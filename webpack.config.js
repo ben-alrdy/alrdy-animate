@@ -1,31 +1,29 @@
 const path = require('path');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
 module.exports = {
-  entry: './src/js/main.js',
+  mode: 'development', // or 'production' or 'none'
+  entry: './src/js/AlrdyAnimate.js',
   output: {
-    filename: 'my-library.js',
+    filename: 'AlrdyAnimate.js',
     path: path.resolve(__dirname, 'dist')
   },
+  devtool: 'source-map', // Use 'source-map' for better debugging in development
   module: {
     rules: [
       {
         test: /\.scss$/,
         use: [
-          'style-loader',
+          MiniCssExtractPlugin.loader,
           'css-loader',
           'sass-loader'
         ]
-      },
-      {
-        test: /\.js$/,
-        exclude: /node_modules/,
-        use: {
-          loader: 'babel-loader',
-          options: {
-            presets: ['@babel/preset-env']
-          }
-        }
       }
     ]
-  }
+  },
+  plugins: [
+    new MiniCssExtractPlugin({
+      filename: 'AlrdyAnimate.css' // Output CSS file name
+    })
+  ]
 };
