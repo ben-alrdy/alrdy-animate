@@ -1,153 +1,52 @@
-/*
-  ANIMATION TYPE: FADE UP SLOW
-*/
-@keyframes fade-up-slow {
-  0% {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  30% {
-    opacity: 1;
-    transform: translateY(-10px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-  }
+:root {
+  --animation-duration: 1s;
+  --animation-delay: 0s;
 }
 
-/* Hide element before animation */
-[aa-animate="fade-up-slow"] {
+[aa-animate] {
   opacity: 0;
+  animation-duration: var(--animation-duration);
+  animation-delay: var(--animation-delay);
 }
 
-/* When in view, play animation */
 [aa-animate="fade-up-slow"].in-view {
-  animation: fade-up-slow var(--animation-duration, 1s) ease-out forwards;
-  animation-delay: var(--animation-delay, 0s);
+  animation: fade-up-slow var(--animation-duration) ease-out forwards;
 }
 
-/*
-  ANIMATION TYPE: FADE DOWN SLOW
-*/
-@keyframes fade-down-slow {
-  0% {
-    opacity: 0;
-    transform: translateY(-30px);
-  }
-  30% {
-    opacity: 1;
-    transform: translateY(10px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-  }
+[aa-animate="fade-up-slow"].out-of-view {
+  animation: fade-up-slow var(--animation-duration) ease-out reverse;
 }
 
-/* Hide element before animation */
-[aa-animate="fade-down-slow"] {
-  opacity: 0;
-}
-
-/* When in view, play animation */
 [aa-animate="fade-down-slow"].in-view {
-  animation: fade-down-slow var(--animation-duration, 1s) ease-out forwards;
-  animation-delay: var(--animation-delay, 0s);
+  animation: fade-down-slow var(--animation-duration) ease-out forwards;
 }
 
-/*
-  ANIMATION TYPE: FADE LEFT SLOW
-*/
-@keyframes fade-left-slow {
-  0% {
-    opacity: 0;
-    transform: translateX(-30px);
-  }
-  30% {
-    opacity: 1;
-    transform: translateX(5px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateX(0);
-  }
+[aa-animate="fade-down-slow"].out-of-view {
+  animation: fade-down-slow var(--animation-duration) ease-out reverse;
 }
 
-/* Hide element before animation */
-[aa-animate="fade-left-slow"] {
-  opacity: 0;
-}
-
-/* When in view, play animation */
 [aa-animate="fade-left-slow"].in-view {
-  animation: fade-left-slow var(--animation-duration, 1s) ease-out forwards;
-  animation-delay: var(--animation-delay, 0s);
+  animation: fade-left-slow var(--animation-duration) ease-out forwards;
 }
 
-/*
-  ANIMATION TYPE: FADE RIGHT SLOW
-*/
-@keyframes fade-right-slow {
-  0% {
-    opacity: 0;
-    transform: translateX(30px);
-  }
-  30% {
-    opacity: 1;
-    transform: translateX(-5px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateX(0);
-  }
+[aa-animate="fade-left-slow"].out-of-view {
+  animation: fade-left-slow var(--animation-duration) ease-out reverse;
 }
 
-/* Hide element before animation */
-[aa-animate="fade-right-slow"] {
-  opacity: 0;
-}
-
-/* When in view, play animation */
 [aa-animate="fade-right-slow"].in-view {
-  animation: fade-right-slow var(--animation-duration, 1s) ease-out forwards;
-  animation-delay: var(--animation-delay, 0s);
+  animation: fade-right-slow var(--animation-duration) ease-out forwards;
 }
 
-/*
-  ANIMATION TYPE: ABSOLUTE DIV SLIDE DOWN
-*/
-@keyframes slide-down {
-  0% {
-    height: 0%;
-  }
-  100% {
-    height: 100%;
-  }
-}
-
-[aa-animate="slide-down"] {
-  height: 0%;
+[aa-animate="fade-right-slow"].out-of-view {
+  animation: fade-right-slow var(--animation-duration) ease-out reverse;
 }
 
 [aa-animate="slide-down"].in-view {
   animation: slide-down var(--animation-duration, 0.6s) cubic-bezier(0.4, 0, 0.25, 1) forwards;
-  animation-delay: var(--animation-delay, 0s);
 }
 
-section[aa-animate="bg-swipe-in"] {
-  position: relative;
-  width: 100%;
-  height: 100vh; /* Adjust this height as needed */
-  overflow: hidden;
-}
-
-/*
-  ANIMATION TYPE: PSEUDO BACKGROUND SLIDE DOWN
-*/
-[aa-animate="bg-slide-down"] {
-  position: relative;
-  background: var(--background-color--background-page);
+[aa-animate="slide-down"].out-of-view {
+  animation: slide-down var(--animation-duration, 0.6s) cubic-bezier(0.4, 0, 0.25, 1) reverse;
 }
 
 [aa-animate="bg-slide-down"]::before {
