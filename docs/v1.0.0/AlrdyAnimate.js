@@ -176,13 +176,17 @@ document.addEventListener("DOMContentLoaded", () => {
           // Create a new observer with the specific root margin
           observersMap[rootMarginValue] = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
+              const rect = entry.target.getBoundingClientRect();
+              console.log(`Element: ${entry.target.id}, Rect.top: ${rect.top}, Window.innerHeight: ${window.innerHeight}`);
+  
               if (entry.isIntersecting) {
                 entry.target.classList.add('in-view');
+                console.log(`Added 'in-view' class to ${entry.target.id}`);
               } else {
-                const rect = entry.target.getBoundingClientRect();
                 if (rect.top >= window.innerHeight) {
                   // Element is leaving the viewport towards the bottom
                   entry.target.classList.remove('in-view');
+                  console.log(`Removed 'in-view' class from ${entry.target.id}`);
                 }
                 // No action needed for elements leaving towards the top
               }
