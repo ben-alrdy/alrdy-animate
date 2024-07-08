@@ -1,7 +1,6 @@
 /*
-ANIMATION TYPE: FADE UP SLOW
+  ANIMATION TYPE: FADE UP SLOW
 */
-
 @keyframes fade-up-slow {
   0% {
     opacity: 0;
@@ -24,13 +23,13 @@ ANIMATION TYPE: FADE UP SLOW
 
 /* When in view, play animation */
 [aa-animate="fade-up-slow"].in-view {
-  animation: fade-up-slow 1s ease-out forwards;
+  animation: fade-up-slow var(--animation-duration, 1s) ease-out forwards;
+  animation-delay: var(--animation-delay, 0s);
 }
 
 /*
   ANIMATION TYPE: FADE DOWN SLOW
-  */
-
+*/
 @keyframes fade-down-slow {
   0% {
     opacity: 0;
@@ -53,13 +52,13 @@ ANIMATION TYPE: FADE UP SLOW
 
 /* When in view, play animation */
 [aa-animate="fade-down-slow"].in-view {
-  animation: fade-down-slow 1s ease-out forwards;
+  animation: fade-down-slow var(--animation-duration, 1s) ease-out forwards;
+  animation-delay: var(--animation-delay, 0s);
 }
 
 /*
   ANIMATION TYPE: FADE LEFT SLOW
-  */
-
+*/
 @keyframes fade-left-slow {
   0% {
     opacity: 0;
@@ -82,13 +81,13 @@ ANIMATION TYPE: FADE UP SLOW
 
 /* When in view, play animation */
 [aa-animate="fade-left-slow"].in-view {
-  animation: fade-left-slow 1s ease-out forwards;
+  animation: fade-left-slow var(--animation-duration, 1s) ease-out forwards;
+  animation-delay: var(--animation-delay, 0s);
 }
 
 /*
   ANIMATION TYPE: FADE RIGHT SLOW
-  */
-
+*/
 @keyframes fade-right-slow {
   0% {
     opacity: 0;
@@ -111,13 +110,13 @@ ANIMATION TYPE: FADE UP SLOW
 
 /* When in view, play animation */
 [aa-animate="fade-right-slow"].in-view {
-  animation: fade-right-slow 1s ease-out forwards;
+  animation: fade-right-slow var(--animation-duration, 1s) ease-out forwards;
+  animation-delay: var(--animation-delay, 0s);
 }
 
 /*
   ANIMATION TYPE: ABSOLUTE DIV SLIDE DOWN
-  */
-
+*/
 @keyframes slide-down {
   0% {
     height: 0%;
@@ -132,7 +131,8 @@ ANIMATION TYPE: FADE UP SLOW
 }
 
 [aa-animate="slide-down"].in-view {
-  animation: slide-down 0.6s cubic-bezier(0.4, 0, 0.25, 1) forwards;
+  animation: slide-down var(--animation-duration, 0.6s) cubic-bezier(0.4, 0, 0.25, 1) forwards;
+  animation-delay: var(--animation-delay, 0s);
 }
 
 section[aa-animate="bg-swipe-in"] {
@@ -144,8 +144,7 @@ section[aa-animate="bg-swipe-in"] {
 
 /*
   ANIMATION TYPE: PSEUDO BACKGROUND SLIDE DOWN
-  */
-
+*/
 [aa-animate="bg-slide-down"] {
   position: relative;
   background: var(--background-color--background-page);
@@ -160,8 +159,8 @@ section[aa-animate="bg-swipe-in"] {
   height: 0;
   background: var(--background-color--background-alternate);
   z-index: 0;
-  transition: height 0.6s cubic-bezier(0.4, 0, 0.25, 1);
-  transition-delay: 200ms;
+  transition: height var(--animation-duration, 0.6s) cubic-bezier(0.4, 0, 0.25, 1);
+  transition-delay: var(--animation-delay, 0.2s);
 }
 
 [aa-animate="bg-slide-down"].in-view::before {
