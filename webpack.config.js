@@ -6,7 +6,7 @@ module.exports = {
   entry: './src/js/AlrdyAnimate.js',
   output: {
     filename: 'AlrdyAnimate.js',
-    path: path.resolve(__dirname, 'docs') // Changed from 'dist' to 'docs'
+    path: path.resolve(__dirname, 'dist') 
   },
   devtool: 'source-map', // or false in production
   module: {
