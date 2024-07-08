@@ -10,6 +10,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const aaMobile = element.getAttribute("aa-mobile");
     const duration = element.getAttribute("aa-duration");
     const delay = element.getAttribute("aa-delay");
+    const anchorSelector = element.getAttribute("aa-anchor");
+    let anchorElement = element;
 
     if (duration) {
       element.style.setProperty("--animation-duration", duration);
@@ -19,6 +21,10 @@ document.addEventListener("DOMContentLoaded", () => {
       element.style.setProperty("--animation-delay", "0s");
     } else if (delay) {
       element.style.setProperty("--animation-delay", delay);
+    }
+
+    if (anchorSelector) {
+      anchorElement = document.querySelector(anchorSelector);
     }
 
     const viewportPercentageAttr = element.getAttribute("aa-viewport");
@@ -40,7 +46,7 @@ document.addEventListener("DOMContentLoaded", () => {
         (entries) => {
           entries.forEach((entry) => {
             if (entry.isIntersecting) {
-              entry.target.classList.add("in-view");
+              element.classList.add("in-view");
             }
           });
         },
@@ -56,7 +62,7 @@ document.addEventListener("DOMContentLoaded", () => {
           entries.forEach((entry) => {
             const rect = entry.target.getBoundingClientRect();
             if (!entry.isIntersecting && rect.top >= window.innerHeight) {
-              entry.target.classList.remove("in-view");
+              element.classList.remove("in-view");
             }
           });
         },
@@ -66,8 +72,8 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       );
 
-      addObserver.observe(element);
-      removeObserver.observe(element);
+      addObserver.observe(anchorElement);
+      removeObserver.observe(anchorElement);
     }
   });
 });
