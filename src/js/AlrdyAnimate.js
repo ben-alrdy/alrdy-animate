@@ -2,7 +2,7 @@ import styles from "../scss/AlrdyAnimate.scss";
 
 document.addEventListener("DOMContentLoaded", () => {
   const isMobile = window.innerWidth < 768;
-  const allAnimatedElements = document.querySelectorAll("[aa-animate]");
+  const allAnimatedElements = document.querySelectorAll("[aa-animate], [aa-transition]");
 
   allAnimatedElements.forEach((element) => {
     const aaMobile = element.getAttribute("aa-mobile");

@@ -1,8 +1,9 @@
+/*FADE ANIMATIONS*/
+
 :root {
   --animation-duration: 1s;
   --animation-delay: 0s;
 }
-
 
 [aa-animate^='fade'][aa-animate^='fade'] {
   opacity: 0;
@@ -19,36 +20,34 @@
 
 [aa-animate="fade-down-slow"].in-view {
   animation: fade-down-slow var(--animation-duration) ease-out forwards;
-  animation-delay: var(--animation-delay);
 }
 
 
 [aa-animate="fade-left-slow"].in-view {
   animation: fade-left-slow var(--animation-duration) ease-out forwards;
-  animation-delay: var(--animation-delay);
 }
 
 
 [aa-animate="fade-right-slow"].in-view {
   animation: fade-right-slow var(--animation-duration) ease-out forwards;
-  animation-delay: var(--animation-delay);
 }
 
 
-[aa-animate="slide-down"]{
-  opacity: 1;
+
+/*SLIDE ANIMATIONS*/
+
+:root {
+  --animation-duration: 0.6s;
+  --animation-delay: 0.2s;
 }
+
 
 [aa-animate="slide-down"].in-view {
   animation: slide-down var(--animation-duration, 0.6s) cubic-bezier(0.4, 0, 0.25, 1) forwards;
   animation-delay: var(--animation-delay);
 }
 
-[aa-animate="bg-slide-down"]{
-  opacity: 1;
-}
-
-[aa-animate="bg-slide-down"]::before {
+[aa-animate="slide-down-pseudo"]::before {
   content: "";
   position: absolute;
   top: 0;
@@ -61,6 +60,6 @@
   transition-delay: var(--animation-delay, 0.2s);
 }
 
-[aa-animate="bg-slide-down"].in-view::before {
+[aa-animate="slide-down-pseudo"].in-view::before {
   height: 100%;
 }
