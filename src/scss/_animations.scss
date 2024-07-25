@@ -3,13 +3,17 @@
   --animation-delay: 0s;
 }
 
-[aa-animate] {
+
+[aa-animate^='fade'][aa-animate^='fade'] {
   opacity: 0;
+
+  &.in-view {
+    animation-delay: var(--animation-delay);
+  }
 }
 
 [aa-animate="fade-up-slow"].in-view {
   animation: fade-up-slow var(--animation-duration) ease-out forwards;
-  animation-delay: var(--animation-delay);
 }
 
 
