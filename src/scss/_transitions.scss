@@ -18,6 +18,8 @@ $aa-distance: 100px !default;
     [aa-transition^='fade'][aa-transition^='fade'] {
       opacity: 0;
       transition-property: opacity, transform;
+      transition-duration: var(--animation-duration); 
+      transition-delay: var(--animation-delay);       
 
       &.in-view {
         opacity: 1;
@@ -69,6 +71,8 @@ $aa-distance: 100px !default;
     [aa-transition^='zoom'][aa-transition^='zoom'] {
       opacity: 0;
       transition-property: opacity, transform;
+      transition-duration: var(--animation-duration); 
+      transition-delay: var(--animation-delay);  
 
       &.in-view {
         opacity: 1;
@@ -126,6 +130,8 @@ $aa-distance: 100px !default;
     [aa-transition^='slide'][aa-transition^='slide'] {
       transition-property: transform;
       visibility: hidden;
+      transition-duration: var(--animation-duration); 
+      transition-delay: var(--animation-delay);  
 
       &.in-view {
         visibility: visible;
@@ -160,6 +166,8 @@ $aa-distance: 100px !default;
     [aa-transition^='flip'][aa-transition^='flip'] {
       backface-visibility: hidden;
       transition-property: transform;
+      transition-duration: var(--animation-duration); 
+      transition-delay: var(--animation-delay);  
     }
 
     [aa-transition='flip-left'] {
