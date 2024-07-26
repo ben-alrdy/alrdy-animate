@@ -1,13 +1,12 @@
 import styles from "../scss/AlrdyAnimate.scss";
 
-
 const defaultOptions = {
   easing: 'ease'
 };
 
 function init(options = {}) {
   const settings = { ...defaultOptions, ...options };
-  
+
   document.body.setAttribute("aa-easing", settings.easing);
 
   document.addEventListener("DOMContentLoaded", () => {
@@ -83,8 +82,10 @@ function init(options = {}) {
         const addObserver = new IntersectionObserver(
           (entries) => {
             entries.forEach((entry) => {
+              console.log('Entry observed for adding in-view:', entry); // Added log
               if (entry.isIntersecting) {
-                element.classList.add("in-view");
+                console.log('Adding in-view class to element:', entry.target);
+                entry.target.classList.add("in-view");
               }
             });
           },
@@ -99,8 +100,10 @@ function init(options = {}) {
           (entries) => {
             entries.forEach((entry) => {
               const rect = entry.target.getBoundingClientRect();
+              console.log('Entry observed for removing in-view:', entry); // Added log
               if (!entry.isIntersecting && rect.top >= window.innerHeight) {
-                element.classList.remove("in-view");
+                console.log('Removing in-view class from element:', entry.target);
+                entry.target.classList.remove("in-view");
               }
             });
           },
@@ -122,4 +125,3 @@ export { AlrdyAnimate };
 
 // Attach to global namespace if needed
 window.AlrdyAnimate = AlrdyAnimate;
-
