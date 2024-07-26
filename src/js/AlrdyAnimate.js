@@ -1,5 +1,6 @@
 import styles from "../scss/AlrdyAnimate.scss";
 
+
 const defaultOptions = {
   easing: 'ease'
 };
@@ -116,13 +117,9 @@ function init(options = {}) {
   });
 }
 
-export { init };
-
-/*
 const AlrdyAnimate = { init };
-export  AlrdyAnimate;
+export { AlrdyAnimate };
 
 // Attach to global namespace if needed
 window.AlrdyAnimate = AlrdyAnimate;
 
-*/
