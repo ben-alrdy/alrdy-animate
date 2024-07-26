@@ -13,6 +13,8 @@ function init(options = {}) {
     const isMobile = window.innerWidth < 768;
     const allAnimatedElements = document.querySelectorAll("[aa-animate], [aa-transition]");
 
+    /*
+
     // Fallback for browsers without CSS variables support
     if (!window.CSS || !window.CSS.supports || !window.CSS.supports('--a', '0')) {
       allAnimatedElements.forEach((element) => {
@@ -30,7 +32,7 @@ function init(options = {}) {
       });
       return; // Exit the script as the fallback is applied
     }
-
+*/
     // Intersection Observer setup for supported browsers
     allAnimatedElements.forEach((element) => {
       const aaMobile = element.getAttribute("aa-mobile");
@@ -82,9 +84,7 @@ function init(options = {}) {
         const addObserver = new IntersectionObserver(
           (entries) => {
             entries.forEach((entry) => {
-              console.log('Entry observed for adding in-view:', entry); // Added log
               if (entry.isIntersecting) {
-                console.log('Adding in-view class to element:', entry.target);
                 entry.target.classList.add("in-view");
               }
             });
@@ -100,9 +100,7 @@ function init(options = {}) {
           (entries) => {
             entries.forEach((entry) => {
               const rect = entry.target.getBoundingClientRect();
-              console.log('Entry observed for removing in-view:', entry); // Added log
               if (!entry.isIntersecting && rect.top >= window.innerHeight) {
-                console.log('Removing in-view class from element:', entry.target);
                 entry.target.classList.remove("in-view");
               }
             });
