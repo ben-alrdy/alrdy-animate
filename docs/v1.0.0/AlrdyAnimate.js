@@ -1,1 +1,0 @@
-(()=>{"use strict";const o={message:"Hello, World!"};window.AlrdyAnimate={init:function(s={}){const e={...o,...s};console.log(e.message)}}})();

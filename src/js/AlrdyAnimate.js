@@ -1,21 +1,6 @@
 import styles from "../scss/AlrdyAnimate.scss";
 
 const defaultOptions = {
-    message: 'Hello, World!'
-  };
-
-  function init(options = {}) {
-    const settings = { ...defaultOptions, ...options };
-    console.log(settings.message);
-  }
-
-  // Attach to global namespace
-  window.AlrdyAnimate = { init };
-
-  export { init };
-
-/*
-const defaultOptions = {
   easing: 'ease'
 };
 
@@ -131,8 +116,11 @@ function init(options = {}) {
   });
 }
 
+export { init };
+
+/*
 const AlrdyAnimate = { init };
-export default AlrdyAnimate;
+export  AlrdyAnimate;
 
 // Attach to global namespace if needed
 window.AlrdyAnimate = AlrdyAnimate;
