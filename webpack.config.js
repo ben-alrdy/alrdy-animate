@@ -7,23 +7,13 @@ module.exports = {
   output: {
     filename: 'AlrdyAnimate.js',
     path: path.resolve(__dirname, 'dist'),
-    library: 'AlrdyAnimate', // Define the library name
-    libraryTarget: 'umd', // Support different module systems
-    umdNamedDefine: true
+    library: 'AlrdyAnimate',
+    libraryTarget: 'umd',
+    globalObject: 'this'
   },
-  devtool: false, // Disable source maps 'source-map' for production 
+  devtool: 'source-map', // or false in production
   module: {
     rules: [
-      {
-        test: /\.js$/,
-        exclude: /node_modules/,
-        use: {
-          loader: 'babel-loader',
-          options: {
-            presets: ['@babel/preset-env']
-          }
-        }
-      },
       {
         test: /\.scss$/,
         use: [
