@@ -1,5 +1,4 @@
 const path = require('path');
-const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
 module.exports = {
   mode: 'production', // or 'development'
@@ -11,22 +10,16 @@ module.exports = {
     libraryTarget: 'umd',
     globalObject: 'this'
   },
-  devtool: 'source-map', // or false in production
   module: {
     rules: [
       {
         test: /\.scss$/,
         use: [
-          MiniCssExtractPlugin.loader,
+          'style-loader',
           'css-loader',
           'sass-loader'
         ]
       }
     ]
-  },
-  plugins: [
-    new MiniCssExtractPlugin({
-      filename: 'AlrdyAnimate.css' // Output CSS file name
-    })
-  ]
+  }
 };
