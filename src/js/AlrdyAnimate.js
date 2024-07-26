@@ -1,6 +1,19 @@
 import styles from "../scss/AlrdyAnimate.scss";
 
 const defaultOptions = {
+    message: 'Hello, World!'
+};
+
+function init(options = {}) {
+const settings = { ...defaultOptions, ...options };
+console.log(settings.message);
+}
+
+export default { init };
+
+/*
+
+const defaultOptions = {
   easing: 'ease'
 };
 
@@ -117,3 +130,5 @@ function init(options = {}) {
 }
 
 export default { init };
+
+*/
