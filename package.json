@@ -1,13 +1,13 @@
 {
-  "name": "alrdy-animations",
+  "name": "alrdy-animate",
   "version": "1.0.0",
   "main": "src/js/AlrdyAnimate.js",
   "scripts": {
     "build": "webpack"
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "author": "Benjamin Brühl",
+  "license": "MIT",
   "description": "",
   "devDependencies": {
     "@babel/core": "^7.24.7",
