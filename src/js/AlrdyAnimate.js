@@ -27,6 +27,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const aaMobile = element.getAttribute("aa-mobile");
     const duration = element.getAttribute("aa-duration");
     const delay = element.getAttribute("aa-delay");
+    const colorInitial = element.getAttribute("aa-color-initial");
+    const colorFinal = element.getAttribute("aa-color-final");
     const anchorSelector = element.getAttribute("aa-anchor");
     let anchorElement = element;
 
@@ -40,6 +42,15 @@ document.addEventListener("DOMContentLoaded", () => {
     } else if (delay) {
       element.style.setProperty("--animation-delay", delay);
     }
+
+    // Set background colors based on attributes
+    if (colorInitial) {
+      element.style.setProperty("--background-color-initial", colorInitial);
+    }
+    if (colorFinal) {
+      element.style.setProperty("--background-color-final", colorFinal);
+    }
+
 
     // Use the anchor element if specified
     if (anchorSelector) {
