@@ -12,6 +12,8 @@ const defaultOptions = {
   // Attach to global namespace
   window.AlrdyAnimate = { init };
 
+  export default { init };
+
 /*
 const defaultOptions = {
   easing: 'ease'
