@@ -2,15 +2,13 @@ const path = require('path');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
 module.exports = {
-  mode: 'production',
+  mode: 'production', // or 'development'
   entry: './src/js/AlrdyAnimate.js',
   output: {
     filename: 'AlrdyAnimate.js',
-    path: path.resolve(__dirname, 'dist'),
-    library: 'AlrdyAnimate',
-    libraryTarget: 'umd',
-    globalObject: 'this'
+    path: path.resolve(__dirname, 'dist')
   },
+  devtool: false, //'source-map' or false in production
   module: {
     rules: [
       {

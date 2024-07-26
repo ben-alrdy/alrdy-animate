@@ -1,14 +1,22 @@
 {
   "name": "alrdy-animate",
   "version": "1.0.0",
-  "main": "src/js/AlrdyAnimate.js",
+  "description": "A library to handle animations on scroll.",
+  "main": "docs/v1.0.0/AlrdyAnimate.js",
   "scripts": {
     "build": "webpack"
   },
-  "keywords": [],
+  "keywords": ["animations", "scroll", "library"],
   "author": "Benjamin Brühl",
   "license": "MIT",
-  "description": "",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/alrdy-animate.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yourusername/alrdy-animate/issues"
+  },
+  "homepage": "https://github.com/yourusername/alrdy-animate#readme",
   "devDependencies": {
     "@babel/core": "^7.24.7",
     "@babel/preset-env": "^7.24.7",
