@@ -4,6 +4,15 @@ document.addEventListener("DOMContentLoaded", () => {
   const isMobile = window.innerWidth < 768;
   const allAnimatedElements = document.querySelectorAll("[aa-animate], [aa-transition]");
 
+  // Fallback for browsers that do not support IntersectionObserver
+  if (!('IntersectionObserver' in window)) {
+    allAnimatedElements.forEach((element) => {
+      element.classList.add("in-view");
+    });
+    return; // Exit the script as the fallback is applied
+  }
+
+  // Intersection Observer setup for supported browsers
   allAnimatedElements.forEach((element) => {
     const aaMobile = element.getAttribute("aa-mobile");
     const duration = element.getAttribute("aa-duration");
