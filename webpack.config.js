@@ -8,7 +8,7 @@ module.exports = {
     filename: 'AlrdyAnimate.js',
     path: path.resolve(__dirname, 'dist') 
   },
-  devtool: 'source-map', // or false in production
+  devtool: false, // 'source-map' or false in production
   module: {
     rules: [
       {

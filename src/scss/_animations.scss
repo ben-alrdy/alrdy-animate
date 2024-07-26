@@ -39,6 +39,8 @@
 :root {
   --animation-duration: 0.6s;
   --animation-delay: 0.2s;
+  --background-color-initial: var(--background-color--background-page);
+  --background-color-final: var(--background-color--background-alternate);
 }
 
 
