@@ -12,6 +12,7 @@ function init(options = {}) {
   const isMobile = window.innerWidth < 768;
   const allAnimatedElements = document.querySelectorAll("[aa-animate], [aa-transition]");
 
+  /*
   // Fallback for browsers without CSS variables support
   if (!window.CSS || !window.CSS.supports || !window.CSS.supports('--a', '0')) {
     allAnimatedElements.forEach((element) => {
@@ -28,7 +29,7 @@ function init(options = {}) {
       element.classList.add("in-view");
     });
     return; // Exit the script as the fallback is applied
-  }
+  }*/
 
   // Intersection Observer setup for supported browsers
   allAnimatedElements.forEach((element) => {
