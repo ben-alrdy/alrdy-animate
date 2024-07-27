@@ -1,16 +1,19 @@
 import styles from "../scss/AlrdyAnimate.scss";
 
+// Default options for the animation settings
 const defaultOptions = {
-  easing: 'ease'
+  easing: 'ease',            // Default easing function for animations
+  again: true,               // True = removes 'in-view' class when element is out of view
+  viewportPercentage: 0.8,   // Default percentage of the viewport height to trigger the animation
+  duration: '1s',            // Default animation duration
+  delay: '0s'                // Default animation delay
 };
 
+// Initialize the animation script with the given options
 function init(options = {}) {
   const settings = { ...defaultOptions, ...options };
-
-  document.body.setAttribute("aa-easing", settings.easing);
-
-  const isMobile = window.innerWidth < 768;
   const allAnimatedElements = document.querySelectorAll("[aa-animate], [aa-transition]");
+  const isMobile = window.innerWidth < 768;
 
   // Fallback for browsers that do not support IntersectionObserver
   if (!('IntersectionObserver' in window)) {
@@ -20,24 +23,25 @@ function init(options = {}) {
     return; // Exit the script as the fallback is applied
   }
 
+  // Set easing on the body element
+  document.body.setAttribute("aa-easing", settings.easing);
+
   // Intersection Observer setup for supported browsers
   allAnimatedElements.forEach((element) => {
     const aaMobile = element.getAttribute("aa-mobile");
-    const duration = element.getAttribute("aa-duration");
-    const delay = element.getAttribute("aa-delay");
+    const duration = element.getAttribute("aa-duration") || settings.duration;
+    const delay = element.getAttribute("aa-delay") || settings.delay;
     const colorInitial = element.getAttribute("aa-color-initial");
     const colorFinal = element.getAttribute("aa-color-final");
     const anchorSelector = element.getAttribute("aa-anchor");
     let anchorElement = element;
 
-    // Set animation duration and delay based on attributes
-    if (duration) {
-      element.style.setProperty("--animation-duration", duration);
-    }
+    // Set animation duration and delay based on attributes or default settings
+    element.style.setProperty("--animation-duration", duration);
 
     if (isMobile && aaMobile === "no-delay") {
       element.style.setProperty("--animation-delay", "0s");
-    } else if (delay) {
+    } else {
       element.style.setProperty("--animation-delay", delay);
     }
 
@@ -54,32 +58,29 @@ function init(options = {}) {
       anchorElement = document.querySelector(anchorSelector);
     }
 
+    // Get viewport percentage for triggering animation
     const viewportPercentageAttr = element.getAttribute("aa-viewport");
     let viewportPercentage = viewportPercentageAttr
       ? parseFloat(viewportPercentageAttr)
-      : 0.8;
+      : settings.viewportPercentage;
 
-    if (
-      !isNaN(viewportPercentage) &&
-      viewportPercentage >= 0 &&
-      viewportPercentage <= 1
-    ) {
+    if (viewportPercentage >= 0 && viewportPercentage <= 1) {
+      // Calculate the bottom margin based on the viewport percentage
       const bottomMargin = (1 - viewportPercentage) * 100;
+      // Set the root margin to trigger the observer when the element is within the specified viewport percentage
       const rootMarginValue = `0px 0px -${bottomMargin}% 0px`;
 
       // Observer to add 'in-view' class
       const addObserver = new IntersectionObserver(
         (entries) => {
           entries.forEach((entry) => {
-            console.log('Entry observed for adding in-view:', entry); // Added log
             if (entry.isIntersecting) {
-              console.log('Adding in-view class to element:', entry.target);
               entry.target.classList.add("in-view");
             }
           });
         },
         {
-          threshold: [0, 1],
+          threshold: [0, 1], // Trigger callback when any part or the whole element is visible
           rootMargin: rootMarginValue,
         }
       );
@@ -89,16 +90,14 @@ function init(options = {}) {
         (entries) => {
           entries.forEach((entry) => {
             const rect = entry.target.getBoundingClientRect();
-            console.log('Entry observed for removing in-view:', entry); // Added log
-            if (!entry.isIntersecting && rect.top >= window.innerHeight) {
-              console.log('Removing in-view class from element:', entry.target);
+            if (!entry.isIntersecting && rect.top >= window.innerHeight && (settings.again || anchorSelector)) {
               entry.target.classList.remove("in-view");
             }
           });
         },
         {
-          threshold: 0,
-          rootMargin: "0px",
+          threshold: 0, // Trigger callback when the element is not visible at all
+          rootMargin: "0px", // Ensure this observer uses the full viewport
         }
       );
 
