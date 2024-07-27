@@ -75,11 +75,7 @@ function init(options = {}) {
         (entries) => {
           entries.forEach((entry) => {
             if (entry.isIntersecting) {
-              entry.target.classList.add("in-view");
-              if (anchorSelector) {
-                console.log(`Anchor in view: ${anchorSelector}`);
-                console.log('Added in-view:', entry.target);
-              }
+              element.classList.add("in-view");
             }
           });
         },
@@ -95,11 +91,7 @@ function init(options = {}) {
           entries.forEach((entry) => {
             const rect = entry.target.getBoundingClientRect();
             if (!entry.isIntersecting && rect.top >= window.innerHeight && (settings.again || anchorSelector)) {
-              entry.target.classList.remove("in-view");
-              if (anchorSelector) {
-                console.log(`Anchor out of view: ${anchorSelector}`);
-                console.log('Removed in-view:', entry.target);
-              }
+              element.classList.remove("in-view");
             }
           });
         },
