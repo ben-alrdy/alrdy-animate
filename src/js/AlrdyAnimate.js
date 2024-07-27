@@ -39,7 +39,6 @@ function init(options = {}) {
     // Use the anchor element (if specified) to trigger the animation for element
     if (anchorSelector) {
         anchorElement = document.querySelector(anchorSelector);
-        console.log(anchorSelector);
     }
 
     // Set animation duration and delay based on attributes or default settings
@@ -77,7 +76,10 @@ function init(options = {}) {
           entries.forEach((entry) => {
             if (entry.isIntersecting) {
               entry.target.classList.add("in-view");
-              console.log('add class:', entry);
+              if (anchorSelector) {
+                console.log(`Anchor in view: ${anchorSelector}`);
+                console.log('Added in-view:', entry.target);
+              }
             }
           });
         },
@@ -94,7 +96,10 @@ function init(options = {}) {
             const rect = entry.target.getBoundingClientRect();
             if (!entry.isIntersecting && rect.top >= window.innerHeight && (settings.again || anchorSelector)) {
               entry.target.classList.remove("in-view");
-              console.log('remove class:', entry);
+              if (anchorSelector) {
+                console.log(`Anchor out of view: ${anchorSelector}`);
+                console.log('Removed in-view:', entry.target);
+              }
             }
           });
         },
