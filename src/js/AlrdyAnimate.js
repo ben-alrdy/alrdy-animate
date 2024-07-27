@@ -34,7 +34,13 @@ function init(options = {}) {
     const colorInitial = element.getAttribute("aa-color-initial");
     const colorFinal = element.getAttribute("aa-color-final");
     const anchorSelector = element.getAttribute("aa-anchor");
-    let anchorElement = element;
+    let anchorElement = element; // The 'anchorElement' will be observed, while the 'element' gets the in-view class
+
+    // Use the anchor element (if specified) to trigger the animation for element
+    if (anchorSelector) {
+        anchorElement = document.querySelector(anchorSelector);
+        console.log(anchorSelector);
+    }
 
     // Set animation duration and delay based on attributes or default settings
     element.style.setProperty("--animation-duration", duration);
@@ -51,11 +57,6 @@ function init(options = {}) {
     }
     if (colorFinal) {
       element.style.setProperty("--background-color-final", colorFinal);
-    }
-
-    // Use the anchor element if specified
-    if (anchorSelector) {
-      anchorElement = document.querySelector(anchorSelector);
     }
 
     // Get viewport percentage for triggering animation
@@ -76,6 +77,7 @@ function init(options = {}) {
           entries.forEach((entry) => {
             if (entry.isIntersecting) {
               entry.target.classList.add("in-view");
+              console.log('add class:', entry);
             }
           });
         },
@@ -90,8 +92,9 @@ function init(options = {}) {
         (entries) => {
           entries.forEach((entry) => {
             const rect = entry.target.getBoundingClientRect();
-            if (!entry.isIntersecting && rect.top >= window.innerHeight) {
+            if (!entry.isIntersecting && rect.top >= window.innerHeight && (settings.again || anchorSelector)) {
               entry.target.classList.remove("in-view");
+              console.log('remove class:', entry);
             }
           });
         },
