@@ -4,9 +4,7 @@ import styles from "../scss/AlrdyAnimate.scss";
 const defaultOptions = {
   easing: 'ease',            // Default easing function for animations
   again: true,               // True = removes 'in-view' class when element is out of view
-  viewportPercentage: 0.8,   // Default percentage of the viewport height to trigger the animation
-  duration: '1s',            // Default animation duration
-  delay: '0s'                // Default animation delay
+  viewportPercentage: 0.8    // Default percentage of the viewport height to trigger the animation
 };
 
 // Initialize the animation script with the given options
@@ -29,8 +27,8 @@ function init(options = {}) {
   // Intersection Observer setup for supported browsers
   allAnimatedElements.forEach((element) => {
     const aaMobile = element.getAttribute("aa-mobile");
-    const duration = element.getAttribute("aa-duration") || settings.duration;
-    const delay = element.getAttribute("aa-delay") || settings.delay;
+    const duration = element.getAttribute("aa-duration") || options.duration;
+    const delay = element.getAttribute("aa-delay") || options.delay;
     const colorInitial = element.getAttribute("aa-color-initial");
     const colorFinal = element.getAttribute("aa-color-final");
     const anchorSelector = element.getAttribute("aa-anchor");
@@ -38,16 +36,20 @@ function init(options = {}) {
 
     // Use the anchor element (if specified) to trigger the animation for element
     if (anchorSelector) {
-        anchorElement = document.querySelector(anchorSelector);
+      anchorElement = document.querySelector(anchorSelector);
     }
 
-    // Set animation duration and delay based on attributes or default settings
-    element.style.setProperty("--animation-duration", duration);
+    // Set animation duration and delay based on attributes or init options
+    if (duration) {
+      element.style.setProperty("--animation-duration", duration);
+    }
+
+    if (delay) {
+      element.style.setProperty("--animation-delay", delay);
+    }
 
     if (isMobile && aaMobile === "no-delay") {
       element.style.setProperty("--animation-delay", "0s");
-    } else {
-      element.style.setProperty("--animation-delay", delay);
     }
 
     // Set background colors based on attributes
