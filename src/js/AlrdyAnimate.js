@@ -90,7 +90,7 @@ function init(options = {}) {
         (entries) => {
           entries.forEach((entry) => {
             const rect = entry.target.getBoundingClientRect();
-            if (!entry.isIntersecting && rect.top >= window.innerHeight && (settings.again || anchorSelector)) {
+            if (!entry.isIntersecting && rect.top >= window.innerHeight) {
               entry.target.classList.remove("in-view");
             }
           });
