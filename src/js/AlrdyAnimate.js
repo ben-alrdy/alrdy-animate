@@ -31,8 +31,8 @@ function init(options = {}) {
     const aaMobile = element.getAttribute("aa-mobile");
     const duration = element.getAttribute("aa-duration") || options.duration;
     const delay = element.getAttribute("aa-delay") || options.delay;
-    const colorInitial = element.getAttribute("aa-color-initial");
-    const colorFinal = element.getAttribute("aa-color-final");
+    const colorInitial = element.getAttribute("aa-color-initial") || options.color-initial;
+    const colorFinal = element.getAttribute("aa-color-final") || options.color-final;
     const anchorSelector = element.getAttribute("aa-anchor");
     let anchorElement = element; // The 'anchorElement' will be observed, while the 'element' gets the in-view class
 
