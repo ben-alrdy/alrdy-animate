@@ -28,9 +28,9 @@ function init(options = {}) {
 
   // Intersection Observer setup for supported browsers
   allAnimatedElements.forEach((element) => {
-    const aaMobile = element.getAttribute("aa-mobile");
     const duration = element.getAttribute("aa-duration") || options.duration;
     const delay = element.getAttribute("aa-delay") || options.delay;
+    const delayMobile = element.getAttribute("aa-delay-mobile");
     const colorInitial = element.getAttribute("aa-color-initial") || options.colorInitial;
     const colorFinal = element.getAttribute("aa-color-final") || options.colorFinal;
     const anchorSelector = element.getAttribute("aa-anchor");
@@ -47,8 +47,8 @@ function init(options = {}) {
     }
 
     // Set animation delay based on attributes, init options, and mobile settings
-    if (isMobile && aaMobile === "no-delay") {
-      element.style.setProperty("--animation-delay", "0s");
+    if (isMobile && delayMobile === "no-delay") {
+      element.style.setProperty("--animation-delay", delayMobile);
     } else if (delay) {
       element.style.setProperty("--animation-delay", delay);
     }
