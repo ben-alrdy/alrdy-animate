@@ -2,19 +2,21 @@ import styles from "../scss/AlrdyAnimate.scss";
 
 // Default options for the animation settings
 const defaultOptions = {
-  easing: 'ease',            // Default easing function for animations
-  again: true,               // True = removes 'in-view' class when element is out of view
-  viewportPercentage: 0.8    // Default percentage of the viewport height to trigger the animation
+  easing: "ease", // Default easing function for animations
+  again: true, // True = removes 'in-view' class when element is out of view
+  viewportPercentage: 0.8, // Default percentage of the viewport height to trigger the animation
 };
 
 // Initialize the animation script with the given options
 function init(options = {}) {
   const settings = { ...defaultOptions, ...options };
-  const allAnimatedElements = document.querySelectorAll("[aa-animate], [aa-transition]");
+  const allAnimatedElements = document.querySelectorAll(
+    "[aa-animate], [aa-transition]"
+  );
   const isMobile = window.innerWidth < 768;
 
   // Fallback for browsers that do not support IntersectionObserver
-  if (!('IntersectionObserver' in window)) {
+  if (!("IntersectionObserver" in window)) {
     allAnimatedElements.forEach((element) => {
       element.classList.add("in-view");
     });
@@ -44,12 +46,11 @@ function init(options = {}) {
       element.style.setProperty("--animation-duration", duration);
     }
 
-    if (delay) {
-      element.style.setProperty("--animation-delay", delay);
-    }
-
+    // Set animation delay based on attributes, init options, and mobile settings
     if (isMobile && aaMobile === "no-delay") {
       element.style.setProperty("--animation-delay", "0s");
+    } else if (delay) {
+      element.style.setProperty("--animation-delay", delay);
     }
 
     // Set background colors based on attributes
@@ -92,7 +93,11 @@ function init(options = {}) {
         (entries) => {
           entries.forEach((entry) => {
             const rect = entry.target.getBoundingClientRect();
-            if (!entry.isIntersecting && rect.top >= window.innerHeight && (settings.again || anchorSelector)) {
+            if (
+              !entry.isIntersecting &&
+              rect.top >= window.innerHeight &&
+              (settings.again || anchorSelector)
+            ) {
               element.classList.remove("in-view");
             }
           });
