@@ -1,5 +1,13 @@
 # AlrdyAnimate Library
 
+## Table of Contents
+- [Overview](#overview)
+- [Installation](#installation)
+- [Usage](#usage)
+- [Options](#options)
+- [Examples](#example)
+
+
 AlrdyAnimate is a lightweight JavaScript library for adding scroll-triggered animations to your web pages. It provides easy-to-use options for customizing animation behavior and supports IntersectionObserver for efficient performance.
 
 ## Installation
@@ -81,7 +89,7 @@ AlrdyAnimate.init({
 
 ### Global Options
 
-- **easing** (default: `'ease'`): The default easing function for animations. Accepts any valid CSS easing value.
+- **easing** (default: `'ease'`): The default easing function for transitions (no effect for aa-animate). See [Supported Easing Functions](#supported-easing-functions).
 - **again** (default: `true`): If set to `true`, the animation will be triggered again for elements that have scrolled out of view towards the bottom (i.e. user scrolled up).
 - **viewportPercentage** (default: `0.8`): A number between `0` and `1` representing the percentage of the viewport height required to trigger the animation.
 - **duration** (default: `'1s'`): The default animation duration. Can be overridden on individual elements using the `aa-duration` attribute.
@@ -101,6 +109,42 @@ AlrdyAnimate.init({
 - **aa-color-final**: The final background color for the animation.
 - **aa-anchor**: Specify an anchor element to trigger the animation (useful for fixed elements that should be animated when the anchor scrolls into view). Example: `aa-anchor="#anchorElement"`.
 - **aa-viewport**: Override the global viewport percentage for this element. Example: `aa-viewport="0.6"`.
+
+
+### Supported Easing Functions
+
+The `AlrdyAnimate` library supports a variety of easing functions to control the rate of animation, providing a more natural motion compared to linear timing functions. Below are the easing functions supported by the library, grouped by type with brief descriptions:
+
+1. **Linear**
+   - **Linear**: Moves at a constant speed.
+
+2. **Ease**
+   - **Ease**: Smooth and gradual start and end.
+
+3. **Ease-in**
+   - **Ease-in**: Slow start, then speeds up.
+   - **Ease-in-back**: Slow start with a slight backward motion.
+   - **Ease-in-sine**: Slow start, resembling a sine wave.
+   - **Ease-in-quad**: Accelerates faster than linear.
+   - **Ease-in-cubic**: Starts slowly, then rapidly speeds up.
+   - **Ease-in-quart**: Starts very slowly, then rapidly speeds up.
+
+4. **Ease-out**
+   - **Ease-out**: Starts quickly, then slows down.
+   - **Ease-out-back**: Ends slowly with a slight backward motion.
+   - **Ease-out-sine**: Ends slowly, resembling a sine wave.
+   - **Ease-out-quad**: Decelerates faster than linear.
+   - **Ease-out-cubic**: Starts quickly, then slows down rapidly.
+   - **Ease-out-quart**: Starts quickly, then slows down very rapidly.
+
+5. **Ease-in-out**
+   - **Ease-in-out**: Smooth start and end with a faster middle.
+   - **Ease-in-out-back**: Combines ease-in-back and ease-out-back.
+   - **Ease-in-out-sine**: Smooth start and end with a sine wave motion.
+   - **Ease-in-out-quad**: Combines ease-in-quad and ease-out-quad.
+   - **Ease-in-out-cubic**: Combines ease-in-cubic and ease-out-cubic.
+   - **Ease-in-out-quart**: Combines ease-in-quart and ease-out-quart.
+
 
 ## Example
 
