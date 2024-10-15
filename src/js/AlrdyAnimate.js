@@ -47,7 +47,7 @@ function init(options = {}) {
     }
 
     // Set animation delay based on attributes, init options, and mobile settings
-    if (isMobile && delayMobile === "no-delay") {
+    if (isMobile && delayMobile !== null) {
       element.style.setProperty("--animation-delay", delayMobile);
     } else if (delay) {
       element.style.setProperty("--animation-delay", delay);

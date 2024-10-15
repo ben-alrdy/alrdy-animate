@@ -82,7 +82,7 @@ AlrdyAnimate.init({
 
 ### Global Options
 
-- **easing** (default: `'ease'`): The default easing function for transitions (no effect for aa-animate). See [Supported Easing Functions](#supported-easing-functions).
+- **easing** (default: `'ease'`): The default easing function for animations and transitions. See [Supported Easing Functions](#supported-easing-functions).
 - **again** (default: `true`): If set to `true`, the animation will be triggered again for elements that have scrolled out of view towards the bottom (i.e. user scrolled up).
 - **viewportPercentage** (default: `0.8`): A number between `0` and `1` representing the percentage of the viewport height required to trigger the animation.
 - **duration** (default: `'1s'`): The default animation duration. Can be overridden on individual elements using the `aa-duration` attribute.
@@ -93,13 +93,14 @@ AlrdyAnimate.init({
 
 ### Element Attributes
 
-- **aa-animate**: The animation type to apply. Example: `aa-animate="fade-u-slow"`.
+- **aa-animate**: The animation type to apply. Example: `aa-animate="fade-up-slow"`.
 - **aa-transition**: Similar to `aa-animate` but for transition effects.
+- **aa-easing**: Overwrites the global easing function for this element. Example: `aa-easing="ease-in-out"`.
 - **aa-duration**: The animation duration for this element. Example: `aa-duration="2s"`.
 - **aa-delay**: The animation delay for this element. Example: `aa-delay="0.5s"`.
-- **aa-delay-mobile**: If set, overwrites the delay on mobile devices.
-- **aa-color-initial**: The initial background color for the animation.
-- **aa-color-final**: The final background color for the animation.
+- **aa-delay-mobile**: If set, overwrites the delay on mobile devices. Example: `aa-delay-mobile="0.5s"`.
+- **aa-color-initial**: The initial background color for the animation. Example: `aa-color-initial="#d7ff64"`.
+- **aa-color-final**: The final background color for the animation. Example: `aa-color-final="#d7ff64"`.
 - **aa-anchor**: Specify an anchor element to trigger the animation (useful for fixed elements that should be animated when the anchor scrolls into view). Example: `aa-anchor="#anchorElement"`.
 - **aa-viewport**: Override the global viewport percentage for this element. Example: `aa-viewport="0.6"`.
 
