@@ -5,6 +5,8 @@
   --animation-delay: 0s;
 }
 
+/*FADE SLOW ANIMATIONS*/
+
 [aa-animate^='fade'][aa-animate^='fade'] {
   opacity: 0;
 
@@ -31,6 +33,37 @@
 [aa-animate="fade-right-slow"].in-view {
   animation: fade-right-slow var(--animation-duration) forwards;
 }
+
+
+
+/*BLURRED SLIDE ANIMATIONS*/
+
+[aa-animate^='slide-in-blurred'][aa-animate^='slide-in-blurred'] {
+  opacity: 0;
+
+  &.in-view {
+    animation-delay: var(--animation-delay);
+  }
+}
+
+[aa-animate="slide-in-blurred-bottom"].in-view {
+  animation: slide-in-blurred-bottom var(--animation-duration) forwards;
+}
+
+[aa-animate="slide-in-blurred-top"].in-view {
+  animation: slide-in-blurred-top var(--animation-duration) forwards;
+}
+
+[aa-animate="slide-in-blurred-left"].in-view {
+  animation: slide-in-blurred-left var(--animation-duration) forwards;
+}
+
+[aa-animate="slide-in-blurred-right"].in-view {
+  animation: slide-in-blurred-right var(--animation-duration) forwards;
+}
+
+
+
 
 
 

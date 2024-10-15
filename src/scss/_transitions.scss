@@ -1,5 +1,5 @@
 // Animations variables
-$aa-distance: 100px !default;
+$aa-distance: 50px !default;
 
 :root {
     --animation-duration: 1s;
@@ -189,5 +189,38 @@ $aa-distance: 100px !default;
       transform: perspective(2500px) rotateX(100deg);
       &.in-view {transform: perspective(2500px) rotateX(0);}
     }
+
+    /**
+    * Slide and Rotate animations
+    */
+
+    [aa-transition^='slide-rotate'][aa-transition^='slide-rotate'] {
+      transition-property: transform;
+      visibility: hidden;
+      transition-duration: var(--animation-duration);
+      transition-delay: var(--animation-delay);
+
+      &.in-view {
+        visibility: visible;
+        transform: translate3d(0, 0, 0) rotate(0deg);
+      }
+    }
+
+    [aa-transition='slide-rotate-bottom-right'] {
+      transform: translate3d(-$aa-distance, $aa-distance, 0) rotate(-45deg);
+    }
+
+    [aa-transition='slide-rotate-bottom-left'] {
+      transform: translate3d($aa-distance, $aa-distance, 0) rotate(45deg);
+    }
+
+    [aa-transition='slide-rotate-top-right'] {
+      transform: translate3d(-$aa-distance, -$aa-distance, 0) rotate(45deg);
+    }
+
+    [aa-transition='slide-rotate-top-left'] {
+      transform: translate3d($aa-distance, -$aa-distance, 0) rotate(-45deg);
+    }
+
   }
 }

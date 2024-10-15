@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AlrdyAnimate Test</title>
+    <link rel="stylesheet" href="./AlrdyAnimate.css">
+    <style>
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif, sans-serif;
+            margin: 0;
+            padding: 10rem 1rem;
+            display: flex;
+            justify-content: center;
+        }
+        .container {
+            max-width: 80rem;
+            width: 100%;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+        }
+        .box {
+            border: 1px solid #ccc;
+            padding: 1rem;
+            text-align: center;
+            min-height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="grid">
+            <div class="box"><span aa-animate="fade-up-slow">Fade Up Slow</span></div>
+            <div class="box"><span aa-animate="fade-down-slow">Fade Down Slow</span></div>
+            <div class="box"><span aa-animate="fade-left-slow">Fade Left Slow</span></div>
+            <div class="box"><span aa-animate="fade-right-slow">Fade Right Slow</span></div>
+            <div class="box"><span aa-transition="fade-up" aa-easing="ease-out-back">Transition Up</span></div>
+            <div class="box"><span aa-transition="fade-down">Transition Down</span></div>
+            <div class="box"><span aa-transition="fade-left">Transition Left</span></div>
+            <div class="box"><span aa-transition="fade-right">Transition Right</span></div>
+            <div class="box"><span aa-transition="fade-up-left">Transition Up Left</span></div>
+            <div class="box"><span aa-transition="fade-up-right">Transition Up Right</span></div>
+            <div class="box"><span aa-transition="fade-down-left">Transition Down Left</span></div>
+            <div class="box"><span aa-transition="fade-down-right">Transition Down Right</span></div>
+        
+            <!-- Zoom animations -->
+            <div class="box"><span aa-transition="zoom-in">Zoom In</span></div>
+            <div class="box"><span aa-transition="zoom-in-up">Zoom In Up</span></div>
+            <div class="box"><span aa-transition="zoom-in-down">Zoom In Down</span></div>
+            <div class="box"><span aa-transition="zoom-in-left">Zoom In Left</span></div>
+            <div class="box"><span aa-transition="zoom-in-right">Zoom In Right</span></div>
+            <div class="box"><span aa-transition="zoom-out">Zoom Out</span></div>
+            <div class="box"><span aa-transition="zoom-out-up">Zoom Out Up</span></div>
+            <div class="box"><span aa-transition="zoom-out-down">Zoom Out Down</span></div>
+            <div class="box"><span aa-transition="zoom-out-left">Zoom Out Left</span></div>
+            <div class="box"><span aa-transition="zoom-out-right">Zoom Out Right</span></div>
+            
+            <!-- Slide animations -->
+            <div class="box"><span aa-transition="slide-up">Slide Up</span></div>
+            <div class="box"><span aa-transition="slide-down">Slide Down</span></div>
+            <div class="box"><span aa-transition="slide-left">Slide Left</span></div>
+            <div class="box"><span aa-transition="slide-right">Slide Right</span></div>
+            
+            <!-- Flip animations -->
+            <div class="box"><span aa-transition="flip-left">Flip Left</span></div>
+            <div class="box"><span aa-transition="flip-right">Flip Right</span></div>
+            <div class="box"><span aa-transition="flip-up">Flip Up</span></div>
+            <div class="box"><span aa-transition="flip-down">Flip Down</span></div>
+
+            <!-- Slide rotation animations -->
+            <div class="box"><span aa-transition="slide-rotate-bottom-right" aa-easing="ease-out-cubic">Slide Rotate Bottom Right</span></div>
+            <div class="box"><span aa-transition="slide-rotate-bottom-left" aa-easing="ease-out-cubic">Slide Rotate Bottom Left</span></div>
+            <div class="box"><span aa-transition="slide-rotate-top-right" aa-easing="ease-out-cubic">Slide Rotate Top Right</span></div>
+            <div class="box"><span aa-transition="slide-rotate-top-left" aa-easing="ease-out-cubic">Slide Rotate Top Left</span></div>
+
+            <!-- Blurred slide animations -->
+            <div class="box"><span aa-animate="slide-in-blurred-bottom">Slide In Blurred Bottom</span></div>
+            <div class="box"><span aa-animate="slide-in-blurred-top">Slide In Blurred Top</span></div>
+            <div class="box"><span aa-animate="slide-in-blurred-left">Slide In Blurred Left</span></div>
+            <div class="box"><span aa-animate="slide-in-blurred-right">Slide In Blurred Right</span></div>
+        </div>
+    </div>
+
+    <script src="./AlrdyAnimate.js"></script>
+    <script>
+        AlrdyAnimate.init({
+            duration: '1s',
+            easing: 'ease-out'
+        });
+    </script>
+</body>
+</html>
