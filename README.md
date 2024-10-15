@@ -18,10 +18,10 @@ You can include AlrdyAnimate in your project by using a CDN or by bundling it wi
 
 ```html
 <!-- Include the AlrdyAnimate CSS -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/your-username/AlrdyAnimate@master/docs/v1.0.0/AlrdyAnimate.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/ben-alrdy/AlrdyAnimate@master/docs/v1.0.0/AlrdyAnimate.css">
 
 <!-- Include the AlrdyAnimate JS -->
-<script src="https://cdn.jsdelivr.net/gh/your-username/AlrdyAnimate@master/docs/v1.0.0/AlrdyAnimate.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/ben-alrdy/AlrdyAnimate@master/docs/v1.0.0/AlrdyAnimate.js"></script>
 
 <script>
   document.addEventListener('DOMContentLoaded', function() {
@@ -36,13 +36,6 @@ You can include AlrdyAnimate in your project by using a CDN or by bundling it wi
 </script>
 ```
 
-### Using NPM
-
-Install via NPM:
-
-```bash
-npm install alrdy-animate
-```
 
 Include it in your JavaScript file:
 
