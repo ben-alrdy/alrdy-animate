@@ -28,13 +28,21 @@ $aa-easing: (
 );
 
 // Easings implementations
-// Default timing function: 'ease'
 
 [aa-transition] {
   @each $key, $val in $aa-easing {
     body[aa-easing="#{$key}"] &,
     &[aa-transition][aa-easing="#{$key}"] {
       transition-timing-function: $val;
+    }
+  }
+}
+
+[aa-animate] {
+  @each $key, $val in $aa-easing {
+    body[aa-easing="#{$key}"] &,
+    &[aa-animate][aa-easing="#{$key}"] {
+      animation-timing-function: $val;
     }
   }
 }

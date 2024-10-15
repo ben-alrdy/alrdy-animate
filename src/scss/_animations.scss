@@ -14,22 +14,22 @@
 }
 
 [aa-animate="fade-up-slow"].in-view {
-  animation: fade-up-slow var(--animation-duration) ease-out forwards;
+  animation: fade-up-slow var(--animation-duration) forwards;
 }
 
 
 [aa-animate="fade-down-slow"].in-view {
-  animation: fade-down-slow var(--animation-duration) ease-out forwards;
+  animation: fade-down-slow var(--animation-duration) forwards;
 }
 
 
 [aa-animate="fade-left-slow"].in-view {
-  animation: fade-left-slow var(--animation-duration) ease-out forwards;
+  animation: fade-left-slow var(--animation-duration) forwards;
 }
 
 
 [aa-animate="fade-right-slow"].in-view {
-  animation: fade-right-slow var(--animation-duration) ease-out forwards;
+  animation: fade-right-slow var(--animation-duration) forwards;
 }
 
 
