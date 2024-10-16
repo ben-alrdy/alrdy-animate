@@ -1,4 +1,4 @@
-@keyframes fade-up-slow {
+@keyframes fade-up-back {
     0% {
       opacity: 0;
       transform: translateY(30px);
@@ -13,7 +13,7 @@
     }
   }
   
-  @keyframes fade-down-slow {
+  @keyframes fade-down-back {
     0% {
       opacity: 0;
       transform: translateY(-30px);
@@ -28,7 +28,7 @@
     }
   }
   
-  @keyframes fade-left-slow {
+  @keyframes fade-left-back {
     0% {
       opacity: 0;
       transform: translateX(-30px);
@@ -43,7 +43,7 @@
     }
   }
   
-  @keyframes fade-right-slow {
+  @keyframes fade-right-back {
     0% {
       opacity: 0;
       transform: translateX(30px);
@@ -55,15 +55,6 @@
     100% {
       opacity: 1;
       transform: translateX(0);
-    }
-  }
-  
-  @keyframes slide-down {
-    0% {
-      height: 0%;
-    }
-    100% {
-      height: 100%;
     }
   }
 

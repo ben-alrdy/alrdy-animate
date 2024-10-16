@@ -222,5 +222,106 @@ $aa-distance: 50px !default;
       transform: translate3d($aa-distance, -$aa-distance, 0) rotate(-45deg);
     }
 
+
+    /*
+    PSEUDO BACKGROUND SLIDE TRANSITIONS
+    */
+
+    :root {
+      --animation-duration: 0.6s;
+      --animation-delay: 0.2s;
+      --background-color-initial: var(--background-color--background-page);
+      --background-color-final: var(--background-color--background-alternate);
+    }
+
+
+    [aa-transition^="pseudo-bg-slide"][aa-transition^="pseudo-bg-slide"] {
+      position: relative;
+      background: var(--background-color-initial);
+      overflow: hidden; // Hide overflow
+    }
+
+    // Ensure content stays above the pseudo-element
+    [aa-transition^="pseudo-bg-slide"][aa-transition^="pseudo-bg-slide"] > * {
+      position: relative;
+      z-index: 2;
+    }
+
+    [aa-transition^="pseudo-bg-slide"]::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: var(--background-color-final);
+      z-index: 1; // Place it behind the content but above the initial background
+      transition: transform var(--animation-duration);
+      transition-delay: var(--animation-delay);
+    }
+
+    [aa-transition="pseudo-bg-slide-down"]::before {
+      transform: translate3d(0, -100%, 0);
+    }
+    [aa-transition="pseudo-bg-slide-up"]::before {
+      transform: translate3d(0, 100%, 0);
+    }
+    [aa-transition="pseudo-bg-slide-right"]::before {
+      transform: translate3d(-100%, 0, 0);
+    }
+    [aa-transition="pseudo-bg-slide-left"]::before {
+      transform: translate3d(100%, 0, 0);
+    }
+
+    // Resets the transform to 0 when the animation is finished, showing the pseudo background
+    [aa-transition^="pseudo-bg-slide"].in-view::before {
+      transform: translate3d(0, 0, 0);
+    }
+
+
+    /*
+    PSEUDO BACKGROUND REVEAL TRANSITIONS
+    */
+
+    [aa-transition^="pseudo-bg-reveal"][aa-transition^="pseudo-bg-reveal"] {
+      position: relative;
+      background: var(--background-color-final);
+      overflow: hidden; // Hide overflow
+    }
+
+    // Ensure content stays above the pseudo-element
+    [aa-transition^="pseudo-bg-reveal"][aa-transition^="pseudo-bg-reveal"] > * {
+      position: relative;
+      z-index: 2;
+    }
+
+    [aa-transition^="pseudo-bg-reveal"]::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: var(--background-color-initial);
+      z-index: 1;
+      transition: transform var(--animation-duration) var(--animation-delay);
+    }
+
+    [aa-transition^="pseudo-bg-reveal"]::before {
+      transform: translate3d(0, 0, 0);
+    }
+
+    [aa-transition="pseudo-bg-reveal-up"].in-view::before {
+      transform: translateY(-100%);
+    }
+    [aa-transition="pseudo-bg-reveal-down"].in-view::before {
+      transform: translateY(100%);
+    }
+    [aa-transition="pseudo-bg-reveal-right"].in-view::before {
+      transform: translateX(100%);
+    }
+    [aa-transition="pseudo-bg-reveal-left"].in-view::before {
+      transform: translateX(-100%);
+    }
   }
 }

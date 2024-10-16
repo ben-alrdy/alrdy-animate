@@ -9,13 +9,19 @@
         body {
             font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif, sans-serif;
             margin: 0;
-            padding: 10rem 1rem;
+            padding: 5rem 1rem;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
+            align-items: center;
         }
         .container {
             max-width: 80rem;
             width: 100%;
+        }
+        .headline {
+            max-width: 40rem;
+            text-align: center;
+            margin-bottom: 3rem;
         }
         .grid {
             display: grid;
@@ -31,15 +37,19 @@
             align-items: center;
             justify-content: center;
         }
+        [animate] {
+            visibility: hidden;
+        }
     </style>
 </head>
 <body>
     <div class="container">
+        <h1 class="headline" animate>AlrdyAnimate Test Animations AlrdyAnimate Test Animations AlrdyAnimate Test Animations AlrdyAnimate Test Animations</h1>
         <div class="grid">
-            <div class="box"><span aa-animate="fade-up-slow">Fade Up Slow</span></div>
-            <div class="box"><span aa-animate="fade-down-slow">Fade Down Slow</span></div>
-            <div class="box"><span aa-animate="fade-left-slow">Fade Left Slow</span></div>
-            <div class="box"><span aa-animate="fade-right-slow">Fade Right Slow</span></div>
+            <div class="box"><span aa-animate="fade-up-back">Fade Up Back</span></div>
+            <div class="box"><span aa-animate="fade-down-back">Fade Down Back</span></div>
+            <div class="box"><span aa-animate="fade-left-back">Fade Left Back</span></div>
+            <div class="box"><span aa-animate="fade-right-back">Fade Right Back</span></div>
             <div class="box"><span aa-transition="fade-up" aa-easing="ease-out-back">Transition Up</span></div>
             <div class="box"><span aa-transition="fade-down">Transition Down</span></div>
             <div class="box"><span aa-transition="fade-left">Transition Left</span></div>
@@ -84,14 +94,145 @@
             <div class="box"><span aa-animate="slide-in-blurred-top">Slide In Blurred Top</span></div>
             <div class="box"><span aa-animate="slide-in-blurred-left">Slide In Blurred Left</span></div>
             <div class="box"><span aa-animate="slide-in-blurred-right">Slide In Blurred Right</span></div>
+
+            <div class="box" style="height: 500px; background-image: url('https://picsum.photos/800/600'); background-size: cover; background-position: center;" aa-transition="pseudo-bg-reveal-down" aa-color-initial="rgba(255,255,255)" aa-color-final="rgba(255,255,255,1.0)" aa-easing="ease-out-expo">
+                <div>slide down</div>
+            </div>
+            <div class="box" style="height: 500px; background-image: url('https://picsum.photos/800/601'); background-size: cover; background-position: center;" aa-transition="pseudo-bg-reveal-up" aa-color-initial="rgba(0,0,0,0.5)" aa-color-final="rgba(255,255,255,0.5)" aa-easing="ease-out-expo">
+                <div>slide up</div>
+            </div>
+            <div class="box" style="height: 500px;" aa-transition="pseudo-bg-slide-right" aa-color-initial="#000" aa-color-final="#fff" aa-easing="ease-out-expo"><div>slide right</div></div>
+            <div class="box" style="height: 500px;" aa-transition="pseudo-bg-slide-left" aa-color-initial="#000" aa-color-final="#fff" aa-easing="ease-out-expo"><div>slide left</div></div>
+        </div>
+        
+        <h1 class="headline" animate>AlrdyAnimate Test Animations AlrdyAnimate Test Animations AlrdyAnimate Test Animations AlrdyAnimate Test Animations</h1>
+
+        <div class="grid"></div>
+            <div class="box"><span aa-animate="fade-up-back">Fade Up Back</span></div>
+            <div class="box"><span aa-animate="fade-down-back">Fade Down Back</span></div>
+            <div class="box"><span aa-animate="fade-left-back">Fade Left Back</span></div>
+            <div class="box"><span aa-animate="fade-right-back">Fade Right Back</span></div>
+            <div class="box"><span aa-transition="fade-up" aa-easing="ease-out-back">Transition Up</span></div>
+            <div class="box"><span aa-transition="fade-down">Transition Down</span></div>
+            <div class="box"><span aa-transition="fade-left">Transition Left</span></div>
+            <div class="box"><span aa-transition="fade-right">Transition Right</span></div>
+            <div class="box"><span aa-transition="fade-up-left">Transition Up Left</span></div>
+            <div class="box"><span aa-transition="fade-up-right">Transition Up Right</span></div>
+            <div class="box"><span aa-transition="fade-down-left">Transition Down Left</span></div>
+            <div class="box"><span aa-transition="fade-down-right">Transition Down Right</span></div>
+        
+            <!-- Zoom animations -->
+            <div class="box"><span aa-transition="zoom-in">Zoom In</span></div>
+            <div class="box"><span aa-transition="zoom-in-up">Zoom In Up</span></div>
+            <div class="box"><span aa-transition="zoom-in-down">Zoom In Down</span></div>
+            <div class="box"><span aa-transition="zoom-in-left">Zoom In Left</span></div>
+            <div class="box"><span aa-transition="zoom-in-right">Zoom In Right</span></div>
+            <div class="box"><span aa-transition="zoom-out">Zoom Out</span></div>
+            <div class="box"><span aa-transition="zoom-out-up">Zoom Out Up</span></div>
+            <div class="box"><span aa-transition="zoom-out-down">Zoom Out Down</span></div>
+            <div class="box"><span aa-transition="zoom-out-left">Zoom Out Left</span></div>
+            <div class="box"><span aa-transition="zoom-out-right">Zoom Out Right</span></div>
+            
+            <!-- Slide animations -->
+            <div class="box"><span aa-transition="slide-up">Slide Up</span></div>
+            <div class="box"><span aa-transition="slide-down">Slide Down</span></div>
+            <div class="box"><span aa-transition="slide-left">Slide Left</span></div>
+            <div class="box"><span aa-transition="slide-right">Slide Right</span></div>
+            
+            <!-- Flip animations -->
+            <div class="box"><span aa-transition="flip-left">Flip Left</span></div>
+            <div class="box"><span aa-transition="flip-right">Flip Right</span></div>
+            <div class="box"><span aa-transition="flip-up">Flip Up</span></div>
+            <div class="box"><span aa-transition="flip-down">Flip Down</span></div>
+
+            <!-- Slide rotation animations -->
+            <div class="box"><span aa-transition="slide-rotate-bottom-right" aa-easing="ease-out-cubic">Slide Rotate Bottom Right</span></div>
+            <div class="box"><span aa-transition="slide-rotate-bottom-left" aa-easing="ease-out-cubic">Slide Rotate Bottom Left</span></div>
+            <div class="box"><span aa-transition="slide-rotate-top-right" aa-easing="ease-out-cubic">Slide Rotate Top Right</span></div>
+            <div class="box"><span aa-transition="slide-rotate-top-left" aa-easing="ease-out-cubic">Slide Rotate Top Left</span></div>
+
+            <!-- Blurred slide animations -->
+            <div class="box"><span aa-animate="slide-in-blurred-bottom">Slide In Blurred Bottom</span></div>
+            <div class="box"><span aa-animate="slide-in-blurred-top">Slide In Blurred Top</span></div>
+            <div class="box"><span aa-animate="slide-in-blurred-left">Slide In Blurred Left</span></div>
+            <div class="box"><span aa-animate="slide-in-blurred-right">Slide In Blurred Right</span></div>
+
+            <div class="box" style="height: 500px; background-image: url('https://picsum.photos/800/600'); background-size: cover; background-position: center;" aa-transition="pseudo-bg-reveal-down" aa-color-initial="rgba(255,255,255)" aa-color-final="rgba(255,255,255,1.0)" aa-easing="ease-out-expo">
+                <div>slide down</div>
+            </div>
+            <div class="box" style="height: 500px; background-image: url('https://picsum.photos/800/601'); background-size: cover; background-position: center;" aa-transition="pseudo-bg-reveal-up" aa-color-initial="rgba(0,0,0,0.5)" aa-color-final="rgba(255,255,255,0.5)" aa-easing="ease-out-expo">
+                <div>slide up</div>
+            </div>
+            <div class="box" style="height: 500px;" aa-transition="pseudo-bg-slide-right" aa-color-initial="#000" aa-color-final="#fff" aa-easing="ease-out-expo"><div>slide right</div></div>
+            <div class="box" style="height: 500px;" aa-transition="pseudo-bg-slide-left" aa-color-initial="#000" aa-color-final="#fff" aa-easing="ease-out-expo"><div>slide left</div></div>
         </div>
     </div>
 
     <script src="./AlrdyAnimate.js"></script>
+    <script src="https://unpkg.com/split-type"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/ScrollTrigger.min.js"></script>
+
     <script>
         AlrdyAnimate.init({
             duration: '1s',
             easing: 'ease-out'
+        });
+
+        window.addEventListener('load', () => {
+            requestAnimationFrame(() => {
+                gsap.registerPlugin(ScrollTrigger);
+
+                const animateElements = document.querySelectorAll('[animate]');
+
+                animateElements.forEach((element) => {
+                    let typeSplit = new SplitType(element, {
+                        types: 'lines',
+                        tagName: 'span'
+                    });
+
+                    let tl = gsap.timeline({
+                        paused: true,
+                    });
+
+                    // Animate the parent element's autoAlpha
+                    tl.from(element, {
+                        autoAlpha: 0,
+                        duration: 0.1
+                    });
+
+                    // Animate each line
+                    tl.from(element.querySelectorAll('.line'), {
+                        y: '110%',
+                        rotationZ: 10,
+                        opacity: 0,
+                        duration: 0.5,
+                        ease: 'back.out',
+                        stagger: 0.2
+                    }, "-=0.1");
+
+                    // Main ScrollTrigger for animation
+                    ScrollTrigger.create({
+                        trigger: element,
+                        start: 'top 80%',
+                        end: 'bottom top',
+                        onEnter: () => tl.play(),
+                        // Uncomment the next line to see trigger markers
+                        // markers: true,
+                    });
+
+                    // Second ScrollTrigger for reset functionality
+                    ScrollTrigger.create({
+                        trigger: element,
+                        start: 'top 100%', // Reset when the element is fully below the viewport
+                        onLeaveBack: () => {
+                            tl.progress(0).pause(); // Reset when scrolling up past the element
+                        },
+                        // Uncomment the next line to see trigger markers
+                        // markers: {startColor: "purple", endColor: "fuchsia", fontSize: "12px"},
+                    });
+                });
+            });
         });
     </script>
 </body>
