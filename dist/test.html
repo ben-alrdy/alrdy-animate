@@ -20,7 +20,7 @@
         }
         .headline {
             max-width: 40rem;
-            text-align: center;
+            text-align: left;
             margin-bottom: 3rem;
         }
         .grid {
@@ -37,14 +37,27 @@
             align-items: center;
             justify-content: center;
         }
-        [animate] {
-            visibility: hidden;
+        
+        .anchor {
+            height: 100px;
+            width: 100px;
+            background-color: darkgreen;
+            border-radius: 50%;
+            position: fixed;
+            top: 20;
+            left: 20;
+            z-index: 1000;
         }
+
     </style>
 </head>
 <body>
+    <div class="anchor" aa-anchor="#secondGrid" aa-transition="fade-right"></div>
+
     <div class="container">
-        <h1 class="headline" animate>AlrdyAnimate Test Animations AlrdyAnimate Test Animations AlrdyAnimate Test Animations AlrdyAnimate Test Animations</h1>
+        <h1 class="headline" aa-animate="textRotateUp" aa-split="lines" aa-easing="expo.out">
+            This text can be one line or multiple lines, can be animated line by line or word by word, on load or scroll
+        </h1>
         <div class="grid">
             <div class="box"><span aa-animate="fade-up-back">Fade Up Back</span></div>
             <div class="box"><span aa-animate="fade-down-back">Fade Down Back</span></div>
@@ -104,10 +117,12 @@
             <div class="box" style="height: 500px;" aa-transition="pseudo-bg-slide-right" aa-color-initial="#000" aa-color-final="#fff" aa-easing="ease-out-expo"><div>slide right</div></div>
             <div class="box" style="height: 500px;" aa-transition="pseudo-bg-slide-left" aa-color-initial="#000" aa-color-final="#fff" aa-easing="ease-out-expo"><div>slide left</div></div>
         </div>
-        
-        <h1 class="headline" animate>AlrdyAnimate Test Animations AlrdyAnimate Test Animations AlrdyAnimate Test Animations AlrdyAnimate Test Animations</h1>
 
-        <div class="grid"></div>
+        
+        <h1 class="headline" aa-animate="textRotateUp" aa-split="words" >
+            AlrdyAnimate Test Animations AlrdyAnimate Test Animations AlrdyAnimate Test Animations AlrdyAnimate Test Animations
+        </h1>
+        <div class="grid" id="secondGrid">
             <div class="box"><span aa-animate="fade-up-back">Fade Up Back</span></div>
             <div class="box"><span aa-animate="fade-down-back">Fade Down Back</span></div>
             <div class="box"><span aa-animate="fade-left-back">Fade Left Back</span></div>
@@ -169,17 +184,19 @@
     </div>
 
     <script src="./AlrdyAnimate.js"></script>
-    <script src="https://unpkg.com/split-type"></script>
+   <!--  <script src="https://unpkg.com/split-type"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/gsap.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/ScrollTrigger.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/ScrollTrigger.min.js"></script> -->
 
     <script>
         AlrdyAnimate.init({
             duration: '1s',
-            easing: 'ease-out'
+            easing: 'ease-out',
+            again: true,
+            useGSAP: true
         });
 
-        window.addEventListener('load', () => {
+        /* window.addEventListener('load', () => {
             requestAnimationFrame(() => {
                 gsap.registerPlugin(ScrollTrigger);
 
@@ -233,7 +250,7 @@
                     });
                 });
             });
-        });
+        }); */
     </script>
 </body>
 </html>

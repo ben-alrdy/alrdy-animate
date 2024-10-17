@@ -2,3 +2,8 @@
 @import 'animations';
 @import 'easing';
 @import 'transitions';
+
+// Hide the element when split, GSAP will handle the animation and turn visibility back on
+[aa-split] {
+    visibility: hidden;
+}

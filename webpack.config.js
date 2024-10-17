@@ -6,7 +6,9 @@ module.exports = {
   entry: './src/js/AlrdyAnimate.js',
   output: {
     filename: 'AlrdyAnimate.js',
-    path: path.resolve(__dirname, 'dist')
+    path: path.resolve(__dirname, 'dist'),
+    // Add this line for dynamic imports
+    chunkFilename: '[name].chunk.js'
   },
   devtool: false, //'source-map' or false in production
   module: {
@@ -18,6 +20,18 @@ module.exports = {
           'css-loader',
           'sass-loader'
         ]
+      },
+      // Add this rule for JavaScript files
+      {
+        test: /\.js$/,
+        exclude: /node_modules/,
+        use: {
+          loader: 'babel-loader',
+          options: {
+            presets: ['@babel/preset-env'],
+            plugins: ['@babel/plugin-syntax-dynamic-import']
+          }
+        }
       }
     ]
   },
@@ -25,5 +39,11 @@ module.exports = {
     new MiniCssExtractPlugin({
       filename: 'AlrdyAnimate.css' // Output CSS file name
     })
-  ]
+  ],
+  // Add this optimization configuration
+  optimization: {
+    splitChunks: {
+      chunks: 'all',
+    },
+  },
 };
