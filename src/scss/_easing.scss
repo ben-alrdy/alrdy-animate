@@ -1,47 +1,48 @@
 $aa-easing: (
-  linear: cubic-bezier(0.250, 0.250, 0.750, 0.750),
+  // Standard CSS easings and their GSAP equivalents
+  linear: cubic-bezier(0, 0, 1, 1),
+  ease: cubic-bezier(0.25, 0.1, 0.25, 1),       // GSAP: "power1.inOut"
+  ease-in: cubic-bezier(0.42, 0, 1, 1),         // GSAP: "power2.in"
+  ease-out: cubic-bezier(0, 0, 0.58, 1),        // GSAP: "power2.out"
+  ease-in-out: cubic-bezier(0.42, 0, 0.58, 1),  // GSAP: "power2.inOut"
 
-  ease: cubic-bezier(0.250, 0.100, 0.250, 1.000),
-  ease-in: cubic-bezier(0.420, 0.000, 1.000, 1.000),
-  ease-out: cubic-bezier(0.000, 0.000, 0.580, 1.000),
-  ease-in-out: cubic-bezier(0.420, 0.000, 0.580, 1.000), 
-
-  ease-in-back: cubic-bezier(0.600, -0.280, 0.735, 0.045),
-  ease-out-back: cubic-bezier(0.175, 0.885, 0.320, 1.275),
-  ease-in-out-back: cubic-bezier(0.680, -0.550, 0.265, 1.550),
-
-  ease-in-sine: cubic-bezier(0.470, 0.000, 0.745, 0.715),
-  ease-out-sine: cubic-bezier(0.390, 0.575, 0.565, 1.000),
-  ease-in-out-sine: cubic-bezier(0.445, 0.050, 0.550, 0.950),
-
-  ease-in-quad: cubic-bezier(0.550, 0.085, 0.680, 0.530),
-  ease-out-quad: cubic-bezier(0.250, 0.460, 0.450, 0.940),
-  ease-in-out-quad: cubic-bezier(0.455, 0.030, 0.515, 0.955),
-
-  ease-in-cubic: cubic-bezier(0.550, 0.055, 0.675, 0.190),
-  ease-out-cubic: cubic-bezier(0.215, 0.610, 0.355, 1.000),
-  ease-in-out-cubic: cubic-bezier(0.645, 0.045, 0.355, 1.000),
-
-  ease-in-quart: cubic-bezier(0.895, 0.030, 0.685, 0.220),
-  ease-out-quart: cubic-bezier(0.165, 0.840, 0.440, 1.000),
-  ease-in-out-quart: cubic-bezier(0.770, 0.000, 0.175, 1.000),
-
-  ease-in-quint: cubic-bezier(0.755, 0.050, 0.855, 0.060),
-  ease-out-quint: cubic-bezier(0.230, 1.000, 0.320, 1.000),
-  ease-in-out-quint: cubic-bezier(0.860, 0.000, 0.070, 1.000),
-
-  ease-in-expo: cubic-bezier(0.950, 0.050, 0.795, 0.035),
-  ease-out-expo: cubic-bezier(0.190, 1.000, 0.220, 1.000),
-  ease-in-out-expo: cubic-bezier(1.000, 0.000, 0.000, 1.000),
-
-  ease-in-circ: cubic-bezier(0.600, 0.040, 0.980, 0.335),
-  ease-out-circ: cubic-bezier(0.075, 0.820, 0.165, 1.000),
-  ease-in-out-circ: cubic-bezier(0.785, 0.135, 0.150, 0.860),
+  // GSAP Easings with cubic-bezier equivalents
+  'power1.in': cubic-bezier(0.55, 0.085, 0.68, 0.53),    // Quad.easeIn
+  'power1.out': cubic-bezier(0.25, 0.46, 0.45, 0.94),    // Quad.easeOut
+  'power1.inOut': cubic-bezier(0.455, 0.03, 0.515, 0.955), // Quad.easeInOut
   
+  'power2.in': cubic-bezier(0.55, 0.055, 0.675, 0.19),   // Cubic.easeIn
+  'power2.out': cubic-bezier(0.215, 0.61, 0.355, 1),     // Cubic.easeOut
+  'power2.inOut': cubic-bezier(0.645, 0.045, 0.355, 1),  // Cubic.easeInOut
+  
+  'power3.in': cubic-bezier(0.895, 0.03, 0.685, 0.22),   // Quart.easeIn
+  'power3.out': cubic-bezier(0.165, 0.84, 0.44, 1),      // Quart.easeOut
+  'power3.inOut': cubic-bezier(0.77, 0, 0.175, 1),       // Quart.easeInOut
+  
+  'power4.in': cubic-bezier(0.755, 0.05, 0.855, 0.06),   // Quint.easeIn
+  'power4.out': cubic-bezier(0.23, 1, 0.32, 1),          // Quint.easeOut
+  'power4.inOut': cubic-bezier(0.86, 0, 0.07, 1),        // Quint.easeInOut
+  
+  'back.in': cubic-bezier(0.6, -0.28, 0.735, 0.045),
+  'back.out': cubic-bezier(0.175, 0.885, 0.32, 1.275),
+  'back.inOut': cubic-bezier(0.68, -0.55, 0.265, 1.55),
+
+  'circ.in': cubic-bezier(0.6, 0.04, 0.98, 0.335),
+  'circ.out': cubic-bezier(0.075, 0.82, 0.165, 1),
+  'circ.inOut': cubic-bezier(0.785, 0.135, 0.15, 0.86),
+  
+  'expo.in': cubic-bezier(0.95, 0.05, 0.795, 0.035),
+  'expo.out': cubic-bezier(0.19, 1, 0.22, 1),
+  'expo.inOut': cubic-bezier(1, 0, 0, 1),
+  
+  'sine.in': cubic-bezier(0.47, 0, 0.745, 0.715),
+  'sine.out': cubic-bezier(0.39, 0.575, 0.565, 1),
+  'sine.inOut': cubic-bezier(0.445, 0.05, 0.55, 0.95)
 );
 
-// Easings implementations, default timing function: 'ease'
+// Note: elastic and bounce easings are not included as they can't be accurately represented with cubic-bezier
 
+// Easings implementations
 [aa-transition] {
   @each $key, $val in $aa-easing {
     body[aa-easing="#{$key}"] &,

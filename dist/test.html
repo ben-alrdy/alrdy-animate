@@ -63,7 +63,7 @@
             <div class="box"><span aa-animate="fade-down-back">Fade Down Back</span></div>
             <div class="box"><span aa-animate="fade-left-back">Fade Left Back</span></div>
             <div class="box"><span aa-animate="fade-right-back">Fade Right Back</span></div>
-            <div class="box"><span aa-transition="fade-up" aa-easing="ease-out-back">Transition Up</span></div>
+            <div class="box"><span aa-transition="fade-up" aa-easing="back.out">Transition Up</span></div>
             <div class="box"><span aa-transition="fade-down">Transition Down</span></div>
             <div class="box"><span aa-transition="fade-left">Transition Left</span></div>
             <div class="box"><span aa-transition="fade-right">Transition Right</span></div>
@@ -190,10 +190,10 @@
 
     <script>
         AlrdyAnimate.init({
-            duration: '1s',
+            duration: 1,
             easing: 'ease-out',
             again: true,
-            useGSAP: true
+            useGSAP: false
         });
 
         /* window.addEventListener('load', () => {

@@ -7,8 +7,8 @@ const defaultOptions = {
   again: true, // True = removes 'in-view' class when element is out of view towards the bottom
   viewportPercentage: 0.8, // Default percentage of the viewport height to trigger the animation
   useGSAP: false, // Use GSAP for animations
-  duration: '1s',
-  delay: '0s'
+  duration: 1, // 1 second
+  delay: 0 // 0 seconds
 };
 
 // Initialize the animation script with the given options
@@ -56,29 +56,25 @@ async function init(options = {}) {
 // Setup animations for elements
 function setupAnimations(elements, settings, isMobile, gsap = null, ScrollTrigger = null, animations = null) {
   elements.forEach((element) => {
-    const duration = element.getAttribute("aa-duration") || settings.duration;
-    const delay = element.getAttribute("aa-delay") || settings.delay;
-    const delayMobile = element.getAttribute("aa-delay-mobile");
+    const duration = element.hasAttribute("aa-duration") ? parseFloat(element.getAttribute("aa-duration")) : settings.duration;
+    const delay = element.hasAttribute("aa-delay") ? parseFloat(element.getAttribute("aa-delay")) : settings.delay;
+    const delayMobile = element.hasAttribute("aa-delay-mobile") ? parseFloat(element.getAttribute("aa-delay-mobile")) : null;
     const colorInitial = element.getAttribute("aa-color-initial") || settings.colorInitial;
     const colorFinal = element.getAttribute("aa-color-final") || settings.colorFinal;
+    const viewportPercentage = element.hasAttribute("aa-viewport") ? parseFloat(element.getAttribute("aa-viewport")) : settings.viewportPercentage;
     const anchorSelector = element.getAttribute("aa-anchor");
-    let anchorElement = element; // The 'anchorElement' will be observed, while the 'element' gets the in-view class
-
-    // Use the anchor element (if specified) to trigger the animation for element, i.e. anchor != element
-    if (anchorSelector) {
-      anchorElement = document.querySelector(anchorSelector);
-    }
+    const anchorElement = anchorSelector ? document.querySelector(anchorSelector) : element; //The 'anchorElement' will be observed, while the 'element' gets the in-view class; if there is no anchorSelector, the element itself is the anchor
 
     // Set animation duration and delay based on attributes or init options
     if (duration) {
-      element.style.setProperty("--animation-duration", duration);
+      element.style.setProperty("--animation-duration", `${duration}s`);
     }
 
     // Set animation delay based on attributes, init options, and mobile settings
     if (isMobile && delayMobile !== null) {
-      element.style.setProperty("--animation-delay", delayMobile);
+      element.style.setProperty("--animation-delay", `${delayMobile}s`);
     } else if (delay) {
-      element.style.setProperty("--animation-delay", delay);
+      element.style.setProperty("--animation-delay", `${delay}s`);
     }
 
     // Set background colors based on attributes
@@ -89,12 +85,7 @@ function setupAnimations(elements, settings, isMobile, gsap = null, ScrollTrigge
       element.style.setProperty("--background-color-final", colorFinal);
     }
 
-    // Get viewport percentage for triggering animation
-    const viewportPercentageAttr = element.getAttribute("aa-viewport");
-    // Set viewportPercentage to the parsed float value of viewportPercentageAttr if it exists; otherwise, use the value from settings.viewportPercentage.
-    let viewportPercentage = viewportPercentageAttr
-      ? parseFloat(viewportPercentageAttr)
-      : settings.viewportPercentage;
+
 
     if (settings.useGSAP && gsap && ScrollTrigger && animations) {
       setupGSAPAnimation(element, anchorSelector, anchorElement, viewportPercentage, settings, gsap, ScrollTrigger, animations);
