@@ -35,11 +35,77 @@ export async function createAnimations() {
         default:
           types = 'lines'; // Default to lines if no valid type is provided
       }
-      return new SplitType(element, { types: types });
+      
+      let result = new SplitType(element, { types: types });
+      
+      // Wrap each line div inside a line-wrapper, but only if we're splitting by lines
+      if (types === 'lines' && result.lines) {
+        result.lines.forEach(line => {
+          const wrapper = document.createElement('div');
+          wrapper.classList.add('line-wrapper');
+          
+          // Insert the wrapper before the line in the DOM
+          line.parentNode.insertBefore(wrapper, line);
+          
+          // Move the line into the wrapper
+          wrapper.appendChild(line);
+        });
+      }
+
+      return result;
     },
 
     /*
-    * TEXT ROTATE UP
+    * TEXT SLIDE
+    */
+    textSlideUp: (element, splitText, splitType, duration, stagger, ease) => {
+      duration = duration ?? 0.5;
+      stagger = stagger ?? 0.05;
+      ease = ease ?? 'back.out';
+      
+      const animationTarget = splitText[splitType] || splitText.lines;       // Determine the animation target based on the split type or defaulting to lines
+      const tl = gsap.timeline();
+
+      tl.from(element, {
+        autoAlpha: 0,      
+        duration: 0.1
+      });
+
+      tl.from(animationTarget, {
+        y: "110%",
+        duration,
+        stagger,
+        ease
+      }, ">");
+
+      return tl;
+    },
+
+    textSlideDown: (element, splitText, splitType, duration, stagger, ease) => {
+      duration = duration ?? 0.5;
+      stagger = stagger ?? 0.05;
+      ease = ease ?? 'back.out';
+      
+      const animationTarget = splitText[splitType] || splitText.lines;       // Determine the animation target based on the split type or defaulting to lines
+      const tl = gsap.timeline();
+
+      tl.from(element, {
+        autoAlpha: 0,      
+        duration: 0.1
+      });
+
+      tl.from(animationTarget, {
+        y: "-110%",
+        duration,
+        stagger,
+        ease
+      }, ">");
+
+      return tl;
+    },
+
+    /*
+    * TEXT ROTATE 
     */
     textRotateUp: (element, splitText, splitType, duration, stagger, ease) => {
       duration = duration ?? 0.5;
@@ -66,9 +132,6 @@ export async function createAnimations() {
       return tl;
     },
 
-    /*
-    * TEXT ROTATE DOWN
-    */
     textRotateDown: (element, splitText, splitType, duration, stagger, ease) => {
       duration = duration ?? 0.5;
       stagger = stagger ?? 0.05;
@@ -94,6 +157,9 @@ export async function createAnimations() {
       return tl;
     },
 
+    /*
+    * TEXT CASCADE
+    */
     textCascadeUp: (element, splitText, duration, stagger, ease) => {
       duration = duration ?? 0.5;
       stagger = stagger ?? 0.05;

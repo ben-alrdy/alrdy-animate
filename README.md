@@ -195,10 +195,8 @@ For certain text animations, you may want to clip the text to prevent overflow d
 Add the following CSS to your stylesheet:
 
 ```css
-[aa-animate="textCascadeUp"] > .line,
-[aa-animate="textCascadeDown"] > .line,
-[aa-animate="textRotateUp"] > .line,
-[aa-animate="textRotateDown"] > .line {
+[aa-animate] > .line,
+[aa-animate] > .line-wrapper{
     overflow: hidden;
 }
 ```
@@ -217,6 +215,8 @@ This clipping effect is particularly useful for the following animations:
 - `textCascadeDown`
 - `textRotateUp`
 - `textRotateDown`
+- `textSlideUp`
+- `textSlideDown`
 
 
 ## Contributing

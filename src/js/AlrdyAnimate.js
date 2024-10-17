@@ -121,6 +121,12 @@ function setupGSAPAnimation(element, anchorSelector, anchorElement, viewportPerc
 
     // Choose the animation based on the attribute
     switch(animationType) {
+      case 'textSlideUp':
+        tl.add(animations.textSlideUp(element, splitText, splitType, duration, stagger, ease));
+        break;
+      case 'textSlideDown':
+        tl.add(animations.textSlideDown(element, splitText, splitType, duration, stagger, ease));
+        break;
       case 'textRotateUp':
         tl.add(animations.textRotateUp(element, splitText, splitType, duration, stagger, ease));
         break;
