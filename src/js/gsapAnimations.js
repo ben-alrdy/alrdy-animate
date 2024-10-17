@@ -20,35 +20,28 @@ export async function createAnimations() {
     /*
     * SPLIT TEXT HELPER
     */
-    splitText: (element, type) => {
-      let types;
-      switch (type) {
-        case 'lines':
-          types = 'lines';
-          break;
-        case 'words':
-          types = 'lines, words';
-          break;
-        case 'chars':
-          types = 'lines, words, chars';
-          break;
-        default:
-          types = 'lines'; // Default to lines if no valid type is provided
+    splitText: (element, type = 'lines') => {
+
+      const isClip = type.includes('clip'); // check if clip option is included in the type
+      
+      // default split type is lines, checks if chars or words are included in the type
+      let types = 'lines';
+      if (type.includes('chars')) {
+        types = 'lines, words, chars';
+      } else if (type.includes('words')) {
+        types = 'lines, words';
       }
-      
-      let result = new SplitType(element, { types: types });
-      
-      // Wrap each line div inside a line-wrapper, but only if we're splitting by lines
-      if (types === 'lines' && result.lines) {
+
+      // split the text into lines, words or chars
+      let result = new SplitType(element, { types });
+
+      // if clip option is included, wrap each line in a clip wrapper
+      if (result.lines && isClip) {
         result.lines.forEach(line => {
           const wrapper = document.createElement('div');
-          wrapper.classList.add('line-wrapper');
-          
-          // Insert the wrapper before the line in the DOM
-          line.parentNode.insertBefore(wrapper, line);
-          
-          // Move the line into the wrapper
-          wrapper.appendChild(line);
+          wrapper.classList.add('line-clip-wrapper');
+          line.parentNode.insertBefore(wrapper, line); // insert the wrapper before the line  
+          wrapper.appendChild(line); // append the line to the wrapper
         });
       }
 
@@ -63,7 +56,8 @@ export async function createAnimations() {
       stagger = stagger ?? 0.05;
       ease = ease ?? 'back.out';
       
-      const animationTarget = splitText[splitType] || splitText.lines;       // Determine the animation target based on the split type or defaulting to lines
+      const baseSplitType = splitType.split('.')[0]; // Extract the base split type (before the dot)
+      const animationTarget = splitText[baseSplitType] || splitText.lines;       // Determine the animation target based on the split type or defaulting to lines
       const tl = gsap.timeline();
 
       tl.from(element, {

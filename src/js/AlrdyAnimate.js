@@ -101,9 +101,6 @@ function setupGSAPAnimation(element, anchorSelector, anchorElement, viewportPerc
   const duration = element.hasAttribute('aa-duration') ? parseFloat(element.getAttribute('aa-duration')) : undefined;
   const stagger = element.hasAttribute('aa-stagger') ? parseFloat(element.getAttribute('aa-stagger')) : undefined;
   const ease = element.hasAttribute('aa-easing') ? element.getAttribute('aa-easing') : undefined;
-  
-  // Split text
-  const splitText = animations.splitText(element, splitType);
 
   requestAnimationFrame(() => { // Wait for the next animation frame to ensure the element is visible
     let tl = gsap.timeline({
@@ -119,26 +116,30 @@ function setupGSAPAnimation(element, anchorSelector, anchorElement, viewportPerc
       }
     });
 
-    // Choose the animation based on the attribute
-    switch(animationType) {
-      case 'textSlideUp':
-        tl.add(animations.textSlideUp(element, splitText, splitType, duration, stagger, ease));
-        break;
-      case 'textSlideDown':
-        tl.add(animations.textSlideDown(element, splitText, splitType, duration, stagger, ease));
-        break;
-      case 'textRotateUp':
-        tl.add(animations.textRotateUp(element, splitText, splitType, duration, stagger, ease));
-        break;
-      case 'textRotateDown':
-        tl.add(animations.textRotateDown(element, splitText, splitType, duration, stagger, ease));
-        break;
-      case 'textCascadeUp':
-        tl.add(animations.textCascadeUp(element, splitText, duration, stagger, ease));
-        break;
-      case 'textCascadeDown':
-        tl.add(animations.textCascadeDown(element, splitText, duration, stagger, ease));
-        break;
+    if (splitType) {
+      const splitText = animations.splitText(element, splitType); // generate split text into lines or words or chars
+
+      // Choose the animation based on the attribute
+      switch(animationType) {
+        case 'textSlideUp':
+          tl.add(animations.textSlideUp(element, splitText, splitType, duration, stagger, ease));
+          break;
+        case 'textSlideDown':
+          tl.add(animations.textSlideDown(element, splitText, splitType, duration, stagger, ease));
+          break;
+        case 'textRotateUp':
+          tl.add(animations.textRotateUp(element, splitText, splitType, duration, stagger, ease));
+          break;
+        case 'textRotateDown':
+          tl.add(animations.textRotateDown(element, splitText, splitType, duration, stagger, ease));
+          break;
+        case 'textCascadeUp':
+          tl.add(animations.textCascadeUp(element, splitText, duration, stagger, ease));
+          break;
+        case 'textCascadeDown':
+          tl.add(animations.textCascadeDown(element, splitText, duration, stagger, ease));
+          break;
+      }
     }
 
     // Second ScrollTrigger for reset functionality

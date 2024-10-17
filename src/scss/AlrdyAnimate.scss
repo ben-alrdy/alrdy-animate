@@ -7,3 +7,8 @@
 [aa-split] {
     visibility: hidden;
 }
+
+// clip the text animation to prevent overflow
+[aa-split] > .line-clip-wrapper{
+    overflow: hidden;
+}

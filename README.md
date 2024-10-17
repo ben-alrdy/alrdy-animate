@@ -112,7 +112,7 @@ AlrdyAnimate.init({
 - **aa-color-final**: The final background color for the animation. Example: `aa-color-final="#d7ff64"`.
 - **aa-anchor**: Specify an anchor element to trigger the animation (useful for fixed elements that should be animated when the anchor scrolls into view). Example: `aa-anchor="#anchorElement"`.
 - **aa-viewport**: Override the global viewport percentage for this element. Example: `aa-viewport="0.6"`.
-- **aa-split**: Specifies how to split the text for animation. Possible values: `lines`, `words`, `chars`.
+- **aa-split**: Specifies how to split the text for animation. Possible values: `lines`, `words`, `chars`. Optionally, you can add `clip` to wrap each line in a clip wrapper and prevent overflow, resulting in a clipping effect during the animation. Example: `aa-split="words.clip"`.
 - **aa-stagger**: Sets the stagger effect for split text animations, in seconds. Example: `aa-stagger="0.05"`.
 
 ## Examples
@@ -184,39 +184,6 @@ Usage example:
 ```
 
 This will apply a fade-up animation with a 'back out' easing, which means it will slightly overshoot and then settle into place.
-
-
-## Clipping Text Animations
-
-For certain text animations, you may want to clip the text to prevent overflow during the animation process. This is particularly useful for animations where text moves in from off-screen. You can achieve this effect by adding custom CSS to your project.
-
-### How to Clip Text Animations
-
-Add the following CSS to your stylesheet:
-
-```css
-[aa-animate] > .line,
-[aa-animate] > .line-wrapper{
-    overflow: hidden;
-}
-```
-
-
-This CSS does the following:
-
-1. It targets elements with the class `.line` that are direct children of elements with specific `aa-animate` attributes.
-2. It sets `overflow: hidden` on these elements, which clips any content that exceeds the element's dimensions.
-
-### Supported Animations
-
-This clipping effect is particularly useful for the following animations:
-
-- `textCascadeUp`
-- `textCascadeDown`
-- `textRotateUp`
-- `textRotateDown`
-- `textSlideUp`
-- `textSlideDown`
 
 
 ## Contributing

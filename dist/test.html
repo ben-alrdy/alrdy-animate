@@ -49,20 +49,14 @@
             z-index: 1000;
         }
 
-        /*
-        * CROP TEXT ANIMATIONS
-        */
-        [aa-animate] > .line,
-        [aa-animate] > .line-wrapper{
-            overflow: hidden;
-        }
+      
     </style>
 </head>
 <body>
     <div class="anchor" aa-anchor="#secondGrid" aa-transition="fade-right"></div>
 
     <div class="container">
-        <h1 class="headline" aa-animate="textSlideUp" aa-split="lines" aa-stagger="0.1" aa-easing="expo.out">
+        <h1 class="headline" aa-animate="textSlideUp" aa-split="lines.clip" aa-stagger="0.1" aa-easing="expo.out">
             This text can be one line or multiple lines, can be animated line by line or word by word, on load or scroll
         </h1>
         <div class="grid">
