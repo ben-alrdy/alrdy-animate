@@ -100,6 +100,7 @@ function setupGSAPAnimation(element, anchorSelector, anchorElement, viewportPerc
   const splitType = element.getAttribute('aa-split');
   const duration = element.hasAttribute('aa-duration') ? parseFloat(element.getAttribute('aa-duration')) : undefined;
   const stagger = element.hasAttribute('aa-stagger') ? parseFloat(element.getAttribute('aa-stagger')) : undefined;
+  const delay = element.hasAttribute('aa-delay') ? parseFloat(element.getAttribute('aa-delay')) : undefined;
   const ease = element.hasAttribute('aa-easing') ? element.getAttribute('aa-easing') : undefined;
 
   requestAnimationFrame(() => { // Wait for the next animation frame to ensure the element is visible
@@ -122,22 +123,22 @@ function setupGSAPAnimation(element, anchorSelector, anchorElement, viewportPerc
       // Choose the animation based on the attribute
       switch(animationType) {
         case 'textSlideUp':
-          tl.add(animations.textSlideUp(element, splitText, splitType, duration, stagger, ease));
+          tl.add(animations.textSlideUp(element, splitText, splitType, duration, stagger, delay, ease));
           break;
         case 'textSlideDown':
-          tl.add(animations.textSlideDown(element, splitText, splitType, duration, stagger, ease));
+          tl.add(animations.textSlideDown(element, splitText, splitType, duration, stagger, delay, ease));
           break;
         case 'textRotateUp':
-          tl.add(animations.textRotateUp(element, splitText, splitType, duration, stagger, ease));
+          tl.add(animations.textRotateUp(element, splitText, splitType, duration, stagger, delay, ease));
           break;
         case 'textRotateDown':
-          tl.add(animations.textRotateDown(element, splitText, splitType, duration, stagger, ease));
+          tl.add(animations.textRotateDown(element, splitText, splitType, duration, stagger, delay, ease));
           break;
         case 'textCascadeUp':
-          tl.add(animations.textCascadeUp(element, splitText, duration, stagger, ease));
+          tl.add(animations.textCascadeUp(element, splitText, duration, stagger, delay, ease));
           break;
         case 'textCascadeDown':
-          tl.add(animations.textCascadeDown(element, splitText, duration, stagger, ease));
+          tl.add(animations.textCascadeDown(element, splitText, duration, stagger, delay, ease));
           break;
       }
     }

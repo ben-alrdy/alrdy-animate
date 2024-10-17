@@ -51,9 +51,10 @@ export async function createAnimations() {
     /*
     * TEXT SLIDE
     */
-    textSlideUp: (element, splitText, splitType, duration, stagger, ease) => {
+    textSlideUp: (element, splitText, splitType, duration, stagger, delay, ease) => {
       duration = duration ?? 0.5;
       stagger = stagger ?? 0.05;
+      delay = delay ?? 0;
       ease = ease ?? 'back.out';
       
       const baseSplitType = splitType.split('.')[0]; // Extract the base split type (before the dot)
@@ -69,18 +70,21 @@ export async function createAnimations() {
         y: "110%",
         duration,
         stagger,
-        ease
+        ease,
+        delay
       }, ">");
 
       return tl;
     },
 
-    textSlideDown: (element, splitText, splitType, duration, stagger, ease) => {
+    textSlideDown: (element, splitText, splitType, duration, stagger, delay, ease) => {
       duration = duration ?? 0.5;
       stagger = stagger ?? 0.05;
+      delay = delay ?? 0;
       ease = ease ?? 'back.out';
       
-      const animationTarget = splitText[splitType] || splitText.lines;       // Determine the animation target based on the split type or defaulting to lines
+      const baseSplitType = splitType.split('.')[0]; // Extract the base split type (before the dot)
+      const animationTarget = splitText[baseSplitType] || splitText.lines;       // Determine the animation target based on the split type or defaulting to lines
       const tl = gsap.timeline();
 
       tl.from(element, {
@@ -92,7 +96,8 @@ export async function createAnimations() {
         y: "-110%",
         duration,
         stagger,
-        ease
+        ease,
+        delay
       }, ">");
 
       return tl;
@@ -101,12 +106,14 @@ export async function createAnimations() {
     /*
     * TEXT ROTATE 
     */
-    textRotateUp: (element, splitText, splitType, duration, stagger, ease) => {
+    textRotateUp: (element, splitText, splitType, duration, stagger, delay, ease) => {
       duration = duration ?? 0.5;
       stagger = stagger ?? 0.05;
+      delay = delay ?? 0;
       ease = ease ?? 'back.out';
       
-      const animationTarget = splitText[splitType] || splitText.lines;       // Determine the animation target based on the split type or defaulting to lines
+      const baseSplitType = splitType.split('.')[0]; // Extract the base split type (before the dot)
+      const animationTarget = splitText[baseSplitType] || splitText.lines;       // Determine the animation target based on the split type or defaulting to lines
       const tl = gsap.timeline();
 
       tl.from(element, {
@@ -120,18 +127,21 @@ export async function createAnimations() {
         rotation: 10,
         duration,
         stagger,
-        ease
+        ease,
+        delay
       }, ">");
 
       return tl;
     },
 
-    textRotateDown: (element, splitText, splitType, duration, stagger, ease) => {
+    textRotateDown: (element, splitText, splitType, duration, stagger, delay, ease) => {
       duration = duration ?? 0.5;
       stagger = stagger ?? 0.05;
+      delay = delay ?? 0;
       ease = ease ?? 'back.out';
       
-      const animationTarget = splitText[splitType] || splitText.lines;       // Determine the animation target based on the split type or defaulting to lines
+      const baseSplitType = splitType.split('.')[0]; // Extract the base split type (before the dot)
+      const animationTarget = splitText[baseSplitType] || splitText.lines;       // Determine the animation target based on the split type or defaulting to lines
       const tl = gsap.timeline();
 
       tl.from(element, {
@@ -145,7 +155,8 @@ export async function createAnimations() {
         rotation: -10,
         duration,
         stagger,
-        ease
+        ease,
+        delay
       }, ">");
 
       return tl;
@@ -154,9 +165,10 @@ export async function createAnimations() {
     /*
     * TEXT CASCADE
     */
-    textCascadeUp: (element, splitText, duration, stagger, ease) => {
+    textCascadeUp: (element, splitText, duration, stagger, delay, ease) => {
       duration = duration ?? 0.5;
       stagger = stagger ?? 0.05;
+      delay = delay ?? 0;
       ease = ease ?? 'expo.out';
     
       // Ensure we have both lines and words split
@@ -178,16 +190,18 @@ export async function createAnimations() {
           opacity: 0,
           duration,
           stagger,
-          ease 
+          ease,
+          delay
         }, index * stagger * 4); // Delay each line
       });
 
       return tl;
     },
 
-    textCascadeDown: (element, splitText, duration, stagger, ease) => {
+    textCascadeDown: (element, splitText, duration, stagger, delay, ease) => {
       duration = duration ?? 0.5;
       stagger = stagger ?? 0.05;
+      delay = delay ?? 0;
       ease = ease ?? 'expo.out';
     
       // Ensure we have both lines and words split
@@ -209,7 +223,8 @@ export async function createAnimations() {
           opacity: 0,
           duration,
           stagger,
-          ease 
+          ease,
+          delay
         }, index * stagger * 4); // Delay each line
       });
 
