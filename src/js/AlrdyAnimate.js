@@ -121,14 +121,17 @@ function setupGSAPAnimation(element, anchorSelector, anchorElement, viewportPerc
 
     // Choose the animation based on the attribute
     switch(animationType) {
-      case 'char':
-        tl.add(animations.characterAnimation(element, duration, stagger));
-        break;
-      case 'word':
-        tl.add(animations.wordAnimation(element, duration, stagger));
-        break;
       case 'textRotateUp':
         tl.add(animations.textRotateUp(element, splitText, splitType, duration, stagger, ease));
+        break;
+      case 'textRotateDown':
+        tl.add(animations.textRotateDown(element, splitText, splitType, duration, stagger, ease));
+        break;
+      case 'textCascadeUp':
+        tl.add(animations.textCascadeUp(element, splitText, duration, stagger, ease));
+        break;
+      case 'textCascadeDown':
+        tl.add(animations.textCascadeDown(element, splitText, duration, stagger, ease));
         break;
     }
 

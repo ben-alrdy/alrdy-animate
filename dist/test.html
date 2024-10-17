@@ -49,13 +49,22 @@
             z-index: 1000;
         }
 
+        /*
+        * CROP TEXT ANIMATIONS
+        */
+        [aa-animate="textCascadeUp"] > .line,
+        [aa-animate="textCascadeDown"] > .line,
+        [aa-animate="textRotateUp"] > .line,
+        [aa-animate="textRotateDown"] > .line{
+            overflow: hidden;
+        }
     </style>
 </head>
 <body>
     <div class="anchor" aa-anchor="#secondGrid" aa-transition="fade-right"></div>
 
     <div class="container">
-        <h1 class="headline" aa-animate="textRotateUp" aa-split="lines" aa-easing="expo.out">
+        <h1 class="headline" aa-animate="textCascadeUp" aa-split="words" aa-stagger="0.03">
             This text can be one line or multiple lines, can be animated line by line or word by word, on load or scroll
         </h1>
         <div class="grid">
@@ -193,7 +202,7 @@
             duration: 1,
             easing: 'ease-out',
             again: true,
-            useGSAP: false
+            useGSAP: true
         });
 
         /* window.addEventListener('load', () => {

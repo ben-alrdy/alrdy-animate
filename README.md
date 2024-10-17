@@ -185,6 +185,40 @@ Usage example:
 
 This will apply a fade-up animation with a 'back out' easing, which means it will slightly overshoot and then settle into place.
 
+
+## Clipping Text Animations
+
+For certain text animations, you may want to clip the text to prevent overflow during the animation process. This is particularly useful for animations where text moves in from off-screen. You can achieve this effect by adding custom CSS to your project.
+
+### How to Clip Text Animations
+
+Add the following CSS to your stylesheet:
+
+```css
+[aa-animate="textCascadeUp"] > .line,
+[aa-animate="textCascadeDown"] > .line,
+[aa-animate="textRotateUp"] > .line,
+[aa-animate="textRotateDown"] > .line {
+    overflow: hidden;
+}
+```
+
+
+This CSS does the following:
+
+1. It targets elements with the class `.line` that are direct children of elements with specific `aa-animate` attributes.
+2. It sets `overflow: hidden` on these elements, which clips any content that exceeds the element's dimensions.
+
+### Supported Animations
+
+This clipping effect is particularly useful for the following animations:
+
+- `textCascadeUp`
+- `textCascadeDown`
+- `textRotateUp`
+- `textRotateDown`
+
+
 ## Contributing
 
 Contributions are welcome! Please fork the repository and submit pull requests for any improvements.
