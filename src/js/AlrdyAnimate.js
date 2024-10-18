@@ -1,5 +1,4 @@
 import styles from "../scss/AlrdyAnimate.scss";
-import { createAnimations } from './gsapAnimations';
 
 // Default options for the animation settings
 const defaultOptions = {
@@ -33,12 +32,9 @@ async function init(options = {}) {
   window.addEventListener('load', async () => {
       if (settings.useGSAP) {
         try {
-          const { gsap } = await import('gsap');
-          const { ScrollTrigger } = await import('gsap/ScrollTrigger');
-          gsap.registerPlugin(ScrollTrigger);
-          
-          const animations = await createAnimations();
+          const { gsap, ScrollTrigger, animations } = await import('./gsapBundle'); // Import the gsap, ScrollTrigger and animations modules
           setupAnimations(allAnimatedElements, settings, isMobile, gsap, ScrollTrigger, animations);
+
         } catch (error) {
           console.error('Failed to load GSAP:', error);
           // Make all elements visible that were hidden for GSAP animations

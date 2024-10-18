@@ -1,19 +1,4 @@
-let gsap, SplitType;
-
-async function loadDependencies() {
-  if (!gsap) {
-    const gsapModule = await import('gsap');
-    gsap = gsapModule.gsap;
-    const { ScrollTrigger } = await import('gsap/ScrollTrigger');
-    gsap.registerPlugin(ScrollTrigger);
-  }
-  if (!SplitType) {
-    SplitType = (await import('split-type')).default;
-  }
-}
-
-export async function createAnimations() {
-  await loadDependencies();
+export function createAnimations(gsap, SplitType) {
 
   return {
 
