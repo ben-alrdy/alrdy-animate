@@ -41,8 +41,9 @@ async function init(options = {}) {
           setupAnimations(allAnimatedElements, settings, isMobile, gsap, ScrollTrigger, animations);
         } catch (error) {
           console.error('Failed to load GSAP:', error);
+          // Make all elements visible that were hidden for GSAP animations
           allAnimatedElements.forEach((element) => {
-            element.style.visibility = 'visible'; // Make all elements visible that were hidden for GSAP animations
+            element.style.visibility = 'visible'; 
           });
           // Fallback to non-GSAP animations if loading fails
           setupAnimations(allAnimatedElements, settings, isMobile);
@@ -87,20 +88,19 @@ function setupAnimations(elements, settings, isMobile, gsap = null, ScrollTrigge
 
 
 
-    if (settings.useGSAP && gsap && ScrollTrigger && animations) {
-      setupGSAPAnimation(element, anchorSelector, anchorElement, viewportPercentage, settings, gsap, ScrollTrigger, animations);
+    if (settings.useGSAP) {
+      setupGSAPAnimation(element, anchorSelector, anchorElement, viewportPercentage, delay, settings, gsap, ScrollTrigger, animations);
     } else {
       setupIntersectionObserver(element, anchorSelector, anchorElement, viewportPercentage, settings);
     }
   });
 }
 
-function setupGSAPAnimation(element, anchorSelector, anchorElement, viewportPercentage, settings, gsap, ScrollTrigger, animations) {
+function setupGSAPAnimation(element, anchorSelector, anchorElement, viewportPercentage, delay, settings, gsap, ScrollTrigger, animations) {
   const animationType = element.getAttribute('aa-animate');
   const splitType = element.getAttribute('aa-split');
   const duration = element.hasAttribute('aa-duration') ? parseFloat(element.getAttribute('aa-duration')) : undefined;
   const stagger = element.hasAttribute('aa-stagger') ? parseFloat(element.getAttribute('aa-stagger')) : undefined;
-  const delay = element.hasAttribute('aa-delay') ? parseFloat(element.getAttribute('aa-delay')) : undefined;
   const ease = element.hasAttribute('aa-easing') ? element.getAttribute('aa-easing') : undefined;
 
   requestAnimationFrame(() => { // Wait for the next animation frame to ensure the element is visible

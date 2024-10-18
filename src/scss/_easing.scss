@@ -1,10 +1,10 @@
 $aa-easing: (
-  // Standard CSS easings and their GSAP equivalents
+  // Standard CSS easings 
   linear: cubic-bezier(0, 0, 1, 1),
-  ease: cubic-bezier(0.25, 0.1, 0.25, 1),       // GSAP: "power1.inOut"
-  ease-in: cubic-bezier(0.42, 0, 1, 1),         // GSAP: "power2.in"
-  ease-out: cubic-bezier(0, 0, 0.58, 1),        // GSAP: "power2.out"
-  ease-in-out: cubic-bezier(0.42, 0, 0.58, 1),  // GSAP: "power2.inOut"
+  ease: cubic-bezier(0.25, 0.1, 0.25, 1),       
+  ease-in: cubic-bezier(0.42, 0, 1, 1),        
+  ease-out: cubic-bezier(0, 0, 0.58, 1),      
+  ease-in-out: cubic-bezier(0.42, 0, 0.58, 1),  
 
   // GSAP Easings with cubic-bezier equivalents
   'power1.in': cubic-bezier(0.55, 0.085, 0.68, 0.53),    // Quad.easeIn
