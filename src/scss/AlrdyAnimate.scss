@@ -3,9 +3,14 @@
 @import 'easing';
 @import 'transitions';
 
-// Hide the element when split, GSAP will handle the animation and turn visibility back on
-[aa-split] {
+// Hide the text animations initially
+[aa-animate^="text-"] {
     visibility: hidden;
+}
+
+// Since the text-fade start with 30% opacity, show the element
+[aa-animate="text-fade"] {
+    visibility: visible;
 }
 
 // clip the text animation to prevent overflow

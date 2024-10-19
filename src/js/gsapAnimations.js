@@ -1,17 +1,25 @@
 export function createAnimations(gsap) {
+  // Helper function to get scroll trigger values
+  const getScrollTriggerValues = (isMobile) => {
+    return {
+      start: isMobile ? "top 40%" : "top 80%",
+      end: isMobile ? "top 20%" : "top 40%"
+    };
+  };
+
   return {
     /*
     * TEXT SLIDE
     */
-    textSlideUp: (element, splitText, splitType, duration, stagger, delay, ease) => {
+    textSlideUp: (element, splitResult, splitType, duration, stagger, delay, ease, isMobile, scroll) => {
       duration = duration ?? 0.5;
       stagger = stagger ?? 0.05;
       delay = delay ?? 0;
       ease = ease ?? 'back.out';
       
-      const baseSplitType = splitType.split('.')[0]; // Extract the base split type (before the dot)
-      const animationTarget = splitText[baseSplitType] || splitText.lines;       // Determine the animation target based on the split type or defaulting to lines
+      const animationTarget = splitResult[splitType] || splitResult.lines;       // Determine the animation target based on the split type or defaulting to lines
       const tl = gsap.timeline();
+      const { start, end } = getScrollTriggerValues(isMobile);
 
       // Set initial opacity of the whole element
       tl.set(element, { autoAlpha: 0 });
@@ -23,21 +31,31 @@ export function createAnimations(gsap) {
         stagger,
         ease,
         delay,
+        ...(scroll && { // if scroll is not null
+          scrollTrigger: {
+            trigger: element,
+            start,
+            end,
+            scrub: scroll.includes('smooth') ? 2 :
+                   scroll.includes('snap') ? { snap: 0.2 } :
+                   true
+          }
+        }),
         onStart: () => gsap.set(element, { autoAlpha: 1 }) // Make the whole element visible when animation starts
       }, ">");
 
       return tl;
     },
 
-    textSlideDown: (element, splitText, splitType, duration, stagger, delay, ease) => {
+    textSlideDown: (element, splitResult, splitType, duration, stagger, delay, ease, isMobile, scroll) => {
       duration = duration ?? 0.5;
       stagger = stagger ?? 0.05;
       delay = delay ?? 0;
       ease = ease ?? 'back.out';
       
-      const baseSplitType = splitType.split('.')[0]; // Extract the base split type (before the dot)
-      const animationTarget = splitText[baseSplitType] || splitText.lines;       // Determine the animation target based on the split type or defaulting to lines
+      const animationTarget = splitResult[splitType] || splitResult.lines;       // Determine the animation target based on the split type or defaulting to lines
       const tl = gsap.timeline();
+      const { start, end } = getScrollTriggerValues(isMobile);
 
       // Set initial opacity of the whole element
       tl.set(element, { autoAlpha: 0 });
@@ -49,6 +67,16 @@ export function createAnimations(gsap) {
         stagger,
         ease,
         delay,
+        ...(scroll && { // if scroll is not null
+          scrollTrigger: {
+            trigger: element,
+            start,
+            end,
+            scrub: scroll.includes('smooth') ? 2 :
+                   scroll.includes('snap') ? { snap: 0.2 } :
+                   true
+          }
+        }),
         onStart: () => gsap.set(element, { autoAlpha: 1 }) // Make the whole element visible when animation starts
       }, ">");
 
@@ -58,15 +86,15 @@ export function createAnimations(gsap) {
     /*
     * TEXT ROTATE 
     */
-    textTurnUp: (element, splitText, splitType, duration, stagger, delay, ease) => {
+    textTiltUp: (element, splitResult, splitType, duration, stagger, delay, ease, isMobile, scroll) => {
       duration = duration ?? 0.5;
       stagger = stagger ?? 0.05;
       delay = delay ?? 0;
       ease = ease ?? 'back.out';
       
-      const baseSplitType = splitType.split('.')[0]; // Extract the base split type (before the dot)
-      const animationTarget = splitText[baseSplitType] || splitText.lines;       // Determine the animation target based on the split type or defaulting to lines
+      const animationTarget = splitResult[splitType] || splitResult.lines;       // Determine the animation target based on the split type or defaulting to lines
       const tl = gsap.timeline();
+      const { start, end } = getScrollTriggerValues(isMobile);
 
       // Set initial opacity of the whole element
       tl.set(element, { autoAlpha: 0 });
@@ -79,21 +107,31 @@ export function createAnimations(gsap) {
         stagger,
         ease,
         delay,
+        ...(scroll && { // if scroll is not null
+          scrollTrigger: {
+            trigger: element,
+            start,
+            end,
+            scrub: scroll.includes('smooth') ? 2 :
+                   scroll.includes('snap') ? { snap: 0.2 } :
+                   true
+          }
+        }),
         onStart: () => gsap.set(element, { autoAlpha: 1 }) // Make the whole element visible when animation starts
       }, ">");
 
       return tl;
     },
 
-    textTurnDown: (element, splitText, splitType, duration, stagger, delay, ease) => {
+    textTiltDown: (element, splitResult, splitType, duration, stagger, delay, ease, isMobile, scroll) => {
       duration = duration ?? 0.5;
       stagger = stagger ?? 0.05;
       delay = delay ?? 0;
       ease = ease ?? 'back.out';
       
-      const baseSplitType = splitType.split('.')[0]; // Extract the base split type (before the dot)
-      const animationTarget = splitText[baseSplitType] || splitText.lines;       // Determine the animation target based on the split type or defaulting to lines
+      const animationTarget = splitResult[splitType] || splitResult.lines;       // Determine the animation target based on the split type or defaulting to lines
       const tl = gsap.timeline();
+      const { start, end } = getScrollTriggerValues(isMobile);
 
       // Set initial opacity of the whole element
       tl.set(element, { autoAlpha: 0 });
@@ -106,6 +144,16 @@ export function createAnimations(gsap) {
         stagger,
         ease,
         delay,
+        ...(scroll && { // if scroll is not null
+          scrollTrigger: {
+            trigger: element,
+            start,
+            end,
+            scrub: scroll.includes('smooth') ? 2 :
+                   scroll.includes('snap') ? { snap: 0.2 } :
+                   true
+          }
+        }),
         onStart: () => gsap.set(element, { autoAlpha: 1 }) // Make the whole element visible when animation starts
       }, ">");
 
@@ -115,22 +163,22 @@ export function createAnimations(gsap) {
     /*
     * TEXT CASCADE
     */
-    textCascadeUp: (element, splitText, duration, stagger, delay, ease) => {
+    textCascadeUp: (element, splitResult, duration, stagger, delay, ease, isMobile, scroll) => {
       duration = duration ?? 0.5;
       stagger = stagger ?? 0.05;
       delay = delay ?? 0;
       ease = ease ?? 'expo.out';
+
+      const { start, end } = getScrollTriggerValues(isMobile);
     
       // Ensure we have both lines and words split
-      const lines = splitText.lines;
-      const words = splitText.words;
+      const lines = splitResult.lines;
+      const words = splitResult.words;
 
       const tl = gsap.timeline();
 
-      tl.from(element, { 
-        autoAlpha: 0,
-        duration: 0.1
-      });
+      // Set initial opacity of the whole element
+      tl.set(element, { autoAlpha: 0 });
 
       lines.forEach((line, index) => {
         const wordsInLine = words.filter(word => line.contains(word));
@@ -141,22 +189,35 @@ export function createAnimations(gsap) {
           duration,
           stagger,
           ease,
-          delay
+          delay,
+          ...(scroll && { // if scroll is not null
+            scrollTrigger: {
+              trigger: element,
+              start,
+              end,
+              scrub: scroll.includes('smooth') ? 2 :
+                     scroll.includes('snap') ? { snap: 0.2 } :
+                     true
+            }
+          }),
+          onStart: () => gsap.set(element, { autoAlpha: 1 }) // Make the whole element visible when animation starts
         }, index * stagger * 3); // Delay each line
       });
 
       return tl;
     },
 
-    textCascadeDown: (element, splitText, duration, stagger, delay, ease) => {
+    textCascadeDown: (element, splitResult, duration, stagger, delay, ease, isMobile, scroll) => {
       duration = duration ?? 0.5;
       stagger = stagger ?? 0.05;
       delay = delay ?? 0;
       ease = ease ?? 'expo.out';
+
+      const { start, end } = getScrollTriggerValues(isMobile);
     
       // Ensure we have both lines and words split
-      const lines = splitText.lines;
-      const words = splitText.words;
+      const lines = splitResult.lines;
+      const words = splitResult.words;
 
       const tl = gsap.timeline();
 
@@ -173,6 +234,16 @@ export function createAnimations(gsap) {
           stagger,
           ease,
           delay,
+          ...(scroll && { // if scroll is not null
+            scrollTrigger: {
+              trigger: element,
+              start,
+              end,
+              scrub: scroll.includes('smooth') ? 2 :
+                     scroll.includes('snap') ? { snap: 0.2 } :
+                     true
+            }
+          }),
           onStart: () => gsap.set(element, { autoAlpha: 1 }) // Make the whole element visible when animation starts
         }, index * stagger * 4); // Delay each line
       });
@@ -183,16 +254,16 @@ export function createAnimations(gsap) {
     /*
     * ROTATE IN TOP FORWARD
     */
-    textRotateSoft: (element, splitText, splitType = 'lines', duration, stagger, delay, ease) => {
+    textRotateSoft: (element, splitResult, splitType, duration, stagger, delay, ease, isMobile, scroll) => {
       duration = duration ?? 1.2;
       stagger = stagger ?? 0.1;
       delay = delay ?? 0;
       ease = ease ?? 'power3.out';
 
-      // Split the text
-      const baseSplitType = splitType.split('.')[0]; // Extract the base split type (before the dot)
-      const animationTarget = splitText[baseSplitType] || splitText.lines;       // Determine the animation target based on the split type or defaulting to lines
+      const animationTarget = splitResult[splitType] || splitResult.lines;       // Determine the animation target based on the split type or defaulting to lines
       const tl = gsap.timeline();
+
+      const { start, end } = getScrollTriggerValues(isMobile);
 
       // Calculate perspective in pixels based on font size
       const computedStyle = window.getComputedStyle(element);
@@ -232,6 +303,95 @@ export function createAnimations(gsap) {
         stagger,
         ease,
         delay,
+        ...(scroll && { // if scroll is not null
+          scrollTrigger: {
+            trigger: element,
+            start,
+            end,
+            scrub: scroll.includes('smooth') ? 2 :
+                   scroll.includes('snap') ? { snap: 0.2 } :
+                   true
+          }
+        }),
+        onStart: () => gsap.set(element, { autoAlpha: 1 }) // Make the whole element visible when animation starts
+      });
+
+      return tl;
+    },
+
+    /*
+    * FADE ANIMATION, STARTING WITH 30% OPACITY
+    */
+    textFade: (element, splitResult, splitType, duration, stagger, delay, ease, isMobile, scroll) => {
+      duration = duration ?? 0.5;
+      stagger = stagger ?? 0.05;
+      delay = delay ?? 0;
+      ease = ease ?? 'power3.out';
+
+      const animationTarget = splitResult[splitType] || splitResult.lines;       // Determine the animation target based on the split type or defaulting to lines
+      const tl = gsap.timeline();
+
+      const { start, end } = getScrollTriggerValues(isMobile);
+
+      tl.set(animationTarget, {
+        opacity: 0.3
+      });
+
+      tl.from(animationTarget, {
+        opacity: 0.3,
+        duration,
+        stagger,  
+        ease,
+        delay,
+        ...(scroll && { // if scroll is not null
+          scrollTrigger: {
+            trigger: element,
+            start,
+            end,
+            scrub: scroll.includes('smooth') ? 2 :
+                   scroll.includes('snap') ? { snap: 0.2 } :
+                   true
+          }
+        })
+      });
+
+      return tl;
+    },
+
+    /*
+    * APPEAR ANIMATION, STARTING WITH 0% OPACITY
+    */
+    textAppear: (element, splitResult, splitType, duration, stagger, delay, ease, isMobile, scroll) => {
+      duration = duration ?? 0.5;
+      stagger = stagger ?? 0.05;
+      delay = delay ?? 0;
+      ease = ease ?? 'power3.out';
+
+      const animationTarget = splitResult[splitType] || splitResult.lines;       // Determine the animation target based on the split type or defaulting to lines
+      const tl = gsap.timeline();
+
+      const { start, end } = getScrollTriggerValues(isMobile);
+
+      tl.set(element, {
+        autoAlpha: 0
+      });
+
+      tl.from(animationTarget, {
+        opacity: 0,
+        duration,
+        stagger,  
+        ease,
+        delay,
+        ...(scroll && { // if scroll is not null
+          scrollTrigger: {
+            trigger: element,
+            start,
+            end,
+            scrub: scroll.includes('smooth') ? 2 :
+                   scroll.includes('snap') ? { snap: 0.2 } :
+                   true
+          }
+        }),
         onStart: () => gsap.set(element, { autoAlpha: 1 }) // Make the whole element visible when animation starts
       });
 

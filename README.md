@@ -112,8 +112,12 @@ AlrdyAnimate.init({
 - **aa-color-final**: The final background color for the animation. Example: `aa-color-final="#d7ff64"`.
 - **aa-anchor**: Specify an anchor element to trigger the animation (useful for fixed elements that should be animated when the anchor scrolls into view). Example: `aa-anchor="#anchorElement"`.
 - **aa-viewport**: Override the global viewport percentage for this element. Example: `aa-viewport="0.6"`.
+
+#### Special attributes for text animations (requires `useGSAP: true`):
+
 - **aa-split**: Specifies how to split the text for animation. Possible values: `lines`, `words`, `chars`. Optionally, you can add `clip` to wrap each line in a clip wrapper and prevent overflow, resulting in a clipping effect during the animation. Example: `aa-split="words.clip"`.
 - **aa-stagger**: Sets the stagger effect for split text animations, in seconds. Example: `aa-stagger="0.05"`.
+- **aa-scroll**: Sets the scroll behavior for text animations. Possible values: `snap`, `smooth`. Example: `aa-scroll="snap"`.
 
 ## Examples
 
@@ -203,16 +207,20 @@ AlrdyAnimate includes a variety of text animations (via `aa-animate`) that need 
 
 For the cascade animations, `aa-split` needs to be either `words` or `words.clip`.
 
+You can also use `aa-scroll` to make the animation scroll-driven. There are two options: `aa-scroll="snap"` and `aa-scroll="smooth"`.
+
 ### Available Text Animations
 
 
 - `text-slide-up`: Slides the text up from the bottom.
 - `text-slide-down`: Slides the text down from the top.
-- `text-turn-up`: Slides and rotates the text up from the bottom.
-- `text-turn-down`: Slides and rotates the text down from the top.
+- `text-tilt-up`: Slides and rotates the text up from the bottom.
+- `text-tilt-down`: Slides and rotates the text down from the top.
 - `text-cascade-up`: Cascades the text up from the bottom; both lines and words appear sequentially. Requires `aa-split="words"` or `aa-split="words.clip"`.
 - `text-cascade-down`: Cascades the text down from the top; both lines and words appear sequentially. Requires `aa-split="words"` or `aa-split="words.clip"`.
 - `text-rotate-soft`: Rotates the text softly around the X axis. Best works with `aa-split="lines"` or `aa-split="lines.clip"`.
+- `text-fade`: Fades the text in, starts with 30% opacity.
+- `text-appear`: Fades the text in, starts with 0% opacity.
 
 
 ## Contributing
