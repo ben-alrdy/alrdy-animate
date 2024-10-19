@@ -118,26 +118,26 @@ function setupGSAPAnimation(element, anchorSelector, anchorElement, viewportPerc
 
       // Choose the animation based on the attribute
       switch(animationType) {
-        case 'textSlideUp':
+        case 'text-slide-up':
           tl.add(animations.textSlideUp(element, splitResult, splitType, duration, stagger, delay, ease));
           break;
-        case 'textSlideDown':
+        case 'text-slide-down':
           tl.add(animations.textSlideDown(element, splitResult, splitType, duration, stagger, delay, ease));
           break;
-        case 'textRotateUp':
-          tl.add(animations.textRotateUp(element, splitResult, splitType, duration, stagger, delay, ease));
+        case 'text-turn-up':
+          tl.add(animations.textTurnUp(element, splitResult, splitType, duration, stagger, delay, ease));
           break;
-        case 'textRotateDown':
-          tl.add(animations.textRotateDown(element, splitResult, splitType, duration, stagger, delay, ease));
+        case 'text-turn-down':
+          tl.add(animations.textTurnDown(element, splitResult, splitType, duration, stagger, delay, ease));
           break;
-        case 'textCascadeUp':
+        case 'text-cascade-up':
           tl.add(animations.textCascadeUp(element, splitResult, duration, stagger, delay, ease));
           break;
-        case 'textCascadeDown':
+        case 'text-cascade-down':
           tl.add(animations.textCascadeDown(element, splitResult, duration, stagger, delay, ease));
           break;
-        case 'textRotateTopFwd':
-          tl.add(animations.textRotateTopFwd(element, splitResult, splitType, duration, stagger, delay, ease));
+        case 'text-rotate-soft':
+          tl.add(animations.textRotateSoft(element, splitResult, splitType, duration, stagger, delay, ease));
           break;
       }
     }

@@ -112,7 +112,7 @@ AlrdyAnimate.init({
 - **aa-color-final**: The final background color for the animation. Example: `aa-color-final="#d7ff64"`.
 - **aa-anchor**: Specify an anchor element to trigger the animation (useful for fixed elements that should be animated when the anchor scrolls into view). Example: `aa-anchor="#anchorElement"`.
 - **aa-viewport**: Override the global viewport percentage for this element. Example: `aa-viewport="0.6"`.
-- **aa-split**: Specifies how to split the text for animation. Possible values: `lines`, `words`, `chars`. Optionally, you can add `clip` to wrap each line in a clip wrapper and prevent overflow, resulting in a clipping effect during the animation. Example: `aa-split="words.clip"`. Note: you need specify `aa-split="words"` if you want to use the `aa-animate="textCascadeUp"` or `aa-animate="textCascadeDown"` animations.
+- **aa-split**: Specifies how to split the text for animation. Possible values: `lines`, `words`, `chars`. Optionally, you can add `clip` to wrap each line in a clip wrapper and prevent overflow, resulting in a clipping effect during the animation. Example: `aa-split="words.clip"`.
 - **aa-stagger**: Sets the stagger effect for split text animations, in seconds. Example: `aa-stagger="0.05"`.
 
 ## Examples
@@ -196,6 +196,23 @@ AlrdyAnimate includes a variety of 3D animations (via `aa-animate`) that require
 - `rotate-elliptic`: Rotates the element elliptically around the X and Y axes.
 - `swing-fwd`: Swings the element forward around the X axis anchored to the top.
 - `swing-bwd`: Swings the element backward around the X axis anchored to the top.
+
+## Text Animations
+
+AlrdyAnimate includes a variety of text animations (via `aa-animate`) that need to be paired with `aa-split` to work. There are 3 split types: `lines`, `words`, `chars`. Each can be optionally paired with `clip` to create a clipping effect during the animation, e.g. `aa-split="words.clip"`.
+
+For the cascade animations, `aa-split` needs to be either `words` or `words.clip`.
+
+### Available Text Animations
+
+
+- `text-slide-up`: Slides the text up from the bottom.
+- `text-slide-down`: Slides the text down from the top.
+- `text-turn-up`: Slides and rotates the text up from the bottom.
+- `text-turn-down`: Slides and rotates the text down from the top.
+- `text-cascade-up`: Cascades the text up from the bottom; both lines and words appear sequentially. Requires `aa-split="words"` or `aa-split="words.clip"`.
+- `text-cascade-down`: Cascades the text down from the top; both lines and words appear sequentially. Requires `aa-split="words"` or `aa-split="words.clip"`.
+- `text-rotate-soft`: Rotates the text softly around the X axis. Best works with `aa-split="lines"` or `aa-split="lines.clip"`.
 
 
 ## Contributing

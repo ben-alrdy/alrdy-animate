@@ -72,10 +72,16 @@
             /* perspective: 1000px; */
         }
 
-        .headline {
+        h1 {
             font-size: 8rem;
             padding-bottom: 2rem;
-            max-width: 600px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        h2 {
+            font-size: 3rem;
+            padding-bottom: 2rem;
+            max-width: 800px;
             margin: 0 auto;
         }
 
@@ -216,7 +222,7 @@
             <h1 class="headline" aa-animate="rotate-soft-3em" aa-duration="2.5" aa-easing="expo.out" aa-delay="0.9">
                 ThickPic
             </h1>
-            <p class="subheadline" aa-transition="rotate-soft"  aa-easing="power2.out" aa-delay="0.2" aa-duration="0.5">
+            <p class="subheadline" aa-animate="text-rotate-soft" aa-split="lines.clip" aa-easing="power2.out" aa-delay="0.2" aa-duration="0.5">
                 Easily record and share AI-powered video messages with your teammates and customers to supercharge
                 productivity
             </p>
@@ -242,8 +248,8 @@
         </section>
         <section>
             <div class="container">
-                <h1 class="headline" aa-transition="rotate-soft"  aa-easing="expo.out" aa-duration="0.5" aa-delay="0.5">
-                    This text can be one line 
+                <h1 aa-animate="text-rotate-soft" aa-split="lines" aa-easing="expo.out" aa-stagger="0.1" aa-duration="2" aa-delay="0.5">
+                    This text can be one line text can be one line  line This text can be one line text can be one line 
                 </h1>
                 <div class="grid">
                     <div class="box"><span aa-animate="fade-up-back">Fade Up Back</span></div>
