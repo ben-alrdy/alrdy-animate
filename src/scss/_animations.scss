@@ -63,7 +63,7 @@
 }
 
 
-/*SWING ANIMATIONS*/
+/*3D SWING ANIMATIONS*/
 
 [aa-animate^='swing'][aa-animate^='swing'] {
   opacity: 0;
@@ -74,17 +74,17 @@
   }
 }
 
-[aa-animate="swing-in-top-fwd"].in-view {
-  animation: swing-in-top-fwd var(--animation-duration) forwards;
+[aa-animate="swing-fwd"].in-view {
+  animation: swing-fwd var(--animation-duration) forwards;
 }
 
-[aa-animate="swing-in-top-bck"].in-view {
-  animation: swing-in-top-bck var(--animation-duration) forwards;
+[aa-animate="swing-bwd"].in-view {
+  animation: swing-bwd var(--animation-duration) forwards;
 }
 
-/*SLIDE ELLIPTIC ANIMATIONS*/
+/*3D ROTATION ANIMATIONS*/
 
-[aa-animate^='slide-in'][aa-animate^='slide-in'] {
+[aa-animate^='rotate'][aa-animate^='rotate'] {
   opacity: 0;
 
   &.in-view {
@@ -92,10 +92,14 @@
   }
 }
 
-[aa-animate="slide-in-elliptic-top-fwd"].in-view {
-  animation: slide-in-elliptic-top-fwd var(--animation-duration) forwards;
+[aa-animate="rotate-soft"].in-view {
+  animation: rotate-soft var(--animation-duration) forwards;
 }
 
-[aa-animate="slide-in-rotate-top-fwd"].in-view {
-  animation: slide-in-rotate-top-fwd var(--animation-duration) forwards;
+[aa-animate="rotate-soft-3em"].in-view {
+  animation: rotate-soft-3em var(--animation-duration) forwards;
+}
+
+[aa-animate="rotate-elliptic"].in-view {
+  animation: rotate-elliptic var(--animation-duration) forwards;
 }

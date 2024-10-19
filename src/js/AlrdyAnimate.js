@@ -32,7 +32,7 @@ async function init(options = {}) {
   window.addEventListener('load', async () => {
       if (settings.useGSAP) {
         try {
-          const { gsap, ScrollTrigger, animations, splitText } = await import('./gsapBundle'); // Import the gsap, ScrollTrigger and animations modules
+          const { gsap, ScrollTrigger, animations, splitText } = await import('./gsapBundle'); // Import the gsap, ScrollTrigger, SplitText and animations modules
           setupAnimations(allAnimatedElements, settings, isMobile, gsap, ScrollTrigger, animations, splitText);
 
         } catch (error) {

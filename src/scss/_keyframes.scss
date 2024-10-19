@@ -126,10 +126,10 @@
 
 /**
  * ----------------------------------------
- * animation swing-in-top
+ * 3D Animations, require the parent element to have a perspective set, e.g. perspective: 1000px;
  * ----------------------------------------
  */
-@keyframes swing-in-top-fwd {
+@keyframes swing-fwd {
   0% {
     transform: rotateX(-100deg);
     transform-origin: top;
@@ -142,7 +142,7 @@
   }
 }
 
-@keyframes swing-in-top-bck {
+@keyframes swing-bwd {
   0% {
     transform: rotateX(70deg);
     transform-origin: top;
@@ -155,12 +155,30 @@
   }
 }
 
-/**
- * ----------------------------------------
- * animation slide-in-elliptic-top-fwd
- * ----------------------------------------
- */
- @keyframes slide-in-elliptic-top-fwd {
+@keyframes rotate-soft {
+  0% {
+    transform: rotateX(-90deg) translate3d(0, 100%, 0) scale3d(.75, 1, 1);
+    opacity: 0;
+  }
+  100% {
+    transform: rotate3d(0, 0, 0, 0) translateZ(0) scaleZ(1);
+    opacity: 1;
+  }
+}
+
+/*Includes perspective so that it doesn't need to be set on the parent element*/
+@keyframes rotate-soft-3em {
+  0% {
+    transform: perspective(3em) rotateX(-90deg) translate3d(0, 100%, 0) scale3d(.75, 1, 1);
+    opacity: 0;
+  }
+  100% {
+    transform: perspective(3em) rotate3d(0, 0, 0, 0) translateZ(0) scaleZ(1);
+    opacity: 1;
+  }
+}
+
+ @keyframes rotate-elliptic {
   0% {
     transform: translateY(-600px) rotateX(-30deg) scale(0);
     transform-origin: 50% 100%;
@@ -173,13 +191,3 @@
   }
 }
 
-@keyframes slide-in-rotate-top-fwd {
-  0% {
-    transform: perspective(1000px) rotateX(-90deg) translate3d(0, 100%, 0) scale3d(.75, 1, 1);
-    opacity: 0;
-  }
-  100% {
-    transform: perspective(1000px) rotate3d(0, 0, 0, 0) translateZ(0) scaleZ(1);
-    opacity: 1;
-  }
-}

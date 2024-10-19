@@ -69,7 +69,7 @@
             padding: 4rem 2rem;
             max-width: 1200px;
             margin: 0 auto;
-            perspective: 1000px;
+            /* perspective: 1000px; */
         }
 
         .headline {
@@ -207,14 +207,20 @@
 
     <main>
         <section class="hero">
-            <h1 class="headline" aa-transition="rotate-in-top-fwd"  aa-easing="power2.out" aa-delay="0.2" aa-duration="1.2">
+            <h1 class="headline" aa-animate="rotate-soft-3em" aa-duration="2.5" aa-easing="expo.out" aa-delay="0.5">
                 ThickPic
             </h1>
-            <p class="subheadline" aa-transition="rotate2-in-top-fwd"  aa-easing="power2.out" aa-delay="0.2" aa-duration="0.5">
+            <h1 class="headline" aa-animate="rotate-soft-3em" aa-duration="2.5" aa-easing="expo.out" aa-delay="0.7">
+                ThickPic
+            </h1>
+            <h1 class="headline" aa-animate="rotate-soft-3em" aa-duration="2.5" aa-easing="expo.out" aa-delay="0.9">
+                ThickPic
+            </h1>
+            <p class="subheadline" aa-transition="rotate-soft"  aa-easing="power2.out" aa-delay="0.2" aa-duration="0.5">
                 Easily record and share AI-powered video messages with your teammates and customers to supercharge
                 productivity
             </p>
-            <div class="cta-buttons" aa-transition="rotate2-in-top-fwd" aa-duration="1.5" aa-easing="power2.out" aa-delay="0.5">
+            <div class="cta-buttons" aa-transition="rotate-elliptic" aa-duration="1.5" aa-easing="power2.out" aa-delay="0.5">
                 <a href="#" class="primary-cta">Get Loom for free</a>
                 <a href="#" class="secondary-cta">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -225,7 +231,7 @@
                     Install Chrome Extension
                 </a>
             </div>
-            <div class="hero-image" aa-animate="slide-in-elliptic-top-fwd" aa-duration="0.5" aa-easing="power2.out" aa-delay="0.5">
+            <div class="hero-image" aa-transition="rotate-elliptic" aa-duration="0.5" aa-easing="back.out" aa-delay="0.5">
                 <img src="https://images.unsplash.com/photo-1611162617474-5b21e879e113?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1674&q=80" alt="Person using laptop with calendar app open">
                 <button class="play-button" aria-label="Play video">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -236,7 +242,7 @@
         </section>
         <section>
             <div class="container">
-                <h1 class="headline" aa-animate="textRotateUp" aa-split="words.clip" aa-stagger="0.05" aa-easing="expo.out" aa-duration="0.5" aa-delay="0.5">
+                <h1 class="headline" aa-transition="rotate-soft"  aa-easing="expo.out" aa-duration="0.5" aa-delay="0.5">
                     This text can be one line 
                 </h1>
                 <div class="grid">

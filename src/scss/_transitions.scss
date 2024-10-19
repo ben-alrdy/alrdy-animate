@@ -223,49 +223,6 @@ $aa-distance: 50px !default;
     }
 
 
-    /**
-    * 3D Rotate animations
-    */
-
-    [aa-transition^='rotate'][aa-transition^='rotate'] {
-      transition-property: transform, opacity;
-      transition-duration: var(--animation-duration);
-      transition-delay: var(--animation-delay);
-      opacity: 0;
-      transform-origin: 50% 0;
-
-      &.in-view {
-        transform: perspective(3em)rotate3d(0, 0, 0, 0) translateZ(0) scale(1);
-        opacity: 1;
-      }
-    }
-
-    [aa-transition='rotate-in-top-fwd'] {
-      transform: perspective(3em) rotateX(-90deg) translate3d(0, 100%, 0) scale3d(.75, 1, 1);
-    }
-
-    [aa-transition^='rotate2'][aa-transition^='rotate2'] {
-      transition-property: transform, opacity, transform-origin;
-      transition-duration: var(--animation-duration);
-      transition-delay: var(--animation-delay);
-      opacity: 0;
-
-      &.in-view {
-        transform: translateY(0) rotateX(0) scale(1);
-        transform-origin: 50% 1400px;
-        opacity: 1;
-      }
-    }
-
-    [aa-transition='rotate2-in-top-fwd'] {
-      transform: translateY(-600px) rotateX(-30deg) scale(0);
-      transform-origin: 50% 100%;
-    }
-
-
-
-
-
     /*
     PSEUDO BACKGROUND SLIDE TRANSITIONS
     */

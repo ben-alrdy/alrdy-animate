@@ -185,6 +185,18 @@ Usage example:
 
 This will apply a fade-up animation with a 'back out' easing, which means it will slightly overshoot and then settle into place.
 
+## 3D Animations
+
+AlrdyAnimate includes a variety of 3D animations (via `aa-animate`) that require a parent element to have a perspective set, e.g. `perspective: 1000px;`.
+
+### Available 3D Animations
+
+- `rotate-soft`: Rotates the element softly around the X axis.
+- `rotate-soft-3em`: Rotates the element softly around the X axis, with a perspective of 3em set to the element itself (hence the parent does not need to have a perspective set).
+- `rotate-elliptic`: Rotates the element elliptically around the X and Y axes.
+- `swing-fwd`: Swings the element forward around the X axis anchored to the top.
+- `swing-bwd`: Swings the element backward around the X axis anchored to the top.
+
 
 ## Contributing
 
