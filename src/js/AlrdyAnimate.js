@@ -32,8 +32,8 @@ async function init(options = {}) {
   window.addEventListener('load', async () => {
       if (settings.useGSAP) {
         try {
-          const { gsap, ScrollTrigger, animations } = await import('./gsapBundle'); // Import the gsap, ScrollTrigger and animations modules
-          setupAnimations(allAnimatedElements, settings, isMobile, gsap, ScrollTrigger, animations);
+          const { gsap, ScrollTrigger, animations, splitText } = await import('./gsapBundle'); // Import the gsap, ScrollTrigger and animations modules
+          setupAnimations(allAnimatedElements, settings, isMobile, gsap, ScrollTrigger, animations, splitText);
 
         } catch (error) {
           console.error('Failed to load GSAP:', error);
@@ -51,7 +51,7 @@ async function init(options = {}) {
 }
 
 // Setup animations for elements
-function setupAnimations(elements, settings, isMobile, gsap = null, ScrollTrigger = null, animations = null) {
+function setupAnimations(elements, settings, isMobile, gsap = null, ScrollTrigger = null, animations = null, splitText = null) {
   elements.forEach((element) => {
     const duration = element.hasAttribute("aa-duration") ? parseFloat(element.getAttribute("aa-duration")) : settings.duration;
     const delay = element.hasAttribute("aa-delay") ? parseFloat(element.getAttribute("aa-delay")) : settings.delay;
@@ -85,16 +85,16 @@ function setupAnimations(elements, settings, isMobile, gsap = null, ScrollTrigge
 
 
     if (settings.useGSAP) {
-      setupGSAPAnimation(element, anchorSelector, anchorElement, viewportPercentage, delay, settings, gsap, ScrollTrigger, animations);
+      setupGSAPAnimation(element, anchorSelector, anchorElement, viewportPercentage, delay, settings, gsap, ScrollTrigger, animations, splitText);
     } else {
       setupIntersectionObserver(element, anchorSelector, anchorElement, viewportPercentage, settings);
     }
   });
 }
 
-function setupGSAPAnimation(element, anchorSelector, anchorElement, viewportPercentage, delay, settings, gsap, ScrollTrigger, animations) {
+function setupGSAPAnimation(element, anchorSelector, anchorElement, viewportPercentage, delay, settings, gsap, ScrollTrigger, animations, splitText) {
   const animationType = element.getAttribute('aa-animate');
-  const splitType = element.getAttribute('aa-split');
+  const splitTypeAttr = element.getAttribute('aa-split');
   const duration = element.hasAttribute('aa-duration') ? parseFloat(element.getAttribute('aa-duration')) : undefined;
   const stagger = element.hasAttribute('aa-stagger') ? parseFloat(element.getAttribute('aa-stagger')) : undefined;
   const ease = element.hasAttribute('aa-easing') ? element.getAttribute('aa-easing') : undefined;
@@ -113,28 +113,31 @@ function setupGSAPAnimation(element, anchorSelector, anchorElement, viewportPerc
       }
     });
 
-    if (splitType) {
-      const splitText = animations.splitText(element, splitType); // generate split text into lines or words or chars
+    if (splitTypeAttr) {
+      const { splitResult, splitType } = splitText(element, splitTypeAttr); // generate split text into lines or words or chars, 
 
       // Choose the animation based on the attribute
       switch(animationType) {
         case 'textSlideUp':
-          tl.add(animations.textSlideUp(element, splitText, splitType, duration, stagger, delay, ease));
+          tl.add(animations.textSlideUp(element, splitResult, splitType, duration, stagger, delay, ease));
           break;
         case 'textSlideDown':
-          tl.add(animations.textSlideDown(element, splitText, splitType, duration, stagger, delay, ease));
+          tl.add(animations.textSlideDown(element, splitResult, splitType, duration, stagger, delay, ease));
           break;
         case 'textRotateUp':
-          tl.add(animations.textRotateUp(element, splitText, splitType, duration, stagger, delay, ease));
+          tl.add(animations.textRotateUp(element, splitResult, splitType, duration, stagger, delay, ease));
           break;
         case 'textRotateDown':
-          tl.add(animations.textRotateDown(element, splitText, splitType, duration, stagger, delay, ease));
+          tl.add(animations.textRotateDown(element, splitResult, splitType, duration, stagger, delay, ease));
           break;
         case 'textCascadeUp':
-          tl.add(animations.textCascadeUp(element, splitText, duration, stagger, delay, ease));
+          tl.add(animations.textCascadeUp(element, splitResult, duration, stagger, delay, ease));
           break;
         case 'textCascadeDown':
-          tl.add(animations.textCascadeDown(element, splitText, duration, stagger, delay, ease));
+          tl.add(animations.textCascadeDown(element, splitResult, duration, stagger, delay, ease));
+          break;
+        case 'textRotateTopFwd':
+          tl.add(animations.textRotateTopFwd(element, splitResult, splitType, duration, stagger, delay, ease));
           break;
       }
     }

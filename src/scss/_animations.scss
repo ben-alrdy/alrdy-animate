@@ -63,3 +63,39 @@
 }
 
 
+/*SWING ANIMATIONS*/
+
+[aa-animate^='swing'][aa-animate^='swing'] {
+  opacity: 0;
+  transform-origin: 50% 0;
+
+  &.in-view {
+    animation-delay: var(--animation-delay);
+  }
+}
+
+[aa-animate="swing-in-top-fwd"].in-view {
+  animation: swing-in-top-fwd var(--animation-duration) forwards;
+}
+
+[aa-animate="swing-in-top-bck"].in-view {
+  animation: swing-in-top-bck var(--animation-duration) forwards;
+}
+
+/*SLIDE ELLIPTIC ANIMATIONS*/
+
+[aa-animate^='slide-in'][aa-animate^='slide-in'] {
+  opacity: 0;
+
+  &.in-view {
+    animation-delay: var(--animation-delay);
+  }
+}
+
+[aa-animate="slide-in-elliptic-top-fwd"].in-view {
+  animation: slide-in-elliptic-top-fwd var(--animation-duration) forwards;
+}
+
+[aa-animate="slide-in-rotate-top-fwd"].in-view {
+  animation: slide-in-rotate-top-fwd var(--animation-duration) forwards;
+}

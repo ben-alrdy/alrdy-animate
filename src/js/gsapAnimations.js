@@ -1,38 +1,5 @@
-export function createAnimations(gsap, SplitType) {
-
+export function createAnimations(gsap) {
   return {
-
-    /*
-    * SPLIT TEXT HELPER
-    */
-    splitText: (element, type = 'lines') => {
-
-      const isClip = type.includes('clip'); // check if clip option is included in the type
-      
-      // default split type is lines, checks if chars or words are included in the type
-      let types = 'lines';
-      if (type.includes('chars')) {
-        types = 'lines, words, chars';
-      } else if (type.includes('words')) {
-        types = 'lines, words';
-      }
-
-      // split the text into lines, words or chars
-      let result = new SplitType(element, { types });
-
-      // if clip option is included, wrap each line in a clip wrapper
-      if (result.lines && isClip) {
-        result.lines.forEach(line => {
-          const wrapper = document.createElement('div');
-          wrapper.classList.add('line-clip-wrapper');
-          line.parentNode.insertBefore(wrapper, line); // insert the wrapper before the line  
-          wrapper.appendChild(line); // append the line to the wrapper
-        });
-      }
-
-      return result;
-    },
-
     /*
     * TEXT SLIDE
     */
@@ -46,17 +13,16 @@ export function createAnimations(gsap, SplitType) {
       const animationTarget = splitText[baseSplitType] || splitText.lines;       // Determine the animation target based on the split type or defaulting to lines
       const tl = gsap.timeline();
 
-      tl.from(element, {
-        autoAlpha: 0,      
-        duration: 0.1
-      });
+      // Set initial opacity of the whole element
+      tl.set(element, { autoAlpha: 0 });
 
       tl.from(animationTarget, {
         y: "110%",
         duration,
         stagger,
         ease,
-        delay
+        delay,
+        onStart: () => gsap.set(element, { autoAlpha: 1 }) // Make the whole element visible when animation starts
       }, ">");
 
       return tl;
@@ -72,17 +38,16 @@ export function createAnimations(gsap, SplitType) {
       const animationTarget = splitText[baseSplitType] || splitText.lines;       // Determine the animation target based on the split type or defaulting to lines
       const tl = gsap.timeline();
 
-      tl.from(element, {
-        autoAlpha: 0,      
-        duration: 0.1
-      });
+      // Set initial opacity of the whole element
+      tl.set(element, { autoAlpha: 0 });
 
       tl.from(animationTarget, {
         y: "-110%",
         duration,
         stagger,
         ease,
-        delay
+        delay,
+        onStart: () => gsap.set(element, { autoAlpha: 1 }) // Make the whole element visible when animation starts
       }, ">");
 
       return tl;
@@ -101,10 +66,8 @@ export function createAnimations(gsap, SplitType) {
       const animationTarget = splitText[baseSplitType] || splitText.lines;       // Determine the animation target based on the split type or defaulting to lines
       const tl = gsap.timeline();
 
-      tl.from(element, {
-        autoAlpha: 0,      
-        duration: 0.1
-      });
+      // Set initial opacity of the whole element
+      tl.set(element, { autoAlpha: 0 });
 
       tl.from(animationTarget, {
         y: "110%",
@@ -113,7 +76,8 @@ export function createAnimations(gsap, SplitType) {
         duration,
         stagger,
         ease,
-        delay
+        delay,
+        onStart: () => gsap.set(element, { autoAlpha: 1 }) // Make the whole element visible when animation starts
       }, ">");
 
       return tl;
@@ -129,10 +93,8 @@ export function createAnimations(gsap, SplitType) {
       const animationTarget = splitText[baseSplitType] || splitText.lines;       // Determine the animation target based on the split type or defaulting to lines
       const tl = gsap.timeline();
 
-      tl.from(element, {
-        autoAlpha: 0,      
-        duration: 0.1
-      });
+      // Set initial opacity of the whole element
+      tl.set(element, { autoAlpha: 0 });
 
       tl.from(animationTarget, {
         y: "-110%",
@@ -141,7 +103,8 @@ export function createAnimations(gsap, SplitType) {
         duration,
         stagger,
         ease,
-        delay
+        delay,
+        onStart: () => gsap.set(element, { autoAlpha: 1 }) // Make the whole element visible when animation starts
       }, ">");
 
       return tl;
@@ -162,10 +125,8 @@ export function createAnimations(gsap, SplitType) {
 
       const tl = gsap.timeline();
 
-      tl.from(element, {
-        autoAlpha: 0,
-        duration: 0.1
-      });
+      // Set initial opacity of the whole element
+      tl.set(element, { autoAlpha: 0 });
 
       lines.forEach((line, index) => {
         const wordsInLine = words.filter(word => line.contains(word));
@@ -176,7 +137,8 @@ export function createAnimations(gsap, SplitType) {
           duration,
           stagger,
           ease,
-          delay
+          delay,
+          onStart: () => gsap.set(element, { autoAlpha: 1 }) // Make the whole element visible when animation starts
         }, index * stagger * 4); // Delay each line
       });
 
@@ -195,10 +157,8 @@ export function createAnimations(gsap, SplitType) {
 
       const tl = gsap.timeline();
 
-      tl.from(element, {
-        autoAlpha: 0,
-        duration: 0.1
-      });
+      // Set initial opacity of the whole element
+      tl.set(element, { autoAlpha: 0 });
 
       lines.forEach((line, index) => {
         const wordsInLine = words.filter(word => line.contains(word));
@@ -209,8 +169,47 @@ export function createAnimations(gsap, SplitType) {
           duration,
           stagger,
           ease,
-          delay
+          delay,
+          onStart: () => gsap.set(element, { autoAlpha: 1 }) // Make the whole element visible when animation starts
         }, index * stagger * 4); // Delay each line
+      });
+
+      return tl;
+    },
+
+    /*
+    * ROTATE IN TOP FORWARD
+    */
+    textRotateTopFwd: (element, splitText, splitType = 'lines', duration, stagger, delay, ease) => {
+      duration = duration ?? 1.2;
+      stagger = stagger ?? 0.1;
+      delay = delay ?? 0;
+      ease = ease ?? 'power3.out';
+
+      // Split the text
+      const baseSplitType = splitType.split('.')[0]; // Extract the base split type (before the dot)
+      const animationTarget = splitText[baseSplitType] || splitText.lines;       // Determine the animation target based on the split type or defaulting to lines
+      const tl = gsap.timeline();
+
+      // Set initial opacity of the whole element
+      tl.set(element, { autoAlpha: 0 });
+
+      tl.set(animationTarget, {
+        transformOrigin: '50% 0%',
+        transformPerspective: '3em'
+      });
+
+      // Animate each split element
+      tl.from(animationTarget, {
+        autoAlpha: 0,
+        rotateX: -90,
+        y: '100%',
+        scale: 0.75,
+        duration,
+        stagger,
+        ease,
+        delay,
+        onStart: () => gsap.set(element, { autoAlpha: 1 }) // Make the whole element visible when animation starts
       });
 
       return tl;
