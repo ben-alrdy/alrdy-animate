@@ -35,10 +35,14 @@ async function init(options = {}) {
       try {
         const { gsap, ScrollTrigger, animations, splitText, stickyNav } = await import('./gsapBundle'); // Import the gsap, ScrollTrigger, SplitText and animations modules
         
+        if (!ScrollTrigger.isRegistered()) {
+          gsap.registerPlugin(ScrollTrigger);
+        }
+
         // Set up sticky nav
         const navElement = document.querySelector('[aa-nav="sticky"]');
         if (navElement) {
-          const navEase = navElement.getAttribute('aa-easing') || settings.easing;
+          const navEase = navElement.getAttribute('aa-easing');
           const navDuration = navElement.getAttribute('aa-duration');
           stickyNav(gsap, ScrollTrigger, navElement, navEase, navDuration);
         }
