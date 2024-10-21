@@ -27,7 +27,6 @@ export function splitText(element, type = 'lines') {
       wrapper.appendChild(line); // append the line to the wrapper
     });
   }
-  
   return { 
     splitResult: result, // the result of the SplitType function
     splitType: type // the type of split (lines, words, chars), without the 'clip' option from the original attribute

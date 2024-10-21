@@ -1,4 +1,5 @@
 import styles from "../scss/AlrdyAnimate.scss";
+import debounce from 'lodash.debounce';
 
 // Default options for the animation settings
 const defaultOptions = {
@@ -16,7 +17,7 @@ async function init(options = {}) {
   const allAnimatedElements = document.querySelectorAll(
     "[aa-animate], [aa-transition]"
   );
-  const isMobile = window.innerWidth < 768;
+  let isMobile = window.innerWidth < 768;
 
   // Fallback for browsers that do not support IntersectionObserver
   if (!("IntersectionObserver" in window) && !settings.useGSAP) {
@@ -30,32 +31,46 @@ async function init(options = {}) {
   document.body.setAttribute("aa-easing", settings.easing);
 
   window.addEventListener('load', async () => {
-      if (settings.useGSAP) {
-        try {
-          const { gsap, ScrollTrigger, animations, splitText, stickyNav } = await import('./gsapBundle'); // Import the gsap, ScrollTrigger, SplitText and animations modules
-          
-          // Set up sticky nav
-          const navElement = document.querySelector('[aa-nav="sticky"]');
-          if (navElement) {
-            const navEase = navElement.getAttribute('aa-easing') || settings.easing;
-            const navDuration = navElement.getAttribute('aa-duration');
-            stickyNav(gsap, ScrollTrigger, navElement, navEase, navDuration);
-          }
-          
-          setupAnimations(allAnimatedElements, settings, isMobile, gsap, ScrollTrigger, animations, splitText);
-
-        } catch (error) {
-          console.error('Failed to load GSAP:', error);
-          // Make all elements visible that were hidden for GSAP animations
-          allAnimatedElements.forEach((element) => {
-            element.style.visibility = 'visible'; 
-          });
-          // Fallback to non-GSAP animations if loading fails
-          setupAnimations(allAnimatedElements, settings, isMobile);
+    if (settings.useGSAP) {
+      try {
+        const { gsap, ScrollTrigger, animations, splitText, stickyNav } = await import('./gsapBundle'); // Import the gsap, ScrollTrigger, SplitText and animations modules
+        
+        // Set up sticky nav
+        const navElement = document.querySelector('[aa-nav="sticky"]');
+        if (navElement) {
+          const navEase = navElement.getAttribute('aa-easing') || settings.easing;
+          const navDuration = navElement.getAttribute('aa-duration');
+          stickyNav(gsap, ScrollTrigger, navElement, navEase, navDuration);
         }
-      } else {
+        
+        setupAnimations(allAnimatedElements, settings, isMobile, gsap, ScrollTrigger, animations, splitText);
+
+        // Create a debounced function
+        const handleResize = () => {
+          isMobile = window.innerWidth < 768;
+          // Refresh all ScrollTriggers
+          ScrollTrigger.refresh();
+          // Re-setup animations
+          setupAnimations(allAnimatedElements, settings, isMobile, gsap, ScrollTrigger, animations, splitText);
+        };
+
+        const debouncedResize = debounce(handleResize, 250);
+
+        // Add resize event listener
+        window.addEventListener('resize', debouncedResize);
+
+      } catch (error) {
+        console.error('Failed to load GSAP:', error);
+        // Make all elements visible that were hidden for GSAP animations
+        allAnimatedElements.forEach((element) => {
+          element.style.visibility = 'visible'; 
+        });
+        // Fallback to non-GSAP animations if loading fails
         setupAnimations(allAnimatedElements, settings, isMobile);
       }
+    } else {
+      setupAnimations(allAnimatedElements, settings, isMobile);
+    }
   });
 }
 
@@ -106,8 +121,14 @@ function setupGSAPAnimation(element, anchorSelector, anchorElement, viewportPerc
   const duration = element.hasAttribute('aa-duration') ? parseFloat(element.getAttribute('aa-duration')) : undefined;
   const stagger = element.hasAttribute('aa-stagger') ? parseFloat(element.getAttribute('aa-stagger')) : undefined;
   const ease = element.hasAttribute('aa-easing') ? element.getAttribute('aa-easing') : undefined;
-  const navElement = document.querySelector('[aa-animate="nav"]');
 
+  // Clear existing animation if any
+  if (element.timeline) {
+    element.timeline.kill();
+  }
+  if (element.splitInstance) {
+    element.splitInstance.revert();
+  }
 
   requestAnimationFrame(() => { // Wait for the next animation frame to ensure the element is visible
     
@@ -124,8 +145,11 @@ function setupGSAPAnimation(element, anchorSelector, anchorElement, viewportPerc
       }
     });
 
+    element.timeline = tl; // Store the timeline on the element for future reference
+
     if (splitTypeAttr) {
-      const { splitResult, splitType } = splitText(element, splitTypeAttr); // generate split text into lines or words or chars, 
+      const { splitResult, splitType } = splitText(element, splitTypeAttr);
+      element.splitInstance = splitResult; // Store the split instance on the element
 
       // Choose the animation based on the attribute
       switch(animationType) {

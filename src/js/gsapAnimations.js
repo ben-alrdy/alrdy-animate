@@ -32,12 +32,6 @@ export function stickyNav(gsap, ScrollTrigger, element, ease, duration) {
         }
         lastScrollTop = currentScrollTop;
       }
-
-      console.log('ScrollTrigger update', { 
-        currentScrollTop, 
-        scrollDelta,
-        isVisible,
-      });
     }
   });
 }
