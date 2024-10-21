@@ -1,6 +1,10 @@
 import styles from "../scss/AlrdyAnimate.scss";
 import debounce from 'lodash.debounce';
 
+// Define these variables in the module scope
+let gsap = null;
+let ScrollTrigger = null;
+
 // Default options for the animation settings
 const defaultOptions = {
   easing: "ease", // Default easing function for animations
@@ -33,17 +37,23 @@ async function init(options = {}) {
   window.addEventListener('load', async () => {
     if (settings.useGSAP) {
       try {
-        const { gsap, ScrollTrigger, animations, splitText, stickyNav } = await import('./gsapBundle'); // Import the gsap, ScrollTrigger, SplitText and animations modules
+        const importedModules = await import('./gsapBundle');
+
+        // Store instances and make them globally available
+        gsap = importedModules.gsap;
+        ScrollTrigger = importedModules.ScrollTrigger;
+        window.gsap = gsap;
+        window.ScrollTrigger = ScrollTrigger;
 
         // Set up sticky nav
         const navElement = document.querySelector('[aa-nav="sticky"]');
         if (navElement) {
           const navEase = navElement.getAttribute('aa-easing');
           const navDuration = navElement.getAttribute('aa-duration');
-          stickyNav(gsap, ScrollTrigger, navElement, navEase, navDuration);
+          importedModules.stickyNav(importedModules.gsap, importedModules.ScrollTrigger, navElement, navEase, navDuration);
         }
-        
-        setupAnimations(allAnimatedElements, settings, isMobile, gsap, ScrollTrigger, animations, splitText);
+
+        setupAnimations(allAnimatedElements, settings, isMobile, importedModules.animations, importedModules.splitText);
 
         // Create a debounced function for the resize event
         const debouncedResize = debounce(() => {
@@ -51,7 +61,7 @@ async function init(options = {}) {
           // Refresh all ScrollTriggers
           ScrollTrigger.refresh();
           // Re-setup animations
-          setupAnimations(allAnimatedElements, settings, isMobile, gsap, ScrollTrigger, animations, splitText);
+          setupAnimations(allAnimatedElements, settings, isMobile, importedModules.animations, importedModules.splitText);
         }, 250);
 
         // Add resize event listener
@@ -61,7 +71,7 @@ async function init(options = {}) {
         console.error('Failed to load GSAP:', error);
         // Make all elements visible that were hidden for GSAP animations
         allAnimatedElements.forEach((element) => {
-          element.style.visibility = 'visible'; 
+          element.style.visibility = 'visible';
         });
         // Fallback to non-GSAP animations if loading fails
         setupAnimations(allAnimatedElements, settings, isMobile);
@@ -73,7 +83,7 @@ async function init(options = {}) {
 }
 
 // Setup animations for elements
-function setupAnimations(elements, settings, isMobile, gsap = null, ScrollTrigger = null, animations = null, splitText = null) {
+function setupAnimations(elements, settings, isMobile, animations = null, splitText = null) {
   elements.forEach((element) => {
     const duration = element.hasAttribute("aa-duration") ? parseFloat(element.getAttribute("aa-duration")) : settings.duration;
     const delay = element.hasAttribute("aa-delay") ? parseFloat(element.getAttribute("aa-delay")) : settings.delay;
@@ -105,18 +115,18 @@ function setupAnimations(elements, settings, isMobile, gsap = null, ScrollTrigge
     }
 
     if (settings.useGSAP) {
-      setupGSAPAnimation(element, anchorSelector, anchorElement, viewportPercentage, delay, settings, gsap, ScrollTrigger, animations, splitText, isMobile);
+      setupGSAPAnimation(element, anchorSelector, anchorElement, viewportPercentage, delay, settings, animations, splitText, isMobile);
     } else {
       setupIntersectionObserver(element, anchorSelector, anchorElement, viewportPercentage, settings);
     }
   });
 }
 
-function setupGSAPAnimation(element, anchorSelector, anchorElement, viewportPercentage, delay, settings, gsap, ScrollTrigger, animations, splitText, isMobile) {
+function setupGSAPAnimation(element, anchorSelector, anchorElement, viewportPercentage, delay, settings, animations, splitText, isMobile) {
   const animationType = element.getAttribute('aa-animate');
   const splitTypeAttr = element.getAttribute('aa-split');
   const scroll = element.getAttribute('aa-scroll');
-  const duration = element.hasAttribute('aa-duration') ? parseFloat(element.getAttribute('aa-duration')) : undefined;
+  const duration = element.hasAttribute('aa-duration') ? parseFloat(element.getAttribute("aa-duration")) : undefined;
   const stagger = element.hasAttribute('aa-stagger') ? parseFloat(element.getAttribute('aa-stagger')) : undefined;
   const ease = element.hasAttribute('aa-easing') ? element.getAttribute('aa-easing') : undefined;
 
@@ -129,7 +139,7 @@ function setupGSAPAnimation(element, anchorSelector, anchorElement, viewportPerc
   }
 
   requestAnimationFrame(() => { // Wait for the next animation frame to ensure the element is visible
-    
+
     let tl = gsap.timeline({
       paused: true,
       scrollTrigger: {
@@ -139,7 +149,7 @@ function setupGSAPAnimation(element, anchorSelector, anchorElement, viewportPerc
           element.classList.add("in-view");
           tl.play();
         },
-       // markers: true
+        // markers: true
       }
     });
 
@@ -150,7 +160,7 @@ function setupGSAPAnimation(element, anchorSelector, anchorElement, viewportPerc
       element.splitInstance = splitResult; // Store the split instance on the element
 
       // Choose the animation based on the attribute
-      switch(animationType) {
+      switch (animationType) {
         case 'text-slide-up':
           tl.add(animations.textSlideUp(element, splitResult, splitType, duration, stagger, delay, ease, isMobile, scroll));
           break;
@@ -238,8 +248,13 @@ function setupIntersectionObserver(element, anchorSelector, anchorElement, viewp
   removeObserver.observe(anchorElement);
 }
 
-const AlrdyAnimate = { init };
+const AlrdyAnimate = {
+  init,
+  getGSAP: () => gsap,
+  getScrollTrigger: () => ScrollTrigger
+};
+
 export { AlrdyAnimate };
 
-// Attach to global namespace if needed
+// Attach to global namespace
 window.AlrdyAnimate = AlrdyAnimate;
