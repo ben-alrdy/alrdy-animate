@@ -45,16 +45,14 @@ async function init(options = {}) {
         
         setupAnimations(allAnimatedElements, settings, isMobile, gsap, ScrollTrigger, animations, splitText);
 
-        // Create a debounced function
-        const handleResize = () => {
+        // Create a debounced function for the resize event
+        const debouncedResize = debounce(() => {
           isMobile = window.innerWidth < 768;
           // Refresh all ScrollTriggers
           ScrollTrigger.refresh();
           // Re-setup animations
           setupAnimations(allAnimatedElements, settings, isMobile, gsap, ScrollTrigger, animations, splitText);
-        };
-
-        const debouncedResize = debounce(handleResize, 250);
+        }, 250);
 
         // Add resize event listener
         window.addEventListener('resize', debouncedResize);
