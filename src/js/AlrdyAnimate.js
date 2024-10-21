@@ -34,51 +34,56 @@ async function init(options = {}) {
   // Set easing on the body element
   document.body.setAttribute("aa-easing", settings.easing);
 
-  window.addEventListener('load', async () => {
-    if (settings.useGSAP) {
-      try {
-        const importedModules = await import('./gsapBundle');
+  return new Promise((resolve) => { // Return a promise to handle asynchronous loading
+    window.addEventListener('load', async () => {
+      if (settings.useGSAP) {
+        try {
+          const importedModules = await import('./gsapBundle');
 
-        // Store instances and make them globally available
-        gsap = importedModules.gsap;
-        ScrollTrigger = importedModules.ScrollTrigger;
-        window.gsap = gsap;
-        window.ScrollTrigger = ScrollTrigger;
+          // Store instances and make them globally available
+          gsap = importedModules.gsap;
+          ScrollTrigger = importedModules.ScrollTrigger;
+          window.gsap = gsap;
+          window.ScrollTrigger = ScrollTrigger;
 
-        // Set up sticky nav
-        const navElement = document.querySelector('[aa-nav="sticky"]');
-        if (navElement) {
-          const navEase = navElement.getAttribute('aa-easing');
-          const navDuration = navElement.getAttribute('aa-duration');
-          importedModules.stickyNav(importedModules.gsap, importedModules.ScrollTrigger, navElement, navEase, navDuration);
-        }
+          // Set up sticky nav
+          const navElement = document.querySelector('[aa-nav="sticky"]');
+          if (navElement) {
+            const navEase = navElement.getAttribute('aa-easing');
+            const navDuration = navElement.getAttribute('aa-duration');
+            importedModules.stickyNav(importedModules.gsap, importedModules.ScrollTrigger, navElement, navEase, navDuration);
+          }
 
-        setupAnimations(allAnimatedElements, settings, isMobile, importedModules.animations, importedModules.splitText);
-
-        // Create a debounced function for the resize event
-        const debouncedResize = debounce(() => {
-          isMobile = window.innerWidth < 768;
-          // Refresh all ScrollTriggers
-          ScrollTrigger.refresh();
-          // Re-setup animations
           setupAnimations(allAnimatedElements, settings, isMobile, importedModules.animations, importedModules.splitText);
-        }, 250);
 
-        // Add resize event listener
-        window.addEventListener('resize', debouncedResize);
+          // Create a debounced function for the resize event
+          const debouncedResize = debounce(() => {
+            isMobile = window.innerWidth < 768;
+            // Refresh all ScrollTriggers
+            ScrollTrigger.refresh();
+            // Re-setup animations
+            setupAnimations(allAnimatedElements, settings, isMobile, importedModules.animations, importedModules.splitText);
+          }, 250);
 
-      } catch (error) {
-        console.error('Failed to load GSAP:', error);
-        // Make all elements visible that were hidden for GSAP animations
-        allAnimatedElements.forEach((element) => {
-          element.style.visibility = 'visible';
-        });
-        // Fallback to non-GSAP animations if loading fails
+          // Add resize event listener
+          window.addEventListener('resize', debouncedResize);
+
+          resolve({ gsap, ScrollTrigger });  // Resolve the promise with both instances
+        } catch (error) {
+          console.error('Failed to load GSAP:', error);
+          // Make all elements visible that were hidden for GSAP animations
+          allAnimatedElements.forEach((element) => {
+            element.style.visibility = 'visible';
+          });
+          // Fallback to non-GSAP animations if loading fails
+          setupAnimations(allAnimatedElements, settings, isMobile);
+          resolve({ gsap: null, ScrollTrigger: null });  // Resolve with null if GSAP fails to load
+        }
+      } else {
         setupAnimations(allAnimatedElements, settings, isMobile);
+        resolve({ gsap: null, ScrollTrigger: null });  // Resolve with null if not using GSAP
       }
-    } else {
-      setupAnimations(allAnimatedElements, settings, isMobile);
-    }
+    });
   });
 }
 
