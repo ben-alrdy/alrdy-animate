@@ -1,16 +1,49 @@
-export function createAnimations(gsap) {
-  // Helper function to get scroll trigger values
-  const getScrollTriggerValues = (isMobile) => {
-    return {
-      start: isMobile ? "top 40%" : "top 80%",
-      end: isMobile ? "top 20%" : "top 40%"
-    };
-  };
-
+// Helper function to get scroll trigger values
+const getScrollTriggerValues = (isMobile) => {
   return {
-    /*
-    * TEXT SLIDE
-    */
+    start: isMobile ? "top 40%" : "top 80%",
+    end: isMobile ? "top 20%" : "top 40%"
+  };
+};
+
+export function stickyNav(gsap, ScrollTrigger, element, ease, duration) {
+  ease = ease ?? 'back.inOut';
+  duration = duration ?? 0.4;
+  let isVisible = true;
+  let lastScrollTop = 0;
+  const scrollThreshold = 20; // Adjust this value to change sensitivity
+
+  ScrollTrigger.create({
+    start: "top top",
+    end: "max",
+    onUpdate: (self) => {
+      let currentScrollTop = self.scroll();
+      let scrollDelta = currentScrollTop - lastScrollTop;
+
+      if (Math.abs(scrollDelta) > scrollThreshold) {
+        if (scrollDelta > 0 && isVisible) {
+          // Scrolling down, hide the nav
+          isVisible = false;
+          gsap.to(element, { y: '-100%', duration: duration * 2, ease });
+        } else if (scrollDelta < 0 && !isVisible) {
+          // Scrolling up, show the nav
+          isVisible = true;
+          gsap.to(element, { y: '0%', duration, ease });
+        }
+        lastScrollTop = currentScrollTop;
+      }
+
+      console.log('ScrollTrigger update', { 
+        currentScrollTop, 
+        scrollDelta,
+        isVisible,
+      });
+    }
+  });
+}
+
+export function createAnimations(gsap) {
+  return {
     textSlideUp: (element, splitResult, splitType, duration, stagger, delay, ease, isMobile, scroll) => {
       duration = duration ?? 0.5;
       stagger = stagger ?? 0.05;
@@ -46,7 +79,6 @@ export function createAnimations(gsap) {
 
       return tl;
     },
-
     textSlideDown: (element, splitResult, splitType, duration, stagger, delay, ease, isMobile, scroll) => {
       duration = duration ?? 0.5;
       stagger = stagger ?? 0.05;
@@ -82,10 +114,6 @@ export function createAnimations(gsap) {
 
       return tl;
     },
-
-    /*
-    * TEXT ROTATE 
-    */
     textTiltUp: (element, splitResult, splitType, duration, stagger, delay, ease, isMobile, scroll) => {
       duration = duration ?? 0.5;
       stagger = stagger ?? 0.05;
@@ -122,7 +150,6 @@ export function createAnimations(gsap) {
 
       return tl;
     },
-
     textTiltDown: (element, splitResult, splitType, duration, stagger, delay, ease, isMobile, scroll) => {
       duration = duration ?? 0.5;
       stagger = stagger ?? 0.05;
@@ -159,10 +186,6 @@ export function createAnimations(gsap) {
 
       return tl;
     },
-
-    /*
-    * TEXT CASCADE
-    */
     textCascadeUp: (element, splitResult, duration, stagger, delay, ease, isMobile, scroll) => {
       duration = duration ?? 0.5;
       stagger = stagger ?? 0.05;
@@ -206,7 +229,6 @@ export function createAnimations(gsap) {
 
       return tl;
     },
-
     textCascadeDown: (element, splitResult, duration, stagger, delay, ease, isMobile, scroll) => {
       duration = duration ?? 0.5;
       stagger = stagger ?? 0.05;
@@ -250,10 +272,6 @@ export function createAnimations(gsap) {
 
       return tl;
     },
-
-    /*
-    * ROTATE IN TOP FORWARD
-    */
     textRotateSoft: (element, splitResult, splitType, duration, stagger, delay, ease, isMobile, scroll) => {
       duration = duration ?? 1.2;
       stagger = stagger ?? 0.1;
@@ -318,10 +336,6 @@ export function createAnimations(gsap) {
 
       return tl;
     },
-
-    /*
-    * FADE ANIMATION, STARTING WITH 30% OPACITY
-    */
     textFade: (element, splitResult, splitType, duration, stagger, delay, ease, isMobile, scroll) => {
       duration = duration ?? 0.5;
       stagger = stagger ?? 0.05;
@@ -357,10 +371,6 @@ export function createAnimations(gsap) {
 
       return tl;
     },
-
-    /*
-    * APPEAR ANIMATION, STARTING WITH 0% OPACITY
-    */
     textAppear: (element, splitResult, splitType, duration, stagger, delay, ease, isMobile, scroll) => {
       duration = duration ?? 0.5;
       stagger = stagger ?? 0.05;
@@ -397,6 +407,5 @@ export function createAnimations(gsap) {
 
       return tl;
     }
-
   };
 }

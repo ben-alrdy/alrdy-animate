@@ -195,14 +195,14 @@ $aa-distance: 50px !default;
     */
 
     [aa-transition^='slide-rotate'][aa-transition^='slide-rotate'] {
-      transition-property: transform;
-      visibility: hidden;
+      transition-property: transform, opacity;
       transition-duration: var(--animation-duration);
       transition-delay: var(--animation-delay);
+      opacity: 0;
 
       &.in-view {
-        visibility: visible;
         transform: translate3d(0, 0, 0) rotate(0deg);
+        opacity: 1;
       }
     }
 

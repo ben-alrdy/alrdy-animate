@@ -222,6 +222,9 @@ You can also use `aa-scroll` to make the animation scroll-driven. There are two 
 - `text-fade`: Fades the text in, starts with 30% opacity.
 - `text-appear`: Fades the text in, starts with 0% opacity.
 
+## Sticky Nav
+
+You can use the `aa-nav="sticky"` attribute to create a sticky navigation bar that slides out of view when the user scrolls down and slides back in when the user scrolls up. It's easing defaults to `back.inOut` and the duration defaults to `0.4s`. You can overwrite both by adding `aa-easing` and `aa-duration` to the nav element.
 
 ## Contributing
 

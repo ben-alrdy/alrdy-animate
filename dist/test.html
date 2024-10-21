@@ -29,6 +29,11 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
         }
 
         .nav-links {
@@ -193,7 +198,7 @@
     <div class="anchor" aa-anchor="#secondGrid" aa-transition="fade-right"></div>
 
     <header>
-        <nav>
+        <nav aa-nav="sticky" aa-easing="back.inOut" aa-duration="2">
             <div class="logo">
                 <img src="https://placehold.co/100x50" alt="Loom Logo">
             </div>
@@ -327,7 +332,7 @@
     
 
 
-        <h1 class="headline" aa-animate="textRotateTopFwd" aa-split="lines">
+        <h1 class="headline" aa-animate="text-rotate-soft" aa-split="lines">
             AlrdyAnimate Test Animations AlrdyAnimate Test Animations AlrdyAnimate Test Animations AlrdyAnimate Test
             Animations
         </h1>

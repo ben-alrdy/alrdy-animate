@@ -32,7 +32,16 @@ async function init(options = {}) {
   window.addEventListener('load', async () => {
       if (settings.useGSAP) {
         try {
-          const { gsap, ScrollTrigger, animations, splitText } = await import('./gsapBundle'); // Import the gsap, ScrollTrigger, SplitText and animations modules
+          const { gsap, ScrollTrigger, animations, splitText, stickyNav } = await import('./gsapBundle'); // Import the gsap, ScrollTrigger, SplitText and animations modules
+          
+          // Set up sticky nav
+          const navElement = document.querySelector('[aa-nav="sticky"]');
+          if (navElement) {
+            const navEase = navElement.getAttribute('aa-easing') || settings.easing;
+            const navDuration = navElement.getAttribute('aa-duration');
+            stickyNav(gsap, ScrollTrigger, navElement, navEase, navDuration);
+          }
+          
           setupAnimations(allAnimatedElements, settings, isMobile, gsap, ScrollTrigger, animations, splitText);
 
         } catch (error) {
@@ -82,8 +91,6 @@ function setupAnimations(elements, settings, isMobile, gsap = null, ScrollTrigge
       element.style.setProperty("--background-color-final", colorFinal);
     }
 
-
-
     if (settings.useGSAP) {
       setupGSAPAnimation(element, anchorSelector, anchorElement, viewportPercentage, delay, settings, gsap, ScrollTrigger, animations, splitText, isMobile);
     } else {
@@ -99,8 +106,11 @@ function setupGSAPAnimation(element, anchorSelector, anchorElement, viewportPerc
   const duration = element.hasAttribute('aa-duration') ? parseFloat(element.getAttribute('aa-duration')) : undefined;
   const stagger = element.hasAttribute('aa-stagger') ? parseFloat(element.getAttribute('aa-stagger')) : undefined;
   const ease = element.hasAttribute('aa-easing') ? element.getAttribute('aa-easing') : undefined;
+  const navElement = document.querySelector('[aa-animate="nav"]');
+
 
   requestAnimationFrame(() => { // Wait for the next animation frame to ensure the element is visible
+    
     let tl = gsap.timeline({
       paused: true,
       scrollTrigger: {

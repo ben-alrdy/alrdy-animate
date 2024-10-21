@@ -3,11 +3,11 @@
 
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { createAnimations } from './gsapAnimations';
+import { createAnimations, stickyNav } from './gsapAnimations';
 import { splitText } from './textSplitter';
 
 gsap.registerPlugin(ScrollTrigger);
 
 const animations = createAnimations(gsap);
 
-export { gsap, ScrollTrigger, animations, splitText };
+export { gsap, ScrollTrigger, animations, splitText, stickyNav };
