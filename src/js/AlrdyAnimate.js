@@ -34,10 +34,6 @@ async function init(options = {}) {
     if (settings.useGSAP) {
       try {
         const { gsap, ScrollTrigger, animations, splitText, stickyNav } = await import('./gsapBundle'); // Import the gsap, ScrollTrigger, SplitText and animations modules
-        
-        if (!ScrollTrigger.isRegistered()) {
-          gsap.registerPlugin(ScrollTrigger);
-        }
 
         // Set up sticky nav
         const navElement = document.querySelector('[aa-nav="sticky"]');
