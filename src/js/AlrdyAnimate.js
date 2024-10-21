@@ -4,6 +4,9 @@ import debounce from 'lodash.debounce';
 // Define these variables in the module scope
 let gsap = null;
 let ScrollTrigger = null;
+let allAnimatedElements = null;
+let settings = null;
+let isMobile = false;
 
 // Default options for the animation settings
 const defaultOptions = {
@@ -17,11 +20,11 @@ const defaultOptions = {
 
 // Initialize the animation script with the given options
 async function init(options = {}) {
-  const settings = { ...defaultOptions, ...options };
-  const allAnimatedElements = document.querySelectorAll(
+  settings = { ...defaultOptions, ...options };
+  allAnimatedElements = document.querySelectorAll(
     "[aa-animate], [aa-transition]"
   );
-  let isMobile = window.innerWidth < 768;
+  isMobile = window.innerWidth < 768;
 
   // Fallback for browsers that do not support IntersectionObserver
   if (!("IntersectionObserver" in window) && !settings.useGSAP) {
@@ -56,19 +59,10 @@ async function init(options = {}) {
 
           setupAnimations(allAnimatedElements, settings, isMobile, importedModules.animations, importedModules.splitText);
 
-          // Create a debounced function for the resize event
-          const debouncedResize = debounce(() => {
-            isMobile = window.innerWidth < 768;
-            // Refresh all ScrollTriggers
-            ScrollTrigger.refresh();
-            // Re-setup animations
-            setupAnimations(allAnimatedElements, settings, isMobile, importedModules.animations, importedModules.splitText);
-          }, 250);
+          // Set up resize handler
+          setupResizeHandler(importedModules);
 
-          // Add resize event listener
-          window.addEventListener('resize', debouncedResize);
-
-          resolve({ gsap, ScrollTrigger });  // Resolve the promise with both instances
+          resolve({ gsap, ScrollTrigger });
         } catch (error) {
           console.error('Failed to load GSAP:', error);
           // Make all elements visible that were hidden for GSAP animations
@@ -84,6 +78,36 @@ async function init(options = {}) {
         resolve({ gsap: null, ScrollTrigger: null });  // Resolve with null if not using GSAP
       }
     });
+  });
+}
+
+// function to handle resize logic
+function setupResizeHandler(importedModules) {
+  let prevWidth = window.innerWidth;
+
+  const debouncedResize = debounce(() => {
+    const currentWidth = window.innerWidth;
+    
+    if (currentWidth !== prevWidth) {
+      isMobile = currentWidth < 768;
+      // Refresh all ScrollTriggers
+      ScrollTrigger.refresh();
+      // Re-setup animations
+      setupAnimations(allAnimatedElements, settings, isMobile, importedModules.animations, importedModules.splitText);
+      
+      prevWidth = currentWidth;
+    }
+  }, 250);
+
+  window.addEventListener('resize', debouncedResize);
+
+  window.addEventListener('orientationchange', () => {
+    setTimeout(() => {
+      const currentWidth = window.innerWidth;
+      if (currentWidth !== prevWidth) {
+        debouncedResize();
+      }
+    }, 100);
   });
 }
 
