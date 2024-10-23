@@ -19,6 +19,7 @@
             color: var(--text-color);
             margin: 0;
             padding: 0;
+            position: relative;
         }
 
         header {
@@ -187,15 +188,205 @@
             background-color: darkgreen;
             border-radius: 50%;
             position: fixed;
-            top: 20;
-            left: 20;
+            top: 20px;
+            left: 45%;
             z-index: 1000;
         }
+
+        :root {
+  --shiny-cta-bg: #001eff;
+  --shiny-cta-bg-subtle: #0013a5;
+  --shiny-cta-fg: #ffffff;
+  --shiny-cta-highlight: #00bfff;
+  --shiny-cta-highlight-subtle: #e0dc00;
+}
+
+@property --gradient-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@property --gradient-angle-offset {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@property --gradient-percent {
+  syntax: "<percentage>";
+  initial-value: 5%;
+  inherits: false;
+}
+
+@property --gradient-shine {
+  syntax: "<color>";
+  initial-value: #00bfff;
+  inherits: false;
+}
+
+.shiny-cta {
+  --animation: gradient-angle linear infinite;
+  --duration: 3s;
+  --shadow-size: 2px;
+  isolation: isolate;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  outline-offset: 4px;
+  padding: 1.25rem 2.5rem;
+  font-family: inherit;
+  font-size: 1.125rem;
+  line-height: 1.2;
+  border: 2px solid transparent;
+  border-radius: 360px;
+  color: var(--shiny-cta-fg);
+  background: linear-gradient(var(--shiny-cta-bg), var(--shiny-cta-bg))
+      padding-box,
+    conic-gradient(
+        from calc(var(--gradient-angle) - var(--gradient-angle-offset)),
+        var(--shiny-cta-bg-subtle),
+        var(--shiny-cta-highlight) var(--gradient-percent),
+        var(--gradient-shine) calc(var(--gradient-percent) * 2),
+        var(--shiny-cta-highlight) calc(var(--gradient-percent) * 3),
+        var(--shiny-cta-bg-subtle) calc(var(--gradient-percent) * 4)
+      )
+      border-box;
+  box-shadow: inset 0 0 0 1px var(--shiny-cta-bg-subtle);
+
+  &::before,
+  &::after,
+  span::before {
+    content: "";
+    pointer-events: none;
+    position: absolute;
+    inset-inline-start: 50%;
+    inset-block-start: 50%;
+    translate: -50% -50%;
+    z-index: -1;
+  }
+
+  &:active {
+    translate: 0 1px;
+  }
+}
+
+/* Dots pattern */
+.shiny-cta::before {
+  --size: calc(100% - var(--shadow-size) * 3);
+  --position: 2px;
+  --space: calc(var(--position) * 2);
+  width: var(--size);
+  height: var(--size);
+  background: radial-gradient(
+      circle at var(--position) var(--position),
+      white calc(var(--position) / 4),
+      transparent 0
+    )
+    padding-box;
+  background-size: var(--space) var(--space);
+  background-repeat: space;
+  mask-image: conic-gradient(
+    from calc(var(--gradient-angle) + 45deg),
+    black,
+    transparent 10% 90%,
+    black
+  );
+  border-radius: inherit;
+  opacity: 0.4;
+  z-index: -1;
+}
+
+/* Inner shimmer */
+.shiny-cta::after {
+  --animation: shimmer linear infinite;
+  width: 100%;
+  aspect-ratio: 1;
+  background: linear-gradient(
+    -50deg,
+    transparent,
+    var(--shiny-cta-highlight),
+    transparent
+  );
+  mask-image: radial-gradient(circle at bottom, transparent 40%, black);
+  opacity: 0.6;
+}
+
+.shiny-cta span {
+  z-index: 1;
+
+  &::before {
+    --size: calc(100% + 1rem);
+    width: var(--size);
+    height: var(--size);
+    box-shadow: inset 0 -1ex 2rem 4px var(--shiny-cta-highlight);
+    opacity: 0;
+  }
+}
+
+/* Animate */
+.shiny-cta {
+  --transition: 800ms cubic-bezier(0.25, 1, 0.5, 1);
+  transition: var(--transition);
+  transition-property: --gradient-angle-offset, --gradient-percent,
+    --gradient-shine;
+
+  &,
+  &::before,
+  &::after {
+    animation: var(--animation) var(--duration),
+      var(--animation) calc(var(--duration) / 0.4) reverse paused;
+    animation-composition: add;
+  }
+
+  span::before {
+    transition: opacity var(--transition);
+    animation: calc(var(--duration) * 1.5) breathe linear infinite;
+  }
+}
+
+.shiny-cta:is(:hover, :focus-visible) {
+  --gradient-percent: 20%;
+  --gradient-angle-offset: 95deg;
+  --gradient-shine: var(--shiny-cta-highlight-subtle);
+
+  &,
+  &::before,
+  &::after {
+    animation-play-state: running;
+  }
+
+  span::before {
+    opacity: 1;
+  }
+}
+
+@keyframes gradient-angle {
+  to {
+    --gradient-angle: 360deg;
+  }
+}
+
+@keyframes shimmer {
+  to {
+    rotate: 360deg;
+  }
+}
+
+@keyframes breathe {
+  from,
+  to {
+    scale: 1;
+  }
+  50% {
+    scale: 1.2;
+  }
+}
     </style>
 </head>
 
 <body>
-    <div class="anchor" aa-anchor="#secondGrid" aa-transition="fade-right"></div>
+    <div class="anchor" aa-anchor="#trigger-circle" aa-transition="fade-right"></div>
 
     <header>
         <nav aa-nav="sticky">
@@ -225,8 +416,11 @@
                 Easily record and share AI-powered video messages with your teammates and customers to supercharge
                 productivity
             </p>
+
             <div class="cta-buttons" aa-animate="fade-up-back" aa-duration="1.5" aa-easing="power2.out" aa-delay="1.2">
-                <a href="#" class="primary-cta">Get Loom for free</a>
+                <button class="shiny-cta">
+                    <span>Get unlimited access</span>
+                </button>
                 <a href="#" class="secondary-cta">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path
@@ -255,14 +449,15 @@
                     <div class="box"><span aa-animate="fade-down-back">Fade Down Back</span></div>
                     <div class="box"><span aa-animate="fade-left-back">Fade Left Back</span></div>
                     <div class="box"><span aa-animate="fade-right-back">Fade Right Back</span></div>
-                    <div class="box"><span aa-transition="fade-up" aa-easing="back.out">Transition Up</span></div>
-                    <div class="box"><span aa-transition="fade-down">Transition Down</span></div>
-                    <div class="box"><span aa-transition="fade-left">Transition Left</span></div>
-                    <div class="box"><span aa-transition="fade-right">Transition Right</span></div>
-                    <div class="box"><span aa-transition="fade-up-left">Transition Up Left</span></div>
-                    <div class="box"><span aa-transition="fade-up-right">Transition Up Right</span></div>
-                    <div class="box"><span aa-transition="fade-down-left">Transition Down Left</span></div>
-                    <div class="box"><span aa-transition="fade-down-right">Transition Down Right</span></div>
+                    <div class="box"><span aa-transition="fade" aa-duration="1.5">Fade</span></div>
+                    <div class="box"><span aa-transition="fade-up" aa-easing="back.out">Fade Up</span></div>
+                    <div class="box"><span aa-transition="fade-down">Fade Down</span></div>
+                    <div class="box"><span aa-transition="fade-left">Fade Left</span></div>
+                    <div class="box"><span aa-transition="fade-right">Fade Right</span></div>
+                    <div class="box"><span aa-transition="fade-up-left">Fade Up Left</span></div>
+                    <div class="box"><span aa-transition="fade-up-right">Fade Up Right</span></div>
+                    <div class="box"><span aa-transition="fade-down-left">Fade Down Left</span></div>
+                    <div class="box"><span aa-transition="fade-down-right">Fade Down Right</span></div>
         
                     <!-- Zoom animations -->
                     <div class="box"><span aa-transition="zoom-in">Zoom In</span></div>
@@ -289,7 +484,7 @@
                     <div class="box"><span aa-transition="flip-down">Flip Down</span></div>
         
                     <!-- Slide rotation animations -->
-                    <div class="box"><span aa-transition="slide-rotate-bottom-right" aa-easing="ease-out-cubic">Slide Rotate
+                    <div class="box" id="trigger-circle"><span aa-transition="slide-rotate-bottom-right" aa-easing="ease-out-cubic">Slide Rotate
                             Bottom Right</span></div>
                     <div class="box"><span aa-transition="slide-rotate-bottom-left" aa-easing="ease-out-cubic">Slide Rotate
                             Bottom Left</span></div>
@@ -304,22 +499,20 @@
                     <div class="box"><span aa-animate="slide-in-blurred-left">Slide In Blurred Left</span></div>
                     <div class="box"><span aa-animate="slide-in-blurred-right">Slide In Blurred Right</span></div>
         
-                    <div class="box" style="height: 500px;">
-                        <img src="https://picsum.photos/800/600" alt="Image" style="width: 100%; height: 100%; object-fit: cover;" 
-                        aa-transition="pseudo-bg-reveal-down" aa-color-initial="rgba(255,255,255)"
-                        aa-color-final="rgba(255,255,255,1.0)" aa-easing="ease-out-expo">
+                    <div class="box" style="height: 500px;" aa-transition="pseudo-reveal-down" aa-color-initial="rgba(255,255,255,1)" aa-easing="ease-out-expo" aa-delay="2">
+                        <img src="https://picsum.photos/800/600" alt="Image" style="width: 100%; height: 100%; object-fit: cover;">
                     </div>
                     <div class="box"
                         style="height: 500px; background-image: url('https://picsum.photos/800/601'); background-size: cover; background-position: center;"
-                        aa-transition="pseudo-bg-reveal-up" aa-color-initial="rgba(0,0,0,0.5)"
+                        aa-transition="pseudo-reveal-up" aa-color-initial="rgba(0,0,0,0.5)"
                         aa-color-final="rgba(255,255,255,0.5)" aa-easing="ease-out-expo">
                         <div>slide up</div>
                     </div>
-                    <div class="box" style="height: 500px;" aa-transition="pseudo-bg-slide-right" aa-color-initial="#000"
+                    <div class="box" style="height: 500px;" aa-transition="pseudo-bg-slide-right" aa-color-initial="#f1f0ff"
                         aa-color-final="#fff" aa-easing="ease-out-expo">
                         <div>slide right</div>
                     </div>
-                    <div class="box" style="height: 500px;" aa-transition="pseudo-bg-slide-left" aa-color-initial="#000"
+                    <div class="box" style="height: 500px;" aa-transition="pseudo-bg-slide-left" aa-color-initial="#f1f0ff"
                         aa-color-final="#fff" aa-easing="ease-out-expo">
                         <div>slide left</div>
                     </div>
@@ -327,90 +520,6 @@
         </section>
     </main>
 
-
-    
-
-
-        <h1 class="headline" aa-animate="text-rotate-soft" aa-split="lines">
-            AlrdyAnimate Test Animations AlrdyAnimate Test Animations AlrdyAnimate Test Animations AlrdyAnimate Test
-            Animations
-        </h1>
-        <div class="grid" id="secondGrid">
-            <div class="box"><span aa-animate="fade-up-back">Fade Up Back</span></div>
-            <div class="box"><span aa-animate="fade-down-back">Fade Down Back</span></div>
-            <div class="box"><span aa-animate="fade-left-back">Fade Left Back</span></div>
-            <div class="box"><span aa-animate="fade-right-back">Fade Right Back</span></div>
-            <div class="box"><span aa-transition="fade-up" aa-easing="ease-out-back">Transition Up</span></div>
-            <div class="box"><span aa-transition="fade-down">Transition Down</span></div>
-            <div class="box"><span aa-transition="fade-left">Transition Left</span></div>
-            <div class="box"><span aa-transition="fade-right">Transition Right</span></div>
-            <div class="box"><span aa-transition="fade-up-left">Transition Up Left</span></div>
-            <div class="box"><span aa-transition="fade-up-right">Transition Up Right</span></div>
-            <div class="box"><span aa-transition="fade-down-left">Transition Down Left</span></div>
-            <div class="box"><span aa-transition="fade-down-right">Transition Down Right</span></div>
-
-            <!-- Zoom animations -->
-            <div class="box"><span aa-transition="zoom-in">Zoom In</span></div>
-            <div class="box"><span aa-transition="zoom-in-up">Zoom In Up</span></div>
-            <div class="box"><span aa-transition="zoom-in-down">Zoom In Down</span></div>
-            <div class="box"><span aa-transition="zoom-in-left">Zoom In Left</span></div>
-            <div class="box"><span aa-transition="zoom-in-right">Zoom In Right</span></div>
-            <div class="box"><span aa-transition="zoom-out">Zoom Out</span></div>
-            <div class="box"><span aa-transition="zoom-out-up">Zoom Out Up</span></div>
-            <div class="box"><span aa-transition="zoom-out-down">Zoom Out Down</span></div>
-            <div class="box"><span aa-transition="zoom-out-left">Zoom Out Left</span></div>
-            <div class="box"><span aa-transition="zoom-out-right">Zoom Out Right</span></div>
-
-            <!-- Slide animations -->
-            <div class="box"><span aa-transition="slide-up">Slide Up</span></div>
-            <div class="box"><span aa-transition="slide-down">Slide Down</span></div>
-            <div class="box"><span aa-transition="slide-left">Slide Left</span></div>
-            <div class="box"><span aa-transition="slide-right">Slide Right</span></div>
-
-            <!-- Flip animations -->
-            <div class="box"><span aa-transition="flip-left">Flip Left</span></div>
-            <div class="box"><span aa-transition="flip-right">Flip Right</span></div>
-            <div class="box"><span aa-transition="flip-up">Flip Up</span></div>
-            <div class="box"><span aa-transition="flip-down">Flip Down</span></div>
-
-            <!-- Slide rotation animations -->
-            <div class="box"><span aa-transition="slide-rotate-bottom-right" aa-easing="ease-out-cubic">Slide Rotate
-                    Bottom Right</span></div>
-            <div class="box"><span aa-transition="slide-rotate-bottom-left" aa-easing="ease-out-cubic">Slide Rotate
-                    Bottom Left</span></div>
-            <div class="box"><span aa-transition="slide-rotate-top-right" aa-easing="ease-out-cubic">Slide Rotate Top
-                    Right</span></div>
-            <div class="box"><span aa-transition="slide-rotate-top-left" aa-easing="ease-out-cubic">Slide Rotate Top
-                    Left</span></div>
-
-            <!-- Blurred slide animations -->
-            <div class="box"><span aa-animate="slide-in-blurred-bottom">Slide In Blurred Bottom</span></div>
-            <div class="box"><span aa-animate="slide-in-blurred-top">Slide In Blurred Top</span></div>
-            <div class="box"><span aa-animate="slide-in-blurred-left">Slide In Blurred Left</span></div>
-            <div class="box"><span aa-animate="slide-in-blurred-right">Slide In Blurred Right</span></div>
-
-            <div class="box"
-                style="height: 500px; background-image: url('https://picsum.photos/800/600'); background-size: cover; background-position: center;"
-                aa-transition="pseudo-bg-reveal-down" aa-color-initial="rgba(255,255,255)"
-                aa-color-final="rgba(255,255,255,1.0)" aa-easing="ease-out-expo">
-                <div>slide down</div>
-            </div>
-            <div class="box"
-                style="height: 500px; background-image: url('https://picsum.photos/800/601'); background-size: cover; background-position: center;"
-                aa-transition="pseudo-bg-reveal-up" aa-color-initial="rgba(0,0,0,0.5)"
-                aa-color-final="rgba(255,255,255,0.5)" aa-easing="ease-out-expo">
-                <div>slide up</div>
-            </div>
-            <div class="box" style="height: 500px;" aa-transition="pseudo-bg-slide-right" aa-color-initial="#000"
-                aa-color-final="#fff" aa-easing="ease-out-expo">
-                <div>slide right</div>
-            </div>
-            <div class="box" style="height: 500px;" aa-transition="pseudo-bg-slide-left" aa-color-initial="#000"
-                aa-color-final="#fff" aa-easing="ease-out-expo">
-                <div>slide left</div>
-            </div>
-        </div>
-    </div>
 
     
     <script src="./AlrdyAnimate.js"></script>
@@ -422,7 +531,7 @@
         console.log('DOM Content Loaded, initializing AlrdyAnimate...');
         AlrdyAnimate.init({
           easing: 'ease-in-out',
-          again: false,
+          again: true,
           useGSAP: true
         }).then(({ gsap, ScrollTrigger }) => {
           console.log('AlrdyAnimate init completed. GSAP:', gsap, 'ScrollTrigger:', ScrollTrigger);

@@ -283,45 +283,63 @@ $aa-distance: 50px !default;
     PSEUDO BACKGROUND REVEAL TRANSITIONS
     */
 
-    [aa-transition^="pseudo-bg-reveal"][aa-transition^="pseudo-bg-reveal"] {
+    [aa-transition^="pseudo-reveal"][aa-transition^="pseudo-reveal"] {
       position: relative;
       background: var(--background-color-final);
-      overflow: hidden; // Hide overflow
+      overflow: hidden;
     }
 
-    // Ensure content stays above the pseudo-element
-    [aa-transition^="pseudo-bg-reveal"][aa-transition^="pseudo-bg-reveal"] > * {
+    [aa-transition^="pseudo-reveal"][aa-transition^="pseudo-reveal"] > * {
       position: relative;
-      z-index: 2;
+      z-index: 1;
     }
 
-    [aa-transition^="pseudo-bg-reveal"]::before {
+    [aa-transition^="pseudo-reveal"]::before {
       content: "";
       position: absolute;
       top: 0;
       left: 0;
-      right: 0;
-      bottom: 0;
+      width: 100%;
+      height: 100%;
       background: var(--background-color-initial);
-      z-index: 1;
+      z-index: 2;
       transition: transform var(--animation-duration) var(--animation-delay);
     }
 
-    [aa-transition^="pseudo-bg-reveal"]::before {
+    [aa-transition^="pseudo-reveal"]::before {
       transform: translate3d(0, 0, 0);
     }
 
-    [aa-transition="pseudo-bg-reveal-up"].in-view::before {
-      transform: translateY(-100%);
+    [aa-transition="pseudo-reveal-up"]::before {
+      transform-origin: top;
+      transform: scaleY(1);
     }
-    [aa-transition="pseudo-bg-reveal-down"].in-view::before {
-      transform: translateY(100%);
+    [aa-transition="pseudo-reveal-up"].in-view::before {
+      transform: scaleY(0);
     }
-    [aa-transition="pseudo-bg-reveal-right"].in-view::before {
-      transform: translateX(100%);
+
+    [aa-transition="pseudo-reveal-down"]::before {
+      transform-origin: bottom;
+      transform: scaleY(1);
     }
-    [aa-transition="pseudo-bg-reveal-left"].in-view::before {
-      transform: translateX(-100%);
+    [aa-transition="pseudo-reveal-down"].in-view::before {
+      transform: scaleY(0);
+    }
+
+    [aa-transition="pseudo-reveal-right"]::before {
+      transform-origin: right;
+      transform: scaleX(1);
+    }
+    [aa-transition="pseudo-reveal-right"].in-view::before {
+      transform: scaleX(0);
+    }
+
+    [aa-transition="pseudo-reveal-left"]::before {
+      transform-origin: left;
+      transform: scaleX(1);
+    }
+    [aa-transition="pseudo-reveal-left"].in-view::before {
+      transform: scaleX(0);
     }
   }
 }
