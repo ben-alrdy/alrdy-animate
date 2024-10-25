@@ -1,6 +1,6 @@
 {
   "name": "alrdy-animate",
-  "version": "2.0.6",
+  "version": "2.0.7",
   "description": "A library to handle animations on scroll.",
   "main": "docs/v2.0.0/AlrdyAnimate.js",
   "scripts": {

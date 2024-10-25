@@ -63,7 +63,7 @@ async function init(options = {}) {
           // Set up resize handler
           setupResizeHandler(importedModules);
 
-          // Add this line to handle lazy-loaded images
+          // Handle lazy-loaded images
           handleLazyLoadedImages();
 
           resolve({ gsap, ScrollTrigger });
@@ -281,15 +281,20 @@ function setupIntersectionObserver(element, anchorSelector, anchorElement, viewp
   removeObserver.observe(anchorElement);
 }
 
-// Add this new function to handle lazy-loaded images
+// Refresh ScrollTrigger instances when lazy-loaded images are loaded
 function handleLazyLoadedImages() {
+  const debouncedRefresh = debounce(() => {
+    if (ScrollTrigger) {
+      ScrollTrigger.refresh();
+    }
+  }, 200);
+
   const lazyImages = document.querySelectorAll('img[loading="lazy"]');
+
   lazyImages.forEach((img) => {
-    if (!img.complete) { // Check if the image is not already loaded
+    if (!img.complete) {
       img.addEventListener('load', () => {
-        if (ScrollTrigger) {
-          ScrollTrigger.refresh();
-        }
+        requestAnimationFrame(debouncedRefresh);
       }, { once: true });
     }
   });
