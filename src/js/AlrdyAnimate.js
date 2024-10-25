@@ -63,6 +63,9 @@ async function init(options = {}) {
           // Set up resize handler
           setupResizeHandler(importedModules);
 
+          // Add this line to handle lazy-loaded images
+          handleLazyLoadedImages();
+
           resolve({ gsap, ScrollTrigger });
         } catch (error) {
           console.error('Failed to load GSAP:', error);
@@ -185,28 +188,6 @@ function setupGSAPAnimation(element, anchorSelector, anchorElement, viewportPerc
 
     element.timeline = tl; // Store the timeline on the element for future reference
 
-    // Check if the element or its anchor is an image with loading="lazy"
-    const targetElement = anchorSelector ? anchorElement : element;
-    if (targetElement.tagName.toLowerCase() === 'img' && targetElement.loading === 'lazy') {
-      const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            targetElement.addEventListener('load', () => {
-              // Refresh all ScrollTrigger instances below this image
-              ScrollTrigger.getAll().forEach(st => {
-                if (st.trigger.getBoundingClientRect().top > targetElement.getBoundingClientRect().bottom) {
-                  st.refresh();
-                }
-              });
-            }, { once: true });
-            observer.disconnect();
-          }
-        });
-      }, { rootMargin: "200px" }); // Start observing when image is 200px from entering the viewport
-
-      observer.observe(targetElement);
-    }
-
     if (splitTypeAttr) {
       const { splitResult, splitType } = splitText(element, splitTypeAttr);
       element.splitInstance = splitResult; // Store the split instance on the element
@@ -300,10 +281,25 @@ function setupIntersectionObserver(element, anchorSelector, anchorElement, viewp
   removeObserver.observe(anchorElement);
 }
 
+// Add this new function to handle lazy-loaded images
+function handleLazyLoadedImages() {
+  const lazyImages = document.querySelectorAll('img[loading="lazy"]');
+  lazyImages.forEach((img) => {
+    if (!img.complete) { // Check if the image is not already loaded
+      img.addEventListener('load', () => {
+        if (ScrollTrigger) {
+          ScrollTrigger.refresh();
+        }
+      }, { once: true });
+    }
+  });
+}
+
 const AlrdyAnimate = {
   init,
   getGSAP: () => gsap,
-  getScrollTrigger: () => ScrollTrigger
+  getScrollTrigger: () => ScrollTrigger,
+  handleLazyLoadedImages
 };
 
 export { AlrdyAnimate };
