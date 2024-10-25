@@ -18,11 +18,14 @@ You can include AlrdyAnimate in your project by using a CDN or by bundling it wi
 ### Using CDN
 
 ```html
-<!-- Include the AlrdyAnimate CSS -->
+<!-- Include the AlrdyAnimate CSS, first link is a stable version, second link is the latest version -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/ben-alrdy/AlrdyAnimate@master/docs/v2.0.2/AlrdyAnimate.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/ben-alrdy/AlrdyAnimate@latest/docs/AlrdyAnimate.css">
 
-<!-- Include the AlrdyAnimate JS -->
+<!-- Include the AlrdyAnimate JS, first link is a stable version, second link is the latest version-->
 <script src="https://cdn.jsdelivr.net/gh/ben-alrdy/AlrdyAnimate@master/docs/v2.0.2/AlrdyAnimate.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/ben-alrdy/AlrdyAnimate@latest/docs/AlrdyAnimate.js"></script>
+
 
 <script>
   document.addEventListener('DOMContentLoaded', function() {
