@@ -15,7 +15,8 @@ const defaultOptions = {
   viewportPercentage: 0.8, // Default percentage of the viewport height to trigger the animation
   useGSAP: false, // Use GSAP for animations
   duration: 1, // 1 second
-  delay: 0 // 0 seconds
+  delay: 0, // 0 seconds
+  debug: false // Set to true to see GSAP debug info
 };
 
 // Initialize the animation script with the given options
@@ -178,7 +179,7 @@ function setupGSAPAnimation(element, anchorSelector, anchorElement, viewportPerc
           element.classList.add("in-view");
           tl.play();
         },
-        // markers: true
+        markers: settings.debug
       }
     });
 

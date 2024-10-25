@@ -588,9 +588,9 @@
     </main>
 
 
-    
+     <!-- Include the AlrdyAnimate JS -->
     <script src="./AlrdyAnimate.js"></script>
-    <!-- Include the AlrdyAnimate JS -->
+   
     <!-- <script src="https://cdn.jsdelivr.net/gh/ben-alrdy/AlrdyAnimate@master/docs/v2.0.1/AlrdyAnimate.js"></script> -->
     
     <script>
@@ -599,7 +599,8 @@
         AlrdyAnimate.init({
           easing: 'ease-in-out',
           again: true,
-          useGSAP: true
+          useGSAP: true,
+          debug: false
         }).then(({ gsap, ScrollTrigger }) => {
           console.log('AlrdyAnimate init completed. GSAP:', gsap, 'ScrollTrigger:', ScrollTrigger);
           if (gsap && ScrollTrigger) {
