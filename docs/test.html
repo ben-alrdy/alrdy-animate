@@ -416,7 +416,6 @@
   }
 
   </style>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/ben-alrdy/AlrdyAnimate@master/docs/v2.0.2/AlrdyAnimate.css">
 </head>
 
 <body>
@@ -479,9 +478,7 @@
               <div class="padding-section-large">
                 <div class="layout1_component">
                   <div class="w-layout-grid layout1_content">
-                    <div class="layout1_image-wrapper"><img aa-animate="fade-up-back" loading="lazy" alt=""
-                        src="https://cdn.prod.website-files.com/6516f7068e6c39e2de68e695/6516f7068e6c39e2de68e722_placeholder-image.svg"
-                        class="layout1_image in-view" style="--animation-duration: 1s;"></div>
+                    <div class="layout1_image-wrapper"><img src="https://cdn.prod.website-files.com/6516f7068e6c39e2de68e695/6719424a7bd12f572ef97c10_process-img.png" loading="lazy" sizes="(max-width: 479px) 100vw, (max-width: 767px) 90vw, (max-width: 991px) 43vw, (max-width: 2933px) 42vw, 1232px" srcset="https://cdn.prod.website-files.com/6516f7068e6c39e2de68e695/6719424a7bd12f572ef97c10_process-img-p-500.png 500w, https://cdn.prod.website-files.com/6516f7068e6c39e2de68e695/6719424a7bd12f572ef97c10_process-img-p-800.png 800w, https://cdn.prod.website-files.com/6516f7068e6c39e2de68e695/6719424a7bd12f572ef97c10_process-img-p-1080.png 1080w, https://cdn.prod.website-files.com/6516f7068e6c39e2de68e695/6719424a7bd12f572ef97c10_process-img.png 1232w" alt=""></div>
                     <div class="layout1_content-left">
                       <div class="text-style-tagline">Tagline</div>
                       <div class="spacer-xsmall"></div>
@@ -589,10 +586,10 @@
     </main>
 
 
-    
-    <!-- <script src="./AlrdyAnimate.js"></script> -->
-    <!-- Include the AlrdyAnimate JS -->
-    <script src="https://cdn.jsdelivr.net/gh/ben-alrdy/AlrdyAnimate@master/docs/v2.0.2/AlrdyAnimate.js"></script>
+     <!-- Include the AlrdyAnimate JS -->
+    <script src="./AlrdyAnimate.js"></script>
+   
+    <!-- <script src="https://cdn.jsdelivr.net/gh/ben-alrdy/AlrdyAnimate@master/docs/v2.0.1/AlrdyAnimate.js"></script> -->
     
     <script>
       document.addEventListener('DOMContentLoaded', function() {
@@ -600,7 +597,8 @@
         AlrdyAnimate.init({
           easing: 'ease-in-out',
           again: true,
-          useGSAP: true
+          useGSAP: true,
+          debug: true
         }).then(({ gsap, ScrollTrigger }) => {
           console.log('AlrdyAnimate init completed. GSAP:', gsap, 'ScrollTrigger:', ScrollTrigger);
           if (gsap && ScrollTrigger) {
