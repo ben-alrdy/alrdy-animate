@@ -188,9 +188,23 @@ function setupGSAPAnimation(element, anchorSelector, anchorElement, viewportPerc
     // Check if the element or its anchor is an image with loading="lazy"
     const targetElement = anchorSelector ? anchorElement : element;
     if (targetElement.tagName.toLowerCase() === 'img' && targetElement.loading === 'lazy') {
-      targetElement.addEventListener('load', () => {
-        ScrollTrigger.refresh();
-      });
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            targetElement.addEventListener('load', () => {
+              // Refresh all ScrollTrigger instances below this image
+              ScrollTrigger.getAll().forEach(st => {
+                if (st.trigger.getBoundingClientRect().top > targetElement.getBoundingClientRect().bottom) {
+                  st.refresh();
+                }
+              });
+            }, { once: true });
+            observer.disconnect();
+          }
+        });
+      }, { rootMargin: "200px" }); // Start observing when image is 200px from entering the viewport
+
+      observer.observe(targetElement);
     }
 
     if (splitTypeAttr) {
