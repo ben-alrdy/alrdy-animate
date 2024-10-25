@@ -185,6 +185,14 @@ function setupGSAPAnimation(element, anchorSelector, anchorElement, viewportPerc
 
     element.timeline = tl; // Store the timeline on the element for future reference
 
+    // Check if the element or its anchor is an image with loading="lazy"
+    const targetElement = anchorSelector ? anchorElement : element;
+    if (targetElement.tagName.toLowerCase() === 'img' && targetElement.loading === 'lazy') {
+      targetElement.addEventListener('load', () => {
+        ScrollTrigger.refresh();
+      });
+    }
+
     if (splitTypeAttr) {
       const { splitResult, splitType } = splitText(element, splitTypeAttr);
       element.splitInstance = splitResult; // Store the split instance on the element
