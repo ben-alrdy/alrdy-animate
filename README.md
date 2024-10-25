@@ -19,10 +19,10 @@ You can include AlrdyAnimate in your project by using a CDN or by bundling it wi
 
 ```html
 <!-- Include the AlrdyAnimate CSS -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/ben-alrdy/AlrdyAnimate@master/docs/v2.0.0/AlrdyAnimate.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/ben-alrdy/AlrdyAnimate@master/docs/v2.0.2/AlrdyAnimate.css">
 
 <!-- Include the AlrdyAnimate JS -->
-<script src="https://cdn.jsdelivr.net/gh/ben-alrdy/AlrdyAnimate@master/docs/v2.0.0/AlrdyAnimate.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/ben-alrdy/AlrdyAnimate@master/docs/v2.0.2/AlrdyAnimate.js"></script>
 
 <script>
   document.addEventListener('DOMContentLoaded', function() {
@@ -225,6 +225,28 @@ You can also use `aa-scroll` to make the animation scroll-driven. There are two 
 ## Sticky Nav
 
 You can use the `aa-nav="sticky"` attribute to create a sticky navigation bar that slides out of view when the user scrolls down and slides back in when the user scrolls up. It's easing defaults to `back.inOut` and the duration defaults to `0.4s`. You can overwrite both by adding `aa-easing` and `aa-duration` to the nav element.
+
+## Setting attributes via JavaScript
+
+If you'd like to set the same animation on a certain class or element, you can do so via JavaScript:
+
+```javascript
+document.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('h1').forEach((element) => {       //or querySelectorAll('.my-class')
+    if (!element.hasAttribute('aa-animate')) {
+      element.setAttribute('aa-animate', 'text-tilt-up');
+      element.setAttribute('aa-split', 'words.clip'); 
+      element.setAttribute('aa-duration', '0.5');  
+    }
+  });
+  
+  AlrdyAnimate.init({
+    easing: 'power1.out',
+    again: true,
+    useGSAP: true  
+  });
+});
+```
 
 ## Contributing
 
