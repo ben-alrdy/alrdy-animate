@@ -281,11 +281,13 @@ function setupIntersectionObserver(element, anchorSelector, anchorElement, viewp
   removeObserver.observe(anchorElement);
 }
 
-// Refresh ScrollTrigger instances when lazy-loaded images are loaded
 function handleLazyLoadedImages() {
+  let needsRefresh = false;
+
   const debouncedRefresh = debounce(() => {
-    if (ScrollTrigger) {
+    if (ScrollTrigger && needsRefresh) {
       ScrollTrigger.refresh();
+      needsRefresh = false; // Reset after refresh
     }
   }, 200);
 
@@ -294,8 +296,14 @@ function handleLazyLoadedImages() {
   lazyImages.forEach((img) => {
     if (!img.complete) {
       img.addEventListener('load', () => {
-        requestAnimationFrame(debouncedRefresh);
+        needsRefresh = true;
       }, { once: true });
+    }
+  });
+
+  ScrollTrigger.addEventListener('scrollEnd', () => {
+    if (needsRefresh) {
+      debouncedRefresh(); // Refresh when scrolling ends if needed
     }
   });
 }
