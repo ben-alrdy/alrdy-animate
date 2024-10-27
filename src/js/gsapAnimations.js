@@ -1,3 +1,6 @@
+// Store gsap at module level
+let gsap = null;
+
 export function stickyNav(gsap, ScrollTrigger, element, ease, duration) {
   ease = ease ?? 'back.inOut';
   duration = duration ?? 0.4;
@@ -5,32 +8,43 @@ export function stickyNav(gsap, ScrollTrigger, element, ease, duration) {
   let lastScrollTop = 0;
   const scrollThreshold = 20; // Adjust this value to change sensitivity
 
+  // Function to ensure nav is visible at top
+  const showNavAtTop = () => {
+    isVisible = true;
+    gsap.to(element, { y: '0%', duration, ease, overwrite: true });
+  };
+
   ScrollTrigger.create({
     start: "top top",
     end: "max",
     onUpdate: (self) => {
       let currentScrollTop = self.scroll();
+
+      // Always force show at top regardless of previous state
+      if (currentScrollTop <= 10) {
+        showNavAtTop();
+        lastScrollTop = currentScrollTop;
+        return;
+      }
+
       let scrollDelta = currentScrollTop - lastScrollTop;
 
-      // Always show the nav on the top of the page
-      if (currentScrollTop <= 10) {
-        if (!isVisible) {
-          isVisible = true;
-          gsap.to(element, { y: '0%', duration, ease });
-        }
-      } else if (Math.abs(scrollDelta) > scrollThreshold) {
+      // Normal scroll behavior
+      if (Math.abs(scrollDelta) > scrollThreshold) {
         if (scrollDelta > 0 && isVisible) {
           // Scrolling down, hide the nav
           isVisible = false;
-          gsap.to(element, { y: '-100%', duration: duration * 2, ease });
+          gsap.to(element, { y: '-100%', duration: duration * 2, ease, overwrite: true });
         } else if (scrollDelta < 0 && !isVisible) {
           // Scrolling up, show the nav
           isVisible = true;
-          gsap.to(element, { y: '0%', duration, ease });
+          gsap.to(element, { y: '0%', duration, ease, overwrite: true });
         }
         lastScrollTop = currentScrollTop;
       }
-    }
+    },
+    onLeaveBack: showNavAtTop,
+    onLeave: showNavAtTop
   });
 }
 
@@ -112,9 +126,6 @@ function createTimeline(animationProps) {
     return tl;
   };
 }
-
-// Store gsap at module level
-let gsap = null;
 
 // Function to create all the animations
 export function createAnimations(gsapInstance) {
