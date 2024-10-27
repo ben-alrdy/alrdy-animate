@@ -113,8 +113,13 @@ function createTimeline(animationProps) {
   };
 }
 
+// Store gsap at module level
+let gsap = null;
+
 // Function to create all the animations
-export function createAnimations(gsap) {
+export function createAnimations(gsapInstance) {
+  gsap = gsapInstance; // Store gsap instance
+
   return {
     textSlideUp: createTimeline({
       y: "110%",
