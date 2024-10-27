@@ -157,7 +157,7 @@ function setupAnimations(elements, settings, isMobile, animations = null, splitT
 
 function setupGSAPAnimation(element, anchorSelector, anchorElement, viewportPercentage, delay, settings, animations, splitText, isMobile) {
   const animationType = element.getAttribute('aa-animate');
-  const splitTypeAttr = element.getAttribute('aa-split') || 'lines';
+  const splitTypeAttr = element.getAttribute('aa-split');
   const scroll = element.getAttribute('aa-scroll');
   const duration = element.hasAttribute('aa-duration') ? parseFloat(element.getAttribute("aa-duration")) : undefined;
   const stagger = element.hasAttribute('aa-stagger') ? parseFloat(element.getAttribute('aa-stagger')) : undefined;
