@@ -415,6 +415,51 @@
     }
   }
 
+  .filter-boxes {
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+  }
+
+  .filter-box {
+    width: 100%;
+    height: 100%;
+  }
+
+  .filter-box.color-dodge {
+    background-color: #d9d9d9;
+    mix-blend-mode: color-dodge;
+  }
+
+  .filter-box.color-burn {
+    background-color: black;
+    mix-blend-mode: color-burn;
+  }
+
+  .circles-container {
+    display: flex;
+    gap: 2rem;
+    padding: 2rem 0;
+    position: relative;
+    z-index: 1;
+    justify-content: center;
+  }
+
+  .circle {
+    width: 10rem;
+    height: 10rem;
+    background-color: black;
+    border-radius: 50%;
+    filter: blur(10px);
+    cursor: grab;
+  }
+
+  .circle:active {
+    cursor: grabbing;
+  }
+
   </style>
 </head>
 
@@ -586,6 +631,24 @@
                     </div>
                 </div>
         </section>
+        <section>
+            <div class="container" style="position: relative; background: white; padding: 2rem;">
+                <!-- Color filter boxes -->
+                <div class="filter-boxes">
+                    <div class="filter-box color-burn"></div>
+                    <div class="filter-box color-dodge"></div>
+                    <div class="filter-box color-dodge"></div>
+                </div>
+                
+                <!-- Circles container -->
+                <div class="circles-container">
+                    <div class="circle"></div>
+                    <div class="circle"></div>
+                </div>
+            </div>
+        </section>
+
+        
     </main>
 
 
@@ -621,6 +684,31 @@
           console.log('typeof gsap:', typeof gsap);
           console.log('gsap.to function available:', typeof gsap?.to === 'function');
         }, 1000); // Check after 1 second
+
+        // Add drag functionality to circles
+        const circles = document.querySelectorAll('.circle');
+        circles.forEach(circle => {
+            let isDragging = false;
+            let startX, circleLeft;
+
+            circle.addEventListener('mousedown', e => {
+                isDragging = true;
+                startX = e.pageX - circle.offsetLeft;
+                circle.style.cursor = 'grabbing';
+            });
+
+            document.addEventListener('mousemove', e => {
+                if (!isDragging) return;
+                e.preventDefault();
+                const x = e.pageX - startX;
+                circle.style.transform = `translateX(${x}px)`;
+            });
+
+            document.addEventListener('mouseup', () => {
+                isDragging = false;
+                circle.style.cursor = 'grab';
+            });
+        });
       });
     </script>
   </body>

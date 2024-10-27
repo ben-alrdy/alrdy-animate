@@ -12,7 +12,13 @@ export function stickyNav(gsap, ScrollTrigger, element, ease, duration) {
       let currentScrollTop = self.scroll();
       let scrollDelta = currentScrollTop - lastScrollTop;
 
-      if (Math.abs(scrollDelta) > scrollThreshold) {
+      // Always show the nav on the top of the page
+      if (currentScrollTop <= 10) {
+        if (!isVisible) {
+          isVisible = true;
+          gsap.to(element, { y: '0%', duration, ease });
+        }
+      } else if (Math.abs(scrollDelta) > scrollThreshold) {
         if (scrollDelta > 0 && isVisible) {
           // Scrolling down, hide the nav
           isVisible = false;

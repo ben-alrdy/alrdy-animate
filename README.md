@@ -19,11 +19,11 @@ You can include AlrdyAnimate in your project by using a CDN or by bundling it wi
 
 ```html
 <!-- Include the AlrdyAnimate CSS, first link is a stable version, second link is the latest version -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/ben-alrdy/AlrdyAnimate@master/docs/v2.0.6/AlrdyAnimate.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/ben-alrdy/AlrdyAnimate@master/docs/v2.1.0/AlrdyAnimate.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/ben-alrdy/AlrdyAnimate@latest/docs/AlrdyAnimate.css">
 
 <!-- Include the AlrdyAnimate JS, first link is a stable version, second link is the latest version-->
-<script src="https://cdn.jsdelivr.net/gh/ben-alrdy/AlrdyAnimate@master/docs/v2.0.6/AlrdyAnimate.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/ben-alrdy/AlrdyAnimate@master/docs/v2.1.0/AlrdyAnimate.js"></script>
 <script src="https://cdn.jsdelivr.net/gh/ben-alrdy/AlrdyAnimate@latest/docs/AlrdyAnimate.js"></script>
 
 
@@ -133,12 +133,12 @@ Here's a complete example using AlrdyAnimate with custom options and GSAP animat
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AlrdyAnimate Example</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/ben-alrdy/AlrdyAnimate@master/docs/v2.0.0/AlrdyAnimate.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/ben-alrdy/AlrdyAnimate@latest/docs/AlrdyAnimate.css">
 </head>
 <body>
-  <div aa-animate="textRotateUp" aa-duration="1.5s" aa-delay="0.3s" aa-split="words" aa-stagger="0.05">Your content here</div>
+  <div aa-animate="text-slide-up" aa-duration="1.5s" aa-delay="0.3s" aa-split="words.clip" aa-stagger="0.05">Your content here</div>
 
-  <script src="https://cdn.jsdelivr.net/gh/ben-alrdy/AlrdyAnimate@master/docs/v2.0.0/AlrdyAnimate.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/ben-alrdy/AlrdyAnimate@latest/docs/AlrdyAnimate.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', function() {
       AlrdyAnimate.init({
@@ -206,9 +206,7 @@ AlrdyAnimate includes a variety of 3D animations (via `aa-animate`) that require
 
 ## Text Animations
 
-AlrdyAnimate includes a variety of text animations (via `aa-animate`) that need to be paired with `aa-split` to work. There are 3 split types: `lines`, `words`, `chars`. Each can be optionally paired with `clip` to create a clipping effect during the animation, e.g. `aa-split="words.clip"`.
-
-For the cascade animations, `aa-split` needs to be either `words` or `words.clip`.
+AlrdyAnimate includes a variety of text animations (via `aa-animate`) that need to be paired with `aa-split` to work. There are 3 split types: `lines`, `words`, `chars` or `lines&words` (i.e. both lines and words will be animated simultaneously). Each can be optionally paired with `clip` to create a clipping effect during the animation, e.g. `aa-split="words.clip"`.
 
 You can also use `aa-scroll` to make the animation scroll-driven. There are two options: `aa-scroll="snap"` and `aa-scroll="smooth"`.
 
@@ -219,8 +217,6 @@ You can also use `aa-scroll` to make the animation scroll-driven. There are two 
 - `text-slide-down`: Slides the text down from the top.
 - `text-tilt-up`: Slides and rotates the text up from the bottom.
 - `text-tilt-down`: Slides and rotates the text down from the top.
-- `text-cascade-up`: Cascades the text up from the bottom; both lines and words appear sequentially. Requires `aa-split="words"` or `aa-split="words.clip"`.
-- `text-cascade-down`: Cascades the text down from the top; both lines and words appear sequentially. Requires `aa-split="words"` or `aa-split="words.clip"`.
 - `text-rotate-soft`: Rotates the text softly around the X axis. Best works with `aa-split="lines"` or `aa-split="lines.clip"`.
 - `text-fade`: Fades the text in, starts with 30% opacity.
 - `text-appear`: Fades the text in, starts with 0% opacity.
