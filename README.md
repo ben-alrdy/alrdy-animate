@@ -23,8 +23,8 @@ You can include AlrdyAnimate in your project using either CDN or npm.
 <script src="https://cdn.jsdelivr.net/gh/ben-alrdy/alrdy-animate@latest/cdn/AlrdyAnimate.js"></script>
 
 <!-- Or specific version -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/ben-alrdy/alrdy-animate@master/cdn/AlrdyAnimate.css">
-<script src="https://cdn.jsdelivr.net/gh/ben-alrdy/alrdy-animate@master/cdn/AlrdyAnimate.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/ben-alrdy/alrdy-animate@2.1.3/cdn/v2.1.3/AlrdyAnimate.css">
+<script src="https://cdn.jsdelivr.net/gh/ben-alrdy/alrdy-animate@2.1.3/cdn/v2.1.3/AlrdyAnimate.js"></script>
 
 <script>
   document.addEventListener('DOMContentLoaded', function() {
@@ -149,12 +149,12 @@ Here's a complete example using AlrdyAnimate with custom options and GSAP animat
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AlrdyAnimate Example</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/ben-alrdy/AlrdyAnimate@latest/docs/AlrdyAnimate.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/ben-alrdy/alrdy-animate@latest/cdn/AlrdyAnimate.css">
 </head>
 <body>
   <div aa-animate="text-slide-up" aa-duration="1.5s" aa-delay="0.3s" aa-split="words.clip" aa-stagger="0.05">Your content here</div>
 
-  <script src="https://cdn.jsdelivr.net/gh/ben-alrdy/AlrdyAnimate@latest/docs/AlrdyAnimate.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/ben-alrdy/alrdy-animate@latest/cdn/AlrdyAnimate.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', function() {
       AlrdyAnimate.init({

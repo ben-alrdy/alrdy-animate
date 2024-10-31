@@ -22,7 +22,7 @@ npm whoami  # Should show your username
 
 ### 1. Local Development
 ```bash
-# Start development server with hot reload
+# Start development server with hot reload, i.e. changes are reflected immediately locally (no need to run build)
 npm run dev
 
 # Build for testing
@@ -52,9 +52,9 @@ npm version major  # Breaking changes (2.1.2 -> 3.0.0)
 This automatically:
 - Updates version in package.json
 - Creates new build
-- Updates CDN files
+- Updates CDN files (accessible via jsdelivr.net through GitHub)
 - Creates git commit and tag
-- Updates 'latest' tag
+- Updates 'latest' tag on GitHub
 - Pushes to GitHub
 - Publishes to npm
 
@@ -79,16 +79,17 @@ The build process maintains this structure:
 │   ├── AlrdyAnimate.js
 │   ├── AlrdyAnimate.css
 │   └── chunks/
-└── latest/                    # Always points to newest version
-    └── ...
+├── AlrdyAnimate.js           # Latest version
+├── AlrdyAnimate.css
+└── chunks/
 ```
 
 ## CDN Usage
 
 ### Latest Version
 ```html
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/ben-alrdy/alrdy-animate@latest/cdn/latest/AlrdyAnimate.css">
-<script src="https://cdn.jsdelivr.net/gh/ben-alrdy/alrdy-animate@latest/cdn/latest/AlrdyAnimate.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/ben-alrdy/alrdy-animate@latest/cdn/AlrdyAnimate.css">
+<script src="https://cdn.jsdelivr.net/gh/ben-alrdy/alrdy-animate@latest/cdn/AlrdyAnimate.js"></script>
 ```
 
 ### Specific Version
