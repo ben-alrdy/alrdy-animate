@@ -6,6 +6,20 @@ This document explains the automated deployment process for AlrdyAnimate, includ
 
 ### Prerequisites
 1. npm account (create at npmjs.com)
+1.1 On NPM, create a granular token with read/write permissions and add it to your `.npmrc` file:
+
+Either manually edit `~/.npmrc`:
+```bash
+# Add this line to ~/.npmrc
+//registry.npmjs.org/:_authToken=<your-token>
+```
+
+Or use npm config command:
+```bash
+npm config set //registry.npmjs.org/:_authToken=<your-token>
+```
+
+Note: The token needs "Read and write packages" and "Maintain packages" permissions.
 2. GitHub repository access
 3. Local development environment
 
@@ -36,7 +50,30 @@ npm run build
 
 # Create local package for testing
 npm pack
+
+# This creates alrdy-animate-2.1.3.tgz
+# You can verify the contents or test it locally:
+tar -tf alrdy-animate-2.1.3.tgz  # List contents
+# OR
+npm install ../path/to/alrdy-animate-2.1.3.tgz  # Test in another project
 ```
+
+### 3. Committing Changes
+```bash
+# Check what needs to be committed
+git status
+
+# Add all changes
+git add .
+
+# Commit changes
+git commit -m "Your descriptive commit message"
+
+# Push changes to GitHub
+git push origin master
+```
+
+Note: Always commit your changes before running `npm version patch/minor/major`. The version command will fail if you have uncommitted changes.
 
 ## Release Process
 
@@ -71,7 +108,7 @@ The process uses these npm scripts:
 }
 ```
 
-### 3. CDN Structure
+### 3. CDN Folder Structure
 The build process maintains this structure:
 ```
 /cdn
