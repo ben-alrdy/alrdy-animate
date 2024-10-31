@@ -13,19 +13,18 @@ AlrdyAnimate is a lightweight JavaScript library for adding scroll-triggered ani
 
 ## Installation
 
-You can include AlrdyAnimate in your project by using a CDN or by bundling it with your build process.
+You can include AlrdyAnimate in your project using either CDN or npm.
 
 ### Using CDN
 
 ```html
-<!-- Include the AlrdyAnimate CSS, first link is a stable version, second link is the latest version -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/ben-alrdy/AlrdyAnimate@master/docs/v2.1.0/AlrdyAnimate.css">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/ben-alrdy/AlrdyAnimate@latest/docs/AlrdyAnimate.css">
+<!-- Latest version (recommended) -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/ben-alrdy/alrdy-animate@latest/cdn/AlrdyAnimate.css">
+<script src="https://cdn.jsdelivr.net/gh/ben-alrdy/alrdy-animate@latest/cdn/AlrdyAnimate.js"></script>
 
-<!-- Include the AlrdyAnimate JS, first link is a stable version, second link is the latest version-->
-<script src="https://cdn.jsdelivr.net/gh/ben-alrdy/AlrdyAnimate@master/docs/v2.1.0/AlrdyAnimate.js"></script>
-<script src="https://cdn.jsdelivr.net/gh/ben-alrdy/AlrdyAnimate@latest/docs/AlrdyAnimate.js"></script>
-
+<!-- Or specific version -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/ben-alrdy/alrdy-animate@master/cdn/AlrdyAnimate.css">
+<script src="https://cdn.jsdelivr.net/gh/ben-alrdy/alrdy-animate@master/cdn/AlrdyAnimate.js"></script>
 
 <script>
   document.addEventListener('DOMContentLoaded', function() {
@@ -35,7 +34,9 @@ You can include AlrdyAnimate in your project by using a CDN or by bundling it wi
       viewportPercentage: 0.6,
       duration: '2s',
       delay: '0.5s',
-      useGSAP: true  // Enable GSAP animations
+      useGSAP: true  // Enable GSAP animations (will load additional chunks)
+    }).then(({ gsap, ScrollTrigger }) => {
+      console.log('GSAP and ScrollTrigger loaded successfully');
     });
   });
 </script>
@@ -43,29 +44,44 @@ You can include AlrdyAnimate in your project by using a CDN or by bundling it wi
 
 ### Using NPM
 
-Install the package:
-
+1. Install the package:
 ```bash
 npm install alrdy-animate
 ```
 
-Include it in your JavaScript file:
-
+2. Import and initialize:
 ```javascript
 import { AlrdyAnimate } from 'alrdy-animate';
 import 'alrdy-animate/dist/AlrdyAnimate.css';
 
-document.addEventListener('DOMContentLoaded', () => {
-  AlrdyAnimate.init({
-    easing: 'ease-in-out',
-    again: false,
-    viewportPercentage: 0.6,
-    duration: '2s',
-    delay: '0.5s',
-    useGSAP: true  // Enable GSAP animations
-  });
+document.addEventListener('DOMContentLoaded', async () => {
+  try {
+    const { gsap, ScrollTrigger } = await AlrdyAnimate.init({
+      easing: 'ease-in-out',
+      again: false,
+      viewportPercentage: 0.6,
+      duration: '2s',
+      delay: '0.5s',
+      useGSAP: true  // Enable GSAP animations (will load additional chunks)
+    });
+    
+    console.log('GSAP and ScrollTrigger loaded successfully');
+  } catch (error) {
+    console.error('Error initializing AlrdyAnimate:', error);
+  }
 });
 ```
+
+### Configuration Options
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `easing` | string | 'ease-in-out' | Animation easing function |
+| `again` | boolean | false | Whether animations should replay when scrolling up |
+| `viewportPercentage` | number | 0.6 | When element should start animating (0.0 - 1.0) |
+| `duration` | string | '2s' | Animation duration |
+| `delay` | string | '0.5s' | Animation delay |
+| `useGSAP` | boolean | false | Enable GSAP animations (loads additional chunks) |
 
 ## Usage
 

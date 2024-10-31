@@ -41,4 +41,7 @@ yarn-error.log*
 .env.*.local
 
 # Examples
-/examples 
+/examples
+
+# CDN files (they're for GitHub, not npm)
+/cdn

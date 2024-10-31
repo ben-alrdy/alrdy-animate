@@ -13,7 +13,11 @@
     "clean": "rimraf dist",
     "build": "npm run clean && webpack",
     "prepare": "npm run build",
-    "dev": "webpack --mode=development --watch"
+    "dev": "webpack --mode=development --watch",
+    "build:cdn": "npm run build && node scripts/deploy-cdn.js",
+    "prepublishOnly": "npm run build",
+    "version": "npm run build:cdn && git add cdn",
+    "postversion": "git tag -f latest && git push && git push --tags && git push origin latest -f && npm publish"
   },
   "keywords": [
     "animations",
@@ -40,6 +44,7 @@
     "@babel/preset-env": "^7.25.8",
     "babel-loader": "^9.2.1",
     "css-loader": "^7.1.2",
+    "fs-extra": "^11.2.0",
     "mini-css-extract-plugin": "^2.9.0",
     "rimraf": "^5.0.10",
     "sass": "^1.77.6",
