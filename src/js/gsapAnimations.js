@@ -37,8 +37,7 @@ export function stickyNav(gsap, ScrollTrigger, element, ease, duration) {
           gsap.to(element, { y: '-100%', duration: duration * 2, ease, overwrite: true });
         } else if (scrollDelta < 0 && !isVisible) {
           // Scrolling up, show the nav
-          isVisible = true;
-          gsap.to(element, { y: '0%', duration, ease, overwrite: true });
+          showNavAtTop();
         }
         lastScrollTop = currentScrollTop;
       }
@@ -57,7 +56,7 @@ const getScrollTriggerValues = (isMobile) => {
 };
 
 // Helper function to create the base timeline with all attributes from the element
-function baseTimeline(gsap, element, splitResult, splitType, duration, stagger, delay, ease, scroll, start, end) {
+function baseTimeline(element, splitResult, splitType, duration, stagger, delay, ease, scroll, start, end) {
   const tl = gsap.timeline();
 
   const baseProps = {
@@ -101,7 +100,7 @@ function baseTimeline(gsap, element, splitResult, splitType, duration, stagger, 
 function createTimeline(animationProps) {
   return (element, splitResult, splitType, duration, stagger, delay, ease, isMobile, scroll) => {
     const { start, end } = getScrollTriggerValues(isMobile);
-    const { tl, baseProps, animationTarget } = baseTimeline(gsap, element, splitResult, splitType, duration, stagger, delay, ease, scroll, start, end);
+    const { tl, baseProps, animationTarget } = baseTimeline(element, splitResult, splitType, duration, stagger, delay, ease, scroll, start, end);
 
     // Check if this is a fade animation (opacity is defined and greater than 0)
     const isFadeAnimation = 'opacity' in animationProps && animationProps.opacity > 0;
