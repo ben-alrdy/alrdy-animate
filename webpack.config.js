@@ -7,8 +7,14 @@ module.exports = {
   output: {
     filename: 'AlrdyAnimate.js',
     path: path.resolve(__dirname, 'dist'),
-    // Add this line for dynamic imports
-    chunkFilename: '[name].chunk.js'
+    clean: true,
+    library: {
+      name: 'AlrdyAnimate',
+      type: 'umd',
+      export: 'AlrdyAnimate',
+    },
+    globalObject: 'this',
+    chunkFilename: 'chunks/[name].js'
   },
   devtool: false, //'source-map' or false in production
   module: {
@@ -21,7 +27,6 @@ module.exports = {
           'sass-loader'
         ]
       },
-      // Add this rule for JavaScript files
       {
         test: /\.js$/,
         exclude: /node_modules/,
@@ -37,13 +42,33 @@ module.exports = {
   },
   plugins: [
     new MiniCssExtractPlugin({
-      filename: 'AlrdyAnimate.css' // Output CSS file name
+      filename: 'AlrdyAnimate.css'
     })
   ],
-  // Add this optimization configuration
   optimization: {
+    minimize: true,
     splitChunks: {
-      chunks: 'all',
-    },
+      chunks: 'async',
+      minSize: 20000,
+      cacheGroups: {
+        gsapCore: {
+          test: /[\\/]node_modules[\\/]gsap[\\/]/,
+          name: 'gsap-core',
+          chunks: 'async',
+          priority: 20,
+          enforce: true
+        },
+        animations: {
+          test: /[\\/](gsapBundle|gsapAnimations|textSplitter)[\\/]/,
+          name: 'gsap-animations',
+          chunks: 'async',
+          priority: 10,
+          enforce: true
+        }
+      }
+    }
   },
+  performance: {
+    hints: false
+  }
 };

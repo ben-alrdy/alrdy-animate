@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AlrdyAnimate Test</title>
-    <link rel="stylesheet" href="./AlrdyAnimate.css">
+    <link rel="stylesheet" href="dist/AlrdyAnimate.css">
     <style>
         :root {
             --primary-color: #625df5;
@@ -415,11 +415,94 @@
     }
   }
 
+  .button-wrapper {
+  position: relative;
+  display: inline-flex;
+  filter: url(#buttonFilter);
+}
+
+.liquid-button {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+.button {
+  position: relative;
+  background: #000;
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 5rem;
+  font-size: 1.125rem;
+  line-height: 1.2;  /* Explicitly set line-height */
+  font-weight: 500;
+  margin-right: -0.75rem; /* Pull circle closer to button */
+}
+
+.circle-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #000;
+  color: white;
+  /* Calculate: padding (0.75rem * 2) + (font-size * line-height) */
+  width: calc(0.75rem * 2 + 1.125rem * 1.2);
+  height: calc(0.75rem * 2 + 1.125rem * 1.2);
+  border-radius: 50%;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.arrow {
+  width: 0.875rem;
+  height: 0.875rem;
+  fill: currentColor;
+}
+
+/* Hover Effects */
+.liquid-button:hover .circle-wrapper {
+  transform: translateX(1.25rem) rotate(45deg);
+}
+
   </style>
 </head>
 
 <body>
     <div class="anchor" aa-anchor="#trigger-circle" aa-transition="fade-right"></div>
+
+    <section>
+      <div class="container">
+        <div class="button-wrapper">
+          <!-- SVG Filter for the blur effect -->
+          <svg width="0" height="0">
+            <defs>
+              <filter id="buttonFilter">
+                <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="blur"/>
+                <feColorMatrix in="blur" mode="matrix" 
+                  values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 19 -9" 
+                  result="buttonFilter"/>
+                <feComposite in="SourceGraphic" in2="buttonFilter" operator="atop"/>
+                <feBlend in="SourceGraphic" in2="buttonFilter"/>
+              </filter>
+            </defs>
+          </svg>
+        
+          <!-- Button Component -->
+          <a href="#" class="liquid-button">
+            <div class="button">
+              <span>View our work</span>
+            </div>
+            <div class="circle-wrapper">
+          
+                <svg class="arrow" viewBox="0 0 384 512">
+                  <path d="M328 96h24v288h-48V177.9L81 401l-17 17-33.9-34 17-17 223-223H64V96h264z"/>
+                </svg>
+        
+            </div>
+          </a>
+        </div>
+      </div>
+  </section>
 
     <header>
         <nav aa-nav="sticky">
@@ -445,7 +528,7 @@
             <h1 class="headline" aa-animate="rotate-soft-3em" aa-duration="2.5" aa-easing="expo.out" aa-delay="0.5">
                 ThickPic
             </h1>
-            <p class="subheadline" aa-animate="text-fade" aa-split="words" aa-easing="power2.out" aa-delay="1" aa-duration="0.5">
+            <p class="subheadline" aa-animate="text-slide-down" aa-split="words" aa-stagger="0.1">
                 Easily record and share AI-powered video messages with your teammates and customers to supercharge
                 productivity
             </p>
@@ -506,9 +589,12 @@
         </section>
         <section>
             <div class="container">
-                <h2 aa-animate="text-fade" aa-scroll="smooth" aa-split="chars" aa-easing="power4" aa-stagger="0.1" aa-duration="2" aa-delay="0.5">
-                    This text can be one line text can be one line  line This text can be one line text can be one line 
+                <h2 aa-animate="text-rotate-soft" style="font-size: 10rem;" aa-split="lines" aa-stagger="0.3" aa-duration="1.2" aa-easing="circ.out">
+                    This text can be 
                 </h2>
+                <h2 aa-animate="rotate-soft-3em" >
+                  This text can be one line
+              </h2>
                 <div class="grid">
                     <div class="box"><span aa-animate="fade-up-back">Fade Up Back</span></div>
                     <div class="box"><span aa-animate="fade-down-back">Fade Down Back</span></div>
@@ -583,13 +669,16 @@
                     </div>
                 </div>
         </section>
+
+
+        
     </main>
 
 
      <!-- Include the AlrdyAnimate JS -->
-    <script src="./AlrdyAnimate.js"></script>
+    <script src="dist/AlrdyAnimate.js"></script>
    
-    <!-- <script src="https://cdn.jsdelivr.net/gh/ben-alrdy/AlrdyAnimate@master/docs/v2.0.1/AlrdyAnimate.js"></script> -->
+  <!--   <script src="https://cdn.jsdelivr.net/gh/ben-alrdy/AlrdyAnimate@latest/docs/AlrdyAnimate.js"></script> -->
     
     <script>
       document.addEventListener('DOMContentLoaded', function() {
@@ -618,6 +707,31 @@
           console.log('typeof gsap:', typeof gsap);
           console.log('gsap.to function available:', typeof gsap?.to === 'function');
         }, 1000); // Check after 1 second
+
+        // Add drag functionality to circles
+        const circles = document.querySelectorAll('.circle');
+        circles.forEach(circle => {
+            let isDragging = false;
+            let startX, circleLeft;
+
+            circle.addEventListener('mousedown', e => {
+                isDragging = true;
+                startX = e.pageX - circle.offsetLeft;
+                circle.style.cursor = 'grabbing';
+            });
+
+            document.addEventListener('mousemove', e => {
+                if (!isDragging) return;
+                e.preventDefault();
+                const x = e.pageX - startX;
+                circle.style.transform = `translateX(${x}px)`;
+            });
+
+            document.addEventListener('mouseup', () => {
+                isDragging = false;
+                circle.style.cursor = 'grab';
+            });
+        });
       });
     </script>
   </body>

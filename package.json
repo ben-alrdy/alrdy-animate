@@ -1,26 +1,39 @@
 {
   "name": "alrdy-animate",
   "version": "2.1.2",
-  "description": "A library to handle animations on scroll.",
-  "main": "docs/v2.0.0/AlrdyAnimate.js",
+  "description": "A library to handle animations on scroll with GSAP integration.",
+  "main": "dist/AlrdyAnimate.js",
+  "files": [
+    "dist/AlrdyAnimate.js",
+    "dist/AlrdyAnimate.css",
+    "dist/AlrdyAnimate.js.LICENSE.txt",
+    "dist/chunks"
+  ],
   "scripts": {
-    "build": "webpack"
+    "clean": "rimraf dist",
+    "build": "npm run clean && webpack",
+    "prepare": "npm run build",
+    "dev": "webpack --mode=development --watch"
   },
   "keywords": [
     "animations",
     "scroll",
-    "library"
+    "library",
+    "gsap",
+    "animation-library",
+    "scroll-animations",
+    "web-animations"
   ],
   "author": "Benjamin Brühl",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/yourusername/alrdy-animate.git"
+    "url": "https://github.com/ben-alrdy/alrdy-animate.git"
   },
   "bugs": {
-    "url": "https://github.com/yourusername/alrdy-animate/issues"
+    "url": "https://github.com/ben-alrdy/alrdy-animate/issues"
   },
-  "homepage": "https://github.com/yourusername/alrdy-animate#readme",
+  "homepage": "https://github.com/ben-alrdy/alrdy-animate#readme",
   "devDependencies": {
     "@babel/core": "^7.25.8",
     "@babel/plugin-syntax-dynamic-import": "^7.8.3",
@@ -28,6 +41,7 @@
     "babel-loader": "^9.2.1",
     "css-loader": "^7.1.2",
     "mini-css-extract-plugin": "^2.9.0",
+    "rimraf": "^5.0.10",
     "sass": "^1.77.6",
     "sass-loader": "^16.0.2",
     "style-loader": "^4.0.0",
@@ -39,5 +53,8 @@
     "lodash.debounce": "^4.0.8",
     "lodash.throttle": "^4.1.1",
     "split-type": "^0.3.4"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

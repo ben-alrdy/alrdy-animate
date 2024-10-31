@@ -42,7 +42,10 @@ async function init(options = {}) {
     window.addEventListener('load', async () => {
       if (settings.useGSAP) {
         try {
-          const importedModules = await import('./gsapBundle');
+          const importedModules = await import(
+            /* webpackChunkName: "gsap-animations" */ 
+            './gsapBundle'
+          );
 
           // Store instances and make them globally available
           gsap = importedModules.gsap;
@@ -309,7 +312,10 @@ const AlrdyAnimate = {
   handleLazyLoadedImages
 };
 
+// Export as a named export
 export { AlrdyAnimate };
 
-// Attach to global namespace
-window.AlrdyAnimate = AlrdyAnimate;
+// Also attach to window for direct browser usage
+if (typeof window !== 'undefined') {
+  window.AlrdyAnimate = AlrdyAnimate;
+}
