@@ -84,18 +84,31 @@ The build process maintains this structure:
 └── chunks/
 ```
 
-## CDN Usage
+## CDN Usage via GitHub
 
-### Latest Version
+### Latest Version GitHub
 ```html
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/ben-alrdy/alrdy-animate@latest/cdn/AlrdyAnimate.css">
 <script src="https://cdn.jsdelivr.net/gh/ben-alrdy/alrdy-animate@latest/cdn/AlrdyAnimate.js"></script>
 ```
 
-### Specific Version
+### Specific Version GitHub
 ```html
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/ben-alrdy/alrdy-animate@2.1.3/cdn/v2.1.3/AlrdyAnimate.css">
 <script src="https://cdn.jsdelivr.net/gh/ben-alrdy/alrdy-animate@2.1.3/cdn/v2.1.3/AlrdyAnimate.js"></script>
+```
+
+## CDN Usage via UNPKG
+### Latest Version UNPKG
+```html
+<!-- Latest version (automatically uses newest) -->
+<link rel="stylesheet" href="https://unpkg.com/alrdy-animate/dist/AlrdyAnimate.css">
+<script src="https://unpkg.com/alrdy-animate/dist/AlrdyAnimate.js"></script>
+
+### Specific Version UNPKG
+```html
+<link rel="stylesheet" href="https://unpkg.com/alrdy-animate@2.1.3/dist/AlrdyAnimate.css">
+<script src="https://unpkg.com/alrdy-animate@2.1.3/dist/AlrdyAnimate.js"></script>
 ```
 
 ## Troubleshooting

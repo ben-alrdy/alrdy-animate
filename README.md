@@ -18,13 +18,24 @@ You can include AlrdyAnimate in your project using either CDN or npm.
 ### Using CDN
 
 ```html
-<!-- Latest version (recommended) -->
+
+<!-- From GitHub  -->
+ <!-- Latest version-->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/ben-alrdy/alrdy-animate@latest/cdn/AlrdyAnimate.css">
 <script src="https://cdn.jsdelivr.net/gh/ben-alrdy/alrdy-animate@latest/cdn/AlrdyAnimate.js"></script>
 
 <!-- Or specific version -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/ben-alrdy/alrdy-animate@2.1.3/cdn/v2.1.3/AlrdyAnimate.css">
 <script src="https://cdn.jsdelivr.net/gh/ben-alrdy/alrdy-animate@2.1.3/cdn/v2.1.3/AlrdyAnimate.js"></script>
+
+<!-- From UNPKG -->
+<!-- Latest version -->
+<link rel="stylesheet" href="https://unpkg.com/alrdy-animate/dist/AlrdyAnimate.css">
+<script src="https://unpkg.com/alrdy-animate/dist/AlrdyAnimate.js"></script>
+
+<!-- Or specific version -->
+<link rel="stylesheet" href="https://unpkg.com/alrdy-animate@2.1.3/dist/AlrdyAnimate.css">
+<script src="https://unpkg.com/alrdy-animate@2.1.3/dist/AlrdyAnimate.js"></script>
 
 <script>
   document.addEventListener('DOMContentLoaded', function() {
@@ -270,4 +281,6 @@ Contributions are welcome! Please fork the repository and submit pull requests f
 ## License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+
+
 
