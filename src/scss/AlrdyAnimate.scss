@@ -3,6 +3,11 @@
 @import 'easing';
 @import 'transitions';
 
+// Hide elements with aa-children initially
+[aa-children] {
+    opacity: 0;
+}
+
 // Hide the text animations initially
 [aa-animate^="text-"] {
     visibility: hidden;

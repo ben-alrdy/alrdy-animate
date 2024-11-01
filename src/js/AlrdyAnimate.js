@@ -23,7 +23,7 @@ const defaultOptions = {
 async function init(options = {}) {
   settings = { ...defaultOptions, ...options };
   allAnimatedElements = document.querySelectorAll(
-    "[aa-animate], [aa-transition]"
+    "[aa-animate], [aa-transition], [aa-children]"
   );
   isMobile = window.innerWidth < 768;
 
@@ -120,7 +120,54 @@ function setupResizeHandler(importedModules) {
 
 // Setup animations for elements
 function setupAnimations(elements, settings, isMobile, animations = null, splitText = null) {
+  // First, process parent elements with aa-children attribute
   elements.forEach((element) => {
+    if (element.hasAttribute("aa-children")) {
+      const children = Array.from(element.children);
+      const parentDelay = element.hasAttribute("aa-delay") ? parseFloat(element.getAttribute("aa-delay")) : settings.delay;
+      const stagger = element.hasAttribute("aa-stagger") ? parseFloat(element.getAttribute("aa-stagger")) : 0;
+      const animationType = element.getAttribute("aa-children"); // Get the animation type
+      
+      // Copy relevant attributes from parent to children
+      children.forEach((child, index) => {
+
+        console.log('Setting animation type:', animationType);
+        // Skip if child already has animation attributes
+        if (child.hasAttribute("aa-animate") || child.hasAttribute("aa-transition")) {
+          return;
+        }
+        
+
+        // Set the animation type from aa-children as aa-animate
+        if (animationType && animationType !== "true") {
+          
+          child.setAttribute("aa-animate", animationType);
+        }
+
+        // Copy all aa-* attributes except aa-children and aa-stagger
+        Array.from(element.attributes)
+          .filter(attr => attr.name.startsWith('aa-') && 
+                         attr.name !== 'aa-children' && 
+                         attr.name !== 'aa-stagger' &&
+                         attr.name !== 'aa-delay')
+          .forEach(attr => {
+            child.setAttribute(attr.name, attr.value);
+          });
+
+        // Calculate and set staggered delay
+        const childDelay = parentDelay + (index * stagger);
+        child.setAttribute("aa-delay", childDelay.toString());
+      });
+
+      // Make parent visible after processing children
+      element.style.opacity = '1';
+      
+      // Process the children as animated elements
+      setupAnimations(children, settings, isMobile, animations, splitText);
+      return; // Skip processing the parent element
+    }
+
+    // Original setupAnimations logic for non-parent elements
     const duration = element.hasAttribute("aa-duration") ? parseFloat(element.getAttribute("aa-duration")) : settings.duration;
     const delay = element.hasAttribute("aa-delay") ? parseFloat(element.getAttribute("aa-delay")) : settings.delay;
     const delayMobile = element.hasAttribute("aa-delay-mobile") ? parseFloat(element.getAttribute("aa-delay-mobile")) : null;

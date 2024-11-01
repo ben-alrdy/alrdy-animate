@@ -133,6 +133,7 @@ AlrdyAnimate.init({
 ### Element Attributes
 
 - **aa-animate**: The animation type to apply. Example: `aa-animate="fade-up-slow"`.
+- **aa-children**: Accepts same values as `aa-animate`, but applies animation to all children if set. Use in conjunction with `aa-stagger` to set a staggered animation and `aa-delay` to set the starting point for all children. Example: `aa-children="fade-up-slow"`.
 - **aa-transition**: Similar to `aa-animate` but for transition effects. Example: `aa-transition="fade"`.
 - **aa-easing**: Overwrites the global easing function for this element. Example: `aa-easing="ease-in-out"`.
 - **aa-duration**: The animation duration for this element, in seconds. Example: `aa-duration="2"`.
