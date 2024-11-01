@@ -469,7 +469,7 @@
 </head>
 
 <body>
-    <div class="anchor" aa-anchor="#trigger-circle" aa-transition="fade-right"></div>
+    <div class="anchor" aa-anchor="#trigger-circle" aa-animate="fade-right"></div>
 
     <section>
       <div class="container">
@@ -569,7 +569,7 @@
                       <h2 class="heading-style-h2 in-view" aa-animate="text-tilt-up" aa-split="lines.clip"
                         style="--animation-duration: 1s;">Medium length section heading goes here</h2>
                       <div class="spacer-small"></div>
-                      <p aa-transition="fade" class="text-size-medium in-view" style="--animation-duration: 1s;">Lorem ipsum
+                      <p aa-animate="fade" class="text-size-medium in-view" style="--animation-duration: 1s;">Lorem ipsum
                         dolor sit amet, consectetur adipiscing elit. Suspendisse varius enim in eros elementum tristique. Duis
                         cursus, mi quis viverra ornare, eros dolor interdum nulla, ut commodo diam libero vitae erat.</p>
                       <div class="spacer-medium"></div>
@@ -596,58 +596,58 @@
                 <h2 aa-animate="rotate-soft-3em" >
                   This text can be one line
               </h2>
-                <div class="grid" aa-children="fade-up-back" aa-delay="1" aa-duration="1.5" aa-easing="power2.out" aa-stagger="0.2">
+                <div class="grid" aa-children="appear-up" aa-delay="1" aa-duration="1.5" aa-easing="power2.out" aa-stagger="0.2">
                   <div class="box"></div>
                   <div class="box"></div>
                   <div class="box"></div>
                 </div>
                 <div class="grid">
-                    <div class="box"><span aa-animate="fade-up-back">Fade Up Back</span></div>
-                    <div class="box"><span aa-animate="fade-down-back">Fade Down Back</span></div>
-                    <div class="box"><span aa-animate="fade-left-back">Fade Left Back</span></div>
-                    <div class="box"><span aa-animate="fade-right-back">Fade Right Back</span></div>
-                    <div class="box"><span aa-transition="fade" aa-duration="1.5">Fade</span></div>
-                    <div class="box"><span aa-transition="fade-up" aa-easing="back.out">Fade Up</span></div>
-                    <div class="box"><span aa-transition="fade-down">Fade Down</span></div>
-                    <div class="box"><span aa-transition="fade-left">Fade Left</span></div>
-                    <div class="box"><span aa-transition="fade-right">Fade Right</span></div>
-                    <div class="box"><span aa-transition="fade-up-left">Fade Up Left</span></div>
-                    <div class="box"><span aa-transition="fade-up-right">Fade Up Right</span></div>
-                    <div class="box"><span aa-transition="fade-down-left">Fade Down Left</span></div>
-                    <div class="box"><span aa-transition="fade-down-right">Fade Down Right</span></div>
+                    <div class="box"><span aa-animate="appear-up">Fade Up Back</span></div>
+                    <div class="box"><span aa-animate="appear-down">Fade Down Back</span></div>
+                    <div class="box"><span aa-animate="appear-left">Fade Left Back</span></div>
+                    <div class="box"><span aa-animate="appear-right">Fade Right Back</span></div>
+                    <div class="box"><span aa-animate="fade" aa-duration="1.5">Fade</span></div>
+                    <div class="box"><span aa-animate="fade-up" aa-easing="back.out">Fade Up</span></div>
+                    <div class="box"><span aa-animate="fade-down">Fade Down</span></div>
+                    <div class="box"><span aa-animate="fade-left">Fade Left</span></div>
+                    <div class="box"><span aa-animate="fade-right">Fade Right</span></div>
+                    <div class="box"><span aa-animate="fade-up-left">Fade Up Left</span></div>
+                    <div class="box"><span aa-animate="fade-up-right">Fade Up Right</span></div>
+                    <div class="box"><span aa-animate="fade-down-left">Fade Down Left</span></div>
+                    <div class="box"><span aa-animate="fade-down-right">Fade Down Right</span></div>
         
                     <!-- Zoom animations -->
-                    <div class="box"><span aa-transition="zoom-in">Zoom In</span></div>
-                    <div class="box"><span aa-transition="zoom-in-up">Zoom In Up</span></div>
-                    <div class="box"><span aa-transition="zoom-in-down">Zoom In Down</span></div>
-                    <div class="box"><span aa-transition="zoom-in-left">Zoom In Left</span></div>
-                    <div class="box"><span aa-transition="zoom-in-right">Zoom In Right</span></div>
-                    <div class="box"><span aa-transition="zoom-out">Zoom Out</span></div>
-                    <div class="box"><span aa-transition="zoom-out-up">Zoom Out Up</span></div>
-                    <div class="box"><span aa-transition="zoom-out-down">Zoom Out Down</span></div>
-                    <div class="box"><span aa-transition="zoom-out-left">Zoom Out Left</span></div>
-                    <div class="box"><span aa-transition="zoom-out-right">Zoom Out Right</span></div>
+                    <div class="box"><span aa-animate="zoom-in">Zoom In</span></div>
+                    <div class="box"><span aa-animate="zoom-in-up">Zoom In Up</span></div>
+                    <div class="box"><span aa-animate="zoom-in-down">Zoom In Down</span></div>
+                    <div class="box"><span aa-animate="zoom-in-left">Zoom In Left</span></div>
+                    <div class="box"><span aa-animate="zoom-in-right">Zoom In Right</span></div>
+                    <div class="box"><span aa-animate="zoom-out">Zoom Out</span></div>
+                    <div class="box"><span aa-animate="zoom-out-up">Zoom Out Up</span></div>
+                    <div class="box"><span aa-animate="zoom-out-down">Zoom Out Down</span></div>
+                    <div class="box"><span aa-animate="zoom-out-left">Zoom Out Left</span></div>
+                    <div class="box"><span aa-animate="zoom-out-right">Zoom Out Right</span></div>
         
                     <!-- Slide animations -->
-                    <div class="box"><span aa-transition="slide-up">Slide Up</span></div>
-                    <div class="box"><span aa-transition="slide-down">Slide Down</span></div>
-                    <div class="box"><span aa-transition="slide-left">Slide Left</span></div>
-                    <div class="box"><span aa-transition="slide-right">Slide Right</span></div>
+                    <div class="box"><span aa-animate="slide-up">Slide Up</span></div>
+                    <div class="box"><span aa-animate="slide-down">Slide Down</span></div>
+                    <div class="box"><span aa-animate="slide-left">Slide Left</span></div>
+                    <div class="box"><span aa-animate="slide-right">Slide Right</span></div>
         
                     <!-- Flip animations -->
-                    <div class="box"><span aa-transition="flip-left">Flip Left</span></div>
-                    <div class="box"><span aa-transition="flip-right">Flip Right</span></div>
-                    <div class="box"><span aa-transition="flip-up">Flip Up</span></div>
-                    <div class="box"><span aa-transition="flip-down">Flip Down</span></div>
+                    <div class="box"><span aa-animate="flip-left">Flip Left</span></div>
+                    <div class="box"><span aa-animate="flip-right">Flip Right</span></div>
+                    <div class="box"><span aa-animate="flip-up">Flip Up</span></div>
+                    <div class="box"><span aa-animate="flip-down">Flip Down</span></div>
         
                     <!-- Slide rotation animations -->
-                    <div class="box" id="trigger-circle"><span aa-transition="slide-rotate-bottom-right" aa-easing="ease-out-cubic">Slide Rotate
+                    <div class="box" id="trigger-circle"><span aa-animate="slide-rotate-bottom-right" aa-easing="ease-out-cubic">Slide Rotate
                             Bottom Right</span></div>
-                    <div class="box"><span aa-transition="slide-rotate-bottom-left" aa-easing="ease-out-cubic">Slide Rotate
+                    <div class="box"><span aa-animate="slide-rotate-bottom-left" aa-easing="ease-out-cubic">Slide Rotate
                             Bottom Left</span></div>
-                    <div class="box"><span aa-transition="slide-rotate-top-right" aa-easing="ease-out-cubic">Slide Rotate Top
+                    <div class="box"><span aa-animate="slide-rotate-top-right" aa-easing="ease-out-cubic">Slide Rotate Top
                             Right</span></div>
-                    <div class="box"><span aa-transition="slide-rotate-top-left" aa-easing="ease-out-cubic">Slide Rotate Top
+                    <div class="box"><span aa-animate="slide-rotate-top-left" aa-easing="ease-out-cubic">Slide Rotate Top
                             Left</span></div>
         
                     <!-- Blurred slide animations -->
@@ -656,20 +656,20 @@
                     <div class="box"><span aa-animate="slide-in-blurred-left">Slide In Blurred Left</span></div>
                     <div class="box"><span aa-animate="slide-in-blurred-right">Slide In Blurred Right</span></div>
         
-                    <div class="box" style="height: 500px;" aa-transition="pseudo-reveal-down" aa-color-initial="rgba(255,255,255,1)" aa-easing="ease-out-expo" aa-delay="2">
+                    <div class="box" style="height: 500px;" aa-animate="pseudo-reveal-down" aa-color-initial="rgba(255,255,255,1)" aa-easing="ease-out-expo" aa-delay="2">
                         <img src="https://picsum.photos/800/600" alt="Image" style="width: 100%; height: 100%; object-fit: cover;">
                     </div>
                     <div class="box"
                         style="height: 500px; background-image: url('https://picsum.photos/800/601'); background-size: cover; background-position: center;"
-                        aa-transition="pseudo-reveal-up" aa-color-initial="rgba(0,0,0,0.5)"
+                        aa-animate="pseudo-reveal-up" aa-color-initial="rgba(0,0,0,0.5)"
                         aa-color-final="rgba(255,255,255,0.5)" aa-easing="ease-out-expo">
                         <div>slide up</div>
                     </div>
-                    <div class="box" style="height: 500px;" aa-transition="pseudo-bg-slide-right" aa-color-initial="#f1f0ff"
+                    <div class="box" style="height: 500px;" aa-animate="pseudo-bg-slide-right" aa-color-initial="#f1f0ff"
                         aa-color-final="#fff" aa-easing="ease-out-expo">
                         <div>slide right</div>
                     </div>
-                    <div class="box" style="height: 500px;" aa-transition="pseudo-bg-slide-left" aa-color-initial="#f1f0ff"
+                    <div class="box" style="height: 500px;" aa-animate="pseudo-bg-slide-left" aa-color-initial="#f1f0ff"
                         aa-color-final="#fff" aa-easing="ease-out-expo">
                         <div>slide left</div>
                     </div>

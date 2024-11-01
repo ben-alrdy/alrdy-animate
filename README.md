@@ -98,7 +98,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 ### HTML
 
-To use AlrdyAnimate, add the `aa-animate` or `aa-transition` attribute to the elements you want to animate. You can also add optional attributes to customize the animation for individual elements.
+To use AlrdyAnimate, add the `aa-animate` attribute to the elements you want to animate. You can also add optional attributes to customize the animation for individual elements.
 
 ```html
 <div aa-animate="fade-up" aa-duration="1.5s" aa-delay="0.3s" aa-split="words" aa-stagger="0.05">Your content here</div>
@@ -134,7 +134,6 @@ AlrdyAnimate.init({
 
 - **aa-animate**: The animation type to apply. Example: `aa-animate="fade-up-slow"`.
 - **aa-children**: Accepts same values as `aa-animate`, but applies animation to all children if set. Use in conjunction with `aa-stagger` to set a staggered animation and `aa-delay` to set the starting point for all children. Example: `aa-children="fade-up-slow"`.
-- **aa-transition**: Similar to `aa-animate` but for transition effects. Example: `aa-transition="fade"`.
 - **aa-easing**: Overwrites the global easing function for this element. Example: `aa-easing="ease-in-out"`.
 - **aa-duration**: The animation duration for this element, in seconds. Example: `aa-duration="2"`.
 - **aa-delay**: The animation delay for this element, in seconds. Example: `aa-delay="0.5"`.

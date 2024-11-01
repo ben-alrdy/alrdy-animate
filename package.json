@@ -32,7 +32,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/ben-alrdy/alrdy-animate.git"
+    "url": "git+https://github.com/ben-alrdy/alrdy-animate.git"
   },
   "bugs": {
     "url": "https://github.com/ben-alrdy/alrdy-animate/issues"

@@ -5,9 +5,9 @@
   --animation-delay: 0s;
 }
 
-/*FADE SLOW ANIMATIONS*/
+/*APPEAR WITH BACK BOUNCE ANIMATIONS*/
 
-[aa-animate^='fade'][aa-animate^='fade'] {
+[aa-animate^='appear'][aa-animate^='appear'] {
   opacity: 0;
 
   &.in-view {
@@ -15,23 +15,23 @@
   }
 }
 
-[aa-animate="fade-up-back"].in-view {
-  animation: fade-up-back var(--animation-duration) forwards;
+[aa-animate="appear-up"].in-view {
+  animation: appear-up var(--animation-duration) forwards;
 }
 
 
-[aa-animate="fade-down-back"].in-view {
-  animation: fade-down-back var(--animation-duration) forwards;
+[aa-animate="appear-down"].in-view {
+  animation: appear-down var(--animation-duration) forwards;
 }
 
 
-[aa-animate="fade-left-back"].in-view {
-  animation: fade-left-back var(--animation-duration) forwards;
+[aa-animate="appear-left"].in-view {
+  animation: appear-left var(--animation-duration) forwards;
 }
 
 
-[aa-animate="fade-right-back"].in-view {
-  animation: fade-right-back var(--animation-duration) forwards;
+[aa-animate="appear-right"].in-view {
+  animation: appear-right var(--animation-duration) forwards;
 }
 
 

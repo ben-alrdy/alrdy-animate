@@ -23,7 +23,7 @@ const defaultOptions = {
 async function init(options = {}) {
   settings = { ...defaultOptions, ...options };
   allAnimatedElements = document.querySelectorAll(
-    "[aa-animate], [aa-transition], [aa-children]"
+    "[aa-animate], [aa-children]"
   );
   isMobile = window.innerWidth < 768;
 
@@ -133,7 +133,7 @@ function setupAnimations(elements, settings, isMobile, animations = null, splitT
 
         console.log('Setting animation type:', animationType);
         // Skip if child already has animation attributes
-        if (child.hasAttribute("aa-animate") || child.hasAttribute("aa-transition")) {
+        if (child.hasAttribute("aa-animate")) {
           return;
         }
         

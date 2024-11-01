@@ -1,4 +1,4 @@
-@keyframes fade-up-back {
+@keyframes appear-up {
     0% {
       opacity: 0;
       transform: translateY(30px);
@@ -13,7 +13,7 @@
     }
   }
   
-  @keyframes fade-down-back {
+  @keyframes appear-down {
     0% {
       opacity: 0;
       transform: translateY(-30px);
@@ -28,7 +28,7 @@
     }
   }
   
-  @keyframes fade-left-back {
+  @keyframes appear-left {
     0% {
       opacity: 0;
       transform: translateX(-30px);
@@ -43,7 +43,7 @@
     }
   }
   
-  @keyframes fade-right-back {
+  @keyframes appear-right {
     0% {
       opacity: 0;
       transform: translateX(30px);

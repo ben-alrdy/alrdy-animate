@@ -59,12 +59,13 @@ module.exports = {
           enforce: true
         },
         animations: {
-          test: /[\\/](gsapBundle|gsapAnimations|textSplitter)[\\/]/,
+          test: /[\\/](gsapBundle|gsapAnimations|textSplitter)[\\/]|[\\/]node_modules[\\/]split-type[\\/]/,
           name: 'gsap-animations',
           chunks: 'async',
           priority: 10,
           enforce: true
-        }
+        },
+        defaultVendors: false
       }
     }
   },
