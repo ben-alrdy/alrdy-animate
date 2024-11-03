@@ -3,11 +3,20 @@
 
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { createAnimations, stickyNav } from './gsapAnimations';
+import { createScrollAnimations } from './gsapAnimations/scrollAnimations';
+import { createTextAnimations } from './gsapAnimations/textAnimations';
 import { splitText } from './textSplitter';
 
 gsap.registerPlugin(ScrollTrigger);
 
-const animations = createAnimations(gsap);
+const animations = {
+  ...createTextAnimations(gsap, ScrollTrigger),
+  ...createScrollAnimations(gsap, ScrollTrigger)
+};
 
-export { gsap, ScrollTrigger, animations, splitText, stickyNav };
+export { 
+  gsap, 
+  ScrollTrigger, 
+  animations,
+  splitText 
+};

@@ -1,5 +1,7 @@
 import styles from "../scss/AlrdyAnimate.scss";
 import debounce from 'lodash.debounce';
+import { setupResizeHandler } from './utils/resizeHandler';
+import { handleLazyLoadedImages } from './utils/lazyLoadHandler';
 
 // Define these variables in the module scope
 let gsap = null;
@@ -58,16 +60,16 @@ async function init(options = {}) {
           if (navElement) {
             const navEase = navElement.getAttribute('aa-easing');
             const navDuration = navElement.getAttribute('aa-duration');
-            importedModules.stickyNav(importedModules.gsap, importedModules.ScrollTrigger, navElement, navEase, navDuration);
+            importedModules.animations.stickyNav(navElement, navEase ?? 'back.inOut', navDuration ?? 0.4);
           }
 
           setupAnimations(allAnimatedElements, settings, isMobile, importedModules.animations, importedModules.splitText);
 
           // Set up resize handler
-          setupResizeHandler(importedModules);
+          setupResizeHandler(importedModules.ScrollTrigger, allAnimatedElements, settings, isMobile, importedModules, setupAnimations);
 
           // Handle lazy-loaded images
-          handleLazyLoadedImages();
+          handleLazyLoadedImages(ScrollTrigger);
 
           resolve({ gsap, ScrollTrigger });
         } catch (error) {
@@ -85,36 +87,6 @@ async function init(options = {}) {
         resolve({ gsap: null, ScrollTrigger: null });  // Resolve with null if not using GSAP
       }
     });
-  });
-}
-
-// function to handle resize logic
-function setupResizeHandler(importedModules) {
-  let prevWidth = window.innerWidth;
-
-  const debouncedResize = debounce(() => {
-    const currentWidth = window.innerWidth;
-    
-    if (currentWidth !== prevWidth) {
-      isMobile = currentWidth < 768;
-      // Refresh all ScrollTriggers
-      ScrollTrigger.refresh();
-      // Re-setup animations
-      setupAnimations(allAnimatedElements, settings, isMobile, importedModules.animations, importedModules.splitText);
-      
-      prevWidth = currentWidth;
-    }
-  }, 250);
-
-  window.addEventListener('resize', debouncedResize);
-
-  window.addEventListener('orientationchange', () => {
-    setTimeout(() => {
-      const currentWidth = window.innerWidth;
-      if (currentWidth !== prevWidth) {
-        debouncedResize();
-      }
-    }, 100);
   });
 }
 
@@ -323,33 +295,6 @@ function setupIntersectionObserver(element, anchorSelector, anchorElement, viewp
 
   addObserver.observe(anchorElement);
   removeObserver.observe(anchorElement);
-}
-
-function handleLazyLoadedImages() {
-  let needsRefresh = false;
-
-  const debouncedRefresh = debounce(() => {
-    if (ScrollTrigger && needsRefresh) {
-      ScrollTrigger.refresh();
-      needsRefresh = false; // Reset after refresh
-    }
-  }, 200);
-
-  const lazyImages = document.querySelectorAll('img[loading="lazy"]');
-
-  lazyImages.forEach((img) => {
-    if (!img.complete) {
-      img.addEventListener('load', () => {
-        needsRefresh = true;
-      }, { once: true });
-    }
-  });
-
-  ScrollTrigger.addEventListener('scrollEnd', () => {
-    if (needsRefresh) {
-      debouncedRefresh(); // Refresh when scrolling ends if needed
-    }
-  });
 }
 
 const AlrdyAnimate = {

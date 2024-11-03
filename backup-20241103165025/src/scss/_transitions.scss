@@ -1,0 +1,345 @@
+// Animations variables
+$aa-distance: 50px !default;
+
+:root {
+    --animation-duration: 1s;
+    --animation-delay: 0s;
+}
+
+@media screen {
+  html:not(.no-js) {
+    /**
+    * Fade animations:
+    * fade
+    * fade-up, fade-down, fade-left, fade-right
+    * fade-up-right, fade-up-left, fade-down-right, fade-down-left
+    */
+
+    [aa-animate^='fade'][aa-animate^='fade'] {
+      opacity: 0;
+      transition-property: opacity, transform;
+      transition-duration: var(--animation-duration); 
+      transition-delay: var(--animation-delay);       
+
+      &.in-view {
+        opacity: 1;
+        transform: none;
+      }
+    }
+
+    [aa-animate='fade-up'] {
+      transform: translate3d(0, $aa-distance, 0);
+    }
+
+    [aa-animate='fade-down'] {
+      transform: translate3d(0, -$aa-distance, 0);
+    }
+
+    [aa-animate='fade-right'] {
+      transform: translate3d(-$aa-distance, 0, 0);
+    }
+
+    [aa-animate='fade-left'] {
+      transform: translate3d($aa-distance, 0, 0);
+    }
+
+    [aa-animate='fade-up-right'] {
+      transform: translate3d(-$aa-distance, $aa-distance, 0);
+    }
+
+    [aa-animate='fade-up-left'] {
+      transform: translate3d($aa-distance, $aa-distance, 0);
+    }
+
+    [aa-animate='fade-down-right'] {
+      transform: translate3d(-$aa-distance, -$aa-distance, 0);
+    }
+
+    [aa-animate='fade-down-left'] {
+      transform: translate3d($aa-distance, -$aa-distance, 0);
+    }
+
+
+
+
+    /**
+    * Zoom animations:
+    * zoom-in, zoom-in-up, zoom-in-down, zoom-in-left, zoom-in-right
+    * zoom-out, zoom-out-up, zoom-out-down, zoom-out-left, zoom-out-right
+    */
+
+    [aa-animate^='zoom'][aa-animate^='zoom'] {
+      opacity: 0;
+      transition-property: opacity, transform;
+      transition-duration: var(--animation-duration); 
+      transition-delay: var(--animation-delay);  
+
+      &.in-view {
+        opacity: 1;
+        transform: translate3d(0, 0, 0) scale(1);
+      }
+    }
+
+    [aa-animate='zoom-in'] {
+      transform: scale(.6);
+    }
+
+    [aa-animate='zoom-in-up'] {
+      transform: translate3d(0, $aa-distance, 0) scale(.6);
+    }
+
+    [aa-animate='zoom-in-down'] {
+      transform: translate3d(0, -$aa-distance, 0) scale(.6);
+    }
+
+    [aa-animate='zoom-in-right'] {
+      transform: translate3d(-$aa-distance, 0, 0) scale(.6);
+    }
+
+    [aa-animate='zoom-in-left'] {
+      transform: translate3d($aa-distance, 0, 0) scale(.6);
+    }
+
+    [aa-animate='zoom-out'] {
+      transform: scale(1.2);
+    }
+
+    [aa-animate='zoom-out-up'] {
+      transform: translate3d(0, $aa-distance, 0) scale(1.2);
+    }
+
+    [aa-animate='zoom-out-down'] {
+      transform: translate3d(0, -$aa-distance, 0) scale(1.2);
+    }
+
+    [aa-animate='zoom-out-right'] {
+      transform: translate3d(-$aa-distance, 0, 0) scale(1.2);
+    }
+
+    [aa-animate='zoom-out-left'] {
+      transform: translate3d($aa-distance, 0, 0) scale(1.2);
+    }
+
+
+
+
+    /**
+    * Slide animations
+    */
+
+    [aa-animate^='slide'][aa-animate^='slide'] {
+      transition-property: transform;
+      visibility: hidden;
+      transition-duration: var(--animation-duration); 
+      transition-delay: var(--animation-delay);  
+
+      &.in-view {
+        visibility: visible;
+        transform: translate3d(0, 0, 0);
+      }
+    }
+
+    [aa-animate='slide-up'] {
+      transform: translate3d(0, 100%, 0);
+    }
+
+    [aa-animate='slide-down'] {
+      transform: translate3d(0, -100%, 0);
+    }
+
+    [aa-animate='slide-right'] {
+      transform: translate3d(-100%, 0, 0);
+    }
+
+    [aa-animate='slide-left'] {
+      transform: translate3d(100%, 0, 0);
+    }
+
+
+
+
+    /**
+    * Flip animations:
+    * flip-left, flip-right, flip-up, flip-down
+    */
+
+    [aa-animate^='flip'][aa-animate^='flip'] {
+      backface-visibility: hidden;
+      transition-property: transform;
+      transition-duration: var(--animation-duration); 
+      transition-delay: var(--animation-delay);  
+    }
+
+    [aa-animate='flip-left'] {
+      transform: perspective(2500px) rotateY(-100deg);
+      &.in-view {transform: perspective(2500px) rotateY(0);}
+    }
+
+    [aa-animate='flip-right'] {
+      transform: perspective(2500px) rotateY(100deg);
+      &.in-view {transform: perspective(2500px) rotateY(0);}
+    }
+
+    [aa-animate='flip-up'] {
+      transform: perspective(2500px) rotateX(-100deg);
+      &.in-view {transform: perspective(2500px) rotateX(0);}
+    }
+
+    [aa-animate='flip-down'] {
+      transform: perspective(2500px) rotateX(100deg);
+      &.in-view {transform: perspective(2500px) rotateX(0);}
+    }
+
+    /**
+    * Slide and Rotate animations
+    */
+
+    [aa-animate^='slide-rotate'][aa-animate^='slide-rotate'] {
+      transition-property: transform, opacity;
+      transition-duration: var(--animation-duration);
+      transition-delay: var(--animation-delay);
+      opacity: 0;
+
+      &.in-view {
+        transform: translate3d(0, 0, 0) rotate(0deg);
+        opacity: 1;
+      }
+    }
+
+    [aa-animate='slide-rotate-bottom-right'] {
+      transform: translate3d(-$aa-distance, $aa-distance, 0) rotate(-45deg);
+    }
+
+    [aa-animate='slide-rotate-bottom-left'] {
+      transform: translate3d($aa-distance, $aa-distance, 0) rotate(45deg);
+    }
+
+    [aa-animate='slide-rotate-top-right'] {
+      transform: translate3d(-$aa-distance, -$aa-distance, 0) rotate(45deg);
+    }
+
+    [aa-animate='slide-rotate-top-left'] {
+      transform: translate3d($aa-distance, -$aa-distance, 0) rotate(-45deg);
+    }
+
+
+    /*
+    PSEUDO BACKGROUND SLIDE TRANSITIONS
+    */
+
+    :root {
+      --animation-duration: 0.6s;
+      --animation-delay: 0.2s;
+      --background-color-initial: var(--background-color--background-page);
+      --background-color-final: var(--background-color--background-alternate);
+    }
+
+
+    [aa-animate^="pseudo-bg-slide"][aa-animate^="pseudo-bg-slide"] {
+      position: relative;
+      background: var(--background-color-initial);
+      overflow: hidden; // Hide overflow
+    }
+
+    // Ensure content stays above the pseudo-element
+    [aa-animate^="pseudo-bg-slide"][aa-animate^="pseudo-bg-slide"] > * {
+      position: relative;
+      z-index: 2;
+    }
+
+    [aa-animate^="pseudo-bg-slide"]::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: var(--background-color-final);
+      z-index: 1; // Place it behind the content but above the initial background
+      transition: transform var(--animation-duration);
+      transition-delay: var(--animation-delay);
+    }
+
+    [aa-animate="pseudo-bg-slide-down"]::before {
+      transform: translate3d(0, -100%, 0);
+    }
+    [aa-animate="pseudo-bg-slide-up"]::before {
+      transform: translate3d(0, 100%, 0);
+    }
+    [aa-animate="pseudo-bg-slide-right"]::before {
+      transform: translate3d(-100%, 0, 0);
+    }
+    [aa-animate="pseudo-bg-slide-left"]::before {
+      transform: translate3d(100%, 0, 0);
+    }
+
+    // Resets the transform to 0 when the animation is finished, showing the pseudo background
+    [aa-animate^="pseudo-bg-slide"].in-view::before {
+      transform: translate3d(0, 0, 0);
+    }
+
+
+    /*
+    PSEUDO BACKGROUND REVEAL TRANSITIONS
+    */
+
+    [aa-animate^="pseudo-reveal"][aa-animate^="pseudo-reveal"] {
+      position: relative;
+      background: var(--background-color-final);
+      overflow: hidden;
+    }
+
+    [aa-animate^="pseudo-reveal"][aa-animate^="pseudo-reveal"] > * {
+      position: relative;
+      z-index: 1;
+    }
+
+    [aa-animate^="pseudo-reveal"]::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: var(--background-color-initial);
+      z-index: 2;
+      transition: transform var(--animation-duration) var(--animation-delay);
+    }
+
+    [aa-animate^="pseudo-reveal"]::before {
+      transform: translate3d(0, 0, 0);
+    }
+
+    [aa-animate="pseudo-reveal-up"]::before {
+      transform-origin: top;
+      transform: scaleY(1);
+    }
+    [aa-animate="pseudo-reveal-up"].in-view::before {
+      transform: scaleY(0);
+    }
+
+    [aa-animate="pseudo-reveal-down"]::before {
+      transform-origin: bottom;
+      transform: scaleY(1);
+    }
+    [aa-animate="pseudo-reveal-down"].in-view::before {
+      transform: scaleY(0);
+    }
+
+    [aa-animate="pseudo-reveal-right"]::before {
+      transform-origin: right;
+      transform: scaleX(1);
+    }
+    [aa-animate="pseudo-reveal-right"].in-view::before {
+      transform: scaleX(0);
+    }
+
+    [aa-animate="pseudo-reveal-left"]::before {
+      transform-origin: left;
+      transform: scaleX(1);
+    }
+    [aa-animate="pseudo-reveal-left"].in-view::before {
+      transform: scaleX(0);
+    }
+  }
+}
