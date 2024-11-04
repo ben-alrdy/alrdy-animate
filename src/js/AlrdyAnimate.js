@@ -17,6 +17,7 @@ const defaultOptions = {
   again: true, // True = removes 'in-view' class when element is out of view towards the bottom
   viewportPercentage: 0.8, // Default percentage of the viewport height to trigger the animation
   useGSAP: false, // Use GSAP for animations
+  GSAPAnimations: ['scroll', 'draggable', 'text'], // Array of GSAP animations to use
   duration: 1, // 1 second
   delay: 0, // 0 seconds
   debug: false // Set to true to see GSAP debug info
@@ -155,7 +156,7 @@ function setupGSAPAnimations(element, elementSettings, initOptions, animations, 
         'text-appear': { fn: animations.textAppear,           defaults: { duration: 1, stagger: 0.08, ease: 'power2.inOut' } }
       };
 
-      // Get the animation configuration
+      // Get the animation configuration defined in the element settings
       const config = animationConfigs[animationType];
 
       if (config) {
