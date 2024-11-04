@@ -1,8 +1,8 @@
 import styles from "../scss/AlrdyAnimate.scss";
-import debounce from 'lodash.debounce';
 import { setupResizeHandler } from './utils/resizeHandler';
 import { handleLazyLoadedImages } from './utils/lazyLoadHandler';
 import { processChildren } from './utils/childrenHandler';
+import { getElementSettings, applyElementStyles } from './utils/elementAttributes';
 
 // Define these variables in the module scope
 let gsap = null;
@@ -38,9 +38,7 @@ async function init(options = {}) {
     return; // Exit the script as the fallback is applied
   }
 
-  // Set default values on body
-  document.body.style.setProperty("--aa-default-duration", `${settings.duration}s`);
-  document.body.style.setProperty("--aa-default-delay", `${settings.delay}s`);
+  // Set easing on the body element
   document.body.setAttribute("aa-easing", settings.easing);
 
   return new Promise((resolve) => { // Return a promise to handle asynchronous loading
@@ -55,6 +53,20 @@ async function init(options = {}) {
           // Store instances and make them globally available
           gsap = importedModules.gsap;
           ScrollTrigger = importedModules.ScrollTrigger;
+
+          // Double-check registration
+          if (!gsap.plugins?.ScrollTrigger) {
+            console.log('Registering ScrollTrigger plugin in AlrdyAnimate.js');
+            gsap.registerPlugin(ScrollTrigger);
+          }
+
+          // Verify registration
+          if (!gsap.plugins?.ScrollTrigger) {
+            console.error('ScrollTrigger registration failed in AlrdyAnimate.js');
+          } else {
+            console.log('ScrollTrigger registration confirmed in AlrdyAnimate.js');
+          }
+
           window.gsap = gsap;
           window.ScrollTrigger = ScrollTrigger;
 
@@ -95,47 +107,43 @@ async function init(options = {}) {
 
 // Setup animations for elements
 function setupAnimations(elements, settings, isMobile, animations = null, splitText = null) {
+  // First, process parent elements with aa-children attribute
   elements.forEach((element) => {
     if (element.hasAttribute("aa-children")) {
-      const children = processChildren(element);
+      // Use the new processChildren utility
+      const children = processChildren(element, settings);
       setupAnimations(children, settings, isMobile, animations, splitText);
-      return; // Skip processing the parent element
+      return;
     }
 
-    // Original setupAnimations logic for non-parent elements
-    const duration = element.hasAttribute("aa-duration") ? parseFloat(element.getAttribute("aa-duration")) : undefined;
-    const delay = element.hasAttribute("aa-delay") ? parseFloat(element.getAttribute("aa-delay")) : undefined;
-    const delayMobile = element.hasAttribute("aa-delay-mobile") ? parseFloat(element.getAttribute("aa-delay-mobile")) : null;
-    const colorInitial = element.getAttribute("aa-color-initial") || settings.colorInitial;
-    const colorFinal = element.getAttribute("aa-color-final") || settings.colorFinal;
-    const viewportPercentage = element.hasAttribute("aa-viewport") ? parseFloat(element.getAttribute("aa-viewport")) : settings.viewportPercentage;
-    const anchorSelector = element.getAttribute("aa-anchor");
-    const anchorElement = anchorSelector ? document.querySelector(anchorSelector) : element; //The 'anchorElement' will be observed, while the 'element' gets the in-view class; if there is no anchorSelector, the element itself is the anchor
-
-    // Set animation duration and delay based on attributes or init options
-    if (element.hasAttribute("aa-duration")) {
-      element.style.setProperty("--animation-duration", `${duration}s`);
-    }
-
-    // Set animation delay based on attributes, init options, and mobile settings
-    if (isMobile && delayMobile !== null) {
-      element.style.setProperty("--animation-delay", `${delayMobile}s`);
-    } else if (element.hasAttribute("aa-delay")) {
-      element.style.setProperty("--animation-delay", `${delay}s`);
-    }
-
-    // Set background colors based on attributes
-    if (colorInitial) {
-      element.style.setProperty("--background-color-initial", colorInitial);
-    }
-    if (colorFinal) {
-      element.style.setProperty("--background-color-final", colorFinal);
-    }
+    // Use the new elementAttributes utilities
+    applyElementStyles(element, settings, isMobile);
+    const elementSettings = getElementSettings(element, settings, isMobile);
+    
+    const anchorElement = elementSettings.anchorSelector ? 
+      document.querySelector(elementSettings.anchorSelector) : 
+      element;
 
     if (settings.useGSAP) {
-      setupGSAPAnimation(element, anchorSelector, anchorElement, viewportPercentage, delay, settings, animations, splitText, isMobile);
+      setupGSAPAnimation(
+        element, 
+        elementSettings.anchorSelector, 
+        anchorElement, 
+        elementSettings.viewportPercentage, 
+        elementSettings.delay, 
+        settings, 
+        animations, 
+        splitText, 
+        isMobile
+      );
     } else {
-      setupIntersectionObserver(element, anchorSelector, anchorElement, viewportPercentage, settings);
+      setupIntersectionObserver(
+        element, 
+        elementSettings.anchorSelector, 
+        anchorElement, 
+        elementSettings.viewportPercentage, 
+        settings
+      );
     }
   });
 }
@@ -263,8 +271,7 @@ function setupIntersectionObserver(element, anchorSelector, anchorElement, viewp
 const AlrdyAnimate = {
   init,
   getGSAP: () => gsap,
-  getScrollTrigger: () => ScrollTrigger,
-  handleLazyLoadedImages
+  getScrollTrigger: () => ScrollTrigger
 };
 
 // Export as a named export

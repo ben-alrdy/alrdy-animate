@@ -1,11 +1,6 @@
 // Animations variables
 $aa-distance: 50px !default;
 
-:root {
-    --animation-duration: 1s;
-    --animation-delay: 0s;
-}
-
 @media screen {
   html:not(.no-js) {
     /**
@@ -225,14 +220,8 @@ $aa-distance: 50px !default;
 
     /*
     PSEUDO BACKGROUND SLIDE TRANSITIONS
+    Good defaults: duration: 0.6s, delay: 0.2s
     */
-
-    :root {
-      --animation-duration: 0.6s;
-      --animation-delay: 0.2s;
-      --background-color-initial: var(--background-color--background-page);
-      --background-color-final: var(--background-color--background-alternate);
-    }
 
 
     [aa-animate^="pseudo-bg-slide"][aa-animate^="pseudo-bg-slide"] {

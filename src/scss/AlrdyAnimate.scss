@@ -1,3 +1,17 @@
+// Set initial defaults on 
+body {
+  --aa-default-duration: 1s;
+  --aa-default-delay: 0s;
+  --background-color-initial: var(--background-color--background-page);
+  --background-color-final: var(--background-color--background-alternate);
+}
+
+// Base styles for all animated elements
+[aa-animate] {
+  --animation-duration: var(--aa-default-duration);
+  --animation-delay: var(--aa-default-delay);
+}
+
 @import 'keyframes';
 @import 'animations';
 @import 'easing';

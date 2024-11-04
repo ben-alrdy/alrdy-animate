@@ -1,10 +1,3 @@
-/*FADE ANIMATIONS*/
-
-:root {
-  --animation-duration: 1s;
-  --animation-delay: 0s;
-}
-
 /*APPEAR WITH BACK BOUNCE ANIMATIONS*/
 
 [aa-animate^='appear'][aa-animate^='appear'] {
@@ -16,22 +9,26 @@
 }
 
 [aa-animate="appear-up"].in-view {
-  animation: appear-up var(--animation-duration) forwards;
+  animation: appear-up forwards;
+  animation-duration: var(--animation-duration);
 }
 
 
 [aa-animate="appear-down"].in-view {
-  animation: appear-down var(--animation-duration) forwards;
+  animation: appear-down forwards;
+  animation-duration: var(--animation-duration);
 }
 
 
 [aa-animate="appear-left"].in-view {
-  animation: appear-left var(--animation-duration) forwards;
+  animation: appear-left forwards;
+  animation-duration: var(--animation-duration);
 }
 
 
 [aa-animate="appear-right"].in-view {
-  animation: appear-right var(--animation-duration) forwards;
+  animation: appear-right forwards;
+  animation-duration: var(--animation-duration);
 }
 
 
@@ -47,19 +44,23 @@
 }
 
 [aa-animate="slide-in-blurred-bottom"].in-view {
-  animation: slide-in-blurred-bottom var(--animation-duration) forwards;
+  animation: slide-in-blurred-bottom forwards;
+  animation-duration: var(--animation-duration);
 }
 
 [aa-animate="slide-in-blurred-top"].in-view {
-  animation: slide-in-blurred-top var(--animation-duration) forwards;
+  animation: slide-in-blurred-top forwards;
+  animation-duration: var(--animation-duration);
 }
 
 [aa-animate="slide-in-blurred-left"].in-view {
-  animation: slide-in-blurred-left var(--animation-duration) forwards;
+  animation: slide-in-blurred-left forwards;
+  animation-duration: var(--animation-duration);
 }
 
 [aa-animate="slide-in-blurred-right"].in-view {
-  animation: slide-in-blurred-right var(--animation-duration) forwards;
+  animation: slide-in-blurred-right forwards;
+  animation-duration: var(--animation-duration);
 }
 
 
@@ -75,11 +76,13 @@
 }
 
 [aa-animate="swing-fwd"].in-view {
-  animation: swing-fwd var(--animation-duration) forwards;
+  animation: swing-fwd forwards;
+  animation-duration: var(--animation-duration);
 }
 
 [aa-animate="swing-bwd"].in-view {
-  animation: swing-bwd var(--animation-duration) forwards;
+  animation: swing-bwd forwards;
+  animation-duration: var(--animation-duration);
 }
 
 /*3D ROTATION ANIMATIONS*/
@@ -93,13 +96,16 @@
 }
 
 [aa-animate="rotate-soft"].in-view {
-  animation: rotate-soft var(--animation-duration) forwards;
+  animation: rotate-soft forwards;
+  animation-duration: var(--animation-duration);
 }
 
 [aa-animate="rotate-soft-3em"].in-view {
-  animation: rotate-soft-3em var(--animation-duration) forwards;
+  animation: rotate-soft-3em forwards;
+  animation-duration: var(--animation-duration);
 }
 
 [aa-animate="rotate-elliptic"].in-view {
-  animation: rotate-elliptic var(--animation-duration) forwards;
+  animation: rotate-elliptic forwards;
+  animation-duration: var(--animation-duration);
 }
