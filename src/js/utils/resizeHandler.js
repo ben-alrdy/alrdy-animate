@@ -1,6 +1,6 @@
 import { debounce } from './shared';
 
-export function setupResizeHandler(ScrollTrigger, allAnimatedElements, settings, isMobile, importedModules, setupAnimations) {
+export function setupResizeHandler(allAnimatedElements, settings, isMobile, modules, setupAnimations) {
   let prevWidth = window.innerWidth;
 
   const debouncedResize = debounce(() => {
@@ -9,9 +9,9 @@ export function setupResizeHandler(ScrollTrigger, allAnimatedElements, settings,
     if (currentWidth !== prevWidth) {
       isMobile = currentWidth < 768;
       // Refresh all ScrollTriggers
-      ScrollTrigger.refresh();
+      modules.ScrollTrigger.refresh();
       // Re-setup animations
-      setupAnimations(allAnimatedElements, settings, isMobile, importedModules.animations, importedModules.splitText);
+      setupAnimations(allAnimatedElements, settings, isMobile, modules);
       
       prevWidth = currentWidth;
     }

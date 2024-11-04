@@ -1,22 +1,22 @@
-// This file is used to bundle the gsap and ScrollTrigger modules
-// It is also used to create the animations object that is used in the AlrdyAnimate.js file
-
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { createScrollAnimations } from './gsapAnimations/scrollAnimations';
-import { createTextAnimations } from './gsapAnimations/textAnimations';
-import { splitText } from './textSplitter';
 
-gsap.registerPlugin(ScrollTrigger);
-
-const animations = {
-  ...createTextAnimations(gsap, ScrollTrigger),
-  ...createScrollAnimations(gsap, ScrollTrigger)
+export const animationModules = {
+  text: {
+    animations: () => import(/* webpackChunkName: "gsap-text" */ './gsapAnimations/textAnimations'),
+    dependencies: () => import(/* webpackChunkName: "gsap-text" */ './textSplitter')
+  },
+  scroll: {
+    animations: () => import(/* webpackChunkName: "gsap-scroll" */ './gsapAnimations/scrollAnimations')
+  },
+  draggable: {
+    // Load both plugins in parallel
+    plugins: () => Promise.all([
+      import(/* webpackChunkName: "gsap-draggable" */ 'gsap/Draggable'),
+      import(/* webpackChunkName: "gsap-draggable" */ 'gsap/InertiaPlugin')
+    ]),
+    animations: () => import(/* webpackChunkName: "gsap-draggable" */ './gsapAnimations/draggableAnimations')
+  }
 };
 
-export { 
-  gsap, 
-  ScrollTrigger, 
-  animations,
-  splitText 
-};
+export { gsap, ScrollTrigger };

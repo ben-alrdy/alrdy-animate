@@ -1,5 +1,4 @@
 import styles from "../scss/AlrdyAnimate.scss";
-import debounce from 'lodash.debounce';
 import { setupResizeHandler } from './utils/resizeHandler';
 import { handleLazyLoadedImages } from './utils/lazyLoadHandler';
 import { processChildren } from './utils/childrenHandler';
@@ -17,7 +16,7 @@ const defaultOptions = {
   again: true, // True = removes 'in-view' class when element is out of view towards the bottom
   viewportPercentage: 0.8, // Default percentage of the viewport height to trigger the animation
   useGSAP: false, // Use GSAP for animations
-  GSAPAnimations: ['scroll', 'draggable', 'text'], // Array of GSAP animations to use
+  GSAPAnimations: ['scroll', 'text', 'draggable'], // Array of GSAP animations to use
   duration: 1, // 1 second
   delay: 0, // 0 seconds
   debug: false // Set to true to see GSAP debug info
@@ -48,14 +47,59 @@ async function init(options = {}) {
     window.addEventListener('load', async () => {
       if (initOptions.useGSAP) {
         try {
-          const importedModules = await import(
-            /* webpackChunkName: "gsap-animations" */ 
+          // Import the base configuration and GSAP instances
+          const { gsap, ScrollTrigger, animationModules } = await import(
+            /* webpackChunkName: "gsap-core" */ 
             './gsapBundle'
           );
 
-          // Store instances and make them globally available
-          gsap = importedModules.gsap;
-          ScrollTrigger = importedModules.ScrollTrigger;
+          // Initialize modules and animations objects
+          const modules = { gsap, ScrollTrigger };
+          const animations = {};
+          
+          // Register ScrollTrigger by default
+          gsap.registerPlugin(ScrollTrigger);
+
+          // Make GSAP globally available
+          window.gsap = gsap;
+          window.ScrollTrigger = ScrollTrigger;
+
+          // Load requested animation modules in parallel
+          await Promise.all(
+            initOptions.GSAPAnimations.map(async (type) => {
+              const moduleConfig = animationModules[type];
+              if (!moduleConfig) return;
+
+              // Load animations
+              if (moduleConfig.animations) {
+                const animationModule = await moduleConfig.animations();
+                Object.assign(animations, 
+                  type === 'text' 
+                    ? animationModule.createTextAnimations(gsap, ScrollTrigger)
+                    : type === 'scroll'
+                    ? animationModule.createScrollAnimations(gsap, ScrollTrigger)
+                    : animationModule.createDraggableAnimations(gsap, modules[type])
+                );
+              }
+
+              // Load dependencies if any (e.g., textSplitter)
+              if (moduleConfig.dependencies) {
+                const deps = await moduleConfig.dependencies();
+                Object.assign(modules, deps);
+              }
+
+              // Load plugins if any (e.g., Draggable)
+              if (moduleConfig.plugins) {
+                const [{ Draggable }, { InertiaPlugin }] = await moduleConfig.plugins();
+                gsap.registerPlugin(Draggable, InertiaPlugin);
+                modules[type] = Draggable; // If you need to reference Draggable later
+              }
+            })
+          );
+
+          modules.animations = animations;
+
+          // Make GSAP globally available
           window.gsap = gsap;
           window.ScrollTrigger = ScrollTrigger;
 
@@ -64,16 +108,21 @@ async function init(options = {}) {
           if (navElement) {
             const navEase = navElement.getAttribute('aa-easing');
             const navDuration = navElement.getAttribute('aa-duration');
-            importedModules.animations.stickyNav(navElement, navEase ?? 'back.inOut', navDuration ?? 0.4);
+            modules.animations.stickyNav?.(navElement, navEase ?? 'back.inOut', navDuration ?? 0.4);
           }
 
-          setupAnimations(allAnimatedElements, initOptions, isMobile, importedModules.animations, importedModules.splitText);
+          setupAnimations(
+            allAnimatedElements, 
+            initOptions, 
+            isMobile, 
+            modules
+          );
 
           // Set up resize handler
-          setupResizeHandler(importedModules.ScrollTrigger, allAnimatedElements, initOptions, isMobile, importedModules, setupAnimations);
+          setupResizeHandler(allAnimatedElements, initOptions, isMobile, modules, setupAnimations);
 
           // Handle lazy-loaded images
-          handleLazyLoadedImages(ScrollTrigger);
+          handleLazyLoadedImages(modules.ScrollTrigger);
 
           resolve({ gsap, ScrollTrigger });
         } catch (error) {
@@ -83,11 +132,11 @@ async function init(options = {}) {
             element.style.visibility = 'visible';
           });
           // Fallback to non-GSAP animations if loading fails
-          setupAnimations(allAnimatedElements, initOptions, isMobile);
+          setupAnimations(allAnimatedElements, initOptions, isMobile, { gsap: null, ScrollTrigger: null });
           resolve({ gsap: null, ScrollTrigger: null });  // Resolve with null if GSAP fails to load
         }
       } else {
-        setupAnimations(allAnimatedElements, initOptions, isMobile);
+        setupAnimations(allAnimatedElements, initOptions, isMobile, { gsap: null, ScrollTrigger: null });
         resolve({ gsap: null, ScrollTrigger: null });  // Resolve with null if not using GSAP
       }
     });
@@ -95,11 +144,11 @@ async function init(options = {}) {
 }
 
 // Setup animations for elements
-function setupAnimations(elements, initOptions, isMobile, animations = null, splitText = null) {
+function setupAnimations(elements, initOptions, isMobile, modules) {
   elements.forEach((element) => {
     if (element.hasAttribute("aa-children")) {
       const children = processChildren(element);
-      setupAnimations(children, initOptions, isMobile, animations, splitText);
+      setupAnimations(children, initOptions, isMobile, modules);
       return; // Skip processing the parent element
     }
 
@@ -110,23 +159,22 @@ function setupAnimations(elements, initOptions, isMobile, animations = null, spl
     applyElementStyles(element, elementSettings, isMobile);
 
     if (initOptions.useGSAP) {
-      setupGSAPAnimations(element, elementSettings, initOptions, animations, splitText, isMobile);
+      setupGSAPAnimations(element, elementSettings, initOptions, isMobile, modules);
     } else {
       setupIntersectionObserver(element, elementSettings, initOptions);
     }
   });
 }
 
-function setupGSAPAnimations(element, elementSettings, initOptions, animations, splitText, isMobile) {
+function setupGSAPAnimations(element, elementSettings, initOptions, isMobile, modules) {
   const { animationType, splitType: splitTypeAttr, scroll, duration, stagger, delay, ease, anchorElement, anchorSelector, viewportPercentage } = elementSettings;
 
   // Clear existing animation if any in case of re-run (e.g. when changing the viewport width)
   if (element.timeline) element.timeline.kill();
   if (element.splitInstance) element.splitInstance.revert();
 
-  requestAnimationFrame(() => { // Wait for the next animation frame to ensure the element is visible
-
-    let tl = gsap.timeline({
+  requestAnimationFrame(() => {
+    let tl = modules.gsap.timeline({
       paused: true,
       scrollTrigger: {
         trigger: anchorElement,
@@ -142,18 +190,18 @@ function setupGSAPAnimations(element, elementSettings, initOptions, animations, 
     element.timeline = tl; // Store the timeline on the element for future reference
 
     if (splitTypeAttr) {
-      const { splitResult, splitType } = splitText(element, splitTypeAttr);
+      const { splitResult, splitType } = modules.splitText(element, splitTypeAttr);
       element.splitInstance = splitResult; // Store the split instance on the element
 
       // Define the animation configurations
       const animationConfigs = {
-        'text-slide-up': { fn: animations.textSlideUp,        defaults: { duration: 0.5, stagger: 0.1, ease: 'back.out' } },
-        'text-slide-down': { fn: animations.textSlideDown,    defaults: { duration: 0.5, stagger: 0.1, ease: 'back.out' } },
-        'text-tilt-up': { fn: animations.textTiltUp,          defaults: { duration: 0.5, stagger: 0.1, ease: 'back.out' } },
-        'text-tilt-down': { fn: animations.textTiltDown,      defaults: { duration: 0.5, stagger: 0.1, ease: 'back.out' } },
-        'text-rotate-soft': { fn: animations.textRotateSoft,  defaults: { duration: 1.2, stagger: 0.3, ease: 'circ.out' } },
-        'text-fade': { fn: animations.textFade,               defaults: { duration: 1, stagger: 0.08, ease: 'power2.inOut' } },
-        'text-appear': { fn: animations.textAppear,           defaults: { duration: 1, stagger: 0.08, ease: 'power2.inOut' } }
+        'text-slide-up': { fn: modules.animations.textSlideUp,        defaults: { duration: 0.5, stagger: 0.1, ease: 'back.out' } },
+        'text-slide-down': { fn: modules.animations.textSlideDown,    defaults: { duration: 0.5, stagger: 0.1, ease: 'back.out' } },
+        'text-tilt-up': { fn: modules.animations.textTiltUp,          defaults: { duration: 0.5, stagger: 0.1, ease: 'back.out' } },
+        'text-tilt-down': { fn: modules.animations.textTiltDown,      defaults: { duration: 0.5, stagger: 0.1, ease: 'back.out' } },
+        'text-rotate-soft': { fn: modules.animations.textRotateSoft,  defaults: { duration: 1.2, stagger: 0.3, ease: 'circ.out' } },
+        'text-fade': { fn: modules.animations.textFade,               defaults: { duration: 1, stagger: 0.08, ease: 'power2.inOut' } },
+        'text-appear': { fn: modules.animations.textAppear,           defaults: { duration: 1, stagger: 0.08, ease: 'power2.inOut' } }
       };
 
       // Get the animation configuration defined in the element settings
@@ -176,7 +224,7 @@ function setupGSAPAnimations(element, elementSettings, initOptions, animations, 
     }
 
     // Second ScrollTrigger for reset functionality
-    ScrollTrigger.create({
+    modules.ScrollTrigger.create({
       trigger: anchorElement,
       start: 'top 100%',
       onLeaveBack: () => {

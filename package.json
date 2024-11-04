@@ -54,7 +54,7 @@
     "webpack-cli": "^5.1.4"
   },
   "dependencies": {
-    "gsap": "^3.12.5",
+    "gsap": "npm:@gsap/shockingly@^3.12.5",
     "lodash.debounce": "^4.0.8",
     "lodash.throttle": "^4.1.1",
     "split-type": "^0.3.4"

@@ -58,9 +58,23 @@ module.exports = {
           priority: 20,
           enforce: true
         },
-        animations: {
-          test: /[\\/](gsapBundle|gsapAnimations|textSplitter)[\\/]|[\\/]node_modules[\\/]split-type[\\/]/,
-          name: 'gsap-animations',
+        text: {
+          test: /[\\/](gsapAnimations[\\/]textAnimations|textSplitter)[\\/]|[\\/]node_modules[\\/]split-type[\\/]/,
+          name: 'gsap-text',
+          chunks: 'async',
+          priority: 10,
+          enforce: true
+        },
+        scroll: {
+          test: /[\\/]gsapAnimations[\\/]scrollAnimations[\\/]/,
+          name: 'gsap-scroll',
+          chunks: 'async',
+          priority: 10,
+          enforce: true
+        },
+        draggable: {
+          test: /[\\/](gsapAnimations[\\/]draggableAnimations|[\\/]node_modules[\\/]gsap[\\/](Draggable|InertiaPlugin))[\\/]/,
+          name: 'gsap-draggable',
           chunks: 'async',
           priority: 10,
           enforce: true
