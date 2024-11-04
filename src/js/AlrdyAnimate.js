@@ -3,12 +3,12 @@ import debounce from 'lodash.debounce';
 import { setupResizeHandler } from './utils/resizeHandler';
 import { handleLazyLoadedImages } from './utils/lazyLoadHandler';
 import { processChildren } from './utils/childrenHandler';
+import { getElementSettings, applyElementStyles } from './utils/elementAttributes';
 
 // Define these variables in the module scope
 let gsap = null;
 let ScrollTrigger = null;
 let allAnimatedElements = null;
-let settings = null;
 let isMobile = false;
 
 // Default options for the animation settings
@@ -24,14 +24,14 @@ const defaultOptions = {
 
 // Initialize the animation script with the given options
 async function init(options = {}) {
-  settings = { ...defaultOptions, ...options };
+  const initOptions = { ...defaultOptions, ...options };
   allAnimatedElements = document.querySelectorAll(
     "[aa-animate], [aa-children]"
   );
   isMobile = window.innerWidth < 768;
 
   // Fallback for browsers that do not support IntersectionObserver
-  if (!("IntersectionObserver" in window) && !settings.useGSAP) {
+  if (!("IntersectionObserver" in window) && !initOptions.useGSAP) {
     allAnimatedElements.forEach((element) => {
       element.classList.add("in-view");
     });
@@ -39,13 +39,13 @@ async function init(options = {}) {
   }
 
   // Set default values on body
-  document.body.style.setProperty("--aa-default-duration", `${settings.duration}s`);
-  document.body.style.setProperty("--aa-default-delay", `${settings.delay}s`);
-  document.body.setAttribute("aa-easing", settings.easing);
+  document.body.style.setProperty("--aa-default-duration", `${initOptions.duration}s`);
+  document.body.style.setProperty("--aa-default-delay", `${initOptions.delay}s`);
+  document.body.setAttribute("aa-easing", initOptions.easing);
 
   return new Promise((resolve) => { // Return a promise to handle asynchronous loading
     window.addEventListener('load', async () => {
-      if (settings.useGSAP) {
+      if (initOptions.useGSAP) {
         try {
           const importedModules = await import(
             /* webpackChunkName: "gsap-animations" */ 
@@ -66,10 +66,10 @@ async function init(options = {}) {
             importedModules.animations.stickyNav(navElement, navEase ?? 'back.inOut', navDuration ?? 0.4);
           }
 
-          setupAnimations(allAnimatedElements, settings, isMobile, importedModules.animations, importedModules.splitText);
+          setupAnimations(allAnimatedElements, initOptions, isMobile, importedModules.animations, importedModules.splitText);
 
           // Set up resize handler
-          setupResizeHandler(importedModules.ScrollTrigger, allAnimatedElements, settings, isMobile, importedModules, setupAnimations);
+          setupResizeHandler(importedModules.ScrollTrigger, allAnimatedElements, initOptions, isMobile, importedModules, setupAnimations);
 
           // Handle lazy-loaded images
           handleLazyLoadedImages(ScrollTrigger);
@@ -82,11 +82,11 @@ async function init(options = {}) {
             element.style.visibility = 'visible';
           });
           // Fallback to non-GSAP animations if loading fails
-          setupAnimations(allAnimatedElements, settings, isMobile);
+          setupAnimations(allAnimatedElements, initOptions, isMobile);
           resolve({ gsap: null, ScrollTrigger: null });  // Resolve with null if GSAP fails to load
         }
       } else {
-        setupAnimations(allAnimatedElements, settings, isMobile);
+        setupAnimations(allAnimatedElements, initOptions, isMobile);
         resolve({ gsap: null, ScrollTrigger: null });  // Resolve with null if not using GSAP
       }
     });
@@ -94,67 +94,34 @@ async function init(options = {}) {
 }
 
 // Setup animations for elements
-function setupAnimations(elements, settings, isMobile, animations = null, splitText = null) {
+function setupAnimations(elements, initOptions, isMobile, animations = null, splitText = null) {
   elements.forEach((element) => {
     if (element.hasAttribute("aa-children")) {
       const children = processChildren(element);
-      setupAnimations(children, settings, isMobile, animations, splitText);
+      setupAnimations(children, initOptions, isMobile, animations, splitText);
       return; // Skip processing the parent element
     }
 
-    // Original setupAnimations logic for non-parent elements
-    const duration = element.hasAttribute("aa-duration") ? parseFloat(element.getAttribute("aa-duration")) : undefined;
-    const delay = element.hasAttribute("aa-delay") ? parseFloat(element.getAttribute("aa-delay")) : undefined;
-    const delayMobile = element.hasAttribute("aa-delay-mobile") ? parseFloat(element.getAttribute("aa-delay-mobile")) : null;
-    const colorInitial = element.getAttribute("aa-color-initial") || settings.colorInitial;
-    const colorFinal = element.getAttribute("aa-color-final") || settings.colorFinal;
-    const viewportPercentage = element.hasAttribute("aa-viewport") ? parseFloat(element.getAttribute("aa-viewport")) : settings.viewportPercentage;
-    const anchorSelector = element.getAttribute("aa-anchor");
-    const anchorElement = anchorSelector ? document.querySelector(anchorSelector) : element; //The 'anchorElement' will be observed, while the 'element' gets the in-view class; if there is no anchorSelector, the element itself is the anchor
+    // Get all element settings from the aa-attributes
+    const elementSettings = getElementSettings(element, initOptions);
+    
+    // Apply styles (duration, delay, colors)
+    applyElementStyles(element, elementSettings, isMobile);
 
-    // Set animation duration and delay based on attributes or init options
-    if (element.hasAttribute("aa-duration")) {
-      element.style.setProperty("--animation-duration", `${duration}s`);
-    }
-
-    // Set animation delay based on attributes, init options, and mobile settings
-    if (isMobile && delayMobile !== null) {
-      element.style.setProperty("--animation-delay", `${delayMobile}s`);
-    } else if (element.hasAttribute("aa-delay")) {
-      element.style.setProperty("--animation-delay", `${delay}s`);
-    }
-
-    // Set background colors based on attributes
-    if (colorInitial) {
-      element.style.setProperty("--background-color-initial", colorInitial);
-    }
-    if (colorFinal) {
-      element.style.setProperty("--background-color-final", colorFinal);
-    }
-
-    if (settings.useGSAP) {
-      setupGSAPAnimation(element, anchorSelector, anchorElement, viewportPercentage, delay, settings, animations, splitText, isMobile);
+    if (initOptions.useGSAP) {
+      setupGSAPAnimations(element, elementSettings, initOptions, animations, splitText, isMobile);
     } else {
-      setupIntersectionObserver(element, anchorSelector, anchorElement, viewportPercentage, settings);
+      setupIntersectionObserver(element, elementSettings, initOptions);
     }
   });
 }
 
-function setupGSAPAnimation(element, anchorSelector, anchorElement, viewportPercentage, delay, settings, animations, splitText, isMobile) {
-  const animationType = element.getAttribute('aa-animate');
-  const splitTypeAttr = element.getAttribute('aa-split');
-  const scroll = element.getAttribute('aa-scroll');
-  const duration = element.hasAttribute('aa-duration') ? parseFloat(element.getAttribute("aa-duration")) : undefined;
-  const stagger = element.hasAttribute('aa-stagger') ? parseFloat(element.getAttribute('aa-stagger')) : undefined;
-  const ease = element.hasAttribute('aa-easing') ? element.getAttribute('aa-easing') : undefined;
+function setupGSAPAnimations(element, elementSettings, initOptions, animations, splitText, isMobile) {
+  const { animationType, splitType: splitTypeAttr, scroll, duration, stagger, delay, ease, anchorElement, anchorSelector, viewportPercentage } = elementSettings;
 
   // Clear existing animation if any in case of re-run (e.g. when changing the viewport width)
-  if (element.timeline) {
-    element.timeline.kill();
-  }
-  if (element.splitInstance) {
-    element.splitInstance.revert();
-  }
+  if (element.timeline) element.timeline.kill();
+  if (element.splitInstance) element.splitInstance.revert();
 
   requestAnimationFrame(() => { // Wait for the next animation frame to ensure the element is visible
 
@@ -167,7 +134,7 @@ function setupGSAPAnimation(element, anchorSelector, anchorElement, viewportPerc
           element.classList.add("in-view");
           tl.play();
         },
-        markers: settings.debug
+        markers: initOptions.debug
       }
     });
 
@@ -177,29 +144,33 @@ function setupGSAPAnimation(element, anchorSelector, anchorElement, viewportPerc
       const { splitResult, splitType } = splitText(element, splitTypeAttr);
       element.splitInstance = splitResult; // Store the split instance on the element
 
-      // Choose the animation based on the attribute
-      switch (animationType) {
-        case 'text-slide-up':
-          tl.add(animations.textSlideUp(element, splitResult, splitType, duration ?? 0.5, stagger ?? 0.1, delay, ease ?? 'back.out', isMobile, scroll));
-          break;
-        case 'text-slide-down':
-          tl.add(animations.textSlideDown(element, splitResult, splitType, duration ?? 0.5, stagger ?? 0.1, delay, ease ?? 'back.out', isMobile, scroll));
-          break;
-        case 'text-tilt-up':
-          tl.add(animations.textTiltUp(element, splitResult, splitType, duration ?? 0.5, stagger ?? 0.1, delay, ease ?? 'back.out', isMobile, scroll));
-          break;
-        case 'text-tilt-down':
-          tl.add(animations.textTiltDown(element, splitResult, splitType, duration ?? 0.5, stagger ?? 0.1, delay, ease ?? 'back.out', isMobile, scroll));
-          break;
-        case 'text-rotate-soft':
-          tl.add(animations.textRotateSoft(element, splitResult, splitType, duration ?? 1.2, stagger ?? 0.3, delay, ease ?? 'circ.out', isMobile, scroll));
-          break;
-        case 'text-fade':
-          tl.add(animations.textFade(element, splitResult, splitType, duration ?? 1, stagger ?? 0.08, delay, ease ?? 'power2.inOut', isMobile, scroll));
-          break;
-        case 'text-appear':
-          tl.add(animations.textAppear(element, splitResult, splitType, duration ?? 1, stagger ?? 0.08, delay, ease ?? 'power2.inOut', isMobile, scroll));
-          break;
+      // Define the animation configurations
+      const animationConfigs = {
+        'text-slide-up': { fn: animations.textSlideUp,        defaults: { duration: 0.5, stagger: 0.1, ease: 'back.out' } },
+        'text-slide-down': { fn: animations.textSlideDown,    defaults: { duration: 0.5, stagger: 0.1, ease: 'back.out' } },
+        'text-tilt-up': { fn: animations.textTiltUp,          defaults: { duration: 0.5, stagger: 0.1, ease: 'back.out' } },
+        'text-tilt-down': { fn: animations.textTiltDown,      defaults: { duration: 0.5, stagger: 0.1, ease: 'back.out' } },
+        'text-rotate-soft': { fn: animations.textRotateSoft,  defaults: { duration: 1.2, stagger: 0.3, ease: 'circ.out' } },
+        'text-fade': { fn: animations.textFade,               defaults: { duration: 1, stagger: 0.08, ease: 'power2.inOut' } },
+        'text-appear': { fn: animations.textAppear,           defaults: { duration: 1, stagger: 0.08, ease: 'power2.inOut' } }
+      };
+
+      // Get the animation configuration
+      const config = animationConfigs[animationType];
+
+      if (config) {
+        // Add the animation to the timeline
+        tl.add(config.fn(
+          element,
+          splitResult,
+          splitType,
+          duration ?? config.defaults.duration,
+          stagger ?? config.defaults.stagger,
+          delay,
+          ease ?? config.defaults.ease,
+          isMobile,
+          scroll
+        ));
       }
     }
 
@@ -208,7 +179,7 @@ function setupGSAPAnimation(element, anchorSelector, anchorElement, viewportPerc
       trigger: anchorElement,
       start: 'top 100%',
       onLeaveBack: () => {
-        if (settings.again || anchorSelector) {
+        if (initOptions.again || anchorSelector) {
           element.classList.remove("in-view");
           tl.progress(0).pause();
         }
@@ -217,7 +188,8 @@ function setupGSAPAnimation(element, anchorSelector, anchorElement, viewportPerc
   });
 }
 
-function setupIntersectionObserver(element, anchorSelector, anchorElement, viewportPercentage, settings) {
+function setupIntersectionObserver(element, elementSettings, initOptions) {
+  const { anchorElement, anchorSelector, viewportPercentage } = elementSettings;
   const bottomMargin = (1 - viewportPercentage) * 100;
   const rootMarginValue = `0px 0px -${bottomMargin}% 0px`;
 
@@ -236,7 +208,7 @@ function setupIntersectionObserver(element, anchorSelector, anchorElement, viewp
     }
   );
 
-  // Observer to remove 'in-view' class if settings.again is true or triggered by anchor
+  // Observer to remove 'in-view' class if initOptions.again is true or triggered by anchor
   const removeObserver = new IntersectionObserver(
     (entries) => {
       entries.forEach((entry) => {
@@ -244,7 +216,7 @@ function setupIntersectionObserver(element, anchorSelector, anchorElement, viewp
         if (
           !entry.isIntersecting &&
           rect.top >= window.innerHeight &&
-          (settings.again || anchorSelector)
+          (initOptions.again || anchorSelector)
         ) {
           element.classList.remove("in-view");
         }
