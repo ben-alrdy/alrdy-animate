@@ -14,7 +14,7 @@ module.exports = {
       export: 'AlrdyAnimate',
     },
     globalObject: 'this',
-    chunkFilename: 'chunks/[name].js'
+    chunkFilename: 'chunks/[name].[contenthash].js' 
   },
   devtool: false, //'source-map' or false in production
   module: {

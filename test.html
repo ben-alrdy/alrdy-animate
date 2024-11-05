@@ -465,6 +465,38 @@
   transform: translateX(1.25rem) rotate(45deg);
 }
 
+
+
+
+.loop-section {
+  overflow: hidden;
+  padding: 4rem 0;
+}
+
+.loop-container {
+  overflow: hidden;
+  padding: 50px 0;
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+
+.loop-item {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgb(0, 160, 189);
+  width: 30%;
+  padding: 2rem;
+  position: relative;
+  flex-shrink: 0;
+  color: white;
+  border-radius: 1rem;
+}
+
+
+
   </style>
 </head>
 
@@ -555,6 +587,18 @@
                     </svg>
                 </button>
             </div>
+        </section>
+        <section class="loop-section">
+          <div class="container">
+          <div class="loop-container" aa-animate="loop-right-draggable" aa-duration="1">
+            <div class="loop-item">Item 1</div>
+            <div class="loop-item">Item 2</div>
+            <div class="loop-item">Item 3</div>
+            <div class="loop-item">Item 4</div>
+            <div class="loop-item">Item 5</div>
+            <div class="loop-item">Item 6</div>
+          </div>
+        </div>
         </section>
         <section class="section_layout1">
           <div class="padding-global">
@@ -687,13 +731,21 @@
   <!--   <script src="https://cdn.jsdelivr.net/gh/ben-alrdy/AlrdyAnimate@latest/docs/AlrdyAnimate.js"></script> -->
     
     <script>
+      window.addEventListener('draggableAnimationsLoaded', (e) => {
+        console.log('Draggable module event:', e.detail);
+      });
+
+      window.addEventListener('setupLoopStarted', (e) => {
+        console.log('Setup loop event:', e.detail);
+      });
+
       document.addEventListener('DOMContentLoaded', function() {
         console.log('DOM Content Loaded, initializing AlrdyAnimate...');
         AlrdyAnimate.init({
           easing: 'ease-in-out',
           duration: 1,
           again: true,
-          useGSAP: true,
+          gsapFeatures: ['scroll', 'text', 'loop'],
           debug: true
         }).then(({ gsap, ScrollTrigger }) => {
           console.log('AlrdyAnimate init completed. GSAP:', gsap, 'ScrollTrigger:', ScrollTrigger);

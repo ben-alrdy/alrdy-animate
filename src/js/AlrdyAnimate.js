@@ -9,14 +9,14 @@ let gsap = null;
 let ScrollTrigger = null;
 let allAnimatedElements = null;
 let isMobile = false;
+let enableGSAP = false;
 
 // Default options for the animation settings
 const defaultOptions = {
   easing: "ease", // Default easing function for animations
   again: true, // True = removes 'in-view' class when element is out of view towards the bottom
   viewportPercentage: 0.8, // Default percentage of the viewport height to trigger the animation
-  useGSAP: false, // Use GSAP for animations
-  GSAPAnimations: ['scroll', 'text', 'draggable'], // Array of GSAP animations to use
+  gsapFeatures: [],  // Available: ['text', 'loop', 'scroll']
   duration: 1, // 1 second
   delay: 0, // 0 seconds
   debug: false // Set to true to see GSAP debug info
@@ -30,8 +30,11 @@ async function init(options = {}) {
   );
   isMobile = window.innerWidth < 768;
 
+  // Set enableGSAP based on requested features
+  enableGSAP = initOptions.gsapFeatures.length > 0;
+
   // Fallback for browsers that do not support IntersectionObserver
-  if (!("IntersectionObserver" in window) && !initOptions.useGSAP) {
+  if (!("IntersectionObserver" in window) && !enableGSAP) {
     allAnimatedElements.forEach((element) => {
       element.classList.add("in-view");
     });
@@ -45,7 +48,7 @@ async function init(options = {}) {
 
   return new Promise((resolve) => { // Return a promise to handle asynchronous loading
     window.addEventListener('load', async () => {
-      if (initOptions.useGSAP) {
+      if (enableGSAP) {
         try {
           // Import the base configuration and GSAP instances
           const { gsap, ScrollTrigger, animationModules } = await import(
@@ -64,44 +67,49 @@ async function init(options = {}) {
           window.gsap = gsap;
           window.ScrollTrigger = ScrollTrigger;
 
-          // Load requested animation modules in parallel
+          // Load requested features in parallel
           await Promise.all(
-            initOptions.GSAPAnimations.map(async (type) => {
-              const moduleConfig = animationModules[type];
-              if (!moduleConfig) return;
-
-              // Load animations
-              if (moduleConfig.animations) {
-                const animationModule = await moduleConfig.animations();
-                Object.assign(animations, 
-                  type === 'text' 
-                    ? animationModule.createTextAnimations(gsap, ScrollTrigger)
-                    : type === 'scroll'
-                    ? animationModule.createScrollAnimations(gsap, ScrollTrigger)
-                    : animationModule.createDraggableAnimations(gsap, modules[type])
-                );
+            initOptions.gsapFeatures.map(async (feature) => {
+              const moduleConfig = animationModules[feature];
+              if (!moduleConfig) {
+                console.warn(`Unknown GSAP feature: ${feature}`);
+                return;
               }
 
-              // Load dependencies if any (e.g., textSplitter)
+              // 1. Load and register plugins
+              if (moduleConfig.plugins) {
+                const plugins = await moduleConfig.plugins();
+                plugins.forEach(plugin => {
+                  Object.values(plugin).forEach(p => gsap.registerPlugin(p));
+                });
+                Object.assign(modules, ...plugins);
+              }
+
+              // 2. Load dependencies next (e.g., textSplitter)
               if (moduleConfig.dependencies) {
                 const deps = await moduleConfig.dependencies();
                 Object.assign(modules, deps);
               }
 
-              // Load plugins if any (e.g., Draggable)
-              if (moduleConfig.plugins) {
-                const [{ Draggable }, { InertiaPlugin }] = await moduleConfig.plugins();
-                gsap.registerPlugin(Draggable, InertiaPlugin);
-                modules[type] = Draggable; // If you need to reference Draggable later
+              // 3. Finally, create animations using the loaded plugins and dependencies
+              if (moduleConfig.animations) {
+                const animationModule = await moduleConfig.animations();
+                
+                let moduleAnimations;
+                if (feature === 'text') {
+                  moduleAnimations = animationModule.createTextAnimations(gsap, ScrollTrigger);
+                } else if (feature === 'scroll') {
+                  moduleAnimations = animationModule.createScrollAnimations(gsap, ScrollTrigger);
+                } else if (feature === 'loop') {
+                  moduleAnimations = animationModule.createLoopAnimations(gsap, modules.Draggable);
+                }
+                
+                Object.assign(animations, moduleAnimations);
               }
             })
           );
 
           modules.animations = animations;
-
-          // Make GSAP globally available
-          window.gsap = gsap;
-          window.ScrollTrigger = ScrollTrigger;
 
           // Set up sticky nav
           const navElement = document.querySelector('[aa-nav="sticky"]');
@@ -127,6 +135,7 @@ async function init(options = {}) {
           resolve({ gsap, ScrollTrigger });
         } catch (error) {
           console.error('Failed to load GSAP:', error);
+          enableGSAP = false;  // Disable GSAP if loading fails
           // Make all elements visible that were hidden for GSAP animations
           allAnimatedElements.forEach((element) => {
             element.style.visibility = 'visible';
@@ -158,8 +167,18 @@ function setupAnimations(elements, initOptions, isMobile, modules) {
     // Apply styles (duration, delay, colors)
     applyElementStyles(element, elementSettings, isMobile);
 
-    if (initOptions.useGSAP) {
-      setupGSAPAnimations(element, elementSettings, initOptions, isMobile, modules);
+    if (enableGSAP) {
+      const animationType = elementSettings.animationType;
+      
+      if (animationType.startsWith('loop-')) {
+        if (!modules.animations?.loop) {
+          console.warn(`Loop animation requested but 'loop' module not loaded. Add 'loop' to gsapFeatures array in init options to use loop animations.`);
+          return;
+        }
+        modules.animations.loop(element, animationType, elementSettings.duration);
+      } else {
+        setupGSAPAnimations(element, elementSettings, initOptions, isMobile, modules);
+      }
     } else {
       setupIntersectionObserver(element, elementSettings, initOptions);
     }
@@ -284,8 +303,7 @@ function setupIntersectionObserver(element, elementSettings, initOptions) {
 const AlrdyAnimate = {
   init,
   getGSAP: () => gsap,
-  getScrollTrigger: () => ScrollTrigger,
-  handleLazyLoadedImages
+  getScrollTrigger: () => ScrollTrigger
 };
 
 // Export as a named export

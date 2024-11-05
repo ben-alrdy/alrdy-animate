@@ -36,3 +36,14 @@ body {
 [aa-split] > .line-clip-wrapper{
     overflow: hidden;
 }
+
+// Set the grab cursor for draggable elements
+[aa-animate*="draggable"] {
+  cursor: grab;
+}
+
+// Change to grabbing cursor when dragging
+[aa-animate*="draggable"]:active,
+[aa-animate*="draggable"]:hover:active {
+  cursor: grabbing !important;
+}

@@ -9,13 +9,13 @@ export const animationModules = {
   scroll: {
     animations: () => import(/* webpackChunkName: "gsap-scroll" */ './gsapAnimations/scrollAnimations')
   },
-  draggable: {
+  loop: {
     // Load both plugins in parallel
     plugins: () => Promise.all([
       import(/* webpackChunkName: "gsap-draggable" */ 'gsap/Draggable'),
       import(/* webpackChunkName: "gsap-draggable" */ 'gsap/InertiaPlugin')
     ]),
-    animations: () => import(/* webpackChunkName: "gsap-draggable" */ './gsapAnimations/draggableAnimations')
+    animations: () => import(/* webpackChunkName: "gsap-draggable" */ './gsapAnimations/loopAnimations')
   }
 };
 
