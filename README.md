@@ -3,9 +3,24 @@
 ## Table of Contents
 - [Overview](#overview)
 - [Installation](#installation)
+  - [Using CDN](#using-cdn)
+  - [Using NPM](#using-npm)
+  - [Configuration Options](#configuration-options)
 - [Usage](#usage)
+  - [HTML](#html)
+  - [JavaScript](#javascript)
 - [Options](#options)
-- [Examples](#examples)
+  - [Global Options](#global-options)
+  - [Element Attributes](#element-attributes)
+- [GSAP Features](#gsap-features)
+  - [Text Animations](#text-animations)
+  - [Loop Animations](#loop-animations)
+  - [Scroll Animations](#scroll-animations)
+- [Easing Functions](#easing-functions)
+- [3D Animations](#3d-animations)
+- [Setting attributes via JavaScript](#setting-attributes-via-javascript)
+- [Contributing](#contributing)
+- [License](#license)
 
 ## Overview
 
@@ -45,7 +60,7 @@ You can include AlrdyAnimate in your project using either CDN or npm.
       viewportPercentage: 0.6,
       duration: '2s',
       delay: '0.5s',
-      useGSAP: true  // Enable GSAP animations (will load additional chunks)
+      gsapFeatures: ['text', 'loop', 'scroll']  // Specify which GSAP features to load
     }).then(({ gsap, ScrollTrigger }) => {
       console.log('GSAP and ScrollTrigger loaded successfully');
     });
@@ -73,7 +88,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       viewportPercentage: 0.6,
       duration: '2s',
       delay: '0.5s',
-      useGSAP: true  // Enable GSAP animations (will load additional chunks)
+      gsapFeatures: ['text', 'loop', 'scroll']  // Specify which GSAP features to load
     });
     
     console.log('GSAP and ScrollTrigger loaded successfully');
@@ -90,49 +105,19 @@ document.addEventListener('DOMContentLoaded', async () => {
 | `easing` | string | 'ease-in-out' | Animation easing function |
 | `again` | boolean | false | Whether animations should replay when scrolling up |
 | `viewportPercentage` | number | 0.6 | When element should start animating (0.0 - 1.0) |
-| `duration` | string | '2s' | Animation duration |
-| `delay` | string | '0.5s' | Animation delay |
-| `useGSAP` | boolean | false | Enable GSAP animations (loads additional chunks) |
+| `duration` | number | 1 | Animation duration in seconds |
+| `delay` | number | 0 | Animation delay in seconds |
+| `gsapFeatures` | array | [] | GSAP features to load: ['text', 'loop', 'scroll'] |
+| `debug` | boolean | false | Enable GSAP debug info |
 
-## Usage
 
-### HTML
+## CSS Animations
+You can simply add the `aa-animate` attribute to the element you want to animate. You can also add optional attributes (see element attributes below) to customize the animation for individual elements.
 
-To use AlrdyAnimate, add the `aa-animate` attribute to the elements you want to animate. You can also add optional attributes to customize the animation for individual elements.
-
-```html
-<div aa-animate="fade-up" aa-duration="1.5s" aa-delay="0.3s" aa-split="words" aa-stagger="0.05">Your content here</div>
-```
-
-### JavaScript
-
-Initialize the library with your desired options:
-
-```javascript
-AlrdyAnimate.init({
-  easing: 'ease-in-out',      // Default easing function
-  again: false,               // Do not remove 'in-view' class when out of view
-  viewportPercentage: 0.6,    // Trigger animation when 60% of the element is in view
-  duration: 2,                // Default animation duration, in seconds, e.g. 2
-  delay: 0.5,                 // Default animation delay, in seconds, e.g. 0.5
-  useGSAP: true               // Enable GSAP animations
-});
-```
-
-## Options
-
-### Global Options
-
-- **easing** (default: `'ease'`): The default easing function for animations and transitions.
-- **again** (default: `true`): If set to `true`, the animation will be triggered again for elements that have scrolled out of view towards the bottom.
-- **viewportPercentage** (default: `0.8`): A number between `0` and `1` representing the percentage of the viewport height required to trigger the animation.
-- **duration** (default: `1`): The default animation duration.
-- **delay** (default: `0`): The default animation delay.
-- **useGSAP** (default: `false`): Enable GSAP animations for more advanced effects.
+- **aa-animate**: The animation type to apply. Example: `aa-animate="appear-up"`.
 
 ### Element Attributes
 
-- **aa-animate**: The animation type to apply. Example: `aa-animate="fade-up-slow"`.
 - **aa-children**: Accepts same values as `aa-animate`, but applies animation to all children if set. Use in conjunction with `aa-stagger` to set a staggered animation and `aa-delay` to set the starting point for all children. Example: `aa-children="fade-up-slow"`.
 - **aa-easing**: Overwrites the global easing function for this element. Example: `aa-easing="ease-in-out"`.
 - **aa-duration**: The animation duration for this element, in seconds. Example: `aa-duration="2"`.
@@ -143,44 +128,115 @@ AlrdyAnimate.init({
 - **aa-anchor**: Specify an anchor element to trigger the animation (useful for fixed elements that should be animated when the anchor scrolls into view). Example: `aa-anchor="#anchorElement"`.
 - **aa-viewport**: Override the global viewport percentage for this element. Example: `aa-viewport="0.6"`.
 
-#### Special attributes for text animations (requires `useGSAP: true`):
 
-- **aa-split**: Specifies how to split the text for animation. Possible values: `lines`, `words`, `chars`. Optionally, you can add `clip` to wrap each line in a clip wrapper and prevent overflow, resulting in a clipping effect during the animation. Example: `aa-split="words.clip"`.
-- **aa-stagger**: Sets the stagger effect for split text animations, in seconds. Example: `aa-stagger="0.05"`.
-- **aa-scroll**: Sets the scroll behavior for text animations. Possible values: `snap`, `smooth`. Example: `aa-scroll="snap"`.
+## GSAP Features
 
-## Examples
+AlrdyAnimate supports several GSAP-powered features that can be enabled by including them in the `gsapFeatures` array during initialization:
 
-Here's a complete example using AlrdyAnimate with custom options and GSAP animations:
+### Text Animations (`gsapFeatures: ['text']`)
+
+- Set the animation type with `aa-animate="text-..."`.
+- Pair with `aa-split` to define how to split the text for animation:
+  - There are 4 split types: `lines`, `words`, `chars` or `lines&words` (i.e. both lines and words will be animated simultaneously). 
+  - Optionally, you can add `clip` to wrap each line in a clip wrapper and prevent overflow, resulting in a clipping effect during the animation. Example: `aa-split="words.clip"`.
+- Use `aa-scroll` to make the animation scroll-driven. There are two options: `aa-scroll="snap"` and `aa-scroll="smooth"`.
+- Use `aa-stagger` to set the stagger effect for split text animations, in seconds. Example: `aa-stagger="0.05"`.
+
+#### Available Text Animations
+
+- `text-slide-up`: Slides the text up from the bottom.
+- `text-slide-down`: Slides the text down from the top.
+- `text-tilt-up`: Slides and rotates the text up from the bottom.
+- `text-tilt-down`: Slides and rotates the text down from the top.
+- `text-rotate-soft`: Rotates the text softly around the X axis. Best works with `aa-split="lines"` or `aa-split="lines.clip"`.
+- `text-fade`: Fades the text in, starts with 30% opacity.
+- `text-appear`: Fades the text in, starts with 0% opacity.
+
+
+### Loop Animations (`gsapFeatures: ['loop']`)
+
+Creates infinite scrolling or draggable loops. To use:
+1. Set the animation type with `aa-animate="loop-..."` on the container that has the elements to loop
+2. Ensure `.loop-container` has `display: flex` and `gap` set
+3. Each `.loop-item` should have a fixed width (percentage or pixels) and `flex-shrink: 0`
+4. You can add other animations on elements within each `.loop-item`, but not on the `.loop-item` itself
+
+Available animations:
+- `loop-left`: Continuous left-scrolling loop
+- `loop-right`: Continuous right-scrolling loop
+- `loop-left-draggable`: Draggable left-scrolling loop; clicking an item will pause the animation and center that item
+- `loop-right-draggable`: Draggable right-scrolling loop; clicking an item will pause the animation and center that item
+
+Example HTML and CSS:
 
 ```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AlrdyAnimate Example</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/ben-alrdy/alrdy-animate@latest/cdn/AlrdyAnimate.css">
-</head>
-<body>
-  <div aa-animate="text-slide-up" aa-duration="1.5s" aa-delay="0.3s" aa-split="words.clip" aa-stagger="0.05">Your content here</div>
-
-  <script src="https://cdn.jsdelivr.net/gh/ben-alrdy/alrdy-animate@latest/cdn/AlrdyAnimate.js"></script>
-  <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      AlrdyAnimate.init({
-        easing: 'ease-in-out',
-        again: false,
-        viewportPercentage: 0.6,
-        duration: '2s',
-        delay: '0.5s',
-        useGSAP: true
-      });
-    });
-  </script>
-</body>
-</html>
+<div class="loop-wrapper">
+  <!-- Container with loop animation -->
+  <div class="loop-container" aa-animate="loop-left-draggable">
+    <!-- Individual items -->
+    <div class="loop-item">
+      <div>Item 1</div>
+    </div>    
+    <div class="loop-item">
+      <div>Item 2</div>
+    </div>
+    <!-- Add more items as needed -->
+  </div>
+</div>
 ```
+
+```css
+
+.loop-wrapper {
+  overflow: hidden;
+  padding: 4rem 0; /* Optional padding */
+}
+
+/* Container around the loop items */
+.loop-container {
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  gap: 2rem;  /* Space between items */
+  padding: 50px 0;
+}
+
+/* Individual loop items */
+.loop-item {
+  width: 20%;  /* Fixed width for each item */
+  flex-shrink: 0;  /* Prevent items from shrinking */
+}
+
+/* Content within items */
+.loop-item > div {
+  padding: 2rem;
+  background: rgb(0, 160, 189);
+  border-radius: 1rem;
+  color: white;
+  text-align: center;
+}
+```
+
+### Scroll Animations (`gsapFeatures: ['scroll']`)
+Enables scroll-driven animations and effects. 
+
+Required for: Sticky navigation
+- You can use the `aa-nav="sticky"` attribute to create a sticky navigation bar that slides out of view when the user scrolls down and slides back in when the user scrolls up. 
+- Easing defaults to `back.inOut` 
+- Duration defaults to `0.4s`
+- You can overwrite both by adding `aa-easing` and `aa-duration` to the nav element.
+
+
+Example usage with all features:
+```javascript
+AlrdyAnimate.init({
+  easing: 'power1.out',
+  again: true,
+  gsapFeatures: ['text', 'loop', 'scroll'],
+  debug: true
+});
+```
+
 
 ## Easing Functions
 
@@ -231,26 +287,6 @@ AlrdyAnimate includes a variety of 3D animations (via `aa-animate`) that require
 - `swing-fwd`: Swings the element forward around the X axis anchored to the top.
 - `swing-bwd`: Swings the element backward around the X axis anchored to the top.
 
-## Text Animations
-
-AlrdyAnimate includes a variety of text animations (via `aa-animate`) that need to be paired with `aa-split` to work. There are 3 split types: `lines`, `words`, `chars` or `lines&words` (i.e. both lines and words will be animated simultaneously). Each can be optionally paired with `clip` to create a clipping effect during the animation, e.g. `aa-split="words.clip"`.
-
-You can also use `aa-scroll` to make the animation scroll-driven. There are two options: `aa-scroll="snap"` and `aa-scroll="smooth"`.
-
-### Available Text Animations
-
-
-- `text-slide-up`: Slides the text up from the bottom.
-- `text-slide-down`: Slides the text down from the top.
-- `text-tilt-up`: Slides and rotates the text up from the bottom.
-- `text-tilt-down`: Slides and rotates the text down from the top.
-- `text-rotate-soft`: Rotates the text softly around the X axis. Best works with `aa-split="lines"` or `aa-split="lines.clip"`.
-- `text-fade`: Fades the text in, starts with 30% opacity.
-- `text-appear`: Fades the text in, starts with 0% opacity.
-
-## Sticky Nav
-
-You can use the `aa-nav="sticky"` attribute to create a sticky navigation bar that slides out of view when the user scrolls down and slides back in when the user scrolls up. It's easing defaults to `back.inOut` and the duration defaults to `0.4s`. You can overwrite both by adding `aa-easing` and `aa-duration` to the nav element.
 
 ## Setting attributes via JavaScript
 

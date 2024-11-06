@@ -13,12 +13,12 @@ let enableGSAP = false;
 
 // Default options for the animation settings
 const defaultOptions = {
-  easing: "ease", // Default easing function for animations
+  easing: "ease-in-out", // Default easing function for animations
   again: true, // True = removes 'in-view' class when element is out of view towards the bottom
   viewportPercentage: 0.8, // Default percentage of the viewport height to trigger the animation
-  gsapFeatures: [],  // Available: ['text', 'loop', 'scroll']
   duration: 1, // 1 second
   delay: 0, // 0 seconds
+  gsapFeatures: [],  // Available: ['text', 'loop', 'scroll']
   debug: false // Set to true to see GSAP debug info
 };
 

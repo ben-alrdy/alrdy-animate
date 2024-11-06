@@ -482,19 +482,20 @@
 }
 
 .loop-item {
-  box-sizing: border-box;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgb(0, 160, 189);
-  width: 30%;
-  padding: 2rem;
-  position: relative;
+  width: 20%;
   flex-shrink: 0;
-  color: white;
-  border-radius: 1rem;
 }
 
+.loop-item > div {
+  box-sizing: border-box;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  padding: 2rem;
+  color: white;
+  background: rgb(0, 160, 189);
+  border-radius: 1rem;
+}
 
 
   </style>
@@ -590,13 +591,25 @@
         </section>
         <section class="loop-section">
           <div class="container">
-          <div class="loop-container" aa-animate="loop-right-draggable" aa-duration="1">
-            <div class="loop-item">Item 1</div>
-            <div class="loop-item">Item 2</div>
-            <div class="loop-item">Item 3</div>
-            <div class="loop-item">Item 4</div>
-            <div class="loop-item">Item 5</div>
-            <div class="loop-item">Item 6</div>
+          <div class="loop-container" aa-animate="loop-left-draggable" aa-duration="1">
+            <div class="loop-item">
+              <div aa-animate="appear-up">Item 1</div>
+            </div>    
+            <div class="loop-item">
+              <div aa-animate="appear-up" aa-delay="0.1">Item 2</div>
+            </div>
+            <div class="loop-item">
+              <div aa-animate="appear-up" aa-delay="0.2">Item 3</div>
+            </div>
+            <div class="loop-item">
+              <div aa-animate="appear-up" aa-delay="0.3">Item 4</div>
+            </div>
+            <div class="loop-item">
+              <div aa-animate="appear-up" aa-delay="0.4">Item 5</div>
+            </div>
+            <div class="loop-item">
+              <div aa-animate="appear-up" aa-delay="0.5">Item 6</div>
+            </div>
           </div>
         </div>
         </section>
