@@ -1,6 +1,6 @@
 import { debounce } from './shared';
 
-export function setupResizeHandler(allAnimatedElements, settings, isMobile, modules, setupAnimations) {
+export function setupResizeHandler(modules, initOptions, isMobile, setupAnimations) {
   let prevWidth = window.innerWidth;
 
   const debouncedResize = debounce(() => {
@@ -8,17 +8,28 @@ export function setupResizeHandler(allAnimatedElements, settings, isMobile, modu
     
     if (currentWidth !== prevWidth) {
       isMobile = currentWidth < 768;
-      // Refresh all ScrollTriggers
+
+      // Let each module handle its own cleanup
+      if (modules.animations?.loop) {
+        modules.animations.cleanupLoops();
+      }
+
+      // Refresh ScrollTrigger
       modules.ScrollTrigger.refresh();
-      // Re-setup animations
-      setupAnimations(allAnimatedElements, settings, isMobile, modules);
+      
+      // Recreate all animations
+      setupAnimations(
+        document.querySelectorAll("[aa-animate], [aa-children]"),
+        initOptions, 
+        isMobile, 
+        modules
+      );
       
       prevWidth = currentWidth;
     }
   }, 250);
 
   window.addEventListener('resize', debouncedResize);
-
   window.addEventListener('orientationchange', () => {
     setTimeout(() => {
       const currentWidth = window.innerWidth;

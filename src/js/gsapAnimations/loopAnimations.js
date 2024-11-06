@@ -1,4 +1,6 @@
 export function createLoopAnimations(gsap, Draggable) {
+  const activeLoops = new Set();
+
   function horizontalLoop(items, config) {
     /*
     https://gsap.com/docs/v3/HelperFunctions/helpers/seamlessLoop/
@@ -284,6 +286,8 @@ export function createLoopAnimations(gsap, Draggable) {
     }
 
     const loop = horizontalLoop(items, config);
+    element._loop = loop;
+    activeLoops.add(element);
 
     // Add click handlers only for draggable versions
     if (animationType.includes('draggable')) {
@@ -311,7 +315,23 @@ export function createLoopAnimations(gsap, Draggable) {
     return loop;
   }
 
+  function cleanupLoops() {
+    activeLoops.forEach(element => {
+      if (element._loop) {
+        // Kill any existing GSAP tweens on the children
+        gsap.killTweensOf(element.children);
+        // Kill the loop timeline
+        element._loop.kill();
+        element._loop = null;
+        // Reset all GSAP properties
+        gsap.set(element.children, { clearProps: "all" });
+      }
+    });
+    activeLoops.clear();
+  }
+
   return {
-    loop: (element, animationType, duration) => setupLoopAnimation(element, animationType, duration)
+    loop: (element, animationType, duration) => setupLoopAnimation(element, animationType, duration),
+    cleanupLoops
   };
 }

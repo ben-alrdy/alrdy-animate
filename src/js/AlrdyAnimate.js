@@ -119,6 +119,7 @@ async function init(options = {}) {
             modules.animations.stickyNav?.(navElement, navEase ?? 'back.inOut', navDuration ?? 0.4);
           }
 
+          // Setup animations first
           setupAnimations(
             allAnimatedElements, 
             initOptions, 
@@ -126,8 +127,8 @@ async function init(options = {}) {
             modules
           );
 
-          // Set up resize handler
-          setupResizeHandler(allAnimatedElements, initOptions, isMobile, modules, setupAnimations);
+          // Then setup resize handler with the configured modules
+          setupResizeHandler(modules, initOptions, isMobile, setupAnimations);
 
           // Handle lazy-loaded images
           handleLazyLoadedImages(modules.ScrollTrigger);
