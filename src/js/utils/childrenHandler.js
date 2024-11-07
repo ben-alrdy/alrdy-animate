@@ -1,6 +1,6 @@
 export function processChildren(element) {
   const children = Array.from(element.children);
-  const parentDelay = element.hasAttribute("aa-delay") ? parseFloat(element.getAttribute("aa-delay")) : undefined;
+  const parentDelay = element.hasAttribute("aa-delay") ? parseFloat(element.getAttribute("aa-delay")) : 0;
   const stagger = element.hasAttribute("aa-stagger") ? parseFloat(element.getAttribute("aa-stagger")) : 0;
   const animationType = element.getAttribute("aa-children");
 
