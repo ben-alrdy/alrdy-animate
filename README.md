@@ -35,7 +35,7 @@ You can include AlrdyAnimate in your project using either CDN or npm.
 ```html
 
 <!-- From GitHub  -->
- <!-- Latest version-->
+<!-- Latest version-->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/ben-alrdy/alrdy-animate@latest/cdn/AlrdyAnimate.css">
 <script src="https://cdn.jsdelivr.net/gh/ben-alrdy/alrdy-animate@latest/cdn/AlrdyAnimate.js"></script>
 
@@ -57,9 +57,9 @@ You can include AlrdyAnimate in your project using either CDN or npm.
     AlrdyAnimate.init({
       easing: 'ease-in-out',
       again: false,
-      viewportPercentage: 0.6,
-      duration: '2s',
-      delay: '0.5s',
+      viewportPercentage: 0.9,
+      duration: 2,
+      delay: 0.5,
       gsapFeatures: ['text', 'loop', 'scroll']  // Specify which GSAP features to load
     }).then(({ gsap, ScrollTrigger }) => {
       console.log('GSAP and ScrollTrigger loaded successfully');
@@ -86,8 +86,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       easing: 'ease-in-out',
       again: false,
       viewportPercentage: 0.6,
-      duration: '2s',
-      delay: '0.5s',
+      duration: 2,
+      delay: 0.5,
       gsapFeatures: ['text', 'loop', 'scroll']  // Specify which GSAP features to load
     });
     
@@ -114,11 +114,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 ## CSS Animations
 You can simply add the `aa-animate` attribute to the element you want to animate. You can also add optional attributes (see element attributes below) to customize the animation for individual elements.
 
-- **aa-animate**: The animation type to apply. Example: `aa-animate="appear-up"`.
+- **aa-animate**: The animation type to apply. Example: `aa-animate="float-up"`.
 
 ### Element Attributes
 
-- **aa-children**: Accepts same values as `aa-animate`, but applies animation to all children if set. Use in conjunction with `aa-stagger` to set a staggered animation and `aa-delay` to set the starting point for all children. Example: `aa-children="fade-up-slow"`.
+- **aa-children**: Accepts same values as `aa-animate`, but applies animation to all children if set. Use in conjunction with `aa-stagger` to set a staggered animation and `aa-delay` to set the starting point for all children. Example: `aa-children="fade-up"`.
 - **aa-easing**: Overwrites the global easing function for this element. Example: `aa-easing="ease-in-out"`.
 - **aa-duration**: The animation duration for this element, in seconds. Example: `aa-duration="2"`.
 - **aa-delay**: The animation delay for this element, in seconds. Example: `aa-delay="0.5"`.
@@ -149,8 +149,8 @@ AlrdyAnimate supports several GSAP-powered features that can be enabled by inclu
 - `text-tilt-up`: Slides and rotates the text up from the bottom.
 - `text-tilt-down`: Slides and rotates the text down from the top.
 - `text-rotate-soft`: Rotates the text softly around the X axis. Best works with `aa-split="lines"` or `aa-split="lines.clip"`.
-- `text-fade`: Fades the text in, starts with 30% opacity.
-- `text-appear`: Fades the text in, starts with 0% opacity.
+- `text-fade-soft`: Fades the text in, starts with 30% opacity.
+- `text-fade`: Fades the text in, starts with 0% opacity.
 
 
 ### Loop Animations (`gsapFeatures: ['loop']`)

@@ -1,11 +1,11 @@
-@keyframes appear-up {
+@keyframes float-up {
     0% {
       opacity: 0;
-      transform: translateY(30px);
+      transform: translateY(calc(30px * var(--aa-distance-factor)));
     }
     30% {
       opacity: 1;
-      transform: translateY(-10px);
+      transform: translateY(calc(-10px * var(--aa-distance-factor)));
     }
     100% {
       opacity: 1;
@@ -13,14 +13,14 @@
     }
   }
   
-  @keyframes appear-down {
+  @keyframes float-down {
     0% {
       opacity: 0;
-      transform: translateY(-30px);
+      transform: translateY(calc(-30px * var(--aa-distance-factor)));
     }
     30% {
       opacity: 1;
-      transform: translateY(10px);
+      transform: translateY(calc(10px * var(--aa-distance-factor)));
     }
     100% {
       opacity: 1;
@@ -28,14 +28,14 @@
     }
   }
   
-  @keyframes appear-left {
+  @keyframes float-left {
     0% {
       opacity: 0;
-      transform: translateX(-30px);
+      transform: translateX(calc(-30px * var(--aa-distance-factor)));
     }
     30% {
       opacity: 1;
-      transform: translateX(5px);
+      transform: translateX(calc(5px * var(--aa-distance-factor)));
     }
     100% {
       opacity: 1;
@@ -43,14 +43,14 @@
     }
   }
   
-  @keyframes appear-right {
+  @keyframes float-right {
     0% {
       opacity: 0;
-      transform: translateX(30px);
+      transform: translateX(calc(30px * var(--aa-distance-factor)));
     }
     30% {
       opacity: 1;
-      transform: translateX(-5px);
+      transform: translateX(calc(-5px * var(--aa-distance-factor)));
     }
     100% {
       opacity: 1;

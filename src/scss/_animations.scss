@@ -1,6 +1,6 @@
-/*APPEAR WITH BACK BOUNCE ANIMATIONS*/
+/*float WITH BACK BOUNCE ANIMATIONS*/
 
-[aa-animate^='appear'][aa-animate^='appear'] {
+[aa-animate^='float'][aa-animate^='float'] {
   opacity: 0;
 
   &.in-view {
@@ -8,26 +8,26 @@
   }
 }
 
-[aa-animate="appear-up"].in-view {
-  animation: appear-up forwards;
+[aa-animate="float-up"].in-view {
+  animation: float-up forwards;
   animation-duration: var(--animation-duration);
 }
 
 
-[aa-animate="appear-down"].in-view {
-  animation: appear-down forwards;
+[aa-animate="float-down"].in-view {
+  animation: float-down forwards;
   animation-duration: var(--animation-duration);
 }
 
 
-[aa-animate="appear-left"].in-view {
-  animation: appear-left forwards;
+[aa-animate="float-left"].in-view {
+  animation: float-left forwards;
   animation-duration: var(--animation-duration);
 }
 
 
-[aa-animate="appear-right"].in-view {
-  animation: appear-right forwards;
+[aa-animate="float-right"].in-view {
+  animation: float-right forwards;
   animation-duration: var(--animation-duration);
 }
 

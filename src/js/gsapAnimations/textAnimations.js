@@ -105,10 +105,10 @@ export function createTextAnimations(gsapInstance, ScrollTriggerInstance) {
             opacity: 0,
             rotation: -10,
         }),
-        textFade: createTimeline({
+        textFadeSoft: createTimeline({
             opacity: 0.3
         }),
-        textAppear: createTimeline({
+        textFade: createTimeline({
             opacity: 0
         }),
         textRotateSoft: (element, splitResult, splitType, duration, stagger, delay, ease, isMobile, scroll) => {

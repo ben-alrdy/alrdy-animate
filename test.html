@@ -593,22 +593,22 @@
           <div class="container">
           <div class="loop-container" aa-animate="loop-left-draggable" aa-duration="1">
             <div class="loop-item">
-              <div aa-animate="appear-up">Item 1</div>
+              <div aa-animate="float-up">Item 1</div>
             </div>    
             <div class="loop-item">
-              <div aa-animate="appear-up" aa-delay="0.1">Item 2</div>
+              <div aa-animate="float-up" aa-delay="0.1">Item 2</div>
             </div>
             <div class="loop-item">
-              <div aa-animate="appear-up" aa-delay="0.2">Item 3</div>
+              <div aa-animate="float-up" aa-delay="0.2">Item 3</div>
             </div>
             <div class="loop-item">
-              <div aa-animate="appear-up" aa-delay="0.3">Item 4</div>
+              <div aa-animate="float-up" aa-delay="0.3">Item 4</div>
             </div>
             <div class="loop-item">
-              <div aa-animate="appear-up" aa-delay="0.4">Item 5</div>
+              <div aa-animate="float-up" aa-delay="0.4">Item 5</div>
             </div>
             <div class="loop-item">
-              <div aa-animate="appear-up" aa-delay="0.5">Item 6</div>
+              <div aa-animate="float-up" aa-delay="0.5">Item 6</div>
             </div>
           </div>
         </div>
@@ -653,16 +653,16 @@
                 <h2 aa-animate="rotate-soft-3em" >
                   This text can be one line
               </h2>
-                <div class="grid" aa-children="appear-up" aa-delay="1" aa-duration="1.5" aa-easing="power2.out" aa-stagger="0.2">
+                <div class="grid" aa-children="float-up" aa-delay="1" aa-duration="1.5" aa-easing="power2.out" aa-stagger="0.2">
                   <div class="box"></div>
                   <div class="box"></div>
                   <div class="box"></div>
                 </div>
                 <div class="grid">
-                    <div class="box"><span aa-animate="appear-up">Fade Up Back</span></div>
-                    <div class="box"><span aa-animate="appear-down">Fade Down Back</span></div>
-                    <div class="box"><span aa-animate="appear-left">Fade Left Back</span></div>
-                    <div class="box"><span aa-animate="appear-right">Fade Right Back</span></div>
+                    <div class="box"><span aa-animate="float-up" aa-distance="20">Fade Up Back</span></div>
+                    <div class="box"><span aa-animate="float-down">Fade Down Back</span></div>
+                    <div class="box"><span aa-animate="float-left">Fade Left Back</span></div>
+                    <div class="box"><span aa-animate="float-right">Fade Right Back</span></div>
                     <div class="box"><span aa-animate="fade" aa-duration="1.5">Fade</span></div>
                     <div class="box"><span aa-animate="fade-up" aa-easing="back.out">Fade Up</span></div>
                     <div class="box"><span aa-animate="fade-down">Fade Down</span></div>
@@ -759,6 +759,7 @@
           duration: 1,
           again: true,
           gsapFeatures: ['scroll', 'text', 'loop'],
+          distance: 5,
           debug: true
         }).then(({ gsap, ScrollTrigger }) => {
           console.log('AlrdyAnimate init completed. GSAP:', gsap, 'ScrollTrigger:', ScrollTrigger);

@@ -2,6 +2,7 @@
 body {
   --aa-default-duration: 1s;
   --aa-default-delay: 0s;
+  --aa-distance-factor: 1;
   --background-color-initial: var(--background-color--background-page);
   --background-color-final: var(--background-color--background-alternate);
 }

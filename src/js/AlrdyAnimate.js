@@ -18,6 +18,7 @@ const defaultOptions = {
   viewportPercentage: 0.8, // Default percentage of the viewport height to trigger the animation
   duration: 1, // 1 second
   delay: 0, // 0 seconds
+  distance: 1, // Distance factor for the animations
   gsapFeatures: [],  // Available: ['text', 'loop', 'scroll']
   debug: false // Set to true to see GSAP debug info
 };
@@ -44,6 +45,7 @@ async function init(options = {}) {
   // Set default values on body
   document.body.style.setProperty("--aa-default-duration", `${initOptions.duration}s`);
   document.body.style.setProperty("--aa-default-delay", `${initOptions.delay}s`);
+  document.body.style.setProperty("--aa-distance-factor", `${initOptions.distance}`);
   document.body.setAttribute("aa-easing", initOptions.easing);
 
   return new Promise((resolve) => { // Return a promise to handle asynchronous loading
@@ -220,8 +222,8 @@ function setupGSAPAnimations(element, elementSettings, initOptions, isMobile, mo
         'text-tilt-up': { fn: modules.animations.textTiltUp,          defaults: { duration: 0.5, stagger: 0.1, ease: 'back.out' } },
         'text-tilt-down': { fn: modules.animations.textTiltDown,      defaults: { duration: 0.5, stagger: 0.1, ease: 'back.out' } },
         'text-rotate-soft': { fn: modules.animations.textRotateSoft,  defaults: { duration: 1.2, stagger: 0.3, ease: 'circ.out' } },
-        'text-fade': { fn: modules.animations.textFade,               defaults: { duration: 1, stagger: 0.08, ease: 'power2.inOut' } },
-        'text-appear': { fn: modules.animations.textAppear,           defaults: { duration: 1, stagger: 0.08, ease: 'power2.inOut' } }
+        'text-fade-soft': { fn: modules.animations.textFadeSoft,     defaults: { duration: 1, stagger: 0.08, ease: 'power2.inOut' } },
+        'text-fade': { fn: modules.animations.textFade,               defaults: { duration: 1, stagger: 0.08, ease: 'power2.inOut' } }
       };
 
       // Get the animation configuration defined in the element settings

@@ -8,6 +8,7 @@ export function getElementSettings(element, settings) {
     ease: element.hasAttribute('aa-easing') ? element.getAttribute('aa-easing') : settings.easing,
     splitType: element.getAttribute('aa-split'),
     scroll: element.getAttribute('aa-scroll'),
+    distance: element.hasAttribute('aa-distance') ? parseFloat(element.getAttribute('aa-distance')) : settings.distance,
 
     // Animation timing
     duration: element.hasAttribute('aa-duration') ? parseFloat(element.getAttribute('aa-duration')) : undefined,
@@ -31,7 +32,7 @@ export function getElementSettings(element, settings) {
 }
 
 export function applyElementStyles(element, elementSettings, isMobile) {
-  const { duration, delay, delayMobile, colorInitial, colorFinal } = elementSettings;
+  const { duration, delay, distance, delayMobile, colorInitial, colorFinal } = elementSettings;
 
   // Set duration if specified on element
   if (element.hasAttribute('aa-duration')) {
@@ -42,6 +43,11 @@ export function applyElementStyles(element, elementSettings, isMobile) {
   if (element.hasAttribute('aa-delay')) {
     const finalDelay = isMobile && delayMobile !== undefined ? delayMobile : delay;
     element.style.setProperty("--animation-delay", `${finalDelay}s`);
+  }
+
+  // Set distance if specified on element
+  if (element.hasAttribute('aa-distance')) {
+    element.style.setProperty("--aa-distance-factor", `${distance}`);
   }
 
   if (colorInitial) {

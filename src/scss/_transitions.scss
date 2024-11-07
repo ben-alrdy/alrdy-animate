@@ -1,6 +1,4 @@
 // Animations variables
-$aa-distance: 50px !default;
-
 @media screen {
   html:not(.no-js) {
     /**
@@ -23,35 +21,35 @@ $aa-distance: 50px !default;
     }
 
     [aa-animate='fade-up'] {
-      transform: translate3d(0, $aa-distance, 0);
+      transform: translate3d(0, calc(50px * var(--aa-distance-factor)), 0);
     }
 
     [aa-animate='fade-down'] {
-      transform: translate3d(0, -$aa-distance, 0);
+      transform: translate3d(0, calc(-50px * var(--aa-distance-factor)), 0);
     }
 
     [aa-animate='fade-right'] {
-      transform: translate3d(-$aa-distance, 0, 0);
+      transform: translate3d(calc(-50px * var(--aa-distance-factor)), 0, 0);
     }
 
     [aa-animate='fade-left'] {
-      transform: translate3d($aa-distance, 0, 0);
+      transform: translate3d(calc(50px * var(--aa-distance-factor)), 0, 0);
     }
 
     [aa-animate='fade-up-right'] {
-      transform: translate3d(-$aa-distance, $aa-distance, 0);
+      transform: translate3d(calc(-50px * var(--aa-distance-factor)), calc(50px * var(--aa-distance-factor)), 0);
     }
 
     [aa-animate='fade-up-left'] {
-      transform: translate3d($aa-distance, $aa-distance, 0);
+      transform: translate3d(calc(50px * var(--aa-distance-factor)), calc(50px * var(--aa-distance-factor)), 0);
     }
 
     [aa-animate='fade-down-right'] {
-      transform: translate3d(-$aa-distance, -$aa-distance, 0);
+      transform: translate3d(calc(-50px * var(--aa-distance-factor)), calc(-50px * var(--aa-distance-factor)), 0);
     }
 
     [aa-animate='fade-down-left'] {
-      transform: translate3d($aa-distance, -$aa-distance, 0);
+      transform: translate3d(calc(50px * var(--aa-distance-factor)), calc(-50px * var(--aa-distance-factor)), 0);
     }
 
 
@@ -80,19 +78,19 @@ $aa-distance: 50px !default;
     }
 
     [aa-animate='zoom-in-up'] {
-      transform: translate3d(0, $aa-distance, 0) scale(.6);
+      transform: translate3d(0, calc(50px * var(--aa-distance-factor)), 0) scale(.6);
     }
 
     [aa-animate='zoom-in-down'] {
-      transform: translate3d(0, -$aa-distance, 0) scale(.6);
+      transform: translate3d(0, calc(-50px * var(--aa-distance-factor)), 0) scale(.6);
     }
 
     [aa-animate='zoom-in-right'] {
-      transform: translate3d(-$aa-distance, 0, 0) scale(.6);
+      transform: translate3d(calc(-50px * var(--aa-distance-factor)), 0, 0) scale(.6);
     }
 
     [aa-animate='zoom-in-left'] {
-      transform: translate3d($aa-distance, 0, 0) scale(.6);
+      transform: translate3d(calc(50px * var(--aa-distance-factor)), 0, 0) scale(.6);
     }
 
     [aa-animate='zoom-out'] {
@@ -100,19 +98,19 @@ $aa-distance: 50px !default;
     }
 
     [aa-animate='zoom-out-up'] {
-      transform: translate3d(0, $aa-distance, 0) scale(1.2);
+      transform: translate3d(0, calc(50px * var(--aa-distance-factor)), 0) scale(1.2);
     }
 
     [aa-animate='zoom-out-down'] {
-      transform: translate3d(0, -$aa-distance, 0) scale(1.2);
+      transform: translate3d(0, calc(-50px * var(--aa-distance-factor)), 0) scale(1.2);
     }
 
     [aa-animate='zoom-out-right'] {
-      transform: translate3d(-$aa-distance, 0, 0) scale(1.2);
+      transform: translate3d(calc(-50px * var(--aa-distance-factor)), 0, 0) scale(1.2);
     }
 
     [aa-animate='zoom-out-left'] {
-      transform: translate3d($aa-distance, 0, 0) scale(1.2);
+      transform: translate3d(calc(50px * var(--aa-distance-factor)), 0, 0) scale(1.2);
     }
 
 
@@ -202,19 +200,19 @@ $aa-distance: 50px !default;
     }
 
     [aa-animate='slide-rotate-bottom-right'] {
-      transform: translate3d(-$aa-distance, $aa-distance, 0) rotate(-45deg);
+      transform: translate3d(calc(-50px * var(--aa-distance-factor)), calc(50px * var(--aa-distance-factor)), 0) rotate(-45deg);
     }
 
     [aa-animate='slide-rotate-bottom-left'] {
-      transform: translate3d($aa-distance, $aa-distance, 0) rotate(45deg);
+      transform: translate3d(calc(50px * var(--aa-distance-factor)), calc(50px * var(--aa-distance-factor)), 0) rotate(45deg);
     }
 
     [aa-animate='slide-rotate-top-right'] {
-      transform: translate3d(-$aa-distance, -$aa-distance, 0) rotate(45deg);
+      transform: translate3d(calc(-50px * var(--aa-distance-factor)), calc(-50px * var(--aa-distance-factor)), 0) rotate(45deg);
     }
 
     [aa-animate='slide-rotate-top-left'] {
-      transform: translate3d($aa-distance, -$aa-distance, 0) rotate(-45deg);
+      transform: translate3d(calc(50px * var(--aa-distance-factor)), calc(-50px * var(--aa-distance-factor)), 0) rotate(-45deg);
     }
 
 
