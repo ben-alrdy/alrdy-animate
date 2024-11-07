@@ -117,7 +117,6 @@ export function createLoopAnimations(gsap, Draggable) {
           }
           timeWrap = gsap.utils.wrap(0, tl.duration());
         },
-        lastWidth = window.innerWidth;  // store the last width to check if it has changed for mobile browser height changes on scroll
         refresh = (deep) => {
           let progress = tl.progress();
           tl.progress(0, true);
@@ -126,13 +125,7 @@ export function createLoopAnimations(gsap, Draggable) {
           populateOffsets();
           deep && tl.draggable ? tl.time(times[curIndex], true) : tl.progress(progress, true);
         },
-        onResize = () => {
-          // Only refresh if the width has changed
-          if (window.innerWidth !== lastWidth) {
-            lastWidth = window.innerWidth;
-            refresh(true);
-          }
-        },
+        onResize = () => refresh(true),
         proxy;
       gsap.set(items, { x: 0 });
       populateWidths();
@@ -238,7 +231,7 @@ export function createLoopAnimations(gsap, Draggable) {
       lastIndex = curIndex;
       onChange && onChange(items[curIndex], curIndex);
       timeline = tl;
-      return () => window.removeEventListener("resize", onResize); // cleanup
+      /* return () => window.removeEventListener("resize", onResize); // cleanup */
     });
     return timeline;
   }
