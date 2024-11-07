@@ -128,6 +128,89 @@ You can simply add the `aa-animate` attribute to the element you want to animate
 - **aa-anchor**: Specify an anchor element to trigger the animation (useful for fixed elements that should be animated when the anchor scrolls into view). Example: `aa-anchor="#anchorElement"`.
 - **aa-viewport**: Override the global viewport percentage for this element. Example: `aa-viewport="0.6"`.
 
+## CSS Animations
+
+AlrdyAnimate provides a wide variety of CSS animations that can be applied using the `aa-animate` attribute.
+
+### Fade Animations
+Simple fade animations with optional directional movement:
+- `fade`
+- `fade-up`, `fade-down`, `fade-left`, `fade-right`
+- `fade-up-right`, `fade-up-left`, `fade-down-right`, `fade-down-left`
+
+### Float Animations
+Fade animations with a smooth back-bounce effect:
+- `float-up`, `float-down`, `float-left`, `float-right`
+
+### Zoom Animations
+Scale animations with optional directional movement:
+- `zoom-in`, `zoom-out`
+- `zoom-in-up`, `zoom-in-down`, `zoom-in-left`, `zoom-in-right`
+- `zoom-out-up`, `zoom-out-down`, `zoom-out-left`, `zoom-out-right`
+
+### Slide Animations
+Pure sliding movements:
+- `slide-up`, `slide-down`, `slide-left`, `slide-right`
+
+### Blurred Slide Animations
+Sliding with a blur effect:
+- `slide-in-blurred-bottom`, `slide-in-blurred-top`
+- `slide-in-blurred-left`, `slide-in-blurred-right`
+
+### Flip Animations
+3D flip effects (requires parent with perspective):
+- `flip-left`, `flip-right`, `flip-up`, `flip-down`
+
+### Slide and Rotate Animations
+Combined sliding and rotation effects:
+- `slide-rotate-bottom-right`, `slide-rotate-bottom-left`
+- `slide-rotate-top-right`, `slide-rotate-top-left`
+
+### 3D Animations
+#### Swing Animations
+3D swing effects (anchored to top):
+- `swing-fwd`, `swing-bwd`
+
+#### Rotation Animations
+3D rotation effects:
+- `rotate-soft`: Soft rotation around X axis
+- `rotate-soft-3em`: Same as rotate-soft but with built-in perspective
+- `rotate-elliptic`: Rotation around both X and Y axes
+
+### Background Transitions
+#### Pseudo Background Slide
+Background color transitions with sliding reveal:
+- `pseudo-bg-slide-down`, `pseudo-bg-slide-up`
+- `pseudo-bg-slide-right`, `pseudo-bg-slide-left`
+
+#### Pseudo Background Reveal
+Background color transitions with scaling reveal:
+- `pseudo-reveal-up`, `pseudo-reveal-down`
+- `pseudo-reveal-right`, `pseudo-reveal-left`
+
+### Customizing Animations
+All animations can be customized using these attributes:
+- `aa-duration`: Animation duration in seconds
+- `aa-delay`: Animation delay in seconds
+- `aa-distance`: Multiplier for animation distance (where applicable)
+- `aa-easing`: Overwrites the global easing function for this element. Example: `aa-easing="ease-in-out"`.
+
+For background transitions, you can also set:
+- `--background-color-initial`: Starting background color
+- `--background-color-final`: Ending background color
+
+Example usage:
+```html
+<div 
+  aa-animate="fade-up" 
+  aa-duration="0.6" 
+  aa-delay="0.2" 
+  aa-distance-factor="1.5"
+>
+  Animated content
+</div>
+```
+
 
 ## GSAP Features
 
