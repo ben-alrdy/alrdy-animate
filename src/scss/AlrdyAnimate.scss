@@ -1,10 +1,21 @@
-// Set initial defaults on 
+html {
+  // Fix to reduce mobile viewport stuttering
+  height: -webkit-fill-available;
+}
+
 body {
+  // Set initial defaults on 
+
   --aa-default-duration: 1s;
   --aa-default-delay: 0s;
   --aa-distance-factor: 1;
   --background-color-initial: var(--background-color--background-page);
   --background-color-final: var(--background-color--background-alternate);
+
+  // Fix to reduce mobile viewport stuttering
+  min-height: 100vh;
+  /* mobile viewport bug fix */
+  min-height: -webkit-fill-available;
 }
 
 // Base styles for all animated elements
