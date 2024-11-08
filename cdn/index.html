@@ -497,6 +497,18 @@
   border-radius: 1rem;
 }
 
+/* Add at the top of your CSS */
+html {
+  height: -webkit-fill-available;
+}
+
+body {
+  min-height: 100vh;
+  /* mobile viewport bug fix */
+  min-height: -webkit-fill-available;
+  /* Optional: prevent bounce/rubber-band effect */
+  overscroll-behavior-y: none;
+}
 
   </style>
 </head>
