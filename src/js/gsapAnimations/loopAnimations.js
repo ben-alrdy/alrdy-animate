@@ -131,7 +131,7 @@ export function createLoopAnimations(gsap, Draggable) {
       populateWidths();
       populateTimeline();
       populateOffsets();
-      window.addEventListener("resize", onResize);
+      // window.addEventListener("resize", onResize); removed since we're handling this in the resizeHandler.js file
       function toIndex(index, vars) {
         vars = vars || {};
         const gap = parseFloat(window.getComputedStyle(container).gap) || 0;
