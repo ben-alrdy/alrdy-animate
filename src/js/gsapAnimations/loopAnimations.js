@@ -272,11 +272,7 @@ export function createLoopAnimations(gsap, Draggable) {
       repeat: -1,
       center: true
     };
-  
-    if (animationType.includes('right')) {
-      config.reversed = true;
-    }
-  
+
     if (animationType.includes('draggable') || animationType.includes('snap')) {
       config.draggable = true;
       config.snap = true;
@@ -284,6 +280,10 @@ export function createLoopAnimations(gsap, Draggable) {
   
     if (animationType.includes('snap')) {
       config.paused = true;
+    }
+  
+    if (animationType.includes('right')) {
+      config.reversed = true;
     }
   
     return config;
@@ -298,16 +298,20 @@ export function createLoopAnimations(gsap, Draggable) {
         onComplete: startSnapCycle
       });
     };
-
-    console.log(ease);
   
     const startSnapCycle = () => {
       gsap.delayedCall(2, moveToNext);
     };
-  
-    // Initial setup
-    loop.toIndex(0, { duration: 0 });
-    gsap.delayedCall(0.1, startSnapCycle);
+
+    // Start from the first item
+    loop.toIndex(0, { duration: 0 }); 
+
+    // Pause the loop if it's going right to auto movement bug
+    if (animationType.includes('right')) {
+      loop.pause();
+    }
+
+    gsap.delayedCall(0.01, startSnapCycle);
   
     // Make these functions accessible to the drag handlers
     loop.moveToNext = moveToNext;
@@ -326,11 +330,16 @@ export function createLoopAnimations(gsap, Draggable) {
       onThrowComplete: loop.draggable.vars.onThrowComplete
     };
 
+    loop.draggable.vars.onPressInit = function() {
+      if (loop.paused() && !startSnapCycle) {
+        loop.play();
+      }
+    };
+
     loop.draggable.vars.onDragStart = function() {
       if (originalHandlers.onPressInit) {
         originalHandlers.onPressInit.call(this);
       }
-      console.log("drag start");
 
       // Pause the loop timeline
       loop.pause();
@@ -346,7 +355,7 @@ export function createLoopAnimations(gsap, Draggable) {
       if (originalHandlers.onThrowComplete) {
         originalHandlers.onThrowComplete.call(this);
       }
-      console.log("draggable throw complete");
+
       if (startSnapCycle) {
         startSnapCycle();
       } else {

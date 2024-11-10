@@ -1,4 +1,4 @@
-$aa-easing: (
+$aa-ease: (
   // Standard CSS easings 
   linear: cubic-bezier(0, 0, 1, 1),
   ease: cubic-bezier(0.25, 0.1, 0.25, 1),       
@@ -44,9 +44,9 @@ $aa-easing: (
 
 // Easings implementations
 [aa-animate] {
-  @each $key, $val in $aa-easing {
-    body[aa-easing="#{$key}"] &,
-    &[aa-animate][aa-easing="#{$key}"] {
+  @each $key, $val in $aa-ease {
+    body[aa-ease="#{$key}"] &,
+    &[aa-animate][aa-ease="#{$key}"] {
       animation-timing-function: $val;
       transition-timing-function: $val;
     }
