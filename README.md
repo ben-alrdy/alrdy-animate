@@ -55,7 +55,7 @@ You can include AlrdyAnimate in your project using either CDN or npm.
 <script>
   document.addEventListener('DOMContentLoaded', function() {
     AlrdyAnimate.init({
-      easing: 'ease-in-out',
+      ease: 'ease-in-out',
       again: false,
       viewportPercentage: 0.9,
       duration: 2,
@@ -83,7 +83,7 @@ import 'alrdy-animate/dist/AlrdyAnimate.css';
 document.addEventListener('DOMContentLoaded', async () => {
   try {
     const { gsap, ScrollTrigger } = await AlrdyAnimate.init({
-      easing: 'ease-in-out',
+      ease: 'ease-in-out',
       again: false,
       viewportPercentage: 0.6,
       duration: 2,
@@ -102,7 +102,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
-| `easing` | string | 'ease-in-out' | Animation easing function |
+| `ease` | string | 'ease-in-out' | Animation easing function |
 | `again` | boolean | false | Whether animations should replay when scrolling up |
 | `viewportPercentage` | number | 0.6 | When element should start animating (0.0 - 1.0) |
 | `duration` | number | 1 | Animation duration in seconds |
@@ -119,7 +119,7 @@ You can simply add the `aa-animate` attribute to the element you want to animate
 ### Element Attributes
 
 - **aa-children**: Accepts same values as `aa-animate`, but applies animation to all children if set. Use in conjunction with `aa-stagger` to set a staggered animation and `aa-delay` to set the starting point for all children. Example: `aa-children="fade-up"`.
-- **aa-easing**: Overwrites the global easing function for this element. Example: `aa-easing="ease-in-out"`.
+- **aa-ease**: Overwrites the global easing function for this element. Example: `aa-ease="ease-in-out"`.
 - **aa-duration**: The animation duration for this element, in seconds. Example: `aa-duration="2"`.
 - **aa-delay**: The animation delay for this element, in seconds. Example: `aa-delay="0.5"`.
 - **aa-delay-mobile**: If set, overwrites the delay on mobile devices. Example: `aa-delay-mobile="0.5s"`.
@@ -193,7 +193,7 @@ All animations can be customized using these attributes:
 - `aa-duration`: Animation duration in seconds
 - `aa-delay`: Animation delay in seconds
 - `aa-distance`: Multiplier for animation distance (where applicable)
-- `aa-easing`: Overwrites the global easing function for this element. Example: `aa-easing="ease-in-out"`.
+- `aa-ease`: Overwrites the global easing function for this element. Example: `aa-ease="ease-in-out"`.
 
 For background transitions, you can also set:
 - `--background-color-initial`: Starting background color
@@ -307,13 +307,13 @@ Required for: Sticky navigation
 - You can use the `aa-nav="sticky"` attribute to create a sticky navigation bar that slides out of view when the user scrolls down and slides back in when the user scrolls up. 
 - Easing defaults to `back.inOut` 
 - Duration defaults to `0.4s`
-- You can overwrite both by adding `aa-easing` and `aa-duration` to the nav element.
+- You can overwrite both by adding `aa-ease` and `aa-duration` to the nav element.
 
 
 Example usage with all features:
 ```javascript
 AlrdyAnimate.init({
-  easing: 'power1.out',
+  ease: 'power1.out',
   again: true,
   gsapFeatures: ['text', 'loop', 'scroll'],
   debug: true
@@ -353,7 +353,7 @@ Note: 'Elastic' and 'Bounce' easings are available when using GSAP but not for C
 
 Usage example:
 ```html
-<div aa-animate="fade-up" aa-easing="back.out">Animated content</div>
+<div aa-animate="fade-up" aa-ease="back.out">Animated content</div>
 ```
 
 This will apply a fade-up animation with a 'back out' easing, which means it will slightly overshoot and then settle into place.

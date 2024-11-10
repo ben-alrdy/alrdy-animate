@@ -13,7 +13,7 @@ let enableGSAP = false;
 
 // Default options for the animation settings
 const defaultOptions = {
-  easing: "ease-in-out", // Default easing function for animations
+  ease: "ease-in-out", // Default easing function for animations
   again: true, // True = removes 'in-view' class when element is out of view towards the bottom
   viewportPercentage: 0.8, // Default percentage of the viewport height to trigger the animation
   duration: 1, // 1 second
@@ -46,7 +46,7 @@ async function init(options = {}) {
   document.body.style.setProperty("--aa-default-duration", `${initOptions.duration}s`);
   document.body.style.setProperty("--aa-default-delay", `${initOptions.delay}s`);
   document.body.style.setProperty("--aa-distance-factor", `${initOptions.distance}`);
-  document.body.setAttribute("aa-easing", initOptions.easing);
+  document.body.setAttribute("aa-ease", initOptions.ease);
 
   return new Promise((resolve) => { // Return a promise to handle asynchronous loading
     window.addEventListener('load', async () => {
@@ -116,7 +116,7 @@ async function init(options = {}) {
           // Set up sticky nav
           const navElement = document.querySelector('[aa-nav="sticky"]');
           if (navElement) {
-            const navEase = navElement.getAttribute('aa-easing');
+            const navEase = navElement.getAttribute('aa-ease');
             const navDuration = navElement.getAttribute('aa-duration');
             modules.animations.stickyNav?.(navElement, navEase ?? 'back.inOut', navDuration ?? 0.4);
           }
@@ -178,7 +178,7 @@ function setupAnimations(elements, initOptions, isMobile, modules) {
           console.warn(`Loop animation requested but 'loop' module not loaded. Add 'loop' to gsapFeatures array in init options to use loop animations.`);
           return;
         }
-        modules.animations.loop(element, animationType, elementSettings.duration);
+        modules.animations.loop(element, animationType, elementSettings.duration, elementSettings.ease);
       } else {
         setupGSAPAnimations(element, elementSettings, initOptions, isMobile, modules);
       }

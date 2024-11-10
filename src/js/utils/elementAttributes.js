@@ -5,7 +5,7 @@ export function getElementSettings(element, settings) {
   return {
     // Animation properties
     animationType: element.getAttribute('aa-animate'),
-    ease: element.hasAttribute('aa-easing') ? element.getAttribute('aa-easing') : settings.easing,
+    ease: element.hasAttribute('aa-ease') ? element.getAttribute('aa-ease') : settings.ease,
     splitType: element.getAttribute('aa-split'),
     scroll: element.getAttribute('aa-scroll'),
     distance: element.hasAttribute('aa-distance') ? parseFloat(element.getAttribute('aa-distance')) : settings.distance,

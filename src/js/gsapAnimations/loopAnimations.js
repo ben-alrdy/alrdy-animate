@@ -12,9 +12,9 @@ export function createLoopAnimations(gsap, Draggable) {
     - When each item animates to the left or right enough, it will loop back to the other side
     - Optionally pass in a config object with values like "speed" (default: 1, which travels at roughly 100 pixels per second), paused (boolean),  repeat, reversed, and paddingRight.
     - The returned timeline will have the following methods added to it:
-    - next() - animates to the next element using a timeline.tweenTo() which it returns. You can pass in a vars object to control duration, easing, etc.
-    - previous() - animates to the previous element using a timeline.tweenTo() which it returns. You can pass in a vars object to control duration, easing, etc.
-    - toIndex() - pass in a zero-based index value of the element that it should animate to, and optionally pass in a vars object to control duration, easing, etc. Always goes in the shortest direction
+    - next() - animates to the next element using a timeline.tweenTo() which it returns. You can pass in a vars object to control duration, ease, etc.
+    - previous() - animates to the previous element using a timeline.tweenTo() which it returns. You can pass in a vars object to control duration, ease, etc.
+    - toIndex() - pass in a zero-based index value of the element that it should animate to, and optionally pass in a vars object to control duration, ease, etc. Always goes in the shortest direction
     - current() - returns the current index (if an animation is in-progress, it reflects the final index)
     - times - an Array of the times on the timeline where each element hits the "starting" spot. There's also a label added accordingly, so "label1" is when the 2nd element reaches the start.
     */
@@ -178,7 +178,7 @@ export function createLoopAnimations(gsap, Draggable) {
           ratio, startProgress, draggable, dragSnap, lastSnap, initChangeX, wasPlaying,
           align = () => tl.progress(wrap(startProgress + (draggable.startX - draggable.x) * ratio)),
           syncIndex = () => tl.closestIndex(true);
-        
+
         draggable = Draggable.create(proxy, {
           trigger: items[0].parentNode,
           type: "x",
@@ -236,83 +236,123 @@ export function createLoopAnimations(gsap, Draggable) {
     return timeline;
   }
 
-  function setupLoopAnimation(element, animationType, duration = 1) {
+  function setupLoopAnimation(element, animationType, duration = 1, ease = "power2.inOut") {
     const items = gsap.utils.toArray(element.children);
     if (items.length === 0) {
       console.warn('No items found in container element.');
       return;
     }
-
-    // Base configuration
-    const config = {
-      onChange: (element, index) => {
-        const activeElement = element.parentElement.querySelector('.active');
-        if (activeElement) activeElement.classList.remove('active');
-        element.classList.add('active'); // Add active class to the clicked element
-      },
-      speed: duration,
-      repeat: -1  // Add infinite repeat here for all cases
-    };
-
-    // Configure based on animation type
-    switch (animationType) {
-      case 'loop-right':
-        config.paused = false;
-        config.reversed = true;
-        config.center = true;
-        break;
-
-      case 'loop-left':
-        config.paused = false;
-        config.center = true;
-        break;
-
-      case 'loop-right-draggable':
-        config.draggable = true;
-        config.reversed = true;
-        config.center = true;
-        config.snap = true;
-        break;
-
-      case 'loop-left-draggable':
-        config.draggable = true;
-        config.center = true;
-        config.snap = true;
-        break;
-
-      default:
-        console.warn('Unknown animation type:', animationType);
-        return;
-    }
-
+  
+    // Create the loop configuration
+    const config = createLoopConfig(animationType, duration);
+    
+    // Initialize the loop
     const loop = horizontalLoop(items, config);
     element._loop = loop;
     activeLoops.add(element);
-
-    // Add click handlers only for draggable versions
-    if (animationType.includes('draggable')) {
-      items.forEach((item, i) => {
-        item.addEventListener("click", () => {        
-          loop.pause();
-          
-          loop.toIndex(i, {
-            duration: 0.8, 
-            ease: "power1.inOut",
-            onComplete: () => {
-              gsap.delayedCall(1, () => {
-                if (i === 0) { // For index 0, i.e. first element is clicked, force the timeline to a position that will trigger movement
-                  loop.time(0);   // First reset the time to ensure we're at the start
-                  loop.progress(0.001); // Then move slightly forward (0.1% progress)
-                }
-                loop.play();
-              });
-            } 
-          });
-        });
-      });
+  
+    // Setup additional behaviors based on animation type
+    if (animationType.includes('snap')) {
+      setupSnapBehavior(loop, animationType, duration, ease);
+    } else if (animationType.includes('draggable')) {
+      setupDragHandlers(loop);
     }
-
+  
     return loop;
+  }
+  
+  function createLoopConfig(animationType, duration) {
+    const config = {
+      onChange: (element) => {
+        const activeElement = element.parentElement.querySelector('.active');
+        if (activeElement) activeElement.classList.remove('active');
+        element.classList.add('active');
+      },
+      speed: duration,
+      repeat: -1,
+      center: true
+    };
+  
+    if (animationType.includes('right')) {
+      config.reversed = true;
+    }
+  
+    if (animationType.includes('draggable') || animationType.includes('snap')) {
+      config.draggable = true;
+      config.snap = true;
+    }
+  
+    if (animationType.includes('snap')) {
+      config.paused = true;
+    }
+  
+    return config;
+  }
+  
+  function setupSnapBehavior(loop, animationType, duration, ease) {
+    const moveToNext = () => {
+      const direction = animationType.includes('right') ? 'previous' : 'next';
+      loop[direction]({
+        duration: duration,
+        ease: ease,
+        onComplete: startSnapCycle
+      });
+    };
+
+    console.log(ease);
+  
+    const startSnapCycle = () => {
+      gsap.delayedCall(2, moveToNext);
+    };
+  
+    // Initial setup
+    loop.toIndex(0, { duration: 0 });
+    gsap.delayedCall(0.1, startSnapCycle);
+  
+    // Make these functions accessible to the drag handlers
+    loop.moveToNext = moveToNext;
+    loop.startSnapCycle = startSnapCycle;
+  
+    // Handle dragging
+    if (loop.draggable) {
+      setupDragHandlers(loop, startSnapCycle);
+    }
+  }
+  
+  function setupDragHandlers(loop, startSnapCycle = null) {
+    const originalHandlers = {
+      onPressInit: loop.draggable.vars.onPressInit,
+      onRelease: loop.draggable.vars.onRelease,
+      onThrowComplete: loop.draggable.vars.onThrowComplete
+    };
+
+    loop.draggable.vars.onDragStart = function() {
+      if (originalHandlers.onPressInit) {
+        originalHandlers.onPressInit.call(this);
+      }
+      console.log("drag start");
+
+      // Pause the loop timeline
+      loop.pause();
+      
+      // Kill any existing delayed calls
+      if (startSnapCycle) {
+        gsap.killTweensOf(loop.moveToNext);
+        gsap.killTweensOf(loop.startSnapCycle);
+      }
+    };
+
+    loop.draggable.vars.onThrowComplete = function() {
+      if (originalHandlers.onThrowComplete) {
+        originalHandlers.onThrowComplete.call(this);
+      }
+      console.log("draggable throw complete");
+      if (startSnapCycle) {
+        startSnapCycle();
+      } else {
+        loop.play();
+      }
+    };
   }
 
   function cleanupLoops() {
@@ -331,7 +371,7 @@ export function createLoopAnimations(gsap, Draggable) {
   }
 
   return {
-    loop: (element, animationType, duration) => setupLoopAnimation(element, animationType, duration),
+    loop: (element, animationType, duration, ease) => setupLoopAnimation(element, animationType, duration, ease),
     cleanupLoops
   };
 }

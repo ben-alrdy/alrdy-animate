@@ -559,7 +559,7 @@
 
     <main>
         <section class="hero">
-            <h1 class="headline" aa-animate="rotate-soft-3em"  aa-easing="expo.out" aa-delay="0" aa-duration="0.4">
+            <h1 class="headline" aa-animate="rotate-soft-3em"  aa-ease="expo.out" aa-delay="0" aa-duration="0.4">
                 ThickPic
             </h1>
             <p class="subheadline" aa-animate="text-slide-down" aa-split="words" aa-stagger="0.1" aa-delay="2.5">
@@ -567,7 +567,7 @@
                 productivity
             </p>
 
-            <div class="cta-buttons" aa-animate="fade-up-back" aa-duration="1.5" aa-easing="power2.out" aa-delay="1.2">
+            <div class="cta-buttons" aa-animate="fade-up-back" aa-duration="1.5" aa-ease="power2.out" aa-delay="1.2">
                 <button class="shiny-cta">
                     <span>Get unlimited access</span>
                 </button>
@@ -580,7 +580,7 @@
                     Install Chrome Extension
                 </a>
             </div>
-            <div class="hero-image" aa-animate="rotate-elliptic" aa-duration="0.5" aa-easing="back.out" aa-delay="1.5">
+            <div class="hero-image" aa-animate="rotate-elliptic" aa-duration="0.5" aa-ease="back.out" aa-delay="1.5">
                 <img src="https://images.unsplash.com/photo-1611162617474-5b21e879e113?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1674&q=80" alt="Person using laptop with calendar app open">
                 <button class="play-button" aria-label="Play video">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -591,7 +591,7 @@
         </section>
         <section class="loop-section">
           <div class="container">
-          <div class="loop-container" aa-animate="loop-left-draggable" aa-duration="1">
+          <div class="loop-container" aa-animate="loop-left-snap" aa-duration="1">
             <div class="loop-item">
               <div aa-animate="float-up">Item 1</div>
             </div>    
@@ -647,13 +647,13 @@
         </section>
         <section>
             <div class="container">
-                <h2 aa-animate="text-rotate-soft" style="font-size: 10rem;" aa-split="lines" aa-stagger="0.3" aa-duration="1.2" aa-easing="circ.out">
+                <h2 aa-animate="text-rotate-soft" style="font-size: 10rem;" aa-split="lines" aa-stagger="0.3" aa-duration="1.2" aa-ease="circ.out">
                     This text can be 
                 </h2>
                 <h2 aa-animate="rotate-soft-3em" >
                   This text can be one line
               </h2>
-                <div class="grid" aa-children="float-up" aa-delay="1" aa-duration="1.5" aa-easing="power2.out" aa-stagger="0.2">
+                <div class="grid" aa-children="float-up" aa-delay="1" aa-duration="1.5" aa-ease="power2.out" aa-stagger="0.2">
                   <div class="box"></div>
                   <div class="box"></div>
                   <div class="box"></div>
@@ -664,7 +664,7 @@
                     <div class="box"><span aa-animate="float-left">Fade Left Back</span></div>
                     <div class="box"><span aa-animate="float-right">Fade Right Back</span></div>
                     <div class="box"><span aa-animate="fade" aa-duration="1.5">Fade</span></div>
-                    <div class="box"><span aa-animate="fade-up" aa-easing="back.out">Fade Up</span></div>
+                    <div class="box"><span aa-animate="fade-up" aa-ease="back.out">Fade Up</span></div>
                     <div class="box"><span aa-animate="fade-down">Fade Down</span></div>
                     <div class="box"><span aa-animate="fade-left">Fade Left</span></div>
                     <div class="box"><span aa-animate="fade-right">Fade Right</span></div>
@@ -698,13 +698,13 @@
                     <div class="box"><span aa-animate="flip-down">Flip Down</span></div>
         
                     <!-- Slide rotation animations -->
-                    <div class="box" id="trigger-circle"><span aa-animate="slide-rotate-bottom-right" aa-easing="ease-out-cubic">Slide Rotate
+                    <div class="box" id="trigger-circle"><span aa-animate="slide-rotate-bottom-right" aa-ease="ease-out-cubic">Slide Rotate
                             Bottom Right</span></div>
-                    <div class="box"><span aa-animate="slide-rotate-bottom-left" aa-easing="ease-out-cubic">Slide Rotate
+                    <div class="box"><span aa-animate="slide-rotate-bottom-left" aa-ease="ease-out-cubic">Slide Rotate
                             Bottom Left</span></div>
-                    <div class="box"><span aa-animate="slide-rotate-top-right" aa-easing="ease-out-cubic">Slide Rotate Top
+                    <div class="box"><span aa-animate="slide-rotate-top-right" aa-ease="ease-out-cubic">Slide Rotate Top
                             Right</span></div>
-                    <div class="box"><span aa-animate="slide-rotate-top-left" aa-easing="ease-out-cubic">Slide Rotate Top
+                    <div class="box"><span aa-animate="slide-rotate-top-left" aa-ease="ease-out-cubic">Slide Rotate Top
                             Left</span></div>
         
                     <!-- Blurred slide animations -->
@@ -713,21 +713,21 @@
                     <div class="box"><span aa-animate="slide-in-blurred-left">Slide In Blurred Left</span></div>
                     <div class="box"><span aa-animate="slide-in-blurred-right">Slide In Blurred Right</span></div>
         
-                    <div class="box" style="height: 500px;" aa-animate="pseudo-reveal-down" aa-color-initial="rgba(255,255,255,1)" aa-easing="ease-out-expo" aa-delay="2">
+                  <!--   <div class="box" style="height: 500px;" aa-animate="pseudo-reveal-down" aa-color-initial="rgba(255,255,255,1)" aa-ease="ease-out-expo" aa-delay="2">
                         <img src="https://picsum.photos/800/600" alt="Image" style="width: 100%; height: 100%; object-fit: cover;">
                     </div>
                     <div class="box"
                         style="height: 500px; background-image: url('https://picsum.photos/800/601'); background-size: cover; background-position: center;"
                         aa-animate="pseudo-reveal-up" aa-color-initial="rgba(0,0,0,0.5)"
-                        aa-color-final="rgba(255,255,255,0.5)" aa-easing="ease-out-expo">
+                        aa-color-final="rgba(255,255,255,0.5)" aa-ease="ease-out-expo">
                         <div>slide up</div>
-                    </div>
+                    </div> -->
                     <div class="box" style="height: 500px;" aa-animate="pseudo-bg-slide-right" aa-color-initial="#f1f0ff"
-                        aa-color-final="#fff" aa-easing="ease-out-expo">
+                        aa-color-final="#fff" aa-ease="ease-out-expo">
                         <div>slide right</div>
                     </div>
                     <div class="box" style="height: 500px;" aa-animate="pseudo-bg-slide-left" aa-color-initial="#f1f0ff"
-                        aa-color-final="#fff" aa-easing="ease-out-expo">
+                        aa-color-final="#fff" aa-ease="ease-out-expo">
                         <div>slide left</div>
                     </div>
                 </div>
@@ -755,11 +755,11 @@
       document.addEventListener('DOMContentLoaded', function() {
         console.log('DOM Content Loaded, initializing AlrdyAnimate...');
         AlrdyAnimate.init({
-          easing: 'ease-in-out',
+          ease: 'ease-in-out',
           duration: 1,
           again: true,
           gsapFeatures: ['scroll', 'text', 'loop'],
-          distance: 5,
+          distance: 2,
           debug: true
         }).then(({ gsap, ScrollTrigger }) => {
           console.log('AlrdyAnimate init completed. GSAP:', gsap, 'ScrollTrigger:', ScrollTrigger);
