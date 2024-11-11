@@ -5,8 +5,6 @@ import { processChildren } from './utils/childrenHandler';
 import { getElementSettings, applyElementStyles } from './utils/elementAttributes';
 
 // Define these variables in the module scope
-let gsap = null;
-let ScrollTrigger = null;
 let allAnimatedElements = null;
 let isMobile = false;
 let enableGSAP = false;
@@ -305,8 +303,8 @@ function setupIntersectionObserver(element, elementSettings, initOptions) {
 
 const AlrdyAnimate = {
   init,
-  getGSAP: () => gsap,
-  getScrollTrigger: () => ScrollTrigger
+  getGSAP: () => window.gsap,
+  getScrollTrigger: () => window.ScrollTrigger
 };
 
 // Export as a named export
