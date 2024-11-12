@@ -63,9 +63,10 @@ async function init(options = {}) {
           // Register ScrollTrigger by default
           gsap.registerPlugin(ScrollTrigger);
 
-          // Make GSAP globally available
+          // Make GSAP and ScrollTrigger globally available
           window.gsap = gsap;
           window.ScrollTrigger = ScrollTrigger;
+          
 
           // Load requested features in parallel
           await Promise.all(
@@ -79,8 +80,16 @@ async function init(options = {}) {
               // 1. Load and register plugins
               if (moduleConfig.plugins) {
                 const plugins = await moduleConfig.plugins();
-                plugins.forEach(plugin => {
-                  Object.values(plugin).forEach(p => gsap.registerPlugin(p));
+                
+                plugins.forEach((plugin, index) => {
+                  Object.entries(plugin).forEach(([key, value]) => {
+                    gsap.registerPlugin(value);
+                    // Check if this is the Draggable constructor
+                    if (key === 'Draggable' || value.toString().includes('Draggable')) {
+                      window.Draggable = value;
+                      globalThis.Draggable = value; // Make it available in the global scope
+                    }
+                  });
                 });
                 Object.assign(modules, ...plugins);
               }
@@ -304,7 +313,8 @@ function setupIntersectionObserver(element, elementSettings, initOptions) {
 const AlrdyAnimate = {
   init,
   getGSAP: () => window.gsap,
-  getScrollTrigger: () => window.ScrollTrigger
+  getScrollTrigger: () => window.ScrollTrigger,
+  getDraggable: () => window.Draggable
 };
 
 // Export as a named export
