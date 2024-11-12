@@ -54,6 +54,16 @@ You can include AlrdyAnimate in your project using either CDN or npm.
 
 <script>
   document.addEventListener('DOMContentLoaded', function() {
+    // Basic initialization
+    AlrdyAnimate.init({
+      ease: 'ease-in-out',
+      again: false,
+      viewportPercentage: 0.9,
+      duration: 2,
+      delay: 0.5
+    });
+
+    // With GSAP features
     AlrdyAnimate.init({
       ease: 'ease-in-out',
       again: false,
@@ -61,8 +71,14 @@ You can include AlrdyAnimate in your project using either CDN or npm.
       duration: 2,
       delay: 0.5,
       gsapFeatures: ['text', 'loop', 'scroll']  // Specify which GSAP features to load
-    }).then(({ gsap, ScrollTrigger }) => {
-      console.log('GSAP and ScrollTrigger loaded successfully');
+    }).then(() => {
+      // GSAP features are now available globally
+      console.log('GSAP features loaded successfully');
+      
+      // You can now use:
+      // - gsap
+      // - ScrollTrigger
+      // - Draggable (if 'loop' feature was loaded)
     });
   });
 </script>
@@ -80,20 +96,28 @@ npm install alrdy-animate
 import { AlrdyAnimate } from 'alrdy-animate';
 import 'alrdy-animate/dist/AlrdyAnimate.css';
 
-document.addEventListener('DOMContentLoaded', async () => {
+document.addEventListener('DOMContentLoaded', () => {
   try {
-    const { gsap, ScrollTrigger } = await AlrdyAnimate.init({
+    AlrdyAnimate.init({
       ease: 'ease-in-out',
       again: false,
       viewportPercentage: 0.6,
       duration: 2,
       delay: 0.5,
       gsapFeatures: ['text', 'loop', 'scroll']  // Specify which GSAP features to load
+    }).then(() => {
+      // GSAP features are now available globally
+      console.log('GSAP features loaded successfully');
+      
+      // You can now use:
+      // - gsap
+      // - ScrollTrigger
+      // - Draggable (if 'loop' feature was loaded)
+    }).catch(error => {
+      console.error('Error initializing AlrdyAnimate:', error);
     });
-    
-    console.log('GSAP and ScrollTrigger loaded successfully');
   } catch (error) {
-    console.error('Error initializing AlrdyAnimate:', error);
+    console.error('Error during initialization setup:', error);
   }
 });
 ```
@@ -161,10 +185,12 @@ Sliding with a blur effect:
 3D flip effects (requires parent with perspective):
 - `flip-left`, `flip-right`, `flip-up`, `flip-down`
 
-### Slide and Rotate Animations
-Combined sliding and rotation effects:
-- `slide-rotate-bottom-right`, `slide-rotate-bottom-left`
-- `slide-rotate-top-right`, `slide-rotate-top-left`
+### Rotate Animations
+Rotate animations from bottom right (br) and bottom left (bl) corners, clockwise (cw) and counter-clockwise (ccw). Optionally, you can add `-10` to the end of the animation to rotate by 10 degrees instead of 45.
+- `rotate-br-cw`, `rotate-br-ccw`
+- `rotate-bl-cw`, `rotate-bl-ccw`
+- `rotate-br-cw-10`, `rotate-br-ccw-10`
+- `rotate-bl-cw-10`, `rotate-bl-ccw-10`
 
 ### 3D Animations
 #### Swing Animations
@@ -173,9 +199,9 @@ Combined sliding and rotation effects:
 
 #### Rotation Animations
 3D rotation effects:
-- `rotate-soft`: Soft rotation around X axis
-- `rotate-soft-3em`: Same as rotate-soft but with built-in perspective
-- `rotate-elliptic`: Rotation around both X and Y axes
+- `rotate-3d-soft`: Soft rotation around X axis
+- `rotate-3d-soft-3em`: Same as rotate-soft but with built-in perspective
+- `rotate-3d-elliptic`: Stronger elliptic rotation around X axis
 
 ### Background Transitions
 #### Pseudo Background Slide

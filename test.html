@@ -559,7 +559,7 @@
 
     <main>
         <section class="hero">
-            <h1 class="headline" aa-animate="rotate-soft-3em"  aa-ease="expo.out" aa-delay="0" aa-duration="0.4">
+            <h1 class="headline" aa-animate="rotate-3d-soft-3em"  aa-ease="expo.out" aa-delay="0" aa-duration="0.4">
                 ThickPic
             </h1>
             <p class="subheadline" aa-animate="text-slide-down" aa-split="words" aa-stagger="0.1" aa-delay="2.5">
@@ -580,7 +580,7 @@
                     Install Chrome Extension
                 </a>
             </div>
-            <div class="hero-image" aa-animate="rotate-elliptic" aa-duration="0.5" aa-ease="back.out" aa-delay="1.5">
+            <div class="hero-image" aa-animate="rotate-3d-elliptic" aa-duration="0.5" aa-ease="back.out" aa-delay="1.5">
                 <img src="https://images.unsplash.com/photo-1611162617474-5b21e879e113?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1674&q=80" alt="Person using laptop with calendar app open">
                 <button class="play-button" aria-label="Play video">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -589,7 +589,7 @@
                 </button>
             </div>
         </section>
-        <section class="loop-section">
+        <section class="loop-section" id="trigger-circle">
           <div class="container">
           <div class="loop-container" aa-animate="loop-left-snap" aa-duration="1">
             <div class="loop-item">
@@ -650,13 +650,19 @@
                 <h2 aa-animate="text-rotate-soft" style="font-size: 10rem;" aa-split="lines" aa-stagger="0.3" aa-duration="1.2" aa-ease="circ.out">
                     This text can be 
                 </h2>
-                <h2 aa-animate="rotate-soft-3em" >
+                <h2 aa-animate="rotate-3d-soft-3em" >
                   This text can be one line
               </h2>
                 <div class="grid" aa-children="float-up" aa-delay="1" aa-duration="1.5" aa-ease="power2.out" aa-stagger="0.2">
                   <div class="box"></div>
                   <div class="box"></div>
                   <div class="box"></div>
+                </div>
+                <div class="grid" style="grid-template-columns: repeat(4, 1fr);">
+                  <div class="box" style="background-color: #5b50fa; height: 300px;" aa-duration="0.8" aa-distance="0.01" aa-ease="back.out" aa-animate="rotate-br-cw"></div>
+                  <div class="box" style="background-color: #5b50fa; height: 300px;" aa-duration="0.8" aa-ease="back.out" aa-animate="rotate-br-cw-10"></div>
+                  <div class="box" style="background-color: #5b50fa; height: 300px;" aa-duration="0.8" aa-ease="back.out" aa-animate="rotate-bl-ccw-10"></div>
+                  <div class="box" style="background-color: #5b50fa; height: 300px;" aa-duration="0.8" aa-distance="0.01" aa-ease="back.out" aa-animate="rotate-bl-ccw"></div>
                 </div>
                 <div class="grid">
                     <div class="box"><span aa-animate="float-up" aa-distance="20">Fade Up Back</span></div>
@@ -696,16 +702,6 @@
                     <div class="box"><span aa-animate="flip-right">Flip Right</span></div>
                     <div class="box"><span aa-animate="flip-up">Flip Up</span></div>
                     <div class="box"><span aa-animate="flip-down">Flip Down</span></div>
-        
-                    <!-- Slide rotation animations -->
-                    <div class="box" id="trigger-circle"><span aa-animate="slide-rotate-bottom-right" aa-ease="ease-out-cubic">Slide Rotate
-                            Bottom Right</span></div>
-                    <div class="box"><span aa-animate="slide-rotate-bottom-left" aa-ease="ease-out-cubic">Slide Rotate
-                            Bottom Left</span></div>
-                    <div class="box"><span aa-animate="slide-rotate-top-right" aa-ease="ease-out-cubic">Slide Rotate Top
-                            Right</span></div>
-                    <div class="box"><span aa-animate="slide-rotate-top-left" aa-ease="ease-out-cubic">Slide Rotate Top
-                            Left</span></div>
         
                     <!-- Blurred slide animations -->
                     <div class="box"><span aa-animate="slide-in-blurred-bottom">Slide In Blurred Bottom</span></div>

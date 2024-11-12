@@ -87,7 +87,7 @@
 
 /*3D ROTATION ANIMATIONS*/
 
-[aa-animate^='rotate'][aa-animate^='rotate'] {
+[aa-animate^='rotate-3d'][aa-animate^='rotate-3d'] {
   opacity: 0;
 
   &.in-view {
@@ -95,17 +95,17 @@
   }
 }
 
-[aa-animate="rotate-soft"].in-view {
-  animation: rotate-soft forwards;
+[aa-animate="rotate-3d-soft"].in-view {
+  animation: rotate-3d-soft forwards;
   animation-duration: var(--animation-duration);
 }
 
-[aa-animate="rotate-soft-3em"].in-view {
-  animation: rotate-soft-3em forwards;
+[aa-animate="rotate-3d-soft-3em"].in-view {
+  animation: rotate-3d-soft-3em forwards;
   animation-duration: var(--animation-duration);
 }
 
-[aa-animate="rotate-elliptic"].in-view {
-  animation: rotate-elliptic forwards;
+[aa-animate="rotate-3d-elliptic"].in-view {
+  animation: rotate-3d-elliptic forwards;
   animation-duration: var(--animation-duration);
 }
