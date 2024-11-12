@@ -504,39 +504,6 @@
 <body>
     <div class="anchor" aa-anchor="#trigger-circle" aa-animate="fade-right"></div>
 
-    <section>
-      <div class="container">
-        <div class="button-wrapper">
-          <!-- SVG Filter for the blur effect -->
-          <svg width="0" height="0">
-            <defs>
-              <filter id="buttonFilter">
-                <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="blur"/>
-                <feColorMatrix in="blur" mode="matrix" 
-                  values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 19 -9" 
-                  result="buttonFilter"/>
-                <feComposite in="SourceGraphic" in2="buttonFilter" operator="atop"/>
-                <feBlend in="SourceGraphic" in2="buttonFilter"/>
-              </filter>
-            </defs>
-          </svg>
-        
-          <!-- Button Component -->
-          <a href="#" class="liquid-button">
-            <div class="button">
-              <span>View our work</span>
-            </div>
-            <div class="circle-wrapper">
-          
-                <svg class="arrow" viewBox="0 0 384 512">
-                  <path d="M328 96h24v288h-48V177.9L81 401l-17 17-33.9-34 17-17 223-223H64V96h264z"/>
-                </svg>
-        
-            </div>
-          </a>
-        </div>
-      </div>
-  </section>
 
     <header>
         <nav aa-nav="sticky">
@@ -571,14 +538,35 @@
                 <button class="shiny-cta">
                     <span>Get unlimited access</span>
                 </button>
-                <a href="#" class="secondary-cta">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path
-                            d="M3 16.5V18.75C3 19.3467 3.23705 19.919 3.65901 20.341C4.08097 20.7629 4.65326 21 5.25 21H18.75C19.3467 21 19.919 20.7629 20.341 20.341C20.7629 19.919 21 19.3467 21 18.75V16.5M16.5 12L12 16.5M12 16.5L7.5 12M12 16.5V3"
-                            stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                    </svg>
-                    Install Chrome Extension
-                </a>
+                <div class="button-wrapper">
+                  <!-- SVG Filter for the blur effect -->
+                  <svg width="0" height="0">
+                    <defs>
+                      <filter id="buttonFilter">
+                        <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="blur"/>
+                        <feColorMatrix in="blur" mode="matrix" 
+                          values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 19 -9" 
+                          result="buttonFilter"/>
+                        <feComposite in="SourceGraphic" in2="buttonFilter" operator="atop"/>
+                        <feBlend in="SourceGraphic" in2="buttonFilter"/>
+                      </filter>
+                    </defs>
+                  </svg>
+                
+                  <!-- Button Component -->
+                  <a href="#" class="liquid-button">
+                    <div class="button">
+                      <span>View our work</span>
+                    </div>
+                    <div class="circle-wrapper">
+                  
+                        <svg class="arrow" viewBox="0 0 384 512">
+                          <path d="M328 96h24v288h-48V177.9L81 401l-17 17-33.9-34 17-17 223-223H64V96h264z"/>
+                        </svg>
+                
+                    </div>
+                  </a>
+                </div>
             </div>
             <div class="hero-image" aa-animate="rotate-3d-elliptic" aa-duration="0.5" aa-ease="back.out" aa-delay="1.5">
                 <img src="https://images.unsplash.com/photo-1611162617474-5b21e879e113?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1674&q=80" alt="Person using laptop with calendar app open">
@@ -629,16 +617,8 @@
                       <p aa-animate="fade" class="text-size-medium in-view" style="--animation-duration: 1s;">Lorem ipsum
                         dolor sit amet, consectetur adipiscing elit. Suspendisse varius enim in eros elementum tristique. Duis
                         cursus, mi quis viverra ornare, eros dolor interdum nulla, ut commodo diam libero vitae erat.</p>
-                      <div class="spacer-medium"></div>
-                      <div class="button-group"><a href="#" class="button is-secondary w-button">Button</a><a href="#"
-                          class="button is-link is-icon w-inline-block">
-                          <div>Button</div>
-                          <div class="icon-embed-xxsmall w-embed"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"
-                              xmlns="http://www.w3.org/2000/svg">
-                              <path d="M6 3L11 8L6 13" stroke="CurrentColor" stroke-width="1.5"></path>
-                            </svg></div>
-                        </a></div>
-                    </div>
+                     
+                     
                   </div>
                 </div>
               </div>
