@@ -498,6 +498,31 @@
 }
 
 
+
+.text-animations-demo {
+  padding: 8rem 0;
+  background-color: var(--background-color);
+}
+
+.text-animations-demo h2 {
+  font-size: 3rem;
+  line-height: 1.3;
+  margin-bottom: 8rem;
+  max-width: 800px;
+}
+
+/* Add spacing between lines for multi-line headlines */
+.text-animations-demo h2 [class*="line"] {
+  display: block;
+  margin-bottom: 0.2em;
+}
+
+/* Ensure proper spacing for character splits */
+.text-animations-demo h2 [class*="char"] {
+  display: inline-block;
+  margin-right: -0.05em; /* Adjust character spacing */
+}
+
   </style>
 </head>
 
@@ -525,6 +550,87 @@
     </header>
 
     <main>
+
+      <section class="text-animations-demo">
+        <div class="container">
+          <h2 aa-animate="text-slide-up" aa-split="words" aa-stagger="0.1">
+            This headline slides up word by word
+          </h2>
+      
+          <h2 aa-animate="text-slide-down" aa-split="words" aa-stagger="0.1">
+            This headline slides down word by word
+          </h2>
+      
+          <h2 aa-animate="text-tilt-up" aa-split="lines" aa-stagger="0.2">
+            This headline tilts up
+            with a slight rotation
+            line by line
+          </h2>
+      
+          <h2 aa-animate="text-tilt-down" aa-split="lines" aa-stagger="0.2">
+            This headline tilts down
+            with a slight rotation
+            line by line
+          </h2>
+      
+          <h2 aa-animate="text-rotate-soft" aa-split="lines" aa-stagger="0.3">
+            This headline rotates in
+            with a 3D perspective
+            line by line
+          </h2>
+      
+          <h2 aa-animate="text-fade-soft" aa-split="chars" aa-stagger="0.05">
+            This headline fades in softly character by character
+          </h2>
+      
+          <h2 aa-animate="text-fade" aa-split="lines&words" aa-stagger="0.1">
+            This headline demonstrates
+            the lines&words split type
+            with a fade animation
+          </h2>
+        </div>
+      </section>
+
+      <section class="text-animations-demo"></section>
+        <div class="container">
+          <h2 aa-animate="text-slide-up" aa-split="words" aa-scroll="snap" aa-stagger="0.1">
+            This headline slides up word by word
+          </h2>
+      
+          <h2 aa-animate="text-slide-down" aa-split="words" aa-scroll="snap" aa-stagger="0.1">
+            This headline slides down word by word
+          </h2>
+      
+          <h2 aa-animate="text-tilt-up" aa-split="lines" aa-scroll="snap" aa-stagger="0.2">
+            This headline tilts up
+            with a slight rotation
+            line by line
+          </h2>
+      
+          <h2 aa-animate="text-tilt-down" aa-split="lines" aa-scroll="snap" aa-stagger="0.2">
+            This headline tilts down
+            with a slight rotation
+            line by line
+          </h2>
+      
+          <h2 aa-animate="text-rotate-soft" aa-split="lines" aa-scroll="snap" aa-stagger="0.3">
+            This headline rotates in
+            with a 3D perspective
+            line by line
+          </h2>
+      
+          <h2 aa-animate="text-fade-soft" aa-split="chars" aa-scroll="snap" aa-stagger="0.05">
+            This headline fades in softly character by character
+          </h2>
+      
+          <h2 aa-animate="text-fade" aa-split="lines&words" aa-scroll="snap" aa-stagger="0.1">
+            This headline demonstrates
+            the lines&words split type
+            with a fade animation
+          </h2>
+        </div>
+      </section>
+
         <section class="hero">
             <h1 class="headline" aa-animate="rotate-3d-soft-3em"  aa-ease="expo.out" aa-delay="0" aa-duration="0.4">
                 ThickPic
@@ -577,6 +683,7 @@
                 </button>
             </div>
         </section>
+
         <section class="loop-section" id="trigger-circle">
           <div class="container">
           <div class="loop-container" aa-animate="loop-left-snap" aa-duration="1">
@@ -640,8 +747,8 @@
                 </div>
                 <div class="grid" style="grid-template-columns: repeat(4, 1fr);">
                   <div class="box" style="background-color: #5b50fa; height: 300px;" aa-duration="0.8" aa-distance="0.01" aa-ease="back.out" aa-animate="rotate-br-cw"></div>
-                  <div class="box" style="background-color: #5b50fa; height: 300px;" aa-duration="0.8" aa-ease="back.out" aa-animate="rotate-br-cw-10"></div>
-                  <div class="box" style="background-color: #5b50fa; height: 300px;" aa-duration="0.8" aa-ease="back.out" aa-animate="rotate-bl-ccw-10"></div>
+                  <div class="box" style="background-color: #5b50fa; height: 300px;" aa-duration="0.8" aa-ease="back.out" aa-animate="rotate-br-cw.20"></div>
+                  <div class="box" style="background-color: #5b50fa; height: 300px;" aa-duration="0.8" aa-ease="back.out" aa-animate="rotate-bl-ccw.20"></div>
                   <div class="box" style="background-color: #5b50fa; height: 300px;" aa-duration="0.8" aa-distance="0.01" aa-ease="back.out" aa-animate="rotate-bl-ccw"></div>
                 </div>
                 <div class="grid">

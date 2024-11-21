@@ -222,30 +222,26 @@ function setupGSAPAnimations(element, elementSettings, initOptions, isMobile, mo
       const { splitResult, splitType } = modules.splitText(element, splitTypeAttr);
       element.splitInstance = splitResult; // Store the split instance on the element
 
-      // Define the animation configurations
-      const animationConfigs = {
-        'text-slide-up': { fn: modules.animations.textSlideUp,        defaults: { duration: 0.5, stagger: 0.1, ease: 'back.out' } },
-        'text-slide-down': { fn: modules.animations.textSlideDown,    defaults: { duration: 0.5, stagger: 0.1, ease: 'back.out' } },
-        'text-tilt-up': { fn: modules.animations.textTiltUp,          defaults: { duration: 0.5, stagger: 0.1, ease: 'back.out' } },
-        'text-tilt-down': { fn: modules.animations.textTiltDown,      defaults: { duration: 0.5, stagger: 0.1, ease: 'back.out' } },
-        'text-rotate-soft': { fn: modules.animations.textRotateSoft,  defaults: { duration: 1.2, stagger: 0.3, ease: 'circ.out' } },
-        'text-fade-soft': { fn: modules.animations.textFadeSoft,     defaults: { duration: 1, stagger: 0.08, ease: 'power2.inOut' } },
-        'text-fade': { fn: modules.animations.textFade,               defaults: { duration: 1, stagger: 0.08, ease: 'power2.inOut' } }
+      const textAnimationMap = {
+        'text-slide-up': 'slideUp',
+        'text-slide-down': 'slideDown',
+        'text-tilt-up': 'tiltUp',
+        'text-tilt-down': 'tiltDown',
+        'text-rotate-soft': 'rotateSoft',
+        'text-fade-soft': 'fadeSoft',
+        'text-fade': 'fade'
       };
 
-      // Get the animation configuration defined in the element settings
-      const config = animationConfigs[animationType];
-
-      if (config) {
-        // Add the animation to the timeline
-        tl.add(config.fn(
+      const animationName = textAnimationMap[animationType];
+      if (animationName) {
+        tl.add(modules.animations[animationName](
           element,
           splitResult,
           splitType,
-          duration ?? config.defaults.duration,
-          stagger ?? config.defaults.stagger,
+          duration,
+          stagger,
           delay,
-          ease ?? config.defaults.ease,
+          ease,
           isMobile,
           scroll
         ));

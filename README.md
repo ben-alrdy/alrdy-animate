@@ -186,11 +186,9 @@ Sliding with a blur effect:
 - `flip-left`, `flip-right`, `flip-up`, `flip-down`
 
 ### Rotate Animations
-Rotate animations from bottom right (br) and bottom left (bl) corners, clockwise (cw) and counter-clockwise (ccw). Optionally, you can add `-10` to the end of the animation to rotate by 10 degrees instead of 45.
+Rotate animations from bottom right (br) and bottom left (bl) corners, clockwise (cw) and counter-clockwise (ccw). Optionally, you can define the rotation degree by adding a numeric value separated by a dot at the end, e.g. `rotate-br-cw.10`. This will overwrite the default 45 rotation degree angle.
 - `rotate-br-cw`, `rotate-br-ccw`
 - `rotate-bl-cw`, `rotate-bl-ccw`
-- `rotate-br-cw-10`, `rotate-br-ccw-10`
-- `rotate-bl-cw-10`, `rotate-bl-ccw-10`
 
 ### 3D Animations
 #### Swing Animations

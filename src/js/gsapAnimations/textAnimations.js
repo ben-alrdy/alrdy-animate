@@ -1,175 +1,181 @@
-// Store gsap at module level
-let gsap = null;
-let ScrollTrigger = null;
+export function createTextAnimations(gsap, ScrollTrigger) {
+  // Animation defaults - moved from AlrdyAnimate.js
+  const defaults = {
+    slideUp:     { duration: 0.5, stagger: 0.1, ease: 'back.out' },
+    slideDown:   { duration: 0.5, stagger: 0.1, ease: 'back.out' },
+    tiltUp:      { duration: 0.5, stagger: 0.1, ease: 'back.out' },
+    tiltDown:    { duration: 0.5, stagger: 0.1, ease: 'back.out' },
+    rotateSoft:  { duration: 1.2, stagger: 0.3, ease: 'circ.out' },
+    fadeSoft:    { duration: 1.0, stagger: 0.08, ease: 'power2.inOut' },
+    fade:        { duration: 1.0, stagger: 0.08, ease: 'power2.inOut' }
+  };
 
-// Helper function to get scroll trigger values
-const getScrollTriggerValues = (isMobile) => {
-    return {
-        start: isMobile ? "top 40%" : "top 80%",
-        end: isMobile ? "top 20%" : "top 40%"
-    };
-};
+  // Helper function to get scroll trigger values (moved from original)
+  const getScrollTriggerValues = (isMobile) => ({
+    start: isMobile ? "top 40%" : "top 80%",
+    end: isMobile ? "top 20%" : "top 40%"
+  });
 
-// Helper function to create the base timeline with all attributes from the element
-function baseTimeline(element, splitResult, splitType, duration, stagger, delay, ease, scroll, start, end) {
+  // Helper function to create base animation configuration
+  function createBaseAnimation(element, splitResult, splitType, duration, stagger, delay, ease, scroll, start, end) {
     const tl = gsap.timeline();
-
+    
     const baseProps = {
-        duration,
-        stagger,
-        ease,
-        delay,
-        ...(scroll && {
-            scrollTrigger: {
-                trigger: element,
-                start,
-                end,
-                scrub: scroll.includes('smooth') ? 2 :
-                    scroll.includes('snap') ? { snap: 0.2 } :
-                        true
-            }
-        }),
-        onStart: () => gsap.set(element, { autoAlpha: 1 }) // Make the whole element visible when animation starts
+      duration,
+      stagger,
+      ease,
+      delay,
+      ...(scroll && {
+        scrollTrigger: {
+          trigger: element,
+          start,
+          end,
+          scrub: scroll.includes('smooth') ? 2 :
+                 scroll.includes('snap') ? { snap: 0.2 } : true
+        }
+      }),
+      onStart: () => gsap.set(element, { autoAlpha: 1 })
     };
 
-    let animationTarget;
-
+    // Handle lines&words split type
     if (splitType === 'lines&words') {
-        animationTarget = (animationProps) => {
-            splitResult.lines.forEach((line, index) => {
-                const wordsInLine = splitResult.words.filter(word => line.contains(word));
-                tl.from(wordsInLine, {
-                    ...baseProps,
-                    ...animationProps,
-                }, index * stagger * 3); // Delay each line
-            });
-        };
-    } else {
-        animationTarget = splitResult[splitType];
+      return {
+        tl,
+        animate: (props) => {
+          splitResult.lines.forEach((line, index) => {
+            const wordsInLine = splitResult.words.filter(word => line.contains(word));
+            tl.from(wordsInLine, {
+              ...baseProps,
+              ...props
+            }, index * stagger * 3);
+          });
+        }
+      };
     }
 
-    return { tl, baseProps, animationTarget };
-}
-
-// Helper function to create the timeline with the specific animation properties
-function createTimeline(animationProps) {
-    return (element, splitResult, splitType, duration, stagger, delay, ease, isMobile, scroll) => {
-        const { start, end } = getScrollTriggerValues(isMobile);
-        const { tl, baseProps, animationTarget } = baseTimeline(element, splitResult, splitType, duration, stagger, delay, ease, scroll, start, end);
-
-        // Check if this is a fade animation (opacity is defined and greater than 0)
-        const isFadeAnimation = 'opacity' in animationProps && animationProps.opacity > 0;
-
-        if (!isFadeAnimation) {
-            // Set initial opacity of the whole element only for non-fade animations
-            tl.set(element, { autoAlpha: 0 });
-        }
-
-        // If the animationTarget is a function (i.e. lines&words split type), call it with the animationProps
-        if (typeof animationTarget === 'function') {
-            animationTarget(animationProps);
-        }
-        // Otherwise, add the animationProps to the baseProps and add them to the timeline 
-        else {
-            tl.from(animationTarget, {
-                ...baseProps,
-                ...animationProps
-            }, ">"); // Starts the animation after the previous animation
-        }
-
-        return tl;
-    };
-}
-
-// Function to create all the animations
-export function createTextAnimations(gsapInstance, ScrollTriggerInstance) {
-    gsap = gsapInstance; // Store gsap instance
-    ScrollTrigger = ScrollTriggerInstance; // Store ScrollTrigger instance
-
+    // Handle regular split types
     return {
-        textSlideUp: createTimeline({
-            y: "110%",
-            opacity: 0,
-        }),
-        textSlideDown: createTimeline({
-            y: "-110%",
-            opacity: 0,
-        }),
-        textTiltUp: createTimeline({
-            y: "110%",
-            opacity: 0,
-            rotation: 10,
-        }),
-        textTiltDown: createTimeline({
-            y: "-110%",
-            opacity: 0,
-            rotation: -10,
-        }),
-        textFadeSoft: createTimeline({
-            opacity: 0.3
-        }),
-        textFade: createTimeline({
-            opacity: 0
-        }),
-        textRotateSoft: (element, splitResult, splitType, duration, stagger, delay, ease, isMobile, scroll) => {
-
-            const animationTarget = splitResult[splitType] || splitResult.lines;       // Determine the animation target based on the split type or defaulting to lines
-            const tl = gsap.timeline();
-
-            const { start, end } = getScrollTriggerValues(isMobile);
-
-            // Calculate perspective in pixels based on font size
-            const computedStyle = window.getComputedStyle(element);
-            const fontSize = parseFloat(computedStyle.fontSize);
-            const perspectiveInPixels = fontSize * 5; // 3em
-
-            // Add perspective wrapper around each line
-            animationTarget.forEach(line => {
-                const wrapper = document.createElement('div');
-                wrapper.classList.add('line-perspective-wrapper');
-                line.parentNode.insertBefore(wrapper, line); // insert the wrapper before the line  
-                wrapper.appendChild(line); // append the line to the wrapper
-            });
-
-
-            // Set initial opacity of the whole element
-            tl.set(element, {
-                autoAlpha: 0
-            });
-
-            tl.set('.line-perspective-wrapper', {
-                transformStyle: 'preserve-3d',
-                perspective: perspectiveInPixels
-            });
-
-            tl.set(animationTarget, {
-                transformOrigin: '50% 0%'
-            });
-
-            // Animate each split element
-            tl.from(animationTarget, {
-                autoAlpha: 0,
-                rotateX: -90,
-                y: '100%',
-                scaleX: 0.75,
-                duration,
-                stagger,
-                ease,
-                delay,
-                ...(scroll && { // if scroll is not null
-                    scrollTrigger: {
-                        trigger: element,
-                        start,
-                        end,
-                        scrub: scroll.includes('smooth') ? 2 :
-                            scroll.includes('snap') ? { snap: 0.2 } :
-                                true
-                    }
-                }),
-                onStart: () => gsap.set(element, { autoAlpha: 1 }) // Make the whole element visible when animation starts
-            });
-
-            return tl;
-        }
+      tl,
+      animate: (props) => {
+        tl.from(splitResult[splitType], {
+          ...baseProps,
+          ...props
+        });
+      }
     };
+  }
+
+  // Create animation function with defaults
+  function createAnimation(animationProps, defaultValues) {
+    return (element, splitResult, splitType, duration, stagger, delay, ease, isMobile, scroll) => {
+      const { start, end } = getScrollTriggerValues(isMobile);
+      
+      const { tl, animate } = createBaseAnimation(
+        element,
+        splitResult,
+        splitType,
+        duration ?? defaultValues.duration,
+        stagger ?? defaultValues.stagger,
+        delay,
+        ease ?? defaultValues.ease,
+        scroll,
+        start,
+        end
+      );
+
+      // Set initial opacity for non-fade animations
+      const isFadeAnimation = 'opacity' in animationProps && animationProps.opacity > 0;
+      if (!isFadeAnimation) {
+        tl.set(element, { autoAlpha: 0 });
+      }
+
+      animate(animationProps);
+      return tl;
+    };
+  }
+
+  // Return all animations with their specific configurations
+  return {
+    slideUp: createAnimation(
+      { y: "110%", opacity: 0 },
+      defaults.slideUp
+    ),
+    
+    slideDown: createAnimation(
+      { y: "-110%", opacity: 0 },
+      defaults.slideDown
+    ),
+    
+    tiltUp: createAnimation(
+      { y: "110%", opacity: 0, rotation: 10 },
+      defaults.tiltUp
+    ),
+    
+    tiltDown: createAnimation(
+      { y: "-110%", opacity: 0, rotation: -10 },
+      defaults.tiltDown
+    ),
+    
+    fadeSoft: createAnimation(
+      { opacity: 0.3 },
+      defaults.fadeSoft
+    ),
+    
+    fade: createAnimation(
+      { opacity: 0 },
+      defaults.fade
+    ),
+    
+    rotateSoft: (element, splitResult, splitType, duration, stagger, delay, ease, isMobile, scroll) => {
+      const { start, end } = getScrollTriggerValues(isMobile);
+      const tl = gsap.timeline();
+      const animationTarget = splitResult[splitType] || splitResult.lines;
+
+      // Calculate perspective
+      const fontSize = parseFloat(window.getComputedStyle(element).fontSize);
+      const perspectiveInPixels = fontSize * 5;
+
+      // Add perspective wrappers
+      animationTarget.forEach(line => {
+        const wrapper = document.createElement('div');
+        wrapper.classList.add('line-perspective-wrapper');
+        line.parentNode.insertBefore(wrapper, line);
+        wrapper.appendChild(line);
+      });
+
+      // Setup initial states
+      tl.set(element, { autoAlpha: 0 })
+        .set('.line-perspective-wrapper', {
+          transformStyle: 'preserve-3d',
+          perspective: perspectiveInPixels
+        })
+        .set(animationTarget, {
+          transformOrigin: '50% 0%'
+        });
+
+      // Animate
+      tl.from(animationTarget, {
+        autoAlpha: 0,
+        rotateX: -90,
+        y: '100%',
+        scaleX: 0.75,
+        duration: duration ?? defaults.rotateSoft.duration,
+        stagger: stagger ?? defaults.rotateSoft.stagger,
+        ease: ease ?? defaults.rotateSoft.ease,
+        delay,
+        ...(scroll && {
+          scrollTrigger: {
+            trigger: element,
+            start,
+            end,
+            scrub: scroll.includes('smooth') ? 2 :
+                   scroll.includes('snap') ? { snap: 0.2 } : true
+          }
+        }),
+        onStart: () => gsap.set(element, { autoAlpha: 1 })
+      });
+
+      return tl;
+    }
+  };
 }
