@@ -185,6 +185,10 @@
 
     /**
     * Rotate animations
+    * br = bottom right
+    * bl = bottom left
+    * cw = clockwise
+    * ccw = counter clockwise
     */
 
     [aa-animate^='rotate-br'][aa-animate^='rotate-br'] {
@@ -207,7 +211,6 @@
     [aa-animate*='rotate-br-ccw'] {
       transform: translateY(calc(50px * var(--aa-distance-factor))) rotate(var(--aa-rotation-degree, 45deg));
     }
-
 
 
     [aa-animate^='rotate-bl'][aa-animate^='rotate-bl'] {
