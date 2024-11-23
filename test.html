@@ -523,6 +523,45 @@
   margin-right: -0.05em; /* Adjust character spacing */
 }
 
+.instant-animations-demo {
+  padding: 8rem 0;
+  background-color: var(--background-color);
+
+  h2 {
+    font-size: 3rem;
+    line-height: 1.3;
+    max-width: 800px;
+  }
+
+  h3 {
+    font-size: 2rem;
+    margin: 0;
+  }
+
+  p {
+    font-size: 1.25rem;
+    margin: 1rem 0;
+  }
+
+  button {
+    padding: 1rem 2rem;
+    font-size: 1rem;
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+
+  .hero-sequence {
+    max-width: 600px;
+    padding: 2rem;
+    background: white;
+    border-radius: 8px;
+    margin: 2rem 0;
+  }
+}
+
   </style>
 </head>
 
@@ -550,6 +589,58 @@
     </header>
 
     <main>
+
+      <section class="instant-animations-demo">
+        <div class="container">
+          <h2 aa-instant="float-up" aa-duration="2" aa-delay="0.5" aa-ease="expo.out">
+            This headline instantly slides up word by word
+          </h2>
+      
+          <div class="grid" style="margin-top: 4rem;">
+            <!-- Float animations -->
+            <div class="box"><span aa-instant="float-up">Instant Float Up</span></div>
+            <div class="box"><span aa-instant="float-down">Instant Float Down</span></div>
+            <div class="box"><span aa-instant="float-left">Instant Float Left</span></div>
+            <div class="box"><span aa-instant="float-right">Instant Float Right</span></div>
+
+             <!-- Fade animations -->
+             <div class="box"><span aa-instant="fade">Instant Fade Up</span></div>
+             <div class="box"><span aa-instant="fade-up">Instant Fade Up</span></div>
+             <div class="box"><span aa-instant="fade-down">Instant Fade Down</span></div>
+             <div class="box"><span aa-instant="fade-left">Instant Fade Left</span></div>
+             <div class="box"><span aa-instant="fade-right">Instant Fade Right</span></div>
+      
+            <!-- Blurred slide animations -->
+            <div class="box"><span aa-instant="slide-in-blurred-bottom">Instant Blurred Bottom</span></div>
+            <div class="box"><span aa-instant="slide-in-blurred-top">Instant Blurred Top</span></div>
+            <div class="box"><span aa-instant="slide-in-blurred-left">Instant Blurred Left</span></div>
+            <div class="box"><span aa-instant="slide-in-blurred-right">Instant Blurred Right</span></div>
+      
+            <!-- 3D Swing animations -->
+            <div class="box"><span aa-instant="swing-fwd" aa-duration="1.5" aa-ease="back.out">Instant Swing Forward</span></div>
+            <div class="box"><span aa-instant="swing-bwd" aa-duration="1.5" aa-ease="back.out">Instant Swing Backward</span></div>
+      
+            <!-- 3D Rotation animations -->
+            <div class="box"><span aa-instant="rotate-3d-soft" aa-duration="0.8">Instant Rotate 3D Soft</span></div>
+            <div class="box"><span aa-instant="rotate-3d-soft-3em" aa-duration="0.8">Instant Rotate 3D 3em</span></div>
+            <div class="box"><span aa-instant="rotate-3d-elliptic" aa-duration="0.8">Instant Rotate 3D Elliptic</span></div>
+          </div>
+      
+          <!-- Sequence example -->
+          <div aa-stagger="0.2" style="margin-top: 4rem;">
+            <h3 aa-instant="float-up">First item</h3>
+            <p aa-instant="float-up">Second item</p>
+            <button aa-instant="float-up">Third item</button>
+          </div>
+      
+          <!-- Custom delay sequence -->
+          <div aa-stagger="0.2" aa-delay="1" style="margin-top: 4rem;">
+            <h3 aa-instant="float-up">Slower sequence - First</h3>
+            <p aa-instant="float-up">Slower sequence - Second</p>
+            <button aa-instant="float-up">Slower sequence - Third</button>
+          </div>
+        </div>
+      </section>
 
       <section class="text-animations-demo">
         <div class="container">

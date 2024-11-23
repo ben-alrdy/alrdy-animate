@@ -6,18 +6,17 @@
   - [Using CDN](#using-cdn)
   - [Using NPM](#using-npm)
   - [Configuration Options](#configuration-options)
-- [Usage](#usage)
-  - [HTML](#html)
-  - [JavaScript](#javascript)
-- [Options](#options)
-  - [Global Options](#global-options)
-  - [Element Attributes](#element-attributes)
+- [CSS Animations triggered on scroll (via JS)](#css-animations-triggered-on-scroll-via-js)
+- [CSS Animations triggered instantly (CSS only)](#css-animations-triggered-instantly-css-only)
+- [Animation Types](#animation-types)
+  - [Scroll Animations](#scroll-animations)
+  - [Instant Animations](#instant-animations)
+  - [3D Animations](#3d-animations)
 - [GSAP Features](#gsap-features)
   - [Text Animations](#text-animations)
   - [Loop Animations](#loop-animations)
   - [Scroll Animations](#scroll-animations)
 - [Easing Functions](#easing-functions)
-- [3D Animations](#3d-animations)
 - [Setting attributes via JavaScript](#setting-attributes-via-javascript)
 - [Contributing](#contributing)
 - [License](#license)
@@ -135,8 +134,8 @@ document.addEventListener('DOMContentLoaded', () => {
 | `debug` | boolean | false | Enable GSAP debug info |
 
 
-## CSS Animations
-You can simply add the `aa-animate` attribute to the element you want to animate. You can also add optional attributes (see element attributes below) to customize the animation for individual elements.
+## CSS Animations triggered on scroll (via JS)
+Add the `aa-animate` attribute to the element you want to animate. Once it scrolls into view, JS will add an `in-view` class to the element and the animation will be triggered. You can also add optional attributes (see element attributes below) to customize the animation for individual elements.
 
 - **aa-animate**: The animation type to apply. Example: `aa-animate="float-up"`.
 
@@ -151,20 +150,32 @@ You can simply add the `aa-animate` attribute to the element you want to animate
 - **aa-color-final**: The final background color for the animation. Example: `aa-color-final="#d7ff64"`.
 - **aa-anchor**: Specify an anchor element to trigger the animation (useful for fixed elements that should be animated when the anchor scrolls into view). Example: `aa-anchor="#anchorElement"`.
 - **aa-viewport**: Override the global viewport percentage for this element. Example: `aa-viewport="0.6"`.
+- **aa-distance**: The distance multiplier for the animation. Example: `aa-distance="1.5"`.
 
-## CSS Animations
+## CSS Animations triggered instantly (CSS only)
+Add the `aa-instant` attribute to the element you want to animate. The animation will be triggered immediately. You can also add optional attributes (see element attributes below) to customize the animation for individual elements.
+
+- **aa-instant**: The animation type to apply. Example: `aa-instant="fade-up"`.
+
+### Element Attributes
+- **aa-ease**: Overwrites the global easing function for this element. Example: `aa-ease="ease-in-out"`.
+- **aa-duration**: The animation duration for this element, in seconds. Example: `aa-duration="2"`. Available range: 0.1s - 3s in increments of 0.1s
+- **aa-delay**: The animation delay for this element, in seconds. Example: `aa-delay="0.5"`. Available range: 0.05s - 1.5s in increments of 0.05s
+- **aa-stagger**: The stagger delay for up to 10 child elements, in seconds. Example: `aa-stagger="0.5"`. Available range: 0.1s - 0.5s in increments of 0.1s
+
+## CSS Animation Types
 
 AlrdyAnimate provides a wide variety of CSS animations that can be applied using the `aa-animate` attribute.
 
 ### Fade Animations
 Simple fade animations with optional directional movement:
-- `fade`
-- `fade-up`, `fade-down`, `fade-left`, `fade-right`
+- `fade` (available for instant)
+- `fade-up`, `fade-down`, `fade-left`, `fade-right` (available for instant)
 - `fade-up-right`, `fade-up-left`, `fade-down-right`, `fade-down-left`
 
 ### Float Animations
 Fade animations with a smooth back-bounce effect:
-- `float-up`, `float-down`, `float-left`, `float-right`
+- `float-up`, `float-down`, `float-left`, `float-right` (available for instant)
 
 ### Zoom Animations
 Scale animations with optional directional movement:
@@ -178,11 +189,11 @@ Pure sliding movements:
 
 ### Blurred Slide Animations
 Sliding with a blur effect:
-- `slide-in-blurred-bottom`, `slide-in-blurred-top`
-- `slide-in-blurred-left`, `slide-in-blurred-right`
+- `slide-in-blurred-bottom`, `slide-in-blurred-top` (available for instant)
+- `slide-in-blurred-left`, `slide-in-blurred-right` (available for instant)
 
 ### Flip Animations
-3D flip effects (requires parent with perspective):
+3D flip effects:
 - `flip-left`, `flip-right`, `flip-up`, `flip-down`
 
 ### Rotate Animations
@@ -191,12 +202,14 @@ Rotate animations from bottom right (br) and bottom left (bl) corners, clockwise
 - `rotate-bl-cw`, `rotate-bl-ccw`
 
 ### 3D Animations
+AlrdyAnimate includes a variety of 3D animations that require a parent element to have a perspective set, e.g. `perspective: 1000px;`.
+
 #### Swing Animations
 3D swing effects (anchored to top):
-- `swing-fwd`, `swing-bwd`
+- `swing-fwd`, `swing-bwd` (available for instant)
 
 #### Rotation Animations
-3D rotation effects:
+3D rotation effects (available for instant):
 - `rotate-3d-soft`: Soft rotation around X axis
 - `rotate-3d-soft-3em`: Same as rotate-soft but with built-in perspective
 - `rotate-3d-elliptic`: Stronger elliptic rotation around X axis
@@ -212,16 +225,6 @@ Background color transitions with scaling reveal:
 - `pseudo-reveal-up`, `pseudo-reveal-down`
 - `pseudo-reveal-right`, `pseudo-reveal-left`
 
-### Customizing Animations
-All animations can be customized using these attributes:
-- `aa-duration`: Animation duration in seconds
-- `aa-delay`: Animation delay in seconds
-- `aa-distance`: Multiplier for animation distance (where applicable)
-- `aa-ease`: Overwrites the global easing function for this element. Example: `aa-ease="ease-in-out"`.
-
-For background transitions, you can also set:
-- `--aa-bg-color-initial`: Starting background color
-- `--aa-bg-color-final`: Ending background color
 
 Example usage:
 ```html
@@ -240,7 +243,8 @@ Example usage:
 
 AlrdyAnimate supports several GSAP-powered features that can be enabled by including them in the `gsapFeatures` array during initialization:
 
-### Text Animations (`gsapFeatures: ['text']`)
+### Text Animations 
+(`gsapFeatures: ['text']`)
 
 - Set the animation type with `aa-animate="text-..."`.
 - Pair with `aa-split` to define how to split the text for animation:
@@ -260,7 +264,8 @@ AlrdyAnimate supports several GSAP-powered features that can be enabled by inclu
 - `text-fade`: Fades the text in, starts with 0% opacity.
 
 
-### Loop Animations (`gsapFeatures: ['loop']`)
+### Loop Animations 
+(`gsapFeatures: ['loop']`)
 
 Creates infinite scrolling or draggable loops. To use:
 1. Set the animation type with `aa-animate="loop-..."` on the container that has the elements to loop
@@ -324,7 +329,8 @@ Example HTML and CSS:
 }
 ```
 
-### Scroll Animations (`gsapFeatures: ['scroll']`)
+### Scroll Animations 
+(`gsapFeatures: ['scroll']`)
 Enables scroll-driven animations and effects. 
 
 Required for: Sticky navigation
@@ -381,18 +387,6 @@ Usage example:
 ```
 
 This will apply a fade-up animation with a 'back out' easing, which means it will slightly overshoot and then settle into place.
-
-## 3D Animations
-
-AlrdyAnimate includes a variety of 3D animations (via `aa-animate`) that require a parent element to have a perspective set, e.g. `perspective: 1000px;`.
-
-### Available 3D Animations
-
-- `rotate-soft`: Rotates the element softly around the X axis.
-- `rotate-soft-3em`: Rotates the element softly around the X axis, with a perspective of 3em set to the element itself (hence the parent does not need to have a perspective set).
-- `rotate-elliptic`: Rotates the element elliptically around the X and Y axes.
-- `swing-fwd`: Swings the element forward around the X axis anchored to the top.
-- `swing-bwd`: Swings the element backward around the X axis anchored to the top.
 
 
 ## Setting attributes via JavaScript

@@ -1,111 +1,147 @@
-/*float WITH BACK BOUNCE ANIMATIONS*/
+/*
+**
+** UTILITY CLASSES FOR INSTANT ANIMATIONS
+**
+*/
 
-[aa-animate^='float'][aa-animate^='float'] {
-  opacity: 0;
-
-  &.in-view {
-    animation-delay: var(--aa-delay);
+/*DELAY AND DURATION */
+@for $i from 1 through 30 {
+  [aa-delay="#{$i * 0.05}"] {
+    --aa-delay: #{$i * 0.05}s;
+  }
+  [aa-duration="#{$i * 0.1}"] {
+    --aa-duration: #{$i * 0.1}s;
   }
 }
 
-[aa-animate="float-up"].in-view {
-  animation: float-up forwards;
-  animation-duration: var(--aa-duration);
+// STAGGER VALUES
+@each $stagger in (0.1, 0.2, 0.3, 0.4, 0.5) {
+  [aa-stagger="#{$stagger}"] {
+    --aa-stagger: #{$stagger}s;
+  }
 }
 
 
-[aa-animate="float-down"].in-view {
-  animation: float-down forwards;
-  animation-duration: var(--aa-duration);
+// BASE STAGGER FUNCTIONALITY
+[aa-stagger] {
+  --aa-parent-delay: var(--aa-delay, 0s);
+
+  > [aa-instant] {
+    @for $i from 1 through 10 {
+      &:nth-child(#{$i}) {
+        --aa-delay: calc(var(--aa-parent-delay) + (var(--aa-stagger, 0.1s) * (#{$i} - 1)));
+      }
+    }
+  }
 }
 
+/*
+**
+** ANIMATION CLASSES
+**
+*/
 
-[aa-animate="float-left"].in-view {
-  animation: float-left forwards;
+[aa-instant] {
+  animation-delay: var(--aa-delay);
   animation-duration: var(--aa-duration);
+  animation-fill-mode: forwards;
+  opacity: 0;
 }
 
-
-[aa-animate="float-right"].in-view {
-  animation: float-right forwards;
-  animation-duration: var(--aa-duration);
+/*FLOAT WITH BACK BOUNCE ANIMATIONS*/
+[aa-animate^='float']{
+  opacity: 0;
 }
 
+[aa-animate^='float'].in-view {
+  animation-delay: var(--aa-delay);
+  animation-duration: var(--aa-duration);
+  animation-fill-mode: forwards;
+}
+
+// Shared animation assignments
+[aa-animate="float-up"].in-view,
+[aa-instant="float-up"] { animation-name: float-up; }
+
+[aa-animate="float-down"].in-view,
+[aa-instant="float-down"] { animation-name: float-down; }
+
+[aa-animate="float-left"].in-view,
+[aa-instant="float-left"] { animation-name: float-left; }
+
+[aa-animate="float-right"].in-view,
+[aa-instant="float-right"] { animation-name: float-right; }
 
 
 /*BLURRED SLIDE ANIMATIONS*/
-
-[aa-animate^='slide-in-blurred'][aa-animate^='slide-in-blurred'] {
+[aa-animate^='slide-in-blurred'] {
   opacity: 0;
-
-  &.in-view {
-    animation-delay: var(--aa-delay);
-  }
 }
 
-[aa-animate="slide-in-blurred-bottom"].in-view {
-  animation: slide-in-blurred-bottom forwards;
+[aa-animate^='slide-in-blurred'].in-view {
+  animation-delay: var(--aa-delay);
   animation-duration: var(--aa-duration);
+  animation-fill-mode: forwards;
 }
 
-[aa-animate="slide-in-blurred-top"].in-view {
-  animation: slide-in-blurred-top forwards;
-  animation-duration: var(--aa-duration);
-}
+[aa-animate="slide-in-blurred-bottom"].in-view,
+[aa-instant="slide-in-blurred-bottom"] { animation-name: slide-in-blurred-bottom; }
 
-[aa-animate="slide-in-blurred-left"].in-view {
-  animation: slide-in-blurred-left forwards;
-  animation-duration: var(--aa-duration);
-}
+[aa-animate="slide-in-blurred-top"].in-view,
+[aa-instant="slide-in-blurred-top"] { animation-name: slide-in-blurred-top; }
 
-[aa-animate="slide-in-blurred-right"].in-view {
-  animation: slide-in-blurred-right forwards;
-  animation-duration: var(--aa-duration);
-}
+[aa-animate="slide-in-blurred-left"].in-view,
+[aa-instant="slide-in-blurred-left"] { animation-name: slide-in-blurred-left; }
+
+[aa-animate="slide-in-blurred-right"].in-view,
+[aa-instant="slide-in-blurred-right"] { animation-name: slide-in-blurred-right; }
 
 
 /*3D SWING ANIMATIONS*/
-
-[aa-animate^='swing'][aa-animate^='swing'] {
+[aa-animate^='swing'],
+[aa-instant^='swing'] {
   opacity: 0;
   transform-origin: 50% 0;
-
-  &.in-view {
-    animation-delay: var(--aa-delay);
-  }
 }
 
-[aa-animate="swing-fwd"].in-view {
-  animation: swing-fwd forwards;
+[aa-animate^='swing'].in-view,
+[aa-instant^='swing'] {
+  animation-delay: var(--aa-delay);
   animation-duration: var(--aa-duration);
+  animation-fill-mode: forwards;
 }
 
-[aa-animate="swing-bwd"].in-view {
-  animation: swing-bwd forwards;
-  animation-duration: var(--aa-duration);
-}
+[aa-animate="swing-fwd"].in-view,
+[aa-instant="swing-fwd"] { animation-name: swing-fwd; }
+
+[aa-animate="swing-bwd"].in-view,
+[aa-instant="swing-bwd"] { animation-name: swing-bwd; }
+
 
 /*3D ROTATION ANIMATIONS*/
-
-[aa-animate^='rotate-3d'][aa-animate^='rotate-3d'] {
+[aa-animate^='rotate-3d'] {
   opacity: 0;
-
-  &.in-view {
-    animation-delay: var(--aa-delay);
-  }
 }
 
-[aa-animate="rotate-3d-soft"].in-view {
-  animation: rotate-3d-soft forwards;
+[aa-animate^='rotate-3d'].in-view{
+  animation-delay: var(--aa-delay);
   animation-duration: var(--aa-duration);
+  animation-fill-mode: forwards;
 }
 
-[aa-animate="rotate-3d-soft-3em"].in-view {
-  animation: rotate-3d-soft-3em forwards;
-  animation-duration: var(--aa-duration);
-}
+[aa-animate="rotate-3d-soft"].in-view,
+[aa-instant="rotate-3d-soft"] { animation-name: rotate-3d-soft; }
 
-[aa-animate="rotate-3d-elliptic"].in-view {
-  animation: rotate-3d-elliptic forwards;
-  animation-duration: var(--aa-duration);
-}
+[aa-animate="rotate-3d-soft-3em"].in-view,
+[aa-instant="rotate-3d-soft-3em"] { animation-name: rotate-3d-soft-3em; }
+
+[aa-animate="rotate-3d-elliptic"].in-view,
+[aa-instant="rotate-3d-elliptic"] { animation-name: rotate-3d-elliptic; }
+
+
+/*FADE ANIMATIONS - ONLY FOR INSTANT*/
+[aa-instant="fade"] { animation-name: fadeIn; }
+[aa-instant="fade-up"] { animation-name: fadeInUp; }
+[aa-instant="fade-down"] { animation-name: fadeInDown; }
+[aa-instant="fade-left"] { animation-name: fadeInLeft; }
+[aa-instant="fade-right"] { animation-name: fadeInRight; }

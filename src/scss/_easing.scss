@@ -52,3 +52,13 @@ $aa-ease: (
     }
   }
 }
+
+[aa-instant] {
+  @each $key, $val in $aa-ease {
+    body[aa-ease="#{$key}"] &,
+    &[aa-instant][aa-ease="#{$key}"] {
+      animation-timing-function: $val;
+      transition-timing-function: $val;
+    }
+  }
+}
