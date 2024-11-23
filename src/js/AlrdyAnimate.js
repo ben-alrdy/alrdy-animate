@@ -104,6 +104,10 @@ async function init(options = {}) {
                 case 'loop':
                   moduleAnimations = animationModule.createLoopAnimations(modules.gsap, modules.Draggable);
                   break;
+                case 'hover':
+                  moduleAnimations = animationModule.createHoverAnimations(modules.gsap);
+                  moduleAnimations.initializeHoverAnimations();
+                  break;
               }
               
               Object.assign(animations, moduleAnimations);

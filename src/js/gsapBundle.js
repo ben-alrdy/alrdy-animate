@@ -16,6 +16,9 @@ export const gsapBundles = {
       import(/* webpackChunkName: "gsap-draggable" */ 'gsap/InertiaPlugin')
     ]),
     animations: () => import(/* webpackChunkName: "gsap-draggable" */ './gsapAnimations/loopAnimations')
+  },
+  hover: {
+    animations: () => import(/* webpackChunkName: "gsap-hover" */ './gsapAnimations/hoverAnimations')
   }
 };
 
