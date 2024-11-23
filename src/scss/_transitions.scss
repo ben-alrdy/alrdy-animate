@@ -11,8 +11,8 @@
     [aa-animate^='fade'][aa-animate^='fade'] {
       opacity: 0;
       transition-property: opacity, transform;
-      transition-duration: var(--animation-duration); 
-      transition-delay: var(--animation-delay);       
+      transition-duration: var(--aa-duration); 
+      transition-delay: var(--aa-delay);       
 
       &.in-view {
         opacity: 1;
@@ -21,35 +21,35 @@
     }
 
     [aa-animate='fade-up'] {
-      transform: translate3d(0, calc(50px * var(--aa-distance-factor)), 0);
+      transform: translate3d(0, calc(50px * var(--aa-distance)), 0);
     }
 
     [aa-animate='fade-down'] {
-      transform: translate3d(0, calc(-50px * var(--aa-distance-factor)), 0);
+      transform: translate3d(0, calc(-50px * var(--aa-distance)), 0);
     }
 
     [aa-animate='fade-right'] {
-      transform: translate3d(calc(-50px * var(--aa-distance-factor)), 0, 0);
+      transform: translate3d(calc(-50px * var(--aa-distance)), 0, 0);
     }
 
     [aa-animate='fade-left'] {
-      transform: translate3d(calc(50px * var(--aa-distance-factor)), 0, 0);
+      transform: translate3d(calc(50px * var(--aa-distance)), 0, 0);
     }
 
     [aa-animate='fade-up-right'] {
-      transform: translate3d(calc(-50px * var(--aa-distance-factor)), calc(50px * var(--aa-distance-factor)), 0);
+      transform: translate3d(calc(-50px * var(--aa-distance)), calc(50px * var(--aa-distance)), 0);
     }
 
     [aa-animate='fade-up-left'] {
-      transform: translate3d(calc(50px * var(--aa-distance-factor)), calc(50px * var(--aa-distance-factor)), 0);
+      transform: translate3d(calc(50px * var(--aa-distance)), calc(50px * var(--aa-distance)), 0);
     }
 
     [aa-animate='fade-down-right'] {
-      transform: translate3d(calc(-50px * var(--aa-distance-factor)), calc(-50px * var(--aa-distance-factor)), 0);
+      transform: translate3d(calc(-50px * var(--aa-distance)), calc(-50px * var(--aa-distance)), 0);
     }
 
     [aa-animate='fade-down-left'] {
-      transform: translate3d(calc(50px * var(--aa-distance-factor)), calc(-50px * var(--aa-distance-factor)), 0);
+      transform: translate3d(calc(50px * var(--aa-distance)), calc(-50px * var(--aa-distance)), 0);
     }
 
 
@@ -64,8 +64,8 @@
     [aa-animate^='zoom'][aa-animate^='zoom'] {
       opacity: 0;
       transition-property: opacity, transform;
-      transition-duration: var(--animation-duration); 
-      transition-delay: var(--animation-delay);  
+      transition-duration: var(--aa-duration); 
+      transition-delay: var(--aa-delay);  
 
       &.in-view {
         opacity: 1;
@@ -78,19 +78,19 @@
     }
 
     [aa-animate='zoom-in-up'] {
-      transform: translate3d(0, calc(50px * var(--aa-distance-factor)), 0) scale(.6);
+      transform: translate3d(0, calc(50px * var(--aa-distance)), 0) scale(.6);
     }
 
     [aa-animate='zoom-in-down'] {
-      transform: translate3d(0, calc(-50px * var(--aa-distance-factor)), 0) scale(.6);
+      transform: translate3d(0, calc(-50px * var(--aa-distance)), 0) scale(.6);
     }
 
     [aa-animate='zoom-in-right'] {
-      transform: translate3d(calc(-50px * var(--aa-distance-factor)), 0, 0) scale(.6);
+      transform: translate3d(calc(-50px * var(--aa-distance)), 0, 0) scale(.6);
     }
 
     [aa-animate='zoom-in-left'] {
-      transform: translate3d(calc(50px * var(--aa-distance-factor)), 0, 0) scale(.6);
+      transform: translate3d(calc(50px * var(--aa-distance)), 0, 0) scale(.6);
     }
 
     [aa-animate='zoom-out'] {
@@ -98,19 +98,19 @@
     }
 
     [aa-animate='zoom-out-up'] {
-      transform: translate3d(0, calc(50px * var(--aa-distance-factor)), 0) scale(1.2);
+      transform: translate3d(0, calc(50px * var(--aa-distance)), 0) scale(1.2);
     }
 
     [aa-animate='zoom-out-down'] {
-      transform: translate3d(0, calc(-50px * var(--aa-distance-factor)), 0) scale(1.2);
+      transform: translate3d(0, calc(-50px * var(--aa-distance)), 0) scale(1.2);
     }
 
     [aa-animate='zoom-out-right'] {
-      transform: translate3d(calc(-50px * var(--aa-distance-factor)), 0, 0) scale(1.2);
+      transform: translate3d(calc(-50px * var(--aa-distance)), 0, 0) scale(1.2);
     }
 
     [aa-animate='zoom-out-left'] {
-      transform: translate3d(calc(50px * var(--aa-distance-factor)), 0, 0) scale(1.2);
+      transform: translate3d(calc(50px * var(--aa-distance)), 0, 0) scale(1.2);
     }
 
 
@@ -123,8 +123,8 @@
     [aa-animate^='slide'][aa-animate^='slide'] {
       transition-property: transform;
       visibility: hidden;
-      transition-duration: var(--animation-duration); 
-      transition-delay: var(--animation-delay);  
+      transition-duration: var(--aa-duration); 
+      transition-delay: var(--aa-delay);  
 
       &.in-view {
         visibility: visible;
@@ -159,8 +159,8 @@
     [aa-animate^='flip'][aa-animate^='flip'] {
       backface-visibility: hidden;
       transition-property: transform;
-      transition-duration: var(--animation-duration); 
-      transition-delay: var(--animation-delay);  
+      transition-duration: var(--aa-duration); 
+      transition-delay: var(--aa-delay);  
     }
 
     [aa-animate='flip-left'] {
@@ -198,8 +198,8 @@
     // Base styles for all rotate animations
     [aa-animate^='rotate-'] {
       transition-property: transform, opacity;
-      transition-duration: var(--animation-duration);
-      transition-delay: var(--animation-delay);
+      transition-duration: var(--aa-duration);
+      transition-delay: var(--aa-delay);
       opacity: 0;
 
       &.in-view {
@@ -216,21 +216,21 @@
 
       // Default 45-degree rotations (when no degree is specified)
       [aa-animate='rotate-#{$pos}-cw'] {
-        transform: translateY(calc(50px * var(--aa-distance-factor))) rotate(-45deg);
+        transform: translateY(calc(50px * var(--aa-distance))) rotate(-45deg);
       }
 
       [aa-animate='rotate-#{$pos}-ccw'] {
-        transform: translateY(calc(50px * var(--aa-distance-factor))) rotate(45deg);
+        transform: translateY(calc(50px * var(--aa-distance))) rotate(45deg);
       }
 
       // Generate degree-specific rotations
       @each $degree in $rotation-degrees {
         [aa-animate='rotate-#{$pos}-cw-#{$degree}'] {
-          transform: translateY(calc(50px * var(--aa-distance-factor))) rotate(-#{$degree}deg);
+          transform: translateY(calc(50px * var(--aa-distance))) rotate(-#{$degree}deg);
         }
 
         [aa-animate='rotate-#{$pos}-ccw-#{$degree}'] {
-          transform: translateY(calc(50px * var(--aa-distance-factor))) rotate(#{$degree}deg);
+          transform: translateY(calc(50px * var(--aa-distance))) rotate(#{$degree}deg);
         }
       }
     }
@@ -244,7 +244,7 @@
 
     [aa-animate^="pseudo-bg-slide"][aa-animate^="pseudo-bg-slide"] {
       position: relative;
-      background: var(--background-color-initial);
+      background: var(--aa-bg-color-initial);
       overflow: hidden; // Hide overflow
     }
 
@@ -261,10 +261,10 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background: var(--background-color-final);
+      background: var(--aa-bg-color-final);
       z-index: 1; // Place it behind the content but above the initial background
-      transition: transform var(--animation-duration);
-      transition-delay: var(--animation-delay);
+      transition: transform var(--aa-duration);
+      transition-delay: var(--aa-delay);
     }
 
     [aa-animate="pseudo-bg-slide-down"]::before {
@@ -292,7 +292,7 @@
 
     [aa-animate^="pseudo-reveal"][aa-animate^="pseudo-reveal"] {
       position: relative;
-      background: var(--background-color-final);
+      background: var(--aa-bg-color-final);
       overflow: hidden;
     }
 
@@ -308,9 +308,9 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background: var(--background-color-initial);
+      background: var(--aa-bg-color-initial);
       z-index: 2;
-      transition: transform var(--animation-duration) var(--animation-delay);
+      transition: transform var(--aa-duration) var(--aa-delay);
     }
 
     [aa-animate^="pseudo-reveal"]::before {

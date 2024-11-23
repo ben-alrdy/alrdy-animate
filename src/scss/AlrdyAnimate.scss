@@ -8,9 +8,9 @@ body {
 
   --aa-default-duration: 1s;
   --aa-default-delay: 0s;
-  --aa-distance-factor: 1;
-  --background-color-initial: var(--background-color--background-page);
-  --background-color-final: var(--background-color--background-alternate);
+  --aa-distance: 1;
+  --aa-bg-color-initial: var(--background-color--background-page);
+  --aa-bg-color-final: var(--background-color--background-alternate);
 
   // Fix to reduce mobile viewport stuttering
   min-height: 100vh;
@@ -20,8 +20,8 @@ body {
 
 // Base styles for all animated elements
 [aa-animate] {
-  --animation-duration: var(--aa-default-duration);
-  --animation-delay: var(--aa-default-delay);
+  --aa-duration: var(--aa-default-duration);
+  --aa-delay: var(--aa-default-delay);
 }
 
 @import 'keyframes';

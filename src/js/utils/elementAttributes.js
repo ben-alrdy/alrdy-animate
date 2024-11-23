@@ -37,24 +37,24 @@ export function applyElementStyles(element, elementSettings, isMobile) {
 
   // Set duration if specified on element
   if (element.hasAttribute('aa-duration')) {
-    element.style.setProperty("--animation-duration", `${duration}s`);
+    element.style.setProperty("--aa-duration", `${duration}s`);
   }
 
   // Set delay if specified on element, and handle mobile delay if defined
   if (element.hasAttribute('aa-delay')) {
     const finalDelay = isMobile && delayMobile !== undefined ? delayMobile : delay;
-    element.style.setProperty("--animation-delay", `${finalDelay}s`);
+    element.style.setProperty("--aa-delay", `${finalDelay}s`);
   }
 
   // Set distance if specified on element
   if (element.hasAttribute('aa-distance')) {
-    element.style.setProperty("--aa-distance-factor", `${distance}`);
+    element.style.setProperty("--aa-distance", `${distance}`);
   }
 
   if (colorInitial) {
-    element.style.setProperty("--background-color-initial", colorInitial);
+    element.style.setProperty("--aa-bg-color-initial", colorInitial);
   }
   if (colorFinal) {
-    element.style.setProperty("--background-color-final", colorFinal);
+    element.style.setProperty("--aa-bg-color-final", colorFinal);
   }
 } 

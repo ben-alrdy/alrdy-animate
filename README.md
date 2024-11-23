@@ -220,8 +220,8 @@ All animations can be customized using these attributes:
 - `aa-ease`: Overwrites the global easing function for this element. Example: `aa-ease="ease-in-out"`.
 
 For background transitions, you can also set:
-- `--background-color-initial`: Starting background color
-- `--background-color-final`: Ending background color
+- `--aa-bg-color-initial`: Starting background color
+- `--aa-bg-color-final`: Ending background color
 
 Example usage:
 ```html

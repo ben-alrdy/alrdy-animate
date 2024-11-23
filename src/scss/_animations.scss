@@ -4,31 +4,31 @@
   opacity: 0;
 
   &.in-view {
-    animation-delay: var(--animation-delay);
+    animation-delay: var(--aa-delay);
   }
 }
 
 [aa-animate="float-up"].in-view {
   animation: float-up forwards;
-  animation-duration: var(--animation-duration);
+  animation-duration: var(--aa-duration);
 }
 
 
 [aa-animate="float-down"].in-view {
   animation: float-down forwards;
-  animation-duration: var(--animation-duration);
+  animation-duration: var(--aa-duration);
 }
 
 
 [aa-animate="float-left"].in-view {
   animation: float-left forwards;
-  animation-duration: var(--animation-duration);
+  animation-duration: var(--aa-duration);
 }
 
 
 [aa-animate="float-right"].in-view {
   animation: float-right forwards;
-  animation-duration: var(--animation-duration);
+  animation-duration: var(--aa-duration);
 }
 
 
@@ -39,28 +39,28 @@
   opacity: 0;
 
   &.in-view {
-    animation-delay: var(--animation-delay);
+    animation-delay: var(--aa-delay);
   }
 }
 
 [aa-animate="slide-in-blurred-bottom"].in-view {
   animation: slide-in-blurred-bottom forwards;
-  animation-duration: var(--animation-duration);
+  animation-duration: var(--aa-duration);
 }
 
 [aa-animate="slide-in-blurred-top"].in-view {
   animation: slide-in-blurred-top forwards;
-  animation-duration: var(--animation-duration);
+  animation-duration: var(--aa-duration);
 }
 
 [aa-animate="slide-in-blurred-left"].in-view {
   animation: slide-in-blurred-left forwards;
-  animation-duration: var(--animation-duration);
+  animation-duration: var(--aa-duration);
 }
 
 [aa-animate="slide-in-blurred-right"].in-view {
   animation: slide-in-blurred-right forwards;
-  animation-duration: var(--animation-duration);
+  animation-duration: var(--aa-duration);
 }
 
 
@@ -71,18 +71,18 @@
   transform-origin: 50% 0;
 
   &.in-view {
-    animation-delay: var(--animation-delay);
+    animation-delay: var(--aa-delay);
   }
 }
 
 [aa-animate="swing-fwd"].in-view {
   animation: swing-fwd forwards;
-  animation-duration: var(--animation-duration);
+  animation-duration: var(--aa-duration);
 }
 
 [aa-animate="swing-bwd"].in-view {
   animation: swing-bwd forwards;
-  animation-duration: var(--animation-duration);
+  animation-duration: var(--aa-duration);
 }
 
 /*3D ROTATION ANIMATIONS*/
@@ -91,21 +91,21 @@
   opacity: 0;
 
   &.in-view {
-    animation-delay: var(--animation-delay);
+    animation-delay: var(--aa-delay);
   }
 }
 
 [aa-animate="rotate-3d-soft"].in-view {
   animation: rotate-3d-soft forwards;
-  animation-duration: var(--animation-duration);
+  animation-duration: var(--aa-duration);
 }
 
 [aa-animate="rotate-3d-soft-3em"].in-view {
   animation: rotate-3d-soft-3em forwards;
-  animation-duration: var(--animation-duration);
+  animation-duration: var(--aa-duration);
 }
 
 [aa-animate="rotate-3d-elliptic"].in-view {
   animation: rotate-3d-elliptic forwards;
-  animation-duration: var(--animation-duration);
+  animation-duration: var(--aa-duration);
 }

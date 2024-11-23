@@ -43,7 +43,7 @@ async function init(options = {}) {
   // Set default values on body
   document.body.style.setProperty("--aa-default-duration", `${initOptions.duration}s`);
   document.body.style.setProperty("--aa-default-delay", `${initOptions.delay}s`);
-  document.body.style.setProperty("--aa-distance-factor", `${initOptions.distance}`);
+  document.body.style.setProperty("--aa-distance", `${initOptions.distance}`);
   document.body.setAttribute("aa-ease", initOptions.ease);
 
   return new Promise((resolve) => { // Return a promise to handle asynchronous loading
