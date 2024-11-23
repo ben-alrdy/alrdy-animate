@@ -92,7 +92,20 @@ async function init(options = {}) {
 
             if (moduleConfig.animations) {
               const animationModule = await moduleConfig.animations();
-              const moduleAnimations = await createAnimations(feature, animationModule, modules);
+              let moduleAnimations = {};
+              
+              switch (feature) {
+                case 'text':
+                  moduleAnimations = animationModule.createTextAnimations(modules.gsap, modules.ScrollTrigger);
+                  break;
+                case 'scroll':
+                  moduleAnimations = animationModule.createScrollAnimations(modules.gsap, modules.ScrollTrigger);
+                  break;
+                case 'loop':
+                  moduleAnimations = animationModule.createLoopAnimations(modules.gsap, modules.Draggable);
+                  break;
+              }
+              
               Object.assign(animations, moduleAnimations);
             }
           })
@@ -143,20 +156,6 @@ async function init(options = {}) {
       }
     });
   });
-}
-
-// Helper function to create animations based on feature type
-async function createAnimations(feature, animationModule, modules) {
-  switch (feature) {
-    case 'text':
-      return animationModule.createTextAnimations(modules.gsap, modules.ScrollTrigger);
-    case 'scroll':
-      return animationModule.createScrollAnimations(modules.gsap, modules.ScrollTrigger);
-    case 'loop':
-      return animationModule.createLoopAnimations(modules.gsap, modules.Draggable);
-    default:
-      return {};
-  }
 }
 
 // Setup animations for elements
