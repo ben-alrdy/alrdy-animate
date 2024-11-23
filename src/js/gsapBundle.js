@@ -1,7 +1,7 @@
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
-export const animationModules = {
+export const gsapBundles = {
   text: {
     animations: () => import(/* webpackChunkName: "gsap-text" */ './gsapAnimations/textAnimations'),
     dependencies: () => import(/* webpackChunkName: "gsap-text" */ './textSplitter')

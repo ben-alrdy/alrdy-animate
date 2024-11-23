@@ -1,0 +1,133 @@
+// Base setup for instant animations
+[aa-instant] {
+  // Ensure animations start hidden
+  opacity: 0;
+  animation-fill-mode: forwards;
+  
+  // Default duration and delay if not specified
+  animation-duration: var(--aa-default-duration, 1s);
+  animation-delay: var(--aa-default-delay, 0s);
+  
+  // Override with element-specific values if provided
+  &[aa-duration] {
+    animation-duration: var(--aa-duration);
+  }
+  
+  &[aa-delay] {
+    animation-delay: var(--aa-delay);
+  }
+}
+
+// Animation keyframes
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes fadeInRight {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+// Apply animations based on aa-instant value
+[aa-instant="fade"] { animation-name: fadeIn; }
+[aa-instant="fade-up"] { animation-name: fadeInUp; }
+[aa-instant="fade-down"] { animation-name: fadeInDown; }
+[aa-instant="fade-left"] { animation-name: fadeInLeft; }
+[aa-instant="fade-right"] { animation-name: fadeInRight; }
+[aa-instant="scale"] { animation-name: scaleIn; }
+
+// Sequence utility classes (for creating staggered animations)
+@for $i from 1 through 10 {
+  [aa-delay="#{$i}"] {
+    --aa-delay: #{$i * 0.1}s;
+  }
+}
+
+// Duration utility classes
+@each $duration in (0.3, 0.5, 0.7, 1, 1.2, 1.5, 2) {
+  [aa-duration="#{$duration}"] {
+    --aa-duration: #{$duration}s;
+  }
+}
+
+// Optional: Add support for CSS view timeline animations
+@supports (animation-timeline: view()) {
+  [aa-instant][aa-scroll] {
+    animation-timeline: view();
+    animation-range: entry 10% cover 30%;
+  }
+} 
+
+
+// Additional helper classes
+.hero-sequence {
+    > * {
+      @for $i from 1 through 5 {
+        &:nth-child(#{$i}) {
+          --aa-delay: #{($i - 1) * 0.1}s;
+        }
+      }
+    }
+  }
+  
+  // Sequence with custom delay between items
+  .hero-sequence[aa-sequence-delay="0.2"] {
+    > * {
+      @for $i from 1 through 5 {
+        &:nth-child(#{$i}) {
+          --aa-delay: #{($i - 1) * 0.2}s;
+        }
+      }
+    }
+  }

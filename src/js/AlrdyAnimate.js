@@ -52,7 +52,7 @@ async function init(options = {}) {
     gsapModulesPromise = (async () => {
       try {
         // Load GSAP and its modules
-        const { gsap, ScrollTrigger, animationModules } = await import(
+        const { gsap, ScrollTrigger, gsapBundles } = await import(
           /* webpackChunkName: "gsap-core" */
           './gsapBundle'
         );
@@ -68,7 +68,7 @@ async function init(options = {}) {
         // Load all features in parallel
         await Promise.all(
           initOptions.gsapFeatures.map(async (feature) => {
-            const moduleConfig = animationModules[feature];
+            const moduleConfig = gsapBundles[feature];
             if (!moduleConfig) return;
 
             if (moduleConfig.plugins) {
