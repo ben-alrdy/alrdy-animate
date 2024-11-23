@@ -192,27 +192,30 @@ Sliding with a blur effect:
 - `slide-in-blurred-bottom`, `slide-in-blurred-top` (available for instant)
 - `slide-in-blurred-left`, `slide-in-blurred-right` (available for instant)
 
+
+
+### Rotate Animations
+Rotate animations from bottom right (br) and bottom left (bl) corners, clockwise (cw) and counter-clockwise (ccw). You can define the rotation degree by changing the numeric value at the end, e.g. `rotate-br-cw-15`. Available degrees are 5, 15, 25, 35, 45.
+- `rotate-br-cw-45`, `rotate-br-ccw-45` (available for instant)
+- `rotate-bl-cw-45`, `rotate-bl-ccw-45` (available for instant)
+
+### 3D Animations
+
 ### Flip Animations
 3D flip effects:
 - `flip-left`, `flip-right`, `flip-up`, `flip-down`
 
-### Rotate Animations
-Rotate animations from bottom right (br) and bottom left (bl) corners, clockwise (cw) and counter-clockwise (ccw). The default rotation degree is 45 degrees. Optionally, you can overwrite the rotation degree by adding a numeric value at the end, e.g. `rotate-br-cw-15`. Available degrees are 5, 15, 25, 35, 45.
-- `rotate-br-cw`, `rotate-br-ccw`
-- `rotate-bl-cw`, `rotate-bl-ccw`
-
-### 3D Animations
-AlrdyAnimate includes a variety of 3D animations that require a parent element to have a perspective set, e.g. `perspective: 1000px;`.
+The following 3D animations require a parent element to have a perspective set, e.g. `perspective: 1000px;`.
 
 #### Swing Animations
 3D swing effects (anchored to top):
 - `swing-fwd`, `swing-bwd` (available for instant)
 
-#### Rotation Animations
+#### Forward Turn Animations
 3D rotation effects (available for instant):
-- `rotate-3d-soft`: Soft rotation around X axis
-- `rotate-3d-soft-3em`: Same as rotate-soft but with built-in perspective
-- `rotate-3d-elliptic`: Stronger elliptic rotation around X axis
+- `turn-3d-soft`: Soft rotation around X axis
+- `turn-3d-soft-3em`: Same as rotate-soft but with built-in perspective
+- `turn-3d-elliptic`: Stronger elliptic rotation around X axis
 
 ### Background Transitions
 #### Pseudo Background Slide

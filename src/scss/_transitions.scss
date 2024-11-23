@@ -183,58 +183,6 @@
       &.in-view {transform: perspective(2500px) rotateX(0);}
     }
 
-    /**
-    * Rotate animations
-    * br = bottom right
-    * bl = bottom left
-    * cw = clockwise
-    * ccw = counter clockwise
-    */
-
-    // Define the degrees list
-    $rotation-degrees: (5, 15, 25, 35, 45);
-    $rotation-positions: ('br': (100% 100%), 'bl': (0 100%));
-
-    // Base styles for all rotate animations
-    [aa-animate^='rotate-'] {
-      transition-property: transform, opacity;
-      transition-duration: var(--aa-duration);
-      transition-delay: var(--aa-delay);
-      opacity: 0;
-
-      &.in-view {
-        transform: translateY(0) rotate(0deg);
-        opacity: 1;
-      }
-    }
-
-    // Generate position-specific styles
-    @each $pos, $origin in $rotation-positions {
-      [aa-animate^='rotate-#{$pos}'] {
-        transform-origin: $origin;
-      }
-
-      // Default 45-degree rotations (when no degree is specified)
-      [aa-animate='rotate-#{$pos}-cw'] {
-        transform: translateY(calc(50px * var(--aa-distance))) rotate(-45deg);
-      }
-
-      [aa-animate='rotate-#{$pos}-ccw'] {
-        transform: translateY(calc(50px * var(--aa-distance))) rotate(45deg);
-      }
-
-      // Generate degree-specific rotations
-      @each $degree in $rotation-degrees {
-        [aa-animate='rotate-#{$pos}-cw-#{$degree}'] {
-          transform: translateY(calc(50px * var(--aa-distance))) rotate(-#{$degree}deg);
-        }
-
-        [aa-animate='rotate-#{$pos}-ccw-#{$degree}'] {
-          transform: translateY(calc(50px * var(--aa-distance))) rotate(#{$degree}deg);
-        }
-      }
-    }
-
 
     /*
     PSEUDO BACKGROUND SLIDE TRANSITIONS

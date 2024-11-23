@@ -553,7 +553,7 @@
     cursor: pointer;
   }
 
-  .hero-sequence {
+  [aa-stagger] {
     max-width: 600px;
     padding: 2rem;
     background: white;
@@ -621,20 +621,28 @@
             <div class="box"><span aa-instant="swing-bwd" aa-duration="1.5" aa-ease="back.out">Instant Swing Backward</span></div>
       
             <!-- 3D Rotation animations -->
-            <div class="box"><span aa-instant="rotate-3d-soft" aa-duration="0.8">Instant Rotate 3D Soft</span></div>
-            <div class="box"><span aa-instant="rotate-3d-soft-3em" aa-duration="0.8">Instant Rotate 3D 3em</span></div>
-            <div class="box"><span aa-instant="rotate-3d-elliptic" aa-duration="0.8">Instant Rotate 3D Elliptic</span></div>
+            <div class="box"><span aa-instant="turn-3d-soft" aa-duration="0.8">Instant Rotate 3D Soft</span></div>
+            <div class="box"><span aa-instant="turn-3d-soft-3em" aa-duration="0.8">Instant Rotate 3D 3em</span></div>
+            <div class="box"><span aa-instant="turn-3d-elliptic" aa-duration="0.8">Instant Rotate 3D Elliptic</span></div>
+
+          </div>
+
+          <div class="grid" style="grid-template-columns: repeat(4, 1fr);">
+            <div class="box" style="background-color: #5b50fa; height: 300px;" aa-duration="0.8" aa-distance="0.01" aa-ease="back.out" aa-instant="rotate-br-cw-45"></div>
+            <div class="box" style="background-color: #5b50fa; height: 300px;" aa-duration="0.8" aa-ease="back.out" aa-instant="rotate-br-cw-15"></div>
+            <div class="box" style="background-color: #5b50fa; height: 300px;" aa-duration="0.8" aa-ease="back.out" aa-instant="rotate-bl-ccw-15"></div>
+            <div class="box" style="background-color: #5b50fa; height: 300px;" aa-duration="0.8" aa-distance="0.01" aa-ease="back.out" aa-instant="rotate-bl-ccw-45"></div>
           </div>
       
           <!-- Sequence example -->
-          <div aa-stagger="0.2" style="margin-top: 4rem;">
-            <h3 aa-instant="float-up">First item</h3>
-            <p aa-instant="float-up">Second item</p>
-            <button aa-instant="float-up">Third item</button>
+          <div aa-instant="float-up" aa-duration="0.5" aa-ease="back.out" aa-stagger="0.2" style="margin-top: 4rem;">
+            <h3 aa-instant="fade">First item</h3>
+            <p aa-instant="fade">Second item</p>
+            <button aa-instant="fade">Third item</button>
           </div>
       
           <!-- Custom delay sequence -->
-          <div aa-stagger="0.2" aa-delay="1" style="margin-top: 4rem;">
+          <div aa-instant="fade" aa-duration="0.5" aa-stagger="0.2" aa-delay="1" style="margin-top: 4rem;">
             <h3 aa-instant="float-up">Slower sequence - First</h3>
             <p aa-instant="float-up">Slower sequence - Second</p>
             <button aa-instant="float-up">Slower sequence - Third</button>
@@ -723,7 +731,7 @@
       </section>
 
         <section class="hero">
-            <h1 class="headline" aa-animate="rotate-3d-soft-3em"  aa-ease="expo.out" aa-delay="0" aa-duration="0.4">
+            <h1 class="headline" aa-animate="turn-3d-soft-3em"  aa-ease="expo.out" aa-delay="0" aa-duration="0.4">
                 ThickPic
             </h1>
             <p class="subheadline" aa-animate="text-slide-down" aa-split="words" aa-stagger="0.1" aa-delay="2.5">
@@ -765,7 +773,7 @@
                   </a>
                 </div>
             </div>
-            <div class="hero-image" aa-animate="rotate-3d-elliptic" aa-duration="0.5" aa-ease="back.out" aa-delay="1.5">
+            <div class="hero-image" aa-animate="turn-3d-elliptic" aa-duration="0.5" aa-ease="back.out" aa-delay="1.5">
                 <img src="https://images.unsplash.com/photo-1611162617474-5b21e879e113?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1674&q=80" alt="Person using laptop with calendar app open">
                 <button class="play-button" aria-label="Play video">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -828,7 +836,7 @@
                 <h2 aa-animate="text-rotate-soft" style="font-size: 10rem;" aa-split="lines" aa-stagger="0.3" aa-duration="1.2" aa-ease="circ.out">
                     This text can be 
                 </h2>
-                <h2 aa-animate="rotate-3d-soft-3em" >
+                <h2 aa-animate="turn-3d-soft-3em" >
                   This text can be one line
               </h2>
                 <div class="grid" aa-children="float-up" aa-delay="1" aa-duration="1.5" aa-ease="power2.out" aa-stagger="0.2">
@@ -837,10 +845,10 @@
                   <div class="box"></div>
                 </div>
                 <div class="grid" style="grid-template-columns: repeat(4, 1fr);">
-                  <div class="box" style="background-color: #5b50fa; height: 300px;" aa-duration="0.8" aa-distance="0.01" aa-ease="back.out" aa-animate="rotate-br-cw"></div>
+                  <div class="box" style="background-color: #5b50fa; height: 300px;" aa-duration="0.8" aa-distance="0.01" aa-ease="back.out" aa-animate="rotate-br-cw-45"></div>
                   <div class="box" style="background-color: #5b50fa; height: 300px;" aa-duration="0.8" aa-ease="back.out" aa-animate="rotate-br-cw-15"></div>
                   <div class="box" style="background-color: #5b50fa; height: 300px;" aa-duration="0.8" aa-ease="back.out" aa-animate="rotate-bl-ccw-15"></div>
-                  <div class="box" style="background-color: #5b50fa; height: 300px;" aa-duration="0.8" aa-distance="0.01" aa-ease="back.out" aa-animate="rotate-bl-ccw"></div>
+                  <div class="box" style="background-color: #5b50fa; height: 300px;" aa-duration="0.8" aa-distance="0.01" aa-ease="back.out" aa-animate="rotate-bl-ccw-45"></div>
                 </div>
                 <div class="grid">
                     <div class="box"><span aa-animate="float-up" aa-distance="20">Fade Up Back</span></div>

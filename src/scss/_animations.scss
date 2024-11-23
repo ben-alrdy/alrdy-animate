@@ -118,25 +118,91 @@
 [aa-instant="swing-bwd"] { animation-name: swing-bwd; }
 
 
-/*3D ROTATION ANIMATIONS*/
-[aa-animate^='rotate-3d'] {
+/*3D TURN ROTATION ANIMATIONS*/
+[aa-animate^='turn-3d'] {
   opacity: 0;
 }
 
-[aa-animate^='rotate-3d'].in-view{
+[aa-animate^='turn-3d'].in-view{
   animation-delay: var(--aa-delay);
   animation-duration: var(--aa-duration);
   animation-fill-mode: forwards;
 }
 
-[aa-animate="rotate-3d-soft"].in-view,
-[aa-instant="rotate-3d-soft"] { animation-name: rotate-3d-soft; }
+[aa-animate="turn-3d-soft"].in-view,
+[aa-instant="turn-3d-soft"] { animation-name: turn-3d-soft; }
 
-[aa-animate="rotate-3d-soft-3em"].in-view,
-[aa-instant="rotate-3d-soft-3em"] { animation-name: rotate-3d-soft-3em; }
+[aa-animate="turn-3d-soft-3em"].in-view,
+[aa-instant="turn-3d-soft-3em"] { animation-name: turn-3d-soft-3em; }
 
-[aa-animate="rotate-3d-elliptic"].in-view,
-[aa-instant="rotate-3d-elliptic"] { animation-name: rotate-3d-elliptic; }
+[aa-animate="turn-3d-elliptic"].in-view,
+[aa-instant="turn-3d-elliptic"] { animation-name: turn-3d-elliptic; }
+
+
+
+/*ROTATE ANIMATIONS*/
+
+// Define the degrees list and positions
+$rotation-degrees: (5, 15, 25, 35, 45);
+$rotation-positions: ('br': (100% 100%), 'bl': (0 100%));
+
+// Base styles for rotate animations
+[aa-animate^='rotate-'],
+[aa-instant^='rotate-'] {
+  opacity: 0;
+}
+
+[aa-animate^='rotate-'].in-view{
+  animation-delay: var(--aa-delay);
+  animation-duration: var(--aa-duration);
+  animation-fill-mode: forwards;
+}
+
+// Generate keyframes and animations for each position and degree
+@each $pos, $origin in $rotation-positions {
+  // Set transform origin for both types
+  [aa-animate^='rotate-#{$pos}'],
+  [aa-instant^='rotate-#{$pos}'] {
+    transform-origin: $origin;
+  }
+
+  // Generate degree-specific rotations
+  @each $degree in $rotation-degrees {
+    @keyframes rotate-#{$pos}-cw-#{$degree} {
+      from {
+        opacity: 0;
+        transform: translateY(calc(50px * var(--aa-distance))) rotate(-#{$degree}deg);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) rotate(0deg);
+      }
+    }
+
+    @keyframes rotate-#{$pos}-ccw-#{$degree} {
+      from {
+        opacity: 0;
+        transform: translateY(calc(50px * var(--aa-distance))) rotate(#{$degree}deg);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) rotate(0deg);
+      }
+    }
+
+    [aa-animate='rotate-#{$pos}-cw-#{$degree}'].in-view,
+    [aa-instant='rotate-#{$pos}-cw-#{$degree}'] {
+      animation-name: rotate-#{$pos}-cw-#{$degree};
+    }
+
+    [aa-animate='rotate-#{$pos}-ccw-#{$degree}'].in-view,
+    [aa-instant='rotate-#{$pos}-ccw-#{$degree}'] {
+      animation-name: rotate-#{$pos}-ccw-#{$degree};
+    }
+  }
+}
+
+
 
 
 /*FADE ANIMATIONS - ONLY FOR INSTANT*/

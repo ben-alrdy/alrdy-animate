@@ -161,7 +161,7 @@
   }
 }
 
-@keyframes rotate-3d-soft {
+@keyframes turn-3d-soft {
   0% {
     transform: rotateX(-90deg) translate3d(0, 100%, 0) scale3d(.75, 1, 1);
     opacity: 0;
@@ -173,7 +173,7 @@
 }
 
 /*Includes perspective so that it doesn't need to be set on the parent element*/
-@keyframes rotate-3d-soft-3em {
+@keyframes turn-3d-soft-3em {
   0% {
     transform: perspective(3em) rotateX(-90deg) translate3d(0, 100%, 0) scale3d(.75, 1, 1);
     opacity: 0;
@@ -184,7 +184,7 @@
   }
 }
 
- @keyframes rotate-3d-elliptic {
+ @keyframes turn-3d-elliptic {
   0% {
     transform: translateY(-600px) rotateX(-30deg) scale(0);
     transform-origin: 50% 100%;
