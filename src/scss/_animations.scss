@@ -104,8 +104,7 @@
   transform-origin: 50% 0;
 }
 
-[aa-animate^='swing'].in-view,
-[aa-instant^='swing'] {
+[aa-animate^='swing'].in-view {
   animation-delay: var(--aa-delay);
   animation-duration: var(--aa-duration);
   animation-fill-mode: forwards;

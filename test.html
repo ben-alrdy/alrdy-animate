@@ -616,18 +616,32 @@
             <div class="box"><span aa-instant="slide-in-blurred-left">Instant Blurred Left</span></div>
             <div class="box"><span aa-instant="slide-in-blurred-right">Instant Blurred Right</span></div>
       
-            <!-- 3D Swing animations -->
-            <div class="box"><span aa-instant="swing-fwd" aa-duration="1.5" aa-ease="back.out">Instant Swing Forward</span></div>
-            <div class="box"><span aa-instant="swing-bwd" aa-duration="1.5" aa-ease="back.out">Instant Swing Backward</span></div>
-      
+        
             <!-- 3D Rotation animations -->
-            <div class="box"><span aa-instant="turn-3d-soft" aa-duration="0.8">Instant Rotate 3D Soft</span></div>
-            <div class="box"><span aa-instant="turn-3d-soft-3em" aa-duration="0.8">Instant Rotate 3D 3em</span></div>
-            <div class="box"><span aa-instant="turn-3d-elliptic" aa-duration="0.8">Instant Rotate 3D Elliptic</span></div>
+            <div class="box" style="background-color: #a59ffe; font-size: 3rem;" aa-instant="turn-3d-soft-3em" aa-duration="0.8" aa-delay="0.5"><span >Instant Rotate 3D 3em</span></div>
 
           </div>
 
-          <div class="grid" style="grid-template-columns: repeat(4, 1fr);">
+          <div class="grid" style="margin-top: 4rem; perspective: 1000px;">
+         
+            <!-- 3D Swing animations -->
+            <div class="box" style="background-color: #a59ffe;" aa-instant="swing-fwd" aa-duration="0.8" aa-ease="back.out" aa-delay="0.5"><span >Instant Swing Forward</span></div>
+            <div class="box" style="background-color: #a59ffe;" aa-instant="swing-fwd" aa-duration="0.8" aa-ease="back.out" aa-delay="0.5"><span >Instant Swing Forward</span></div>
+            <div class="box" style="background-color: #a59ffe;" aa-instant="swing-fwd" aa-duration="0.8" aa-ease="back.out" aa-delay="0.5"><span >Instant Swing Forward</span></div>
+
+            <div class="box" style="background-color: #4aebed;" aa-instant="swing-bwd" aa-duration="0.8" aa-ease="back.out" aa-delay="1"><span >Instant Swing Backward</span></div>
+            <div class="box" style="background-color: #4aebed;" aa-instant="swing-bwd" aa-duration="0.8" aa-ease="back.out" aa-delay="1"><span >Instant Swing Backward</span></div>
+            <div class="box" style="background-color: #4aebed;" aa-instant="swing-bwd" aa-duration="0.8" aa-ease="back.out" aa-delay="1"><span >Instant Swing Backward</span></div>
+      
+            <!-- 3D Rotation animations -->
+            <div class="box" style="background-color: #a59ffe;" aa-instant="turn-3d-soft" aa-duration="0.8" aa-delay="1.5"><span >Instant Rotate 3D Soft</span></div>
+            <div class="box" style="background-color: #a59ffe;" aa-instant="turn-3d-elliptic" aa-duration="0.8" aa-delay="1.5"><span >Instant Rotate 3D Elliptic</span></div>
+            <div class="box" style="background-color: #a59ffe; font-size: 3rem;" aa-instant="turn-3d-soft-3em" aa-duration="0.8" aa-delay="1.5"><span >Instant Rotate 3D 3em</span></div>
+
+
+          </div>
+
+          <div class="grid" style="grid-template-columns: repeat(4, 1fr); margin-top: 10rem;">
             <div class="box" style="background-color: #5b50fa; height: 300px;" aa-duration="0.8" aa-distance="0.01" aa-ease="back.out" aa-instant="rotate-br-cw-45"></div>
             <div class="box" style="background-color: #5b50fa; height: 300px;" aa-duration="0.8" aa-ease="back.out" aa-instant="rotate-br-cw-15"></div>
             <div class="box" style="background-color: #5b50fa; height: 300px;" aa-duration="0.8" aa-ease="back.out" aa-instant="rotate-bl-ccw-15"></div>
