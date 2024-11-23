@@ -191,7 +191,12 @@
     * ccw = counter clockwise
     */
 
-    [aa-animate^='rotate-br'][aa-animate^='rotate-br'] {
+    // Define the degrees list
+    $rotation-degrees: (5, 15, 25, 35, 45);
+    $rotation-positions: ('br': (100% 100%), 'bl': (0 100%));
+
+    // Base styles for all rotate animations
+    [aa-animate^='rotate-'] {
       transition-property: transform, opacity;
       transition-duration: var(--animation-duration);
       transition-delay: var(--animation-delay);
@@ -200,40 +205,35 @@
       &.in-view {
         transform: translateY(0) rotate(0deg);
         opacity: 1;
-        transform-origin: 100% 100%;
       }
     }
 
-    [aa-animate*='rotate-br-cw'] {
-      transform: translateY(calc(50px * var(--aa-distance-factor))) rotate(calc(-1 * var(--aa-rotation-degree, 45deg)));
-    }
+    // Generate position-specific styles
+    @each $pos, $origin in $rotation-positions {
+      [aa-animate^='rotate-#{$pos}'] {
+        transform-origin: $origin;
+      }
 
-    [aa-animate*='rotate-br-ccw'] {
-      transform: translateY(calc(50px * var(--aa-distance-factor))) rotate(var(--aa-rotation-degree, 45deg));
-    }
+      // Default 45-degree rotations (when no degree is specified)
+      [aa-animate='rotate-#{$pos}-cw'] {
+        transform: translateY(calc(50px * var(--aa-distance-factor))) rotate(-45deg);
+      }
 
+      [aa-animate='rotate-#{$pos}-ccw'] {
+        transform: translateY(calc(50px * var(--aa-distance-factor))) rotate(45deg);
+      }
 
-    [aa-animate^='rotate-bl'][aa-animate^='rotate-bl'] {
-      transition-property: transform, opacity;
-      transition-duration: var(--animation-duration);
-      transition-delay: var(--animation-delay);
-      opacity: 0;
+      // Generate degree-specific rotations
+      @each $degree in $rotation-degrees {
+        [aa-animate='rotate-#{$pos}-cw-#{$degree}'] {
+          transform: translateY(calc(50px * var(--aa-distance-factor))) rotate(-#{$degree}deg);
+        }
 
-      &.in-view {
-        transform: translateY(0) rotate(0deg);
-        opacity: 1;
-        transform-origin: 0 100%;
+        [aa-animate='rotate-#{$pos}-ccw-#{$degree}'] {
+          transform: translateY(calc(50px * var(--aa-distance-factor))) rotate(#{$degree}deg);
+        }
       }
     }
-
-    [aa-animate*='rotate-bl-cw'] {
-      transform: translateY(calc(50px * var(--aa-distance-factor))) rotate(calc(-1 * var(--aa-rotation-degree, 45deg)));
-    }
-
-    [aa-animate*='rotate-bl-ccw'] {
-      transform: translateY(calc(50px * var(--aa-distance-factor))) rotate(var(--aa-rotation-degree, 45deg));
-    }
-
 
 
     /*

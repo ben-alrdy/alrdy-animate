@@ -3,15 +3,6 @@ export function getElementSettings(element, settings) {
   const anchorSelector = element.getAttribute("aa-anchor");
   const anchorElement = anchorSelector ? document.querySelector(anchorSelector) : element;
 
-  // Parse rotation degree if present
-  let rotationDegree;
-  if (animationType && animationType.includes('rotate-') && animationType.includes('.')) {
-    const degreeMatch = animationType.match(/\.(\d+)$/);
-    if (degreeMatch) {
-      rotationDegree = parseInt(degreeMatch[1]);
-    }
-  }
-
   return {
     // Animation properties
     animationType,
@@ -19,7 +10,6 @@ export function getElementSettings(element, settings) {
     splitType: element.getAttribute('aa-split'),
     scroll: element.getAttribute('aa-scroll'),
     distance: element.hasAttribute('aa-distance') ? parseFloat(element.getAttribute('aa-distance')) : settings.distance,
-    rotationDegree,
 
     // Animation timing
     duration: element.hasAttribute('aa-duration') ? parseFloat(element.getAttribute('aa-duration')) : undefined,
@@ -43,7 +33,7 @@ export function getElementSettings(element, settings) {
 }
 
 export function applyElementStyles(element, elementSettings, isMobile) {
-  const { duration, delay, distance, delayMobile, colorInitial, colorFinal, rotationDegree } = elementSettings;
+  const { duration, delay, distance, delayMobile, colorInitial, colorFinal } = elementSettings;
 
   // Set duration if specified on element
   if (element.hasAttribute('aa-duration')) {
@@ -66,10 +56,5 @@ export function applyElementStyles(element, elementSettings, isMobile) {
   }
   if (colorFinal) {
     element.style.setProperty("--background-color-final", colorFinal);
-  }
-
-  // Set rotation degree
-  if (rotationDegree) {
-    element.style.setProperty("--aa-rotation-degree", `${rotationDegree}deg`);
   }
 } 
