@@ -178,17 +178,7 @@ function setupAnimations(elements, initOptions, isMobile, modules) {
     applyElementStyles(element, elementSettings, isMobile);
 
     if (enableGSAP) {
-      const animationType = elementSettings.animationType;
-      
-      if (animationType.startsWith('loop-')) {
-        if (!modules.animations?.loop) {
-          console.warn(`Loop animation requested but 'loop' module not loaded. Add 'loop' to gsapFeatures array in init options to use loop animations.`);
-          return;
-        }
-        modules.animations.loop(element, animationType, elementSettings.duration, elementSettings.ease);
-      } else {
-        setupGSAPAnimations(element, elementSettings, initOptions, isMobile, modules);
-      }
+      setupGSAPAnimations(element, elementSettings, initOptions, isMobile, modules);
     } else {
       setupIntersectionObserver(element, elementSettings, initOptions);
     }
@@ -197,6 +187,16 @@ function setupAnimations(elements, initOptions, isMobile, modules) {
 
 function setupGSAPAnimations(element, elementSettings, initOptions, isMobile, modules) {
   const { animationType, splitType: splitTypeAttr, scroll, duration, stagger, delay, ease, anchorElement, anchorSelector, viewportPercentage } = elementSettings;
+
+  // Handle loop animations
+  if (animationType.startsWith('loop-')) {
+    if (!modules.animations?.loop) {
+      console.warn(`Loop animation requested but 'loop' module not loaded. Add 'loop' to gsapFeatures array in init options to use loop animations.`);
+      return;
+    }
+    modules.animations.loop(element, animationType, duration, ease);
+    return;
+  }
 
   // Clear existing animation if any in case of re-run (e.g. when changing the viewport width)
   if (element.timeline) element.timeline.kill();
