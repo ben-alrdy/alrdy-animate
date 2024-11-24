@@ -629,6 +629,77 @@
   padding-left: 2.5rem;
 }
 
+          
+              :root {
+                --border-color: #0b1e07;
+                --hover-color: #c2ff5d;
+                --icon-size: 1.25rem;
+                --icon-padding: 0.5rem;
+                --text-color: #0b1e07;
+              }
+            
+              .anm_icon_btn_wrap {
+                display: inline-flex;
+                overflow: hidden;
+                padding: 0.8rem 1rem 0.8rem 2rem;
+                justify-content: flex-start;
+                align-items: center;
+                grid-column-gap: 1rem;
+                grid-row-gap: 1rem;
+                border: 1px solid var(--border-color);
+                border-radius: 50rem;
+                color: var(--text-color);
+                text-decoration: none;
+                transition: border-color 300ms ease-out;
+                background: #fff;
+              }
+            
+              .anm_icon_btn_wrap:hover {
+                border-color: var(--hover-color);
+              }
+            
+              .is-reversed {
+                padding-right: 2rem;
+                padding-left: 1rem;
+                flex-direction: row-reverse;
+                flex-wrap: wrap;
+              }
+            
+              .anm_icon_btn_text {
+                position: relative;
+                z-index: 1;
+              }
+            
+              .anm_icon_btn_icon_wrap {
+                position: relative;
+                padding: var(--icon-padding);
+              }
+            
+              .anm_icon_btn_icon_outer {
+                position: relative;
+                overflow: hidden;
+                height: var(--icon-size);
+              }
+            
+              .anm_icon_btn_icon {
+                position: relative;
+                z-index: 1;
+                width: var(--icon-size);
+                height: var(--icon-size);
+              }
+            
+              .anm_icon_btn_icon_bg {
+                position: absolute;
+                left: 0%;
+                top: 0%;
+                right: 0%;
+                bottom: 0%;
+                border-radius: 50rem;
+                background-color: var(--hover-color);
+                transform: scale(1);
+              }
+          
+
   </style>
 </head>
 
@@ -664,22 +735,24 @@
           <!-- Curve Buttons -->
           <div style="display: flex; gap: 1rem; margin-bottom: 2rem;">
             <a class="button" href="#" aa-hover="bg-curve" aa-hover-direction="all" aa-duration="0.3" aa-ease="power2.out">
-              <div>All Directions</div>
-              <svg class="bg-filler" viewBox="0 0 100 100" preserveAspectRatio="none">
-                <path d="M 0 100 V 0 Q 250 0 500 0 V 0 H 0 z" fill="currentColor"></path>
-              </svg>
+              <div aa-hover-content>All Directions</div>
+              <div>
+                <svg class="bg-filler" viewBox="0 0 100 100" preserveAspectRatio="none" aa-hover-bg>
+                  <path d="M 0 100 V 0 Q 250 0 500 0 V 0 H 0 z" fill="currentColor"></path>
+                </svg>
+              </div>
             </a>
 
             <a class="button" href="#" aa-hover="bg-curve" aa-hover-direction="horizontal">
-              <div>Horizontal Only</div>
-              <svg class="bg-filler" viewBox="0 0 100 100" preserveAspectRatio="none">
+              <div aa-hover-content>Horizontal Only</div>
+              <svg class="bg-filler" viewBox="0 0 100 100" preserveAspectRatio="none" aa-hover-bg>
                 <path d="M 0 100 V 0 Q 250 0 500 0 V 0 H 0 z" fill="currentColor"></path>
               </svg>
             </a>
 
             <a class="button" href="#" aa-hover="bg-curve" aa-hover-direction="vertical" aa-duration="0.8">
-              <div>Vertical Only</div>
-              <svg class="bg-filler" viewBox="0 0 100 100" preserveAspectRatio="none">
+              <div aa-hover-content>Vertical Only</div>
+              <svg class="bg-filler" viewBox="0 0 100 100" preserveAspectRatio="none" aa-hover-bg>
                 <path d="M 0 100 V 0 Q 250 0 500 0 V 0 H 0 z" fill="currentColor"></path>
               </svg>
             </a>
@@ -688,49 +761,108 @@
           <!-- Circle Buttons -->
           <div style="display: flex; gap: 1rem; margin-bottom: 4rem;">
             <a class="button" href="#" aa-hover="bg-circle" aa-hover-direction="all" aa-duration="1.2">
-              <div>Circle</div>
-              <svg class="bg-filler" viewBox="0 0 1 1" preserveAspectRatio="xMidYMid slice">
+              <div aa-hover-content>Circle</div>
+              <svg class="bg-filler" viewBox="0 0 1 1" preserveAspectRatio="xMidYMid slice" aa-hover-bg>
                 <circle cx="0.5" cy="0.5" r="0" fill="currentColor" />
               </svg>
             </a>
 
             <a class="button" href="#" aa-hover="bg-circle" aa-hover-direction="bottom" aa-duration="1">
-              <div>Circle bottom</div>
-              <svg class="bg-filler" viewBox="0 0 1 1" preserveAspectRatio="xMidYMid slice">
+              <div aa-hover-content>Circle bottom</div>
+              <svg class="bg-filler" viewBox="0 0 1 1" preserveAspectRatio="xMidYMid slice" aa-hover-bg>
                 <circle cx="0.5" cy="0.5" r="0" fill="currentColor" />
               </svg>
             </a>
 
             <a class="button" href="#" aa-hover="bg-circle" aa-hover-direction="vertical" aa-duration="1">
-              <div>Circle vertical</div>
-              <svg class="bg-filler" viewBox="0 0 1 1" preserveAspectRatio="xMidYMid slice">
+              <div aa-hover-content>Circle vertical</div>
+              <svg class="bg-filler" viewBox="0 0 1 1" preserveAspectRatio="xMidYMid slice" aa-hover-bg>
                 <circle cx="0.5" cy="0.5" r="0" fill="currentColor" />
               </svg>
             </a>
+
+            
+           
+           
+            
           </div>
 
+           <!-- Icon Button HTML -->
+            <!-- EDIT: anm-color="black" -->
+            <a href="#" class="anm_icon_btn_wrap is-reversed" aa-hover="bg-icon-reverse" aa-hover-direction="up-right">
+              <div class="anm_icon_btn_text" anm-icon-btn="text">Icon Button with longer text</div>
+              <div class="anm_icon_btn_icon_wrap">
+                <div class="anm_icon_btn_icon_outer">
+                  <svg
+                    class="anm_icon_btn_icon"
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="100%"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aa-hover-icon
+                  >
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                    <path d="M17 7l-10 10"></path>
+                    <path d="M8 7l9 0l0 9"></path>
+                  </svg>
+                </div>
+                <div class="anm_icon_btn_icon_bg" aa-hover-bg></div>
+              </div>
+            </a>
+            
+             <!-- Icon Button HTML -->
+            <!-- EDIT: anm-color="black" -->
+            <a href="#" class="anm_icon_btn_wrap is-reversed" aa-hover="bg-icon" aa-hover-direction="up-right">
+              <div class="anm_icon_btn_text" anm-icon-btn="text">Icon Button</div>
+              <div class="anm_icon_btn_icon_wrap">
+                <div class="anm_icon_btn_icon_outer">
+                  <svg
+                    class="anm_icon_btn_icon"
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="100%"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aa-hover-icon
+                  >
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                    <path d="M17 7l-10 10"></path>
+                    <path d="M8 7l9 0l0 9"></path>
+                  </svg>
+                </div>
+                <div class="anm_icon_btn_icon_bg" aa-hover-bg></div>
+              </div>
+            </a>
+            
           <!-- List Items -->
           <div class="list">
             <div class="list_item" aa-hover="bg-curve" aa-hover-direction="vertical" aa-duration="0.4">
-              <div>Product Features</div>
-              <div>→</div>
-              <svg class="bg-filler" viewBox="0 0 100 100" preserveAspectRatio="none">
+              <div aa-hover-content>Product Features</div>
+              <div aa-hover-content>→</div>
+              <svg class="bg-filler" viewBox="0 0 100 100" preserveAspectRatio="none" aa-hover-bg>
                 <path d="M 0 100 V 0 Q 250 0 500 0 V 0 H 0 z" fill="currentColor"></path>
               </svg>
             </div>
             
             <div class="list_item" aa-hover="bg-curve" aa-hover-direction="vertical" aa-duration="0.4">
-              <div>Pricing Plans</div>
-              <div>→</div>
-              <svg class="bg-filler" viewBox="0 0 100 100" preserveAspectRatio="none">
+              <div aa-hover-content>Pricing Plans</div>
+              <div aa-hover-content>→</div>
+              <svg class="bg-filler" viewBox="0 0 100 100" preserveAspectRatio="none" aa-hover-bg>
                 <path d="M 0 100 V 0 Q 250 0 500 0 V 0 H 0 z" fill="currentColor"></path>
               </svg>
             </div>
             
             <div class="list_item" aa-hover="bg-curve" aa-hover-direction="vertical" aa-duration="0.4">
-              <div>Customer Stories</div>
-              <div>→</div>
-              <svg class="bg-filler" viewBox="0 0 100 100" preserveAspectRatio="none">
+              <div aa-hover-content>Customer Stories</div>
+              <div aa-hover-content>→</div>
+              <svg class="bg-filler" viewBox="0 0 100 100" preserveAspectRatio="none" aa-hover-bg>
                 <path d="M 0 100 V 0 Q 250 0 500 0 V 0 H 0 z" fill="currentColor"></path>
               </svg>
             </div>

@@ -85,7 +85,7 @@ function getAdjustedDirection(mouseDirection, hoverDirection, isEnter) {
 }
 
 function initializeCurveAnimation(element, gsap) {
-    const bg = element.querySelector('svg');
+    const bg = element.querySelector('[aa-hover-bg]');
     const bgPath = bg.querySelector('path');
     const hoverDirection = element.getAttribute('aa-hover-direction') || 'all';
     
@@ -134,7 +134,7 @@ function initializeCurveAnimation(element, gsap) {
 }
 
 function initializeCircleAnimation(element, gsap) {
-    const bg = element.querySelector('svg');
+    const bg = element.querySelector('[aa-hover-bg]');
     const circle = bg.querySelector('circle');
     const hoverDirection = element.getAttribute('aa-hover-direction') || 'all';
     const rect = element.getBoundingClientRect();
@@ -199,6 +199,173 @@ function initializeCircleAnimation(element, gsap) {
     element.addEventListener('mouseleave', event => handleCircleHover(event, false));
 }
 
+function initializeIconAnimationReverse(element, gsap) {
+    const icon = element.querySelector('[aa-hover-icon]');
+    const bg = element.querySelector('[aa-hover-bg]');
+    
+    // Get animation settings
+    const duration = element.hasAttribute('aa-duration') ? 
+        parseFloat(element.getAttribute('aa-duration')) : 0.5;
+    const ease = element.getAttribute('aa-ease') || 'power3.inOut';
+
+    // Get hover type to determine direction
+    const iconDirection = element.getAttribute('aa-hover-direction') || 'right';
+
+    // Create and setup icon clone
+    const iconClone = icon.cloneNode(true);
+    iconClone.style.position = 'absolute';
+    icon.after(iconClone);
+
+    // Create timeline with direction-specific animations
+    const timeline = gsap.timeline({
+        defaults: { ease, duration },
+        paused: true,
+    });
+
+    switch(iconDirection) {
+        case 'right':
+            iconClone.style.left = '-100%';
+            iconClone.style.top = '0';
+            timeline
+                .to(icon, { xPercent: 100 }, '<')
+                .to(iconClone, { xPercent: 100 }, '<');
+            break;
+        case 'up-right':
+            iconClone.style.left = '-100%';
+            iconClone.style.top = '100%';
+            timeline
+                .to(icon, { xPercent: 100, yPercent: -100 }, '<')
+                .to(iconClone, { xPercent: 100, yPercent: -100 }, '<');
+            break;
+        case 'down-right':
+            iconClone.style.left = '-100%';
+            iconClone.style.top = '-100%';
+            timeline
+                .to(icon, { xPercent: 100, yPercent: 100 }, '<')
+                .to(iconClone, { xPercent: 100, yPercent: 100 }, '<');
+            break;
+    }
+
+    // Add background animation
+    timeline.to(bg, { scale: 15 }, '<');
+
+    element.addEventListener('mouseenter', () => {
+        timeline.play();
+    });
+
+    element.addEventListener('mouseleave', () => {
+        timeline.reverse();
+    });
+}
+
+function initializeIconAnimation(element, gsap) {
+    const icon = element.querySelector('[aa-hover-icon]');
+    const bg = element.querySelector('[aa-hover-bg]');
+    
+    // Get animation settings
+    const duration = element.hasAttribute('aa-duration') ? 
+        parseFloat(element.getAttribute('aa-duration')) : 0.5;
+    const ease = element.getAttribute('aa-ease') || 'power3.inOut';
+    const iconDirection = element.getAttribute('aa-hover-direction') || 'right';
+
+    // Create and setup icon clone
+    const iconClone = icon.cloneNode(true);
+    iconClone.style.position = 'absolute';
+    icon.after(iconClone);
+
+    // Create and setup background reset clone
+    const bgReset = bg.cloneNode(true);
+    bgReset.style.position = 'absolute';
+    bgReset.style.top = '0';
+    bgReset.style.left = '0';
+    bgReset.style.transform = 'scale(0)';
+    bgReset.style.backgroundColor = window.getComputedStyle(element).backgroundColor;
+    bg.after(bgReset);
+
+    // Create hover in timeline
+    const timelineIn = gsap.timeline({
+        defaults: { ease, duration },
+        paused: true,
+    });
+
+    // Setup icon and background animations for hover in
+    switch(iconDirection) {
+        case 'right':
+            iconClone.style.left = '-100%';
+            iconClone.style.top = '0';
+            timelineIn
+                .set(bg, { scale: 1 }, 0)  // Reset bg scale at start
+                .to(icon, { xPercent: 100 }, 0)
+                .to(iconClone, { xPercent: 100 }, 0)
+                .to(bg, { scale: 15 }, 0);
+            break;
+        case 'up-right':
+            iconClone.style.left = '-100%';
+            iconClone.style.top = '100%';
+            timelineIn
+                .set(bg, { scale: 1 }, 0)  // Reset bg scale at start
+                .to(icon, { xPercent: 100, yPercent: -100 }, 0)
+                .to(iconClone, { xPercent: 100, yPercent: -100 }, 0)
+                .to(bg, { scale: 15 }, 0);
+            break;
+        case 'down-right':
+            iconClone.style.left = '-100%';
+            iconClone.style.top = '-100%';
+            timelineIn
+                .set(bg, { scale: 1 }, 0)  // Reset bg scale at start
+                .to(icon, { xPercent: 100, yPercent: 100 }, 0)
+                .to(iconClone, { xPercent: 100, yPercent: 100 }, 0)
+                .to(bg, { scale: 15 }, 0);
+            break;
+    }
+
+    // Create hover out timeline
+    const timelineOut = gsap.timeline({
+        defaults: { ease, duration },
+        paused: true,
+    });
+
+    // Setup reset animation sequence
+    timelineOut
+        // First expand the reset background from center
+        .to(bgReset, { 
+            scale: 15,
+            duration: duration * 0.6,
+            ease: 'power2.in'
+        })
+        // Instantly hide both backgrounds after reset bg is expanded
+        .set([bg, bgReset], { scale: 0 })
+        // Then scale up the colored background to its original size
+        .to(bg, { 
+            scale: 1,
+            duration: duration * 0.4,
+            ease: 'power2.out'
+        });
+
+    // Add icon animation to out timeline (same direction as in)
+    switch(iconDirection) {
+        case 'right':
+            timelineOut.to([icon, iconClone], { xPercent: 100 }, 0);
+            break;
+        case 'up-right':
+            timelineOut.to([icon, iconClone], { xPercent: 100, yPercent: -100 }, 0);
+            break;
+        case 'down-right':
+            timelineOut.to([icon, iconClone], { xPercent: 100, yPercent: 100 }, 0);
+            break;
+    }
+
+    element.addEventListener('mouseenter', () => {
+        timelineOut.pause(0);
+        timelineIn.restart();  // Reset and play from start
+    });
+
+    element.addEventListener('mouseleave', () => {
+        timelineIn.pause();  // Reset in animation
+        timelineOut.restart();  // Reset and play from start
+    });
+}
+
 function createHoverAnimations(gsap) {
     function initializeHoverAnimations() {
         const elements = document.querySelectorAll('[aa-hover]');
@@ -206,10 +373,19 @@ function createHoverAnimations(gsap) {
         elements.forEach(element => {
             const hoverType = element.getAttribute('aa-hover');
             
-            if (hoverType === 'bg-circle') {
-                initializeCircleAnimation(element, gsap);
-            } else if (hoverType === 'bg-curve') {
-                initializeCurveAnimation(element, gsap);
+            switch(hoverType) {
+                case 'bg-circle':
+                    initializeCircleAnimation(element, gsap);
+                    break;
+                case 'bg-curve':
+                    initializeCurveAnimation(element, gsap);
+                    break;
+                case 'bg-icon-reverse':
+                    initializeIconAnimationReverse(element, gsap);
+                    break;
+                case 'bg-icon':
+                    initializeIconAnimation(element, gsap);
+                    break;
             }
         });
     }

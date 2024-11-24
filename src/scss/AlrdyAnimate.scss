@@ -61,7 +61,7 @@ body {
 }
 
 //Hover animations
-[aa-hover] svg {
+[aa-hover-bg] {
   position: absolute;
   top: 0;
   left: 0;
@@ -70,7 +70,7 @@ body {
   z-index: 0;
 }
 
-[aa-hover] div {
+[aa-hover-content] {
   position: relative;
   z-index: 1;
   transition: color 0.2s ease;
