@@ -50,12 +50,12 @@ function getValidDirection(mouseDirection, allowedDirections) {
         case 'all':
             return mouseDirection;
         case 'vertical':
-            return ['top', 'bottom'].includes(mouseDirection) ? 
-                mouseDirection : 
+            return ['top', 'bottom'].includes(mouseDirection) ?
+                mouseDirection :
                 'bottom';
         case 'horizontal':
-            return ['left', 'right'].includes(mouseDirection) ? 
-                mouseDirection : 
+            return ['left', 'right'].includes(mouseDirection) ?
+                mouseDirection :
                 'left';
         case 'bottom':
             return 'bottom';
@@ -73,14 +73,14 @@ function getValidDirection(mouseDirection, allowedDirections) {
 function getAdjustedDirection(mouseDirection, hoverDirection, isEnter) {
     // First get the base valid direction
     let direction = getValidDirection(mouseDirection, hoverDirection);
-    
+
     // Then adjust based on constraints and enter/exit state
     if (hoverDirection === 'horizontal' && !['left', 'right'].includes(mouseDirection)) {
         direction = isEnter ? 'left' : 'right';  // Enter from left, exit to right
     } else if (hoverDirection === 'vertical' && !['top', 'bottom'].includes(mouseDirection)) {
         direction = isEnter ? 'bottom' : 'top';  // Enter from bottom, exit to top
     }
-    
+
     return direction;
 }
 
@@ -88,9 +88,9 @@ function initializeCurveAnimation(element, gsap) {
     const bg = element.querySelector('[aa-hover-bg]');
     const bgPath = bg.querySelector('path');
     const hoverDirection = element.getAttribute('aa-hover-direction') || 'all';
-    
+
     // Get animation settings directly
-    const duration = element.hasAttribute('aa-duration') ? 
+    const duration = element.hasAttribute('aa-duration') ?
         parseFloat(element.getAttribute('aa-duration')) : 0.5;
     const ease = element.getAttribute('aa-ease') || 'power3.out';
 
@@ -143,14 +143,14 @@ function initializeCircleAnimation(element, gsap) {
     const finalRadius = (buttonDiagonal / rect.width) * 1.3;
 
     // Get animation settings directly
-    const duration = element.hasAttribute('aa-duration') ? 
+    const duration = element.hasAttribute('aa-duration') ?
         parseFloat(element.getAttribute('aa-duration')) : 1;
     const ease = element.getAttribute('aa-ease') || 'power3.out';
 
     function handleCircleHover(event, isEnter) {
         const mouseDirection = getMouseEnterDirection(event, element);
         const direction = getAdjustedDirection(mouseDirection, hoverDirection, isEnter);
-        
+
         // Get mouse position relative to element
         let x = (event.clientX - rect.left) / rect.width;
         let y = (event.clientY - rect.top) / rect.height;
@@ -202,9 +202,9 @@ function initializeCircleAnimation(element, gsap) {
 function initializeIconAnimationReverse(element, gsap) {
     const icon = element.querySelector('[aa-hover-icon]');
     const bg = element.querySelector('[aa-hover-bg]');
-    
+
     // Get animation settings
-    const duration = element.hasAttribute('aa-duration') ? 
+    const duration = element.hasAttribute('aa-duration') ?
         parseFloat(element.getAttribute('aa-duration')) : 0.5;
     const ease = element.getAttribute('aa-ease') || 'power3.inOut';
 
@@ -222,7 +222,7 @@ function initializeIconAnimationReverse(element, gsap) {
         paused: true,
     });
 
-    switch(iconDirection) {
+    switch (iconDirection) {
         case 'right':
             iconClone.style.left = '-100%';
             iconClone.style.top = '0';
@@ -261,9 +261,9 @@ function initializeIconAnimationReverse(element, gsap) {
 function initializeIconAnimation(element, gsap) {
     const icon = element.querySelector('[aa-hover-icon]');
     const bg = element.querySelector('[aa-hover-bg]');
-    
+
     // Get animation settings
-    const duration = element.hasAttribute('aa-duration') ? 
+    const duration = element.hasAttribute('aa-duration') ?
         parseFloat(element.getAttribute('aa-duration')) : 0.5;
     const ease = element.getAttribute('aa-ease') || 'power3.inOut';
     const iconDirection = element.getAttribute('aa-hover-direction') || 'right';
@@ -289,7 +289,7 @@ function initializeIconAnimation(element, gsap) {
     });
 
     // Setup icon and background animations for hover in
-    switch(iconDirection) {
+    switch (iconDirection) {
         case 'right':
             iconClone.style.left = '-100%';
             iconClone.style.top = '0';
@@ -328,7 +328,7 @@ function initializeIconAnimation(element, gsap) {
     // Setup reset animation sequence
     timelineOut
         // First expand the reset background from center
-        .to(bgReset, { 
+        .to(bgReset, {
             scale: 15,
             duration: duration * 0.6,
             ease: 'power2.in'
@@ -336,24 +336,13 @@ function initializeIconAnimation(element, gsap) {
         // Instantly hide both backgrounds after reset bg is expanded
         .set([bg, bgReset], { scale: 0 })
         // Then scale up the colored background to its original size
-        .to(bg, { 
+        .to(bg, {
             scale: 1,
             duration: duration * 0.4,
             ease: 'power2.out'
         });
 
-    // Add icon animation to out timeline (same direction as in)
-    switch(iconDirection) {
-        case 'right':
-            timelineOut.to([icon, iconClone], { xPercent: 100 }, 0);
-            break;
-        case 'up-right':
-            timelineOut.to([icon, iconClone], { xPercent: 100, yPercent: -100 }, 0);
-            break;
-        case 'down-right':
-            timelineOut.to([icon, iconClone], { xPercent: 100, yPercent: 100 }, 0);
-            break;
-    }
+
 
     element.addEventListener('mouseenter', () => {
         timelineOut.pause(0);
@@ -361,31 +350,198 @@ function initializeIconAnimation(element, gsap) {
     });
 
     element.addEventListener('mouseleave', () => {
-        timelineIn.pause();  // Reset in animation
-        timelineOut.restart();  // Reset and play from start
+        timelineIn //plays out the in animation (in case hover was very quick)
+            .then(() => timelineOut.restart()); //then plays out the out animation
     });
 }
 
-function createHoverAnimations(gsap) {
+function initializeTextHoverAnimation(element, gsap, splitText) {
+    const textElement = element.querySelector('[aa-hover-text]');
+    if (!textElement) return;
+    const width = textElement.getBoundingClientRect().width;
+    const height = textElement.getBoundingClientRect().height;
+
+    // Get animation settings
+    const animationType = element.getAttribute('aa-hover').replace('.reverse', '');
+    const isReverse = element.getAttribute('aa-hover').includes('reverse');
+    const stagger = element.hasAttribute('aa-stagger') ? parseFloat(element.getAttribute('aa-stagger')) : 0.02;
+    const delay = element.hasAttribute('aa-delay') ? parseFloat(element.getAttribute('aa-delay')) : 0;
+    const duration = element.hasAttribute('aa-duration') ? parseFloat(element.getAttribute('aa-duration')) : 0.3;
+    const ease = element.getAttribute('aa-ease') || 'power3.inOut';
+    const split = element.getAttribute('aa-split') || 'chars';
+    const splitType = split.split('.')[0]; // Gets 'chars' or 'words' from potential 'chars.clip'
+
+    // Create and position clone
+    const textClone = textElement.cloneNode(true);
+    textClone.style.position = 'absolute';
+    textClone.style.top = '0';
+    textElement.after(textClone);
+
+    // Split both original and clone
+    const { splitResult: textSplit } = splitText(textElement, split);
+    const { splitResult: clonedSplit } = splitText(textClone, split);
+
+    // Get the correct elements to animate based on split type
+    const originalElements = textSplit[splitType];
+    const clonedElements = clonedSplit[splitType];
+
+    // Create timeline
+    const timeline = gsap.timeline({
+        defaults: { ease, duration, stagger },
+        paused: true,
+    });
+
+    // Setup animation based on type
+    switch (animationType) {
+        case 'text-slide-up':
+            textClone.style.top = `${height}px`;
+            timeline
+                .fromTo(originalElements,
+                    { y: 0 },
+                    { y: -height }
+                )
+                .fromTo(clonedElements,
+                    { y: 0 },
+                    { y: -height, delay },
+                    '<'
+                );
+            break;
+
+        case 'text-slide-down':
+            textClone.style.top = `-${height}px`;
+            timeline
+                .fromTo(originalElements,
+                    { y: 0 },
+                    { y: height }
+                )
+                .fromTo(clonedElements,
+                    { y: 0 },
+                    { y: height, delay },
+                    '<'
+                );
+            break;
+
+        case 'text-slide-left':
+            textClone.style.left = `${width}px`;
+            timeline
+                .fromTo(originalElements,
+                    { x: 0 },
+                    { x: -width }
+                )
+                .fromTo(clonedElements,
+                    { x: 0 },
+                    { x: -width, delay },
+                    '<'
+                );
+            break;
+
+        case 'text-slide-right':
+            textClone.style.left = `-${width}px`;
+            timeline
+                .fromTo([...originalElements].reverse(),
+                    { x: 0 },
+                    { x: width }
+                )
+                .fromTo([...clonedElements].reverse(),
+                    { x: 0 },
+                    { x: width, delay },
+                    '<'
+                );
+            break;
+
+        case 'text-fade-up':
+            textClone.style.top = `${height / 3}px`;
+            timeline
+                .fromTo(originalElements,
+                    { y: 0, opacity: 1 },
+                    { y: -height / 3, opacity: 0 }
+                )
+                .fromTo(clonedElements,
+                    { y: 0, opacity: 0 },
+                    { y: -height / 3, opacity: 1, delay },
+                    '<'
+                );
+            break;
+
+        case 'text-fade-down':
+            textClone.style.top = `-${height / 3}px`;
+            timeline
+                .fromTo(originalElements,
+                    { y: 0, opacity: 1 },
+                    { y: height / 3, opacity: 0 }
+                )
+                .fromTo(clonedElements,
+                    { y: 0, opacity: 0 },
+                    { y: height / 3, opacity: 1, delay },
+                    '<'
+                );
+            break;
+
+        case 'text-fade-left':
+            textClone.style.left = `${width / 3}px`;
+            timeline
+                .fromTo(originalElements,
+                    { x: 0, opacity: 1 },
+                    { x: -width / 3, opacity: 0 }
+                )
+                .fromTo(clonedElements,
+                    { x: 0, opacity: 0 },
+                    { x: -width / 3, opacity: 1, delay },
+                    '<'
+                );
+            break;
+
+        case 'text-fade-right':
+            textClone.style.left = `-${width / 3}px`;
+            timeline
+                .fromTo([...originalElements].reverse(),
+                    { x: 0, opacity: 1 },
+                    { x: width / 3, opacity: 0 }
+                )
+                .fromTo([...clonedElements].reverse(),
+                    { x: 0, opacity: 0 },
+                    { x: width / 3, opacity: 1, delay },
+                    '<'
+                );
+            break;
+    }
+
+    // Add hover events
+    element.addEventListener('mouseenter', () => {
+        timeline.restart();
+    });
+
+    element.addEventListener('mouseleave', () => {
+        if (isReverse) {
+            timeline.reverse();
+        }
+    });
+}
+
+function createHoverAnimations(gsap, splitText) {
     function initializeHoverAnimations() {
         const elements = document.querySelectorAll('[aa-hover]');
-        
+
         elements.forEach(element => {
             const hoverType = element.getAttribute('aa-hover');
-            
-            switch(hoverType) {
-                case 'bg-circle':
-                    initializeCircleAnimation(element, gsap);
-                    break;
-                case 'bg-curve':
-                    initializeCurveAnimation(element, gsap);
-                    break;
-                case 'bg-icon-reverse':
-                    initializeIconAnimationReverse(element, gsap);
-                    break;
-                case 'bg-icon':
-                    initializeIconAnimation(element, gsap);
-                    break;
+
+            if (hoverType.startsWith('text-')) {
+                initializeTextHoverAnimation(element, gsap, splitText);
+            } else {
+                switch (hoverType) {
+                    case 'bg-circle':
+                        initializeCircleAnimation(element, gsap);
+                        break;
+                    case 'bg-curve':
+                        initializeCurveAnimation(element, gsap);
+                        break;
+                    case 'bg-icon-reverse':
+                        initializeIconAnimationReverse(element, gsap);
+                        break;
+                    case 'bg-icon':
+                        initializeIconAnimation(element, gsap);
+                        break;
+                }
             }
         });
     }

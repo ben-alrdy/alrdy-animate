@@ -578,6 +578,18 @@
   color: #000;
   text-decoration: none;
   border: 1px solid rgba(0,0,0,0.1);
+  transition: color 0.3s ease-in-out;
+}
+
+.button2 {
+  position: relative;
+  border-radius: 0.5rem;
+  background-color: #ffffff;
+  display: inline-block;
+  overflow: hidden;
+  color: #000;
+  text-decoration: none;
+  border: 1px solid rgba(0,0,0,0.1);
 }
 
 [aa-hover] svg {
@@ -596,7 +608,7 @@
   transition: color 0.2s ease;
 } */
 
-.button:hover div {
+.button:hover {
   color: rgb(255, 255, 255)
 }
 
@@ -699,7 +711,15 @@
                 transform: scale(1);
               }
           
-
+.text-clip {
+  position: relative;
+  overflow: hidden;
+  text-wrap-mode: nowrap;
+}
+[aa-hover-text] {
+  line-height: 1.4;
+  padding: 1rem 2rem;
+}
   </style>
 </head>
 
@@ -781,11 +801,27 @@
               </svg>
             </a>
 
+            <a class="button2" href="#"
+            aa-hover="text-fade-right.reverse" 
+            aa-split="words" 
+            aa-duration="0.3" 
+            aa-stagger="0.02" 
+            aa-delay="0.1"
+            aa-ease="power2.inOut"
+            >
+            
+            <div class="text-clip">
+              <div aa-hover-text>Get free demo</div>
+            </div>
+          </a>
+
             
            
            
             
           </div>
+
+         
 
            <!-- Icon Button HTML -->
             <!-- EDIT: anm-color="black" -->
