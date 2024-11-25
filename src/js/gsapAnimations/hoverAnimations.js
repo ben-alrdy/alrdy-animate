@@ -207,6 +207,7 @@ function initializeIconAnimationReverse(element, gsap) {
     const duration = element.hasAttribute('aa-duration') ?
         parseFloat(element.getAttribute('aa-duration')) : 0.5;
     const ease = element.getAttribute('aa-ease') || 'power3.inOut';
+    const delay = element.hasAttribute('aa-delay') ? parseFloat(element.getAttribute('aa-delay')) : 0.2;
 
     // Get hover type to determine direction
     const iconDirection = element.getAttribute('aa-hover-direction') || 'right';
@@ -216,8 +217,13 @@ function initializeIconAnimationReverse(element, gsap) {
     iconClone.style.position = 'absolute';
     icon.after(iconClone);
 
-    // Create timeline with direction-specific animations
-    const timeline = gsap.timeline({
+    // Create separate timelines for icons and background
+    const iconTimeline = gsap.timeline({
+        defaults: { ease, duration },
+        paused: true,
+    });
+
+    const bgTimeline = gsap.timeline({
         defaults: { ease, duration },
         paused: true,
     });
@@ -226,35 +232,37 @@ function initializeIconAnimationReverse(element, gsap) {
         case 'right':
             iconClone.style.left = '-100%';
             iconClone.style.top = '0';
-            timeline
-                .to(icon, { xPercent: 100 }, '<')
-                .to(iconClone, { xPercent: 100 }, '<');
+            iconTimeline
+                .to(icon, { xPercent: 100 }, 0)
+                .to(iconClone, { xPercent: 100 }, delay);
             break;
         case 'up-right':
             iconClone.style.left = '-100%';
             iconClone.style.top = '100%';
-            timeline
-                .to(icon, { xPercent: 100, yPercent: -100 }, '<')
-                .to(iconClone, { xPercent: 100, yPercent: -100 }, '<');
+            iconTimeline
+                .to(icon, { xPercent: 100, yPercent: -100 }, 0)
+                .to(iconClone, { xPercent: 100, yPercent: -100 }, delay);
             break;
         case 'down-right':
             iconClone.style.left = '-100%';
             iconClone.style.top = '-100%';
-            timeline
-                .to(icon, { xPercent: 100, yPercent: 100 }, '<')
-                .to(iconClone, { xPercent: 100, yPercent: 100 }, '<');
+            iconTimeline
+                .to(icon, { xPercent: 100, yPercent: 100 }, 0)
+                .to(iconClone, { xPercent: 100, yPercent: 100 }, delay);
             break;
     }
 
-    // Add background animation
-    timeline.to(bg, { scale: 15 }, '<');
+    // Separate background animation
+    bgTimeline.to(bg, { scale: 15 }, 0);
 
     element.addEventListener('mouseenter', () => {
-        timeline.play();
+        iconTimeline.play();
+        bgTimeline.play();
     });
 
     element.addEventListener('mouseleave', () => {
-        timeline.reverse();
+        iconTimeline.reverse();
+        bgTimeline.reverse();
     });
 }
 
@@ -266,6 +274,7 @@ function initializeIconAnimation(element, gsap) {
     const duration = element.hasAttribute('aa-duration') ?
         parseFloat(element.getAttribute('aa-duration')) : 0.5;
     const ease = element.getAttribute('aa-ease') || 'power3.inOut';
+    const delay = element.hasAttribute('aa-delay') ? parseFloat(element.getAttribute('aa-delay')) : 0.2;
     const iconDirection = element.getAttribute('aa-hover-direction') || 'right';
 
     // Create and setup icon clone
@@ -295,27 +304,27 @@ function initializeIconAnimation(element, gsap) {
             iconClone.style.top = '0';
             timelineIn
                 .set(bg, { scale: 1 }, 0)  // Reset bg scale at start
+                .to(bg, { scale: 15 }, 0)
                 .to(icon, { xPercent: 100 }, 0)
-                .to(iconClone, { xPercent: 100 }, 0)
-                .to(bg, { scale: 15 }, 0);
+                .to(iconClone, { xPercent: 100 }, delay);                
             break;
         case 'up-right':
             iconClone.style.left = '-100%';
             iconClone.style.top = '100%';
             timelineIn
                 .set(bg, { scale: 1 }, 0)  // Reset bg scale at start
+                .to(bg, { scale: 15 }, 0)
                 .to(icon, { xPercent: 100, yPercent: -100 }, 0)
-                .to(iconClone, { xPercent: 100, yPercent: -100 }, 0)
-                .to(bg, { scale: 15 }, 0);
+                .to(iconClone, { xPercent: 100, yPercent: -100 }, delay);                
             break;
         case 'down-right':
             iconClone.style.left = '-100%';
             iconClone.style.top = '-100%';
             timelineIn
                 .set(bg, { scale: 1 }, 0)  // Reset bg scale at start
+                .to(bg, { scale: 15 }, 0)
                 .to(icon, { xPercent: 100, yPercent: 100 }, 0)
-                .to(iconClone, { xPercent: 100, yPercent: 100 }, 0)
-                .to(bg, { scale: 15 }, 0);
+                .to(iconClone, { xPercent: 100, yPercent: 100 }, delay);                
             break;
     }
 
@@ -362,7 +371,7 @@ function initializeTextHoverAnimation(element, gsap, splitText) {
     const height = textElement.getBoundingClientRect().height;
 
     // Get animation settings
-    const animationType = element.getAttribute('aa-hover').replace('.reverse', '');
+    const animationType = element.getAttribute('aa-hover').replace('-reverse', '');
     const isReverse = element.getAttribute('aa-hover').includes('reverse');
     const stagger = element.hasAttribute('aa-stagger') ? parseFloat(element.getAttribute('aa-stagger')) : 0.02;
     const delay = element.hasAttribute('aa-delay') ? parseFloat(element.getAttribute('aa-delay')) : 0;
