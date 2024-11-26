@@ -199,82 +199,25 @@ function initializeCircleAnimation(element, gsap) {
     element.addEventListener('mouseleave', event => handleCircleHover(event, false));
 }
 
-function initializeIconAnimationReverse(element, gsap) {
-    const icon = element.querySelector('[aa-hover-icon]');
-    const bg = element.querySelector('[aa-hover-bg]');
-
-    // Get animation settings
-    const duration = element.hasAttribute('aa-duration') ?
-        parseFloat(element.getAttribute('aa-duration')) : 0.5;
-    const ease = element.getAttribute('aa-ease') || 'power3.inOut';
-    const delay = element.hasAttribute('aa-delay') ? parseFloat(element.getAttribute('aa-delay')) : 0.2;
-
-    // Get hover type to determine direction
-    const iconDirection = element.getAttribute('aa-hover-direction') || 'right';
-
-    // Create and setup icon clone
-    const iconClone = icon.cloneNode(true);
-    iconClone.style.position = 'absolute';
-    icon.after(iconClone);
-
-    // Create separate timelines for icons and background
-    const iconTimeline = gsap.timeline({
-        defaults: { ease, duration },
-        paused: true,
-    });
-
-    const bgTimeline = gsap.timeline({
-        defaults: { ease, duration },
-        paused: true,
-    });
-
-    switch (iconDirection) {
-        case 'right':
-            iconClone.style.left = '-100%';
-            iconClone.style.top = '0';
-            iconTimeline
-                .to(icon, { xPercent: 100 }, 0)
-                .to(iconClone, { xPercent: 100 }, delay);
-            break;
-        case 'up-right':
-            iconClone.style.left = '-100%';
-            iconClone.style.top = '100%';
-            iconTimeline
-                .to(icon, { xPercent: 100, yPercent: -100 }, 0)
-                .to(iconClone, { xPercent: 100, yPercent: -100 }, delay);
-            break;
-        case 'down-right':
-            iconClone.style.left = '-100%';
-            iconClone.style.top = '-100%';
-            iconTimeline
-                .to(icon, { xPercent: 100, yPercent: 100 }, 0)
-                .to(iconClone, { xPercent: 100, yPercent: 100 }, delay);
-            break;
-    }
-
-    // Separate background animation
-    bgTimeline.to(bg, { scale: 15 }, 0);
-
-    element.addEventListener('mouseenter', () => {
-        iconTimeline.play();
-        bgTimeline.play();
-    });
-
-    element.addEventListener('mouseleave', () => {
-        iconTimeline.reverse();
-        bgTimeline.reverse();
-    });
-}
-
 function initializeIconAnimation(element, gsap) {
+    // Common setup
     const icon = element.querySelector('[aa-hover-icon]');
     const bg = element.querySelector('[aa-hover-bg]');
+    const isReverse = element.getAttribute('aa-hover').includes('reverse');
+
+    // Calculate optimal scale factor
+    const elementRect = element.getBoundingClientRect();
+    const bgRect = bg.getBoundingClientRect();
+    const scaleX = Math.ceil(elementRect.width / bgRect.width * 2); 
+    const scaleY = Math.ceil(elementRect.height / bgRect.height * 2);
+    const scale = Math.max(scaleX, scaleY);
 
     // Get animation settings
-    const duration = element.hasAttribute('aa-duration') ?
+    const duration = element.hasAttribute('aa-duration') ? 
         parseFloat(element.getAttribute('aa-duration')) : 0.5;
     const ease = element.getAttribute('aa-ease') || 'power3.inOut';
-    const delay = element.hasAttribute('aa-delay') ? parseFloat(element.getAttribute('aa-delay')) : 0.2;
+    const delay = element.hasAttribute('aa-delay') ? 
+        parseFloat(element.getAttribute('aa-delay')) : 0.1;
     const iconDirection = element.getAttribute('aa-hover-direction') || 'right';
 
     // Create and setup icon clone
@@ -282,86 +225,103 @@ function initializeIconAnimation(element, gsap) {
     iconClone.style.position = 'absolute';
     icon.after(iconClone);
 
-    // Create and setup background reset clone
-    const bgReset = bg.cloneNode(true);
-    bgReset.style.position = 'absolute';
-    bgReset.style.top = '0';
-    bgReset.style.left = '0';
-    bgReset.style.transform = 'scale(0)';
-    bgReset.style.backgroundColor = window.getComputedStyle(element).backgroundColor;
-    bg.after(bgReset);
-
-    // Create hover in timeline
-    const timelineIn = gsap.timeline({
-        defaults: { ease, duration },
-        paused: true,
-    });
-
-    // Setup icon and background animations for hover in
-    switch (iconDirection) {
-        case 'right':
-            iconClone.style.left = '-100%';
-            iconClone.style.top = '0';
-            timelineIn
-                .set(bg, { scale: 1 }, 0)  // Reset bg scale at start
-                .to(bg, { scale: 15 }, 0)
-                .to(icon, { xPercent: 100 }, 0)
-                .to(iconClone, { xPercent: 100 }, delay);                
-            break;
-        case 'up-right':
-            iconClone.style.left = '-100%';
-            iconClone.style.top = '100%';
-            timelineIn
-                .set(bg, { scale: 1 }, 0)  // Reset bg scale at start
-                .to(bg, { scale: 15 }, 0)
-                .to(icon, { xPercent: 100, yPercent: -100 }, 0)
-                .to(iconClone, { xPercent: 100, yPercent: -100 }, delay);                
-            break;
-        case 'down-right':
-            iconClone.style.left = '-100%';
-            iconClone.style.top = '-100%';
-            timelineIn
-                .set(bg, { scale: 1 }, 0)  // Reset bg scale at start
-                .to(bg, { scale: 15 }, 0)
-                .to(icon, { xPercent: 100, yPercent: 100 }, 0)
-                .to(iconClone, { xPercent: 100, yPercent: 100 }, delay);                
-            break;
+    // Setup icon position based on direction
+    function setupIconPosition() {
+        switch (iconDirection) {
+            case 'right':
+                iconClone.style.left = '-100%';
+                iconClone.style.top = '0';
+                return {
+                    icon: { xPercent: 100 },
+                    clone: { xPercent: 100 }
+                };
+            case 'up-right':
+                iconClone.style.left = '-100%';
+                iconClone.style.top = '100%';
+                return {
+                    icon: { xPercent: 100, yPercent: -100 },
+                    clone: { xPercent: 100, yPercent: -100 }
+                };
+            case 'down-right':
+                iconClone.style.left = '-100%';
+                iconClone.style.top = '-100%';
+                return {
+                    icon: { xPercent: 100, yPercent: 100 },
+                    clone: { xPercent: 100, yPercent: 100 }
+                };
+        }
     }
 
-    // Create hover out timeline
-    const timelineOut = gsap.timeline({
-        defaults: { ease, duration },
-        paused: true,
-    });
+    const iconAnimations = setupIconPosition();
 
-    // Setup reset animation sequence
-    timelineOut
-        // First expand the reset background from center
-        .to(bgReset, {
-            scale: 15,
-            duration: duration * 0.6,
-            ease: 'power2.in'
-        })
-        // Instantly hide both backgrounds after reset bg is expanded
-        .set([bg, bgReset], { scale: 0 })
-        // Then scale up the colored background to its original size
-        .to(bg, {
-            scale: 1,
-            duration: duration * 0.4,
-            ease: 'power2.out'
+    if (isReverse) {
+        // Create and setup reverse animation timeline
+        const timelineIn = gsap.timeline({
+            defaults: { ease, duration },
+            paused: true,
         });
 
+        timelineIn
+            .to(icon, iconAnimations.icon, 0)
+            .to(iconClone, iconAnimations.clone, delay)
+            .to(bg, { scale }, 0);
 
+        // Add reverse animation event listeners
+        element.addEventListener('mouseenter', () => timelineIn.play());
+        element.addEventListener('mouseleave', () => timelineIn.reverse());
 
-    element.addEventListener('mouseenter', () => {
-        timelineOut.pause(0);
-        timelineIn.restart();  // Reset and play from start
-    });
+    } else {
+        // Create and setup background reset clone
+        const bgReset = bg.cloneNode(true);
+        bgReset.style.position = 'absolute';
+        bgReset.style.top = '0';
+        bgReset.style.left = '0';
+        bgReset.style.transform = 'scale(0)';
+        bgReset.style.backgroundColor = window.getComputedStyle(element).backgroundColor;
+        bg.after(bgReset);
 
-    element.addEventListener('mouseleave', () => {
-        timelineIn //plays out the in animation (in case hover was very quick)
-            .then(() => timelineOut.restart()); //then plays out the out animation
-    });
+        // Create hover in/out timelines
+        const timelineIn = gsap.timeline({
+            defaults: { ease, duration },
+            paused: true,
+        });
+
+        const timelineOut = gsap.timeline({
+            defaults: { ease, duration },
+            paused: true,
+        });
+
+        // Setup hover in animation
+        timelineIn
+            .set(bg, { scale: 1 }, 0)
+            .to(bg, { scale }, 0)
+            .to(icon, iconAnimations.icon, 0)
+            .to(iconClone, iconAnimations.clone, delay);
+
+        // Setup hover out animation
+        timelineOut
+            .to(bgReset, {
+                scale,
+                duration: duration * 0.6,
+                ease: 'power2.in'
+            })
+            .set([bg, bgReset], { scale: 0 })
+            .to(bg, {
+                scale: 1,
+                duration: duration * 0.4,
+                ease: 'power2.out'
+            });
+
+        // Add non-reverse animation event listeners
+        element.addEventListener('mouseenter', () => {
+            timelineOut.pause(0);
+            timelineIn.restart();
+        });
+
+        element.addEventListener('mouseleave', () => {
+            timelineIn.then(() => timelineOut.restart());
+        });
+    }
 }
 
 function initializeTextHoverAnimation(element, gsap, splitText) {
@@ -545,7 +505,7 @@ function createHoverAnimations(gsap, splitText) {
                         initializeCurveAnimation(element, gsap);
                         break;
                     case 'bg-icon-reverse':
-                        initializeIconAnimationReverse(element, gsap);
+                        initializeIconAnimation(element, gsap);
                         break;
                     case 'bg-icon':
                         initializeIconAnimation(element, gsap);
