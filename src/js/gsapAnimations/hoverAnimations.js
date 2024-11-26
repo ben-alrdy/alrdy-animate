@@ -151,9 +151,9 @@ function initializeCircleAnimation(element, gsap) {
         const mouseDirection = getMouseEnterDirection(event, element);
         const direction = getAdjustedDirection(mouseDirection, hoverDirection, isEnter);
 
-        // Get mouse position relative to element
-        let x = (event.clientX - rect.left) / rect.width;
-        let y = (event.clientY - rect.top) / rect.height;
+        // Get mouse position relative to element using offsetX/Y
+        let x = event.offsetX / rect.width;
+        let y = event.offsetY / rect.height;
 
         switch (direction) {
             case 'left':
