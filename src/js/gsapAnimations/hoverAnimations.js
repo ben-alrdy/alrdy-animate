@@ -87,23 +87,48 @@ function getAdjustedDirection(mouseDirection, hoverDirection, isEnter) {
 function initializeCurveAnimation(element, gsap) {
     const bg = element.querySelector('[aa-hover-bg]');
     const bgPath = bg.querySelector('path');
+    const hoverTexts = element.querySelectorAll('[aa-hover-text]');
+    const hoverColor = element.getAttribute('aa-hover-color');
+    const originalColors = {};
     const hoverDirection = element.getAttribute('aa-hover-direction') || 'all';
+
+    // Store the original text colors
+    if (hoverTexts.length && hoverColor) {
+        hoverTexts.forEach((text, index) => {
+            originalColors[index] = window.getComputedStyle(text).color;
+        });
+    }
 
     // Get animation settings directly
     const duration = element.hasAttribute('aa-duration') ?
         parseFloat(element.getAttribute('aa-duration')) : 0.5;
     const ease = element.getAttribute('aa-ease') || 'power3.out';
 
-    function animateHover(start, end) {
-        return gsap.fromTo(
+    function animateHover(start, end, isEnter) {
+        const timeline = gsap.timeline({
+            defaults: { duration, ease }
+        });
+
+        // Animate the path
+        timeline.fromTo(
             bgPath,
             { attr: { d: start } },
-            {
-                attr: { d: end },
-                duration,
-                ease,
-            }
+            { attr: { d: end } }
         );
+
+        // Add color animation if texts and hover color exist
+        if (hoverTexts.length && hoverColor) {
+            hoverTexts.forEach((text, index) => {
+                timeline.fromTo(
+                    text,
+                    { color: isEnter ? originalColors[index] : hoverColor },
+                    { color: isEnter ? hoverColor : originalColors[index] },
+                    0 // Start at same time as path animation
+                );
+            });
+        }
+
+        return timeline;
     }
 
     element.addEventListener('mouseenter', event => {
@@ -116,7 +141,7 @@ function initializeCurveAnimation(element, gsap) {
             right: svgPaths.fromRight
         };
         const pathDirection = paths[direction] || paths.bottom;
-        animateHover(pathDirection.start, pathDirection.end);
+        animateHover(pathDirection.start, pathDirection.end, true);
     });
 
     element.addEventListener('mouseleave', event => {
@@ -129,18 +154,23 @@ function initializeCurveAnimation(element, gsap) {
             right: svgPaths.toRight
         };
         const pathDirection = paths[direction] || paths.bottom;
-        animateHover(pathDirection.start, pathDirection.end);
+        animateHover(pathDirection.start, pathDirection.end, false);
     });
 }
 
 function initializeCircleAnimation(element, gsap) {
     const bg = element.querySelector('[aa-hover-bg]');
     const circle = bg.querySelector('circle');
+    const hoverText = element.querySelector('[aa-hover-text]');
+    const hoverColor = element.getAttribute('aa-hover-color');
     const hoverDirection = element.getAttribute('aa-hover-direction') || 'all';
     const rect = element.getBoundingClientRect();
     const offset = 10;
     const buttonDiagonal = Math.sqrt(Math.pow(rect.width, 2) + Math.pow(rect.height, 2));
     const finalRadius = (buttonDiagonal / rect.width) * 1.3;
+
+    // Store the original text color
+    const originalColor = hoverText ? window.getComputedStyle(hoverText).color : null;
 
     // Get animation settings directly
     const duration = element.hasAttribute('aa-duration') ?
@@ -158,40 +188,48 @@ function initializeCircleAnimation(element, gsap) {
         switch (direction) {
             case 'left':
                 x = -offset / rect.width;
-                // Keep mouse y position
                 break;
             case 'right':
                 x = 1 + offset / rect.width;
-                // Keep mouse y position
                 break;
             case 'top':
                 y = -offset / rect.height;
-                // Keep mouse x position
                 break;
             case 'bottom':
                 y = 1 + offset / rect.height;
-                // Keep mouse x position
                 break;
         }
 
         circle.setAttribute('cx', x);
         circle.setAttribute('cy', y);
 
+        const timeline = gsap.timeline({
+            defaults: { duration, ease }
+        });
+
         if (isEnter) {
-            gsap.fromTo(circle,
-                { attr: { r: 0 } },
-                {
-                    attr: { r: finalRadius },
-                    duration,
-                    ease
-                }
-            );
+            timeline
+                .fromTo(circle,
+                    { attr: { r: 0 } },
+                    { attr: { r: finalRadius } },
+                    0
+                );
+
+            if (hoverText && hoverColor) {
+                timeline.fromTo(
+                    hoverText,
+                    { color: originalColor },
+                    { color: hoverColor },
+                    0
+                );
+            }
         } else {
-            gsap.to(circle, {
-                attr: { r: 0 },
-                duration,
-                ease
-            });
+            timeline
+                .to(circle, { attr: { r: 0 } }, 0);
+
+            if (hoverText && hoverColor) {
+                timeline.to(hoverText, { color: originalColor }, 0);
+            }
         }
     }
 
@@ -208,15 +246,15 @@ function initializeIconAnimation(element, gsap) {
     // Calculate optimal scale factor
     const elementRect = element.getBoundingClientRect();
     const bgRect = bg.getBoundingClientRect();
-    const scaleX = Math.ceil(elementRect.width / bgRect.width * 2); 
+    const scaleX = Math.ceil(elementRect.width / bgRect.width * 2);
     const scaleY = Math.ceil(elementRect.height / bgRect.height * 2);
     const scale = Math.max(scaleX, scaleY);
 
     // Get animation settings
-    const duration = element.hasAttribute('aa-duration') ? 
+    const duration = element.hasAttribute('aa-duration') ?
         parseFloat(element.getAttribute('aa-duration')) : 0.5;
     const ease = element.getAttribute('aa-ease') || 'power3.inOut';
-    const delay = element.hasAttribute('aa-delay') ? 
+    const delay = element.hasAttribute('aa-delay') ?
         parseFloat(element.getAttribute('aa-delay')) : 0.1;
     const iconDirection = element.getAttribute('aa-hover-direction') || 'right';
 

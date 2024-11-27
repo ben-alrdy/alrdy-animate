@@ -716,7 +716,7 @@
   overflow: hidden;
   text-wrap-mode: nowrap;
 }
-[aa-hover-text] {
+.aa-hover-text {
   line-height: 1.4;
   padding: 1rem 2rem;
 }
@@ -754,7 +754,7 @@
           
           <!-- Curve Buttons -->
           <div style="display: flex; gap: 1rem; margin-bottom: 2rem;">
-            <a class="button" href="#" aa-hover="bg-curve" aa-hover-direction="all" aa-duration="0.3" aa-ease="power2.out">
+            <a class="button" href="#" aa-hover="bg-curve" aa-hover-color="yellow" aa-hover-direction="all" aa-duration="0.3" aa-ease="power2.out">
               <div aa-hover-content>All Directions</div>
               <div>
                 <svg class="bg-filler" viewBox="0 0 100 100" preserveAspectRatio="none" aa-hover-bg>
@@ -764,14 +764,14 @@
             </a>
 
             <a class="button" href="#" aa-hover="bg-curve" aa-hover-direction="horizontal">
-              <div aa-hover-content>Horizontal Only</div>
+              <div aa-hover-text>Horizontal Only</div>
               <svg class="bg-filler" viewBox="0 0 100 100" preserveAspectRatio="none" aa-hover-bg>
                 <path d="M 0 100 V 0 Q 250 0 500 0 V 0 H 0 z" fill="currentColor"></path>
               </svg>
             </a>
 
             <a class="button" href="#" aa-hover="bg-curve" aa-hover-direction="vertical" aa-duration="0.8">
-              <div aa-hover-content>Vertical Only</div>
+              <div aa-hover-text>Vertical Only</div>
               <svg class="bg-filler" viewBox="0 0 100 100" preserveAspectRatio="none" aa-hover-bg>
                 <path d="M 0 100 V 0 Q 250 0 500 0 V 0 H 0 z" fill="currentColor"></path>
               </svg>
@@ -781,21 +781,21 @@
           <!-- Circle Buttons -->
           <div style="display: flex; gap: 1rem; margin-bottom: 4rem;">
             <a class="button" href="#" aa-hover="bg-circle" aa-hover-direction="all" aa-duration="1.2">
-              <div aa-hover-content>Circle</div>
+              <div aa-hover-text>Circle</div>
               <svg class="bg-filler" viewBox="0 0 1 1" preserveAspectRatio="xMidYMid slice" aa-hover-bg>
                 <circle cx="0.5" cy="0.5" r="0" fill="currentColor" />
               </svg>
             </a>
 
-            <a class="button" href="#" aa-hover="bg-circle" aa-hover-direction="bottom" aa-duration="1">
-              <div aa-hover-content>Circle bottom</div>
+            <a class="button" href="#" aa-hover="bg-circle" aa-hover-color="red" aa-hover-direction="bottom" aa-duration="1">
+              <div aa-hover-text>Circle bottom</div>
               <svg class="bg-filler" viewBox="0 0 1 1" preserveAspectRatio="xMidYMid slice" aa-hover-bg>
                 <circle cx="0.5" cy="0.5" r="0" fill="currentColor" />
               </svg>
             </a>
 
             <a class="button" href="#" aa-hover="bg-circle" aa-hover-direction="vertical" aa-duration="1">
-              <div aa-hover-content>Circle vertical</div>
+              <div aa-hover-text>Circle vertical</div>
               <svg class="bg-filler" viewBox="0 0 1 1" preserveAspectRatio="xMidYMid slice" aa-hover-bg>
                 <circle cx="0.5" cy="0.5" r="0" fill="currentColor" />
               </svg>
@@ -811,7 +811,7 @@
             >
             
             <div class="text-clip">
-              <div aa-hover-text>Get free demo</div>
+              <div aa-hover-text class="aa-hover-text">Get free demo</div>
             </div>
           </a>
 
@@ -904,25 +904,25 @@
             
           <!-- List Items -->
           <div class="list">
-            <div class="list_item" aa-hover="bg-curve" aa-hover-direction="vertical" aa-duration="0.4">
-              <div aa-hover-content>Product Features</div>
-              <div aa-hover-content>→</div>
+            <div class="list_item" aa-hover="bg-curve" aa-hover-direction="vertical" aa-hover-color="red" aa-duration="0.4">
+              <div aa-hover-text>Product Features</div>
+              <div aa-hover-text>→</div>
               <svg class="bg-filler" viewBox="0 0 100 100" preserveAspectRatio="none" aa-hover-bg>
                 <path d="M 0 100 V 0 Q 250 0 500 0 V 0 H 0 z" fill="currentColor"></path>
               </svg>
             </div>
             
             <div class="list_item" aa-hover="bg-curve" aa-hover-direction="vertical" aa-duration="0.4">
-              <div aa-hover-content>Pricing Plans</div>
-              <div aa-hover-content>→</div>
+              <div aa-hover-text>Pricing Plans</div>
+              <div aa-hover-text>→</div>
               <svg class="bg-filler" viewBox="0 0 100 100" preserveAspectRatio="none" aa-hover-bg>
                 <path d="M 0 100 V 0 Q 250 0 500 0 V 0 H 0 z" fill="currentColor"></path>
               </svg>
             </div>
             
             <div class="list_item" aa-hover="bg-curve" aa-hover-direction="vertical" aa-duration="0.4">
-              <div aa-hover-content>Customer Stories</div>
-              <div aa-hover-content>→</div>
+              <div aa-hover-text>Customer Stories</div>
+              <div aa-hover-text>→</div>
               <svg class="bg-filler" viewBox="0 0 100 100" preserveAspectRatio="none" aa-hover-bg>
                 <path d="M 0 100 V 0 Q 250 0 500 0 V 0 H 0 z" fill="currentColor"></path>
               </svg>
