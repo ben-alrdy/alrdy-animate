@@ -172,10 +172,10 @@ function initializeCircleAnimation(element, gsap) {
     const duration = element.hasAttribute('aa-duration') ? parseFloat(element.getAttribute('aa-duration')) : 1;
     const ease = element.getAttribute('aa-ease') || 'power3.out';
     const hoverDirection = element.getAttribute('aa-hover-direction') || 'all';
-    const rect = element.getBoundingClientRect();
+    const elementRect = element.getBoundingClientRect();
     const offset = 10;
-    const buttonDiagonal = Math.sqrt(Math.pow(rect.width, 2) + Math.pow(rect.height, 2));
-    const finalRadius = (buttonDiagonal / rect.width) * 1.3;
+    const elementDiagonal = Math.sqrt(Math.pow(elementRect.width, 2) + Math.pow(elementRect.height, 2));
+    const finalRadius = (elementDiagonal / elementRect.width) * 1.3;
     const originalColors = storeOriginalColors(element);
 
     function handleCircleHover(event, isEnter) {
@@ -183,21 +183,21 @@ function initializeCircleAnimation(element, gsap) {
         const direction = getAdjustedDirection(mouseDirection, hoverDirection, isEnter);
 
         // Get mouse position relative to element using offsetX/Y
-        let x = event.offsetX / rect.width;
-        let y = event.offsetY / rect.height;
+        let x = event.offsetX / elementRect.width;
+        let y = event.offsetY / elementRect.height;
 
         switch (direction) {
             case 'left':
-                x = -offset / rect.width;
+                x = -offset / elementRect.width;
                 break;
             case 'right':
-                x = 1 + offset / rect.width;
+                x = 1 + offset / elementRect.width;
                 break;
             case 'top':
-                y = -offset / rect.height;
+                y = -offset / elementRect.height;
                 break;
             case 'bottom':
-                y = 1 + offset / rect.height;
+                y = 1 + offset / elementRect.height;
                 break;
         }
 
@@ -234,13 +234,10 @@ function initializeExpandAnimation(element, gsap) {
 
     // Calculate optimal scale factor
     const elementRect = element.getBoundingClientRect();
+    const elementDiagonal = Math.sqrt(Math.pow(elementRect.width, 2) + Math.pow(elementRect.height, 2));
     const bgRect = bg.getBoundingClientRect();
     const bgWidth = Math.max(bgRect.width, 1);
-    const bgHeight = Math.max(bgRect.height, 1);
-    
-    const scaleX = Math.ceil(elementRect.width / bgWidth * 2);
-    const scaleY = Math.ceil(elementRect.height / bgHeight * 2);
-    const scale = Math.max(scaleX, scaleY);
+    const scale = Math.ceil(elementDiagonal / bgWidth * 2);
 
     // Get animation settings
     const duration = element.hasAttribute('aa-duration') ?
