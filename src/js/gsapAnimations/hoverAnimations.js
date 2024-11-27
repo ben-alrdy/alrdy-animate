@@ -84,25 +84,43 @@ function getAdjustedDirection(mouseDirection, hoverDirection, isEnter) {
     return direction;
 }
 
+function storeOriginalColors(element) {
+    const hoverTexts = element.querySelectorAll('[aa-hover-text]');
+    const hoverColor = element.getAttribute('aa-hover-color');
+    
+    if (hoverTexts.length && hoverColor) {
+        return Array.from(hoverTexts).map(text => 
+            window.getComputedStyle(text).color
+        );
+    }
+    return null;
+}
+
+function setupTextColorAnimation(element, timeline, isEnter, originalColors) {
+    const hoverTexts = element.querySelectorAll('[aa-hover-text]');
+    const hoverColor = element.getAttribute('aa-hover-color');
+
+    // If we have both hover texts and a hover color
+    if (hoverTexts.length && hoverColor && originalColors) {
+        // Add color animations to timeline
+        hoverTexts.forEach((text, index) => {
+            timeline.fromTo(
+                text,
+                { color: isEnter ? originalColors[index] : hoverColor },
+                { color: isEnter ? hoverColor : originalColors[index] },
+                0 // Start at same time as main animation
+            );
+        });
+    }
+}
+
 function initializeCurveAnimation(element, gsap) {
     const bg = element.querySelector('[aa-hover-bg]');
     const bgPath = bg.querySelector('path');
-    const hoverTexts = element.querySelectorAll('[aa-hover-text]');
-    const hoverColor = element.getAttribute('aa-hover-color');
-    const originalColors = {};
-    const hoverDirection = element.getAttribute('aa-hover-direction') || 'all';
-
-    // Store the original text colors
-    if (hoverTexts.length && hoverColor) {
-        hoverTexts.forEach((text, index) => {
-            originalColors[index] = window.getComputedStyle(text).color;
-        });
-    }
-
-    // Get animation settings directly
-    const duration = element.hasAttribute('aa-duration') ?
-        parseFloat(element.getAttribute('aa-duration')) : 0.5;
+    const duration = element.hasAttribute('aa-duration') ? parseFloat(element.getAttribute('aa-duration')) : 0.5;
     const ease = element.getAttribute('aa-ease') || 'power3.out';
+    const hoverDirection = element.getAttribute('aa-hover-direction') || 'all';
+    const originalColors = storeOriginalColors(element);
 
     function animateHover(start, end, isEnter) {
         const timeline = gsap.timeline({
@@ -110,23 +128,13 @@ function initializeCurveAnimation(element, gsap) {
         });
 
         // Animate the path
-        timeline.fromTo(
-            bgPath,
+        timeline.fromTo(bgPath, 
             { attr: { d: start } },
             { attr: { d: end } }
         );
 
-        // Add color animation if texts and hover color exist
-        if (hoverTexts.length && hoverColor) {
-            hoverTexts.forEach((text, index) => {
-                timeline.fromTo(
-                    text,
-                    { color: isEnter ? originalColors[index] : hoverColor },
-                    { color: isEnter ? hoverColor : originalColors[index] },
-                    0 // Start at same time as path animation
-                );
-            });
-        }
+        // Add color animations using helper
+        setupTextColorAnimation(element, timeline, isEnter, originalColors);
 
         return timeline;
     }
@@ -161,21 +169,14 @@ function initializeCurveAnimation(element, gsap) {
 function initializeCircleAnimation(element, gsap) {
     const bg = element.querySelector('[aa-hover-bg]');
     const circle = bg.querySelector('circle');
-    const hoverText = element.querySelector('[aa-hover-text]');
-    const hoverColor = element.getAttribute('aa-hover-color');
+    const duration = element.hasAttribute('aa-duration') ? parseFloat(element.getAttribute('aa-duration')) : 1;
+    const ease = element.getAttribute('aa-ease') || 'power3.out';
     const hoverDirection = element.getAttribute('aa-hover-direction') || 'all';
     const rect = element.getBoundingClientRect();
     const offset = 10;
     const buttonDiagonal = Math.sqrt(Math.pow(rect.width, 2) + Math.pow(rect.height, 2));
     const finalRadius = (buttonDiagonal / rect.width) * 1.3;
-
-    // Store the original text color
-    const originalColor = hoverText ? window.getComputedStyle(hoverText).color : null;
-
-    // Get animation settings directly
-    const duration = element.hasAttribute('aa-duration') ?
-        parseFloat(element.getAttribute('aa-duration')) : 1;
-    const ease = element.getAttribute('aa-ease') || 'power3.out';
+    const originalColors = storeOriginalColors(element);
 
     function handleCircleHover(event, isEnter) {
         const mouseDirection = getMouseEnterDirection(event, element);
@@ -208,46 +209,37 @@ function initializeCircleAnimation(element, gsap) {
         });
 
         if (isEnter) {
-            timeline
-                .fromTo(circle,
-                    { attr: { r: 0 } },
-                    { attr: { r: finalRadius } },
-                    0
-                );
-
-            if (hoverText && hoverColor) {
-                timeline.fromTo(
-                    hoverText,
-                    { color: originalColor },
-                    { color: hoverColor },
-                    0
-                );
-            }
+            timeline.fromTo(circle,
+                { attr: { r: 0 } },
+                { attr: { r: finalRadius } },
+                0
+            );
         } else {
-            timeline
-                .to(circle, { attr: { r: 0 } }, 0);
-
-            if (hoverText && hoverColor) {
-                timeline.to(hoverText, { color: originalColor }, 0);
-            }
+            timeline.to(circle, { attr: { r: 0 } }, 0);
         }
+
+        // Add color animations using helper
+        setupTextColorAnimation(element, timeline, isEnter, originalColors);
     }
 
     element.addEventListener('mouseenter', event => handleCircleHover(event, true));
     element.addEventListener('mouseleave', event => handleCircleHover(event, false));
 }
 
-function initializeIconAnimation(element, gsap) {
+function initializeExpandAnimation(element, gsap) {
     // Common setup
-    const icon = element.querySelector('[aa-hover-icon]');
     const bg = element.querySelector('[aa-hover-bg]');
+    const icon = element.querySelector('[aa-hover-icon]');
     const isReverse = element.getAttribute('aa-hover').includes('reverse');
 
     // Calculate optimal scale factor
     const elementRect = element.getBoundingClientRect();
     const bgRect = bg.getBoundingClientRect();
-    const scaleX = Math.ceil(elementRect.width / bgRect.width * 2);
-    const scaleY = Math.ceil(elementRect.height / bgRect.height * 2);
+    const bgWidth = Math.max(bgRect.width, 1);
+    const bgHeight = Math.max(bgRect.height, 1);
+    
+    const scaleX = Math.ceil(elementRect.width / bgWidth * 2);
+    const scaleY = Math.ceil(elementRect.height / bgHeight * 2);
     const scale = Math.max(scaleX, scaleY);
 
     // Get animation settings
@@ -257,14 +249,16 @@ function initializeIconAnimation(element, gsap) {
     const delay = element.hasAttribute('aa-delay') ?
         parseFloat(element.getAttribute('aa-delay')) : 0.1;
     const iconDirection = element.getAttribute('aa-hover-direction') || 'right';
-
-    // Create and setup icon clone
-    const iconClone = icon.cloneNode(true);
-    iconClone.style.position = 'absolute';
-    icon.after(iconClone);
+    const originalColors = storeOriginalColors(element);
 
     // Setup icon position based on direction
     function setupIconPosition() {
+        if (!icon) return null;
+        
+        const iconClone = icon.cloneNode(true);
+        iconClone.style.position = 'absolute';
+        icon.after(iconClone);
+
         switch (iconDirection) {
             case 'right':
                 iconClone.style.left = '-100%';
@@ -287,6 +281,13 @@ function initializeIconAnimation(element, gsap) {
                     icon: { xPercent: 100, yPercent: 100 },
                     clone: { xPercent: 100, yPercent: 100 }
                 };
+            default:
+                iconClone.style.left = '-100%';
+                iconClone.style.top = '0';
+                return {
+                    icon: { xPercent: 100 },
+                    clone: { xPercent: 100 }
+                };
         }
     }
 
@@ -299,10 +300,18 @@ function initializeIconAnimation(element, gsap) {
             paused: true,
         });
 
-        timelineIn
-            .to(icon, iconAnimations.icon, 0)
-            .to(iconClone, iconAnimations.clone, delay)
-            .to(bg, { scale }, 0);
+        // Add background animation
+        timelineIn.to(bg, { scale }, 0);
+
+        // Add icon animations if present
+        if (iconAnimations) {
+            timelineIn
+                .to(icon, iconAnimations.icon, 0)
+                .to(icon.nextElementSibling, iconAnimations.clone, delay);
+        }
+
+        // Add color animations using helper
+        setupTextColorAnimation(element, timelineIn, true, originalColors);
 
         // Add reverse animation event listeners
         element.addEventListener('mouseenter', () => timelineIn.play());
@@ -332,9 +341,17 @@ function initializeIconAnimation(element, gsap) {
         // Setup hover in animation
         timelineIn
             .set(bg, { scale: 1 }, 0)
-            .to(bg, { scale }, 0)
-            .to(icon, iconAnimations.icon, 0)
-            .to(iconClone, iconAnimations.clone, delay);
+            .to(bg, { scale }, 0);
+
+        // Add icon animations if present
+        if (iconAnimations) {
+            timelineIn
+                .to(icon, iconAnimations.icon, 0)
+                .to(icon.nextElementSibling, iconAnimations.clone, delay);
+        }
+
+        // Add color animations using helper for hover in
+        setupTextColorAnimation(element, timelineIn, true, originalColors);
 
         // Setup hover out animation
         timelineOut
@@ -349,6 +366,9 @@ function initializeIconAnimation(element, gsap) {
                 duration: duration * 0.4,
                 ease: 'power2.out'
             });
+
+        // Add color animations using helper for hover out
+        setupTextColorAnimation(element, timelineOut, false, originalColors);
 
         // Add non-reverse animation event listeners
         element.addEventListener('mouseenter', () => {
@@ -542,11 +562,11 @@ function createHoverAnimations(gsap, splitText) {
                     case 'bg-curve':
                         initializeCurveAnimation(element, gsap);
                         break;
-                    case 'bg-icon-reverse':
-                        initializeIconAnimation(element, gsap);
+                    case 'bg-expand-reverse':
+                        initializeExpandAnimation(element, gsap);
                         break;
-                    case 'bg-icon':
-                        initializeIconAnimation(element, gsap);
+                    case 'bg-expand':
+                        initializeExpandAnimation(element, gsap);
                         break;
                 }
             }
