@@ -199,6 +199,16 @@ function setupGSAPAnimations(element, elementSettings, initOptions, isMobile, mo
     return;
   }
 
+  // Handle background scroll animations
+  if (animationType === 'background') {
+    if (!modules.animations?.backgroundColor) {
+      console.warn(`Background scroll animation requested but 'scroll' module not loaded. Add 'scroll' to gsapFeatures array in init options to use background scroll animations.`);
+      return;
+    }
+    modules.animations.backgroundColor(element, duration, ease, viewportPercentage, initOptions.debug);
+    return;
+  }
+
   // Clear existing animation if any in case of re-run (e.g. when changing the viewport width)
   if (element.timeline) element.timeline.kill();
   if (element.splitInstance) element.splitInstance.revert();

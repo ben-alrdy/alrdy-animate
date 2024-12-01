@@ -720,6 +720,17 @@
   line-height: 1.4;
   padding: 1rem 2rem;
 }
+
+.bg-parent {
+  padding: 20rem;
+}
+
+.bg-child {
+  height: 100vh;
+  padding: 2rem;
+  background: #bababa;
+  color: #2105af;
+}
   </style>
 </head>
 
@@ -747,6 +758,29 @@
     </header>
 
     <main>
+
+      <div class="bg-parent" aa-animate="background" aa-viewport="0.5" aa-duration="2.5">
+        <!-- Parent div that changes color -->
+
+        <div class="bg-child" >
+          <!-- First section triggers red background with white text -->
+          <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quos.</p>
+        </div>
+        
+        <div class="bg-child" aa-parent-bg="#ff0000" aa-parent-text="#ffffff" aa-child-bg="#dedede" aa-child-text="#f9f9f9" >
+          <!-- First section triggers red background with white text -->
+          <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quos.</p>
+        </div>
+        
+        <div class="bg-child"
+          aa-parent-bg="#00ff00" 
+          aa-parent-text="#000000"
+          aa-child-bg="#0000ff"
+          aa-child-text="#ffffff">
+          <!-- Second section triggers different colors -->
+           <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quos.</p>
+        </div>
+      </div>
 
       <section class="hover-demo" style="padding: 4rem 0; background: #f5f5f5;">
         <div class="container">
