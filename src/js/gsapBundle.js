@@ -14,12 +14,12 @@ export const gsapBundles = {
     scroll: {
         animations: () => import(/* webpackChunkName: "gsap-scroll" */ './gsapAnimations/scrollAnimations')
     },
-    loop: {
+    slider: {
         plugins: () => Promise.all([
             import(/* webpackChunkName: "gsap-draggable" */ 'gsap/Draggable'),
             import(/* webpackChunkName: "gsap-draggable" */ 'gsap/InertiaPlugin')
         ]),
-        animations: () => import(/* webpackChunkName: "gsap-draggable" */ './gsapAnimations/loopAnimations')
+        animations: () => import(/* webpackChunkName: "gsap-draggable" */ './gsapAnimations/sliderAnimations')
     },
     hover: {
         animations: () => import(/* webpackChunkName: "gsap-hover" */ './gsapAnimations/hoverAnimations'),

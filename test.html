@@ -757,6 +757,78 @@
         </nav>
     </header>
 
+    <section class="loop-section" id="trigger-circle">
+      <div class="container" aa-animate="loop-left-snap" aa-duration="0.3" aa-delay="2">
+      <div class="loop-container" >
+        <div class="loop-item" aa-slider-item>
+          <div aa-animate="float-up">Item 1</div>
+        </div>    
+        <div class="loop-item" aa-slider-item>
+          <div aa-animate="float-up" aa-delay="0.1">Item 2</div>
+        </div>
+        <div class="loop-item" aa-slider-item>
+          <div aa-animate="float-up" aa-delay="0.2">Item 3</div>
+        </div>
+        <div class="loop-item" aa-slider-item>
+          <div aa-animate="float-up" aa-delay="0.3">Item 4</div>
+        </div>
+        <div class="loop-item" aa-slider-item>
+          <div aa-animate="float-up" aa-delay="0.4">Item 5</div>
+        </div>
+        <div class="loop-item" aa-slider-item>
+          <div aa-animate="float-up" aa-delay="0.5">Item 6</div>
+        </div>
+      </div>
+
+      <!-- Navigation Controls -->
+      <button aa-slider-prev>Previous</button>
+      <button aa-slider-next>Next</button>
+
+      <!-- Counter -->
+      <div class="counter">
+        <span aa-slider-current>01</span>
+        <span>/</span>
+        <span aa-slider-total>06</span>
+      </div>
+    </div>
+    </section>
+
+    <section class="loop-section" id="trigger-circle"></section>
+      <div class="container" aa-animate="slider-draggable" aa-duration="0.8" aa-ease="back.inOut">
+      <div class="loop-container" >
+        <div class="loop-item" aa-slider-item>
+          <div aa-animate="float-up">Item 1</div>
+        </div>    
+        <div class="loop-item" aa-slider-item>
+          <div aa-animate="float-up" aa-delay="0.1">Item 2</div>
+        </div>
+        <div class="loop-item" aa-slider-item>
+          <div aa-animate="float-up" aa-delay="0.2">Item 3</div>
+        </div>
+        <div class="loop-item" aa-slider-item>
+          <div aa-animate="float-up" aa-delay="0.3">Item 4</div>
+        </div>
+        <div class="loop-item" aa-slider-item>
+          <div aa-animate="float-up" aa-delay="0.4">Item 5</div>
+        </div>
+        <div class="loop-item" aa-slider-item>
+          <div aa-animate="float-up" aa-delay="0.5">Item 6</div>
+        </div>
+      </div>
+
+      <!-- Navigation Controls -->
+      <button aa-slider-prev>Previous</button>
+      <button aa-slider-next>Next</button>
+
+      <!-- Counter -->
+      <div class="counter">
+        <span aa-slider-current>01</span>
+        <span>/</span>
+        <span aa-slider-total>06</span>
+      </div>
+    </div>
+    </section>
+
     <main>
 
       <div class="bg-parent" aa-animate="background" aa-viewport="0.5" aa-duration="2.5">
@@ -1170,30 +1242,7 @@
             </div>
         </section>
 
-        <section class="loop-section" id="trigger-circle">
-          <div class="container">
-          <div class="loop-container" aa-animate="loop-left-snap" aa-duration="1">
-            <div class="loop-item">
-              <div aa-animate="float-up">Item 1</div>
-            </div>    
-            <div class="loop-item">
-              <div aa-animate="float-up" aa-delay="0.1">Item 2</div>
-            </div>
-            <div class="loop-item">
-              <div aa-animate="float-up" aa-delay="0.2">Item 3</div>
-            </div>
-            <div class="loop-item">
-              <div aa-animate="float-up" aa-delay="0.3">Item 4</div>
-            </div>
-            <div class="loop-item">
-              <div aa-animate="float-up" aa-delay="0.4">Item 5</div>
-            </div>
-            <div class="loop-item">
-              <div aa-animate="float-up" aa-delay="0.5">Item 6</div>
-            </div>
-          </div>
-        </div>
-        </section>
+    
         <section class="section_layout1">
           <div class="padding-global">
             <div class="container">
@@ -1329,7 +1378,7 @@
           ease: 'ease-in-out',
           duration: 1,
           again: true,
-          gsapFeatures: ['scroll', 'text', 'loop', 'hover'],
+          gsapFeatures: ['scroll', 'text', 'slider', 'hover'],
           distance: 2,
           debug: true
         }).then(() => {

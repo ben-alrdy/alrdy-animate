@@ -17,7 +17,7 @@ const defaultOptions = {
   duration: 1, // 1 second
   delay: 0, // 0 seconds
   distance: 1, // Distance factor for the animations
-  gsapFeatures: [],  // Available: ['text', 'loop', 'scroll']
+  gsapFeatures: [],  // Available: ['text', 'slider', 'hover', 'scroll']
   debug: false // Set to true to see GSAP debug info
 };
 
@@ -101,8 +101,8 @@ async function init(options = {}) {
                 case 'scroll':
                   moduleAnimations = animationModule.createScrollAnimations(modules.gsap, modules.ScrollTrigger);
                   break;
-                case 'loop':
-                  moduleAnimations = animationModule.createLoopAnimations(modules.gsap, modules.Draggable);
+                case 'slider':
+                  moduleAnimations = animationModule.createSliderAnimations(modules.gsap, modules.Draggable);
                   break;
                 case 'hover':
                   moduleAnimations = animationModule.createHoverAnimations(modules.gsap, modules.splitText);
@@ -189,13 +189,13 @@ function setupAnimations(elements, initOptions, isMobile, modules) {
 function setupGSAPAnimations(element, elementSettings, initOptions, isMobile, modules) {
   const { animationType, splitType: splitTypeAttr, scroll, duration, stagger, delay, ease, anchorElement, anchorSelector, viewportPercentage } = elementSettings;
 
-  // Handle loop animations
-  if (animationType.startsWith('loop-')) {
-    if (!modules.animations?.loop) {
-      console.warn(`Loop animation requested but 'loop' module not loaded. Add 'loop' to gsapFeatures array in init options to use loop animations.`);
+  // Handle slider animations
+  if (animationType.startsWith('slider-') || animationType.startsWith('loop-')) {
+    if (!modules.animations?.slider) {
+      console.warn(`Slider/loop animation requested but 'slider' module not loaded. Add 'slider' to gsapFeatures array in init options to use slider/loop animations.`);
       return;
     }
-    modules.animations.loop(element, animationType, duration, ease);
+    modules.animations.slider(element, animationType, duration, ease, delay);
     return;
   }
 

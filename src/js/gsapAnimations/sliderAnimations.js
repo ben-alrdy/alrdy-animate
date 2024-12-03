@@ -1,4 +1,4 @@
-export function createLoopAnimations(gsap, Draggable) {
+export function createSliderAnimations(gsap, Draggable) {
   const activeLoops = new Set();
 
   function horizontalLoop(items, config) {
@@ -198,6 +198,7 @@ export function createLoopAnimations(gsap, Draggable) {
           overshootTolerance: 0,
           inertia: true,
           throwResistance: 2000,  // Higher number = less distance/speed (default is 0.55)
+          maxDuration: 3,
           snap(value) {
             //note: if the user presses and releases in the middle of a throw, due to the sudden correction of proxy.x in the onPressInit(), the velocity could be very large, throwing off the snap. So sense that condition and adjust for it. We also need to set overshootTolerance to 0 to prevent the inertia from causing it to shoot past and come back
             if (Math.abs(startProgress / -ratio - this.x) < 10) {
@@ -237,31 +238,37 @@ export function createLoopAnimations(gsap, Draggable) {
     return timeline;
   }
 
-  function setupLoopAnimation(element, animationType, duration = 1, ease = "power2.inOut") {
-    const items = gsap.utils.toArray(element.children);
+  function setupLoopAnimation(element, animationType, duration = 1, ease = "power2.inOut", delay = 2) {
+    const items = gsap.utils.toArray('[aa-slider-item]', element);
     if (items.length === 0) {
-      console.warn('No items found in container element.');
+      console.warn('No items found with [aa-slider-item] attribute.');
       return;
     }
-  
+
     // Create the loop configuration
     const config = createLoopConfig(animationType, duration);
-    
+
+    // Add navigation controls if they exist (pass items array)
+    setupNavigationControls(element, items, config);
+
     // Initialize the loop
     const loop = horizontalLoop(items, config);
     element._loop = loop;
     activeLoops.add(element);
-  
+
+    // Setup navigation listeners
+    setupNavigationListeners(animationType, element, loop, duration, ease);
+
     // Setup additional behaviors based on animation type
     if (animationType.includes('snap')) {
-      setupSnapBehavior(loop, animationType, duration, ease);
+      setupSnapBehavior(loop, animationType, duration, ease, delay);
     } else if (animationType.includes('draggable')) {
-      setupDragHandlers(loop);
+      setupDragHandlers(loop, animationType);
     }
-  
+
     return loop;
   }
-  
+
   function createLoopConfig(animationType, duration) {
     const config = {
       onChange: (element) => {
@@ -270,27 +277,36 @@ export function createLoopAnimations(gsap, Draggable) {
         element.classList.add('active');
       },
       speed: duration,
-      repeat: -1,
-      center: true
+      repeat: -1, // -1 means loop indefinitely
+      center: false,
+      paused: false,
+      snap: true
     };
 
     if (animationType.includes('draggable') || animationType.includes('snap')) {
       config.draggable = true;
-      config.snap = true;
     }
-  
+
     if (animationType.includes('snap')) {
       config.paused = true;
     }
-  
+
+    if (animationType.includes('slider')) {
+      config.paused = true;
+    }
+
     if (animationType.includes('right')) {
       config.reversed = true;
     }
-  
+
+    if (animationType.includes('center')) {
+      config.center = true;
+    }
+
     return config;
   }
-  
-  function setupSnapBehavior(loop, animationType, duration, ease) {
+
+  function setupSnapBehavior(loop, animationType, duration, ease, delay) {
     const moveToNext = () => {
       const direction = animationType.includes('right') ? 'previous' : 'next';
       loop[direction]({
@@ -299,13 +315,13 @@ export function createLoopAnimations(gsap, Draggable) {
         onComplete: startSnapCycle
       });
     };
-  
+
     const startSnapCycle = () => {
-      gsap.delayedCall(2, moveToNext);
+      gsap.delayedCall(delay, moveToNext);
     };
 
     // Start from the first item
-    loop.toIndex(0, { duration: 0 }); 
+    loop.toIndex(0, { duration: 0 });
 
     // Pause the loop if it's going right to auto movement bug
     if (animationType.includes('right')) {
@@ -313,56 +329,58 @@ export function createLoopAnimations(gsap, Draggable) {
     }
 
     gsap.delayedCall(0.01, startSnapCycle);
-  
+
     // Make these functions accessible to the drag handlers
     loop.moveToNext = moveToNext;
     loop.startSnapCycle = startSnapCycle;
-  
+
     // Handle dragging
     if (loop.draggable) {
-      setupDragHandlers(loop, startSnapCycle);
+      setupDragHandlers(loop, animationType, startSnapCycle);
     }
   }
-  
-  function setupDragHandlers(loop, startSnapCycle = null) {
+
+  function setupDragHandlers(loop, animationType, startSnapCycle = null) {
     const originalHandlers = {
       onPressInit: loop.draggable.vars.onPressInit,
       onRelease: loop.draggable.vars.onRelease,
       onThrowComplete: loop.draggable.vars.onThrowComplete
     };
 
-    loop.draggable.vars.onPressInit = function() {
-      if (loop.paused() && !startSnapCycle) {
-        loop.play();
-      }
-    };
+    if (animationType.includes('loop')) {
+      loop.draggable.vars.onPressInit = function () {
+        if (loop.paused() && !startSnapCycle) {
+          loop.play();
+        }
+      };
 
-    loop.draggable.vars.onDragStart = function() {
-      if (originalHandlers.onPressInit) {
-        originalHandlers.onPressInit.call(this);
-      }
+      loop.draggable.vars.onDragStart = function () {
+        if (originalHandlers.onPressInit) {
+          originalHandlers.onPressInit.call(this);
+        }
 
-      // Pause the loop timeline
-      loop.pause();
-      
-      // Kill any existing delayed calls
-      if (startSnapCycle) {
-        gsap.killTweensOf(loop.moveToNext);
-        gsap.killTweensOf(loop.startSnapCycle);
-      }
-    };
+        // Pause the loop timeline
+        loop.pause();
 
-    loop.draggable.vars.onThrowComplete = function() {
-      if (originalHandlers.onThrowComplete) {
-        originalHandlers.onThrowComplete.call(this);
-      }
+        // Kill any existing delayed calls
+        if (startSnapCycle) {
+          gsap.killTweensOf(loop.moveToNext);
+          gsap.killTweensOf(loop.startSnapCycle);
+        }
+      };
 
-      if (startSnapCycle) {
-        startSnapCycle();
-      } else {
-        loop.play();
-      }
-    };
+      loop.draggable.vars.onThrowComplete = function () {
+        if (originalHandlers.onThrowComplete) {
+          originalHandlers.onThrowComplete.call(this);
+        }
+
+        if (startSnapCycle) {
+          startSnapCycle();
+        } else {
+          loop.play();
+        }
+      };
+    }
   }
 
   function cleanupLoops() {
@@ -380,8 +398,76 @@ export function createLoopAnimations(gsap, Draggable) {
     activeLoops.clear();
   }
 
+  function setupNavigationControls(element, items, config) {
+    // Find navigation elements relative to the slider element
+    const nextButton = element.querySelector('[aa-slider-next]');
+    const prevButton = element.querySelector('[aa-slider-prev]');
+    const currentElement = element.querySelector('[aa-slider-current]');
+    const totalElement = element.querySelector('[aa-slider-total]');
+
+    // If we have any navigation elements, modify the config
+    if (nextButton || prevButton || currentElement || totalElement) {
+      const totalSlides = items.length;
+
+      // Update total count if element exists
+      if (totalElement) {
+        totalElement.textContent = totalSlides < 10 ? `0${totalSlides}` : totalSlides;
+      }
+
+      // Add onChange handler to update current slide
+      const originalOnChange = config.onChange || (() => { });
+      config.onChange = (element, index) => {
+        // Call original onChange if it exists
+        originalOnChange(element, index);
+
+        // Update current slide number
+        if (currentElement) {
+          currentElement.textContent = (index + 1) < 10 ? `0${index + 1}` : (index + 1);
+        }
+      };
+
+      // Store navigation elements on the element for later use
+      element._sliderNav = {
+        nextButton,
+        prevButton,
+        currentElement,
+        totalElement
+      };
+    }
+  }
+
+  // Add this after horizontalLoop is created but before it's returned
+  function setupNavigationListeners(animationType, element, loop, duration, ease) {
+    if (element._sliderNav) {
+      const { nextButton, prevButton } = element._sliderNav;
+
+      const handleNavigation = (direction) => {
+        // Execute the navigation
+        loop[direction]({
+          ease,
+          duration,
+          onComplete: () => {
+            if (animationType.includes('loop')) {
+              gsap.delayedCall(1, () => {
+                loop.resume();
+              });
+            }
+          }
+        });
+      };
+
+      if (nextButton) {
+        nextButton.addEventListener('click', () => handleNavigation('next'));
+      }
+
+      if (prevButton) {
+        prevButton.addEventListener('click', () => handleNavigation('previous'));
+      }
+    }
+  }
+
   return {
-    loop: (element, animationType, duration, ease) => setupLoopAnimation(element, animationType, duration, ease),
+    slider: (element, animationType, duration, ease, delay) => setupLoopAnimation(element, animationType, duration, ease, delay),
     cleanupLoops
   };
 }

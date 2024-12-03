@@ -120,14 +120,12 @@
     * Slide animations
     */
 
-    [aa-animate^='slide'][aa-animate^='slide'] {
+    [aa-animate^='slide-'][aa-animate^='slide-'] {
       transition-property: transform;
-      visibility: hidden;
       transition-duration: var(--aa-duration); 
       transition-delay: var(--aa-delay);  
 
       &.in-view {
-        visibility: visible;
         transform: translate3d(0, 0, 0);
       }
     }
