@@ -190,7 +190,7 @@ function setupGSAPAnimations(element, elementSettings, initOptions, isMobile, mo
   const { animationType, splitType: splitTypeAttr, scroll, duration, stagger, delay, ease, anchorElement, anchorSelector, viewportPercentage } = elementSettings;
 
   // Handle slider animations
-  if (animationType.startsWith('slider-') || animationType.startsWith('loop-')) {
+  if (animationType.startsWith('slider') || animationType.startsWith('loop') || animationType.startsWith('snap')) {
     if (!modules.animations?.slider) {
       console.warn(`Slider/loop animation requested but 'slider' module not loaded. Add 'slider' to gsapFeatures array in init options to use slider/loop animations.`);
       return;

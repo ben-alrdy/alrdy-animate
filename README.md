@@ -14,7 +14,7 @@
   - [3D Animations](#3d-animations)
 - [GSAP Features](#gsap-features)
   - [Text Animations](#text-animations)
-  - [Loop Animations](#loop-animations)
+  - [Loop & Slider Animations](#infinite-loop-and-slider-animations)
   - [Scroll Animations](#scroll-animations)
 - [Easing Functions](#easing-functions)
 - [Setting attributes via JavaScript](#setting-attributes-via-javascript)
@@ -267,68 +267,79 @@ AlrdyAnimate supports several GSAP-powered features that can be enabled by inclu
 - `text-fade`: Fades the text in, starts with 0% opacity.
 
 
-### Loop Animations 
-(`gsapFeatures: ['loop']`)
+### Infinite Loop and Slider Animations 
+(`gsapFeatures: ['slider']`)
 
-Creates infinite scrolling or draggable loops. To use:
-1. Set the animation type with `aa-animate="loop-..."` on the container that has the elements to loop
-2. Ensure `.loop-container` has `display: flex` and `gap` set
-3. Each `.loop-item` should have a fixed width (percentage or pixels) and `flex-shrink: 0`
-4. You can add other animations on elements within each `.loop-item`, but not on the `.loop-item` itself
+Creates infinite scrolling, snapping, or static slider animations. To use:
 
-Available animations:
-- `loop-left`: Continuous left-scrolling loop
-- `loop-right`: Continuous right-scrolling loop
-- `loop-left-draggable`: Draggable left-scrolling loop; clicking an item will pause the animation and center that item
-- `loop-right-draggable`: Draggable right-scrolling loop; clicking an item will pause the animation and center that item
+1. Add `aa-animate="[type]"` to the container element
+2. Add `aa-slider-item` attribute to each element that should be animated
+3. Optionally add navigation controls (`aa-slider-prev`, `aa-slider-next`) and a counter (`aa-slider-current`, `aa-slider-total`)
 
-Example HTML and CSS:
+#### Basic Setup
 
 ```html
-<div class="loop-wrapper">
-  <!-- Container with loop animation -->
-  <div class="loop-container" aa-animate="loop-left-draggable">
-    <!-- Individual items -->
-    <div class="loop-item">
-      <div>Item 1</div>
-    </div>    
-    <div class="loop-item">
-      <div>Item 2</div>
-    </div>
+<div aa-animate="slider">
+  <div class="slider-container">
+    <div class="slider-item" aa-slider-item>Item 1</div>
+    <div class="slider-item" aa-slider-item>Item 2</div>
     <!-- Add more items as needed -->
   </div>
+
+  <!-- Navigation Controls -->
+      <button aa-slider-prev>Previous</button>
+      <button aa-slider-next>Next</button>
+
+      <!-- Counter -->
+      <div class="counter">
+        <span aa-slider-current>01</span>
+        <span>/</span>
+        <span aa-slider-total>06</span>
+      </div>
 </div>
 ```
 
+
+#### Animation Types
+
+1. **Loop Animations** (`loop-...`)
+   - Continuous infinite scrolling
+   - `aa-duration`: Inversely affects speed (1 is slower than 2)
+   - Combine with:
+     - Direction: `-left` or `-right`
+     - Interaction: `-draggable`
+   - Example: `loop-left-draggable`
+
+2. **Snap Animations** (`snap-...`)
+   - Snaps from one item to the next
+   - `aa-duration`: Duration of each snap animation
+   - `aa-delay`: Pause duration between snaps
+   - Combine with:
+     - Direction: `-left` or `-right`
+     - Interaction: `-draggable`
+   - Example: `snap-right-draggable`
+
+3. **Slider Animations** (`slider-...`)
+   - Static slider that requires navigation
+   - Combine with:
+     - Interaction: `-draggable` or `-snap`
+   - Example: `slider-draggable-snap`
+
+#### CSS Requirements
+- Container needs `display: flex` and `gap` set
+- Items need fixed width (percentage or pixels) and `flex-shrink: 0`
+- Animations can be added to elements within items, but not directly on items
+
+
 ```css
-
-.loop-wrapper {
-  overflow: hidden;
-  padding: 4rem 0; /* Optional padding */
-}
-
-/* Container around the loop items */
-.loop-container {
-  overflow: hidden;
+.slider-container {
   display: flex;
-  align-items: center;
-  gap: 2rem;  /* Space between items */
-  padding: 50px 0;
+  gap: 2rem;
 }
 
-/* Individual loop items */
-.loop-item {
-  width: 20%;  /* Fixed width for each item */
-  flex-shrink: 0;  /* Prevent items from shrinking */
-}
-
-/* Content within items */
-.loop-item > div {
-  padding: 2rem;
-  background: rgb(0, 160, 189);
-  border-radius: 1rem;
-  color: white;
-  text-align: center;
+.slider-item {
+  width: 300px;
+  flex-shrink: 0;
 }
 ```
 

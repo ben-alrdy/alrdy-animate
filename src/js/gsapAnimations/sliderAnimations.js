@@ -49,34 +49,24 @@ export function createSliderAnimations(gsap, Draggable) {
         container = center === true ? items[0].parentNode : gsap.utils.toArray(center)[0] || items[0].parentNode,
         totalWidth,
         getTotalWidth = () => {
-          const gap = parseFloat(window.getComputedStyle(container).gap) || 0;
-
-          const lastItemOffset = items[length - 1].offsetLeft;
-          const lastItemXPercent = xPercents[length - 1] / 100 * widths[length - 1];
-          const lastItemWidth = items[length - 1].offsetWidth * gsap.getProperty(items[length - 1], "scaleX");
-
-          const totalWidth = lastItemOffset + lastItemXPercent - startX + lastItemWidth + gap;
-
-          return totalWidth;
+          return items[length - 1].offsetLeft +
+            xPercents[length - 1] / 100 * widths[length - 1] -
+            startX +
+            items[length - 1].offsetWidth * gsap.getProperty(items[length - 1], "scaleX") +
+            (parseFloat(config.paddingRight) || 0);
         },
         populateWidths = () => {
-          const gap = parseFloat(window.getComputedStyle(container).gap) || 0;
           let b1 = container.getBoundingClientRect(), b2;
-
           items.forEach((el, i) => {
             widths[i] = parseFloat(gsap.getProperty(el, "width", "px"));
             xPercents[i] = snap(parseFloat(gsap.getProperty(el, "x", "px")) / widths[i] * 100 + gsap.getProperty(el, "xPercent"));
             b2 = el.getBoundingClientRect();
-
-            spaceBefore[i] = i === 0 ? gap : 0;
-
+            spaceBefore[i] = b2.left - (i ? b1.right : b1.left);
             b1 = b2;
           });
-
           gsap.set(items, {
             xPercent: i => xPercents[i]
           });
-
           totalWidth = getTotalWidth();
         },
         timeWrap,
@@ -110,9 +100,14 @@ export function createSliderAnimations(gsap, Draggable) {
             curX = xPercents[i] / 100 * widths[i];
             distanceToStart = item.offsetLeft + curX - startX + spaceBefore[0];
             distanceToLoop = distanceToStart + widths[i] * gsap.getProperty(item, "scaleX");
+
             tl.to(item, { xPercent: snap((curX - distanceToLoop) / widths[i] * 100), duration: distanceToLoop / pixelsPerSecond }, 0)
-              .fromTo(item, { xPercent: snap((curX - distanceToLoop + totalWidth) / widths[i] * 100) }, { xPercent: xPercents[i], duration: (curX - distanceToLoop + totalWidth - curX) / pixelsPerSecond, immediateRender: false }, distanceToLoop / pixelsPerSecond)
+              .fromTo(item,
+                { xPercent: snap((curX - distanceToLoop + totalWidth) / widths[i] * 100) },
+                { xPercent: xPercents[i], duration: (curX - distanceToLoop + totalWidth - curX) / pixelsPerSecond, immediateRender: false },
+                distanceToLoop / pixelsPerSecond)
               .add("label" + i, distanceToStart / pixelsPerSecond);
+
             times[i] = distanceToStart / pixelsPerSecond;
           }
           timeWrap = gsap.utils.wrap(0, tl.duration());
@@ -131,17 +126,14 @@ export function createSliderAnimations(gsap, Draggable) {
       populateWidths();
       populateTimeline();
       populateOffsets();
+
       // window.addEventListener("resize", onResize); removed since we're handling this in the resizeHandler.js file
       function toIndex(index, vars) {
         vars = vars || {};
-        const gap = parseFloat(window.getComputedStyle(container).gap) || 0;
 
         (Math.abs(index - curIndex) > length / 2) && (index += index > curIndex ? -length : length); // always go in the shortest direction
         let newIndex = gsap.utils.wrap(0, length, index),
           time = times[newIndex];
-
-        // Subtract the gap offset instead of adding it
-        time -= (gap / pixelsPerSecond);
 
         if (time > tl.time() !== index > curIndex && index !== curIndex) { // if we're wrapping the timeline's playhead, make the proper adjustments
           time += tl.duration() * (index > curIndex ? 1 : -1);
@@ -201,15 +193,19 @@ export function createSliderAnimations(gsap, Draggable) {
           maxDuration: 3,
           snap(value) {
             //note: if the user presses and releases in the middle of a throw, due to the sudden correction of proxy.x in the onPressInit(), the velocity could be very large, throwing off the snap. So sense that condition and adjust for it. We also need to set overshootTolerance to 0 to prevent the inertia from causing it to shoot past and come back
+
             if (Math.abs(startProgress / -ratio - this.x) < 10) {
-              return lastSnap + initChangeX
+              return lastSnap + initChangeX;
             }
+
             let time = -(value * ratio) * tl.duration(),
               wrappedTime = timeWrap(time),
               snapTime = times[getClosest(times, wrappedTime, tl.duration())],
               dif = snapTime - wrappedTime;
+
             Math.abs(dif) > tl.duration() / 2 && (dif += dif < 0 ? tl.duration() : -tl.duration());
             lastSnap = (time + dif) / tl.duration() / -ratio;
+
             return lastSnap;
           },
           onRelease() {
@@ -230,6 +226,10 @@ export function createSliderAnimations(gsap, Draggable) {
         tl.draggable = draggable;
       }
       tl.closestIndex(true);
+      // Move to center on load if configured
+      if (config.center) {
+        toIndex(0, { duration: 0 });
+      }
       lastIndex = curIndex;
       onChange && onChange(items[curIndex], curIndex);
       timeline = tl;
@@ -257,7 +257,7 @@ export function createSliderAnimations(gsap, Draggable) {
     activeLoops.add(element);
 
     // Setup navigation listeners
-    setupNavigationListeners(animationType, element, loop, duration, ease);
+    setupNavigationListeners(element, items, loop, duration, ease, config, animationType);
 
     // Setup additional behaviors based on animation type
     if (animationType.includes('snap')) {
@@ -271,17 +271,16 @@ export function createSliderAnimations(gsap, Draggable) {
 
   function createLoopConfig(animationType, duration) {
     const config = {
-      onChange: (element) => {
-        const activeElement = element.parentElement.querySelector('.active');
-        if (activeElement) activeElement.classList.remove('active');
-        element.classList.add('active');
-      },
       speed: duration,
-      repeat: -1, // -1 means loop indefinitely
+      repeat: -1,
       center: false,
       paused: false,
       snap: true
     };
+
+    // Get the gap value from the parent element of the slider item to be added between the last and first item
+    const sliderItem = document.querySelector('[aa-slider-item]');
+    config.paddingRight = parseFloat(window.getComputedStyle(sliderItem.parentElement).gap) || 0;
 
     if (animationType.includes('draggable') || animationType.includes('snap')) {
       config.draggable = true;
@@ -347,7 +346,7 @@ export function createSliderAnimations(gsap, Draggable) {
       onThrowComplete: loop.draggable.vars.onThrowComplete
     };
 
-    if (animationType.includes('loop')) {
+    if (animationType.includes('draggable') && !animationType.includes('slider')) {
       loop.draggable.vars.onPressInit = function () {
         if (loop.paused() && !startSnapCycle) {
           loop.play();
@@ -386,47 +385,60 @@ export function createSliderAnimations(gsap, Draggable) {
   function cleanupLoops() {
     activeLoops.forEach(element => {
       if (element._loop) {
-        // Kill any existing GSAP tweens on the children
-        gsap.killTweensOf(element.children);
+        // Get all slider items
+        const items = element.querySelectorAll('[aa-slider-item]');
+        
+        // Kill any existing GSAP tweens on the slider items
+        gsap.killTweensOf(items);
+        
         // Kill the loop timeline
         element._loop.kill();
         element._loop = null;
-        // Reset all GSAP properties
-        gsap.set(element.children, { clearProps: "all" });
+        
+        // Reset all GSAP properties on slider items
+        gsap.set(items, { clearProps: "all" });
+        
+        // Remove active classes if they exist
+        items.forEach(item => item.classList.remove('active'));
+        
+        // Clean up navigation event listeners if they exist
+        if (element._sliderNav) {
+          const { nextButton, prevButton } = element._sliderNav;
+          if (nextButton) nextButton.replaceWith(nextButton.cloneNode(true));
+          if (prevButton) prevButton.replaceWith(prevButton.cloneNode(true));
+          element._sliderNav = null;
+        }
       }
     });
     activeLoops.clear();
   }
 
   function setupNavigationControls(element, items, config) {
-    // Find navigation elements relative to the slider element
     const nextButton = element.querySelector('[aa-slider-next]');
     const prevButton = element.querySelector('[aa-slider-prev]');
     const currentElement = element.querySelector('[aa-slider-current]');
     const totalElement = element.querySelector('[aa-slider-total]');
 
-    // If we have any navigation elements, modify the config
     if (nextButton || prevButton || currentElement || totalElement) {
       const totalSlides = items.length;
 
-      // Update total count if element exists
       if (totalElement) {
         totalElement.textContent = totalSlides < 10 ? `0${totalSlides}` : totalSlides;
       }
 
-      // Add onChange handler to update current slide
-      const originalOnChange = config.onChange || (() => { });
-      config.onChange = (element, index) => {
-        // Call original onChange if it exists
-        originalOnChange(element, index);
+      config.onChange = (element, rawIndex) => {
+        // Handle active class
+        const activeElement = element.parentElement.querySelector('.active');
+        if (activeElement) activeElement.classList.remove('active');
+        element.classList.add('active');
 
-        // Update current slide number
+        // Handle counter
         if (currentElement) {
+          const index = ((rawIndex % totalSlides) + totalSlides) % totalSlides;
           currentElement.textContent = (index + 1) < 10 ? `0${index + 1}` : (index + 1);
         }
       };
 
-      // Store navigation elements on the element for later use
       element._sliderNav = {
         nextButton,
         prevButton,
@@ -434,10 +446,10 @@ export function createSliderAnimations(gsap, Draggable) {
         totalElement
       };
     }
+
   }
 
-  // Add this after horizontalLoop is created but before it's returned
-  function setupNavigationListeners(animationType, element, loop, duration, ease) {
+  function setupNavigationListeners(element, items,loop, duration, ease, config, animationType) {
     if (element._sliderNav) {
       const { nextButton, prevButton } = element._sliderNav;
 
@@ -447,7 +459,7 @@ export function createSliderAnimations(gsap, Draggable) {
           ease,
           duration,
           onComplete: () => {
-            if (animationType.includes('loop')) {
+            if (!config.paused) {
               gsap.delayedCall(1, () => {
                 loop.resume();
               });
@@ -463,6 +475,15 @@ export function createSliderAnimations(gsap, Draggable) {
       if (prevButton) {
         prevButton.addEventListener('click', () => handleNavigation('previous'));
       }
+    }
+
+    // Add click handlers for slider type
+    if (animationType.includes('slider')) { 
+      items.forEach((slide, i) => {
+        slide.addEventListener('click', () => {
+          element._loop.toIndex(i, { ease, duration });
+        });
+      });
     }
   }
 

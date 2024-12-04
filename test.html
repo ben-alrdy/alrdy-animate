@@ -483,7 +483,10 @@
 
 .loop-item {
   width: 20%;
-  flex-shrink: 0;
+  flex-shrink: 0; 
+  &.active > div {
+    background-color: #01b3b9;
+  }
 }
 
 .loop-item > div {
@@ -495,6 +498,7 @@
   color: white;
   background: rgb(0, 160, 189);
   border-radius: 1rem;
+
 }
 
 
@@ -731,6 +735,8 @@
   background: #bababa;
   color: #2105af;
 }
+
+
   </style>
 </head>
 
@@ -758,7 +764,43 @@
     </header>
 
     <section class="loop-section" id="trigger-circle">
-      <div class="container" aa-animate="loop-left-snap" aa-duration="0.3" aa-delay="2">
+      <div class="container" aa-animate="snap-left" aa-duration="0.3" aa-delay="2">
+      <div class="loop-container" >
+        <div class="loop-item" aa-slider-item>
+          <div aa-animate="float-up">Item 1</div>
+        </div>    
+        <div class="loop-item" aa-slider-item>
+          <div aa-animate="float-up" aa-delay="0.1">Item 2</div>
+        </div>
+        <div class="loop-item" aa-slider-item>
+          <div aa-animate="float-up" aa-delay="0.2">Item 3</div>
+        </div>
+        <div class="loop-item" aa-slider-item>
+          <div aa-animate="float-up" aa-delay="0.3">Item 4</div>
+        </div>
+        <div class="loop-item" aa-slider-item>
+          <div aa-animate="float-up" aa-delay="0.4">Item 5</div>
+        </div>
+        <div class="loop-item" aa-slider-item>
+          <div aa-animate="float-up" aa-delay="0.5">Item 6</div>
+        </div>
+      </div>
+
+      <!-- Navigation Controls -->
+      <button aa-slider-prev>Previous</button>
+      <button aa-slider-next>Next</button>
+
+      <!-- Counter -->
+      <div class="counter">
+        <span aa-slider-current>01</span>
+        <span>/</span>
+        <span aa-slider-total>06</span>
+      </div>
+    </div>
+    </section>
+
+    <section class="loop-section" id="trigger-circle">
+      <div class="container" aa-animate="loop-left-center" aa-duration="1" >
       <div class="loop-container" >
         <div class="loop-item" aa-slider-item>
           <div aa-animate="float-up">Item 1</div>
@@ -794,7 +836,7 @@
     </section>
 
     <section class="loop-section" id="trigger-circle"></section>
-      <div class="container" aa-animate="slider-draggable" aa-duration="0.8" aa-ease="back.inOut">
+      <div class="container" aa-animate="slider-draggable" aa-duration="0.5" aa-ease="expo.inOut">
       <div class="loop-container" >
         <div class="loop-item" aa-slider-item>
           <div aa-animate="float-up">Item 1</div>

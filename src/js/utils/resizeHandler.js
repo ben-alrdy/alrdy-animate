@@ -10,7 +10,7 @@ export function setupResizeHandler(modules, initOptions, isMobile, setupAnimatio
       isMobile = currentWidth < 768;
 
       // Let each module handle its own cleanup
-      if (modules.animations?.loop) {
+      if (modules.animations?.slider) {
         modules.animations.cleanupLoops();
       }
 
