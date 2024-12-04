@@ -308,6 +308,7 @@ Creates infinite scrolling, snapping, or static slider animations. To use:
    - Combine with:
      - Direction: `-left` or `-right`
      - Interaction: `-draggable`
+     - Position: `-center` (defaults to left aligned)
    - Example: `loop-left-draggable`
 
 2. **Snap Animations** (`snap-...`)
@@ -317,12 +318,14 @@ Creates infinite scrolling, snapping, or static slider animations. To use:
    - Combine with:
      - Direction: `-left` or `-right`
      - Interaction: `-draggable`
+     - Position: `-center` (defaults to left aligned)
    - Example: `snap-right-draggable`
 
 3. **Slider Animations** (`slider-...`)
    - Static slider that requires navigation
    - Combine with:
      - Interaction: `-draggable` or `-snap`
+     - Position: `-center` (defaults to left aligned)
    - Example: `slider-draggable-snap`
 
 #### CSS Requirements
@@ -363,6 +366,64 @@ AlrdyAnimate.init({
   debug: true
 });
 ```
+
+## GSAP Hover Animations
+
+The AlrdyAnimate library includes powerful hover animations using GSAP. These animations can be applied to elements by adding the `aa-hover` attribute.
+
+### Available Hover Animations
+
+
+1. **Text Animations** (`aa-hover="text-..."`) 
+  - Animate text elements with sliding or fading effects. 
+  - Requires `aa-split` attribute to be set (e.g. `aa-split="words"`), optionally add `aa-stagger` 
+  - Mark the text you want to animate with `aa-hover-text`.
+  - Available animations:
+    - Text Sliding: `text-slide-up`, `text-slide-down`, `text-slide-left`, `text-slide-right`
+    - Text Fading: `text-fade-up`, `text-fade-down`, `text-fade-left`, `text-fade-right`
+      - For fading effects, the element with `aa-hover` should include padding to make room for the fade effect.
+
+2. **Background Circle Animation** (`aa-hover="bg-circle"`)
+  - Expands a circle from the hover point.
+  - Requires a circle SVG path in the background, tagged with `aa-hover-bg`.
+  - Optionally, you can define the hover direction with `aa-hover-direction` (possible values: `all`, `top`, `bottom`, `left`, `right`, `vertical`, `horizontal`).
+
+3. **Background Curve Animation** (`aa-hover="bg-curve"`)
+  - Animates an SVG path to create a wave effect.
+  - Requires an SVG path in the background, tagged with `aa-hover-bg`.
+  - Optionally, you can define the hover direction with `aa-hover-direction` (possible values: `all`, `top`, `bottom`, `left`, `right`, `vertical`, `horizontal`).
+
+4. **Background Expand Animation** (`aa-hover="bg-expand"`)
+  - Expands the background with or without reverse animation.
+  - Requires a div, tagged with `aa-hover-bg`, that will expand to fill the element.
+  - Optionally, you can add a tag with `aa-hover-icon` to animate an icon on hover.
+    - Optionally, you can define direction of the icon animation with `aa-hover-direction` on the aa-hover element (possible values: `right`, `up-right`, `down-right`).
+
+For all hover animations, you can optionally change the color of the hovered text by adding `aa-hover-color` to the element with `aa-hover`. Alternatively, using CSS to transition on hover also works. To set content above the background, add `aa-hover-content` to the respective element (or position it via CSS).
+
+For background animations, the aa-hover element needs to have position set to `relative` or `absolute` and overflow set to `hidden`.
+
+
+### HTML Examples
+
+```html
+<a class="button" href="#" aa-hover="bg-circle" aa-hover-direction="all" aa-duration="1">
+  <div aa-hover-text>Circle button</div>
+  <svg class="bg-filler" viewBox="0 0 1 1" preserveAspectRatio="xMidYMid slice" aa-hover-bg>
+    <circle cx="0.5" cy="0.5" r="0" fill="currentColor"></circle>
+  </svg>
+</a>
+
+<a class="button" href="#" aa-hover="bg-curve" aa-hover-direction="vertical" aa-duration="0.8">
+  <div aa-hover-text>Vertical Only</div>
+  <svg class="bg-filler" viewBox="0 0 100 100" preserveAspectRatio="none" aa-hover-bg>
+    <path d="M 0 100 V 0 Q 250 0 500 0 V 0 H 0 z" fill="currentColor"></path>
+  </svg>
+</a>
+```
+
+
+
 
 
 ## Easing Functions
