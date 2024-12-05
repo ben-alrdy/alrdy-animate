@@ -59,7 +59,6 @@
   animation-fill-mode: forwards;
 }
 
-// Shared animation assignments
 [aa-animate="float-up"].in-view,
 [aa-instant="float-up"] { animation-name: float-up; }
 
@@ -210,3 +209,16 @@ $rotation-positions: ('br': (100% 100%), 'bl': (0 100%));
 [aa-instant="fade-down"] { animation-name: fadeInDown; }
 [aa-instant="fade-left"] { animation-name: fadeInLeft; }
 [aa-instant="fade-right"] { animation-name: fadeInRight; }
+
+/*ZOOM ANIMATIONS - ONLY FOR INSTANT*/
+[aa-instant="zoom-in"] { animation-name: zoomIn; }
+[aa-instant="zoom-in-up"] { animation-name: zoomInUp; }
+[aa-instant="zoom-in-down"] { animation-name: zoomInDown; }
+[aa-instant="zoom-in-left"] { animation-name: zoomInLeft; }
+[aa-instant="zoom-in-right"] { animation-name: zoomInRight; }
+
+[aa-instant="zoom-out"] { animation-name: zoomOut; }
+[aa-instant="zoom-out-up"] { animation-name: zoomOutUp; }
+[aa-instant="zoom-out-down"] { animation-name: zoomOutDown; }
+[aa-instant="zoom-out-left"] { animation-name: zoomOutLeft; }
+[aa-instant="zoom-out-right"] { animation-name: zoomOutRight; }

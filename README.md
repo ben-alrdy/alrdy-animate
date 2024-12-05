@@ -179,9 +179,9 @@ Fade animations with a smooth back-bounce effect:
 
 ### Zoom Animations
 Scale animations with optional directional movement:
-- `zoom-in`, `zoom-out`
-- `zoom-in-up`, `zoom-in-down`, `zoom-in-left`, `zoom-in-right`
-- `zoom-out-up`, `zoom-out-down`, `zoom-out-left`, `zoom-out-right`
+- `zoom-in`, `zoom-out` (available for instant)
+- `zoom-in-up`, `zoom-in-down`, `zoom-in-left`, `zoom-in-right` (available for instant)
+- `zoom-out-up`, `zoom-out-down`, `zoom-out-left`, `zoom-out-right` (available for instant)
 
 ### Slide Animations
 Pure sliding movements:

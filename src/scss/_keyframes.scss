@@ -200,7 +200,7 @@
 
   /**
  * ----------------------------------------
- * animation fade
+ * animation fade for instant animations
  * ----------------------------------------
  */
 
@@ -250,5 +250,121 @@
   to {
     opacity: 1;
     transform: translateX(0);
+  }
+}
+
+/**
+ * ----------------------------------------
+ * animation zoom for instant animations
+ * ----------------------------------------
+ */
+
+ @keyframes zoomIn {
+  from {
+    opacity: 0;
+    transform: scale(.6);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes zoomInUp {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 30px, 0) scale(.6);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@keyframes zoomInDown {
+  from {
+    opacity: 0;
+    transform: translate3d(0, -30px, 0) scale(.6);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@keyframes zoomInLeft {
+  from {
+    opacity: 0;
+    transform: translate3d(-30px, 0, 0) scale(.6);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@keyframes zoomInRight {
+  from {
+    opacity: 0;
+    transform: translate3d(30px, 0, 0) scale(.6);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@keyframes zoomOut {
+  from {
+    opacity: 0;
+    transform: scale(1.2);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes zoomOutUp {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 30px, 0) scale(1.2);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@keyframes zoomOutDown {
+  from {
+    opacity: 0;
+    transform: translate3d(0, -30px, 0) scale(1.2);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@keyframes zoomOutLeft {
+  from {
+    opacity: 0;
+    transform: translate3d(-30px, 0, 0) scale(1.2);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@keyframes zoomOutRight {
+  from {
+    opacity: 0;
+    transform: translate3d(30px, 0, 0) scale(1.2);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
   }
 }
