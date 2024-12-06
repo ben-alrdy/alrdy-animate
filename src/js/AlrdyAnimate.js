@@ -24,7 +24,7 @@ const defaultOptions = {
 // Initialize the animation script with the given options
 async function init(options = {}) {
   const initOptions = { ...defaultOptions, ...options };
-  
+
   // Early initialization
   allAnimatedElements = document.querySelectorAll("[aa-animate], [aa-children]");
   isMobile = window.innerWidth < 768;
@@ -93,7 +93,7 @@ async function init(options = {}) {
             if (moduleConfig.animations) {
               const animationModule = await moduleConfig.animations();
               let moduleAnimations = {};
-              
+
               switch (feature) {
                 case 'text':
                   moduleAnimations = animationModule.createTextAnimations(modules.gsap, modules.ScrollTrigger);
@@ -109,7 +109,7 @@ async function init(options = {}) {
                   moduleAnimations.initializeHoverAnimations();
                   break;
               }
-              
+
               Object.assign(animations, moduleAnimations);
             }
           })
@@ -129,7 +129,7 @@ async function init(options = {}) {
     window.addEventListener('load', async () => {
       if (enableGSAP) {
         loadedModules = await gsapModulesPromise;
-        
+
         if (loadedModules) {
           // Setup sticky nav
           const navElement = document.querySelector('[aa-nav="sticky"]');
@@ -143,7 +143,7 @@ async function init(options = {}) {
           setupAnimations(allAnimatedElements, initOptions, isMobile, loadedModules);
           setupResizeHandler(loadedModules, initOptions, isMobile, setupAnimations);
           handleLazyLoadedImages(loadedModules.ScrollTrigger);
-          
+
           resolve({ gsap: loadedModules.gsap, ScrollTrigger: loadedModules.ScrollTrigger });
         } else {
           // Fallback if GSAP loading failed
@@ -173,7 +173,7 @@ function setupAnimations(elements, initOptions, isMobile, modules) {
 
     // Get all element settings from the aa-attributes
     const elementSettings = getElementSettings(element, initOptions);
-    
+
     // Apply styles (duration, delay, colors)
     applyElementStyles(element, elementSettings, isMobile);
 
@@ -187,7 +187,7 @@ function setupAnimations(elements, initOptions, isMobile, modules) {
 }
 
 function setupGSAPAnimations(element, elementSettings, initOptions, isMobile, modules) {
-  const { animationType, splitType: splitTypeAttr, scroll, duration, stagger, delay, ease, anchorElement, anchorSelector, viewportPercentage } = elementSettings;
+  const { animationType, splitType: splitTypeAttr, scroll, duration, stagger, delay, ease, distance, anchorElement, anchorSelector, viewportPercentage } = elementSettings;
 
   // Handle slider animations
   if (animationType.startsWith('slider') || animationType.startsWith('loop') || animationType.startsWith('snap')) {
@@ -211,7 +211,7 @@ function setupGSAPAnimations(element, elementSettings, initOptions, isMobile, mo
 
   // Handle parallax animations
   if (animationType.startsWith('parallax')) {
-    modules.animations.parallax(element);
+    modules.animations.parallax(element, scroll);
     return;
   }
 
@@ -220,22 +220,53 @@ function setupGSAPAnimations(element, elementSettings, initOptions, isMobile, mo
   if (element.splitInstance) element.splitInstance.revert();
 
   requestAnimationFrame(() => {
+    // Create timeline first
     let tl = modules.gsap.timeline({
-      paused: true,
-      scrollTrigger: {
-        trigger: anchorElement,
-        start: `top ${(viewportPercentage) * 100}%`,
-        onEnter: () => {
-          element.classList.add("in-view");
-          tl.play();
-        },
-        markers: initOptions.debug
-      }
+      paused: !scroll
     });
 
-    element.timeline = tl; // Store the timeline on the element for future reference
+    element.timeline = tl;
 
-    if (splitTypeAttr) {
+    // Create ScrollTrigger with access to timeline
+    modules.ScrollTrigger.create({
+      trigger: anchorElement,
+      ...(scroll ? {
+        start: isMobile ? "top 40%" : `top ${(viewportPercentage) * 100}%`,
+        end: isMobile ? "top 20%" : "top 40%",
+        scrub: scroll.includes('smoother') ? 4 :
+            scroll.includes('smooth') ? 2 :
+            scroll.includes('snap') ? { snap: 0.2 } :
+            true
+      } : {
+        start: `top ${(viewportPercentage) * 100}%`
+      }),
+      animation: tl,
+      onEnter: () => {
+        element.classList.add("in-view");
+        if (!scroll) tl.play();
+        if (splitTypeAttr) gsap.set(element, { autoAlpha: 1 });
+      },
+      markers: initOptions.debug
+    });
+
+    // Create reset ScrollTrigger first
+    modules.ScrollTrigger.create({
+      trigger: anchorElement,
+      start: 'top 100%',
+      onLeaveBack: () => {
+        if (initOptions.again || anchorSelector) {
+          element.classList.remove("in-view");
+          tl.progress(0).pause();
+        }
+      },
+    });
+
+    // Add animations to timeline
+    if (animationType.startsWith('appear')) {
+      tl.add(modules.animations.appear(element, duration, ease, delay, distance));
+    } else if (animationType.startsWith('reveal')) {
+      tl.add(modules.animations.reveal(element, duration, ease, delay));
+    } else if (splitTypeAttr) {
       const { splitResult, splitType } = modules.splitText(element, splitTypeAttr);
       element.splitInstance = splitResult; // Store the split instance on the element
 
@@ -259,23 +290,9 @@ function setupGSAPAnimations(element, elementSettings, initOptions, isMobile, mo
           stagger,
           delay,
           ease,
-          isMobile,
-          scroll
         ));
       }
     }
-
-    // Second ScrollTrigger for reset functionality
-    modules.ScrollTrigger.create({
-      trigger: anchorElement,
-      start: 'top 100%',
-      onLeaveBack: () => {
-        if (initOptions.again || anchorSelector) {
-          element.classList.remove("in-view");
-          tl.progress(0).pause();
-        }
-      },
-    });
   });
 }
 

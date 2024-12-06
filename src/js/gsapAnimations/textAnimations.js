@@ -10,14 +10,8 @@ export function createTextAnimations(gsap, ScrollTrigger) {
     fade:        { duration: 1.0, stagger: 0.08, ease: 'power2.inOut' }
   };
 
-  // Helper function to get scroll trigger values (moved from original)
-  const getScrollTriggerValues = (isMobile) => ({
-    start: isMobile ? "top 40%" : "top 80%",
-    end: isMobile ? "top 20%" : "top 40%"
-  });
-
   // Helper function to create base animation configuration
-  function createBaseAnimation(element, splitResult, splitType, duration, stagger, delay, ease, scroll, start, end) {
+  function createBaseAnimation(element, splitResult, splitType, duration, stagger, delay, ease) {
     const tl = gsap.timeline();
     
     const baseProps = {
@@ -25,16 +19,6 @@ export function createTextAnimations(gsap, ScrollTrigger) {
       stagger,
       ease,
       delay,
-      ...(scroll && {
-        scrollTrigger: {
-          trigger: element,
-          start,
-          end,
-          scrub: scroll.includes('smooth') ? 10 :
-                 scroll.includes('snap') ? { snap: 0.2 } : true,
-          onEnter: () => gsap.set(element, { autoAlpha: 1 }) // Ensure visibility on enter
-        }
-      }),
       onStart: () => gsap.set(element, { autoAlpha: 1 })
     };
 
@@ -68,8 +52,7 @@ export function createTextAnimations(gsap, ScrollTrigger) {
 
   // Create animation function with defaults
   function createAnimation(animationProps, defaultValues) {
-    return (element, splitResult, splitType, duration, stagger, delay, ease, isMobile, scroll) => {
-      const { start, end } = getScrollTriggerValues(isMobile);
+    return (element, splitResult, splitType, duration, stagger, delay, ease) => {
       
       const { tl, animate } = createBaseAnimation(
         element,
@@ -79,9 +62,7 @@ export function createTextAnimations(gsap, ScrollTrigger) {
         stagger ?? defaultValues.stagger,
         delay,
         ease ?? defaultValues.ease,
-        scroll,
-        start,
-        end
+
       );
 
       // Set initial opacity for non-fade animations
@@ -127,8 +108,7 @@ export function createTextAnimations(gsap, ScrollTrigger) {
       defaults.fade
     ),
     
-    rotateSoft: (element, splitResult, splitType, duration, stagger, delay, ease, isMobile, scroll) => {
-      const { start, end } = getScrollTriggerValues(isMobile);
+    rotateSoft: (element, splitResult, splitType, duration, stagger, delay, ease) => {
       const tl = gsap.timeline();
       const animationTarget = splitResult[splitType] || splitResult.lines;
 
@@ -164,15 +144,6 @@ export function createTextAnimations(gsap, ScrollTrigger) {
         stagger: stagger ?? defaults.rotateSoft.stagger,
         ease: ease ?? defaults.rotateSoft.ease,
         delay,
-        ...(scroll && {
-          scrollTrigger: {
-            trigger: element,
-            start,
-            end,
-            scrub: scroll.includes('smooth') ? 2 :
-                   scroll.includes('snap') ? { snap: 0.2 } : true
-          }
-        }),
         onStart: () => gsap.set(element, { autoAlpha: 1 })
       });
 
