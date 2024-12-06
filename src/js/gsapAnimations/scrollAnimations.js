@@ -145,6 +145,39 @@ function initializeBackgroundColor(element, gsap, ScrollTrigger, duration = 0.5,
   });
 }
 
+function initializeParallax(element, gsap, ScrollTrigger) {
+  // Get configuration from attributes
+  const [_, direction, value] = element.getAttribute('aa-animate').split('-');
+  const parallaxValue = value || direction || 40; // Handles both parallax-40 and parallax-down-40
+  const isDownward = direction === 'down';
+  const scroll = element.getAttribute('aa-scroll') || 'smooth';
+  
+  // Check if parent has overflow:hidden
+  const parentStyle = window.getComputedStyle(element.parentElement);
+  const hasOverflowHidden = parentStyle.overflow === 'hidden';
+
+  if (hasOverflowHidden) {
+    // Calculate required scale based on parallax value
+    const scale = 1 + (2 * parallaxValue / element.offsetHeight);
+    gsap.set(element, { scale });
+  } 
+  
+  ScrollTrigger.create({
+    trigger: element.parentElement,
+    start: "top bottom",
+    end: "bottom top",
+    scrub: scroll.includes('super-smooth') ? 200 :
+           scroll.includes('smooth') ? 50 :
+           scroll.includes('snap') ? { snap: 0.2 } : true,
+    onUpdate: (self) => {
+      // Calculate y position based on scroll progress
+      // For downward movement, we invert the calculation
+      const yPos = parallaxValue * (self.progress * 2 - 1) * (isDownward ? -1 : 1);
+      gsap.set(element, { y: yPos });
+    }
+  });
+}
+
 function createScrollAnimations(gsap, ScrollTrigger) {
   return {
     stickyNav: (element, ease = 'back.inOut', duration = 0.4) => {
@@ -153,6 +186,10 @@ function createScrollAnimations(gsap, ScrollTrigger) {
     
     backgroundColor: (element, duration, ease, viewportPercentage, debug) => {
       initializeBackgroundColor(element, gsap, ScrollTrigger, duration, ease, viewportPercentage, debug);
+    },
+    
+    parallax: (element) => {
+      initializeParallax(element, gsap, ScrollTrigger);
     }
   };
 }

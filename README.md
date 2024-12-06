@@ -350,28 +350,59 @@ Creates infinite scrolling, snapping, or static slider animations. To use:
 (`gsapFeatures: ['scroll']`)
 Enables scroll-driven animations and effects. 
 
-Required for: Sticky navigation
-- You can use the `aa-nav="sticky"` attribute to create a sticky navigation bar that slides out of view when the user scrolls down and slides back in when the user scrolls up. 
+#### Sticky Navigation
+- Use `aa-nav="sticky"` to create a sticky navigation bar that slides out of view when scrolling down and slides back in when scrolling up
 - Easing defaults to `back.inOut` 
 - Duration defaults to `0.4s`
-- You can overwrite both by adding `aa-ease` and `aa-duration` to the nav element.
+- You can overwrite both by adding `aa-ease` and `aa-duration` to the nav element
 
-
-Example usage with all features:
-```javascript
-AlrdyAnimate.init({
-  ease: 'power1.out',
-  again: true,
-  gsapFeatures: ['text', 'loop', 'scroll'],
-  debug: true
-});
+#### Background Color Transitions
+- Use `aa-animate="background"` on the element you want to animate; optionally set `aa-viewport` and `aa-duration`
+- Use `aa-parent-bg` and `aa-parent-text` on child elements to change the parent's background and text colors when they scroll into view
+- Use `aa-child-bg` and `aa-child-text` to simultaneously change the child element's colors
+- Colors revert when scrolling back up
+- Example:
+```html
+<div class="parent" aa-animate="background" aa-viewport="0.5" aa-duration="2.5">
+  <div aa-parent-bg="#f0f0f0" aa-parent-text="#000">
+    Changes parent background to light gray and text to black
+  </div>
+  <div 
+    aa-parent-bg="#000" 
+    aa-parent-text="#fff"
+    aa-child-bg="#ff0000"
+    aa-child-text="#fff"
+  >
+    Changes parent to dark theme and self to red
+  </div>
+</div>
 ```
 
-## GSAP Hover Animations
+#### Parallax Scrolling
+- Use `aa-animate="parallax-40"` on an image to create a parallax scroll effect
+- The number (40) represents the movement distance in pixels
+- Add direction with `aa-animate="parallax-down-40"` (moves down while scrolling) or `parallax-up-40` (default, moves up)
+- Control smoothness with `aa-scroll`:
+  - `"super-smooth"`: Very lazy, smooth following (scrub: 200)
+  - `"smooth"`: Regular smooth following (scrub: 50)
+  - `"snap"`: Snaps to 20% increments
+  - No value: Direct 1:1 following
+- If the parent element has `overflow: hidden`, the image will be scaled to fit the parent's height
+```html
+<div style="height: 60vh; overflow: hidden">
+  <img 
+    src="image.jpg" 
+    aa-animate="parallax-down-40" 
+    aa-scroll="smooth"
+  >
+</div>
+```
+
+### Hover Animations
 
 The AlrdyAnimate library includes powerful hover animations using GSAP. These animations can be applied to elements by adding the `aa-hover` attribute.
 
-### Available Hover Animations
+#### Available Hover Animations
 
 
 1. **Text Animations** (`aa-hover="text-..."`) 
@@ -404,7 +435,7 @@ For all hover animations, you can optionally change the color of the hovered tex
 For background animations, the aa-hover element needs to have position set to `relative` or `absolute` and overflow set to `hidden`.
 
 
-### HTML Examples
+#### HTML Examples
 
 ```html
 <a class="button" href="#" aa-hover="bg-circle" aa-hover-direction="all" aa-duration="1">

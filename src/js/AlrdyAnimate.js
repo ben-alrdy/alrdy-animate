@@ -209,6 +209,12 @@ function setupGSAPAnimations(element, elementSettings, initOptions, isMobile, mo
     return;
   }
 
+  // Handle parallax animations
+  if (animationType.startsWith('parallax')) {
+    modules.animations.parallax(element);
+    return;
+  }
+
   // Clear existing animation if any in case of re-run (e.g. when changing the viewport width)
   if (element.timeline) element.timeline.kill();
   if (element.splitInstance) element.splitInstance.revert();

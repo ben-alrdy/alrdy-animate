@@ -30,7 +30,7 @@ export function createTextAnimations(gsap, ScrollTrigger) {
           trigger: element,
           start,
           end,
-          scrub: scroll.includes('smooth') ? 2 :
+          scrub: scroll.includes('smooth') ? 10 :
                  scroll.includes('snap') ? { snap: 0.2 } : true,
           onEnter: () => gsap.set(element, { autoAlpha: 1 }) // Ensure visibility on enter
         }
