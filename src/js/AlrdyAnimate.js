@@ -277,6 +277,8 @@ function setupGSAPAnimations(element, elementSettings, initOptions, isMobile, mo
       tl.add(modules.animations.appear(element, duration, ease, delay, distance));
     } else if (animationType.startsWith('reveal')) {
       tl.add(modules.animations.reveal(element, duration, ease, delay));
+    } else if (animationType.startsWith('counter')) {
+      tl.add(modules.animations.counter(element, duration, ease, delay));
     } else if (splitTypeAttr) {
       const { splitResult, splitType } = modules.splitText(element, splitTypeAttr);
       element.splitInstance = splitResult; // Store the split instance on the element

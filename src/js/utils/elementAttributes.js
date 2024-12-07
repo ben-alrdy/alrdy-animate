@@ -12,8 +12,8 @@ export function getElementSettings(element, settings) {
     distance: element.hasAttribute('aa-distance') ? parseFloat(element.getAttribute('aa-distance')) : settings.distance,
 
     // Animation timing
-    duration: element.hasAttribute('aa-duration') ? parseFloat(element.getAttribute('aa-duration')) : undefined,
-    delay: element.hasAttribute('aa-delay') ? parseFloat(element.getAttribute('aa-delay')) : undefined,
+    duration: element.hasAttribute('aa-duration') ? parseFloat(element.getAttribute('aa-duration')) : settings.duration,
+    delay: element.hasAttribute('aa-delay') ? parseFloat(element.getAttribute('aa-delay')) : settings.delay,
     delayMobile: element.hasAttribute('aa-delay-mobile') ? parseFloat(element.getAttribute('aa-delay-mobile')) : undefined,
     stagger: element.hasAttribute('aa-stagger') ? parseFloat(element.getAttribute('aa-stagger')) : undefined,
     

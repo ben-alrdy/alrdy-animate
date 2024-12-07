@@ -791,6 +791,7 @@
     </header>
     
 
+
     <section class="loop-section" id="trigger-circle" aa-instant="zoom-out-down" aa-delay="1">
       <div class="container" aa-animate="snap-left-center" aa-duration="0.3" aa-delay="0.2">
       <div class="loop-container" >
@@ -828,7 +829,7 @@
     </section>
 
     <section>
-      <div style="overflow: hidden;">
+      <div style="">
         <img src="https://placehold.co/1000x500" alt="Reveal" aa-animate="reveal-right" aa-ease="power2.inOut" aa-duration="0.5" aa-delay="0.5">
       </div>
       <div style="overflow: hidden;">
@@ -917,7 +918,14 @@
     </div>
     </section>
 
+    <!-- Count from 0 to 100 -->
+    <div aa-animate="counter" aa-duration="1" aa-ease="power2.inOut" aa-viewport="1">100</div>
 
+    <!-- Count from 10 to 100 -->
+    <div aa-animate="counter-10">100</div>
+    
+    <!-- With formatting -->
+    <div aa-animate="counter-100" aa-scroll="smooth" aa-viewport="1">404</div>
 
 
     <main>

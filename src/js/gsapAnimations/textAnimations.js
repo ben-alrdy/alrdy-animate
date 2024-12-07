@@ -1,5 +1,5 @@
 export function createTextAnimations(gsap, ScrollTrigger) {
-  // Animation defaults - moved from AlrdyAnimate.js
+  // Animation defaults - ease and duration won't actually be considered as they are set on the element or default to initOptions
   const defaults = {
     slideUp:     { duration: 0.5, stagger: 0.1, ease: 'back.out' },
     slideDown:   { duration: 0.5, stagger: 0.1, ease: 'back.out' },

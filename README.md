@@ -16,6 +16,7 @@
   - [Text Animations](#text-animations)
   - [Loop & Slider Animations](#infinite-loop-and-slider-animations)
   - [Scroll Animations](#scroll-animations)
+  - [Hover Animations](#hover-animations)
 - [Easing Functions](#easing-functions)
 - [Setting attributes via JavaScript](#setting-attributes-via-javascript)
 - [Contributing](#contributing)
@@ -397,6 +398,46 @@ Enables scroll-driven animations and effects.
   >
 </div>
 ```
+
+#### Reveal & Appear Animations
+- Use `aa-animate="reveal-..."` for reveal animations that use a colored overlay
+- Use `aa-animate="appear-..."` for appear animations that fade/slide in content
+- Optionally, add `aa-scroll` with the values `smooth`, `snap`, `smoother` or `true` to make the animation scroll-driven
+
+Available animations:
+1. Reveal Animations (by animating a clip path)
+   - `reveal-up`: Reveals content with clip path sliding up
+   - `reveal-down`: Reveals content with clip path sliding down
+   - `reveal-left`: Reveals content with clip path sliding left
+   - `reveal-right`: Reveals content with clip path sliding right
+   - `reveal-center`: Reveals content with clip path splitting from center in a circle shape
+
+2. Appear Animations (clean transitions)
+   - `appear`: Simple fade in
+   - `appear-up`: Fades in while sliding up
+   - `appear-down`: Fades in while sliding down
+   - `appear-left`: Fades in while sliding left
+   - `appear-right`: Fades in while sliding right
+
+Example usage:
+```html
+<!-- Reveal animation -->
+<div>
+  <img src="image.jpg" aa-animate="reveal-up" aa-duration="1.2" aa-ease="power2.inOut">
+</div>
+
+<!-- Appear animation -->
+<div aa-animate="appear" aa-scroll="smooth">
+  Content fades while scrolling
+</div>
+```
+
+#### Counter Animations
+Animate a number from 0 to the value of the element (it needs to be a number and can include a comma or dot as thousand separator).
+
+- Use `aa-animate="counter"` to animate a number from 0 to the target number
+- Use `aa-animate="counter-10"` to animate a number from 10 to the target number
+- Optionally, add `aa-scroll` to make the animation scroll-driven
 
 ### Hover Animations
 

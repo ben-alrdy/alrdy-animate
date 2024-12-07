@@ -46,7 +46,7 @@ function initializeStickyNav(element, ease, duration) {
   });
 }
 
-function initializeBackgroundColor(element, gsap, ScrollTrigger, duration = 0.5, ease = 'power2.inOut', viewportPercentage, debug = false) {
+function initializeBackgroundColor(element, gsap, ScrollTrigger, duration, ease, viewportPercentage, debug = false) {
   
   // Create base animation config
   const animConfig = {
@@ -254,6 +254,49 @@ function createRevealTimeline(element, gsap, duration, ease, delay) {
   });
 }
 
+function createCounterTimeline(element, gsap, duration, ease, delay) {
+  const [_, startValue] = element.getAttribute('aa-animate').split('-');
+  const originalText = element.textContent;
+  
+  // Detect format: replace all thousand separators with nothing to get pure number
+  const cleanNumber = originalText.replace(/[,\.]/g, '');
+  const targetValue = parseFloat(cleanNumber);
+  const start = startValue ? parseFloat(startValue) : 0;
+  
+  // Determine the format (whether using . or , as thousand separator)
+  const usesComma = originalText.includes(',');
+  const usesDot = originalText.includes('.');
+  
+  if (isNaN(targetValue)) {
+    console.warn('Counter animation target must be a number');
+    return gsap.timeline();
+  }
+  
+  // Create and return timeline
+  const tl = gsap.timeline();
+  return tl.fromTo(element, 
+    { 
+      textContent: start 
+    },
+    {
+      textContent: targetValue,
+      duration,
+      ease,
+      delay,
+      snap: { textContent: 1 },
+      onUpdate: function() {
+        const value = this.targets()[0].textContent;
+        // Format based on original format
+        if (usesComma) {
+          this.targets()[0].textContent = Number(value).toLocaleString('en-US').replace(/,/g, ',');
+        } else if (usesDot) {
+          this.targets()[0].textContent = Number(value).toLocaleString('de-DE').replace(/\./g, '.');
+        }
+      }
+    }
+  );
+}
+
 function createScrollAnimations(gsap, ScrollTrigger) {
   return {
     stickyNav: (element, ease = 'back.inOut', duration = 0.4) => {
@@ -274,6 +317,10 @@ function createScrollAnimations(gsap, ScrollTrigger) {
     
     reveal: (element, duration, ease, delay) => {
       return createRevealTimeline(element, gsap, duration, ease, delay);
+    },
+    
+    counter: (element, duration, ease, delay) => {
+      return createCounterTimeline(element, gsap, duration, ease, delay);
     }
   };
 }
