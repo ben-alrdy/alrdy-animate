@@ -141,7 +141,7 @@ async function init(options = {}) {
 
           // Now setup the actual animations
           setupAnimations(allAnimatedElements, initOptions, isMobile, loadedModules);
-          setupResizeHandler(loadedModules, initOptions, isMobile, setupAnimations);
+          setupResizeHandler(loadedModules, initOptions, isMobile, setupGSAPAnimations);
           handleLazyLoadedImages(loadedModules.ScrollTrigger);
 
           resolve({ gsap: loadedModules.gsap, ScrollTrigger: loadedModules.ScrollTrigger });
@@ -172,16 +172,16 @@ function setupAnimations(elements, initOptions, isMobile, modules) {
     }
 
     // Get all element settings from the aa-attributes
-    const elementSettings = getElementSettings(element, initOptions);
+    element.settings = getElementSettings(element, initOptions);
 
     // Apply styles (duration, delay, colors)
-    applyElementStyles(element, elementSettings, isMobile);
+    applyElementStyles(element, element.settings, isMobile);
 
     if (enableGSAP) {
-      setupGSAPAnimations(element, elementSettings, initOptions, isMobile, modules);
+      setupGSAPAnimations(element, element.settings, initOptions, isMobile, modules);
     } else {
       element.style.visibility = 'visible';
-      setupIntersectionObserver(element, elementSettings, initOptions);
+      setupIntersectionObserver(element, element.settings, initOptions);
     }
   });
 }

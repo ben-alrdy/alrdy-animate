@@ -1,6 +1,6 @@
 import { debounce } from './shared';
 
-export function setupResizeHandler(modules, initOptions, isMobile, setupAnimations) {
+export function setupResizeHandler(modules, initOptions, isMobile, setupGSAPAnimations) {
   let prevWidth = window.innerWidth;
 
   const debouncedResize = debounce(() => {
@@ -9,21 +9,18 @@ export function setupResizeHandler(modules, initOptions, isMobile, setupAnimatio
     if (currentWidth !== prevWidth) {
       isMobile = currentWidth < 768;
 
-      // Let each module handle its own cleanup
+      // Cleanup existing animations
       if (modules.animations?.slider) {
         modules.animations.cleanupLoops();
       }
 
       // Refresh ScrollTrigger
-      modules.ScrollTrigger.refresh();
+      modules.ScrollTrigger.refresh(true);
       
-      // Recreate all animations
-      setupAnimations(
-        document.querySelectorAll("[aa-animate], [aa-children]"),
-        initOptions, 
-        isMobile, 
-        modules
-      );
+        // Reset GSAP animations for all elements with aa-animate
+        document.querySelectorAll("[aa-animate]").forEach(element => {
+          setupGSAPAnimations(element, element.settings, initOptions, isMobile, modules);
+        });
       
       prevWidth = currentWidth;
     }
