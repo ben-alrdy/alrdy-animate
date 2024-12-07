@@ -1,4 +1,5 @@
 import { debounce } from './shared';
+import { handleLazyLoadedImages } from './lazyLoadHandler';
 
 export function setupResizeHandler(modules, initOptions, isMobile, setupGSAPAnimations) {
   let prevWidth = window.innerWidth;
@@ -17,10 +18,13 @@ export function setupResizeHandler(modules, initOptions, isMobile, setupGSAPAnim
       // Refresh ScrollTrigger
       modules.ScrollTrigger.refresh(true);
       
-        // Reset GSAP animations for all elements with aa-animate
-        document.querySelectorAll("[aa-animate]").forEach(element => {
-          setupGSAPAnimations(element, element.settings, initOptions, isMobile, modules);
-        });
+      // Reset GSAP animations for all elements with aa-animate
+      document.querySelectorAll("[aa-animate]").forEach(element => {
+        setupGSAPAnimations(element, element.settings, initOptions, isMobile, modules);
+      });
+      
+      // Check for new lazy loaded images
+      handleLazyLoadedImages(modules.ScrollTrigger, true);
       
       prevWidth = currentWidth;
     }

@@ -202,9 +202,9 @@ function createAppearTimeline(element, gsap, duration, ease, delay, distance) {
     opacity: 1,
     y: 0,
     x: 0,
-    duration: duration || 1,
-    ease: ease || 'power2.out',
-    delay: delay || 0
+    duration,
+    ease,
+    delay
   };
   
   // Create and return timeline
@@ -248,9 +248,9 @@ function createRevealTimeline(element, gsap, duration, ease, delay) {
   return tl.to(element, {
     clipPath: clipPaths[direction]?.end || clipPaths.up.end,
     opacity: 1,
-    duration: duration || 1,
-    ease: ease || 'power2.inOut',
-    delay: delay || 0
+    duration,
+    ease,
+    delay
   });
 }
 

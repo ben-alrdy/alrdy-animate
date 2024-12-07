@@ -1,8 +1,8 @@
 import { debounce } from './shared';
 
-export function handleLazyLoadedImages(ScrollTrigger) {
+export function handleLazyLoadedImages(ScrollTrigger, forceReset = false) {
   let needsRefresh = false;
-  let forceLoadExecuted = false;
+  let forceLoadExecuted = forceReset ? false : false;
 
   const debouncedRefresh = debounce(() => {
     if (ScrollTrigger && needsRefresh) {

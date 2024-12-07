@@ -21,6 +21,17 @@ const defaultOptions = {
   debug: false // Set to true to see GSAP debug info
 };
 
+// Map aa-animate attributes to GSAP animation names
+const TEXT_ANIMATION_MAP = {
+  'text-slide-up': 'slideUp',
+  'text-slide-down': 'slideDown',
+  'text-tilt-up': 'tiltUp',
+  'text-tilt-down': 'tiltDown',
+  'text-rotate-soft': 'rotateSoft',
+  'text-fade-soft': 'fadeSoft',
+  'text-fade': 'fade'
+};
+
 // Initialize the animation script with the given options
 async function init(options = {}) {
   const initOptions = { ...defaultOptions, ...options };
@@ -270,17 +281,7 @@ function setupGSAPAnimations(element, elementSettings, initOptions, isMobile, mo
       const { splitResult, splitType } = modules.splitText(element, splitTypeAttr);
       element.splitInstance = splitResult; // Store the split instance on the element
 
-      const textAnimationMap = {
-        'text-slide-up': 'slideUp',
-        'text-slide-down': 'slideDown',
-        'text-tilt-up': 'tiltUp',
-        'text-tilt-down': 'tiltDown',
-        'text-rotate-soft': 'rotateSoft',
-        'text-fade-soft': 'fadeSoft',
-        'text-fade': 'fade'
-      };
-
-      const animationName = textAnimationMap[animationType];
+      const animationName = TEXT_ANIMATION_MAP[animationType];
       if (animationName) {
         tl.add(modules.animations[animationName](
           element,
@@ -354,3 +355,4 @@ export { AlrdyAnimate };
 if (typeof window !== 'undefined') {
   window.AlrdyAnimate = AlrdyAnimate;
 }
+
