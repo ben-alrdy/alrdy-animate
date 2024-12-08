@@ -155,9 +155,10 @@ function initializeBackgroundColor(element, gsap, ScrollTrigger, duration, ease,
 
 function initializeParallax(element, gsap, ScrollTrigger, scroll = 'smooth') {
   // Get configuration from attributes
-  const [_, direction, value] = element.getAttribute('aa-animate').split('-');
-  const parallaxValue = value || direction || 40; // Handles both parallax-40 and parallax-down-40
-  const isDownward = direction === 'down';
+  const parts = element.getAttribute('aa-animate').split('-');
+  const isHalf = parts.includes('half');
+  const isDownward = parts.includes('down');
+  const parallaxValue = parts.find(part => !isNaN(parseFloat(part))) || 40;
   
   // Check if parent has overflow:hidden
   const parentStyle = window.getComputedStyle(element.parentElement);
@@ -169,19 +170,21 @@ function initializeParallax(element, gsap, ScrollTrigger, scroll = 'smooth') {
     gsap.set(element, { scale });
   } 
   
+  // Create a timeline for smooth animation
+  const tl = gsap.timeline({ paused: true });
+  tl.fromTo(element, 
+    { y: isDownward ? -parallaxValue : parallaxValue },
+    { y: isDownward ? parallaxValue : -parallaxValue, ease: "none" }
+  );
+  
   ScrollTrigger.create({
     trigger: element.parentElement,
     start: "top bottom",
-    end: "bottom top",
-    scrub: scroll.includes('smoother') ? 200 :
-           scroll.includes('smooth') ? 50 :
+    end: isHalf ? "center center" : "bottom top",
+    scrub: scroll.includes('smoother') ? 5 :
+           scroll.includes('smooth') ? 2 :
            scroll.includes('snap') ? { snap: 0.2 } : true,
-    onUpdate: (self) => {
-      // Calculate y position based on scroll progress
-      // For downward movement, we invert the calculation
-      const yPos = parallaxValue * (self.progress * 2 - 1) * (isDownward ? -1 : 1);
-      gsap.set(element, { y: yPos });
-    }
+    animation: tl
   });
 }
 

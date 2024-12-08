@@ -383,9 +383,10 @@ Enables scroll-driven animations and effects.
 - Use `aa-animate="parallax-40"` on an image to create a parallax scroll effect
 - The number (40) represents the movement distance in pixels
 - Add direction with `aa-animate="parallax-down-40"` (moves down while scrolling) or `parallax-up-40` (default, moves up)
+- Add `half` to end the parallax when the element reaches the middle of the page: `parallax-down-half-40`
 - Control smoothness with `aa-scroll`:
-  - `"super-smooth"`: Very lazy, smooth following (scrub: 200)
-  - `"smooth"`: Regular smooth following (scrub: 50)
+  - `"smoother"`: Very lazy, smooth following (scrub: 5)
+  - `"smooth"`: Regular smooth following (scrub: 2)
   - `"snap"`: Snaps to 20% increments
   - No value: Direct 1:1 following
 - If the parent element has `overflow: hidden`, the image will be scaled to fit the parent's height
