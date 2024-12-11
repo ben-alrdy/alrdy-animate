@@ -273,7 +273,7 @@ AlrdyAnimate supports several GSAP-powered features that can be enabled by inclu
 
 Creates infinite scrolling, snapping, or static slider animations. To use:
 
-1. Add `aa-animate="[type]"` to the container element
+1. Add `aa-animate="slider"` to the container element
 2. Add `aa-slider-item` attribute to each element that should be animated
 3. Optionally add navigation controls (`aa-slider-prev`, `aa-slider-next`) and a counter (`aa-slider-current`, `aa-slider-total`)
 
@@ -303,31 +303,33 @@ Creates infinite scrolling, snapping, or static slider animations. To use:
 
 #### Animation Types
 
-1. **Loop Animations** (`loop-...`)
-   - Continuous infinite scrolling
-   - `aa-duration`: Inversely affects speed (1 is slower than 2)
-   - Combine with:
-     - Direction: `-left` or `-right`
-     - Interaction: `-draggable`
-     - Position: `-center` (defaults to left aligned)
-   - Example: `loop-left-draggable`
-
-2. **Snap Animations** (`snap-...`)
-   - Snaps from one item to the next
-   - `aa-duration`: Duration of each snap animation
-   - `aa-delay`: Pause duration between snaps
-   - Combine with:
-     - Direction: `-left` or `-right`
-     - Interaction: `-draggable`
-     - Position: `-center` (defaults to left aligned)
-   - Example: `snap-right-draggable`
-
-3. **Slider Animations** (`slider-...`)
+3. **Slider Animations** (`slider`)
    - Static slider that requires navigation
    - Combine with:
      - Interaction: `-draggable` or `-snap`
      - Position: `-center` (defaults to left aligned)
    - Example: `slider-draggable-snap`
+
+2. **Loop Animations** (`slider-loop`)
+   - Continuous infinite scrolling
+   - `aa-duration`: Inversely affects speed (1 is slower than 2)
+   - Combine with:
+     - Direction: `-left` or `-right` (defaults to left)
+     - Interaction: `-draggable`
+     - Position: `-center` (defaults to left aligned)
+   - Example: `slider-loop-left-draggable`
+
+3. **Snap Animations** (`slider-snap`)
+   - Snaps from one item to the next
+   - `aa-duration`: Duration of each snap animation
+   - `aa-delay`: Pause duration between snaps
+   - Combine with:
+     - Direction: `-left` or `-right` (defaults to left)
+     - Interaction: `-draggable`
+     - Position: `-center` (defaults to left aligned)
+   - Example: `slider-snap-right-draggable`
+
+
 
 #### CSS Requirements
 - Container needs `display: flex` and `gap` set

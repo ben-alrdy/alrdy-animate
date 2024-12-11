@@ -170,7 +170,6 @@ function initializeParallax(element, gsap, ScrollTrigger, scroll = 'smooth') {
     gsap.set(element, { scale });
   } 
   
-  // Create a timeline for smooth animation
   const tl = gsap.timeline({ paused: true });
   tl.fromTo(element, 
     { y: isDownward ? -parallaxValue : parallaxValue },
@@ -186,6 +185,7 @@ function initializeParallax(element, gsap, ScrollTrigger, scroll = 'smooth') {
            scroll.includes('snap') ? { snap: 0.2 } : true,
     animation: tl
   });
+
 }
 
 function createAppearTimeline(element, gsap, duration, ease, delay, distance) {

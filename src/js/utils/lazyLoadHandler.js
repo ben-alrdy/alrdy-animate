@@ -31,7 +31,7 @@ export function handleLazyLoadedImages(ScrollTrigger, forceReset = false) {
           img.addEventListener('load', () => {
             loadedCount++;
             if (loadedCount === eagerLoadCount) {
-              ScrollTrigger.refresh(true);
+              ScrollTrigger.refresh();
             }
           }, { once: true });
         } else {

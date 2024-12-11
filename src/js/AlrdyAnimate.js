@@ -199,102 +199,100 @@ function setupAnimations(elements, initOptions, isMobile, modules) {
 
 function setupGSAPAnimations(element, elementSettings, initOptions, isMobile, modules) {
   const { animationType, splitType: splitTypeAttr, scroll, duration, stagger, delay, ease, distance, anchorElement, anchorSelector, viewportPercentage } = elementSettings;
+  
+  // 1. Variables setup
+  const baseType = animationType.includes('-') ? animationType.split('-')[0] : animationType;
+  const gsapAnimations = ['appear', 'reveal', 'counter', 'text', 'slider', 'background', 'parallax'];
 
-  // Handle slider animations
-  if (animationType.startsWith('slider') || animationType.startsWith('loop') || animationType.startsWith('snap')) {
-    if (!modules.animations?.slider) {
-      console.warn(`Slider/loop animation requested but 'slider' module not loaded. Add 'slider' to gsapFeatures array in init options to use slider/loop animations.`);
-      return;
-    }
-    modules.animations.slider(element, animationType, duration, ease, delay);
-    return;
-  }
-
-  // Handle background scroll animations
-  if (animationType === 'background') {
-    if (!modules.animations?.backgroundColor) {
-      console.warn(`Background scroll animation requested but 'scroll' module not loaded. Add 'scroll' to gsapFeatures array in init options to use background scroll animations.`);
-      return;
-    }
-    modules.animations.backgroundColor(element, duration, ease, viewportPercentage, initOptions.debug);
-    return;
-  }
-
-  // Handle parallax animations
-  if (animationType.startsWith('parallax')) {
-    modules.animations.parallax(element, scroll);
-    return;
-  }
-
-  // Clear existing animation if any in case of re-run (e.g. when changing the viewport width)
+  // Clear existing animations
   if (element.timeline) element.timeline.kill();
   if (element.splitInstance) element.splitInstance.revert();
 
-  requestAnimationFrame(() => {
-    // Create timeline first
-    let tl = modules.gsap.timeline({
-      paused: !scroll
-    });
+  // 2. Create timeline and ScrollTrigger setup
+  let tl = modules.gsap.timeline({
+    paused: !scroll
+  });
+  element.timeline = tl;
 
-    element.timeline = tl;
+  //Create Animation ScrollTrigger
+  modules.ScrollTrigger.create({
+    trigger: anchorElement,
+    ...(scroll ? {
+      start: isMobile ? "top 40%" : `top ${(viewportPercentage) * 100}%`,
+      end: isMobile ? "top 20%" : "top 40%",
+      scrub: scroll.includes('smoother') ? 4 :
+          scroll.includes('smooth') ? 2 :
+          scroll.includes('snap') ? { snap: 0.2 } :
+          true
+    } : {
+      start: `top ${(viewportPercentage) * 100}%`
+    }),
+    animation: tl,
+    onEnter: () => {
+      element.classList.add("in-view");
+      if (!scroll) tl.play();
+      gsap.set(element, { visibility: 'visible' });
+    },
+    markers: initOptions.debug
+  });
 
-    // Create ScrollTrigger with access to timeline
-    modules.ScrollTrigger.create({
-      trigger: anchorElement,
-      ...(scroll ? {
-        start: isMobile ? "top 40%" : `top ${(viewportPercentage) * 100}%`,
-        end: isMobile ? "top 20%" : "top 40%",
-        scrub: scroll.includes('smoother') ? 4 :
-            scroll.includes('smooth') ? 2 :
-            scroll.includes('snap') ? { snap: 0.2 } :
-            true
-      } : {
-        start: `top ${(viewportPercentage) * 100}%`
-      }),
-      animation: tl,
-      onEnter: () => {
-        element.classList.add("in-view");
-        if (!scroll) tl.play();
-        if (splitTypeAttr) gsap.set(element, { autoAlpha: 1 });
-      },
-      markers: initOptions.debug
-    });
-
-    // Create reset ScrollTrigger first
-    modules.ScrollTrigger.create({
-      trigger: anchorElement,
-      start: 'top 100%',
-      onLeaveBack: () => {
-        if (initOptions.again || anchorSelector) {
-          element.classList.remove("in-view");
-          tl.progress(0).pause();
-        }
-      },
-    });
-
-    // Add animations to timeline
-    if (animationType.startsWith('appear')) {
-      tl.add(modules.animations.appear(element, duration, ease, delay, distance));
-    } else if (animationType.startsWith('reveal')) {
-      tl.add(modules.animations.reveal(element, duration, ease, delay));
-    } else if (animationType.startsWith('counter')) {
-      tl.add(modules.animations.counter(element, duration, ease, delay));
-    } else if (splitTypeAttr) {
-      const { splitResult, splitType } = modules.splitText(element, splitTypeAttr);
-      element.splitInstance = splitResult; // Store the split instance on the element
-
-      const animationName = TEXT_ANIMATION_MAP[animationType];
-      if (animationName) {
-        tl.add(modules.animations[animationName](
-          element,
-          splitResult,
-          splitType,
-          duration,
-          stagger,
-          delay,
-          ease,
-        ));
+  //Reset Animation ScrollTrigger
+  modules.ScrollTrigger.create({
+    trigger: anchorElement,
+    start: 'top 100%',
+    onLeaveBack: () => {
+      if (initOptions.again || anchorSelector) {
+        element.classList.remove("in-view");
+        tl.progress(0).pause();
       }
+    },
+  });
+
+  // 3. Return early if not a GSAP animation
+  if (!gsapAnimations.includes(baseType)) {
+    return;
+  }
+
+  // 4. Handle GSAP animations
+  requestAnimationFrame(() => {
+    switch(baseType) {
+      case 'slider':
+        modules.animations.slider(element, animationType, duration, ease, delay);
+        break;
+
+      case 'background':
+        modules.animations.backgroundColor(element, duration, ease, viewportPercentage, initOptions.debug);
+        break;
+
+      case 'parallax':
+        modules.animations.parallax(element, scroll);
+        break;
+
+      case 'appear':
+        tl.add(modules.animations.appear(element, duration, ease, delay, distance));
+        break;
+
+      case 'reveal':
+        tl.add(modules.animations.reveal(element, duration, ease, delay));
+        break;
+
+      case 'counter':
+        tl.add(modules.animations.counter(element, duration, ease, delay));
+        break;
+
+      case 'text':
+        const { splitResult, splitType } = modules.splitText(element, splitTypeAttr);
+        element.splitInstance = splitResult;
+
+        const animationName = TEXT_ANIMATION_MAP[animationType];
+        if (animationName) {
+          tl.add(modules.animations[animationName](element, splitResult, splitType, duration, stagger, delay, ease));
+        }
+        break;
+
+      default:
+        console.warn(`Unknown animation type: ${baseType}`);
+        break;
     }
   });
 }

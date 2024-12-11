@@ -35,7 +35,7 @@ body {
 }
 
 // Hide the text animations initially
-[aa-animate^="text-"] {
+[aa-animate^="text-"],[aa-animate^="appear"],[aa-animate^="reveal"] {
     visibility: hidden;
 }
 

@@ -274,7 +274,7 @@ export function createSliderAnimations(gsap, Draggable) {
       speed: duration,
       repeat: -1,
       center: false,
-      paused: false,
+      paused: true,
       snap: true
     };
 
@@ -282,16 +282,12 @@ export function createSliderAnimations(gsap, Draggable) {
     const sliderItem = document.querySelector('[aa-slider-item]');
     config.paddingRight = parseFloat(window.getComputedStyle(sliderItem.parentElement).gap) || 0;
 
-    if (animationType.includes('draggable') || animationType.includes('snap')) {
+    if (animationType.includes('draggable')) {
       config.draggable = true;
     }
 
-    if (animationType.includes('snap')) {
-      config.paused = true;
-    }
-
-    if (animationType.includes('slider')) {
-      config.paused = true;
+    if (animationType.includes('loop')) {
+      config.paused = false;
     }
 
     if (animationType.includes('right')) {
@@ -346,7 +342,7 @@ export function createSliderAnimations(gsap, Draggable) {
       onThrowComplete: loop.draggable.vars.onThrowComplete
     };
 
-    if (animationType.includes('draggable') && !animationType.includes('slider')) {
+    if (animationType.includes('draggable') && (animationType.includes('loop') || animationType.includes('snap'))) {
       loop.draggable.vars.onPressInit = function () {
         if (loop.paused() && !startSnapCycle) {
           loop.play();
@@ -380,37 +376,6 @@ export function createSliderAnimations(gsap, Draggable) {
         }
       };
     }
-  }
-
-  function cleanupLoops() {
-    activeLoops.forEach(element => {
-      if (element._loop) {
-        // Get all slider items
-        const items = element.querySelectorAll('[aa-slider-item]');
-        
-        // Kill any existing GSAP tweens on the slider items
-        gsap.killTweensOf(items);
-        
-        // Kill the loop timeline
-        element._loop.kill();
-        element._loop = null;
-        
-        // Reset all GSAP properties on slider items
-        gsap.set(items, { clearProps: "all" });
-        
-        // Remove active classes if they exist
-        items.forEach(item => item.classList.remove('active'));
-        
-        // Clean up navigation event listeners if they exist
-        if (element._sliderNav) {
-          const { nextButton, prevButton } = element._sliderNav;
-          if (nextButton) nextButton.replaceWith(nextButton.cloneNode(true));
-          if (prevButton) prevButton.replaceWith(prevButton.cloneNode(true));
-          element._sliderNav = null;
-        }
-      }
-    });
-    activeLoops.clear();
   }
 
   function setupNavigationControls(element, items, config) {
@@ -478,13 +443,44 @@ export function createSliderAnimations(gsap, Draggable) {
     }
 
     // Add click handlers for slider type
-    if (animationType.includes('slider')) { 
+    if (!animationType.includes('loop') && !animationType.includes('snap')) { 
       items.forEach((slide, i) => {
         slide.addEventListener('click', () => {
           element._loop.toIndex(i, { ease, duration });
         });
       });
     }
+  }
+
+  function cleanupLoops() {
+    activeLoops.forEach(element => {
+      if (element._loop) {
+        // Get all slider items
+        const items = element.querySelectorAll('[aa-slider-item]');
+        
+        // Kill any existing GSAP tweens on the slider items
+        gsap.killTweensOf(items);
+        
+        // Kill the loop timeline
+        element._loop.kill();
+        element._loop = null;
+        
+        // Reset all GSAP properties on slider items
+        gsap.set(items, { clearProps: "all" });
+        
+        // Remove active classes if they exist
+        items.forEach(item => item.classList.remove('active'));
+        
+        // Clean up navigation event listeners if they exist
+        if (element._sliderNav) {
+          const { nextButton, prevButton } = element._sliderNav;
+          if (nextButton) nextButton.replaceWith(nextButton.cloneNode(true));
+          if (prevButton) prevButton.replaceWith(prevButton.cloneNode(true));
+          element._sliderNav = null;
+        }
+      }
+    });
+    activeLoops.clear();
   }
 
   return {

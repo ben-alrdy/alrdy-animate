@@ -15,12 +15,23 @@ export function setupResizeHandler(modules, initOptions, isMobile, setupGSAPAnim
         modules.animations.cleanupLoops();
       }
 
-      // Refresh ScrollTrigger
+      // Refresh ScrollTrigger for all animations
       modules.ScrollTrigger.refresh(true);
       
-      // Reset GSAP animations for all elements with aa-animate
+      // Only rebuild specific animations that need recalculation
       document.querySelectorAll("[aa-animate]").forEach(element => {
-        setupGSAPAnimations(element, element.settings, initOptions, isMobile, modules);
+        const animationType = element.getAttribute('aa-animate');
+        const baseType = animationType.includes('-') ? animationType.split('-')[0] : animationType;
+          
+        // Only rebuild animations that need dimension recalculation
+        const needsRebuild = [
+          'slider',
+          'text'  // Due to SplitText needing recalc
+        ].includes(baseType);
+        
+        if (needsRebuild) {
+          setupGSAPAnimations(element, element.settings, initOptions, isMobile, modules);
+        }
       });
       
       // Check for new lazy loaded images

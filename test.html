@@ -8,10 +8,10 @@
     <link rel="stylesheet" href="dist/AlrdyAnimate.css">
     <script>
 
-      if ('scrollRestoration' in history) {
+      /* if ('scrollRestoration' in history) {
         history.scrollRestoration = 'manual';
       }
-      window.scrollTo(0, 0);
+      window.scrollTo(0, 0); */
 
     </script>
     <style>
@@ -792,8 +792,8 @@
     
 
 
-    <section class="loop-section" id="trigger-circle" aa-instant="zoom-out-down" aa-delay="1">
-      <div class="container" aa-animate="snap-left-center" aa-duration="0.3" aa-delay="0.2">
+    <section class="loop-section"  aa-instant="zoom-out-down" aa-delay="1">
+      <div class="container" aa-animate="slider-snap-draggable" aa-duration="0.3" aa-delay="0.2">
       <div class="loop-container" >
         <div class="loop-item" aa-slider-item>
           <div aa-animate="float-up">Item 1</div>
@@ -841,7 +841,7 @@
     </section>
 
     <section class="loop-section" id="trigger-circle">
-      <div class="container" aa-animate="loop-left-center" aa-duration="1" >
+      <div class="container" aa-animate="slider-loop-center" aa-duration="1" >
       <div class="loop-container" >
         <div class="loop-item" aa-slider-item>
           <div aa-animate="float-up">Item 1</div>
@@ -882,7 +882,7 @@
       </div>
     </div>
 
-    <section class="loop-section" id="trigger-circle"></section>
+    <section class="loop-section" ></section>
       <div class="container" aa-animate="slider-draggable" aa-duration="0.5" aa-ease="expo.inOut">
       <div class="loop-container" >
         <div class="loop-item" aa-slider-item>

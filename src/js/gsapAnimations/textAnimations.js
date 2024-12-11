@@ -19,7 +19,12 @@ export function createTextAnimations(gsap, ScrollTrigger) {
       stagger,
       ease,
       delay,
-      onStart: () => gsap.set(element, { autoAlpha: 1 })
+      onStart: () => {
+        // Only set visibility in onStart for non-scrubbed animations
+        if (!element.hasAttribute('aa-scroll')) {
+          gsap.set(element, { visibility: 'visible' });
+        }
+      }
     };
 
     // Handle lines&words split type
@@ -64,12 +69,6 @@ export function createTextAnimations(gsap, ScrollTrigger) {
         ease ?? defaultValues.ease,
 
       );
-
-      // Set initial opacity for non-fade animations
-      const isFadeAnimation = 'opacity' in animationProps && animationProps.opacity > 0;
-      if (!isFadeAnimation) {
-        tl.set(element, { autoAlpha: 0 });
-      }
 
       animate(animationProps);
       return tl;
@@ -124,15 +123,13 @@ export function createTextAnimations(gsap, ScrollTrigger) {
         wrapper.appendChild(line);
       });
 
-      // Setup initial states
-      tl.set(element, { autoAlpha: 0 })
-        .set('.line-perspective-wrapper', {
-          transformStyle: 'preserve-3d',
-          perspective: perspectiveInPixels
-        })
-        .set(animationTarget, {
-          transformOrigin: '50% 0%'
-        });
+      tl.set('.line-perspective-wrapper', {
+        transformStyle: 'preserve-3d',
+        perspective: perspectiveInPixels
+      })
+      .set(animationTarget, {
+        transformOrigin: '50% 0%'
+      });
 
       // Animate
       tl.from(animationTarget, {
@@ -144,7 +141,12 @@ export function createTextAnimations(gsap, ScrollTrigger) {
         stagger: stagger ?? defaults.rotateSoft.stagger,
         ease: ease ?? defaults.rotateSoft.ease,
         delay,
-        onStart: () => gsap.set(element, { autoAlpha: 1 })
+        onStart: () => {
+          // Only set autoAlpha in onStart for non-scrubbed animations
+          if (!element.hasAttribute('aa-scroll')) {
+            gsap.set(element, { visibility: 'visible' });
+          }
+        }
       });
 
       return tl;
