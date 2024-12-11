@@ -70,7 +70,7 @@ You can include AlrdyAnimate in your project using either CDN or npm.
       viewportPercentage: 0.9,
       duration: 2,
       delay: 0.5,
-      gsapFeatures: ['text', 'loop', 'scroll']  // Specify which GSAP features to load
+      gsapFeatures: ['text', 'slider', 'scroll', 'hover']  // Specify which GSAP features to load
     }).then(() => {
       // GSAP features are now available globally
       console.log('GSAP features loaded successfully');
@@ -78,7 +78,7 @@ You can include AlrdyAnimate in your project using either CDN or npm.
       // You can now use:
       // - gsap
       // - ScrollTrigger
-      // - Draggable (if 'loop' feature was loaded)
+      // - Draggable (if 'slider' feature was loaded)
     });
   });
 </script>
@@ -149,20 +149,20 @@ Add the `aa-animate` attribute to the element you want to animate. Once it scrol
 - **aa-delay-mobile**: If set, overwrites the delay on mobile devices. Example: `aa-delay-mobile="0.5s"`.
 - **aa-color-initial**: The initial background color for the animation. Example: `aa-color-initial="#d7ff64"`.
 - **aa-color-final**: The final background color for the animation. Example: `aa-color-final="#d7ff64"`.
-- **aa-anchor**: Specify an anchor element to trigger the animation (useful for fixed elements that should be animated when the anchor scrolls into view). Example: `aa-anchor="#anchorElement"`.
+- **aa-anchor**: Specify an anchor element to trigger the animation (useful for fixed elements that should be animated when the anchor scrolls into view). Example: `aa-anchor="#trigger"` on the element to be animated combined with `<div id="trigger">Headline</div>`.
 - **aa-viewport**: Override the global viewport percentage for this element. Example: `aa-viewport="0.6"`.
 - **aa-distance**: The distance multiplier for the animation. Example: `aa-distance="1.5"`.
 
 ## CSS Animations triggered instantly (CSS only)
-Add the `aa-instant` attribute to the element you want to animate. The animation will be triggered immediately. You can also add optional attributes (see element attributes below) to customize the animation for individual elements.
+Add the `aa-instant` attribute to the element you want to animate. The animation will be triggered immediately. You can also add optional attributes (see [instant element attributes](#instant-element-attributes) below) to customize the animation for individual elements.
 
 - **aa-instant**: The animation type to apply. Example: `aa-instant="fade-up"`.
 
-### Element Attributes
+### Instant Element Attributes
 - **aa-ease**: Overwrites the global easing function for this element. Example: `aa-ease="ease-in-out"`.
-- **aa-duration**: The animation duration for this element, in seconds. Example: `aa-duration="2"`. Available range: 0.1s - 3s in increments of 0.1s
-- **aa-delay**: The animation delay for this element, in seconds. Example: `aa-delay="0.5"`. Available range: 0.05s - 1.5s in increments of 0.05s
-- **aa-stagger**: The stagger delay for up to 10 child elements, in seconds. Example: `aa-stagger="0.5"`. Available range: 0.1s - 0.5s in increments of 0.1s
+- **aa-duration**: Set the animation duration for this element, in seconds. Example: `aa-duration="2"`. Available range: 0.1s - 3s in increments of 0.1s
+- **aa-delay**: Set the animation delay for this element, in seconds. Example: `aa-delay="0.5"`. Available range: 0.05s - 1.5s in increments of 0.05s
+- **aa-stagger**: Set a staggered animation delay for up to 10 child elements, in seconds. Example: `aa-stagger="0.5"`. Available range: 0.05s - 0.5s in increments of 0.05s
 
 ## CSS Animation Types
 
