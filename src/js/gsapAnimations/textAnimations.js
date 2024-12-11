@@ -1,13 +1,9 @@
-export function createTextAnimations(gsap, ScrollTrigger) {
+export function createTextAnimations(gsap) {
   // Animation defaults - ease and duration won't actually be considered as they are set on the element or default to initOptions
   const defaults = {
-    slideUp:     { duration: 0.5, stagger: 0.1, ease: 'back.out' },
-    slideDown:   { duration: 0.5, stagger: 0.1, ease: 'back.out' },
-    tiltUp:      { duration: 0.5, stagger: 0.1, ease: 'back.out' },
-    tiltDown:    { duration: 0.5, stagger: 0.1, ease: 'back.out' },
-    rotateSoft:  { duration: 1.2, stagger: 0.3, ease: 'circ.out' },
-    fadeSoft:    { duration: 1.0, stagger: 0.08, ease: 'power2.inOut' },
-    fade:        { duration: 1.0, stagger: 0.08, ease: 'power2.inOut' }
+    slide:        { duration: 0.5, stagger: 0.1, ease: 'back.out' },
+    rotateSoft:   { duration: 1.2, stagger: 0.3, ease: 'circ.out' },
+    fade:         { duration: 1.0, stagger: 0.08, ease: 'power2.inOut' },
   };
 
   // Helper function to create base animation configuration
@@ -77,29 +73,34 @@ export function createTextAnimations(gsap, ScrollTrigger) {
 
   // Return all animations with their specific configurations
   return {
+    fadeUp: createAnimation(
+      { y: "150%", x: "-20", opacity: 0 },
+      defaults.slide
+    ),
+    
     slideUp: createAnimation(
       { y: "110%", opacity: 0 },
-      defaults.slideUp
+      defaults.slide
     ),
     
     slideDown: createAnimation(
       { y: "-110%", opacity: 0 },
-      defaults.slideDown
+      defaults.slide
     ),
     
     tiltUp: createAnimation(
       { y: "110%", opacity: 0, rotation: 10 },
-      defaults.tiltUp
+      defaults.slide
     ),
     
     tiltDown: createAnimation(
       { y: "-110%", opacity: 0, rotation: -10 },
-      defaults.tiltDown
+      defaults.slide
     ),
     
     fadeSoft: createAnimation(
       { opacity: 0.3 },
-      defaults.fadeSoft
+      defaults.fade
     ),
     
     fade: createAnimation(

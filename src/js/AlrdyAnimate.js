@@ -29,7 +29,8 @@ const TEXT_ANIMATION_MAP = {
   'text-tilt-down': 'tiltDown',
   'text-rotate-soft': 'rotateSoft',
   'text-fade-soft': 'fadeSoft',
-  'text-fade': 'fade'
+  'text-fade': 'fade',
+  'text-fade-up': 'fadeUp'
 };
 
 // Initialize the animation script with the given options
@@ -107,7 +108,7 @@ async function init(options = {}) {
 
               switch (feature) {
                 case 'text':
-                  moduleAnimations = animationModule.createTextAnimations(modules.gsap, modules.ScrollTrigger);
+                  moduleAnimations = animationModule.createTextAnimations(modules.gsap);
                   break;
                 case 'scroll':
                   moduleAnimations = animationModule.createScrollAnimations(modules.gsap, modules.ScrollTrigger);

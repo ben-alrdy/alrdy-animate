@@ -523,18 +523,6 @@
   max-width: 800px;
 }
 
-/* Add spacing between lines for multi-line headlines */
-.text-animations-demo h2 [class*="line"] {
-  display: block;
-  margin-bottom: 0.2em;
-}
-
-/* Ensure proper spacing for character splits */
-.text-animations-demo h2 [class*="char"] {
-  display: inline-block;
-  margin-right: -0.05em; /* Adjust character spacing */
-}
-
 .instant-animations-demo {
   padding: 8rem 0;
   background-color: var(--background-color);
@@ -790,6 +778,13 @@
         </nav>
     </header>
     
+    <section class="text-animations-demo">
+      <div class="container">
+        <h2 aa-animate="text-fade-up" aa-split="lines" aa-stagger="0.1">
+          This headline slides up word by word This headline slides up word by word
+        </h2>
+      </div>
+    </section>
 
 
     <section class="loop-section"  aa-instant="zoom-out-down" aa-delay="1">
