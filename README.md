@@ -14,7 +14,7 @@
   - [3D Animations](#3d-animations)
 - [GSAP Features](#gsap-features)
   - [Text Animations](#text-animations)
-  - [Loop & Slider Animations](#infinite-loop-and-slider-animations)
+  - [Slider Animations](#slider-animations)
   - [Scroll Animations](#scroll-animations)
   - [Hover Animations](#hover-animations)
 - [Easing Functions](#easing-functions)
@@ -185,14 +185,13 @@ Scale animations with optional directional movement:
 - `zoom-out-up`, `zoom-out-down`, `zoom-out-left`, `zoom-out-right` (available for instant)
 
 ### Slide Animations
-Pure sliding movements:
-- `slide-up`, `slide-down`, `slide-left`, `slide-right`
+Pure sliding movements without opacity change:
+- `slide-up`, `slide-down`, `slide-left`, `slide-right` (available for instant)
 
 ### Blurred Slide Animations
 Sliding with a blur effect:
 - `slide-in-blurred-bottom`, `slide-in-blurred-top` (available for instant)
 - `slide-in-blurred-left`, `slide-in-blurred-right` (available for instant)
-
 
 
 ### Rotate Animations
@@ -202,30 +201,25 @@ Rotate animations from bottom right (br) and bottom left (bl) corners, clockwise
 
 ### 3D Animations
 
-### Flip Animations
+#### Flip Animations
 3D flip effects:
 - `flip-left`, `flip-right`, `flip-up`, `flip-down`
 
-The following 3D animations require a parent element to have a perspective set, e.g. `perspective: 1000px;`.
-
 #### Swing Animations
+Requires a parent element to have a perspective set, e.g. `perspective: 1000px;`.
 3D swing effects (anchored to top):
 - `swing-fwd`, `swing-bwd` (available for instant)
 
 #### Forward Turn Animations
+Requires a parent element to have a perspective set, e.g. `perspective: 1000px;`.
 3D rotation effects (available for instant):
 - `turn-3d-soft`: Soft rotation around X axis
 - `turn-3d-soft-3em`: Same as rotate-soft but with built-in perspective
 - `turn-3d-elliptic`: Stronger elliptic rotation around X axis
 
-### Background Transitions
-#### Pseudo Background Slide
-Background color transitions with sliding reveal:
-- `pseudo-bg-slide-down`, `pseudo-bg-slide-up`
-- `pseudo-bg-slide-right`, `pseudo-bg-slide-left`
 
-#### Pseudo Background Reveal
-Background color transitions with scaling reveal:
+### Pseudo Overlay Reveal
+Creates a pseudo element on top of the content and reveals it. Use `aa-bg-color-initial` to set the color of the pseudo element.
 - `pseudo-reveal-up`, `pseudo-reveal-down`
 - `pseudo-reveal-right`, `pseudo-reveal-left`
 
@@ -268,7 +262,7 @@ AlrdyAnimate supports several GSAP-powered features that can be enabled by inclu
 - `text-fade`: Fades the text in, starts with 0% opacity.
 
 
-### Infinite Loop and Slider Animations 
+### Slider Animations 
 (`gsapFeatures: ['slider']`)
 
 Creates infinite scrolling, snapping, or static slider animations. To use:
@@ -559,6 +553,14 @@ document.addEventListener('DOMContentLoaded', function() {
     useGSAP: true  
   });
 });
+```
+
+If you want a page refresh to always start from the top, you can add this script to the head tag, so it runs before the page loads:
+```javascript
+if ('scrollRestoration' in history) {
+  history.scrollRestoration = 'manual';
+}
+window.scrollTo(0, 0);
 ```
 
 ## Contributing

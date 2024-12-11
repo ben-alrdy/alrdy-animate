@@ -778,12 +778,13 @@
         </nav>
     </header>
     
-    <section class="text-animations-demo">
-      <div class="container">
+    <section class="text-animations-demo" style="height: 50vh; overflow: hidden; position: relative;">
+      <div class="container" style="position: relative; z-index: 1;">
         <h2 aa-animate="text-fade-up" aa-split="lines" aa-stagger="0.1">
           This headline slides up word by word This headline slides up word by word
         </h2>
       </div>
+      <div aa-instant="slide-up" aa-duration="0.5" aa-ease="power2.inOut" aa-delay="0.5" style="height: 100%; background: blueviolet; z-index: 0; position: absolute; top: 0; left: 0; right: 0; bottom: 0;"></div>
     </section>
 
 

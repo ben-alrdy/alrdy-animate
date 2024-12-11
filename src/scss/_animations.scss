@@ -222,3 +222,9 @@ $rotation-positions: ('br': (100% 100%), 'bl': (0 100%));
 [aa-instant="zoom-out-down"] { animation-name: zoomOutDown; }
 [aa-instant="zoom-out-left"] { animation-name: zoomOutLeft; }
 [aa-instant="zoom-out-right"] { animation-name: zoomOutRight; }
+
+/*SLIDE ANIMATIONS - FOR INSTANT*/
+[aa-instant="slide-up"] { animation-name: slideUp; }
+[aa-instant="slide-down"] { animation-name: slideDown; }
+[aa-instant="slide-left"] { animation-name: slideLeft; }
+[aa-instant="slide-right"] { animation-name: slideRight; }
