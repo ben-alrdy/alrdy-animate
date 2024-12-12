@@ -35,7 +35,7 @@ function initializeStickyNav(element, ease, duration, distance) {
         if (scrollDelta > 0 && isVisible) {
           isVisible = false;
           gsap.to(element, { 
-            y: `${-100 * (distance || 1)}%`, 
+            y: `${-100 * distance}%`, 
             duration: duration * 2, 
             ease, 
             overwrite: true 
@@ -307,8 +307,8 @@ function createCounterTimeline(element, gsap, duration, ease, delay) {
 
 function createScrollAnimations(gsap, ScrollTrigger) {
   return {
-    stickyNav: (element, ease = 'back.inOut', duration = 0.4) => {
-      initializeStickyNav(element, ease, duration);
+    stickyNav: (element, ease, duration, distance) => {
+      initializeStickyNav(element, ease, duration, distance);
     },
     
     backgroundColor: (element, duration, ease, viewportPercentage, debug) => {
