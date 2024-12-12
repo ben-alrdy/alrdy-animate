@@ -148,7 +148,8 @@ async function init(options = {}) {
           if (navElement) {
             const navEase = navElement.getAttribute('aa-ease');
             const navDuration = navElement.getAttribute('aa-duration');
-            loadedModules.animations.stickyNav?.(navElement, navEase ?? 'back.inOut', navDuration ?? 0.4);
+            const navDistance = navElement.getAttribute('aa-distance');
+            loadedModules.animations.stickyNav?.(navElement, navEase ?? 'back.inOut', navDuration ?? 0.4, navDistance ?? 1);
           }
 
           // Now setup the actual animations

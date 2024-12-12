@@ -6,7 +6,7 @@ function getScrollTriggerValues(isMobile) {
   };
 }
 
-function initializeStickyNav(element, ease, duration) {
+function initializeStickyNav(element, ease, duration, distance) {
   let isVisible = true;
   let lastScrollTop = 0;
   const scrollThreshold = 20;
@@ -34,7 +34,12 @@ function initializeStickyNav(element, ease, duration) {
       if (Math.abs(scrollDelta) > scrollThreshold) {
         if (scrollDelta > 0 && isVisible) {
           isVisible = false;
-          gsap.to(element, { y: '-100%', duration: duration * 2, ease, overwrite: true });
+          gsap.to(element, { 
+            y: `${-100 * (distance || 1)}%`, 
+            duration: duration * 2, 
+            ease, 
+            overwrite: true 
+          });
         } else if (scrollDelta < 0 && !isVisible) {
           showNavAtTop();
         }

@@ -54,16 +54,6 @@ You can include AlrdyAnimate in your project using either CDN or npm.
 
 <script>
   document.addEventListener('DOMContentLoaded', function() {
-    // Basic initialization
-    AlrdyAnimate.init({
-      ease: 'ease-in-out',
-      again: false,
-      viewportPercentage: 0.9,
-      duration: 2,
-      delay: 0.5
-    });
-
-    // With GSAP features
     AlrdyAnimate.init({
       ease: 'ease-in-out',
       again: false,
@@ -351,6 +341,7 @@ Enables scroll-driven animations and effects.
 - Use `aa-nav="sticky"` to create a sticky navigation bar that slides out of view when scrolling down and slides back in when scrolling up
 - Easing defaults to `back.inOut` 
 - Duration defaults to `0.4s`
+- Use `aa-distance` to set the distance multiplier that the nav element will move. Example: `aa-distance="1.5"`.
 - You can overwrite both by adding `aa-ease` and `aa-duration` to the nav element
 
 #### Background Color Transitions
