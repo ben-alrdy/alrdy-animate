@@ -257,17 +257,21 @@ AlrdyAnimate supports several GSAP-powered features that can be enabled by inclu
 
 Creates infinite scrolling, snapping, or static slider animations. To use:
 
-1. Add `aa-animate="slider"` to the container element
+1. Add `aa-animate="slider"` to the container element. (By default, the slider will animate horizontally, but you can add `-vertical` to animate vertically.)
 2. Add `aa-slider-item` attribute to each element that should be animated
-3. Optionally add navigation controls (`aa-slider-prev`, `aa-slider-next`) and a counter (`aa-slider-current`, `aa-slider-total`)
+3. Optionally, add navigation controls (`aa-slider-prev`, `aa-slider-next`) and a counter (`aa-slider-current`, `aa-slider-total`). These elements need to located inside the element with `aa-animate="slider"`.
 
 #### Basic Setup
 
 ```html
 <div aa-animate="slider">
   <div class="slider-container">
-    <div class="slider-item" aa-slider-item>Item 1</div>
-    <div class="slider-item" aa-slider-item>Item 2</div>
+    <div class="slider-item" aa-slider-item>
+      <div class="slider-item-content">Item 1</div>
+    </div>
+    <div class="slider-item" aa-slider-item>
+      <div class="slider-item-content">Item 2</div>
+    </div>
     <!-- Add more items as needed -->
   </div>
 
@@ -287,7 +291,7 @@ Creates infinite scrolling, snapping, or static slider animations. To use:
 
 #### Animation Types
 
-3. **Slider Animations** (`slider`)
+1. **Slider Animations** (`slider`)
    - Static slider that requires navigation
    - Combine with:
      - Interaction: `-draggable` or `-snap`
@@ -298,7 +302,7 @@ Creates infinite scrolling, snapping, or static slider animations. To use:
    - Continuous infinite scrolling
    - `aa-duration`: Inversely affects speed (1 is slower than 2)
    - Combine with:
-     - Direction: `-left` or `-right` (defaults to left)
+     - Direction: defaults to left, add `-reverse` to animate right
      - Interaction: `-draggable`
      - Position: `-center` (defaults to left aligned)
    - Example: `slider-loop-left-draggable`
@@ -308,7 +312,7 @@ Creates infinite scrolling, snapping, or static slider animations. To use:
    - `aa-duration`: Duration of each snap animation
    - `aa-delay`: Pause duration between snaps
    - Combine with:
-     - Direction: `-left` or `-right` (defaults to left)
+     - Direction: defaults to left, add `-reverse` to animate right
      - Interaction: `-draggable`
      - Position: `-center` (defaults to left aligned)
    - Example: `slider-snap-right-draggable`
@@ -318,6 +322,7 @@ Creates infinite scrolling, snapping, or static slider animations. To use:
 #### CSS Requirements
 - Container needs `display: flex` and `gap` set
 - Items need fixed width (percentage or pixels) and `flex-shrink: 0`
+- Important: The items cannot have a border or padding; if you need such styles, nest another div inside the item and apply the styles to that nested div.
 - Animations can be added to elements within items, but not directly on items
 
 
@@ -454,8 +459,9 @@ The AlrdyAnimate library includes powerful hover animations using GSAP. These an
   - Optionally, you can define the hover direction with `aa-hover-direction` (possible values: `all`, `top`, `bottom`, `left`, `right`, `vertical`, `horizontal`).
 
 4. **Background Expand Animation** (`aa-hover="bg-expand"`)
-  - Expands the background with or without reverse animation.
-  - Requires a div, tagged with `aa-hover-bg`, that will expand to fill the element.
+  - Expands a shape inside the elment to fill the element.
+  - Requires a div nested inside the element, tagged with `aa-hover-bg`, that will expand to fill the element.
+  - Optionally, you can add `-reverse` to `aa-hover` to play the animation in reverse when hovering out, e.g. `aa-hover="bg-expand-reverse"`.
   - Optionally, you can add a tag with `aa-hover-icon` to animate an icon on hover.
     - Optionally, you can define direction of the icon animation with `aa-hover-direction` on the aa-hover element (possible values: `right`, `up-right`, `down-right`).
 

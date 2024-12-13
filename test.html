@@ -751,6 +751,21 @@
   object-fit: cover;
 }
 
+.vertical-slider__container{
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  height: 20rem;
+  overflow: hidden;
+  margin: 2rem 0;
+}
+.vertical-slider__item{
+  height: auto;
+}
+.vertical-slider__content{
+  padding: 1rem;
+  border: 1px solid red;
+}
 
   </style>
 </head>
@@ -777,6 +792,8 @@
             </div>
         </nav>
     </header>
+
+    
     
     <section class="text-animations-demo" style="height: 50vh; overflow: hidden; position: relative;">
       <div class="container" style="position: relative; z-index: 1;">
@@ -787,9 +804,54 @@
       <div aa-instant="slide-up" aa-duration="0.5" aa-ease="power2.inOut" aa-delay="0.5" style="height: 100%; background: blueviolet; z-index: 0; position: absolute; top: 0; left: 0; right: 0; bottom: 0;"></div>
     </section>
 
+    <section class="vertical-slider-section">
+      <div class="container">
+        <!-- Vertical Slider Container -->
+        <div class="vertical-slider" aa-animate="slider-vertical-loop-reverse" aa-duration="0.5" aa-delay="2">
+          <div class="vertical-slider__container">
+            <!-- Slider Items -->
+            <div class="vertical-slider__item" aa-slider-item>
+              <div class="vertical-slider__content">
+                <h3>Slide 1</h3>
+                <p>Content for slide 1</p>
+              </div>
+            </div>
+            <div class="vertical-slider__item" aa-slider-item>
+              <div class="vertical-slider__content">
+                <h3>Slide 2</h3>
+                <p>Content for slide 2</p>
+              </div>
+            </div>
+            <div class="vertical-slider__item" aa-slider-item>
+              <div class="vertical-slider__content">
+                <h3>Slide 3</h3>
+                <p>Content for slide 3</p>
+              </div>
+            </div>
+            <div class="vertical-slider__item" aa-slider-item>
+              <div class="vertical-slider__content">
+                <h3>Slide 4</h3>
+                <p>Content for slide 4</p>
+              </div>
+            </div>
+          </div>
+    
+          <!-- Navigation Controls -->
+          <div class="vertical-slider__controls">
+            <button aa-slider-prev class="vertical-slider__button">↑</button>
+            <div class="vertical-slider__counter">
+              <span aa-slider-current>01</span>
+              <span>/</span>
+              <span aa-slider-total>04</span>
+            </div>
+            <button aa-slider-next class="vertical-slider__button">↓</button>
+          </div>
+        </div>
+      </div>
+    </section>
 
     <section class="loop-section"  aa-instant="zoom-out-down" aa-delay="1">
-      <div class="container" aa-animate="slider-snap-draggable" aa-duration="0.3" aa-delay="0.2">
+      <div class="container" aa-animate="slider-snap-reverse" aa-duration="0.3" aa-delay="0.2">
       <div class="loop-container" >
         <div class="loop-item" aa-slider-item>
           <div aa-animate="float-up">Item 1</div>
@@ -811,16 +873,6 @@
         </div>
       </div>
 
-      <!-- Navigation Controls -->
-      <button aa-slider-prev>Previous</button>
-      <button aa-slider-next>Next</button>
-
-      <!-- Counter -->
-      <div class="counter">
-        <span aa-slider-current>01</span>
-        <span>/</span>
-        <span aa-slider-total>06</span>
-      </div>
     </div>
     </section>
 
@@ -879,7 +931,7 @@
     </div>
 
     <section class="loop-section" ></section>
-      <div class="container" aa-animate="slider-draggable" aa-duration="0.5" aa-ease="expo.inOut">
+      <div class="container" aa-animate="slider-center" aa-duration="0.5" aa-ease="expo.inOut">
       <div class="loop-container" >
         <div class="loop-item" aa-slider-item>
           <div aa-animate="float-up">Item 1</div>
