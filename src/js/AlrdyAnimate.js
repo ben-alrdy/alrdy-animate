@@ -143,13 +143,15 @@ async function init(options = {}) {
         loadedModules = await gsapModulesPromise;
 
         if (loadedModules) {
-          // Setup sticky nav
-          const navElement = document.querySelector('[aa-nav="sticky"]');
+          // Setup nav animations
+          const navElement = document.querySelector('[aa-nav]');
           if (navElement) {
+            const navType = navElement.getAttribute('aa-nav');
             const navEase = navElement.getAttribute('aa-ease');
             const navDuration = navElement.getAttribute('aa-duration');
             const navDistance = navElement.getAttribute('aa-distance');
-            loadedModules.animations.stickyNav?.(navElement, navEase ?? 'back.inOut', navDuration ?? 0.4, navDistance ?? 1);
+            const navScrolled = navElement.hasAttribute('aa-scroll') ? parseInt(navElement.getAttribute('aa-scroll')) : 100;
+            loadedModules.animations.nav?.(navElement, navType, navEase ?? 'back.inOut', navDuration ?? 0.4, navDistance ?? 1, navScrolled);
           }
 
           // Now setup the actual animations

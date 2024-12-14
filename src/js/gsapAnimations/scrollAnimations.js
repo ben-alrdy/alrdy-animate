@@ -1,20 +1,28 @@
-// Helper function to get scroll trigger values
-function getScrollTriggerValues(isMobile) {
-  return {
-    start: isMobile ? "top 40%" : "top 80%",
-    end: isMobile ? "top 20%" : "top 40%"
-  };
-}
-
-function initializeStickyNav(element, ease, duration, distance) {
+function initializeNav(element, type, ease, duration, distance, scrolled) {
   let isVisible = true;
   let lastScrollTop = 0;
   const scrollThreshold = 20;
+
+  // Track class state to avoid unnecessary DOM operations
+  let hasScrolledClass = false;
 
   // Function to ensure nav is visible at top
   const showNavAtTop = () => {
     isVisible = true;
     gsap.to(element, { y: '0%', duration, ease, overwrite: true });
+  };
+
+  // Add function to handle scrolled class
+  const updateScrolledClass = (scrollTop) => {
+    if (scrolled) {
+      if (scrollTop >= scrolled && !hasScrolledClass) {
+        element.classList.add('is-scrolled');
+        hasScrolledClass = true;  
+      } else if (scrollTop < scrolled && hasScrolledClass) {
+        element.classList.remove('is-scrolled');
+        hasScrolledClass = false;
+      }
+    }
   };
 
   ScrollTrigger.create({
@@ -23,31 +31,38 @@ function initializeStickyNav(element, ease, duration, distance) {
     onUpdate: (self) => {
       let currentScrollTop = self.scroll();
 
-      if (currentScrollTop <= 10) {
-        showNavAtTop();
-        lastScrollTop = currentScrollTop;
-        return;
+      // Update scrolled class state
+      if (type.includes('change')) {
+        updateScrolledClass(currentScrollTop);
       }
 
-      let scrollDelta = currentScrollTop - lastScrollTop;
-
-      if (Math.abs(scrollDelta) > scrollThreshold) {
-        if (scrollDelta > 0 && isVisible) {
-          isVisible = false;
-          gsap.to(element, { 
-            y: `${-100 * distance}%`, 
-            duration: duration * 2, 
-            ease, 
-            overwrite: true 
-          });
-        } else if (scrollDelta < 0 && !isVisible) {
+      if (type.includes('hide')) {
+        if (currentScrollTop <= 10) {
           showNavAtTop();
+          lastScrollTop = currentScrollTop;
+          return;
         }
-        lastScrollTop = currentScrollTop;
+
+        let scrollDelta = currentScrollTop - lastScrollTop;
+
+        if (Math.abs(scrollDelta) > scrollThreshold) {
+          if (scrollDelta > 0 && isVisible) {
+            isVisible = false;
+            gsap.to(element, { 
+              y: `${-100 * distance}%`, 
+              duration: duration * 2, 
+              ease, 
+              overwrite: true 
+            });
+          } else if (scrollDelta < 0 && !isVisible) {
+            showNavAtTop();
+          }
+          lastScrollTop = currentScrollTop;
+        }
       }
     },
-    onLeaveBack: showNavAtTop,
-    onLeave: showNavAtTop
+    onLeaveBack: type.includes('hide') ? showNavAtTop : undefined,
+    onLeave: type.includes('hide') ? showNavAtTop : undefined
   });
 }
 
@@ -307,8 +322,8 @@ function createCounterTimeline(element, gsap, duration, ease, delay) {
 
 function createScrollAnimations(gsap, ScrollTrigger) {
   return {
-    stickyNav: (element, ease, duration, distance) => {
-      initializeStickyNav(element, ease, duration, distance);
+    nav: (element, type, ease, duration, distance, scrolled) => {
+      initializeNav(element, type, ease, duration, distance, scrolled);
     },
     
     backgroundColor: (element, duration, ease, viewportPercentage, debug) => {
