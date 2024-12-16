@@ -89,12 +89,12 @@ export function createTextAnimations(gsap) {
     ),
     
     tiltUp: createAnimation(
-      { y: "110%", opacity: 0, rotation: 10 },
+      { y: "110%", opacity: 0, rotation: 10, transformOrigin: "bottom left" },
       defaults.slide
     ),
     
     tiltDown: createAnimation(
-      { y: "-110%", opacity: 0, rotation: -10 },
+      { y: "-110%", opacity: 0, rotation: -10, transformOrigin: "top left" },
       defaults.slide
     ),
     
