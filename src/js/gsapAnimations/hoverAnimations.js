@@ -300,6 +300,9 @@ function initializeExpandAnimation(element, gsap) {
             paused: true,
         });
 
+        // Add color animations using helper at the start
+        setupTextColorAnimation(element, timelineIn, true, originalColors);
+
         // Add background animation only if bg exists
         if (bg) {
             timelineIn.to(bg, { scale }, 0);
@@ -311,9 +314,6 @@ function initializeExpandAnimation(element, gsap) {
                 .to(icon, iconAnimations.icon, 0)
                 .to(icon.nextElementSibling, iconAnimations.clone, delay);
         }
-
-        // Add color animations using helper
-        setupTextColorAnimation(element, timelineIn, true, originalColors);
 
         // Add reverse animation event listeners
         element.addEventListener('mouseenter', () => timelineIn.play());
@@ -330,6 +330,10 @@ function initializeExpandAnimation(element, gsap) {
             defaults: { ease, duration },
             paused: true,
         });
+
+        // Add color animations using helper at the start
+        setupTextColorAnimation(element, timelineIn, true, originalColors);
+        setupTextColorAnimation(element, timelineOut, false, originalColors);
 
         // Setup background animations only if bg exists
         if (bg) {
@@ -368,10 +372,6 @@ function initializeExpandAnimation(element, gsap) {
                 .to(icon, iconAnimations.icon, 0)
                 .to(icon.nextElementSibling, iconAnimations.clone, delay);
         }
-
-        // Add color animations using helper
-        setupTextColorAnimation(element, timelineIn, true, originalColors);
-        setupTextColorAnimation(element, timelineOut, false, originalColors);
 
         // Add non-reverse animation event listeners
         element.addEventListener('mouseenter', () => {
