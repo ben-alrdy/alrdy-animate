@@ -232,12 +232,15 @@ function initializeExpandAnimation(element, gsap) {
     const icon = element.querySelector('[aa-hover-icon]');
     const isReverse = element.getAttribute('aa-hover').includes('reverse');
 
-    // Calculate optimal scale factor
-    const elementRect = element.getBoundingClientRect();
-    const elementDiagonal = Math.sqrt(Math.pow(elementRect.width, 2) + Math.pow(elementRect.height, 2));
-    const bgRect = bg.getBoundingClientRect();
-    const bgWidth = Math.max(bgRect.width, 1);
-    const scale = Math.ceil(elementDiagonal / bgWidth * 2);
+    // Calculate optimal scale factor only if bg exists
+    let scale;
+    if (bg) {
+        const elementRect = element.getBoundingClientRect();
+        const elementDiagonal = Math.sqrt(Math.pow(elementRect.width, 2) + Math.pow(elementRect.height, 2));
+        const bgRect = bg.getBoundingClientRect();
+        const bgWidth = Math.max(bgRect.width, 1);
+        scale = Math.ceil(elementDiagonal / bgWidth * 2);
+    }
 
     // Get animation settings
     const duration = element.hasAttribute('aa-duration') ?
@@ -297,8 +300,10 @@ function initializeExpandAnimation(element, gsap) {
             paused: true,
         });
 
-        // Add background animation
-        timelineIn.to(bg, { scale }, 0);
+        // Add background animation only if bg exists
+        if (bg) {
+            timelineIn.to(bg, { scale }, 0);
+        }
 
         // Add icon animations if present
         if (iconAnimations) {
@@ -315,15 +320,6 @@ function initializeExpandAnimation(element, gsap) {
         element.addEventListener('mouseleave', () => timelineIn.reverse());
 
     } else {
-        // Create and setup background reset clone
-        const bgReset = bg.cloneNode(true);
-        bgReset.style.position = 'absolute';
-        bgReset.style.top = '0';
-        bgReset.style.left = '0';
-        bgReset.style.transform = 'scale(0)';
-        bgReset.style.backgroundColor = window.getComputedStyle(element).backgroundColor;
-        bg.after(bgReset);
-
         // Create hover in/out timelines
         const timelineIn = gsap.timeline({
             defaults: { ease, duration },
@@ -335,10 +331,36 @@ function initializeExpandAnimation(element, gsap) {
             paused: true,
         });
 
-        // Setup hover in animation
-        timelineIn
-            .set(bg, { scale: 1 }, 0)
-            .to(bg, { scale }, 0);
+        // Setup background animations only if bg exists
+        if (bg) {
+            // Create and setup background reset clone
+            const bgReset = bg.cloneNode(true);
+            bgReset.style.position = 'absolute';
+            bgReset.style.top = '0';
+            bgReset.style.left = '0';
+            bgReset.style.transform = 'scale(0)';
+            bgReset.style.backgroundColor = window.getComputedStyle(element).backgroundColor;
+            bg.after(bgReset);
+
+            // Setup hover in animation
+            timelineIn
+                .set(bg, { scale: 1 }, 0)
+                .to(bg, { scale }, 0);
+
+            // Setup hover out animation
+            timelineOut
+                .to(bgReset, {
+                    scale,
+                    duration: duration * 0.6,
+                    ease: 'power2.in'
+                })
+                .set([bg, bgReset], { scale: 0 })
+                .to(bg, {
+                    scale: 1,
+                    duration: duration * 0.4,
+                    ease: 'power2.out'
+                });
+        }
 
         // Add icon animations if present
         if (iconAnimations) {
@@ -347,24 +369,8 @@ function initializeExpandAnimation(element, gsap) {
                 .to(icon.nextElementSibling, iconAnimations.clone, delay);
         }
 
-        // Add color animations using helper for hover in
+        // Add color animations using helper
         setupTextColorAnimation(element, timelineIn, true, originalColors);
-
-        // Setup hover out animation
-        timelineOut
-            .to(bgReset, {
-                scale,
-                duration: duration * 0.6,
-                ease: 'power2.in'
-            })
-            .set([bg, bgReset], { scale: 0 })
-            .to(bg, {
-                scale: 1,
-                duration: duration * 0.4,
-                ease: 'power2.out'
-            });
-
-        // Add color animations using helper for hover out
         setupTextColorAnimation(element, timelineOut, false, originalColors);
 
         // Add non-reverse animation event listeners
