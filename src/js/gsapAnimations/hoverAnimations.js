@@ -104,10 +104,12 @@ function setupTextColorAnimation(element, timeline, isEnter, originalColors) {
     if (hoverTexts.length && hoverColor && originalColors) {
         // Add color animations to timeline
         hoverTexts.forEach((text, index) => {
-            timeline.fromTo(
+            timeline.to(
                 text,
-                { color: isEnter ? originalColors[index] : hoverColor },
-                { color: isEnter ? hoverColor : originalColors[index] },
+                { 
+                    color: isEnter ? hoverColor : originalColors[index],
+                    overwrite: true
+                },
                 0 // Start at same time as main animation
             );
         });
