@@ -395,7 +395,7 @@ Enables scroll-driven animations and effects.
 ```
 
 #### Reveal & Appear Animations
-- Use `aa-animate="reveal-..."` for reveal animations that use a colored overlay
+- Use `aa-animate="reveal-..."` for reveal animations that use a clip path to mask the content
 - Use `aa-animate="appear-..."` for appear animations that fade/slide in content
 - Optionally, add `aa-scroll` with the values `smooth`, `snap`, `smoother` or `true` to make the animation scroll-driven
 
@@ -464,7 +464,7 @@ The AlrdyAnimate library includes powerful hover animations using GSAP. These an
   - Expands a shape inside the elment to fill the element.
   - Requires a div nested inside the element, tagged with `aa-hover-bg`, that will expand to fill the element.
   - Optionally, you can add `-reverse` to `aa-hover` to play the animation in reverse when hovering out, e.g. `aa-hover="bg-expand-reverse"`.
-  - Optionally, you can add a tag with `aa-hover-icon` to animate an icon on hover.
+  - Optionally, you can add a tag with `aa-hover-icon` to animate an icon on hover (usually set on the svg element inside the embed; the embed div itself needs to be set to `position: relative` and `overflow: hidden`).
     - Optionally, you can define direction of the icon animation with `aa-hover-direction` on the aa-hover element (possible values: `right`, `up-right`, `down-right`).
 
 For all hover animations, you can optionally change the color of the hovered text by adding `aa-hover-color` to the element with `aa-hover`. Alternatively, using CSS to transition on hover also works. To set content above the background, add `aa-hover-content` to the respective element (or position it via CSS).

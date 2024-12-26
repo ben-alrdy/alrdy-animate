@@ -189,11 +189,13 @@ export function createSliderAnimations(gsap, Draggable) {
           onThrowUpdate: align,
           overshootTolerance: 0,
           inertia: true,
-          throwResistance: 2000,  // Higher number = less distance/speed (default is 0.55)
-          maxDuration: 3,
+          throwResistance: 3000,  // Higher number = less distance/speed (default is 0.55)
+          maxDuration: 1,
+          minDuration: 0.3,
           snap(value) {
             //note: if the user presses and releases in the middle of a throw, due to the sudden correction of proxy.x in the onPressInit(), the velocity could be very large, throwing off the snap. So sense that condition and adjust for it. We also need to set overshootTolerance to 0 to prevent the inertia from causing it to shoot past and come back
 
+            // Prevent rapid scrolling on quick taps/drags
             if (Math.abs(startProgress / -ratio - this.x) < 10) {
               return lastSnap + initChangeX;
             }
@@ -410,7 +412,6 @@ export function createSliderAnimations(gsap, Draggable) {
             lastSnap,
             initChangeY,
             indexIsDirty;
-        typeof(InertiaPlugin) === "undefined" && console.warn("InertiaPlugin required for momentum-based scrolling and snapping. https://gsap.com/pricing");
         draggable = Draggable.create(proxy, {
           trigger: items[0].parentNode,
           type: "y",
