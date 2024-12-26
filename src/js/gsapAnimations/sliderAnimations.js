@@ -686,29 +686,12 @@ export function createSliderAnimations(gsap, Draggable) {
       }
     }
 
-    // Add click handlers for slider type
-    if (!animationType.includes('loop') && !animationType.includes('snap')) { 
+    // Add click handlers for slider type unless on mobile
+    if (!animationType.includes('loop') && !animationType.includes('snap') && !window.matchMedia('(hover: none)').matches){ 
       items.forEach((slide, i) => {
-        if (window.matchMedia('(hover: none)').matches) {
-          // Touch device handlers
-          let isTouchMove = false;
-
-          slide.addEventListener('touchmove', () => {
-            isTouchMove = true;
-          }, { passive: true });
-
-          slide.addEventListener('touchend', () => {
-            if (!isTouchMove) {
-              element._loop.toIndex(i, { ease, duration });
-            }
-            isTouchMove = false;
-          }, { passive: true });
-        } else {
-          // Non-touch device handler
-          slide.addEventListener('click', () => {
-            element._loop.toIndex(i, { ease, duration });
-          });
-        }
+        slide.addEventListener('click', () => {
+          element._loop.toIndex(i, { ease, duration });
+        });
       });
     }
   }
