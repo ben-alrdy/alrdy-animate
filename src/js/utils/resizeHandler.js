@@ -41,13 +41,16 @@ export function setupResizeHandler(modules, initOptions, isMobile, setupGSAPAnim
     }
   }, 250);
 
-  window.addEventListener('resize', debouncedResize);
-  window.addEventListener('orientationchange', () => {
-    setTimeout(() => {
-      const currentWidth = window.innerWidth;
-      if (currentWidth !== prevWidth) {
-        debouncedResize();
-      }
-    }, 100);
-  });
+  if (window.matchMedia('(hover: none)').matches) {
+    window.addEventListener('orientationchange', () => {
+      setTimeout(() => {
+        const currentWidth = window.innerWidth;
+        if (currentWidth !== prevWidth) {
+          debouncedResize();
+        }
+      }, 100);
+    });
+  } else {
+    window.addEventListener('resize', debouncedResize);
+  }
 } 
