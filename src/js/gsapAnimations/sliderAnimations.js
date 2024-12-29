@@ -184,53 +184,26 @@ export function createSliderAnimations(gsap, Draggable) {
             ratio = 1 / totalWidth;
             initChangeX = (startProgress / -ratio) - x;
             gsap.set(proxy, { x: startProgress / -ratio });
-            
-            // Store initial position
-            this.lastX = this.pointerX;
-            this.isVerticalDrag = false;
           },
-          onDrag() {
-            // Check drag direction between current and last position
-            const deltaX = Math.abs(this.pointerX - this.lastX);
-            
-            // Update last positions
-            this.lastX = this.pointerX;
-            
-            if (deltaX < 0.5) {
-              this.isVerticalDrag = true;
-            }
-
-            console.log('Drag detection:', {
-              deltaX,
-              isVertical: this.isVerticalDrag
-            });
-
-            align();
-          },
+          onDrag: align,
           onThrowUpdate: align,
           overshootTolerance: 0,
           inertia: true,
-          throwResistance: 3000,
+          throwResistance: 3000,  // Higher number = less distance/speed (default is 0.55)
           maxDuration: 1,
           minDuration: 0.3,
           snap(value) {
             //note: if the user presses and releases in the middle of a throw, due to the sudden correction of proxy.x in the onPressInit(), the velocity could be very large, throwing off the snap. So sense that condition and adjust for it. We also need to set overshootTolerance to 0 to prevent the inertia from causing it to shoot past and come back
-            
-            // If vertical drag is detected, skip the snap
-            if (this.isVerticalDrag) {
-              console.log('Vertical drag detected, skipping snap');
-              return this.x;  // Return current position without snapping
-            }
 
-            // Regular snap logic
+            // Prevent rapid scrolling on quick taps/drags
             if (Math.abs(startProgress / -ratio - this.x) < 10) {
               return lastSnap + initChangeX;
             }
 
             let time = -(value * ratio) * tl.duration(),
-                wrappedTime = timeWrap(time),
-                snapTime = times[getClosest(times, wrappedTime, tl.duration())],
-                dif = snapTime - wrappedTime;
+              wrappedTime = timeWrap(time),
+              snapTime = times[getClosest(times, wrappedTime, tl.duration())],
+              dif = snapTime - wrappedTime;
 
             Math.abs(dif) > tl.duration() / 2 && (dif += dif < 0 ? tl.duration() : -tl.duration());
             lastSnap = (time + dif) / tl.duration() / -ratio;
