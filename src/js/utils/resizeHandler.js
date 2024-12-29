@@ -44,10 +44,7 @@ export function setupResizeHandler(modules, initOptions, isMobile, setupGSAPAnim
   if (window.matchMedia('(hover: none)').matches) {
     window.addEventListener('orientationchange', () => {
       setTimeout(() => {
-        const currentWidth = window.innerWidth;
-        if (currentWidth !== prevWidth) {
-          debouncedResize();
-        }
+        debouncedResize();
       }, 100);
     });
   } else {
