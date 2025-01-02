@@ -231,6 +231,7 @@ export function createSliderAnimations(gsap, Draggable) {
       // Move to center on load if configured
       if (config.center) {
         toIndex(0, { duration: 0 });
+        refresh(true);
       }
       lastIndex = curIndex;
       onChange && onChange(items[curIndex], curIndex);
@@ -560,24 +561,26 @@ export function createSliderAnimations(gsap, Draggable) {
       gsap.delayedCall(delay, moveToNext);
     };
 
-    // Start from the first item
-    loop.toIndex(0, { duration: 0 });
-
-    // Pause the loop if it's reversed to auto movement bug
-    if (animationType.includes('reverse')) {
-      loop.pause();
+    // Pause the loop initially; needed for reversed sliders
+    loop.pause(); 
+  
+    if (loop.draggable && animationType.includes('center')) {
+      // Fix for incorrect snap position with centered sliders
+      loop.toIndex(0, { 
+        duration: 0.1,
+        onComplete: () => {
+          if (startSnapCycle) {
+            startSnapCycle();
+          }
+        }
+      });
+    } else {
+      gsap.delayedCall(0.01, startSnapCycle);
     }
-
-    gsap.delayedCall(0.01, startSnapCycle);
 
     // Make these functions accessible to the drag handlers
     loop.moveToNext = moveToNext;
     loop.startSnapCycle = startSnapCycle;
-
-    // Handle dragging
-    if (loop.draggable) {
-      setupDragHandlers(loop, animationType, startSnapCycle);
-    }
   }
 
   function setupDragHandlers(loop, animationType, startSnapCycle = null) {
@@ -601,7 +604,7 @@ export function createSliderAnimations(gsap, Draggable) {
 
         // Pause the loop timeline
         loop.pause();
-
+        
         // Kill any existing delayed calls
         if (startSnapCycle) {
           gsap.killTweensOf(loop.moveToNext);
@@ -668,7 +671,7 @@ export function createSliderAnimations(gsap, Draggable) {
           ease,
           duration,
           onComplete: () => {
-            if (!config.paused) {
+            if (animationType.includes('loop')) {
               gsap.delayedCall(1, () => {
                 loop.resume();
               });
