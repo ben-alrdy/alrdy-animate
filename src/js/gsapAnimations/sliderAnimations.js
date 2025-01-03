@@ -623,7 +623,10 @@ export function createSliderAnimations(gsap, Draggable) {
         }
 
         if (startSnapCycle) {
-          loop.startSnapCycle();
+          // Only restart snap cycle if we're not currently being hovered or if it's a touch device
+          if (!element.matches(':hover') || window.matchMedia('(hover: none)').matches) {
+            loop.startSnapCycle();
+          }
         } else {
           loop.play();
         }
