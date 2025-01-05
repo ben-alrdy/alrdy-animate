@@ -502,7 +502,7 @@ export function createSliderAnimations(gsap, Draggable) {
     if (animationType.includes('snap')) {
       setupSnapBehavior(element, loop, animationType, duration, ease, delay);
     } else if (animationType.includes('draggable')) {
-      setupDragHandlers(element, loop, animationType);
+      setupDragHandlers(element, loop, animationType, startSnapCycle);
     }
 
     return loop;
@@ -609,6 +609,7 @@ export function createSliderAnimations(gsap, Draggable) {
 
       loop.draggable.vars.onDragStart = function () {
         loop.pause();
+        loop._isThrowing = false; 
 
         // Kill any pending snap animations
         if (animationType.includes('snap')) {
@@ -617,10 +618,17 @@ export function createSliderAnimations(gsap, Draggable) {
         } 
       };
 
+      // Track throw state
+      loop.draggable.vars.onThrowStart = function() {
+        loop._isThrowing = true;
+      };
+
       loop.draggable.vars.onThrowComplete = function () {
         if (originalHandlers.onThrowComplete) {
           originalHandlers.onThrowComplete.call(this);
         }
+
+        loop._isThrowing = false; 
 
         if (startSnapCycle) {
           // Only restart snap cycle if we're not currently being hovered or if it's a touch device
@@ -642,8 +650,8 @@ export function createSliderAnimations(gsap, Draggable) {
         };
         
         const handleMouseLeave = () => {
-            // Only restart if we're not currently dragging
-            if (!loop.draggable.isDragging) {
+            // Only restart if we're not currently dragging or throwing
+            if (!loop.draggable.isDragging && !loop._isThrowing) {
                 loop.startSnapCycle();
             }
         };
