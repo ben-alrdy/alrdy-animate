@@ -85,35 +85,67 @@ function getAdjustedDirection(mouseDirection, hoverDirection, isEnter) {
 }
 
 function storeOriginalColors(element) {
-    const hoverTexts = element.querySelectorAll('[aa-hover-text]');
-    const hoverColor = element.getAttribute('aa-hover-color');
+    const colorElements = {
+        text: element.querySelectorAll('[aa-hover-text-color]'),
+        background: element.querySelectorAll('[aa-hover-bg-color]')
+    };
     
-    if (hoverTexts.length && hoverColor) {
-        return Array.from(hoverTexts).map(text => 
-            window.getComputedStyle(text).color
+    const originalColors = {
+        text: [],
+        background: []
+    };
+
+    if (colorElements.text.length) {
+        originalColors.text = Array.from(colorElements.text).map(el => 
+            window.getComputedStyle(el).color
         );
     }
-    return null;
+
+    if (colorElements.background.length) {
+        originalColors.background = Array.from(colorElements.background).map(el => 
+            window.getComputedStyle(el).backgroundColor
+        );
+    }
+
+    return originalColors;
 }
 
-function setupTextColorAnimation(element, timeline, isEnter, originalColors) {
-    const hoverTexts = element.querySelectorAll('[aa-hover-text]');
-    const hoverColor = element.getAttribute('aa-hover-color');
-
-    // If we have both hover texts and a hover color
-    if (hoverTexts.length && hoverColor && originalColors) {
-        // Add color animations to timeline
-        hoverTexts.forEach((text, index) => {
+function setupColorAnimation(element, timeline, isEnter) {
+    // Handle text color animations
+    const textElements = element.querySelectorAll('[aa-hover-text-color]');
+    textElements.forEach((el, index) => {
+        const targetColor = el.getAttribute('aa-hover-text-color');
+        const originalColor = timeline.data?.originalColors?.text?.[index];
+        
+        if (targetColor && originalColor) {
             timeline.to(
-                text,
+                el,
                 { 
-                    color: isEnter ? hoverColor : originalColors[index],
+                    color: isEnter ? targetColor : originalColor,
                     overwrite: true
                 },
                 0 // Start at same time as main animation
             );
-        });
-    }
+        }
+    });
+
+    // Handle background color animations
+    const bgElements = element.querySelectorAll('[aa-hover-bg-color]');
+    bgElements.forEach((el, index) => {
+        const targetColor = el.getAttribute('aa-hover-bg-color');
+        const originalColor = timeline.data?.originalColors?.background?.[index];
+        
+        if (targetColor && originalColor) {
+            timeline.to(
+                el,
+                { 
+                    backgroundColor: isEnter ? targetColor : originalColor,
+                    overwrite: true
+                },
+                0 // Start at same time as main animation
+            );
+        }
+    });
 }
 
 function initializeCurveAnimation(element, gsap) {
@@ -126,7 +158,8 @@ function initializeCurveAnimation(element, gsap) {
 
     function animateHover(start, end, isEnter) {
         const timeline = gsap.timeline({
-            defaults: { duration, ease }
+            defaults: { duration, ease },
+            data: { originalColors } // Store original colors in timeline data
         });
 
         // Animate the path
@@ -135,8 +168,8 @@ function initializeCurveAnimation(element, gsap) {
             { attr: { d: end } }
         );
 
-        // Add color animations using helper
-        setupTextColorAnimation(element, timeline, isEnter, originalColors);
+        // Add color animations using new helper
+        setupColorAnimation(element, timeline, isEnter);
 
         return timeline;
     }
@@ -207,7 +240,8 @@ function initializeCircleAnimation(element, gsap) {
         circle.setAttribute('cy', y);
 
         const timeline = gsap.timeline({
-            defaults: { duration, ease }
+            defaults: { duration, ease },
+            data: { originalColors }  // Store original colors in timeline data
         });
 
         if (isEnter) {
@@ -221,7 +255,7 @@ function initializeCircleAnimation(element, gsap) {
         }
 
         // Add color animations using helper
-        setupTextColorAnimation(element, timeline, isEnter, originalColors);
+        setupColorAnimation(element, timeline, isEnter);
     }
 
     element.addEventListener('mouseenter', event => handleCircleHover(event, true));
@@ -300,10 +334,11 @@ function initializeExpandAnimation(element, gsap) {
         const timelineIn = gsap.timeline({
             defaults: { ease, duration },
             paused: true,
+            data: { originalColors }  // Store original colors in timeline data
         });
 
         // Add color animations using helper at the start
-        setupTextColorAnimation(element, timelineIn, true, originalColors);
+        setupColorAnimation(element, timelineIn, true);
 
         // Add background animation only if bg exists
         if (bg) {
@@ -326,16 +361,18 @@ function initializeExpandAnimation(element, gsap) {
         const timelineIn = gsap.timeline({
             defaults: { ease, duration },
             paused: true,
+            data: { originalColors }  // Store original colors in timeline data
         });
 
         const timelineOut = gsap.timeline({
             defaults: { ease, duration },
             paused: true,
+            data: { originalColors }  // Store original colors in timeline data
         });
 
         // Add color animations using helper at the start
-        setupTextColorAnimation(element, timelineIn, true, originalColors);
-        setupTextColorAnimation(element, timelineOut, false, originalColors);
+        setupColorAnimation(element, timelineIn, true);
+        setupColorAnimation(element, timelineOut, false);
 
         // Setup background animations only if bg exists
         if (bg) {
