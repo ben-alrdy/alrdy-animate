@@ -467,7 +467,7 @@ The AlrdyAnimate library includes powerful hover animations using GSAP. These an
   - Optionally, you can add a tag with `aa-hover-icon` to animate an icon on hover (usually set on the svg element inside the embed; the embed div itself needs to be set to `position: relative` and `overflow: hidden`).
     - Optionally, you can define direction of the icon animation with `aa-hover-direction` on the aa-hover element (possible values: `right`, `up-right`, `down-right`).
 
-For all hover animations, you can optionally change the color of the hovered text by adding `aa-hover-color` to the element with `aa-hover`. Alternatively, using CSS to transition on hover also works. To set content above the background, add `aa-hover-content` to the respective element (or position it via CSS).
+For all hover animations, you can optionally change the color of hovered text by adding `aa-hover-text-color` or the background color by adding `aa-hover-bg-color` to any element inside the aa-hover element. The text elements will be positioned relative with z-index set to 1. Alternatively, using CSS to transition on hover also works. To set content above the background, add `aa-hover-content` to the respective element (or position it via CSS).
 
 For background animations, the aa-hover element needs to have position set to `relative` or `absolute` and overflow set to `hidden`.
 
