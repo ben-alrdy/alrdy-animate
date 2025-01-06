@@ -225,7 +225,7 @@ function setupGSAPAnimations(element, elementSettings, initOptions, isMobile, mo
       // start: isMobile ? "top 40%" : `top ${(viewportPercentage) * 100}%`,
       // end: isMobile ? "top 20%" : "top 40%",
       start: `top ${(viewportPercentage) * 100}%`,
-      end: "top 20%",
+      end: "top 40%",
       scrub: scroll.includes('smoother') ? 4 :
           scroll.includes('smooth') ? 2 :
           scroll.includes('snap') ? { snap: 0.2 } :
