@@ -758,16 +758,27 @@ export function createSliderAnimations(gsap, Draggable) {
   function cleanupLoops() {
     activeLoops.forEach(element => {
       if (element._loop) {
+        // Stop any active snap cycles
+        if (element._loop.stopSnapCycle) {
+          element._loop.stopSnapCycle();
+        }
+
         // Remove hover listeners if they exist
         if (element._loop._removeHoverListeners) {
           element._loop._removeHoverListeners();
         }
         
+        // Clean up draggable if it exists
+        if (element._loop.draggable) {
+          element._loop.draggable.kill();
+        }
+        
         // Get all slider items
         const items = element.querySelectorAll('[aa-slider-item]');
         
-        // Kill any existing GSAP tweens on the slider items
+        // Kill any existing GSAP tweens on the items and the loop
         gsap.killTweensOf(items);
+        gsap.killTweensOf(element._loop.moveToNext);
         
         // Kill the loop timeline
         element._loop.kill();
