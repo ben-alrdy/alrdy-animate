@@ -4,7 +4,7 @@ export function splitText(element, type) {
   // Define a mapping of type to SplitType options
   const typeMap = {
     'lines&words': { types: 'lines, words', splitType: 'lines&words' },
-    'chars': { types: 'lines, chars', splitType: 'chars' },
+    'chars': { types: 'lines, words, chars', splitType: 'chars' },
     'words': { types: 'lines, words', splitType: 'words' },
     'lines': { types: 'lines', splitType: 'lines' }
   };

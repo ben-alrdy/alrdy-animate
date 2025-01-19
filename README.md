@@ -443,12 +443,14 @@ The AlrdyAnimate library includes powerful hover animations using GSAP. These an
 
 1. **Text Animations** (`aa-hover="text-..."`) 
   - Animate text elements with sliding or fading effects. 
-  - Requires `aa-split` attribute to be set (e.g. `aa-split="words"`), optionally add `aa-stagger` 
   - Mark the text you want to animate with `aa-hover-text`.
+  - Requires a wrapper element around the `aa-hover-text` that has position set to `relative` or `absolute` and overflow set to `hidden`.
+  - Requires `aa-split` attribute to be set (e.g. `aa-split="words"`), optionally add `aa-stagger` 
   - Available animations:
     - Text Sliding: `text-slide-up`, `text-slide-down`, `text-slide-left`, `text-slide-right`
     - Text Fading: `text-fade-up`, `text-fade-down`, `text-fade-left`, `text-fade-right`
       - For fading effects, the element with `aa-hover` should include padding to make room for the fade effect.
+    - add `-reverse` to the animation type to play the animation in reverse when hovering out, e.g. `aa-hover="text-slide-up-reverse"`.
 
 2. **Background Circle Animation** (`aa-hover="bg-circle"`)
   - Expands a circle from the hover point.
@@ -467,9 +469,9 @@ The AlrdyAnimate library includes powerful hover animations using GSAP. These an
   - Optionally, you can add a tag with `aa-hover-icon` to animate an icon on hover (usually set on the svg element inside the embed; the embed div itself needs to be set to `position: relative` and `overflow: hidden`).
     - Optionally, you can define direction of the icon animation with `aa-hover-direction` on the aa-hover element (possible values: `right`, `up-right`, `down-right`).
 
-For all hover animations, you can optionally change the color of hovered text by adding `aa-hover-text-color` or the background color by adding `aa-hover-bg-color` to any element inside the aa-hover element. The text elements will be positioned relative with z-index set to 1. Alternatively, using CSS to transition on hover also works. To set content above the background, add `aa-hover-content` to the respective element (or position it via CSS).
+For all hover animations, you can optionally add `aa-hover-text-color` or `aa-hover-bg-color` to any element inside the aa-hover element to animate the text or background color. The text elements will be positioned relative with z-index set to 1.
 
-For background animations, the aa-hover element needs to have position set to `relative` or `absolute` and overflow set to `hidden`.
+To set content above the background, add `aa-hover-content` to the respective element (or position it via CSS).
 
 
 #### HTML Examples
