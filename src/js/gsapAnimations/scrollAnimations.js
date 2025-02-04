@@ -25,6 +25,9 @@ function initializeNav(element, type, ease, duration, distance, scrolled) {
     }
   };
 
+  // Initial check for scroll position
+  updateScrolledClass(window.scrollY);
+
   ScrollTrigger.create({
     start: "top top",
     end: "max",
