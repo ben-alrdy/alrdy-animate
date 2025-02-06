@@ -25,11 +25,6 @@ function initializeNav(element, type, ease, duration, distance, scrolled) {
     }
   };
 
-  // Initial check for scroll position
-  if (type.includes('change')) {
-    updateScrolledClass(window.scrollY);
-  }
-
   ScrollTrigger.create({
     start: "top top",
     end: "max",
@@ -64,6 +59,11 @@ function initializeNav(element, type, ease, duration, distance, scrolled) {
           }
           lastScrollTop = currentScrollTop;
         }
+      }
+    },
+    onRefresh: (self) => {
+      if (type.includes('change')) {
+        updateScrolledClass(self.scroll());
       }
     },
     onLeaveBack: type.includes('hide') ? showNavAtTop : undefined,
