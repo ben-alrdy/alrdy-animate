@@ -344,12 +344,13 @@ Enables scroll-driven animations and effects.
 
 #### Sticky Navigation
 - Your nav element needs to have `position: fixed` set so it is sticky.
-- Use `aa-nav="change"` to add the class `is-scrolled` to the nav element when scrolling down and remove it when scrolling up. Combine with `aa-scroll` and pass a pixel value to set the scroll distance. Example: `aa-scroll="100"`. Defaults to `100px`.
+- Use `aa-nav="change"` to add the class `is-scrolled` to the nav element when scrolling down and remove it when scrolling up. 
 - Use `aa-nav="hide"` to create a sticky navigation bar that slides out of view when scrolling down and slides back in when scrolling up
   - Use `aa-ease` to set the easing. Defaults to `back.inOut`
   - Use `aa-duration` to set the duration. Defaults to `0.4s`
   - Use `aa-distance` to set the distance multiplier that the nav element will move. Example: `aa-distance="1.5"`.
 - Use `aa-nav="hide-change"` to combine both effects
+- Add an integer to `aa-nav` to define after how many pixels the the effect should be triggered. Example: `aa-nav="hide-change-50"`. Defaults to `100px`.
 
 #### Background Color Transitions
 - Use `aa-animate="background"` on the element you want to animate; optionally set `aa-viewport` and `aa-duration`

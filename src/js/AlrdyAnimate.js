@@ -150,7 +150,12 @@ async function init(options = {}) {
             const navEase = navElement.getAttribute('aa-ease');
             const navDuration = navElement.getAttribute('aa-duration');
             const navDistance = navElement.getAttribute('aa-distance');
-            const navScrolled = navElement.hasAttribute('aa-scroll') ? parseInt(navElement.getAttribute('aa-scroll')) : 100;
+            
+            // Extract scroll value from navType if present, default to 100
+            const navScrolled = navType.includes('-') ? 
+              parseInt(navType.split('-').pop()) || 100 : 
+              100;
+              
             loadedModules.animations.nav?.(navElement, navType, navEase ?? 'back.inOut', navDuration ?? 0.4, navDistance ?? 1, navScrolled);
           }
 
