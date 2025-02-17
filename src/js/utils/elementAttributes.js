@@ -8,7 +8,7 @@ export function getElementSettings(element, settings) {
     animationType,
     ease: element.hasAttribute('aa-ease') ? element.getAttribute('aa-ease') : settings.ease,
     splitType: element.getAttribute('aa-split'),
-    scroll: element.getAttribute('aa-scroll'),
+    scroll: element.getAttribute('aa-scrub'),
     distance: element.hasAttribute('aa-distance') ? parseFloat(element.getAttribute('aa-distance')) : settings.distance,
 
     // Animation timing

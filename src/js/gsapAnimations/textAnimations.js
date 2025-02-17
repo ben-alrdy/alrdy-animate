@@ -17,7 +17,7 @@ export function createTextAnimations(gsap) {
       delay,
       onStart: () => {
         // Only set visibility in onStart for non-scrubbed animations
-        if (!element.hasAttribute('aa-scroll')) {
+        if (!element.hasAttribute('aa-scrub')) {
           gsap.set(element, { visibility: 'visible' });
         }
       }
@@ -144,7 +144,7 @@ export function createTextAnimations(gsap) {
         delay,
         onStart: () => {
           // Only set autoAlpha in onStart for non-scrubbed animations
-          if (!element.hasAttribute('aa-scroll')) {
+          if (!element.hasAttribute('aa-scrub')) {
             gsap.set(element, { visibility: 'visible' });
           }
         }

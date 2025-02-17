@@ -238,7 +238,7 @@ AlrdyAnimate supports several GSAP-powered features that can be enabled by inclu
 - Pair with `aa-split` to define how to split the text for animation:
   - There are 4 split types: `lines`, `words`, `chars` or `lines&words` (i.e. both lines and words will be animated simultaneously). 
   - Optionally, you can add `clip` to wrap each line in a clip wrapper and prevent overflow, resulting in a clipping effect during the animation. Example: `aa-split="words.clip"`.
-- Use `aa-scroll` to make the animation scroll-driven. There are two options: `aa-scroll="snap"` and `aa-scroll="smooth"`.
+- Use `aa-scrub` to make the animation scroll-driven. There are two options: `aa-scrub="snap"` and `aa-scrub="smooth"`.
 - Use `aa-stagger` to set the stagger effect for split text animations, in seconds. Example: `aa-stagger="0.05"`.
 
 #### Available Text Animations
@@ -379,7 +379,7 @@ Enables scroll-driven animations and effects.
 - The number (40) represents the movement distance in pixels
 - Add direction with `aa-animate="parallax-down-40"` (moves down while scrolling) or `parallax-up-40` (default, moves up)
 - Add `half` to end the parallax when the element reaches the middle of the page: `parallax-down-half-40`
-- Control smoothness with `aa-scroll`:
+- Control smoothness with `aa-scrub`:
   - `"smoother"`: Very lazy, smooth following (scrub: 5)
   - `"smooth"`: Regular smooth following (scrub: 2)
   - `"snap"`: Snaps to 20% increments
@@ -390,7 +390,7 @@ Enables scroll-driven animations and effects.
   <img 
     src="image.jpg" 
     aa-animate="parallax-down-40" 
-    aa-scroll="smooth"
+    aa-scrub="smooth"
   >
 </div>
 ```
@@ -398,7 +398,7 @@ Enables scroll-driven animations and effects.
 #### Reveal & Appear Animations
 - Use `aa-animate="reveal-..."` for reveal animations that use a clip path to mask the content
 - Use `aa-animate="appear-..."` for appear animations that fade/slide in content
-- Optionally, add `aa-scroll` with the values `smooth`, `snap`, `smoother` or `true` to make the animation scroll-driven
+- Optionally, add `aa-scrub` with the values `smooth`, `snap`, `smoother` or `true` to make the animation scroll-driven
 
 Available animations:
 1. Reveal Animations (by animating a clip path)
@@ -423,7 +423,7 @@ Example usage:
 </div>
 
 <!-- Appear animation -->
-<div aa-animate="appear" aa-scroll="smooth">
+<div aa-animate="appear" aa-scrub="smooth">
   Content fades while scrolling
 </div>
 ```
@@ -433,7 +433,7 @@ Animate a number from 0 to the value of the element (it needs to be a number and
 
 - Use `aa-animate="counter"` to animate a number from 0 to the target number
 - Use `aa-animate="counter-10"` to animate a number from 10 to the target number
-- Optionally, add `aa-scroll` to make the animation scroll-driven
+- Optionally, add `aa-scrub` to make the animation scroll-driven
 
 ### Hover Animations
 
