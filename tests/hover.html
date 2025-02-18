@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hover Animations - AlrdyAnimate Tests</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="../dist/AlrdyAnimate.css">
+</head>
+<body>
+    <header>
+        <nav aa-nav="change-200" aa-distance="2">
+            <div class="logo">
+                <img src="https://placehold.co/100x50" alt="Logo">
+            </div>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="css-animations.html">CSS Animations</a></li>
+                <li><a href="text.html">Text Animations</a></li>
+                <li><a href="sliders.html">Sliders</a></li>
+                <li><a href="hover.html" class="active">Hover Effects</a></li>
+                <li><a href="scroll.html">Scroll Effects</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <div class="container">
+            <h1>Hover Animations</h1>
+
+            <!-- Text Hover Animations -->
+            <section class="animation-section">
+                <h2>Text Hover Animations</h2>
+                <div class="hover-grid">
+                    <!-- Text Slide -->
+                    <a href="#" class="hover-button" aa-hover="text-slide-up" aa-split="words">
+                        <div style="position: relative; overflow: hidden;">
+                            <div aa-hover-text>Slide Up Text</div>
+                        </div>
+                    </a>
+                    
+                    <a href="#" class="hover-button" aa-hover="text-slide-down" aa-split="words">
+                        <div style="position: relative; overflow: hidden;">
+                            <div aa-hover-text>Slide Down Text</div>
+                        </div>
+                    </a>
+
+                    <!-- Text Fade -->
+                    <a href="#" class="hover-button" aa-hover="text-fade-up" aa-split="chars" aa-stagger="0.02">
+                        <div style="position: relative; overflow: hidden;">
+                            <div aa-hover-text>Fade Up Chars</div>
+                        </div>
+                    </a>
+
+                    <a href="#" class="hover-button" style="padding: 0;" aa-hover="text-fade-down-reverse" aa-split="words" aa-stagger="0.1">
+                        <div style="position: relative; overflow: hidden;">
+                            <div aa-hover-text style="padding: 1rem;">Fade Down Reverse</div>
+                        </div>
+                    </a>
+                </div>
+            </section>
+
+            <!-- Background Circle Animation -->
+            <section class="animation-section">
+                <h2>Background Circle Animation</h2>
+                <div class="hover-grid">
+                    <a href="#" class="hover-button" aa-hover="bg-circle" aa-hover-direction="all">
+                        <div aa-hover-text>Circle All</div>
+                        <svg class="bg-filler" viewBox="0 0 1 1" preserveAspectRatio="xMidYMid slice" aa-hover-bg>
+                            <circle cx="0.5" cy="0.5" r="0" fill="currentColor"></circle>
+                        </svg>
+                    </a>
+
+                    <a href="#" class="hover-button" aa-hover="bg-circle" aa-hover-direction="top">
+                        <div aa-hover-text>Circle Top</div>
+                        <svg class="bg-filler" viewBox="0 0 1 1" preserveAspectRatio="xMidYMid slice" aa-hover-bg>
+                            <circle cx="0.5" cy="0.5" r="0" fill="currentColor"></circle>
+                        </svg>
+                    </a>
+                </div>
+            </section>
+
+            <!-- Background Curve Animation -->
+            <section class="animation-section">
+                <h2>Background Curve Animation</h2>
+                <div class="hover-grid">
+                    <a href="#" class="hover-button" aa-hover="bg-curve" aa-hover-direction="vertical">
+                        <div aa-hover-text>Curve Vertical</div>
+                        <svg class="bg-filler" viewBox="0 0 100 100" preserveAspectRatio="none" aa-hover-bg>
+                            <path d="M 0 100 V 0 Q 250 0 500 0 V 0 H 0 z" fill="currentColor"></path>
+                        </svg>
+                    </a>
+
+                    <a href="#" class="hover-button" aa-hover="bg-curve" aa-hover-direction="horizontal">
+                        <div aa-hover-text>Curve Horizontal</div>
+                        <svg class="bg-filler" viewBox="0 0 100 100" preserveAspectRatio="none" aa-hover-bg>
+                            <path d="M 0 100 V 0 Q 250 0 500 0 V 0 H 0 z" fill="currentColor"></path>
+                        </svg>
+                    </a>
+                </div>
+            </section>
+
+            <!-- Background Expand Animation -->
+            <section class="animation-section">
+                <h2>Background Expand Animation</h2>
+                <div class="hover-grid">
+                    <a href="#" class="hover-button" aa-hover="bg-expand">
+                        <div aa-hover-text>Basic Expand</div>
+                        <div class="bg-expand" aa-hover-bg></div>
+                    </a>
+
+                    <a href="#" class="hover-button" aa-hover="bg-expand-reverse">
+                        <div aa-hover-text>Expand Reverse</div>
+                        <div class="bg-expand" aa-hover-bg></div>
+                    </a>
+
+                    <div class="hover-button" aa-hover="bg-expand" aa-hover-direction="right">
+                        <div class="icon-embed">
+                            <div aa-hover-text>With Icon</div>
+                            <svg aa-hover-icon width="24" height="24" viewBox="0 0 24 24">
+                                <path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </div>
+                        <div class="bg-expand" aa-hover-bg></div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <script src="../dist/AlrdyAnimate.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html> 

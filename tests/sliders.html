@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Slider Animations - AlrdyAnimate Tests</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="../dist/AlrdyAnimate.css">
+</head>
+<body>
+    <header>
+        <nav aa-nav="change-200" aa-distance="2">
+            <div class="logo">
+                <img src="https://placehold.co/100x50" alt="Logo">
+            </div>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="css-animations.html">CSS Animations</a></li>
+                <li><a href="text.html">Text Animations</a></li>
+                <li><a href="sliders.html" class="active">Sliders</a></li>
+                <li><a href="hover.html">Hover Effects</a></li>
+                <li><a href="scroll.html">Scroll Effects</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <div class="container">
+            <h1 aa-animate="turn-3d-soft-3em">Slider Animations</h1>
+
+            <!-- Basic Slider -->
+            <section class="animation-section">
+                <h2 aa-animate="fade-up">Basic Slider with Navigation</h2>
+                <div aa-animate="slider">
+                    <div class="slider-container">
+                        <div class="slider-item" aa-slider-item>
+                            <div class="slider-content">Slide 1</div>
+                        </div>
+                        <div class="slider-item" aa-slider-item>
+                            <div class="slider-content">Slide 2</div>
+                        </div>
+                        <div class="slider-item" aa-slider-item>
+                            <div class="slider-content">Slide 3</div>
+                        </div>
+                        <div class="slider-item" aa-slider-item>
+                            <div class="slider-content">Slide 4</div>
+                        </div>
+                    </div>
+                    
+                    <div class="slider-controls">
+                        <button aa-slider-prev>Previous</button>
+                        <div class="slider-counter">
+                            <span aa-slider-current>01</span>
+                            <span>/</span>
+                            <span aa-slider-total>04</span>
+                        </div>
+                        <button aa-slider-next>Next</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Draggable Slider -->
+            <section class="animation-section">
+                <h2 aa-animate="fade-up">Draggable Slider</h2>
+                <div aa-animate="slider-draggable">
+                    <div class="slider-container">
+                        <div class="slider-item" aa-slider-item>
+                            <div class="slider-content">Drag Me 1</div>
+                        </div>
+                        <div class="slider-item" aa-slider-item>
+                            <div class="slider-content">Drag Me 2</div>
+                        </div>
+                        <div class="slider-item" aa-slider-item>
+                            <div class="slider-content">Drag Me 3</div>
+                        </div>
+                        <div class="slider-item" aa-slider-item>
+                            <div class="slider-content">Drag Me 4</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Infinite Loop Slider -->
+            <section class="animation-section">
+                <h2 aa-animate="fade-up">Infinite Loop Slider</h2>
+                <div aa-animate="slider-loop" aa-duration="20">
+                    <div class="slider-container">
+                        <div class="slider-item" aa-slider-item>
+                            <div class="slider-content">Looping 1</div>
+                        </div>
+                        <div class="slider-item" aa-slider-item>
+                            <div class="slider-content">Looping 2</div>
+                        </div>
+                        <div class="slider-item" aa-slider-item>
+                            <div class="slider-content">Looping 3</div>
+                        </div>
+                        <div class="slider-item" aa-slider-item>
+                            <div class="slider-content">Looping 4</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Snap Slider -->
+            <section class="animation-section">
+                <h2 aa-animate="fade-up">Snap Slider</h2>
+                <div aa-animate="slider-snap" aa-duration="0.5" aa-delay="2">
+                    <div class="slider-container">
+                        <div class="slider-item" aa-slider-item>
+                            <div class="slider-content">Snap 1</div>
+                        </div>
+                        <div class="slider-item" aa-slider-item>
+                            <div class="slider-content">Snap 2</div>
+                        </div>
+                        <div class="slider-item" aa-slider-item>
+                            <div class="slider-content">Snap 3</div>
+                        </div>
+                        <div class="slider-item" aa-slider-item>
+                            <div class="slider-content">Snap 4</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Centered Slider -->
+            <section class="animation-section">
+                <h2 aa-animate="fade-up">Centered Slider</h2>
+                <div aa-animate="slider-center-draggable">
+                    <div class="slider-container">
+                        <div class="slider-item" aa-slider-item>
+                            <div class="slider-content">Center 1</div>
+                        </div>
+                        <div class="slider-item" aa-slider-item>
+                            <div class="slider-content">Center 2</div>
+                        </div>
+                        <div class="slider-item" aa-slider-item>
+                            <div class="slider-content">Center 3</div>
+                        </div>
+                        <div class="slider-item" aa-slider-item>
+                            <div class="slider-content">Center 4</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <script src="../dist/AlrdyAnimate.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html> 

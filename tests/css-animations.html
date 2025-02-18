@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSS Animations - AlrdyAnimate Tests</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="../dist/AlrdyAnimate.css">
+</head>
+<body>
+    <header>
+        <nav aa-nav="change-200" aa-distance="2">
+            <div class="logo">
+                <img src="https://placehold.co/100x50" alt="Logo">
+            </div>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="css-animations.html" class="active">CSS Animations</a></li>
+                <li><a href="text.html">Text Animations</a></li>
+                <li><a href="sliders.html">Sliders</a></li>
+                <li><a href="hover.html">Hover Effects</a></li>
+                <li><a href="scroll.html">Scroll Effects</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <div class="container">
+            <h1 aa-animate="turn-3d-soft-3em">CSS Animations</h1>
+
+            <!-- Fade Animations -->
+            <section class="animation-section">
+                <h2 aa-animate="fade-up">Fade Animations</h2>
+                <div class="grid">
+                    <div class="demo-box" aa-animate="fade">
+                        <div class="content">fade</div>
+                    </div>
+                    <div class="demo-box" aa-animate="fade-up">
+                        <div class="content">fade-up</div>
+                    </div>
+                    <div class="demo-box" aa-animate="fade-down">
+                        <div class="content">fade-down</div>
+                    </div>
+                    <div class="demo-box" aa-animate="fade-left">
+                        <div class="content">fade-left</div>
+                    </div>
+                    <div class="demo-box" aa-animate="fade-right">
+                        <div class="content">fade-right</div>
+                    </div>
+                    <div class="demo-box" aa-animate="fade-up-right">
+                        <div class="content">fade-up-right</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Float Animations -->
+            <section class="animation-section">
+                <h2 aa-animate="fade-up">Float Animations</h2>
+                <div class="grid">
+                    <div class="demo-box" aa-animate="float-up">
+                        <div class="content">float-up</div>
+                    </div>
+                    <div class="demo-box" aa-animate="float-down">
+                        <div class="content">float-down</div>
+                    </div>
+                    <div class="demo-box" aa-animate="float-left">
+                        <div class="content">float-left</div>
+                    </div>
+                    <div class="demo-box" aa-animate="float-right">
+                        <div class="content">float-right</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Zoom Animations -->
+            <section class="animation-section">
+                <h2 aa-animate="fade-up">Zoom Animations</h2>
+                <div class="grid">
+                    <div class="demo-box" aa-animate="zoom-in">
+                        <div class="content">zoom-in</div>
+                    </div>
+                    <div class="demo-box" aa-animate="zoom-out">
+                        <div class="content">zoom-out</div>
+                    </div>
+                    <div class="demo-box" aa-animate="zoom-in-up">
+                        <div class="content">zoom-in-up</div>
+                    </div>
+                    <div class="demo-box" aa-animate="zoom-in-down">
+                        <div class="content">zoom-in-down</div>
+                    </div>
+                    <div class="demo-box" aa-animate="zoom-out-up">
+                        <div class="content">zoom-out-up</div>
+                    </div>
+                    <div class="demo-box" aa-animate="zoom-out-down">
+                        <div class="content">zoom-out-down</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide Animations -->
+            <section class="animation-section">
+                <h2 aa-animate="fade-up">Slide & Blur Animations</h2>
+                <div class="grid">
+                    <div class="demo-box" aa-animate="slide-up">
+                        <div class="content">slide-up</div>
+                    </div>
+                    <div class="demo-box" aa-animate="slide-down">
+                        <div class="content">slide-down</div>
+                    </div>
+                    <div class="demo-box" aa-animate="slide-left">
+                        <div class="content">slide-left</div>
+                    </div>
+                    <div class="demo-box" aa-animate="slide-right">
+                        <div class="content">slide-right</div>
+                    </div>
+                    <div class="demo-box" aa-animate="slide-in-blurred-top">
+                        <div class="content">slide-in-blurred-top</div>
+                    </div>
+                    <div class="demo-box" aa-animate="slide-in-blurred-bottom">
+                        <div class="content">slide-in-blurred-bottom</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Rotate Animations -->
+            <section class="animation-section">
+                <h2 aa-animate="fade-up">Rotate Animations</h2>
+                <div class="grid">
+                    <div class="demo-box" aa-animate="rotate-br-cw-45">
+                        <div class="content">rotate-br-cw-45</div>
+                    </div>
+                    <div class="demo-box" aa-animate="rotate-br-ccw-45">
+                        <div class="content">rotate-br-ccw-45</div>
+                    </div>
+                    <div class="demo-box" aa-animate="rotate-bl-cw-45">
+                        <div class="content">rotate-bl-cw-45</div>
+                    </div>
+                    <div class="demo-box" aa-animate="rotate-bl-ccw-45">
+                        <div class="content">rotate-bl-ccw-45</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 3D Animations -->
+            <section class="animation-section">
+                <h2 aa-animate="fade-up">3D Animations</h2>
+                <div class="grid">
+                    <div class="demo-box" aa-animate="flip-left">
+                        <div class="content">flip-left</div>
+                    </div>
+                    <div class="demo-box" aa-animate="flip-right">
+                        <div class="content">flip-right</div>
+                    </div>
+                    <div class="demo-box" aa-animate="flip-up">
+                        <div class="content">flip-up</div>
+                    </div>
+                    <div class="demo-box" aa-animate="flip-down">
+                        <div class="content">flip-down</div>
+                    </div>
+                    <div class="demo-box" aa-animate="turn-3d-soft">
+                        <div class="content">turn-3d-soft</div>
+                    </div>
+                    <div class="demo-box" aa-animate="turn-3d-elliptic">
+                        <div class="content">turn-3d-elliptic</div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <script src="../dist/AlrdyAnimate.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html> 

@@ -1,0 +1,352 @@
+/* Global box-sizing reset */
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+:root {
+    --primary-color: #625df5;
+    --text-color: #2b1c50;
+    --bg-color: #f1f0ff;
+    --bg-color-light: #f7f7ff;
+    --bg-color-dark: #2b1c50;
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    margin: 0;
+    padding: 0;
+}
+
+/* Container */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+/* Navigation */
+header {
+    width: 100%;
+}
+
+nav {
+    display: flex;
+    position: fixed;
+    z-index: 1000;
+    top: 0;
+    left: 0;
+    width: 100%;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+    background-color: white;
+    transition: all 0.2s ease-in-out;
+}
+
+nav.is-scrolled{
+    background-color: var(--bg-color-light);
+    width: 95%;
+    left: 2.5%;
+    top: 1rem;
+    border-radius: 1rem;
+    padding: 0.5rem 2rem;
+}
+
+.nav-links {
+    display: flex;
+    list-style: none;
+    gap: 1.5rem;
+    margin: 0;
+    padding: 0;
+}
+
+.nav-links a {
+    text-decoration: none;
+    color: var(--text-color);
+}
+
+
+
+/* Grid Layout */
+.grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin: 2rem 0;
+}
+
+.box {
+    border: 1px solid #ccc;
+    padding: 1rem;
+    text-align: center;
+    min-height: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: white;
+}
+
+/* Text Container */
+.text-container {
+    margin: 4rem 0;
+}
+
+.text-container h3 {
+    font-size: 2rem;
+    line-height: 1.4;
+    margin: 2rem 0;
+}
+
+/* Hover Animations */
+.hover-container {
+    margin: 2rem 0;
+}
+
+.button {
+    position: relative;
+    border-radius: 0.5rem;
+    padding: 1rem 2rem;
+    background-color: #ffffff;
+    display: inline-block;
+    overflow: hidden;
+    color: #000;
+    text-decoration: none;
+    border: 1px solid rgba(0,0,0,0.1);
+    transition: color 0.3s ease-in-out;
+}
+
+.button:hover {
+    color: white;
+}
+
+/* Section Spacing */
+section {
+    padding: 4rem 0;
+}
+
+h1 {
+    font-size: 4rem;
+    margin-bottom: 2rem;
+    margin-top: 10rem;
+}
+
+h2 {
+    font-size: 2rem;
+    margin: 3rem 0 1rem;
+}
+
+/* Animation Demo Styles */
+.animation-section {
+    margin: 4rem 0;
+    padding: 2rem 0;
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+}
+
+.animation-section:last-child {
+    border-bottom: none;
+}
+
+.demo-box {
+    background: white;
+    border-radius: 8px;
+    padding: 2rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 120px;
+    text-align: center;
+}
+
+.demo-box .content {
+    font-family: monospace;
+    font-size: 0.9rem;
+    color: var(--text-color);
+}
+
+/* Active Navigation Link */
+.nav-links .active {
+    color: var(--primary-color);
+    font-weight: bold;
+}
+
+/* Slider Styles */
+.slider-container {
+    display: flex;
+    gap: 1rem;
+    padding: 1rem 0;
+}
+
+.slider-item {
+    flex-shrink: 0;
+    width: 300px;
+}
+
+.slider-content {
+    background: white;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    text-align: center;
+    height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+}
+
+.slider-controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+.slider-counter {
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+button[aa-slider-prev],
+button[aa-slider-next] {
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
+}
+
+button[aa-slider-prev]:hover,
+button[aa-slider-next]:hover {
+    opacity: 0.9;
+}
+
+/* Hover Styles */
+.hover-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+    margin: 2rem 0;
+}
+
+.hover-button {
+    position: relative;
+    border-radius: 0.5rem;
+    padding: 1rem 2rem;
+    background-color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    color: var(--text-color);
+    text-decoration: none;
+    border: 1px solid rgba(0,0,0,0.1);
+    min-height: 60px;
+}
+
+.bg-filler {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    color: var(--primary-color);
+}
+
+.bg-expand {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: var(--primary-color);
+    transform-origin: left;
+    transform: scaleX(0);
+    z-index: 0;
+}
+
+[aa-hover-text] {
+    position: relative;
+    z-index: 1;
+}
+
+.icon-embed {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    overflow: hidden;
+}
+
+[aa-hover-icon] {
+    position: relative;
+    z-index: 1;
+}
+
+/* Parallax Styles */
+.parallax-section {
+    position: relative;
+    height: 80vh;
+    overflow: hidden;
+}
+
+.parallax-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+}
+
+.parallax-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Scroll Demo Styles */
+.scroll-demo {
+    height: 50vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 2rem 0;
+}
+
+/* Reveal Styles */
+.reveal-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    margin: 2rem 0;
+}
+
+.reveal-item {
+    position: relative;
+    overflow: hidden;
+    aspect-ratio: 3/2;
+}
+
+.reveal-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Background Change Styles */
+.bg-change-demo > div {
+    min-height: 50vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    padding: 2rem;
+    text-align: center;
+}

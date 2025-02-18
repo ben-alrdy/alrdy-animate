@@ -455,7 +455,7 @@ The AlrdyAnimate library includes powerful hover animations using GSAP. These an
   - Available animations:
     - Text Sliding: `text-slide-up`, `text-slide-down`, `text-slide-left`, `text-slide-right`
     - Text Fading: `text-fade-up`, `text-fade-down`, `text-fade-left`, `text-fade-right`
-      - For fading effects, the element with `aa-hover` should include padding to make room for the fade effect.
+      - For fading effects, the element with `aa-hover-text` should include padding to make room for the fade effect.
     - add `-reverse` to the animation type to play the animation in reverse when hovering out, e.g. `aa-hover="text-slide-up-reverse"`.
 
 2. **Background Circle Animation** (`aa-hover="bg-circle"`)

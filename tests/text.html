@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text Animations - AlrdyAnimate Tests</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="../dist/AlrdyAnimate.css">
+</head>
+<body>
+    <header>
+        <nav aa-nav="change-200" aa-distance="2">
+            <div class="logo">
+                <img src="https://placehold.co/100x50" alt="Logo">
+            </div>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="css-animations.html">CSS Animations</a></li>
+                <li><a href="text.html" class="active">Text Animations</a></li>
+                <li><a href="sliders.html">Sliders</a></li>
+                <li><a href="hover.html">Hover Effects</a></li>
+                <li><a href="scroll.html">Scroll Effects</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <div class="container">
+            <h1 aa-animate="turn-3d-soft-3em">Text Animations</h1>
+
+            <!-- Basic Text Slides -->
+            <section class="animation-section">
+                <h2 aa-animate="fade-up">Basic Text Slides</h2>
+                
+                <div class="text-container">
+                    <h3 aa-animate="text-slide-up" aa-split="words" aa-stagger="0.1">
+                        This text slides up word by word
+                    </h3>
+                    <h3 aa-animate="text-slide-down" aa-split="words" aa-stagger="0.1">
+                        This text slides down word by word
+                    </h3>
+                </div>
+            </section>
+
+            <!-- Text Tilt Animations -->
+            <section class="animation-section">
+                <h2 aa-animate="fade-up">Text Tilt Animations</h2>
+                
+                <div class="text-container">
+                    <h3 aa-animate="text-tilt-up" aa-split="words" aa-stagger="0.1">
+                        This text tilts up word by word
+                    </h3>
+                    <h3 aa-animate="text-tilt-down" aa-split="words" aa-stagger="0.1">
+                        This text tilts down word by word
+                    </h3>
+                </div>
+            </section>
+
+            <!-- Text Rotate Animations -->
+            <section class="animation-section">
+                <h2 aa-animate="fade-up">Text Rotate Animations</h2>
+                
+                <div class="text-container">
+                    <h3 aa-animate="text-rotate-soft" aa-split="lines.clip" aa-stagger="0.3">
+                        This text rotates in
+                        with a 3D perspective
+                        line by line
+                    </h3>
+                </div>
+            </section>
+
+            <!-- Text Fade Animations -->
+            <section class="animation-section">
+                <h2 aa-animate="fade-up">Text Fade Animations</h2>
+                
+                <div class="text-container">
+                    <h3 aa-animate="text-fade-soft" aa-split="chars" aa-stagger="0.02">
+                        This text fades in character by character
+                    </h3>
+                    <h3 aa-animate="text-fade" aa-split="words" aa-stagger="0.1">
+                        This text fades in word by word
+                    </h3>
+                </div>
+            </section>
+
+            <!-- Split Types Demo -->
+            <section class="animation-section">
+                <h2 aa-animate="fade-up">Split Types Demo</h2>
+                
+                <div class="text-container">
+                    <h3 aa-animate="text-slide-up" aa-split="lines" aa-stagger="0.2">
+                        This text is split by lines
+                        Each line animates separately
+                        With a stagger effect
+                    </h3>
+                    
+                    <h3 aa-animate="text-slide-up" aa-split="words" aa-stagger="0.1">
+                        This text is split by words for more granular control
+                    </h3>
+                    
+                    <h3 aa-animate="text-slide-up" aa-split="chars" aa-stagger="0.02">
+                        Character by character animation
+                    </h3>
+                    
+                    <h3 aa-animate="text-slide-up" aa-split="lines&words" aa-stagger="0.1">
+                        This text is split by both
+                        lines and words for
+                        complex animations
+                    </h3>
+                </div>
+            </section>
+
+            <!-- Scroll-Driven Text -->
+            <section class="animation-section">
+                <h2 aa-animate="fade-up">Scroll-Driven Text</h2>
+                
+                <div class="text-container">
+                    <h3 aa-animate="text-slide-up" aa-split="words" aa-scrub="smooth">
+                        This text animates smoothly as you scroll
+                    </h3>
+                    
+                    <h3 aa-animate="text-slide-up" aa-split="words" aa-scrub="snap">
+                        This text snaps to positions as you scroll
+                    </h3>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <script src="../dist/AlrdyAnimate.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html> 

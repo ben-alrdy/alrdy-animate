@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scroll Effects - AlrdyAnimate Tests</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="../dist/AlrdyAnimate.css">
+</head>
+<body>
+    <header>
+        <nav aa-nav="change-200" aa-distance="2">
+            <div class="logo">
+                <img src="https://placehold.co/100x50" alt="Logo">
+            </div>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="css-animations.html">CSS Animations</a></li>
+                <li><a href="text.html">Text Animations</a></li>
+                <li><a href="sliders.html">Sliders</a></li>
+                <li><a href="hover.html">Hover Effects</a></li>
+                <li><a href="scroll.html" class="active">Scroll Effects</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <!-- Parallax Section -->
+        <section class="parallax-section">
+            <div class="parallax-container">
+                <img 
+                    src="https://picsum.photos/1600/900" 
+                    aa-animate="parallax-40" 
+                    aa-scrub="smooth"
+                    alt="Parallax Image"
+                >
+            </div>
+            <div class="container">
+                <h1 aa-animate="turn-3d-soft-3em">Scroll Effects</h1>
+            </div>
+        </section>
+
+        <!-- Scroll-Driven Animations -->
+        <section class="scroll-section">
+            <div class="container">
+                <h2 aa-animate="fade-up">Scroll-Driven Animations</h2>
+                
+                <!-- Basic Scroll Animation -->
+                <div class="scroll-demo">
+                    <div class="demo-box" aa-animate="fade-up" aa-scrub="smooth">
+                        <div class="content">Smooth Scroll Animation</div>
+                    </div>
+                </div>
+
+                <!-- Snap Animation -->
+                <div class="scroll-demo">
+                    <div class="demo-box" aa-animate="fade-up" aa-scrub="snap">
+                        <div class="content">Snap Animation (20% increments)</div>
+                    </div>
+                </div>
+
+                <!-- Super Smooth Animation -->
+                <div class="scroll-demo">
+                    <div class="demo-box" aa-animate="fade-up" aa-scrub="smoother">
+                        <div class="content">Super Smooth Animation</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Reveal Animations -->
+        <section class="reveal-section">
+            <div class="container">
+                <h2 aa-animate="fade-up">Reveal Animations</h2>
+                
+                <div class="reveal-grid">
+                    <!-- Image Reveals -->
+                    <div class="reveal-item">
+                        <img 
+                            src="https://picsum.photos/600/400" 
+                            aa-animate="reveal-up" 
+                            aa-duration="1.2" 
+                            aa-ease="power2.inOut"
+                            alt="Reveal Up"
+                        >
+                    </div>
+                    
+                    <div class="reveal-item">
+                        <img 
+                            src="https://picsum.photos/600/400" 
+                            aa-animate="reveal-down" 
+                            aa-duration="1.2" 
+                            aa-ease="power2.inOut"
+                            alt="Reveal Down"
+                        >
+                    </div>
+
+                    <div class="reveal-item">
+                        <img 
+                            src="https://picsum.photos/600/400" 
+                            aa-animate="reveal-center" 
+                            aa-duration="1.2" 
+                            aa-ease="power2.inOut"
+                            alt="Reveal Center"
+                        >
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Background Change Section -->
+        <section class="bg-change-section">
+            <div class="container">
+                <h2 aa-animate="fade-up">Background Color Changes</h2>
+                
+                <div class="bg-change-demo">
+                    <div aa-parent-bg="#f1f0ff" aa-parent-text="#2b1c50">
+                        Light Background Section
+                    </div>
+                    
+                    <div aa-parent-bg="#2b1c50" aa-parent-text="#ffffff">
+                        Dark Background Section
+                    </div>
+                    
+                    <div 
+                        aa-parent-bg="#000000" 
+                        aa-parent-text="#ffffff"
+                        aa-child-bg="#ff0000"
+                        aa-child-text="#ffffff"
+                    >
+                        Custom Colors Section
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="../dist/AlrdyAnimate.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html> 

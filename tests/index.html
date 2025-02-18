@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AlrdyAnimate Tests</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="../dist/AlrdyAnimate.css">
+</head>
+<body>
+    <header>
+        <nav aa-nav="change-200" aa-distance="2">
+            <div class="logo">
+                <img src="https://placehold.co/100x50" alt="Logo">
+            </div>
+            <ul class="nav-links">
+                <li><a href="css-animations.html">CSS Animations</a></li>
+                <li><a href="text.html">Text Animations</a></li>
+                <li><a href="sliders.html">Sliders</a></li>
+                <li><a href="hover.html">Hover Effects</a></li>
+                <li><a href="scroll.html">Scroll Effects</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section class="test-section">
+            <div class="container">
+                <h1 aa-animate="turn-3d-soft-3em" aa-ease="expo.out" aa-delay="0" aa-duration="0.4">
+                    AlrdyAnimate Test Suite
+                </h1>
+                
+                <div class="grid">
+                    <a href="css-animations.html" class="box" aa-animate="fade-up">
+                        <h3>CSS Animations</h3>
+                        <p>Basic animations like fade, float, zoom, slide, etc.</p>
+                    </a>
+                    <a href="text.html" class="box" aa-animate="fade-up" aa-delay="0.1">
+                        <h3>Text Animations</h3>
+                        <p>Text splitting and animating with GSAP.</p>
+                    </a>
+                    <a href="sliders.html" class="box" aa-animate="fade-up" aa-delay="0.2">
+                        <h3>Sliders</h3>
+                        <p>Infinite scrolling, snapping, and static sliders.</p>
+                    </a>
+                    <a href="hover.html" class="box" aa-animate="fade-up" aa-delay="0.3">
+                        <h3>Hover Effects</h3>
+                        <p>Text, background, and SVG hover animations.</p>
+                    </a>
+                    <a href="scroll.html" class="box" aa-animate="fade-up" aa-delay="0.4">
+                        <h3>Scroll Effects</h3>
+                        <p>Parallax, sticky nav, background transitions.</p>
+                    </a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="../dist/AlrdyAnimate.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>
