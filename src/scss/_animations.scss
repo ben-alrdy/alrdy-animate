@@ -1,6 +1,6 @@
 /*
 **
-** UTILITY CLASSES FOR INSTANT ANIMATIONS
+** UTILITY CLASSES FOR aa-load ANIMATIONS
 **
 */
 
@@ -203,14 +203,14 @@ $rotation-positions: ('br': (100% 100%), 'bl': (0 100%));
 
 
 
-/*FADE ANIMATIONS - ONLY FOR INSTANT*/
+/*FADE ANIMATIONS - FOR aa-load*/
 [aa-load="fade"] { animation-name: fadeIn; }
 [aa-load="fade-up"] { animation-name: fadeInUp; }
 [aa-load="fade-down"] { animation-name: fadeInDown; }
 [aa-load="fade-left"] { animation-name: fadeInLeft; }
 [aa-load="fade-right"] { animation-name: fadeInRight; }
 
-/*ZOOM ANIMATIONS - ONLY FOR INSTANT*/
+/*ZOOM ANIMATIONS - FOR aa-load*/
 [aa-load="zoom-in"] { animation-name: zoomIn; }
 [aa-load="zoom-in-up"] { animation-name: zoomInUp; }
 [aa-load="zoom-in-down"] { animation-name: zoomInDown; }
@@ -223,7 +223,7 @@ $rotation-positions: ('br': (100% 100%), 'bl': (0 100%));
 [aa-load="zoom-out-left"] { animation-name: zoomOutLeft; }
 [aa-load="zoom-out-right"] { animation-name: zoomOutRight; }
 
-/*SLIDE ANIMATIONS - FOR INSTANT*/
+/*SLIDE ANIMATIONS - FOR aa-load*/
 [aa-load="slide-up"] { animation-name: slideUp; }
 [aa-load="slide-down"] { animation-name: slideDown; }
 [aa-load="slide-left"] { animation-name: slideLeft; }
