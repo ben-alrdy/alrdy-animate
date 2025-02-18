@@ -798,6 +798,79 @@
         </nav>
     </header>
 
+    <section class="instant-animations-demo">
+      <div class="container">
+        <h2 aa-load="float-up" aa-duration="2" aa-delay="0.5" aa-ease="expo.out">
+          This headline instantly slides up word by word
+        </h2>
+    
+        <div class="grid" style="margin-top: 4rem;">
+          <!-- Float animations -->
+          <div class="box"><span aa-load="float-up">Instant Float Up</span></div>
+          <div class="box"><span aa-load="float-down">Instant Float Down</span></div>
+          <div class="box"><span aa-load="float-left">Instant Float Left</span></div>
+          <div class="box"><span aa-load="float-right">Instant Float Right</span></div>
+
+           <!-- Fade animations -->
+           <div class="box"><span aa-load="fade">Instant Fade Up</span></div>
+           <div class="box"><span aa-load="fade-up">Instant Fade Up</span></div>
+           <div class="box"><span aa-load="fade-down">Instant Fade Down</span></div>
+           <div class="box"><span aa-load="fade-left">Instant Fade Left</span></div>
+           <div class="box"><span aa-load="fade-right">Instant Fade Right</span></div>
+    
+          <!-- Blurred slide animations -->
+          <div class="box"><span aa-load="slide-in-blurred-bottom">Instant Blurred Bottom</span></div>
+          <div class="box"><span aa-load="slide-in-blurred-top">Instant Blurred Top</span></div>
+          <div class="box"><span aa-load="slide-in-blurred-left">Instant Blurred Left</span></div>
+          <div class="box"><span aa-load="slide-in-blurred-right">Instant Blurred Right</span></div>
+    
+      
+          <!-- 3D Rotation animations -->
+          <div class="box" style="background-color: #a59ffe; font-size: 3rem;" aa-load="turn-3d-soft-3em" aa-duration="0.8" aa-delay="0.5"><span >Instant Rotate 3D 3em</span></div>
+
+        </div>
+
+        <div class="grid" style="margin-top: 4rem; perspective: 1000px;">
+       
+          <!-- 3D Swing animations -->
+          <div class="box" style="background-color: #a59ffe;" aa-load="swing-fwd" aa-duration="0.8" aa-ease="back.out" aa-delay="0.5"><span >Instant Swing Forward</span></div>
+          <div class="box" style="background-color: #a59ffe;" aa-load="swing-fwd" aa-duration="0.8" aa-ease="back.out" aa-delay="0.5"><span >Instant Swing Forward</span></div>
+          <div class="box" style="background-color: #a59ffe;" aa-load="swing-fwd" aa-duration="0.8" aa-ease="back.out" aa-delay="0.5"><span >Instant Swing Forward</span></div>
+
+          <div class="box" style="background-color: #4aebed;" aa-load="swing-bwd" aa-duration="0.8" aa-ease="back.out" aa-delay="1"><span >Instant Swing Backward</span></div>
+          <div class="box" style="background-color: #4aebed;" aa-load="swing-bwd" aa-duration="0.8" aa-ease="back.out" aa-delay="1"><span >Instant Swing Backward</span></div>
+          <div class="box" style="background-color: #4aebed;" aa-load="swing-bwd" aa-duration="0.8" aa-ease="back.out" aa-delay="1"><span >Instant Swing Backward</span></div>
+    
+          <!-- 3D Rotation animations -->
+          <div class="box" style="background-color: #a59ffe;" aa-load="turn-3d-soft" aa-duration="0.8" aa-delay="1.5"><span >Instant Rotate 3D Soft</span></div>
+          <div class="box" style="background-color: #a59ffe;" aa-load="turn-3d-elliptic" aa-duration="0.8" aa-delay="1.5"><span >Instant Rotate 3D Elliptic</span></div>
+          <div class="box" style="background-color: #a59ffe; font-size: 3rem;" aa-load="turn-3d-soft-3em" aa-duration="0.8" aa-delay="1.5"><span >Instant Rotate 3D 3em</span></div>
+
+
+        </div>
+
+        <div class="grid" style="grid-template-columns: repeat(4, 1fr); margin-top: 10rem;">
+          <div class="box" style="background-color: #5b50fa; height: 300px;" aa-duration="0.8" aa-distance="0.01" aa-ease="back.out" aa-load="rotate-br-cw-45"></div>
+          <div class="box" style="background-color: #5b50fa; height: 300px;" aa-duration="0.8" aa-ease="back.out" aa-load="rotate-br-cw-15"></div>
+          <div class="box" style="background-color: #5b50fa; height: 300px;" aa-duration="0.8" aa-ease="back.out" aa-load="rotate-bl-ccw-15"></div>
+          <div class="box" style="background-color: #5b50fa; height: 300px;" aa-duration="0.8" aa-distance="0.01" aa-ease="back.out" aa-load="rotate-bl-ccw-45"></div>
+        </div>
+    
+        <!-- Sequence example -->
+        <div aa-load="float-up" aa-duration="0.5" aa-ease="back.out" aa-stagger="0.2" style="margin-top: 4rem;">
+          <h3 aa-load="fade">First item</h3>
+          <p aa-load="fade">Second item</p>
+          <button aa-load="fade">Third item</button>
+        </div>
+    
+        <!-- Custom delay sequence -->
+        <div aa-load="fade" aa-duration="0.5" aa-stagger="0.2" aa-delay="1" style="margin-top: 4rem;">
+          <h3 aa-load="float-up">Slower sequence - First</h3>
+          <p aa-load="float-up">Slower sequence - Second</p>
+          <button aa-load="float-up">Slower sequence - Third</button>
+        </div>
+      </div>
+    </section>
     
     
     <section class="text-animations-demo" style="height: 50vh; overflow: hidden; position: relative;">
@@ -806,7 +879,7 @@
           This headline slides up word by word This headline slides up word by word
         </h2>
       </div>
-      <div aa-instant="slide-up" aa-duration="0.5" aa-ease="power2.inOut" aa-delay="0.5" style="height: 100%; background: blueviolet; z-index: 0; position: absolute; top: 0; left: 0; right: 0; bottom: 0;"></div>
+      <div aa-load="slide-up" aa-duration="0.5" aa-ease="power2.inOut" aa-delay="0.5" style="height: 100%; background: blueviolet; z-index: 0; position: absolute; top: 0; left: 0; right: 0; bottom: 0;"></div>
     </section>
 
     <section class="vertical-slider-section">
@@ -855,7 +928,7 @@
       </div>
     </section>
 
-    <section class="loop-section"  aa-instant="zoom-out-down" aa-delay="1">
+    <section class="loop-section"  aa-load="zoom-out-down" aa-delay="1">
       <div class="container" aa-animate="slider-draggable" aa-duration="0.3" aa-delay="0.2">
       <div class="loop-container" >
         <div class="loop-item" aa-slider-item>
@@ -1229,79 +1302,6 @@
         </div>
       </section>
 
-      <section class="instant-animations-demo">
-        <div class="container">
-          <h2 aa-instant="float-up" aa-duration="2" aa-delay="0.5" aa-ease="expo.out">
-            This headline instantly slides up word by word
-          </h2>
-      
-          <div class="grid" style="margin-top: 4rem;">
-            <!-- Float animations -->
-            <div class="box"><span aa-instant="float-up">Instant Float Up</span></div>
-            <div class="box"><span aa-instant="float-down">Instant Float Down</span></div>
-            <div class="box"><span aa-instant="float-left">Instant Float Left</span></div>
-            <div class="box"><span aa-instant="float-right">Instant Float Right</span></div>
-
-             <!-- Fade animations -->
-             <div class="box"><span aa-instant="fade">Instant Fade Up</span></div>
-             <div class="box"><span aa-instant="fade-up">Instant Fade Up</span></div>
-             <div class="box"><span aa-instant="fade-down">Instant Fade Down</span></div>
-             <div class="box"><span aa-instant="fade-left">Instant Fade Left</span></div>
-             <div class="box"><span aa-instant="fade-right">Instant Fade Right</span></div>
-      
-            <!-- Blurred slide animations -->
-            <div class="box"><span aa-instant="slide-in-blurred-bottom">Instant Blurred Bottom</span></div>
-            <div class="box"><span aa-instant="slide-in-blurred-top">Instant Blurred Top</span></div>
-            <div class="box"><span aa-instant="slide-in-blurred-left">Instant Blurred Left</span></div>
-            <div class="box"><span aa-instant="slide-in-blurred-right">Instant Blurred Right</span></div>
-      
-        
-            <!-- 3D Rotation animations -->
-            <div class="box" style="background-color: #a59ffe; font-size: 3rem;" aa-instant="turn-3d-soft-3em" aa-duration="0.8" aa-delay="0.5"><span >Instant Rotate 3D 3em</span></div>
-
-          </div>
-
-          <div class="grid" style="margin-top: 4rem; perspective: 1000px;">
-         
-            <!-- 3D Swing animations -->
-            <div class="box" style="background-color: #a59ffe;" aa-instant="swing-fwd" aa-duration="0.8" aa-ease="back.out" aa-delay="0.5"><span >Instant Swing Forward</span></div>
-            <div class="box" style="background-color: #a59ffe;" aa-instant="swing-fwd" aa-duration="0.8" aa-ease="back.out" aa-delay="0.5"><span >Instant Swing Forward</span></div>
-            <div class="box" style="background-color: #a59ffe;" aa-instant="swing-fwd" aa-duration="0.8" aa-ease="back.out" aa-delay="0.5"><span >Instant Swing Forward</span></div>
-
-            <div class="box" style="background-color: #4aebed;" aa-instant="swing-bwd" aa-duration="0.8" aa-ease="back.out" aa-delay="1"><span >Instant Swing Backward</span></div>
-            <div class="box" style="background-color: #4aebed;" aa-instant="swing-bwd" aa-duration="0.8" aa-ease="back.out" aa-delay="1"><span >Instant Swing Backward</span></div>
-            <div class="box" style="background-color: #4aebed;" aa-instant="swing-bwd" aa-duration="0.8" aa-ease="back.out" aa-delay="1"><span >Instant Swing Backward</span></div>
-      
-            <!-- 3D Rotation animations -->
-            <div class="box" style="background-color: #a59ffe;" aa-instant="turn-3d-soft" aa-duration="0.8" aa-delay="1.5"><span >Instant Rotate 3D Soft</span></div>
-            <div class="box" style="background-color: #a59ffe;" aa-instant="turn-3d-elliptic" aa-duration="0.8" aa-delay="1.5"><span >Instant Rotate 3D Elliptic</span></div>
-            <div class="box" style="background-color: #a59ffe; font-size: 3rem;" aa-instant="turn-3d-soft-3em" aa-duration="0.8" aa-delay="1.5"><span >Instant Rotate 3D 3em</span></div>
-
-
-          </div>
-
-          <div class="grid" style="grid-template-columns: repeat(4, 1fr); margin-top: 10rem;">
-            <div class="box" style="background-color: #5b50fa; height: 300px;" aa-duration="0.8" aa-distance="0.01" aa-ease="back.out" aa-instant="rotate-br-cw-45"></div>
-            <div class="box" style="background-color: #5b50fa; height: 300px;" aa-duration="0.8" aa-ease="back.out" aa-instant="rotate-br-cw-15"></div>
-            <div class="box" style="background-color: #5b50fa; height: 300px;" aa-duration="0.8" aa-ease="back.out" aa-instant="rotate-bl-ccw-15"></div>
-            <div class="box" style="background-color: #5b50fa; height: 300px;" aa-duration="0.8" aa-distance="0.01" aa-ease="back.out" aa-instant="rotate-bl-ccw-45"></div>
-          </div>
-      
-          <!-- Sequence example -->
-          <div aa-instant="float-up" aa-duration="0.5" aa-ease="back.out" aa-stagger="0.2" style="margin-top: 4rem;">
-            <h3 aa-instant="fade">First item</h3>
-            <p aa-instant="fade">Second item</p>
-            <button aa-instant="fade">Third item</button>
-          </div>
-      
-          <!-- Custom delay sequence -->
-          <div aa-instant="fade" aa-duration="0.5" aa-stagger="0.2" aa-delay="1" style="margin-top: 4rem;">
-            <h3 aa-instant="float-up">Slower sequence - First</h3>
-            <p aa-instant="float-up">Slower sequence - Second</p>
-            <button aa-instant="float-up">Slower sequence - Third</button>
-          </div>
-        </div>
-      </section>
 
       <section class="text-animations-demo">
         <div class="container">

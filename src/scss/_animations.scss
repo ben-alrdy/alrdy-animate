@@ -26,7 +26,7 @@
 [aa-stagger] {
   --aa-parent-delay: var(--aa-delay, 0s);
 
-  > [aa-instant] {
+  > [aa-load] {
     @for $i from 1 through 10 {
       &:nth-child(#{$i}) {
         --aa-delay: calc(var(--aa-parent-delay) + (var(--aa-stagger, 0.1s) * (#{$i} - 1)));
@@ -41,7 +41,7 @@
 **
 */
 
-[aa-instant] {
+[aa-load] {
   animation-delay: var(--aa-delay);
   animation-duration: var(--aa-duration);
   animation-fill-mode: forwards;
@@ -60,16 +60,16 @@
 }
 
 [aa-animate="float-up"].in-view,
-[aa-instant="float-up"] { animation-name: float-up; }
+[aa-load="float-up"] { animation-name: float-up; }
 
 [aa-animate="float-down"].in-view,
-[aa-instant="float-down"] { animation-name: float-down; }
+[aa-load="float-down"] { animation-name: float-down; }
 
 [aa-animate="float-left"].in-view,
-[aa-instant="float-left"] { animation-name: float-left; }
+[aa-load="float-left"] { animation-name: float-left; }
 
 [aa-animate="float-right"].in-view,
-[aa-instant="float-right"] { animation-name: float-right; }
+[aa-load="float-right"] { animation-name: float-right; }
 
 
 /*BLURRED SLIDE ANIMATIONS*/
@@ -84,21 +84,21 @@
 }
 
 [aa-animate="slide-in-blurred-bottom"].in-view,
-[aa-instant="slide-in-blurred-bottom"] { animation-name: slide-in-blurred-bottom; }
+[aa-load="slide-in-blurred-bottom"] { animation-name: slide-in-blurred-bottom; }
 
 [aa-animate="slide-in-blurred-top"].in-view,
-[aa-instant="slide-in-blurred-top"] { animation-name: slide-in-blurred-top; }
+[aa-load="slide-in-blurred-top"] { animation-name: slide-in-blurred-top; }
 
 [aa-animate="slide-in-blurred-left"].in-view,
-[aa-instant="slide-in-blurred-left"] { animation-name: slide-in-blurred-left; }
+[aa-load="slide-in-blurred-left"] { animation-name: slide-in-blurred-left; }
 
 [aa-animate="slide-in-blurred-right"].in-view,
-[aa-instant="slide-in-blurred-right"] { animation-name: slide-in-blurred-right; }
+[aa-load="slide-in-blurred-right"] { animation-name: slide-in-blurred-right; }
 
 
 /*3D SWING ANIMATIONS*/
 [aa-animate^='swing'],
-[aa-instant^='swing'] {
+[aa-load^='swing'] {
   opacity: 0;
   transform-origin: 50% 0;
 }
@@ -110,10 +110,10 @@
 }
 
 [aa-animate="swing-fwd"].in-view,
-[aa-instant="swing-fwd"] { animation-name: swing-fwd; }
+[aa-load="swing-fwd"] { animation-name: swing-fwd; }
 
 [aa-animate="swing-bwd"].in-view,
-[aa-instant="swing-bwd"] { animation-name: swing-bwd; }
+[aa-load="swing-bwd"] { animation-name: swing-bwd; }
 
 
 /*3D TURN ROTATION ANIMATIONS*/
@@ -128,13 +128,13 @@
 }
 
 [aa-animate="turn-3d-soft"].in-view,
-[aa-instant="turn-3d-soft"] { animation-name: turn-3d-soft; }
+[aa-load="turn-3d-soft"] { animation-name: turn-3d-soft; }
 
 [aa-animate="turn-3d-soft-3em"].in-view,
-[aa-instant="turn-3d-soft-3em"] { animation-name: turn-3d-soft-3em; }
+[aa-load="turn-3d-soft-3em"] { animation-name: turn-3d-soft-3em; }
 
 [aa-animate="turn-3d-elliptic"].in-view,
-[aa-instant="turn-3d-elliptic"] { animation-name: turn-3d-elliptic; }
+[aa-load="turn-3d-elliptic"] { animation-name: turn-3d-elliptic; }
 
 
 
@@ -146,7 +146,7 @@ $rotation-positions: ('br': (100% 100%), 'bl': (0 100%));
 
 // Base styles for rotate animations
 [aa-animate^='rotate-'],
-[aa-instant^='rotate-'] {
+[aa-load^='rotate-'] {
   opacity: 0;
 }
 
@@ -160,7 +160,7 @@ $rotation-positions: ('br': (100% 100%), 'bl': (0 100%));
 @each $pos, $origin in $rotation-positions {
   // Set transform origin for both types
   [aa-animate^='rotate-#{$pos}'],
-  [aa-instant^='rotate-#{$pos}'] {
+  [aa-load^='rotate-#{$pos}'] {
     transform-origin: $origin;
   }
 
@@ -189,12 +189,12 @@ $rotation-positions: ('br': (100% 100%), 'bl': (0 100%));
     }
 
     [aa-animate='rotate-#{$pos}-cw-#{$degree}'].in-view,
-    [aa-instant='rotate-#{$pos}-cw-#{$degree}'] {
+    [aa-load='rotate-#{$pos}-cw-#{$degree}'] {
       animation-name: rotate-#{$pos}-cw-#{$degree};
     }
 
     [aa-animate='rotate-#{$pos}-ccw-#{$degree}'].in-view,
-    [aa-instant='rotate-#{$pos}-ccw-#{$degree}'] {
+    [aa-load='rotate-#{$pos}-ccw-#{$degree}'] {
       animation-name: rotate-#{$pos}-ccw-#{$degree};
     }
   }
@@ -204,27 +204,27 @@ $rotation-positions: ('br': (100% 100%), 'bl': (0 100%));
 
 
 /*FADE ANIMATIONS - ONLY FOR INSTANT*/
-[aa-instant="fade"] { animation-name: fadeIn; }
-[aa-instant="fade-up"] { animation-name: fadeInUp; }
-[aa-instant="fade-down"] { animation-name: fadeInDown; }
-[aa-instant="fade-left"] { animation-name: fadeInLeft; }
-[aa-instant="fade-right"] { animation-name: fadeInRight; }
+[aa-load="fade"] { animation-name: fadeIn; }
+[aa-load="fade-up"] { animation-name: fadeInUp; }
+[aa-load="fade-down"] { animation-name: fadeInDown; }
+[aa-load="fade-left"] { animation-name: fadeInLeft; }
+[aa-load="fade-right"] { animation-name: fadeInRight; }
 
 /*ZOOM ANIMATIONS - ONLY FOR INSTANT*/
-[aa-instant="zoom-in"] { animation-name: zoomIn; }
-[aa-instant="zoom-in-up"] { animation-name: zoomInUp; }
-[aa-instant="zoom-in-down"] { animation-name: zoomInDown; }
-[aa-instant="zoom-in-left"] { animation-name: zoomInLeft; }
-[aa-instant="zoom-in-right"] { animation-name: zoomInRight; }
+[aa-load="zoom-in"] { animation-name: zoomIn; }
+[aa-load="zoom-in-up"] { animation-name: zoomInUp; }
+[aa-load="zoom-in-down"] { animation-name: zoomInDown; }
+[aa-load="zoom-in-left"] { animation-name: zoomInLeft; }
+[aa-load="zoom-in-right"] { animation-name: zoomInRight; }
 
-[aa-instant="zoom-out"] { animation-name: zoomOut; }
-[aa-instant="zoom-out-up"] { animation-name: zoomOutUp; }
-[aa-instant="zoom-out-down"] { animation-name: zoomOutDown; }
-[aa-instant="zoom-out-left"] { animation-name: zoomOutLeft; }
-[aa-instant="zoom-out-right"] { animation-name: zoomOutRight; }
+[aa-load="zoom-out"] { animation-name: zoomOut; }
+[aa-load="zoom-out-up"] { animation-name: zoomOutUp; }
+[aa-load="zoom-out-down"] { animation-name: zoomOutDown; }
+[aa-load="zoom-out-left"] { animation-name: zoomOutLeft; }
+[aa-load="zoom-out-right"] { animation-name: zoomOutRight; }
 
 /*SLIDE ANIMATIONS - FOR INSTANT*/
-[aa-instant="slide-up"] { animation-name: slideUp; }
-[aa-instant="slide-down"] { animation-name: slideDown; }
-[aa-instant="slide-left"] { animation-name: slideLeft; }
-[aa-instant="slide-right"] { animation-name: slideRight; }
+[aa-load="slide-up"] { animation-name: slideUp; }
+[aa-load="slide-down"] { animation-name: slideDown; }
+[aa-load="slide-left"] { animation-name: slideLeft; }
+[aa-load="slide-right"] { animation-name: slideRight; }

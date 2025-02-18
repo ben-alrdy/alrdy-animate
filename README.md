@@ -7,11 +7,16 @@
   - [Using NPM](#using-npm)
   - [Configuration Options](#configuration-options)
 - [CSS Animations triggered on scroll (via JS)](#css-animations-triggered-on-scroll-via-js)
-- [CSS Animations triggered instantly (CSS only)](#css-animations-triggered-instantly-css-only)
+- [CSS Animations triggered on load (CSS only)](#css-animations-triggered-on-load-css-only)
 - [Animation Types](#animation-types)
-  - [Scroll Animations](#scroll-animations)
-  - [Instant Animations](#instant-animations)
+  - [Fade Animations](#fade-animations)
+  - [Float Animations](#float-animations)
+  - [Zoom Animations](#zoom-animations)
+  - [Slide Animations](#slide-animations)
+  - [Blurred Slide Animations](#blurred-slide-animations)
+  - [Rotate Animations](#rotate-animations)
   - [3D Animations](#3d-animations)
+  - [Pseudo Overlay Reveal](#pseudo-overlay-reveal)
 - [GSAP Features](#gsap-features)
   - [Text Animations](#text-animations)
   - [Slider Animations](#slider-animations)
@@ -143,16 +148,16 @@ Add the `aa-animate` attribute to the element you want to animate. Once it scrol
 - **aa-viewport**: Override the global viewport percentage for this element. Example: `aa-viewport="0.6"`.
 - **aa-distance**: The distance multiplier for the animation. Example: `aa-distance="1.5"`.
 
-## CSS Animations triggered instantly (CSS only)
-Add the `aa-instant` attribute to the element you want to animate. The animation will be triggered immediately. You can also add optional attributes (see [instant element attributes](#instant-element-attributes) below) to customize the animation for individual elements.
+## CSS Animations triggered on load (CSS only)
+Add the `aa-load` attribute to the element you want to animate. The animation will be triggered immediately. You can also add optional attributes (see [on load element attributes](#on-load-element-attributes) below) to customize the animation for individual elements.
 
-- **aa-instant**: The animation type to apply. Example: `aa-instant="fade-up"`.
+- **aa-load**: The animation type to apply. Example: `aa-load="fade-up"`.
 
-### Instant Element Attributes
+### On Load Element Attributes
 - **aa-ease**: Overwrites the global easing function for this element. Example: `aa-ease="ease-in-out"`.
 - **aa-duration**: Set the animation duration for this element, in seconds. Example: `aa-duration="2"`. Available range: 0.1s - 3s in increments of 0.1s
 - **aa-delay**: Set the animation delay for this element, in seconds. Example: `aa-delay="0.5"`. Available range: 0.05s - 1.5s in increments of 0.05s
-- **aa-stagger**: Set a staggered animation delay for up to 10 child elements, in seconds. Example: `aa-stagger="0.5"`. Available range: 0.05s - 0.5s in increments of 0.05s
+- **aa-stagger**: Set a staggered animation delay for up to 10 child elements, in seconds. Example: `aa-stagger="0.5"`. Available range: 0.05s - 0.5s in increments of 0.05s. Still requires the `aa-load` attribute to be set on each child element.
 
 ## CSS Animation Types
 
@@ -160,34 +165,34 @@ AlrdyAnimate provides a wide variety of CSS animations that can be applied using
 
 ### Fade Animations
 Simple fade animations with optional directional movement:
-- `fade` (available for instant)
-- `fade-up`, `fade-down`, `fade-left`, `fade-right` (available for instant)
+- `fade` (available for aa-load)
+- `fade-up`, `fade-down`, `fade-left`, `fade-right` (available for aa-load)
 - `fade-up-right`, `fade-up-left`, `fade-down-right`, `fade-down-left`
 
 ### Float Animations
 Fade animations with a smooth back-bounce effect:
-- `float-up`, `float-down`, `float-left`, `float-right` (available for instant)
+- `float-up`, `float-down`, `float-left`, `float-right` (available for aa-load)
 
 ### Zoom Animations
 Scale animations with optional directional movement:
-- `zoom-in`, `zoom-out` (available for instant)
-- `zoom-in-up`, `zoom-in-down`, `zoom-in-left`, `zoom-in-right` (available for instant)
-- `zoom-out-up`, `zoom-out-down`, `zoom-out-left`, `zoom-out-right` (available for instant)
+- `zoom-in`, `zoom-out` (available for aa-load)
+- `zoom-in-up`, `zoom-in-down`, `zoom-in-left`, `zoom-in-right` (available for aa-load)
+- `zoom-out-up`, `zoom-out-down`, `zoom-out-left`, `zoom-out-right` (available for aa-load)
 
 ### Slide Animations
 Pure sliding movements without opacity change:
-- `slide-up`, `slide-down`, `slide-left`, `slide-right` (available for instant)
+- `slide-up`, `slide-down`, `slide-left`, `slide-right` (available for aa-load)
 
 ### Blurred Slide Animations
 Sliding with a blur effect:
-- `slide-in-blurred-bottom`, `slide-in-blurred-top` (available for instant)
-- `slide-in-blurred-left`, `slide-in-blurred-right` (available for instant)
+- `slide-in-blurred-bottom`, `slide-in-blurred-top` (available for aa-load)
+- `slide-in-blurred-left`, `slide-in-blurred-right` (available for aa-load)
 
 
 ### Rotate Animations
 Rotate animations from bottom right (br) and bottom left (bl) corners, clockwise (cw) and counter-clockwise (ccw). You can define the rotation degree by changing the numeric value at the end, e.g. `rotate-br-cw-15`. Available degrees are 5, 15, 25, 35, 45.
-- `rotate-br-cw-45`, `rotate-br-ccw-45` (available for instant)
-- `rotate-bl-cw-45`, `rotate-bl-ccw-45` (available for instant)
+- `rotate-br-cw-45`, `rotate-br-ccw-45` (available for aa-load)
+- `rotate-bl-cw-45`, `rotate-bl-ccw-45` (available for aa-load)
 
 ### 3D Animations
 
@@ -198,11 +203,11 @@ Rotate animations from bottom right (br) and bottom left (bl) corners, clockwise
 #### Swing Animations
 Requires a parent element to have a perspective set, e.g. `perspective: 1000px;`.
 3D swing effects (anchored to top):
-- `swing-fwd`, `swing-bwd` (available for instant)
+- `swing-fwd`, `swing-bwd` (available for aa-load)
 
 #### Forward Turn Animations
 Requires a parent element to have a perspective set, e.g. `perspective: 1000px;`.
-3D rotation effects (available for instant):
+3D rotation effects (available for aa-load):
 - `turn-3d-soft`: Soft rotation around X axis
 - `turn-3d-soft-3em`: Same as rotate-soft but with built-in perspective
 - `turn-3d-elliptic`: Stronger elliptic rotation around X axis
