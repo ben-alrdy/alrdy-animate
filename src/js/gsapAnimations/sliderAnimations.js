@@ -688,6 +688,12 @@ export function createSliderAnimations(gsap, Draggable) {
     const prevButton = element.querySelector('[aa-slider-prev]');
     const currentElement = element.querySelector('[aa-slider-current]');
     const totalElement = element.querySelector('[aa-slider-total]');
+    
+    // Find slide-specific buttons (either within element or by data-target)
+    const slideButtons = element.id 
+      ? [...element.querySelectorAll('[aa-slider-button]'), 
+         ...document.querySelectorAll(`[aa-slider-button][aa-slider-target="${element.id}"]`)]
+      : element.querySelectorAll('[aa-slider-button]');
 
     // Update total if the element exists
     if (totalElement) {
@@ -696,10 +702,21 @@ export function createSliderAnimations(gsap, Draggable) {
 
     // Set up the onChange handler
     config.onChange = (element, rawIndex) => {
-      // Handle active class
+      // Handle active class for slides
       const activeElement = element.parentElement.querySelector('.active');
       if (activeElement) activeElement.classList.remove('active');
       element.classList.add('active');
+
+      // Handle active class for buttons
+      if (slideButtons.length > 0) {
+        const activeButton = [...slideButtons].find(btn => btn.classList.contains('active'));
+        if (activeButton) activeButton.classList.remove('active');
+        
+        const index = ((rawIndex % totalSlides) + totalSlides) % totalSlides;
+        if (slideButtons[index]) {
+          slideButtons[index].classList.add('active');
+        }
+      }
 
       // Handle counter if it exists
       if (currentElement) {
@@ -713,16 +730,16 @@ export function createSliderAnimations(gsap, Draggable) {
       nextButton,
       prevButton,
       currentElement,
-      totalElement
+      totalElement,
+      slideButtons
     };
   }
 
-  function setupNavigationListeners(element, items,loop, duration, ease, config, animationType) {
+  function setupNavigationListeners(element, items, loop, duration, ease, config, animationType) {
     if (element._sliderNav) {
-      const { nextButton, prevButton } = element._sliderNav;
+      const { nextButton, prevButton, slideButtons } = element._sliderNav;
 
       const handleNavigation = (direction) => {
-        // Execute the navigation
         loop[direction]({
           ease,
           duration,
@@ -743,9 +760,26 @@ export function createSliderAnimations(gsap, Draggable) {
       if (prevButton) {
         prevButton.addEventListener('click', () => handleNavigation('previous'));
       }
+
+      // Add click handlers for slide-specific buttons
+      if (slideButtons?.length > 0) {
+        slideButtons.forEach((button, index) => {
+          button.addEventListener('click', () => {
+            loop.toIndex(index, {
+              ease,
+              duration,
+              onComplete: () => {
+                if (animationType.includes('loop')) {
+                  gsap.delayedCall(1, () => loop.resume());
+                }
+              }
+            });
+          });
+        });
+      }
     }
 
-    // Add click handlers for slider type unless on mobile
+    // Add click handlers for slider items unless on mobile
     if (!animationType.includes('loop') && !animationType.includes('snap') && !window.matchMedia('(hover: none)').matches){ 
       items.forEach((slide, i) => {
         slide.addEventListener('click', () => {

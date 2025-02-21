@@ -264,7 +264,6 @@ Creates infinite scrolling, snapping, or static slider animations. To use:
 
 1. Add `aa-animate="slider"` to the container element. (By default, the slider will animate horizontally, but you can add `-vertical` to animate vertically.)
 2. Add `aa-slider-item` attribute to each element that should be animated
-3. Optionally, add navigation controls (`aa-slider-prev`, `aa-slider-next`) and a counter (`aa-slider-current`, `aa-slider-total`). These elements need to located inside the element with `aa-animate="slider"`.
 
 #### Basic Setup
 
@@ -342,6 +341,18 @@ Creates infinite scrolling, snapping, or static slider animations. To use:
   flex-shrink: 0;
 }
 ```
+
+#### Navigation Controls
+
+- Optionally, add navigation controls for the slider (These elements need to located inside the element with `aa-animate="slider"`):
+  - `aa-slider-prev` and `aa-slider-next` for navigation buttons to show previous and next slide
+  - `aa-slider-current` and `aa-slider-total` to display the current and total number of slides
+  - `aa-slider-button` for specific buttons to jump to a certain slide
+    - the number of buttons needs to match the number of slides
+    - the slide that is active and the corresponding button get the class `active` so you can style them accordingly
+    - optionally, if the buttons don't live in the same wrapper as `aa-animate = slider`, you can add `aa-slider-target=id_of_slider` to each button to control a specific slider
+
+
 
 ### Scroll Animations 
 (`gsapFeatures: ['scroll']`)

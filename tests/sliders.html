@@ -45,6 +45,9 @@
                         <div class="slider-item" aa-slider-item>
                             <div class="slider-content">Slide 4</div>
                         </div>
+                        <div class="slider-item" aa-slider-item>
+                            <div class="slider-content">Slide 5</div>
+                        </div>
                     </div>
                     
                     <div class="slider-controls">
@@ -76,6 +79,9 @@
                         <div class="slider-item" aa-slider-item>
                             <div class="slider-content">Drag Me 4</div>
                         </div>
+                        <div class="slider-item" aa-slider-item>
+                            <div class="slider-content">Drag Me 5</div>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -83,7 +89,7 @@
             <!-- Infinite Loop Slider -->
             <section class="animation-section">
                 <h2 aa-animate="fade-up">Infinite Loop Slider</h2>
-                <div aa-animate="slider-loop" aa-duration="20">
+                <div aa-animate="slider-loop" aa-duration="2">
                     <div class="slider-container">
                         <div class="slider-item" aa-slider-item>
                             <div class="slider-content">Looping 1</div>
@@ -96,6 +102,9 @@
                         </div>
                         <div class="slider-item" aa-slider-item>
                             <div class="slider-content">Looping 4</div>
+                        </div> 
+                        <div class="slider-item" aa-slider-item>
+                            <div class="slider-content">Looping 5</div>
                         </div>
                     </div>
                 </div>
@@ -118,30 +127,97 @@
                         <div class="slider-item" aa-slider-item>
                             <div class="slider-content">Snap 4</div>
                         </div>
+                        <div class="slider-item" aa-slider-item>
+                            <div class="slider-content">Snap 5</div>
+                        </div>
                     </div>
                 </div>
             </section>
 
-            <!-- Centered Slider -->
+            <!-- Button-Controlled Slider -->
             <section class="animation-section">
-                <h2 aa-animate="fade-up">Centered Slider</h2>
+                <h2 aa-animate="fade-up">Button-Controlled Slider</h2>
                 <div aa-animate="slider-center-draggable">
                     <div class="slider-container">
                         <div class="slider-item" aa-slider-item>
-                            <div class="slider-content">Center 1</div>
+                            <div class="slider-content">Button Slide 1</div>
                         </div>
                         <div class="slider-item" aa-slider-item>
-                            <div class="slider-content">Center 2</div>
+                            <div class="slider-content">Button Slide 2</div>
                         </div>
                         <div class="slider-item" aa-slider-item>
-                            <div class="slider-content">Center 3</div>
+                            <div class="slider-content">Button Slide 3</div>
                         </div>
                         <div class="slider-item" aa-slider-item>
-                            <div class="slider-content">Center 4</div>
+                            <div class="slider-content">Button Slide 4</div>
                         </div>
+                        <div class="slider-item" aa-slider-item>
+                            <div class="slider-content">Button Slide 5</div>
+                        </div>
+                    </div>
+                    
+                    <div class="slider-controls">
+                        <button aa-slider-prev>Previous</button>
+                        <div class="slider-counter">
+                            <span aa-slider-current>01</span>
+                            <span>/</span>
+                            <span aa-slider-total>04</span>
+                        </div>
+                        <button aa-slider-next>Next</button>
+                    </div>
+
+                    <div class="slider-buttons">
+                        <button aa-slider-button>Slide 1</button>
+                        <button aa-slider-button>Slide 2</button>
+                        <button aa-slider-button>Slide 3</button>
+                        <button aa-slider-button>Slide 4</button>
+                        <button aa-slider-button>Slide 5</button>
                     </div>
                 </div>
             </section>
+
+             <!-- Button-Controlled Slider with external buttons-->
+             <section class="animation-section">
+                <h2 aa-animate="fade-up">Button-Controlled Slider with external buttons</h2>
+                <div class="slider-buttons">
+                    <button aa-slider-button aa-slider-target="button-slider">Slide 1</button>
+                    <button aa-slider-button aa-slider-target="button-slider">Slide 2</button>
+                    <button aa-slider-button aa-slider-target="button-slider">Slide 3</button>
+                    <button aa-slider-button aa-slider-target="button-slider">Slide 4</button>
+                    <button aa-slider-button aa-slider-target="button-slider">Slide 5</button>
+                </div>
+                <div id="button-slider" aa-animate="slider-center-draggable">
+                    <div class="slider-container">
+                        <div class="slider-item" aa-slider-item>
+                            <div class="slider-content">Button Slide 1</div>
+                        </div>
+                        <div class="slider-item" aa-slider-item>
+                            <div class="slider-content">Button Slide 2</div>
+                        </div>
+                        <div class="slider-item" aa-slider-item>
+                            <div class="slider-content">Button Slide 3</div>
+                        </div>
+                        <div class="slider-item" aa-slider-item>
+                            <div class="slider-content">Button Slide 4</div>
+                        </div>
+                        <div class="slider-item" aa-slider-item>
+                            <div class="slider-content">Button Slide 5</div>
+                        </div>
+                    </div>
+                    
+                    <div class="slider-controls">
+                        <button aa-slider-prev>Previous</button>
+                        <div class="slider-counter">
+                            <span aa-slider-current>01</span>
+                            <span>/</span>
+                            <span aa-slider-total>04</span>
+                        </div>
+                        <button aa-slider-next>Next</button>
+                    </div>
+                </div>
+            </section>
+
+
         </div>
     </main>
 
