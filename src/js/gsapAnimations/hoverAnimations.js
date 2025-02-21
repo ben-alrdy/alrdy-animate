@@ -117,14 +117,14 @@ function setupColorAnimation(element, timeline, isEnter) {
         const targetColor = el.getAttribute('aa-hover-text-color');
         const originalColor = timeline.data?.originalColors?.text?.[index];
         
-        if (targetColor && originalColor) {
+        if (targetColor) {
             timeline.to(
                 el,
                 { 
                     color: isEnter ? targetColor : originalColor,
                     overwrite: true
                 },
-                0 // Start at same time as main animation
+                0 // Start at beginning of timeline
             );
         }
     });
@@ -135,14 +135,14 @@ function setupColorAnimation(element, timeline, isEnter) {
         const targetColor = el.getAttribute('aa-hover-bg-color');
         const originalColor = timeline.data?.originalColors?.background?.[index];
         
-        if (targetColor && originalColor) {
+        if (targetColor) {
             timeline.to(
                 el,
                 { 
                     backgroundColor: isEnter ? targetColor : originalColor,
                     overwrite: true
                 },
-                0 // Start at same time as main animation
+                0 // Start at beginning of timeline
             );
         }
     });
@@ -361,18 +361,18 @@ function initializeExpandAnimation(element, gsap) {
         const timelineIn = gsap.timeline({
             defaults: { ease, duration },
             paused: true,
-            data: { originalColors }  // Store original colors in timeline data
         });
 
         const timelineOut = gsap.timeline({
             defaults: { ease, duration },
             paused: true,
-            data: { originalColors }  // Store original colors in timeline data
         });
 
-        // Add color animations using helper at the start
-        setupColorAnimation(element, timelineIn, true);
-        setupColorAnimation(element, timelineOut, false);
+        const colorTimeline = gsap.timeline({
+            defaults: { ease, duration },
+            paused: true,
+            data: { originalColors }  // Store original colors in timeline data
+        });
 
         // Setup background animations only if bg exists
         if (bg) {
@@ -405,10 +405,13 @@ function initializeExpandAnimation(element, gsap) {
                 });
         }
 
+        // Add color animations
+        setupColorAnimation(element, colorTimeline, true);
+
         // Add icon animations if present
         if (iconAnimations) {
             timelineIn
-                .to(icon, iconAnimations.icon, 0)
+                .to(icon, iconAnimations.icon,   0)
                 .to(icon.nextElementSibling, iconAnimations.clone, delay);
         }
 
@@ -416,10 +419,14 @@ function initializeExpandAnimation(element, gsap) {
         element.addEventListener('mouseenter', () => {
             timelineOut.pause(0);
             timelineIn.restart();
+            colorTimeline.play();
         });
 
         element.addEventListener('mouseleave', () => {
-            timelineIn.then(() => timelineOut.restart());
+            timelineIn.then(() => {
+                timelineOut.restart();
+                colorTimeline.reverse();
+            });
         });
     }
 }

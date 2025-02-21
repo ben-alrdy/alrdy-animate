@@ -19,7 +19,7 @@ body {
 }
 
 // Base styles for all animated elements
-[aa-animate], [aa-load] {
+[aa-animate], [aa-instant] {
   --aa-duration: var(--aa-default-duration);
   --aa-delay: var(--aa-default-delay);
 }
@@ -64,15 +64,6 @@ body {
 [aa-hover] {
   position: relative;
   overflow: hidden;
-}
-
-[aa-hover-bg] {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 0;
 }
 
 [aa-hover-text-color], [aa-hover-content] {

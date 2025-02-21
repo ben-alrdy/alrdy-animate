@@ -65,7 +65,7 @@
                 <h2>Background Circle Animation</h2>
                 <div class="hover-grid">
                     <a href="#" class="hover-button" aa-hover="bg-circle" aa-hover-direction="all">
-                        <div aa-hover-text>Circle All</div>
+                        <div aa-hover-text-color="white">Circle All</div>
                         <svg class="bg-filler" viewBox="0 0 1 1" preserveAspectRatio="xMidYMid slice" aa-hover-bg>
                             <circle cx="0.5" cy="0.5" r="0" fill="currentColor"></circle>
                         </svg>
@@ -104,25 +104,30 @@
             <section class="animation-section">
                 <h2>Background Expand Animation</h2>
                 <div class="hover-grid">
-                    <a href="#" class="hover-button" aa-hover="bg-expand">
-                        <div aa-hover-text>Basic Expand</div>
-                        <div class="bg-expand" aa-hover-bg></div>
-                    </a>
-
-                    <a href="#" class="hover-button" aa-hover="bg-expand-reverse">
-                        <div aa-hover-text>Expand Reverse</div>
-                        <div class="bg-expand" aa-hover-bg></div>
-                    </a>
-
-                    <div class="hover-button" aa-hover="bg-expand" aa-hover-direction="right">
-                        <div class="icon-embed">
-                            <div aa-hover-text>With Icon</div>
-                            <svg aa-hover-icon width="24" height="24" viewBox="0 0 24 24">
-                                <path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                            </svg>
+                    <div class="hover-button is-icon" aa-hover="bg-expand" aa-hover-direction="right">
+                        <div aa-hover-text-color="white">With Icon</div>
+                        <div class="icon-wrapper">
+                            <div class="bg-expand" aa-hover-bg></div>
+                            <div class="icon-clip">
+                                <svg aa-hover-icon width="24" height="24" viewBox="0 0 24 24">
+                                    <path d="M5 12h14M12 5l7 7-7 7" stroke="white" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </div>
                         </div>
-                        <div class="bg-expand" aa-hover-bg></div>
                     </div>
+
+                    <div class="hover-button is-icon" aa-hover="bg-expand-reverse" aa-hover-direction="right">
+                        <div aa-hover-text-color="white">With Icon Reverse</div>
+                        <div class="icon-wrapper">
+                            <div class="bg-expand" aa-hover-bg></div>
+                            <div class="icon-clip">
+                                <svg aa-hover-icon width="24" height="24" viewBox="0 0 24 24">
+                                    <path d="M5 12h14M12 5l7 7-7 7" stroke="white" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                    
                 </div>
             </section>
         </div>
