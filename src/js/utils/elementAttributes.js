@@ -1,5 +1,6 @@
 export function getElementSettings(element, settings) {
   const animationType = element.getAttribute('aa-animate');
+  const hoverType = element.getAttribute('aa-hover');
   const anchorSelector = element.getAttribute("aa-anchor");
   const anchorElement = anchorSelector ? document.querySelector(anchorSelector) : element;
 
@@ -10,6 +11,16 @@ export function getElementSettings(element, settings) {
     splitType: element.getAttribute('aa-split'),
     scroll: element.getAttribute('aa-scrub'),
     distance: element.hasAttribute('aa-distance') ? parseFloat(element.getAttribute('aa-distance')) : settings.distance,
+
+    // Hover properties
+    hoverType,
+    hoverDirection: element.getAttribute('aa-hover-direction') || 'all',
+    isReverse: hoverType ? hoverType.includes('reverse') : false,
+    hoverDuration: element.hasAttribute('aa-duration') ? parseFloat(element.getAttribute('aa-duration')) : settings.hoverDuration,
+    hoverDelay: element.hasAttribute('aa-delay') ? parseFloat(element.getAttribute('aa-delay')) : settings.hoverDelay,
+    hoverEase: element.hasAttribute('aa-ease') ? element.getAttribute('aa-ease') : settings.hoverEase,
+    hoverDistance: element.hasAttribute('aa-distance') ? parseFloat(element.getAttribute('aa-distance')) : settings.hoverDistance,
+    bg: element.querySelector('[aa-hover-bg]'),
 
     // Animation timing
     duration: element.hasAttribute('aa-duration') ? parseFloat(element.getAttribute('aa-duration')) : settings.duration,

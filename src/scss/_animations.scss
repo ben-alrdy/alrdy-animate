@@ -201,6 +201,39 @@ $rotation-positions: ('br': (100% 100%), 'bl': (0 100%));
 }
 
 
+/**
+ * ----------------------------------------
+ * HOVER CLASSES
+ * ----------------------------------------
+ */
+
+
+
+[aa-hover="shrink-bounce"] {  
+  &:hover {
+    animation: shrinkBounce;
+    animation-duration: var(--aa-duration);
+    animation-delay: var(--aa-delay);
+  }
+}
+
+[aa-hover="grow-bounce"] {  
+  &:hover {
+    animation: growBounce;
+    animation-duration: var(--aa-duration);
+    animation-delay: var(--aa-delay);
+  }
+}
+
+
+
+/**
+ * ----------------------------------------
+ * ON-LOAD CLASSES
+ * ----------------------------------------
+ */
+
+
 
 
 /*FADE ANIMATIONS - FOR aa-load*/
@@ -228,3 +261,7 @@ $rotation-positions: ('br': (100% 100%), 'bl': (0 100%));
 [aa-load="slide-down"] { animation-name: slideDown; }
 [aa-load="slide-left"] { animation-name: slideLeft; }
 [aa-load="slide-right"] { animation-name: slideRight; }
+
+
+
+

@@ -453,7 +453,7 @@ Animate a number from 0 to the value of the element (it needs to be a number and
 
 ### Hover Animations
 
-The AlrdyAnimate library includes powerful hover animations using GSAP. These animations can be applied to elements by adding the `aa-hover` attribute.
+The AlrdyAnimate library includes powerful hover animations using GSAP. These animations can be applied to elements by adding the `aa-hover` attribute. Generally, you can use `aa-delay` and `aa-duration` to set the delay and duration of the animation.
 
 #### Available Hover Animations
 
@@ -463,6 +463,7 @@ The AlrdyAnimate library includes powerful hover animations using GSAP. These an
   - Mark the text you want to animate with `aa-hover-text`.
   - Requires a wrapper element around the `aa-hover-text` that has position set to `relative` or `absolute` and overflow set to `hidden`.
   - Requires `aa-split` attribute to be set (e.g. `aa-split="words"`), optionally add `aa-stagger` 
+  - use `aa-distance` to set distance/delay between the original and the clone.
   - Available animations:
     - Text Sliding: `text-slide-up`, `text-slide-down`, `text-slide-left`, `text-slide-right`
     - Text Fading: `text-fade-up`, `text-fade-down`, `text-fade-left`, `text-fade-right`
@@ -483,7 +484,7 @@ The AlrdyAnimate library includes powerful hover animations using GSAP. These an
   - Expands a shape inside the elment to fill the element.
   - Requires a div nested inside the element, tagged with `aa-hover-bg`, that will expand to fill the element.
   - Optionally, you can add `-reverse` to `aa-hover` to play the animation in reverse when hovering out, e.g. `aa-hover="bg-expand-reverse"`.
-  - Optionally, you can add a tag with `aa-hover-icon` to animate an icon on hover (usually set on the svg element inside the embed; the embed div itself needs to be set to `position: relative` and `overflow: hidden`).
+  - Optionally, you can add a tag with `aa-hover-icon` to animate an icon on hover (usually set on the svg element inside the embed; the embed div itself needs to be set to `position: relative` and `overflow: hidden`). Use `aa-distance` to set distance/delay between the original and cloned icon.
     - Optionally, you can define direction of the icon animation with `aa-hover-direction` on the aa-hover element (possible values: `right`, `up-right`, `down-right`).
 
 For all hover animations, you can optionally add `aa-hover-text-color` or `aa-hover-bg-color` to any element inside the aa-hover element to animate the text or background color. The text elements will be positioned relative with z-index set to 1.

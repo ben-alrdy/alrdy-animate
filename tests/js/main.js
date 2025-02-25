@@ -6,7 +6,6 @@ document.addEventListener('DOMContentLoaded', function() {
         duration: 1,
         again: true,
         gsapFeatures: ['scroll', 'text', 'slider', 'hover'],
-        distance: 2,
         debug: true
     }).then(() => {
         console.log('AlrdyAnimate initialized successfully');

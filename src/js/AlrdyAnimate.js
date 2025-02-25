@@ -17,6 +17,10 @@ const defaultOptions = {
   duration: 1, // 1 second
   delay: 0, // 0 seconds
   distance: 1, // Distance factor for the animations
+  hoverDuration: 0.3, // 0.3 seconds
+  hoverDelay: 0, // 0 seconds
+  hoverEase: "power3.out", // Default easing function for hover animations
+  hoverDistance: 0.1, // Distance factor for the hover animations
   gsapFeatures: [],  // Available: ['text', 'slider', 'hover', 'scroll']
   debug: false // Set to true to see GSAP debug info
 };
@@ -38,7 +42,7 @@ async function init(options = {}) {
   const initOptions = { ...defaultOptions, ...options };
 
   // Early initialization
-  allAnimatedElements = document.querySelectorAll("[aa-animate], [aa-children]");
+  allAnimatedElements = document.querySelectorAll("[aa-animate], [aa-children], [aa-hover]");
   isMobile = window.innerWidth < 768;
   enableGSAP = initOptions.gsapFeatures.length > 0;
 
@@ -118,7 +122,6 @@ async function init(options = {}) {
                   break;
                 case 'hover':
                   moduleAnimations = animationModule.createHoverAnimations(modules.gsap, modules.splitText);
-                  moduleAnimations.initializeHoverAnimations();
                   break;
               }
 
@@ -185,6 +188,7 @@ async function init(options = {}) {
 // Setup animations for elements
 function setupAnimations(elements, initOptions, isMobile, modules) {
   elements.forEach((element) => {
+    // Process children elements
     if (element.hasAttribute("aa-children")) {
       const children = processChildren(element);
       setupAnimations(children, initOptions, isMobile, modules);
@@ -197,11 +201,21 @@ function setupAnimations(elements, initOptions, isMobile, modules) {
     // Apply styles (duration, delay, colors)
     applyElementStyles(element, element.settings, isMobile);
 
-    if (enableGSAP) {
-      setupGSAPAnimations(element, element.settings, initOptions, isMobile, modules);
-    } else {
-      element.style.visibility = 'visible';
-      setupIntersectionObserver(element, element.settings, initOptions);
+    // Setup hover animations 
+    if (element.hasAttribute('aa-hover')) {
+      if (enableGSAP && initOptions.gsapFeatures.includes('hover')) {
+        setupGSAPHoverAnimations(element, element.settings, initOptions, isMobile, modules);
+      } 
+    }
+
+    // Setup regular animations
+    if (element.hasAttribute('aa-animate')) {
+      if (enableGSAP) {
+        setupGSAPAnimations(element, element.settings, initOptions, isMobile, modules);
+      } else {
+        element.style.visibility = 'visible';
+        setupIntersectionObserver(element, element.settings, initOptions);
+      }
     }
   });
 }
@@ -350,6 +364,22 @@ function setupIntersectionObserver(element, elementSettings, initOptions) {
 
   addObserver.observe(anchorElement);
   removeObserver.observe(anchorElement);
+}
+
+function setupGSAPHoverAnimations(element, elementSettings, initOptions, isMobile, modules) {
+  const { hoverType } = elementSettings;
+  const baseType = hoverType.includes('-') ? hoverType.split('-')[0] : hoverType;
+
+  // Map hover types to their initialization functions
+  switch (baseType) {
+    case 'text':
+      modules.animations.initializeTextHover(element, elementSettings);
+      break;
+    case 'bg':
+      const animationType = hoverType.split('-')[1]; // circle, curve, expand
+      modules.animations.initializeBackgroundHover(element, elementSettings, animationType);
+      break;
+  }
 }
 
 const AlrdyAnimate = {

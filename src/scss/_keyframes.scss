@@ -418,3 +418,32 @@
     transform: translate3d(0, 0, 0);
   }
 }
+
+
+
+/**
+ * ----------------------------------------
+ * HOVER ANIMATIONS
+ * ----------------------------------------
+ */
+
+
+/**
+ * ----------------------------------------
+ * Scale with bounce
+ * ----------------------------------------
+ */
+
+@keyframes shrinkBounce {
+  0% { transform: scale(1); }
+  40% { transform: scale(0.95); }
+  80% { transform: scale(1.02); }
+  100% { transform: scale(1); }
+}
+
+@keyframes growBounce {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.05); }
+  80% { transform: scale(0.98); }
+  100% { transform: scale(1); }
+}

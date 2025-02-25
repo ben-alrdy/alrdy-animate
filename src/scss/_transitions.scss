@@ -244,5 +244,27 @@
     [aa-animate="pseudo-reveal-left"].in-view::before {
       transform: scaleX(0);
     }
+
+    /*
+    BACKGROUND SHRINK AND GROW TRANSITIONS for hover animations
+    */
+
+    [aa-hover="bg-shrink"] [aa-hover-bg] {  
+      transition-property: transform;
+      transition-duration: var(--aa-duration);
+      transition-delay: var(--aa-delay);
+      &:hover {
+        transform: scale(0.92);
+      }
+    }
+    
+    [aa-hover="bg-grow"] [aa-hover-bg] {  
+      transition-property: transform;
+      transition-duration: var(--aa-duration);
+      transition-delay: var(--aa-delay);
+      &:hover {
+        transform: scale(1.08);
+      }
+    }
   }
 }

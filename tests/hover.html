@@ -33,15 +33,21 @@
                 <h2>Text Hover Animations</h2>
                 <div class="hover-grid">
                     <!-- Text Slide -->
-                    <a href="#" class="hover-button" aa-hover="text-slide-up" aa-split="words">
-                        <div style="position: relative; overflow: hidden;">
-                            <div aa-hover-text>Slide Up Text</div>
+                    <a href="#"  aa-hover="bg-shrink">
+                        <div class="hover-button transparent" aa-hover="text-slide-up" aa-split="words">
+                            <div style="position: relative; overflow: hidden;">
+                                <div aa-hover-text>Slide Up Text</div>
+                            </div>
+                            <div aa-hover-bg aa-duration="0.7" ></div>
                         </div>
                     </a>
-                    
-                    <a href="#" class="hover-button" aa-hover="text-slide-down" aa-split="words">
-                        <div style="position: relative; overflow: hidden;">
-                            <div aa-hover-text>Slide Down Text</div>
+
+                    <a href="#"  aa-hover="bg-grow">
+                        <div class="hover-button transparent" aa-hover="text-slide-down" aa-split="words">
+                            <div style="position: relative; overflow: hidden;">
+                                <div aa-hover-text>Slide Down Text</div>
+                            </div>
+                            <div aa-hover-bg aa-duration="0.7" ></div>
                         </div>
                     </a>
 
@@ -64,14 +70,14 @@
             <section class="animation-section">
                 <h2>Background Circle Animation</h2>
                 <div class="hover-grid">
-                    <a href="#" class="hover-button" aa-hover="bg-circle" aa-hover-direction="all">
+                    <a href="#" class="hover-button" aa-hover="bg-circle" aa-hover-direction="all" aa-duration="1">
                         <div aa-hover-text-color="white">Circle All</div>
                         <svg class="bg-filler" viewBox="0 0 1 1" preserveAspectRatio="xMidYMid slice" aa-hover-bg>
                             <circle cx="0.5" cy="0.5" r="0" fill="currentColor"></circle>
                         </svg>
                     </a>
 
-                    <a href="#" class="hover-button" aa-hover="bg-circle" aa-hover-direction="top">
+                    <a href="#" class="hover-button" aa-hover="bg-circle" aa-hover-direction="bottom" aa-duration="1">
                         <div aa-hover-text>Circle Top</div>
                         <svg class="bg-filler" viewBox="0 0 1 1" preserveAspectRatio="xMidYMid slice" aa-hover-bg>
                             <circle cx="0.5" cy="0.5" r="0" fill="currentColor"></circle>
@@ -84,15 +90,33 @@
             <section class="animation-section">
                 <h2>Background Curve Animation</h2>
                 <div class="hover-grid">
-                    <a href="#" class="hover-button" aa-hover="bg-curve" aa-hover-direction="vertical">
-                        <div aa-hover-text>Curve Vertical</div>
+                    <a href="#" aa-hover="grow-bounce" aa-duration="0.5">
+                        <div class="hover-button" aa-hover="bg-curve" aa-hover-direction="all" aa-delay="0.2" aa-duration="0.3">
+                            <div aa-hover-text-color="white">Curve all</div>
+                            <svg class="bg-filler" viewBox="0 0 100 100" preserveAspectRatio="none" aa-hover-bg>
+                                <path d="M 0 100 V 0 Q 250 0 500 0 V 0 H 0 z" fill="currentColor"></path>
+                            </svg>
+                        </div>
+                    </a>
+
+                    <a href="#" aa-hover="shrink-bounce" aa-duration="0.5">
+                        <div class="hover-button" aa-hover="bg-curve" aa-hover-direction="all" aa-delay="0.2" aa-duration="0.3">
+                            <div aa-hover-text-color="white">Curve all</div>
+                            <svg class="bg-filler" viewBox="0 0 100 100" preserveAspectRatio="none" aa-hover-bg>
+                                <path d="M 0 100 V 0 Q 250 0 500 0 V 0 H 0 z" fill="currentColor"></path>
+                            </svg>
+                        </div>
+                    </a>
+
+                    <a href="#" class="hover-button" aa-hover="bg-curve" aa-hover-direction="horizontal">
+                        <div aa-hover-text>Curve Horizontal</div>
                         <svg class="bg-filler" viewBox="0 0 100 100" preserveAspectRatio="none" aa-hover-bg>
                             <path d="M 0 100 V 0 Q 250 0 500 0 V 0 H 0 z" fill="currentColor"></path>
                         </svg>
                     </a>
 
-                    <a href="#" class="hover-button" aa-hover="bg-curve" aa-hover-direction="horizontal">
-                        <div aa-hover-text>Curve Horizontal</div>
+                    <a href="#" class="hover-button" aa-hover="bg-curve" aa-duration="0.3">
+                        <div aa-hover-text>Curve all</div>
                         <svg class="bg-filler" viewBox="0 0 100 100" preserveAspectRatio="none" aa-hover-bg>
                             <path d="M 0 100 V 0 Q 250 0 500 0 V 0 H 0 z" fill="currentColor"></path>
                         </svg>
@@ -104,7 +128,7 @@
             <section class="animation-section">
                 <h2>Background Expand Animation</h2>
                 <div class="hover-grid">
-                    <div class="hover-button is-icon" aa-hover="bg-expand" aa-hover-direction="right">
+                    <div class="hover-button is-icon" aa-hover="bg-expand" aa-hover-direction="right" aa-duration="0.5" aa-distance="0.1" aa-delay="1">
                         <div aa-hover-text-color="white">With Icon</div>
                         <div class="icon-wrapper">
                             <div class="bg-expand" aa-hover-bg></div>
@@ -116,7 +140,7 @@
                         </div>
                     </div>
 
-                    <div class="hover-button is-icon" aa-hover="bg-expand-reverse" aa-hover-direction="right">
+                    <div class="hover-button is-icon" aa-hover="bg-expand-reverse" aa-hover-direction="right" aa-duration="0.5" aa-distance="0.1">
                         <div aa-hover-text-color="white">With Icon Reverse</div>
                         <div class="icon-wrapper">
                             <div class="bg-expand" aa-hover-bg></div>
