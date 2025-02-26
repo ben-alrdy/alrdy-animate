@@ -4,11 +4,16 @@ html {
 }
 
 body {
-  // Set initial defaults on 
+  // Set initial defaults – not needed since the init function sets them
 
-  --aa-default-duration: 1s;
+  /* --aa-default-duration: 1s;
   --aa-default-delay: 0s;
-  --aa-distance: 1;
+  --aa-default-distance: 1;
+
+  --aa-default-hover-duration: 0.3s;
+  --aa-default-hover-delay: 0s;
+  --aa-default-hover-distance: 0.1; */
+
   --aa-bg-color-initial: var(--background-color--background-page);
   --aa-bg-color-final: var(--background-color--background-alternate);
 
@@ -19,9 +24,16 @@ body {
 }
 
 // Base styles for all animated elements
-[aa-animate], [aa-instant], [aa-hover] {
+[aa-animate], [aa-instant] {
   --aa-duration: var(--aa-default-duration);
   --aa-delay: var(--aa-default-delay);
+  --aa-distance: var(--aa-default-distance);
+}
+
+[aa-hover] {
+  --aa-duration: var(--aa-default-hover-duration);
+  --aa-delay: var(--aa-default-hover-delay);
+  --aa-distance: var(--aa-default-hover-distance);
 }
 
 @import 'keyframes';

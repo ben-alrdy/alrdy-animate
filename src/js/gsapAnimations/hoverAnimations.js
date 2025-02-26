@@ -295,7 +295,7 @@ function initializeExpandAnimation(element, gsap, settings) {
         hoverEase: ease,
         hoverDelay: delay,
         hoverDirection: iconDirection,
-        distance: iconDelay,
+        hoverDistance: iconDelay,
         bg,
         isReverse
     } = settings;
@@ -451,7 +451,7 @@ function initializeTextHoverAnimation(element, gsap, splitText, settings) {
         hoverEase: ease,
         hoverDelay: delay,
         hoverDistance: textDelay,
-        stagger,
+        hoverStagger: stagger,
         splitType,
         isReverse
 

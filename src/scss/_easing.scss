@@ -62,3 +62,13 @@ $aa-ease: (
     }
   }
 }
+
+[aa-hover] {
+  @each $key, $val in $aa-ease {
+    body[aa-ease="#{$key}"] &,
+    &[aa-hover][aa-ease="#{$key}"] {
+      animation-timing-function: $val;
+      transition-timing-function: $val;
+    }
+  }
+}

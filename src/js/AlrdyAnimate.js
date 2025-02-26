@@ -57,7 +57,10 @@ async function init(options = {}) {
   // Set default values on body
   document.body.style.setProperty("--aa-default-duration", `${initOptions.duration}s`);
   document.body.style.setProperty("--aa-default-delay", `${initOptions.delay}s`);
-  document.body.style.setProperty("--aa-distance", `${initOptions.distance}`);
+  document.body.style.setProperty("--aa-default-distance", `${initOptions.distance}`);
+  document.body.style.setProperty("--aa-default-hover-duration", `${initOptions.hoverDuration}s`);
+  document.body.style.setProperty("--aa-default-hover-delay", `${initOptions.hoverDelay}s`);
+  document.body.style.setProperty("--aa-default-hover-distance", `${initOptions.hoverDistance}`);
   document.body.setAttribute("aa-ease", initOptions.ease);
 
   // Start loading GSAP modules early if needed

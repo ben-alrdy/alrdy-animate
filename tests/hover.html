@@ -33,26 +33,22 @@
                 <h2>Text Hover Animations</h2>
                 <div class="hover-grid">
                     <!-- Text Slide -->
-                    <a href="#"  aa-hover="bg-shrink">
-                        <div class="hover-button transparent" aa-hover="text-slide-up" aa-split="words">
-                            <div style="position: relative; overflow: hidden;">
-                                <div aa-hover-text>Slide Up Text</div>
-                            </div>
-                            <div aa-hover-bg aa-duration="0.7" ></div>
+                    <a href="#" class="hover-button transparent" aa-hover="text-slide-up" aa-split="words" >
+                        <div style="position: relative; overflow: hidden; pointer-events: none;">
+                            <div aa-hover-text>Slide Up Text</div>
                         </div>
+                        <div aa-hover-bg aa-hover="bg-shrink" aa-duration="0.7" aa-ease="power3.inOut" ></div>
                     </a>
 
-                    <a href="#"  aa-hover="bg-grow">
-                        <div class="hover-button transparent" aa-hover="text-slide-down" aa-split="words">
-                            <div style="position: relative; overflow: hidden;">
-                                <div aa-hover-text>Slide Down Text</div>
-                            </div>
-                            <div aa-hover-bg aa-duration="0.7" ></div>
+                    <a href="#" class="hover-button transparent" aa-hover="text-slide-down" aa-split="words" >
+                        <div style="position: relative; overflow: hidden; pointer-events: none;">
+                            <div aa-hover-text>Slide Down Text</div>
                         </div>
+                        <div aa-hover-bg aa-hover="bg-grow" aa-duration="0.7" aa-ease="back.inOut" ></div>
                     </a>
 
                     <!-- Text Fade -->
-                    <a href="#" class="hover-button" aa-hover="text-fade-up" aa-split="chars" aa-stagger="0.02">
+                    <a href="#" class="hover-button" aa-hover="text-fade-up" aa-split="chars">
                         <div style="position: relative; overflow: hidden;">
                             <div aa-hover-text>Fade Up Chars</div>
                         </div>
@@ -128,7 +124,7 @@
             <section class="animation-section">
                 <h2>Background Expand Animation</h2>
                 <div class="hover-grid">
-                    <div class="hover-button is-icon" aa-hover="bg-expand" aa-hover-direction="right" aa-duration="0.5" aa-distance="0.1" aa-delay="1">
+                    <div class="hover-button is-icon" aa-hover="bg-expand" aa-hover-direction="right" aa-duration="0.5" aa-delay="1">
                         <div aa-hover-text-color="white">With Icon</div>
                         <div class="icon-wrapper">
                             <div class="bg-expand" aa-hover-bg></div>
