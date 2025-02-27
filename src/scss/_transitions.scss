@@ -249,21 +249,21 @@
     BACKGROUND SHRINK AND GROW TRANSITIONS for hover animations
     */
 
-    [aa-hover="bg-shrink"] {  
+    [aa-hover="shrink"] {  
       transition-property: transform;
       transition-duration: var(--aa-duration);
       transition-delay: var(--aa-delay);
       &:hover {
-        transform: scale(0.92);
+        transform: scale(calc(0.92 * var(--aa-distance)));
       }
     }
     
-    [aa-hover="bg-grow"] {  
+    [aa-hover="grow"] {  
       transition-property: transform;
       transition-duration: var(--aa-duration);
       transition-delay: var(--aa-delay);
       &:hover {
-        transform: scale(1.08);
+        transform: scale(calc(1.08 * var(--aa-distance)));
       }
     }
   }

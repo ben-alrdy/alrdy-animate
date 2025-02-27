@@ -60,7 +60,7 @@ async function init(options = {}) {
   document.body.style.setProperty("--aa-default-distance", `${initOptions.distance}`);
   document.body.style.setProperty("--aa-default-hover-duration", `${initOptions.hoverDuration}s`);
   document.body.style.setProperty("--aa-default-hover-delay", `${initOptions.hoverDelay}s`);
-  document.body.style.setProperty("--aa-default-hover-distance", `${initOptions.hoverDistance}`);
+  document.body.style.setProperty("--aa-default-hover-distance", `${initOptions.distance}`); // relevant for css hover animations; using the default distance of 1 instead of hoverDistance
   document.body.setAttribute("aa-ease", initOptions.ease);
 
   // Start loading GSAP modules early if needed
