@@ -245,26 +245,107 @@
       transform: scaleX(0);
     }
 
+
+
     /*
-    BACKGROUND SHRINK AND GROW TRANSITIONS for hover animations
+    HOVER TRANSITIONS 
     */
 
-    [aa-hover="shrink"] {  
+    // Helper maps
+    $scale-values: (
+      'grow': calc(1.08 * var(--aa-distance)),
+      'shrink': calc(0.92 * var(--aa-distance))
+    );
+
+    $translations: (
+      'up': translateY(calc(-1rem * var(--aa-distance))),
+      'down': translateY(calc(1rem * var(--aa-distance))),
+      'left': translateX(calc(-1rem * var(--aa-distance))),
+      'right': translateX(calc(1rem * var(--aa-distance)))
+    );
+
+    $hover-rotation-degrees: (0, 5, 15, 25, 360, 720);
+
+    // Base transition for all hover effects
+    [aa-hover] {
       transition-property: transform;
       transition-duration: var(--aa-duration);
       transition-delay: var(--aa-delay);
-      &:hover {
-        transform: scale(calc(0.92 * var(--aa-distance)));
+    }
+
+    // Generate all combinations
+    @each $scale-name, $scale-value in $scale-values {
+      // Scale only
+      [aa-hover="#{$scale-name}"]:hover {
+        transform: scale($scale-value);
+      }
+      
+      // Scale + rotate
+      @each $degree in $hover-rotation-degrees {
+        // Clockwise
+        [aa-hover="#{$scale-name}-cw-#{$degree}"]:hover {
+          transform: rotate(#{$degree}deg) scale($scale-value);
+        }
+        // Counter-clockwise
+        [aa-hover="#{$scale-name}-ccw-#{$degree}"]:hover {
+          transform: rotate(-#{$degree}deg) scale($scale-value);
+        }
+
+        // Scale + slide + rotate
+        @each $slide-name, $translate in $translations {
+          // Clockwise
+          [aa-hover="#{$scale-name}-#{$slide-name}-cw-#{$degree}"]:hover {
+            transform: rotate(#{$degree}deg) $translate scale($scale-value);
+          }
+          // Counter-clockwise
+          [aa-hover="#{$scale-name}-#{$slide-name}-ccw-#{$degree}"]:hover {
+            transform: rotate(-#{$degree}deg) $translate scale($scale-value);
+          }
+        }
+      }
+
+      // Scale + slide (without rotation)
+      @each $slide-name, $translate in $translations {
+        [aa-hover="#{$scale-name}-#{$slide-name}"]:hover {
+          transform: $translate scale($scale-value);
+        }
       }
     }
+
+    // Slide only
+    @each $slide-name, $translate in $translations {
+      [aa-hover="slide-#{$slide-name}"]:hover {
+        transform: $translate;
+      }
+      
+      // Slide + rotate
+      @each $degree in $hover-rotation-degrees {
+        // Clockwise
+        [aa-hover="slide-#{$slide-name}-cw-#{$degree}"]:hover {
+          transform: rotate(#{$degree}deg) $translate;
+        }
+        // Counter-clockwise
+        [aa-hover="slide-#{$slide-name}-ccw-#{$degree}"]:hover {
+          transform: rotate(-#{$degree}deg) $translate;
+        }
+      }
+    }
+
+    // Rotate only
+    @each $degree in $hover-rotation-degrees {
+      // Clockwise
+      [aa-hover="rotate-cw-#{$degree}"]:hover {
+        transform: rotate(#{$degree}deg);
+      }
+      // Counter-clockwise
+      [aa-hover="rotate-ccw-#{$degree}"]:hover {
+        transform: rotate(-#{$degree}deg);
+      }
+    }
+
     
-    [aa-hover="grow"] {  
-      transition-property: transform;
-      transition-duration: var(--aa-duration);
-      transition-delay: var(--aa-delay);
-      &:hover {
-        transform: scale(calc(1.08 * var(--aa-distance)));
-      }
-    }
+    
+    
+
   }
 }

@@ -142,7 +142,7 @@
 
 // Define the degrees list and positions
 $rotation-degrees: (5, 15, 25, 35, 45);
-$rotation-positions: ('br': (100% 100%), 'bl': (0 100%));
+$rotation-positions: ('br': (100% 100%), 'bl': (0 100%), 'tr': (100% 0), 'tl': (0 0), 'c': (50% 50%));
 
 // Base styles for rotate animations
 [aa-animate^='rotate-'],
