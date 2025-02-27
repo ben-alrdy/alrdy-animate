@@ -264,9 +264,9 @@
       'right': translateX(calc(1rem * var(--aa-distance)))
     );
 
-    $hover-rotation-degrees: (0, 5, 15, 25, 360, 720);
+    $hover-rotation-degrees: (5, 15, 360, 720);
 
-    // Base transition for all hover effects
+    // Base transition
     [aa-hover] {
       transition-property: transform;
       transition-duration: var(--aa-duration);
@@ -280,24 +280,34 @@
         transform: scale($scale-value);
       }
       
-      // Scale + rotate
+      // Scale + rotate-0
+      [aa-hover="#{$scale-name}-0"]:hover {
+        transform: rotate(0deg) scale($scale-value);
+      }
+      
+      // Scale + rotate with direction
       @each $degree in $hover-rotation-degrees {
-        // Clockwise
         [aa-hover="#{$scale-name}-cw-#{$degree}"]:hover {
           transform: rotate(#{$degree}deg) scale($scale-value);
         }
-        // Counter-clockwise
         [aa-hover="#{$scale-name}-ccw-#{$degree}"]:hover {
           transform: rotate(-#{$degree}deg) scale($scale-value);
         }
+      }
 
-        // Scale + slide + rotate
-        @each $slide-name, $translate in $translations {
-          // Clockwise
+      // Scale + slide + rotate-0
+      @each $slide-name, $translate in $translations {
+        [aa-hover="#{$scale-name}-#{$slide-name}-0"]:hover {
+          transform: rotate(0deg) $translate scale($scale-value);
+        }
+      }
+
+      // Scale + slide + rotate with direction
+      @each $slide-name, $translate in $translations {
+        @each $degree in $hover-rotation-degrees {
           [aa-hover="#{$scale-name}-#{$slide-name}-cw-#{$degree}"]:hover {
             transform: rotate(#{$degree}deg) $translate scale($scale-value);
           }
-          // Counter-clockwise
           [aa-hover="#{$scale-name}-#{$slide-name}-ccw-#{$degree}"]:hover {
             transform: rotate(-#{$degree}deg) $translate scale($scale-value);
           }
@@ -314,30 +324,35 @@
 
     // Slide only
     @each $slide-name, $translate in $translations {
-      [aa-hover="slide-#{$slide-name}"]:hover {
+      [aa-hover="#{$slide-name}"]:hover {
         transform: $translate;
       }
       
-      // Slide + rotate
+      // Slide + rotate-0
+      [aa-hover="#{$slide-name}-0"]:hover {
+        transform: rotate(0deg) $translate;
+      }
+      
+      // Slide + rotate with direction
       @each $degree in $hover-rotation-degrees {
-        // Clockwise
-        [aa-hover="slide-#{$slide-name}-cw-#{$degree}"]:hover {
+        [aa-hover="#{$slide-name}-cw-#{$degree}"]:hover {
           transform: rotate(#{$degree}deg) $translate;
         }
-        // Counter-clockwise
-        [aa-hover="slide-#{$slide-name}-ccw-#{$degree}"]:hover {
+        [aa-hover="#{$slide-name}-ccw-#{$degree}"]:hover {
           transform: rotate(-#{$degree}deg) $translate;
         }
       }
     }
 
     // Rotate only
+    [aa-hover="rotate-0"]:hover {
+      transform: rotate(0deg);
+    }
+
     @each $degree in $hover-rotation-degrees {
-      // Clockwise
       [aa-hover="rotate-cw-#{$degree}"]:hover {
         transform: rotate(#{$degree}deg);
       }
-      // Counter-clockwise
       [aa-hover="rotate-ccw-#{$degree}"]:hover {
         transform: rotate(-#{$degree}deg);
       }
