@@ -246,10 +246,76 @@
     }
 
 
-
     /*
     HOVER TRANSITIONS 
     */
+
+
+     /*
+    Underline Link Animations
+    */
+
+    [aa-hover^="underline"] {
+      position: relative;
+      
+      &::before,
+      &::after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: calc(0.1em * var(--aa-distance));
+        background-color: currentColor;
+        transition: transform;
+        transition-duration: var(--aa-duration);
+        transition-delay: var(--aa-delay);
+        transition-timing-function: cubic-bezier(0.625, 0.05, 0, 1);
+        transform-origin: right;
+        transform: scaleX(0) rotate(0.001deg);
+      }
+    }
+
+    // Single underline
+    [aa-hover="underline-in"] {
+      &:hover::before {
+        transform-origin: left;
+        transform: scaleX(1) rotate(0.001deg);
+      }
+    }
+
+    // Double underline (alt version)
+    [aa-hover="underline-out-in"] {
+      &::before {
+        transform-origin: left;
+        transform: scaleX(1) rotate(0.001deg);
+        transition-delay: 0.3s;
+      }
+
+      &:hover::before {
+        transform-origin: right;
+        transform: scaleX(0) rotate(0.001deg);
+        transition-delay: 0s;
+      }
+
+      &::after {
+        transform-origin: right;
+        transform: scaleX(0) rotate(0.001deg);
+        transition-delay: 0s;
+      }
+
+      &:hover::after {
+        transform-origin: left;
+        transform: scaleX(1) rotate(0.001deg);
+        transition-delay: 0.3s;
+      }
+    }
+
+
+    /*
+    Scale/Translate/Rotate Animations
+    */
+
 
     // Helper maps
     $scale-values: (
@@ -357,9 +423,6 @@
         transform: rotate(-#{$degree}deg);
       }
     }
-
-    
-    
     
 
   }

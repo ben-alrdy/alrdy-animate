@@ -4,6 +4,7 @@ export function createTextAnimations(gsap) {
     slide:        { duration: 0.5, stagger: 0.1, ease: 'back.out' },
     rotateSoft:   { duration: 1.2, stagger: 0.3, ease: 'circ.out' },
     fade:         { duration: 1.0, stagger: 0.08, ease: 'power2.inOut' },
+    blur:         { duration: 0.4, stagger: 0.02, ease: 'ease-out' },
   };
 
   // Helper function to create base animation configuration
@@ -73,10 +74,6 @@ export function createTextAnimations(gsap) {
 
   // Return all animations with their specific configurations
   return {
-    fadeUp: createAnimation(
-      { y: "150%", x: "-20", opacity: 0 },
-      defaults.slide
-    ),
     
     slideUp: createAnimation(
       { y: "110%", opacity: 0 },
@@ -97,6 +94,11 @@ export function createTextAnimations(gsap) {
       { y: "-110%", opacity: 0, rotation: -10, transformOrigin: "top left" },
       defaults.slide
     ),
+
+    fadeUp: createAnimation(
+      { y: "150%", x: "-20", opacity: 0 },
+      defaults.slide
+    ),
     
     fadeSoft: createAnimation(
       { opacity: 0.3 },
@@ -106,6 +108,49 @@ export function createTextAnimations(gsap) {
     fade: createAnimation(
       { opacity: 0 },
       defaults.fade
+    ),
+    
+    blur: createAnimation(
+      { 
+        opacity: 0, 
+        filter: 'blur(10px)',
+        scale: 1.1  
+      },
+      defaults.blur
+    ),
+
+    blurLeft: createAnimation(
+      { 
+        opacity: 0, 
+        filter: 'blur(10px)',
+        x: 30
+      },
+      defaults.blur
+    ),
+
+    blurRight: createAnimation(
+      { 
+        opacity: 0, 
+        filter: 'blur(10px)',
+        x: -30
+      },
+      defaults.blur
+    ),
+    blurUp: createAnimation(
+      { 
+        opacity: 0, 
+        filter: 'blur(10px)',
+        y: "110%"
+      },
+      defaults.blur
+    ),
+    blurDown: createAnimation(
+      { 
+        opacity: 0, 
+        filter: 'blur(10px)',
+        y: "-110%"  
+      },
+      defaults.blur
     ),
     
     rotateSoft: (element, splitResult, splitType, duration, stagger, delay, ease) => {

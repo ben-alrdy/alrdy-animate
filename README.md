@@ -255,6 +255,12 @@ AlrdyAnimate supports several GSAP-powered features that can be enabled by inclu
 - `text-rotate-soft`: Rotates the text softly around the X axis. Best works with `aa-split="lines"` or `aa-split="lines.clip"`.
 - `text-fade-soft`: Fades the text in, starts with 30% opacity.
 - `text-fade`: Fades the text in, starts with 0% opacity.
+- `text-fade-up`: Fades the text in, starts with 0% opacity and slides up.
+- `text-blur`: Blurs the text in, starts with 0% opacity.
+- `text-blur-left`: Blurs the text in, starts with 0% opacity and slides left.
+- `text-blur-right`: Blurs the text in, starts with 0% opacity and slides right.
+- `text-blur-up`: Blurs the text in, starts with 0% opacity and slides up.
+- `text-blur-down`: Blurs the text in, starts with 0% opacity and slides down.
 
 
 ### Slider Animations 

@@ -34,7 +34,12 @@ const TEXT_ANIMATION_MAP = {
   'text-rotate-soft': 'rotateSoft',
   'text-fade-soft': 'fadeSoft',
   'text-fade': 'fade',
-  'text-fade-up': 'fadeUp'
+  'text-fade-up': 'fadeUp',
+  'text-blur': 'blur',
+  'text-blur-left': 'blurLeft',
+  'text-blur-right': 'blurRight',
+  'text-blur-up': 'blurUp',
+  'text-blur-down': 'blurDown'
 };
 
 // Initialize the animation script with the given options

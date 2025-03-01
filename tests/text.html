@@ -26,25 +26,54 @@
 
     <main>
         <div class="container">
-            <h1 aa-animate="turn-3d-soft-3em">Text Animations</h1>
+            <h1>Text Animations</h1>
 
             <!-- Basic Text Slides -->
             <section class="animation-section">
-                <h2 aa-animate="fade-up">Basic Text Slides</h2>
+                <h2>Basic Text Slides</h2>
                 
                 <div class="text-container">
                     <h3 aa-animate="text-slide-up" aa-split="words" aa-stagger="0.1">
                         This text slides up word by word
                     </h3>
-                    <h3 aa-animate="text-slide-down" aa-split="words" aa-stagger="0.1">
+                    <h3 aa-animate="text-slide-down" aa-split="words">
                         This text slides down word by word
+                    </h3>
+                </div>
+            </section>
+
+             <!-- Blur Texts -->
+             <section class="animation-section">
+                <h2>Blur Texts</h2>
+                
+                <div class="text-container">
+                    <h3 aa-animate="text-blur-left" aa-split="words">
+                        This text blurs in word by word
+                    </h3>
+                    <h3 aa-animate="text-blur-right" aa-split="words">
+                        This text blurs in word by word
+                    </h3>
+                    <h3 aa-animate="text-blur-left" aa-split="chars">
+                        This text blurs in character by character
+                    </h3>
+                    <h3 aa-animate="text-blur-right" aa-split="chars">
+                        This text blurs in character by character
+                    </h3>
+                    <h3 aa-animate="text-blur" aa-split="chars">
+                        This text blurs in character by character
+                    </h3>
+                    <h3 aa-animate="text-blur-up" aa-split="words" aa-stagger="0.05" aa-duration="0.6">
+                        This text blurs in word by word
+                    </h3>
+                    <h3 aa-animate="text-blur-down" aa-split="words" aa-stagger="0.05" aa-duration="0.6">
+                        This text blurs in word by word
                     </h3>
                 </div>
             </section>
 
             <!-- Text Tilt Animations -->
             <section class="animation-section">
-                <h2 aa-animate="fade-up">Text Tilt Animations</h2>
+                <h2>Text Tilt Animations</h2>
                 
                 <div class="text-container">
                     <h3 aa-animate="text-tilt-up" aa-split="words" aa-stagger="0.1">
@@ -58,7 +87,7 @@
 
             <!-- Text Rotate Animations -->
             <section class="animation-section">
-                <h2 aa-animate="fade-up">Text Rotate Animations</h2>
+                <h2>Text Rotate Animations</h2>
                 
                 <div class="text-container">
                     <h3 aa-animate="text-rotate-soft" aa-split="lines.clip" aa-stagger="0.3">
@@ -71,7 +100,7 @@
 
             <!-- Text Fade Animations -->
             <section class="animation-section">
-                <h2 aa-animate="fade-up">Text Fade Animations</h2>
+                <h2>Text Fade Animations</h2>
                 
                 <div class="text-container">
                     <h3 aa-animate="text-fade-soft" aa-split="chars" aa-stagger="0.02">
@@ -80,12 +109,15 @@
                     <h3 aa-animate="text-fade" aa-split="words" aa-stagger="0.1">
                         This text fades in word by word
                     </h3>
+                    <h3 aa-animate="text-fade-up" aa-split="words" aa-stagger="0.1">
+                        This text fades in word by word
+                    </h3>
                 </div>
             </section>
 
             <!-- Split Types Demo -->
             <section class="animation-section">
-                <h2 aa-animate="fade-up">Split Types Demo</h2>
+                <h2>Split Types Demo</h2>
                 
                 <div class="text-container">
                     <h3 aa-animate="text-slide-up" aa-split="lines" aa-stagger="0.2">
@@ -112,7 +144,7 @@
 
             <!-- Scroll-Driven Text -->
             <section class="animation-section">
-                <h2 aa-animate="fade-up">Scroll-Driven Text</h2>
+                <h2>Scroll-Driven Text</h2>
                 
                 <div class="text-container">
                     <h3 aa-animate="text-slide-up" aa-split="words" aa-scrub="smooth">
