@@ -233,7 +233,7 @@ function setupGSAPAnimations(element, elementSettings, initOptions, isMobile, mo
   
   // 1. Variables setup
   const baseType = animationType.includes('-') ? animationType.split('-')[0] : animationType;
-  const gsapAnimations = ['appear', 'reveal', 'counter', 'text', 'slider', 'background', 'parallax'];
+  const gsapAnimations = ['appear', 'reveal', 'counter', 'text', 'slider', 'background', 'parallax', 'marquee'];
 
   // Clear existing animations
   if (element.timeline) element.timeline.kill();
@@ -311,6 +311,10 @@ function setupGSAPAnimations(element, elementSettings, initOptions, isMobile, mo
 
       case 'counter':
         tl.add(modules.animations.counter(element, duration, ease, delay));
+        break;
+
+      case 'marquee':
+        modules.animations.marquee(element, duration);
         break;
 
       case 'text':

@@ -76,3 +76,22 @@ body {
   position: relative;
   z-index: 1;
 }
+
+[aa-animate^="marquee"] {
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+[aa-marquee-scroller] {
+  will-change: transform;
+  width: 100%;
+  display: flex;
+  position: relative;
+}
+
+[aa-marquee-items] {
+  will-change: transform;
+  display: flex;
+  position: relative;
+}

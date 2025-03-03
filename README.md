@@ -395,6 +395,26 @@ Enables scroll-driven animations and effects.
 </div>
 ```
 
+#### Marquee Animations
+- Use `aa-animate="marquee-left"` or `aa-animate="marquee-right"` to create a left- or right-moving marquee
+- Add `-hover` to the animation type to create a marquee that slows down on hover, e.g. `aa-animate="marquee-left-hover"`
+- Use `aa-duration` to set the duration of the animation
+- Use `aa-marquee-scroller` to mark the element that increases in speed on scroll; accepts integer to set the speed multiplier, e.g. `aa-marquee-scroller="10"` (defaults to 10, set to 1 for no scroll speed increase)
+- Use `aa-marquee-items` to mark the element that contains the items to duplicate in the marquee; accepts integer to set the number of duplicates, e.g. `aa-marquee-items="3"` (defaults to 2)
+
+Example:
+```html
+<div aa-animate="marquee-left-hover" aa-duration="15" class="marquee">
+  <div aa-marquee-scroller="10">
+    <div aa-marquee-items>
+      <div class="marquee__item">
+        <p>Scroll Effects & Animations</p> 
+      </div>
+    </div>
+  </div>
+</div>
+```
+
 #### Parallax Scrolling
 - Use `aa-animate="parallax-40"` on an image to create a parallax scroll effect
 - The number (40) represents the movement distance in pixels

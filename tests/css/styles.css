@@ -461,3 +461,28 @@ p {
     line-height: 1.6;
     max-width: 60ch;
 }
+
+.marquee-section {
+    width: 100%;
+    padding: 4rem 0;
+}
+
+.marquee__item {
+    display: flex;
+    align-items: center;
+}
+
+.marquee__item p {
+    white-space: nowrap;
+    font-size: max(4em, 8vw);
+    margin: 0;
+    margin-right: 0.25em;
+}
+
+.marquee__box {
+    background-color: #131313;
+    border-radius: 1vw;
+    width: 18vw;
+    height: 18vw;
+    margin: 1vw;
+}

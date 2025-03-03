@@ -59,6 +59,35 @@
             </section>
         </div>
 
+        <!-- Add the marquee sections here -->
+        <section class="marquee-section">
+            <!-- Left-moving marquee -->
+            <div aa-animate="marquee-left-hover" aa-duration="15" class="marquee">
+                <div aa-marquee-scroller>
+                    <div aa-marquee-items>
+                        <div class="marquee__item">
+                            <p>Scroll Effects & Animations - </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right-moving marquee -->
+            <div aa-animate="marquee-right" aa-duration="50" class="marquee">
+                <div aa-marquee-scroller="1">
+                    <div aa-marquee-items>
+                        <div class="marquee__item">
+                            <div class="marquee__box"></div>
+                            <div class="marquee__box"></div>
+                            <div class="marquee__box"></div>
+                            <div class="marquee__box"></div>
+                            <div class="marquee__box"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <section class="full-height-section">
             <div class="container">
                 <h1>Scroll Effects</h1>
@@ -66,6 +95,7 @@
                 <button class="button">Get Started</button>
             </div>
         </section>
+    
     </main>
 
     <script src="../dist/AlrdyAnimate.js"></script>
