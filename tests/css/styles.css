@@ -419,3 +419,45 @@ button[aa-slider-next]:hover {
     background: #333;
     color: white;
 }
+
+/* Scroll Demo Styles */
+
+.background-wrapper{
+    background-color: var(--bg-color);
+    color: var(--text-color);
+}
+.full-height-section {
+    min-height: 60vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 0;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2rem;
+}
+
+.button {
+    margin-top: 2rem;
+    padding: 1rem 2rem;
+    border: none;
+    border-radius: 0.25rem;
+    background: black;
+    color: white;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+h1, h2 {
+    margin-bottom: 1rem;
+    font-size: clamp(2rem, 5vw, 3.5rem);
+}
+
+p {
+    font-size: clamp(1rem, 2vw, 1.25rem);
+    line-height: 1.6;
+    max-width: 60ch;
+}

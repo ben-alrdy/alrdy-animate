@@ -703,18 +703,18 @@ export function createSliderAnimations(gsap, Draggable) {
     // Set up the onChange handler
     config.onChange = (element, rawIndex) => {
       // Handle active class for slides
-      const activeElement = element.parentElement.querySelector('.active');
-      if (activeElement) activeElement.classList.remove('active');
-      element.classList.add('active');
+      const activeElement = element.parentElement.querySelector('.is-active');
+      if (activeElement) activeElement.classList.remove('is-active');
+      element.classList.add('is-active');
 
       // Handle active class for buttons
       if (slideButtons.length > 0) {
-        const activeButton = [...slideButtons].find(btn => btn.classList.contains('active'));
-        if (activeButton) activeButton.classList.remove('active');
+        const activeButton = [...slideButtons].find(btn => btn.classList.contains('is-active'));
+        if (activeButton) activeButton.classList.remove('is-active');
         
         const index = ((rawIndex % totalSlides) + totalSlides) % totalSlides;
         if (slideButtons[index]) {
-          slideButtons[index].classList.add('active');
+          slideButtons[index].classList.add('is-active');
         }
       }
 

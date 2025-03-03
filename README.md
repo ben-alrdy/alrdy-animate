@@ -355,7 +355,7 @@ Creates infinite scrolling, snapping, or static slider animations. To use:
   - `aa-slider-current` and `aa-slider-total` to display the current and total number of slides
   - `aa-slider-button` for specific buttons to jump to a certain slide
     - the number of buttons needs to match the number of slides
-    - the slide that is active and the corresponding button get the class `active` so you can style them accordingly
+    - the slide that is active and the corresponding button get the class `is-active` so you can style them accordingly
     - optionally, if the buttons don't live in the same wrapper as `aa-animate = slider`, you can add `aa-slider-target=id_of_slider` to each button to control a specific slider
 
 
@@ -375,23 +375,22 @@ Enables scroll-driven animations and effects.
 - Add an integer to `aa-nav` to define after how many pixels the the effect should be triggered. Example: `aa-nav="hide-change-50"`. Defaults to `100px`.
 
 #### Background Color Transitions
-- Use `aa-animate="background"` on the element you want to animate; optionally set `aa-viewport` and `aa-duration`
-- Use `aa-parent-bg` and `aa-parent-text` on child elements to change the parent's background and text colors when they scroll into view
-- Use `aa-child-bg` and `aa-child-text` to simultaneously change the child element's colors
-- Colors revert when scrolling back up
+- Use `aa-animate="background"` on a wrapper element you want to animate when sections inside the wrapper scroll into view
+  - Optionally set `aa-duration` to define the duration of the animation and `aa-ease` to define the easing.
+- Set `aa-viewport` to 0.5 to trigger the animation when the section is 50% in view.
+- Set `aa-scrub` to `smooth`, `snap` or `smoother` to make the animation scroll driven.
+- Use `aa-wrapper-colors` with `bg` and `text` to define the background and text colors for the wrapper once the section is scrolled into view, e.g. `aa-wrapper-colors="bg:#f0f0f0;text:#000"`.
+- Use `aa-item-colors` with `bg` and `text` to change the background and text colors for child elements when they scroll into view, e.g. `aa-item-colors="bg:#ff0000;text:#fff"`.
+
 - Example:
 ```html
-<div class="parent" aa-animate="background" aa-viewport="0.5" aa-duration="2.5">
-  <div aa-parent-bg="#f0f0f0" aa-parent-text="#000">
-    Changes parent background to light gray and text to black
+<div class="wrapper" aa-animate="background" aa-viewport="0.5" aa-duration="0.8">
+  <div class="section" aa-wrapper-colors="bg:#f0f0f0;text:#000">
+    Changes wrapper background to light gray and text to black
   </div>
-  <div 
-    aa-parent-bg="#000" 
-    aa-parent-text="#fff"
-    aa-child-bg="#ff0000"
-    aa-child-text="#fff"
-  >
-    Changes parent to dark theme and self to red
+  <div class="section" aa-wrapper-colors="bg:#000;text:#fff" aa-item-colors="bg:#ff0000;text:#fff">
+    Changes wrapper background to dark theme and self to red
+    <div class="item" aa-item-colors="bg:#ff0000;text:#fff">Changes item background to red and text to white</div>
   </div>
 </div>
 ```

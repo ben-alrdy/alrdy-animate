@@ -72,109 +72,177 @@ function initializeNav(element, type, ease, duration, distance, scrolled) {
 }
 
 function initializeBackgroundColor(element, gsap, ScrollTrigger, duration, ease, viewportPercentage, debug = false) {
-  
-  // Create base animation config
-  const animConfig = {
-    duration,
-    ease,
-    overwrite: true
-  };
-  
-  // Store original colors
-  const originalColors = {
-    parent: {
-      backgroundColor: getComputedStyle(element).backgroundColor,
-      color: getComputedStyle(element).color
-    }
-  };
-  
-  // Find and store trigger elements and their colors
-  const triggers = Array.from(element.querySelectorAll('[aa-parent-bg]'));
-  const childOriginalColors = new Map(
-    triggers.map(trigger => {
-      const computedStyle = window.getComputedStyle(trigger);
-      return [trigger, {
-        backgroundColor: computedStyle.backgroundColor === 'rgba(0, 0, 0, 0)' ? 'transparent' : computedStyle.backgroundColor,
-        color: computedStyle.color
-      }];
-    })
-  );
-  
-  let currentActiveChild = null;
-  
-  // Helper function to animate color changes
-  const animateColors = (target, colors) => {
-    gsap.to(target, {
-      ...animConfig,
-      backgroundColor: colors.backgroundColor || null,
-      color: colors.color || null
-    });
-  };
-  
-  triggers.forEach((trigger, index) => {
-    const prevTrigger = index === 0 ? null : triggers[index - 1];
+  // Helper function to convert rgb to hex
+  function rgbToHex(rgb) {
+    // Extract r, g, b values from rgb(r, g, b) format
+    const [r, g, b] = rgb.match(/\d+/g).map(Number);
     
-    // Get all color attributes
-    const colors = {
-      parent: {
-        backgroundColor: trigger.getAttribute('aa-parent-bg'),
-        color: trigger.getAttribute('aa-parent-text')
-      },
-      child: {
-        backgroundColor: trigger.getAttribute('aa-child-bg'),
-        color: trigger.getAttribute('aa-child-text')
-      },
-      prevParent: {
-        backgroundColor: prevTrigger?.getAttribute('aa-parent-bg') || originalColors.parent.backgroundColor,
-        color: prevTrigger?.getAttribute('aa-parent-text') || originalColors.parent.color
+    // Convert to hex and pad with zeros if needed
+    const toHex = (n) => n.toString(16).padStart(2, '0');
+    return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+  }
+
+  // Helper function to parse aa-colors attribute
+  function parseColors(attribute) {
+    if (!attribute) return {};
+    
+    return attribute.split(';').reduce((colors, current) => {
+      const [type, value] = current.split(':').map(s => s.trim());
+      if (type === 'bg' || type === 'text') {
+        colors[type === 'bg' ? 'backgroundColor' : 'color'] = value;
       }
-    };
+      return colors;
+    }, {});
+  }
+
+  // Get animation settings
+  const scrub = element.getAttribute('aa-scrub');
+  const scrubValue = scrub === 'smoother' ? 4 :
+                     scrub === 'smooth' ? 2 :
+                     scrub === 'snap' ? { snap: 0.2 } :
+                     scrub ? true : false;
+
+  // Store and set initial colors (converting to hex)
+  const computedStyle = getComputedStyle(element);
+  const initialColors = {
+    backgroundColor: rgbToHex(computedStyle.backgroundColor),
+    color: rgbToHex(computedStyle.color)
+  };
+  
+  // Explicitly set initial colors
+  gsap.set(element, initialColors);
+
+  // Get and store all sections with their colors
+  const sections = Array.from(element.querySelectorAll('[aa-wrapper-colors]')).map((section, i) => {
+    const sectionColors = parseColors(section.getAttribute('aa-wrapper-colors'));
     
-    ScrollTrigger.create({
-      trigger: trigger,
-      start: `top ${viewportPercentage * 100}%`,
-      onEnter: () => {
-        // Revert previous active child
-        if (currentActiveChild && currentActiveChild !== trigger) {
-          const originalChildColors = childOriginalColors.get(currentActiveChild);
-          animateColors(currentActiveChild, originalChildColors);
+    const items = Array.from(section.querySelectorAll('[aa-item-colors]')).map(item => {
+      const itemColors = parseColors(item.getAttribute('aa-item-colors'));
+      const computedStyle = getComputedStyle(item);
+      const initialItemColors = {
+        backgroundColor: rgbToHex(computedStyle.backgroundColor),
+        color: rgbToHex(computedStyle.color)
+      };
+      
+      return {
+        element: item,
+        initialColors: initialItemColors,
+        colors: itemColors
+      };
+    });
+
+    return {
+      element: section,
+      colors: sectionColors,
+      items
+    };
+  });
+
+  // Create a ScrollTrigger for each section
+  sections.forEach((section, index) => {
+    const prevSection = index > 0 ? sections[index - 1] : null;
+    
+    if (scrub) {
+      // Force initial state globally
+      gsap.set(element, initialColors);
+      
+      const tl = gsap.timeline({
+        defaults: { duration: 1, ease: "none" },
+        paused: true,
+        data: { index }
+      });
+      
+      // Parent animation
+      if (Object.keys(section.colors).length > 0) {
+        const fromColors = prevSection ? {
+          backgroundColor: prevSection.colors.backgroundColor,
+          color: prevSection.colors.color
+        } : initialColors;
+        
+        tl.fromTo(element,
+          fromColors,
+          section.colors,
+          0
+        );
+      }
+
+      // Item animations
+      section.items.forEach(item => {
+        if (Object.keys(item.colors).length > 0) {
+          tl.to(item.element, {
+            backgroundColor: item.colors.backgroundColor,
+            color: item.colors.color
+          }, "<");
         }
-        
-        // Animate parent
-        animateColors(element, colors.parent);
-        
-        // Animate current child if needed
-        if (colors.child.backgroundColor || colors.child.color) {
-          animateColors(trigger, colors.child);
-          currentActiveChild = trigger;
-        }
-      },
-      onLeaveBack: () => {
-        // Animate parent back
-        animateColors(element, colors.prevParent);
-        
-        // Handle child animations
-        if (currentActiveChild === trigger) {
-          // Revert current child to original colors
-          const originalChildColors = childOriginalColors.get(trigger);
-          animateColors(trigger, originalChildColors);
+      });
+
+      ScrollTrigger.create({
+        trigger: section.element,
+        start: `top ${viewportPercentage * 100}%`,
+        end: `center ${viewportPercentage * 100}%`,
+        scrub: scrubValue,
+        animation: tl,
+        markers: debug,
+        invalidateOnRefresh: true,
+        fastScrollEnd: true,
+        preventOverlaps: true,
+        ...(scrub !== 'snap' && { snap: false }),
+        onRefresh: self => {
+          // Create a temporary trigger for the wrapper
+          const wrapperTrigger = ScrollTrigger.create({
+            trigger: element,
+            start: "top bottom", // When top of wrapper hits bottom of viewport
+          });
           
-          // Activate previous child if it exists
-          if (prevTrigger && 
-              (prevTrigger.getAttribute('aa-child-bg') || 
-               prevTrigger.getAttribute('aa-child-text'))) {
-            animateColors(prevTrigger, {
-              backgroundColor: prevTrigger.getAttribute('aa-child-bg') || childOriginalColors.get(prevTrigger).backgroundColor,
-              color: prevTrigger.getAttribute('aa-child-text') || childOriginalColors.get(prevTrigger).color
+          const isAboveWrapper = !wrapperTrigger.isActive;
+          wrapperTrigger.kill(); // Clean up temporary trigger
+          
+          // Only reset colors if we're above the wrapper
+          if (isAboveWrapper) {
+            gsap.set(element, initialColors);
+            sections.forEach(section => {
+              section.items.forEach(item => {
+                gsap.set(item.element, item.initialColors);
+              });
             });
-            currentActiveChild = prevTrigger;
-          } else {
-            currentActiveChild = null;
           }
         }
-      },
-      markers: debug
-    });
+      });
+
+      // Store ScrollTrigger ID for reference
+      section.element.dataset.stId = `background-${index}`;
+    } else {
+      // Create a shared timeline for this section
+      const tl = gsap.timeline({
+        paused: true,
+        defaults: { duration, ease }
+      });
+
+      // Set up the forward animation
+      if (Object.keys(section.colors).length > 0) {
+        tl.to(element, section.colors);
+      }
+
+      section.items.forEach(item => {
+        if (Object.keys(item.colors).length > 0) {
+          tl.to(item.element, {
+            ...item.colors
+          }, "<");
+        }
+      });
+
+      ScrollTrigger.create({
+        trigger: section.element,
+        start: `top ${viewportPercentage * 100}%`,
+        onEnter: () => {
+          tl.play();
+        },
+        onLeaveBack: () => {
+          tl.reverse();
+        },
+        markers: debug
+      });
+    }
   });
 }
 
