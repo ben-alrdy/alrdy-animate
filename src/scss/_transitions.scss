@@ -285,7 +285,7 @@
     }
 
     // Double underline (alt version)
-    [aa-hover="underline-out-in"] {
+    [aa-hover="underline"] {
       &::before {
         transform-origin: left;
         transform: scaleX(1) rotate(0.001deg);

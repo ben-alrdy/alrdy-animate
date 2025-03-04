@@ -442,16 +442,28 @@ function createMarqueeTimeline(element, gsap, ScrollTrigger, duration) {
 
   // Add hover effect only if hover is specified
   if (hasHover) {
+    let currentDirection = directionMultiplier;
+
+    // Update current direction when scroll direction changes
+    ScrollTrigger.create({
+      trigger: element,
+      start: 'top bottom',
+      end: 'bottom top',
+      onUpdate: (self) => {
+        currentDirection = self.direction === 1 ? -directionMultiplier : directionMultiplier;
+      }
+    });
+
     element.addEventListener('mouseenter', () => {
       gsap.to(animation, {
-        timeScale: directionMultiplier / 3,
+        timeScale: currentDirection / 4,
         duration: 0.5
       });
     });
 
     element.addEventListener('mouseleave', () => {
       gsap.to(animation, {
-        timeScale: directionMultiplier,
+        timeScale: currentDirection,
         duration: 0.5
       });
     });
