@@ -24,7 +24,7 @@ body {
 }
 
 // Base styles for all animated elements
-[aa-animate], [aa-instant] {
+[aa-animate], [aa-instant], [aa-load] {
   --aa-duration: var(--aa-default-duration);
   --aa-delay: var(--aa-default-delay);
   --aa-distance: var(--aa-default-distance);
