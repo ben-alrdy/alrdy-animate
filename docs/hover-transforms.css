@@ -1,0 +1,92 @@
+/* CSS Variables */
+:root {
+  --aa-duration: 0.3s;
+  --aa-delay: 0s;
+  --aa-distance: 1;
+}
+
+/* Base transition for all hover transforms */
+[aa-hover*="grow"],
+[aa-hover*="shrink"],
+[aa-hover*="slide"],
+[aa-hover*="rotate"] {
+  transition-property: transform;
+  transition-duration: var(--aa-duration);
+  transition-delay: var(--aa-delay);
+}
+
+/* Scale only */
+[aa-hover="grow"]:hover { transform: scale(calc(1.08 * var(--aa-distance))); }
+[aa-hover="shrink"]:hover { transform: scale(calc(0.92 * var(--aa-distance))); }
+
+/* Scale + rotate-0 */
+[aa-hover="grow-0"]:hover { transform: rotate(0deg) scale(calc(1.08 * var(--aa-distance))); }
+[aa-hover="shrink-0"]:hover { transform: rotate(0deg) scale(calc(0.92 * var(--aa-distance))); }
+
+/* Scale + rotate */
+[aa-hover="grow-cw-5"]:hover { transform: rotate(5deg) scale(calc(1.08 * var(--aa-distance))); }
+[aa-hover="grow-ccw-5"]:hover { transform: rotate(-5deg) scale(calc(1.08 * var(--aa-distance))); }
+[aa-hover="grow-cw-15"]:hover { transform: rotate(15deg) scale(calc(1.08 * var(--aa-distance))); }
+[aa-hover="grow-ccw-15"]:hover { transform: rotate(-15deg) scale(calc(1.08 * var(--aa-distance))); }
+[aa-hover="grow-cw-360"]:hover { transform: rotate(360deg) scale(calc(1.08 * var(--aa-distance))); }
+[aa-hover="grow-ccw-360"]:hover { transform: rotate(-360deg) scale(calc(1.08 * var(--aa-distance))); }
+[aa-hover="grow-cw-720"]:hover { transform: rotate(720deg) scale(calc(1.08 * var(--aa-distance))); }
+[aa-hover="grow-ccw-720"]:hover { transform: rotate(-720deg) scale(calc(1.08 * var(--aa-distance))); }
+
+[aa-hover="shrink-cw-5"]:hover { transform: rotate(5deg) scale(calc(0.92 * var(--aa-distance))); }
+[aa-hover="shrink-ccw-5"]:hover { transform: rotate(-5deg) scale(calc(0.92 * var(--aa-distance))); }
+[aa-hover="shrink-cw-15"]:hover { transform: rotate(15deg) scale(calc(0.92 * var(--aa-distance))); }
+[aa-hover="shrink-ccw-15"]:hover { transform: rotate(-15deg) scale(calc(0.92 * var(--aa-distance))); }
+[aa-hover="shrink-cw-360"]:hover { transform: rotate(360deg) scale(calc(0.92 * var(--aa-distance))); }
+[aa-hover="shrink-ccw-360"]:hover { transform: rotate(-360deg) scale(calc(0.92 * var(--aa-distance))); }
+[aa-hover="shrink-cw-720"]:hover { transform: rotate(720deg) scale(calc(0.92 * var(--aa-distance))); }
+[aa-hover="shrink-ccw-720"]:hover { transform: rotate(-720deg) scale(calc(0.92 * var(--aa-distance))); }
+
+/* Slide only */
+[aa-hover="slide-up"]:hover { transform: translateY(calc(-1rem * var(--aa-distance))); }
+[aa-hover="slide-down"]:hover { transform: translateY(calc(1rem * var(--aa-distance))); }
+[aa-hover="slide-left"]:hover { transform: translateX(calc(-1rem * var(--aa-distance))); }
+[aa-hover="slide-right"]:hover { transform: translateX(calc(1rem * var(--aa-distance))); }
+
+/* Scale + slide */
+[aa-hover="grow-up"]:hover { transform: translateY(calc(-1rem * var(--aa-distance))) scale(calc(1.08 * var(--aa-distance))); }
+[aa-hover="grow-down"]:hover { transform: translateY(calc(1rem * var(--aa-distance))) scale(calc(1.08 * var(--aa-distance))); }
+[aa-hover="grow-left"]:hover { transform: translateX(calc(-1rem * var(--aa-distance))) scale(calc(1.08 * var(--aa-distance))); }
+[aa-hover="grow-right"]:hover { transform: translateX(calc(1rem * var(--aa-distance))) scale(calc(1.08 * var(--aa-distance))); }
+
+[aa-hover="shrink-up"]:hover { transform: translateY(calc(-1rem * var(--aa-distance))) scale(calc(0.92 * var(--aa-distance))); }
+[aa-hover="shrink-down"]:hover { transform: translateY(calc(1rem * var(--aa-distance))) scale(calc(0.92 * var(--aa-distance))); }
+[aa-hover="shrink-left"]:hover { transform: translateX(calc(-1rem * var(--aa-distance))) scale(calc(0.92 * var(--aa-distance))); }
+[aa-hover="shrink-right"]:hover { transform: translateX(calc(1rem * var(--aa-distance))) scale(calc(0.92 * var(--aa-distance))); }
+
+/* Scale + slide + rotate-0 */
+[aa-hover="grow-up-0"]:hover { transform: rotate(0deg) translateY(calc(-1rem * var(--aa-distance))) scale(calc(1.08 * var(--aa-distance))); }
+[aa-hover="grow-down-0"]:hover { transform: rotate(0deg) translateY(calc(1rem * var(--aa-distance))) scale(calc(1.08 * var(--aa-distance))); }
+[aa-hover="grow-left-0"]:hover { transform: rotate(0deg) translateX(calc(-1rem * var(--aa-distance))) scale(calc(1.08 * var(--aa-distance))); }
+[aa-hover="grow-right-0"]:hover { transform: rotate(0deg) translateX(calc(1rem * var(--aa-distance))) scale(calc(1.08 * var(--aa-distance))); }
+
+[aa-hover="shrink-up-0"]:hover { transform: rotate(0deg) translateY(calc(-1rem * var(--aa-distance))) scale(calc(0.92 * var(--aa-distance))); }
+[aa-hover="shrink-down-0"]:hover { transform: rotate(0deg) translateY(calc(1rem * var(--aa-distance))) scale(calc(0.92 * var(--aa-distance))); }
+[aa-hover="shrink-left-0"]:hover { transform: rotate(0deg) translateX(calc(-1rem * var(--aa-distance))) scale(calc(0.92 * var(--aa-distance))); }
+[aa-hover="shrink-right-0"]:hover { transform: rotate(0deg) translateX(calc(1rem * var(--aa-distance))) scale(calc(0.92 * var(--aa-distance))); }
+
+/* Slide + rotate */
+[aa-hover="slide-up-cw-5"]:hover { transform: rotate(5deg) translateY(calc(-1rem * var(--aa-distance))); }
+[aa-hover="slide-up-ccw-5"]:hover { transform: rotate(-5deg) translateY(calc(-1rem * var(--aa-distance))); }
+[aa-hover="slide-up-cw-15"]:hover { transform: rotate(15deg) translateY(calc(-1rem * var(--aa-distance))); }
+[aa-hover="slide-up-ccw-15"]:hover { transform: rotate(-15deg) translateY(calc(-1rem * var(--aa-distance))); }
+[aa-hover="slide-up-cw-360"]:hover { transform: rotate(360deg) translateY(calc(-1rem * var(--aa-distance))); }
+[aa-hover="slide-up-ccw-360"]:hover { transform: rotate(-360deg) translateY(calc(-1rem * var(--aa-distance))); }
+[aa-hover="slide-up-cw-720"]:hover { transform: rotate(720deg) translateY(calc(-1rem * var(--aa-distance))); }
+[aa-hover="slide-up-ccw-720"]:hover { transform: rotate(-720deg) translateY(calc(-1rem * var(--aa-distance))); }
+
+/* Rotate only */
+[aa-hover="rotate-0"]:hover { transform: rotate(0deg); }
+[aa-hover="rotate-cw-5"]:hover { transform: rotate(5deg); }
+[aa-hover="rotate-ccw-5"]:hover { transform: rotate(-5deg); }
+[aa-hover="rotate-cw-15"]:hover { transform: rotate(15deg); }
+[aa-hover="rotate-ccw-15"]:hover { transform: rotate(-15deg); }
+[aa-hover="rotate-cw-360"]:hover { transform: rotate(360deg); }
+[aa-hover="rotate-ccw-360"]:hover { transform: rotate(-360deg); }
+[aa-hover="rotate-cw-720"]:hover { transform: rotate(720deg); }
+[aa-hover="rotate-ccw-720"]:hover { transform: rotate(-720deg); } 

@@ -45,10 +45,14 @@ $aa-ease: (
 // Easings implementations
 [aa-animate], [aa-load], [aa-hover] {
   @each $key, $val in $aa-ease {
-    body[aa-ease="#{$key}"] &,
-    &[aa-ease="#{$key}"][aa-animate],
-    &[aa-ease="#{$key}"][aa-load],
-    &[aa-ease="#{$key}"][aa-hover] {
+    // Global ease setting from body
+    body[aa-ease="#{$key}"] & {
+      animation-timing-function: $val;
+      transition-timing-function: $val;
+    }
+    
+    // Individual element ease settings
+    &[aa-ease="#{$key}"] {
       animation-timing-function: $val;
       transition-timing-function: $val;
     }
