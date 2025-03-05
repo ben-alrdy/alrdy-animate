@@ -333,8 +333,11 @@
     $hover-rotation-degrees: (5, 15, 360, 720);
 
     // Base transition
-    [aa-hover] {
-      transition-property: transform;
+    [aa-hover*="grow"],
+    [aa-hover*="shrink"],
+    [aa-hover*="slide"],
+    [aa-hover*="rotate"] {
+      transition-property: transform, box-shadow, background-color, color, border-color;
       transition-duration: var(--aa-duration);
       transition-delay: var(--aa-delay);
     }
@@ -390,21 +393,21 @@
 
     // Slide only
     @each $slide-name, $translate in $translations {
-      [aa-hover="#{$slide-name}"]:hover {
+      [aa-hover="slide-#{$slide-name}"]:hover {
         transform: $translate;
       }
       
       // Slide + rotate-0
-      [aa-hover="#{$slide-name}-0"]:hover {
+      [aa-hover="slide-#{$slide-name}-0"]:hover {
         transform: rotate(0deg) $translate;
       }
       
       // Slide + rotate with direction
       @each $degree in $hover-rotation-degrees {
-        [aa-hover="#{$slide-name}-cw-#{$degree}"]:hover {
+        [aa-hover="slide-#{$slide-name}-cw-#{$degree}"]:hover {
           transform: rotate(#{$degree}deg) $translate;
         }
-        [aa-hover="#{$slide-name}-ccw-#{$degree}"]:hover {
+        [aa-hover="slide-#{$slide-name}-ccw-#{$degree}"]:hover {
           transform: rotate(-#{$degree}deg) $translate;
         }
       }
