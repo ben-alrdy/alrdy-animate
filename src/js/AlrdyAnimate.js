@@ -46,8 +46,10 @@ const TEXT_ANIMATION_MAP = {
 async function init(options = {}) {
   const initOptions = { ...defaultOptions, ...options };
 
-  // Early initialization
-  allAnimatedElements = document.querySelectorAll("[aa-animate], [aa-children], [aa-hover]");
+  // Just collect attribute-based elements
+  let elements = [...document.querySelectorAll("[aa-animate], [aa-children], [aa-hover]")];
+  
+  allAnimatedElements = elements;
   isMobile = window.innerWidth < 768;
   enableGSAP = initOptions.gsapFeatures.length > 0;
 
@@ -200,36 +202,36 @@ function setupAnimations(elements, initOptions, isMobile, modules) {
     if (element.hasAttribute("aa-children")) {
       const children = processChildren(element);
       setupAnimations(children, initOptions, isMobile, modules);
-      return; // Skip processing the parent element
+      return;
     }
 
-    // Get all element settings from the aa-attributes
-    element.settings = getElementSettings(element, initOptions);
+    // Get settings from attributes
+    const settings = getElementSettings(element, initOptions);
 
     // Apply styles (duration, delay, colors)
-    applyElementStyles(element, element.settings, isMobile);
+    applyElementStyles(element, settings, isMobile);
 
     // Setup hover animations 
     if (element.hasAttribute('aa-hover')) {
       if (enableGSAP && initOptions.gsapFeatures.includes('hover')) {
-        setupGSAPHoverAnimations(element, element.settings, initOptions, isMobile, modules);
+        setupGSAPHoverAnimations(element, settings, initOptions, isMobile, modules);
       } 
     }
 
     // Setup regular animations
     if (element.hasAttribute('aa-animate')) {
       if (enableGSAP) {
-        setupGSAPAnimations(element, element.settings, initOptions, isMobile, modules);
+        setupGSAPAnimations(element, settings, initOptions, isMobile, modules);
       } else {
         element.style.visibility = 'visible';
-        setupIntersectionObserver(element, element.settings, initOptions);
+        setupIntersectionObserver(element, settings, initOptions);
       }
     }
   });
 }
 
 function setupGSAPAnimations(element, elementSettings, initOptions, isMobile, modules) {
-  const { animationType, splitType: splitTypeAttr, scroll, duration, stagger, delay, ease, distance, anchorElement, anchorSelector, viewportPercentage } = elementSettings;
+  const { animationType, splitType: splitTypeAttr, scrub, duration, stagger, delay, ease, distance, anchorElement, anchorSelector, viewportPercentage } = elementSettings;
   
   // 1. Variables setup
   const baseType = animationType.includes('-') ? animationType.split('-')[0] : animationType;
@@ -241,21 +243,21 @@ function setupGSAPAnimations(element, elementSettings, initOptions, isMobile, mo
 
   // 2. Create timeline and ScrollTrigger setup
   let tl = modules.gsap.timeline({
-    paused: !scroll
+    paused: !scrub
   });
   element.timeline = tl;
 
   //Create Animation ScrollTrigger
   modules.ScrollTrigger.create({
     trigger: anchorElement,
-    ...(scroll ? {
+    ...(scrub ? {
       // start: isMobile ? "top 40%" : `top ${(viewportPercentage) * 100}%`,
       // end: isMobile ? "top 20%" : "top 40%",
       start: `top ${(viewportPercentage) * 100}%`,
       end: "top 40%",
-      scrub: scroll.includes('smoother') ? 4 :
-          scroll.includes('smooth') ? 2 :
-          scroll.includes('snap') ? { snap: 0.2 } :
+      scrub: scrub.includes('smoother') ? 4 :
+          scrub.includes('smooth') ? 2 :
+          scrub.includes('snap') ? { snap: 0.2 } :
           true
     } : {
       start: `top ${(viewportPercentage) * 100}%`
@@ -263,7 +265,7 @@ function setupGSAPAnimations(element, elementSettings, initOptions, isMobile, mo
     animation: tl,
     onEnter: () => {
       element.classList.add("in-view");
-      if (!scroll) tl.play();
+      if (!scrub) tl.play();
       gsap.set(element, { visibility: 'visible' });
     },
     markers: initOptions.debug
@@ -298,7 +300,7 @@ function setupGSAPAnimations(element, elementSettings, initOptions, isMobile, mo
         break;
 
       case 'parallax':
-        modules.animations.parallax(element, scroll);
+        modules.animations.parallax(element, scrub);
         break;
 
       case 'appear':

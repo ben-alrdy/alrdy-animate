@@ -33,7 +33,7 @@
                 <h2>Basic Text Slides</h2>
                 
                 <div class="text-container">
-                    <h3 aa-animate="text-slide-up" aa-split="words" aa-stagger="0.1">
+                    <h3 aa-animate="animationType:text-slide-up; splitType:words; stagger:0.1;">
                         This text slides up word by word
                     </h3>
                     <h3 aa-animate="text-slide-down" aa-split="words">
@@ -98,6 +98,21 @@
                 </div>
             </section>
 
+            <!-- Scroll-Driven Text -->
+            <section class="animation-section">
+                <h2>Scroll-Driven Text</h2>
+                
+                <div class="text-container">
+                    <h3 aa-animate="animationType:text-slide-up; splitType:words; scrub:smooth;">
+                        This text animates smoothly as you scroll
+                    </h3>
+                    
+                    <h3 aa-animate="text-slide-up" aa-split="words" aa-scrub="snap">
+                        This text snaps to positions as you scroll
+                    </h3>
+                </div>
+            </section>
+
             <!-- Text Fade Animations -->
             <section class="animation-section">
                 <h2>Text Fade Animations</h2>
@@ -142,20 +157,7 @@
                 </div>
             </section>
 
-            <!-- Scroll-Driven Text -->
-            <section class="animation-section">
-                <h2>Scroll-Driven Text</h2>
-                
-                <div class="text-container">
-                    <h3 aa-animate="text-slide-up" aa-split="words" aa-scrub="smooth">
-                        This text animates smoothly as you scroll
-                    </h3>
-                    
-                    <h3 aa-animate="text-slide-up" aa-split="words" aa-scrub="snap">
-                        This text snaps to positions as you scroll
-                    </h3>
-                </div>
-            </section>
+            
         </div>
     </main>
 

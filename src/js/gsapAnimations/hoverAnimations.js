@@ -115,8 +115,8 @@ function storeOriginalColors(element) {
     return originalColors;
 }
 
-function setupColorAnimation(element, timeline, isEnter) {
-    const { delay = 0 } = element.settings || {};
+function setupColorAnimation(element, timeline, isEnter, settings) {
+    const { hoverDelay: delay = 0 } = settings;
 
     // Handle text color animations
     const textElements = element.querySelectorAll('[aa-hover-text-color]');
@@ -191,7 +191,7 @@ function initializeCurveAnimation(element, gsap, settings) {
             }
         );
 
-        setupColorAnimation(element, timeline, isEnter);
+        setupColorAnimation(element, timeline, isEnter, settings);
         return timeline;
     }
 
@@ -282,7 +282,7 @@ function initializeCircleAnimation(element, gsap, settings) {
             timeline.to(circle, { attr: { r: 0 } }, 0);
         }
 
-        setupColorAnimation(element, timeline, isEnter);
+        setupColorAnimation(element, timeline, isEnter, settings);
     }
 
     element.addEventListener('mouseenter', event => handleCircleHover(event, true));
@@ -362,7 +362,7 @@ function initializeExpandAnimation(element, gsap, settings) {
             data: { originalColors }  // Store original colors in timeline data
         });
 
-        setupColorAnimation(element, timelineIn, true);
+        setupColorAnimation(element, timelineIn, true, settings);
 
         if (bg) {
             timelineIn.to(bg, { scale }, 0);
@@ -422,7 +422,7 @@ function initializeExpandAnimation(element, gsap, settings) {
                 });
         }
 
-        setupColorAnimation(element, colorTimeline, true);
+        setupColorAnimation(element, colorTimeline, true, settings);
 
         if (iconAnimations) {
             timelineIn
@@ -453,8 +453,8 @@ function initializeTextHoverAnimation(element, gsap, splitText, settings) {
         hoverDistance: textDelay,
         hoverStagger: stagger,
         splitType,
-        isReverse
-
+        isReverse,
+        hoverType
     } = settings;
 
     const textElement = element.querySelector('[aa-hover-text]');
@@ -462,7 +462,7 @@ function initializeTextHoverAnimation(element, gsap, splitText, settings) {
 
     const width = textElement.getBoundingClientRect().width;
     const height = textElement.getBoundingClientRect().height;
-    const animationType = element.getAttribute('aa-hover').replace('-reverse', '');
+    const animationType = hoverType.replace('-reverse', '');
     const split = splitType.split('.')[0];
 
     // Create and position clone

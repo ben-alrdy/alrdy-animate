@@ -310,6 +310,27 @@
         transition-delay: 0.3s;
       }
     }
+
+
+    /*
+    Grow and shrink animations
+    */
+
+    // Base transition
+    [aa-hover="grow"],
+    [aa-hover="shrink"]{
+      transition-property: transform, box-shadow, background-color, color, border-color;
+      transition-duration: var(--aa-duration);
+      transition-delay: var(--aa-delay);
+    }
+
+    [aa-hover="grow"]:hover {
+      transform: scale(calc(1.08 * var(--aa-distance)))
+    }
+
+    [aa-hover="shrink"]:hover {
+      transform: scale(calc(0.92 * var(--aa-distance)))
+    }
     
 
   }
