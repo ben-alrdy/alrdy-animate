@@ -551,52 +551,73 @@ export function createSliderAnimations(gsap, Draggable) {
     loop._isSnapCycleActive = false;
 
     loop.moveToNext = () => {
-      const direction = animationType.includes('reverse') ? 'previous' : 'next';
-      loop[direction]({
-        duration: duration,
-        ease: ease,
-        onComplete: () => {
-          // Continue the cycle if it's still active
-          if (loop._isSnapCycleActive) {
-            gsap.delayedCall(delay, loop.moveToNext);
-          }
-        }
-      });
+        const direction = animationType.includes('reverse') ? 'previous' : 'next';
+        loop[direction]({
+            duration: duration,
+            ease: ease,
+            onComplete: () => {
+                if (loop._isSnapCycleActive) {
+                    gsap.delayedCall(delay, loop.moveToNext);
+                }
+            }
+        });
     };
 
-    // Store function for starting snap cycle on loop
+    // Store functions for snap cycle control
     loop.startSnapCycle = () => {
-      // Prevent starting if already active
-      if (loop._isSnapCycleActive) return;
-      
-      loop._isSnapCycleActive = true;
-      gsap.delayedCall(delay, loop.moveToNext);
+        if (loop._isSnapCycleActive) return;
+        loop._isSnapCycleActive = true;
+        gsap.delayedCall(delay, loop.moveToNext);
     };
 
     // Store function for stopping snap cycle on loop
     loop.stopSnapCycle = () => {
-      loop._isSnapCycleActive = false;
-      gsap.killTweensOf(loop.moveToNext);
+        loop._isSnapCycleActive = false;
+        gsap.killTweensOf(loop.moveToNext);
     };
+
+    // Setup hover handlers for snap sliders on non-touch devices
+    if (!window.matchMedia('(hover: none)').matches) {
+        const handleMouseEnter = () => {
+            loop.stopSnapCycle();
+        };
+        
+        const handleMouseLeave = () => {
+            // Only restart if we're not currently dragging or throwing
+            if (!loop.draggable?.isDragging && !loop._isThrowing) {
+                loop.startSnapCycle();
+            }
+        };
+
+        // Add hover listeners
+        element.addEventListener('mouseenter', handleMouseEnter);
+        element.addEventListener('mouseleave', handleMouseLeave);
+
+        // Store cleanup function
+        loop._removeHoverListeners = () => {
+            element.removeEventListener('mouseenter', handleMouseEnter);
+            element.removeEventListener('mouseleave', handleMouseLeave);
+        };
+    }
 
     // Pause the loop initially; needed for reversed sliders
     loop.pause(); 
 
     if (loop.draggable && animationType.includes('center')) {
-      // Fix for incorrect snap position with centered sliders
-      loop.toIndex(0, { 
-        duration: 0.1,
-        onComplete: () => {
-          loop.startSnapCycle();
-        }
-      });
+        // Fix for incorrect snap position with centered sliders
+        loop.toIndex(0, { 
+            duration: 0.1,
+            onComplete: () => {
+                loop.startSnapCycle();
+            }
+        });
     } else {
-      gsap.delayedCall(0.01, loop.startSnapCycle);
+        gsap.delayedCall(0.01, loop.startSnapCycle);
     }
 
-    // Handle dragging
+    // Handle dragging if enabled
     if (loop.draggable) {
-      setupDragHandlers(element, loop, animationType);
+        setupDragHandlers(element, loop, animationType);
     }
   }
 
@@ -655,30 +676,6 @@ export function createSliderAnimations(gsap, Draggable) {
       // Update the draggable instance with all handlers at once
       loop.draggable.vars = {...loop.draggable.vars, ...handlers};
       loop.draggable.enable(); // Re-enable to apply the new handlers
-    }
-
-    // Add hover handlers if it's also a snap slider and not a touch device
-    if (animationType.includes('snap') && !window.matchMedia('(hover: none)').matches) {
-      const handleMouseEnter = () => {
-        loop.stopSnapCycle();
-      };
-      
-      const handleMouseLeave = () => {
-        // Only restart if we're not currently dragging or throwing
-        if (!loop.draggable.isDragging && !loop._isThrowing) {
-          loop.startSnapCycle();
-        }
-      };
-
-      // Add hover listeners
-      element.addEventListener('mouseenter', handleMouseEnter);
-      element.addEventListener('mouseleave', handleMouseLeave);
-
-      // Store cleanup function
-      loop._removeHoverListeners = () => {
-        element.removeEventListener('mouseenter', handleMouseEnter);
-        element.removeEventListener('mouseleave', handleMouseLeave);
-      };
     }
   }
 
