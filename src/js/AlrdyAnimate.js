@@ -207,6 +207,9 @@ function setupAnimations(elements, initOptions, isMobile, modules) {
 
     // Get settings from attributes
     const settings = getElementSettings(element, initOptions);
+    
+    // Store settings on the element for resize handling
+    element.settings = settings;
 
     // Apply styles (duration, delay, colors)
     applyElementStyles(element, settings, isMobile);

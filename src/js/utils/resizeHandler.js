@@ -18,18 +18,11 @@ export function setupResizeHandler(modules, initOptions, isMobile, setupGSAPAnim
       // Refresh ScrollTrigger for all animations
       modules.ScrollTrigger.refresh(true);
       
-      // Only rebuild specific animations that need recalculation
+      // Only rebuild slider and text animations
       document.querySelectorAll("[aa-animate]").forEach(element => {
-        const animationType = element.getAttribute('aa-animate');
-        const baseType = animationType.includes('-') ? animationType.split('-')[0] : animationType;
-          
-        // Only rebuild animations that need dimension recalculation
-        const needsRebuild = [
-          'slider',
-          'text'  // Due to SplitText needing recalc
-        ].includes(baseType);
-        
-        if (needsRebuild) {
+        const aaAnimate = element.getAttribute('aa-animate');
+        // Only rebuild slider and text animations
+        if (aaAnimate && (aaAnimate.includes('slider') || aaAnimate.includes('text'))) {
           setupGSAPAnimations(element, element.settings, initOptions, isMobile, modules);
         }
       });
