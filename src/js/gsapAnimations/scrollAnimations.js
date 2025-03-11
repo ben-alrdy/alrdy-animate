@@ -407,7 +407,7 @@ function createMarqueeTimeline(element, gsap, ScrollTrigger, duration) {
     return;
   }
 
-  const speedMultiplier = window.innerWidth < 479 ? 0.25 : window.innerWidth < 991 ? 0.5 : 1;
+  const speedMultiplier = window.innerWidth < 479 ? 0.5 : window.innerWidth < 991 ? 0.75 : 1;
   const scrollSpeed = parseInt(scrollContainer.getAttribute('aa-marquee-scroller')) || 10;
   const baseSpeed = duration * (collection.offsetWidth / window.innerWidth) * speedMultiplier;
   
