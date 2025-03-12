@@ -6,7 +6,12 @@ export function handleLazyLoadedImages(ScrollTrigger, forceReset = false) {
 
   const debouncedRefresh = debounce(() => {
     if (ScrollTrigger && needsRefresh) {
-      ScrollTrigger.refresh();
+      // Refresh all ScrollTriggers except nav ones
+      ScrollTrigger.getAll().forEach(st => {
+        if (!st.vars.trigger?.hasAttribute('aa-nav')) {
+          st.refresh();
+        }
+      });
       needsRefresh = false;
     }
   }, 200);

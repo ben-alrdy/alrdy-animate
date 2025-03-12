@@ -168,7 +168,6 @@ async function init(options = {}) {
             const navScrolled = navType.includes('-') ? 
               parseInt(navType.split('-').pop()) || 100 : 
               100;
-              
             loadedModules.animations.nav?.(navElement, navType, navEase ?? 'back.inOut', navDuration ?? 0.4, navDistance ?? 1, navScrolled);
           }
 

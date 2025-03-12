@@ -14,14 +14,12 @@ function initializeNav(element, type, ease, duration, distance, scrolled) {
 
   // Add function to handle scrolled class
   const updateScrolledClass = (scrollTop) => {
-    if (scrolled) {
-      if (scrollTop >= scrolled && !hasScrolledClass) {
-        element.classList.add('is-scrolled');
-        hasScrolledClass = true;  
-      } else if (scrollTop < scrolled && hasScrolledClass) {
-        element.classList.remove('is-scrolled');
-        hasScrolledClass = false;
-      }
+    if (scrollTop >= scrolled && !hasScrolledClass) {
+      element.classList.add('is-scrolled');
+      hasScrolledClass = true;  
+    } else if (scrollTop < scrolled && hasScrolledClass) {
+      element.classList.remove('is-scrolled');
+      hasScrolledClass = false;
     }
   };
 
@@ -29,6 +27,7 @@ function initializeNav(element, type, ease, duration, distance, scrolled) {
     start: "top top",
     end: "max",
     onUpdate: (self) => {
+      
       let currentScrollTop = self.scroll();
 
       // Update scrolled class state
@@ -37,6 +36,7 @@ function initializeNav(element, type, ease, duration, distance, scrolled) {
       }
 
       if (type.includes('hide')) {
+
         if (currentScrollTop <= 10) {
           showNavAtTop();
           lastScrollTop = currentScrollTop;
@@ -62,10 +62,14 @@ function initializeNav(element, type, ease, duration, distance, scrolled) {
       }
     },
     onRefresh: (self) => {
+      let currentScrollTop = self.scroll();
+      
       if (type.includes('change')) {
-        updateScrolledClass(self.scroll());
+        updateScrolledClass(currentScrollTop);
       }
+      
     },
+    ignoreMobileResize: true, // Ignore mobile browser address bar show/hide
     onLeaveBack: type.includes('hide') ? showNavAtTop : undefined,
     onLeave: type.includes('hide') ? showNavAtTop : undefined
   });

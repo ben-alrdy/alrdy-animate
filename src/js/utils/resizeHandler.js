@@ -15,9 +15,6 @@ export function setupResizeHandler(modules, initOptions, isMobile, setupGSAPAnim
         modules.animations.cleanupLoops();
       }
 
-      // Refresh ScrollTrigger for all animations
-      modules.ScrollTrigger.refresh(true);
-      
       // Only rebuild slider and text animations
       document.querySelectorAll("[aa-animate]").forEach(element => {
         const aaAnimate = element.getAttribute('aa-animate');
@@ -26,6 +23,8 @@ export function setupResizeHandler(modules, initOptions, isMobile, setupGSAPAnim
           setupGSAPAnimations(element, element.settings, initOptions, isMobile, modules);
         }
       });
+      
+      // modules.ScrollTrigger.refresh();
       
       // Check for new lazy loaded images
       handleLazyLoadedImages(modules.ScrollTrigger, true);
