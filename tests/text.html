@@ -33,10 +33,10 @@
                 <h2>Basic Text Slides</h2>
                 
                 <div class="text-container">
-                    <h3 aa-animate="animationType:text-slide-up; splitType:words; stagger:0.1;">
+                    <h3 aa-animate="animationType:text-slide-up-clip; split:words; stagger:0.1;">
                         This text slides up word by word
                     </h3>
-                    <h3 aa-animate="text-slide-down" aa-split="words">
+                    <h3 aa-animate="text-slide-down-clip" aa-split="words">
                         This text slides down word by word
                     </h3>
                 </div>
@@ -90,7 +90,7 @@
                 <h2>Text Rotate Animations</h2>
                 
                 <div class="text-container">
-                    <h3 aa-animate="text-rotate-soft" aa-split="lines.clip" aa-stagger="0.3">
+                    <h3 aa-animate="text-rotate-soft" aa-split="lines" aa-stagger="0.3" style="font-size: 5rem;" aa-duration="2">
                         This text rotates in
                         with a 3D perspective
                         line by line
@@ -103,7 +103,7 @@
                 <h2>Scroll-Driven Text</h2>
                 
                 <div class="text-container">
-                    <h3 aa-animate="animationType:text-slide-up; splitType:words; scrub:smooth;">
+                    <h3 aa-animate="animationType:text-slide-up; split:words; scrub:smooth;">
                         This text animates smoothly as you scroll
                     </h3>
                     

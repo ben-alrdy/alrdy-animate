@@ -15,11 +15,18 @@ export function setupResizeHandler(modules, initOptions, isMobile, setupGSAPAnim
         modules.animations.cleanupLoops();
       }
 
+      
+
       // Only rebuild slider and text animations
       document.querySelectorAll("[aa-animate]").forEach(element => {
         const aaAnimate = element.getAttribute('aa-animate');
         // Only rebuild slider and text animations
         if (aaAnimate && (aaAnimate.includes('slider') || aaAnimate.includes('text'))) {
+          
+          // Clear existing split instance
+          if (element.splitInstance) {
+            element.splitInstance.revert();
+          }
           setupGSAPAnimations(element, element.settings, initOptions, isMobile, modules);
         }
       });

@@ -452,7 +452,7 @@ function initializeTextHoverAnimation(element, gsap, splitText, settings) {
         hoverDelay: delay,
         hoverDistance: textDelay,
         hoverStagger: stagger,
-        splitType,
+        split,
         isReverse,
         hoverType
     } = settings;
@@ -463,7 +463,6 @@ function initializeTextHoverAnimation(element, gsap, splitText, settings) {
     const width = textElement.getBoundingClientRect().width;
     const height = textElement.getBoundingClientRect().height;
     const animationType = hoverType.replace('-reverse', '');
-    const split = splitType.split('.')[0];
 
     // Create and position clone
     const textClone = textElement.cloneNode(true);
@@ -471,13 +470,13 @@ function initializeTextHoverAnimation(element, gsap, splitText, settings) {
     textClone.style.top = '0';
     textElement.after(textClone);
 
-    // Split both original and clone
-    const { splitResult: textSplit } = splitText(textElement, splitType);
-    const { splitResult: clonedSplit } = splitText(textClone, splitType);
+    // Split both original and clone using our textSplitter
+    const { splitElements: originalSplit } = splitText(textElement, split);
+    const { splitElements: clonedSplit } = splitText(textClone, split);
 
-    // Get the correct elements to animate based on split type
-    const originalElements = textSplit[split];
-    const clonedElements = clonedSplit[split];
+    // Get the correct elements to animate
+    const originalElements = originalSplit[split.split('&')[0]];
+    const clonedElements = clonedSplit[split.split('&')[0]];
 
     // Create timeline
     const timeline = gsap.timeline({

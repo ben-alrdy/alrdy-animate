@@ -43,7 +43,7 @@ export function getElementSettings(element, settings) {
     // Animation properties
     animationType,
     ease: element.hasAttribute('aa-ease') ? element.getAttribute('aa-ease') : settings.ease,
-    splitType: element.getAttribute('aa-split'),
+    split: element.getAttribute('aa-split'),
     scrub: element.getAttribute('aa-scrub'),
     distance: element.hasAttribute('aa-distance') ? parseFloat(element.getAttribute('aa-distance')) : settings.distance,
 

@@ -233,7 +233,7 @@ function setupAnimations(elements, initOptions, isMobile, modules) {
 }
 
 function setupGSAPAnimations(element, elementSettings, initOptions, isMobile, modules) {
-  const { animationType, splitType: splitTypeAttr, scrub, duration, stagger, delay, ease, distance, anchorElement, anchorSelector, viewportPercentage } = elementSettings;
+  const { animationType, split, scrub, duration, stagger, delay, ease, distance, anchorElement, anchorSelector, viewportPercentage } = elementSettings;
   
   // 1. Variables setup
   const baseType = animationType.includes('-') ? animationType.split('-')[0] : animationType;
@@ -282,7 +282,7 @@ function setupGSAPAnimations(element, elementSettings, initOptions, isMobile, mo
         element.classList.remove("in-view");
         tl.progress(0).pause();
       }
-    },
+    }
   });
 
   // 3. Return early if not a GSAP animation
@@ -322,12 +322,12 @@ function setupGSAPAnimations(element, elementSettings, initOptions, isMobile, mo
         break;
 
       case 'text':
-        const { splitResult, splitType } = modules.splitText(element, splitTypeAttr);
-        element.splitInstance = splitResult;
+        const { splitElements, splitInstance } = modules.splitText(element, split);
+        element.splitInstance = splitInstance;
 
-        const animationName = TEXT_ANIMATION_MAP[animationType];
+        const animationName = TEXT_ANIMATION_MAP[animationType.replace('-clip', '')];
         if (animationName) {
-          tl.add(modules.animations[animationName](element, splitResult, splitType, duration, stagger, delay, ease));
+          tl.add(modules.animations[animationName](element, splitElements, split, duration, stagger, delay, ease));
         }
         break;
 

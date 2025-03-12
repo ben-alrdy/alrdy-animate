@@ -8,7 +8,7 @@ export function createTextAnimations(gsap) {
   };
 
   // Helper function to create base animation configuration
-  function createBaseAnimation(element, splitResult, splitType, duration, stagger, delay, ease) {
+  function createBaseAnimation(element, splitElements, split, duration, stagger, delay, ease) {
     const tl = gsap.timeline();
     
     const baseProps = {
@@ -25,12 +25,12 @@ export function createTextAnimations(gsap) {
     };
 
     // Handle lines&words split type
-    if (splitType === 'lines&words') {
+    if (split === 'lines&words') {
       return {
         tl,
         animate: (props) => {
-          splitResult.lines.forEach((line, index) => {
-            const wordsInLine = splitResult.words.filter(word => line.contains(word));
+          splitElements.lines.forEach((line, index) => {
+            const wordsInLine = splitElements.words.filter(word => line.contains(word));
             tl.from(wordsInLine, {
               ...baseProps,
               ...props
@@ -44,7 +44,7 @@ export function createTextAnimations(gsap) {
     return {
       tl,
       animate: (props) => {
-        tl.from(splitResult[splitType], {
+        tl.from(splitElements[split], {
           ...baseProps,
           ...props
         });
@@ -54,17 +54,15 @@ export function createTextAnimations(gsap) {
 
   // Create animation function with defaults
   function createAnimation(animationProps, defaultValues) {
-    return (element, splitResult, splitType, duration, stagger, delay, ease) => {
-      
+    return (element, splitElements, split, duration, stagger, delay, ease) => {
       const { tl, animate } = createBaseAnimation(
         element,
-        splitResult,
-        splitType,
+        splitElements,
+        split,
         duration ?? defaultValues.duration,
         stagger ?? defaultValues.stagger,
         delay,
-        ease ?? defaultValues.ease,
-
+        ease ?? defaultValues.ease
       );
 
       animate(animationProps);
@@ -74,7 +72,6 @@ export function createTextAnimations(gsap) {
 
   // Return all animations with their specific configurations
   return {
-    
     slideUp: createAnimation(
       { y: "110%", opacity: 0 },
       defaults.slide
@@ -136,6 +133,7 @@ export function createTextAnimations(gsap) {
       },
       defaults.blur
     ),
+
     blurUp: createAnimation(
       { 
         opacity: 0, 
@@ -144,6 +142,7 @@ export function createTextAnimations(gsap) {
       },
       defaults.blur
     ),
+
     blurDown: createAnimation(
       { 
         opacity: 0, 
@@ -153,9 +152,9 @@ export function createTextAnimations(gsap) {
       defaults.blur
     ),
     
-    rotateSoft: (element, splitResult, splitType, duration, stagger, delay, ease) => {
+    rotateSoft: (element, splitElements, split, duration, stagger, delay, ease) => {
       const tl = gsap.timeline();
-      const animationTarget = splitResult[splitType] || splitResult.lines;
+      const animationTarget = splitElements[split];
 
       // Calculate perspective
       const fontSize = parseFloat(window.getComputedStyle(element).fontSize);

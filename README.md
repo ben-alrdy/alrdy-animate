@@ -240,9 +240,9 @@ AlrdyAnimate supports several GSAP-powered features that can be enabled by inclu
 (`gsapFeatures: ['text']`)
 
 - Set the animation type with `aa-animate="text-..."`.
+  - Optionally, you can add `-clip` to wrap each line in a clip wrapper and prevent overflow, resulting in a clipping effect during the animation. Example: `aa-animate="text-slide-up-clip"`.
 - Pair with `aa-split` to define how to split the text for animation:
   - There are 4 split types: `lines`, `words`, `chars` or `lines&words` (i.e. both lines and words will be animated simultaneously). 
-  - Optionally, you can add `clip` to wrap each line in a clip wrapper and prevent overflow, resulting in a clipping effect during the animation. Example: `aa-split="words.clip"`.
 - Use `aa-scrub` to make the animation scroll-driven. There are two options: `aa-scrub="snap"` and `aa-scrub="smooth"`.
 - Use `aa-stagger` to set the stagger effect for split text animations, in seconds. Example: `aa-stagger="0.05"`.
 
@@ -252,7 +252,7 @@ AlrdyAnimate supports several GSAP-powered features that can be enabled by inclu
 - `text-slide-down`: Slides the text down from the top.
 - `text-tilt-up`: Slides and rotates the text up from the bottom.
 - `text-tilt-down`: Slides and rotates the text down from the top.
-- `text-rotate-soft`: Rotates the text softly around the X axis. Best works with `aa-split="lines"` or `aa-split="lines.clip"`.
+- `text-rotate-soft`: Rotates the text softly around the X axis. Best works with `aa-split="lines"`
 - `text-fade-soft`: Fades the text in, starts with 30% opacity.
 - `text-fade`: Fades the text in, starts with 0% opacity.
 - `text-fade-up`: Fades the text in, starts with 0% opacity and slides up.
@@ -587,7 +587,7 @@ document.addEventListener('DOMContentLoaded', function() {
   document.querySelectorAll('h1').forEach((element) => {       //or querySelectorAll('.my-class')
     if (!element.hasAttribute('aa-animate')) {
       element.setAttribute('aa-animate', 'text-tilt-up');
-      element.setAttribute('aa-split', 'words.clip'); 
+      element.setAttribute('aa-split', 'words'); 
       element.setAttribute('aa-duration', '0.5');  
     }
   });

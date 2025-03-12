@@ -1,31 +1,41 @@
-import SplitType from 'split-type';
+import { gsap } from 'gsap';
+import { SplitText } from 'gsap/SplitText';
 
-export function splitText(element, type) {
-  // Define a mapping of type to SplitType options
-  const typeMap = {
-    'lines&words': { types: 'lines, words', splitType: 'lines&words' },
-    'chars': { types: 'lines, words, chars', splitType: 'chars' },
-    'words': { types: 'lines, words', splitType: 'words' },
-    'lines': { types: 'lines', splitType: 'lines' }
+export function splitText(element, split) {
+  // Define a mapping of split to SplitText options
+  const splitMap = {
+    'lines&words': { type: 'words,lines' },
+    'chars': { type: 'chars,words,lines' },
+    'words': { type: 'words,lines' },
+    'lines': { type: 'lines' }
   };
 
   // Find the first matching type or default to 'lines'
-  const { types, splitType } = Object.entries(typeMap).find(([key]) => type.startsWith(key))?.[1] || typeMap.lines;
+  const splitConfig = Object.entries(splitMap).find(([key]) => split?.startsWith(key))?.[1] || splitMap.lines;
+  
+  // Split the text using GSAP SplitText
+  let splitInstance = new SplitText(element, splitConfig);
 
-  // split the text into lines, words or chars
-  let result = new SplitType(element, { types });
-
-  // if clip option is included, wrap each line in a clip wrapper
-  if (result.lines && type.includes('clip')) {
-    result.lines.forEach(line => {
+  // Check if animation type includes 'clip'
+  const isClipped = element.settings?.animationType?.includes('-clip') || 
+                   element.getAttribute('aa-animate')?.includes('-clip');
+  
+  // Add clip wrappers if needed
+  if (isClipped && splitInstance.lines) {
+    splitInstance.lines.forEach(line => {
       const wrapper = document.createElement('div');
       wrapper.classList.add('line-clip-wrapper');
-      line.parentNode.insertBefore(wrapper, line); // insert the wrapper before the line  
-      wrapper.appendChild(line); // append the line to the wrapper
+      line.parentNode.insertBefore(wrapper, line);
+      wrapper.appendChild(line);
     });
   }
-  return { 
-    splitResult: result, // the result of the SplitType function
-    splitType: splitType // the type of split (lines, words, chars), without the 'clip' option from the original attribute
+
+  return {
+    splitElements: {
+      lines: splitInstance.lines || [],
+      words: splitInstance.words || [],
+      chars: splitInstance.chars || []
+    },
+    splitInstance  // Return the actual SplitText instance for cleanup
   };
 }

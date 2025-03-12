@@ -1,5 +1,7 @@
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { TextPlugin } from 'gsap/TextPlugin';
+import { SplitText } from 'gsap/SplitText';
 
 // Define shared dependencies
 const sharedDependencies = {
@@ -8,6 +10,7 @@ const sharedDependencies = {
 
 export const gsapBundles = {
     text: {
+        plugins: () => Promise.resolve([{ TextPlugin, SplitText }]),
         animations: () => import(/* webpackChunkName: "gsap-text" */ './gsapAnimations/textAnimations'),
         dependencies: sharedDependencies.textSplitter
     },
@@ -27,4 +30,4 @@ export const gsapBundles = {
     }
 };
 
-export { gsap, ScrollTrigger };
+export { gsap, ScrollTrigger, TextPlugin, SplitText };
