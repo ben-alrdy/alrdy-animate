@@ -1,11 +1,10 @@
-import { gsap } from 'gsap';
 import { SplitText } from 'gsap/SplitText';
 
 export function splitText(element, split) {
   // Define a mapping of split to SplitText options
   const splitMap = {
     'lines&words': { type: 'words,lines' },
-    'chars': { type: 'chars,words,lines' },
+    'chars': { type: 'chars,lines' },
     'words': { type: 'words,lines' },
     'lines': { type: 'lines' }
   };
