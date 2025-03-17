@@ -6,6 +6,7 @@
     <title>CSS Animations - AlrdyAnimate Tests</title>
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="../dist/AlrdyAnimate.css">
+    <link rel="stylesheet" href="../src/css/load-animations.css">
 </head>
 <body>
     <header>
@@ -19,6 +20,7 @@
                 <li><a href="text.html">Text Animations</a></li>
                 <li><a href="sliders.html">Sliders</a></li>
                 <li><a href="hover.html">Hover Effects</a></li>
+                <li><a href="load-animations.html" class="active">Load Animations</a></li>
                 <li><a href="scroll.html">Scroll Effects</a></li>
             </ul>
         </nav>
@@ -72,9 +74,6 @@
                     <div class="demo-box" aa-animate="fade-right">
                         <div class="content">fade-right</div>
                     </div>
-                    <div class="demo-box" aa-animate="fade-up-right">
-                        <div class="content">fade-up-right</div>
-                    </div>
                 </div>
             </section>
 
@@ -124,7 +123,7 @@
 
             <!-- Slide Animations -->
             <section class="animation-section">
-                <h2 aa-animate="fade-up">Slide & Blur Animations</h2>
+                <h2 aa-animate="fade-up">Slide Animations</h2>
                 <div class="grid">
                     <div class="demo-box" aa-animate="slide-up">
                         <div class="content">slide-up</div>
@@ -138,12 +137,6 @@
                     <div class="demo-box" aa-animate="slide-right">
                         <div class="content">slide-right</div>
                     </div>
-                    <div class="demo-box" aa-animate="slide-in-blurred-top">
-                        <div class="content">slide-in-blurred-top</div>
-                    </div>
-                    <div class="demo-box" aa-animate="slide-in-blurred-bottom">
-                        <div class="content">slide-in-blurred-bottom</div>
-                    </div>
                 </div>
             </section>
 
@@ -151,17 +144,17 @@
             <section class="animation-section">
                 <h2 aa-animate="fade-up">Rotate Animations</h2>
                 <div class="grid">
-                    <div class="demo-box" aa-animate="rotate-br-cw-45">
-                        <div class="content">rotate-br-cw-45</div>
+                    <div class="demo-box" aa-animate="rotate-br-cw">
+                        <div class="content">rotate-br-cw</div>
                     </div>
-                    <div class="demo-box" aa-animate="rotate-br-ccw-45">
-                        <div class="content">rotate-br-ccw-45</div>
+                    <div class="demo-box" aa-animate="rotate-br-ccw">
+                        <div class="content">rotate-br-ccw</div>
                     </div>
-                    <div class="demo-box" aa-animate="rotate-bl-cw-45">
-                        <div class="content">rotate-bl-cw-45</div>
+                    <div class="demo-box" aa-animate="rotate-bl-cw">
+                        <div class="content">rotate-bl-cw</div>
                     </div>
-                    <div class="demo-box" aa-animate="rotate-bl-ccw-45">
-                        <div class="content">rotate-bl-ccw-45</div>
+                    <div class="demo-box" aa-animate="rotate-bl-ccw">
+                        <div class="content">rotate-bl-ccw</div>
                     </div>
                 </div>
             </section>
@@ -190,6 +183,26 @@
                     </div>
                 </div>
             </section>
+
+            <!-- Pseudo Background Reveal -->
+            <section class="animation-section">
+                <h2 aa-animate="fade-up">Pseudo Background Reveal</h2>
+                <div class="grid">
+                    <div class="demo-box" aa-animate="pseudo-reveal-up-#cccccc">
+                        <div class="content">pseudo-reveal-up</div> 
+                    </div>
+                    <div class="demo-box" aa-animate="pseudo-reveal-down">
+                        <div class="content">pseudo-reveal-down</div>
+                    </div>
+                    <div class="demo-box" aa-animate="pseudo-reveal-left">
+                        <div class="content">pseudo-reveal-left</div>
+                    </div>
+                    <div class="demo-box" aa-animate="pseudo-reveal-right">
+                        <div class="content">pseudo-reveal-right</div>
+                    </div>
+                </div>
+            </section>
+            
         </div>
     </main>
 

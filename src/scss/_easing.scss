@@ -53,16 +53,6 @@ $aa-ease: (
   }
 }
 
-[aa-load] {
-  @each $key, $val in $aa-ease {
-    body[aa-ease="#{$key}"] &,
-    &[aa-load][aa-ease="#{$key}"] {
-      animation-timing-function: $val;
-      transition-timing-function: $val;
-    }
-  }
-}
-
 [aa-hover] {
   @each $key, $val in $aa-ease {
     body[aa-ease="#{$key}"] &,

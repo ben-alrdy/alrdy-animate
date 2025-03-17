@@ -36,24 +36,6 @@
       transform: translate3d(calc(50px * var(--aa-distance)), 0, 0);
     }
 
-    [aa-animate='fade-up-right'] {
-      transform: translate3d(calc(-50px * var(--aa-distance)), calc(50px * var(--aa-distance)), 0);
-    }
-
-    [aa-animate='fade-up-left'] {
-      transform: translate3d(calc(50px * var(--aa-distance)), calc(50px * var(--aa-distance)), 0);
-    }
-
-    [aa-animate='fade-down-right'] {
-      transform: translate3d(calc(-50px * var(--aa-distance)), calc(-50px * var(--aa-distance)), 0);
-    }
-
-    [aa-animate='fade-down-left'] {
-      transform: translate3d(calc(50px * var(--aa-distance)), calc(-50px * var(--aa-distance)), 0);
-    }
-
-
-
 
     /**
     * Zoom animations:
@@ -74,46 +56,28 @@
     }
 
     [aa-animate='zoom-in'] {
-      transform: scale(.6);
+      transform: scale(0.6);
     }
 
     [aa-animate='zoom-in-up'] {
-      transform: translate3d(0, calc(50px * var(--aa-distance)), 0) scale(.6);
+      transform: translate3d(0, calc(50px * var(--aa-distance)), 0) scale(0.6);
     }
 
     [aa-animate='zoom-in-down'] {
-      transform: translate3d(0, calc(-50px * var(--aa-distance)), 0) scale(.6);
-    }
-
-    [aa-animate='zoom-in-right'] {
-      transform: translate3d(calc(-50px * var(--aa-distance)), 0, 0) scale(.6);
-    }
-
-    [aa-animate='zoom-in-left'] {
-      transform: translate3d(calc(50px * var(--aa-distance)), 0, 0) scale(.6);
+      transform: translate3d(0, calc(-50px * var(--aa-distance)), 0) scale(0.6);
     }
 
     [aa-animate='zoom-out'] {
-      transform: scale(1.2);
+      transform: scale(1.5);
     }
 
     [aa-animate='zoom-out-up'] {
-      transform: translate3d(0, calc(50px * var(--aa-distance)), 0) scale(1.2);
+      transform: translate3d(0, calc(50px * var(--aa-distance)), 0) scale(1.5);
     }
 
     [aa-animate='zoom-out-down'] {
-      transform: translate3d(0, calc(-50px * var(--aa-distance)), 0) scale(1.2);
+      transform: translate3d(0, calc(-50px * var(--aa-distance)), 0) scale(1.5);
     }
-
-    [aa-animate='zoom-out-right'] {
-      transform: translate3d(calc(-50px * var(--aa-distance)), 0, 0) scale(1.2);
-    }
-
-    [aa-animate='zoom-out-left'] {
-      transform: translate3d(calc(50px * var(--aa-distance)), 0, 0) scale(1.2);
-    }
-
-
 
 
     /**
@@ -188,7 +152,6 @@
 
     [aa-animate^="pseudo-reveal"][aa-animate^="pseudo-reveal"] {
       position: relative;
-      background: var(--aa-bg-color-final);
       overflow: hidden;
     }
 
@@ -204,7 +167,7 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background: var(--aa-bg-color-initial);
+      background: var(--aa-pseudo-color);
       z-index: 2;
       transition: transform var(--aa-duration) var(--aa-delay);
     }
@@ -213,41 +176,43 @@
       transform: translate3d(0, 0, 0);
     }
 
-    [aa-animate="pseudo-reveal-up"]::before {
+    [aa-animate^="pseudo-reveal-up"]::before {
       transform-origin: top;
       transform: scaleY(1);
     }
-    [aa-animate="pseudo-reveal-up"].in-view::before {
+    [aa-animate^="pseudo-reveal-up"].in-view::before {
       transform: scaleY(0);
     }
 
-    [aa-animate="pseudo-reveal-down"]::before {
+    [aa-animate^="pseudo-reveal-down"]::before {
       transform-origin: bottom;
       transform: scaleY(1);
     }
-    [aa-animate="pseudo-reveal-down"].in-view::before {
+    [aa-animate^="pseudo-reveal-down"].in-view::before {
       transform: scaleY(0);
     }
 
-    [aa-animate="pseudo-reveal-right"]::before {
+    [aa-animate^="pseudo-reveal-right"]::before {
       transform-origin: right;
       transform: scaleX(1);
     }
-    [aa-animate="pseudo-reveal-right"].in-view::before {
+    [aa-animate^="pseudo-reveal-right"].in-view::before {
       transform: scaleX(0);
     }
 
-    [aa-animate="pseudo-reveal-left"]::before {
+    [aa-animate^="pseudo-reveal-left"]::before {
       transform-origin: left;
       transform: scaleX(1);
     }
-    [aa-animate="pseudo-reveal-left"].in-view::before {
+    [aa-animate^="pseudo-reveal-left"].in-view::before {
       transform: scaleX(0);
     }
 
 
     /*
-    HOVER TRANSITIONS 
+    *
+    * HOVER TRANSITIONS 
+    *
     */
 
 

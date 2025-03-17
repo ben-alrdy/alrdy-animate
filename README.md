@@ -142,32 +142,26 @@ Add the `aa-animate` attribute to the element you want to animate. Once it scrol
 - **aa-duration**: The animation duration for this element, in seconds. Example: `aa-duration="2"`.
 - **aa-delay**: The animation delay for this element, in seconds. Example: `aa-delay="0.5"`.
 - **aa-delay-mobile**: If set, overwrites the delay on mobile devices. Example: `aa-delay-mobile="0.5s"`.
-- **aa-color-initial**: The initial background color for the animation. Example: `aa-color-initial="#d7ff64"`.
-- **aa-color-final**: The final background color for the animation. Example: `aa-color-final="#d7ff64"`.
 - **aa-anchor**: Specify an anchor element to trigger the animation (useful for fixed elements that should be animated when the anchor scrolls into view). Example: `aa-anchor="#trigger"` on the element to be animated combined with `<div id="trigger">Headline</div>`.
 - **aa-viewport**: Override the global viewport percentage for this element. Example: `aa-viewport="0.6"`.
 - **aa-distance**: The distance multiplier for the animation. Example: `aa-distance="1.5"`.
 
 ## CSS Animations triggered on load (CSS only)
-Add the `aa-load` attribute to the element you want to animate. The animation will be triggered immediately. You can also add optional attributes (see [on load element attributes](#on-load-element-attributes) below) to customize the animation for individual elements.
+Add the `aa-load` attribute to the element you want to animate. The animation will be triggered immediately when the page loads. For best performance, use the CSS directly in Webflow.
 
 - **aa-load**: The animation type to apply. Example: `aa-load="fade-up"`.
 
-### On Load Element Attributes
-- **aa-ease**: Overwrites the global easing function for this element. Example: `aa-ease="ease-in-out"`.
-- **aa-duration**: Set the animation duration for this element, in seconds. Example: `aa-duration="2"`. Available range: 0.1s - 3s in increments of 0.1s
-- **aa-delay**: Set the animation delay for this element, in seconds. Example: `aa-delay="0.5"`. Available range: 0.05s - 1.5s in increments of 0.05s
-- **aa-stagger**: Set a staggered animation delay for up to 10 child elements, in seconds. Example: `aa-stagger="0.5"`. Available range: 0.05s - 0.5s in increments of 0.05s. Still requires the `aa-load` attribute to be set on each child element.
+### Staggering
+- You can combine the `aa-load` attribute with the `aa-stagger` attribute on a parent element to stagger the animation for up to 10 child elements. Example: `aa-stagger="0.5"`.
 
 ## CSS Animation Types
 
-AlrdyAnimate provides a wide variety of CSS animations that can be applied using the `aa-animate` attribute.
+AlrdyAnimate provides a wide variety of CSS animations that can be applied using the `aa-load` attribute.
 
 ### Fade Animations
 Simple fade animations with optional directional movement:
 - `fade` (available for aa-load)
 - `fade-up`, `fade-down`, `fade-left`, `fade-right` (available for aa-load)
-- `fade-up-right`, `fade-up-left`, `fade-down-right`, `fade-down-left`
 
 ### Float Animations
 Fade animations with a smooth back-bounce effect:
@@ -176,23 +170,18 @@ Fade animations with a smooth back-bounce effect:
 ### Zoom Animations
 Scale animations with optional directional movement:
 - `zoom-in`, `zoom-out` (available for aa-load)
-- `zoom-in-up`, `zoom-in-down`, `zoom-in-left`, `zoom-in-right` (available for aa-load)
-- `zoom-out-up`, `zoom-out-down`, `zoom-out-left`, `zoom-out-right` (available for aa-load)
+- `zoom-in-up`, `zoom-in-down`, `zoom-in-left`, `zoom-in-right` 
+- `zoom-out-up`, `zoom-out-down`, `zoom-out-left`, `zoom-out-right` 
 
 ### Slide Animations
 Pure sliding movements without opacity change:
 - `slide-up`, `slide-down`, `slide-left`, `slide-right` (available for aa-load)
 
-### Blurred Slide Animations
-Sliding with a blur effect:
-- `slide-in-blurred-bottom`, `slide-in-blurred-top` (available for aa-load)
-- `slide-in-blurred-left`, `slide-in-blurred-right` (available for aa-load)
-
 
 ### Rotate Animations
-Rotate animations from bottom right (br) and bottom left (bl) corners, clockwise (cw) and counter-clockwise (ccw). You can define the rotation degree by changing the numeric value at the end, e.g. `rotate-br-cw-15`. Available degrees are 5, 15, 25, 35, 45.
-- `rotate-br-cw-45`, `rotate-br-ccw-45` (available for aa-load)
-- `rotate-bl-cw-45`, `rotate-bl-ccw-45` (available for aa-load)
+Rotate animations from bottom right (br) and bottom left (bl) corners, clockwise (cw) and counter-clockwise (ccw).The base roation degree is 5 which you can multiply with the aa-distance attribute. 
+- `rotate-br-cw`, `rotate-br-ccw` (available for aa-load)
+- `rotate-bl-cw`, `rotate-bl-ccw` (available for aa-load)
 
 ### 3D Animations
 
@@ -214,7 +203,7 @@ Requires a parent element to have a perspective set, e.g. `perspective: 1000px;`
 
 
 ### Pseudo Overlay Reveal
-Creates a pseudo element on top of the content and reveals it. Use `aa-bg-color-initial` to set the color of the pseudo element.
+Creates a pseudo element on top of the content and reveals it. Add the color you want to use as a pseudo color to the animation type, e.g. `aa-animate="pseudo-reveal-up-#cccccc"`. Defaults to `var(--background-color--background-primary)` or black.
 - `pseudo-reveal-up`, `pseudo-reveal-down`
 - `pseudo-reveal-right`, `pseudo-reveal-left`
 

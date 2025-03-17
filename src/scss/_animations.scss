@@ -1,203 +1,104 @@
 /*
 **
-** UTILITY CLASSES FOR aa-load ANIMATIONS
-**
-*/
-
-/*DELAY AND DURATION */
-@for $i from 1 through 30 {
-  [aa-delay="#{$i * 0.05}"] {
-    --aa-delay: #{$i * 0.05}s;
-  }
-  [aa-duration="#{$i * 0.1}"] {
-    --aa-duration: #{$i * 0.1}s;
-  }
-}
-
-// STAGGER VALUES
-@each $stagger in (0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5) {
-  [aa-stagger="#{$stagger}"] {
-    --aa-stagger: #{$stagger}s;
-  }
-}
-
-
-// BASE STAGGER FUNCTIONALITY
-[aa-stagger] {
-  --aa-parent-delay: var(--aa-delay, 0s);
-
-  > [aa-load] {
-    @for $i from 1 through 10 {
-      &:nth-child(#{$i}) {
-        --aa-delay: calc(var(--aa-parent-delay) + (var(--aa-stagger, 0.1s) * (#{$i} - 1)));
-      }
-    }
-  }
-}
-
-/*
-**
 ** ANIMATION CLASSES
 **
 */
 
-// Base styles for aa-load animations
-[aa-load] {
+/*FADE WITH BACK BOUNCE ANIMATIONS – KEYFRAMES IN LOAD-ANIMATIONS.CSS*/
+
+[aa-animate^='float'] {
   animation-delay: var(--aa-delay);
   animation-duration: var(--aa-duration);
   animation-fill-mode: forwards;
   opacity: 0;
 }
 
-/*FLOAT WITH BACK BOUNCE ANIMATIONS*/
-[aa-animate^='float']{
-  opacity: 0;
-}
-
-[aa-animate^='float'].in-view {
-  animation-delay: var(--aa-delay);
-  animation-duration: var(--aa-duration);
-  animation-fill-mode: forwards;
-}
-
-[aa-animate="float-up"].in-view,
-[aa-load="float-up"] { animation-name: float-up; }
-
-[aa-animate="float-down"].in-view,
-[aa-load="float-down"] { animation-name: float-down; }
-
-[aa-animate="float-left"].in-view,
-[aa-load="float-left"] { animation-name: float-left; }
-
-[aa-animate="float-right"].in-view,
-[aa-load="float-right"] { animation-name: float-right; }
-
-
-/*BLURRED SLIDE ANIMATIONS*/
-[aa-animate^='slide-in-blurred'] {
-  opacity: 0;
-}
-
-[aa-animate^='slide-in-blurred'].in-view {
-  animation-delay: var(--aa-delay);
-  animation-duration: var(--aa-duration);
-  animation-fill-mode: forwards;
-}
-
-[aa-animate="slide-in-blurred-bottom"].in-view,
-[aa-load="slide-in-blurred-bottom"] { animation-name: slide-in-blurred-bottom; }
-
-[aa-animate="slide-in-blurred-top"].in-view,
-[aa-load="slide-in-blurred-top"] { animation-name: slide-in-blurred-top; }
-
-[aa-animate="slide-in-blurred-left"].in-view,
-[aa-load="slide-in-blurred-left"] { animation-name: slide-in-blurred-left; }
-
-[aa-animate="slide-in-blurred-right"].in-view,
-[aa-load="slide-in-blurred-right"] { animation-name: slide-in-blurred-right; }
-
+[aa-animate="float-up"].in-view{ animation-name: floatUp; }
+[aa-animate="float-down"].in-view{ animation-name: floatDown; }
+[aa-animate="float-left"].in-view{ animation-name: floatLeft; }
+[aa-animate="float-right"].in-view{ animation-name: floatRight; }
 
 /*3D SWING ANIMATIONS*/
-[aa-animate^='swing'],
-[aa-load^='swing'] {
-  opacity: 0;
+[aa-animate^='swing'] {
   transform-origin: 50% 0;
+  opacity: 0;
 }
 
-[aa-animate^='swing'].in-view {
+[aa-animate^='swing'] {
   animation-delay: var(--aa-delay);
   animation-duration: var(--aa-duration);
   animation-fill-mode: forwards;
 }
 
-[aa-animate="swing-fwd"].in-view,
-[aa-load="swing-fwd"] { animation-name: swing-fwd; }
-
-[aa-animate="swing-bwd"].in-view,
-[aa-load="swing-bwd"] { animation-name: swing-bwd; }
+[aa-animate="swing-fwd"].in-view{ animation-name: swing-fwd; }
+[aa-animate="swing-bwd"].in-view{ animation-name: swing-bwd; }
 
 
 /*3D TURN ROTATION ANIMATIONS*/
-[aa-animate^='turn-3d'] {
-  opacity: 0;
-}
 
-[aa-animate^='turn-3d'].in-view{
+[aa-animate^='turn-3d']{
   animation-delay: var(--aa-delay);
   animation-duration: var(--aa-duration);
   animation-fill-mode: forwards;
+  opacity: 0;
 }
 
-[aa-animate="turn-3d-soft"].in-view,
-[aa-load="turn-3d-soft"] { animation-name: turn-3d-soft; }
-
-[aa-animate="turn-3d-soft-3em"].in-view,
-[aa-load="turn-3d-soft-3em"] { animation-name: turn-3d-soft-3em; }
-
-[aa-animate="turn-3d-elliptic"].in-view,
-[aa-load="turn-3d-elliptic"] { animation-name: turn-3d-elliptic; }
+[aa-animate="turn-3d-soft"].in-view{ animation-name: turn-3d-soft; }
+[aa-animate="turn-3d-soft-3em"].in-view{ animation-name: turn-3d-soft-3em; }
+[aa-animate="turn-3d-elliptic"].in-view{ animation-name: turn-3d-elliptic; }
 
 
 
 /*ROTATE ANIMATIONS*/
 
-// Define the degrees list and positions
-$rotation-degrees: (5, 15, 25, 35, 45);
+// Define the positions
 $rotation-positions: ('br': (100% 100%), 'bl': (0 100%), 'tr': (100% 0), 'tl': (0 0), 'c': (50% 50%));
 
 // Base styles for rotate animations
-[aa-animate^='rotate-'],
-[aa-load^='rotate-'] {
-  opacity: 0;
-}
-
-[aa-animate^='rotate-'].in-view{
+[aa-animate^='rotate-'] {
   animation-delay: var(--aa-delay);
   animation-duration: var(--aa-duration);
   animation-fill-mode: forwards;
+  opacity: 0;
 }
 
-// Generate keyframes and animations for each position and degree
+// Generate keyframes and animations for each position
 @each $pos, $origin in $rotation-positions {
-  // Set transform origin for both types
-  [aa-animate^='rotate-#{$pos}'],
-  [aa-load^='rotate-#{$pos}'] {
+  [aa-animate^='rotate-#{$pos}'] {
     transform-origin: $origin;
   }
 
-  // Generate degree-specific rotations
-  @each $degree in $rotation-degrees {
-    @keyframes rotate-#{$pos}-cw-#{$degree} {
-      from {
-        opacity: 0;
-        transform: translateY(calc(50px * var(--aa-distance))) rotate(-#{$degree}deg);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0) rotate(0deg);
-      }
+  // Generate clockwise and counter-clockwise rotations
+  @keyframes rotate-#{$pos}-cw {
+    from {
+      opacity: 0;
+      transform: translateY(calc(50px * var(--aa-distance))) 
+                rotate(calc(-5deg * var(--aa-distance, 1)));
     }
+    to {
+      opacity: 1;
+      transform: translateY(0) rotate(0deg);
+    }
+  }
 
-    @keyframes rotate-#{$pos}-ccw-#{$degree} {
-      from {
-        opacity: 0;
-        transform: translateY(calc(50px * var(--aa-distance))) rotate(#{$degree}deg);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0) rotate(0deg);
-      }
+  @keyframes rotate-#{$pos}-ccw {
+    from {
+      opacity: 0;
+      transform: translateY(calc(50px * var(--aa-distance))) 
+                rotate(calc(5deg * var(--aa-distance, 1)));
     }
+    to {
+      opacity: 1;
+      transform: translateY(0) rotate(0deg);
+    }
+  }
 
-    [aa-animate='rotate-#{$pos}-cw-#{$degree}'].in-view,
-    [aa-load='rotate-#{$pos}-cw-#{$degree}'] {
-      animation-name: rotate-#{$pos}-cw-#{$degree};
-    }
+  [aa-animate='rotate-#{$pos}-cw'].in-view {
+    animation-name: rotate-#{$pos}-cw;
+  }
 
-    [aa-animate='rotate-#{$pos}-ccw-#{$degree}'].in-view,
-    [aa-load='rotate-#{$pos}-ccw-#{$degree}'] {
-      animation-name: rotate-#{$pos}-ccw-#{$degree};
-    }
+  [aa-animate='rotate-#{$pos}-ccw'].in-view {
+    animation-name: rotate-#{$pos}-ccw;
   }
 }
 
@@ -225,44 +126,3 @@ $rotation-positions: ('br': (100% 100%), 'bl': (0 100%), 'tr': (100% 0), 'tl': (
     animation-delay: var(--aa-delay);
   }
 }
-
-
-
-/**
- * ----------------------------------------
- * ON-LOAD CLASSES
- * ----------------------------------------
- */
-
-
-
-
-/*FADE ANIMATIONS - FOR aa-load*/
-[aa-load="fade"] { animation-name: fadeIn; }
-[aa-load="fade-up"] { animation-name: fadeInUp; }
-[aa-load="fade-down"] { animation-name: fadeInDown; }
-[aa-load="fade-left"] { animation-name: fadeInLeft; }
-[aa-load="fade-right"] { animation-name: fadeInRight; }
-
-/*ZOOM ANIMATIONS - FOR aa-load*/
-[aa-load="zoom-in"] { animation-name: zoomIn; }
-[aa-load="zoom-in-up"] { animation-name: zoomInUp; }
-[aa-load="zoom-in-down"] { animation-name: zoomInDown; }
-[aa-load="zoom-in-left"] { animation-name: zoomInLeft; }
-[aa-load="zoom-in-right"] { animation-name: zoomInRight; }
-
-[aa-load="zoom-out"] { animation-name: zoomOut; }
-[aa-load="zoom-out-up"] { animation-name: zoomOutUp; }
-[aa-load="zoom-out-down"] { animation-name: zoomOutDown; }
-[aa-load="zoom-out-left"] { animation-name: zoomOutLeft; }
-[aa-load="zoom-out-right"] { animation-name: zoomOutRight; }
-
-/*SLIDE ANIMATIONS - FOR aa-load*/
-[aa-load="slide-up"] { animation-name: slideUp; }
-[aa-load="slide-down"] { animation-name: slideDown; }
-[aa-load="slide-left"] { animation-name: slideLeft; }
-[aa-load="slide-right"] { animation-name: slideRight; }
-
-
-
-

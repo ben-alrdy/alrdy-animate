@@ -91,59 +91,73 @@ async function init(options = {}) {
         window.gsap = gsap;
         window.ScrollTrigger = ScrollTrigger;
 
-        // Load all features in parallel
-        await Promise.all(
-          initOptions.gsapFeatures.map(async (feature) => {
-            const moduleConfig = gsapBundles[feature];
-            if (!moduleConfig) return;
+        try {
+          // Load all features in parallel with individual error handling
+          await Promise.all(
+            initOptions.gsapFeatures.map(async (feature) => {
+              try {
+                const moduleConfig = gsapBundles[feature];
+                if (!moduleConfig) return;
 
-            if (moduleConfig.plugins) {
-              const plugins = await moduleConfig.plugins();
-              plugins.forEach(plugin => {
-                Object.entries(plugin).forEach(([key, value]) => {
-                  gsap.registerPlugin(value);
-                  if (key === 'Draggable' || value.toString().includes('Draggable')) {
-                    window.Draggable = value;
-                    globalThis.Draggable = value;
+                if (moduleConfig.plugins) {
+                  const plugins = await moduleConfig.plugins();
+                  plugins.forEach(plugin => {
+                    try {
+                      Object.entries(plugin).forEach(([key, value]) => {
+                        gsap.registerPlugin(value);
+                        if (key === 'Draggable' || value.toString().includes('Draggable')) {
+                          window.Draggable = value;
+                          globalThis.Draggable = value;
+                        }
+                      });
+                      Object.assign(modules, plugin);
+                    } catch (pluginError) {
+                      console.warn(`Failed to register plugin for feature ${feature}:`, pluginError);
+                    }
+                  });
+                }
+
+                if (moduleConfig.dependencies) {
+                  const deps = await moduleConfig.dependencies();
+                  Object.assign(modules, deps);
+                }
+
+                if (moduleConfig.animations) {
+                  const animationModule = await moduleConfig.animations();
+                  let moduleAnimations = {};
+
+                  switch (feature) {
+                    case 'text':
+                      moduleAnimations = animationModule.createTextAnimations(modules.gsap);
+                      break;
+                    case 'scroll':
+                      moduleAnimations = animationModule.createScrollAnimations(modules.gsap, modules.ScrollTrigger);
+                      break;
+                    case 'slider':
+                      moduleAnimations = animationModule.createSliderAnimations(modules.gsap, modules.Draggable);
+                      break;
+                    case 'hover':
+                      moduleAnimations = animationModule.createHoverAnimations(modules.gsap, modules.splitText);
+                      break;
                   }
-                });
-                Object.assign(modules, plugin);
-              });
-            }
 
-            if (moduleConfig.dependencies) {
-              const deps = await moduleConfig.dependencies();
-              Object.assign(modules, deps);
-            }
-
-            if (moduleConfig.animations) {
-              const animationModule = await moduleConfig.animations();
-              let moduleAnimations = {};
-
-              switch (feature) {
-                case 'text':
-                  moduleAnimations = animationModule.createTextAnimations(modules.gsap);
-                  break;
-                case 'scroll':
-                  moduleAnimations = animationModule.createScrollAnimations(modules.gsap, modules.ScrollTrigger);
-                  break;
-                case 'slider':
-                  moduleAnimations = animationModule.createSliderAnimations(modules.gsap, modules.Draggable);
-                  break;
-                case 'hover':
-                  moduleAnimations = animationModule.createHoverAnimations(modules.gsap, modules.splitText);
-                  break;
+                  Object.assign(animations, moduleAnimations);
+                }
+              } catch (featureError) {
+                console.warn(`Failed to load feature ${feature}:`, featureError);
+                // Continue with other features
               }
-
-              Object.assign(animations, moduleAnimations);
-            }
-          })
-        );
+            })
+          );
+        } catch (featuresError) {
+          console.warn('Failed to load some GSAP features:', featuresError);
+          // Continue with partial functionality
+        }
 
         modules.animations = animations;
         return modules;
       } catch (error) {
-        console.error('Failed to load GSAP:', error);
+        console.warn('Failed to load GSAP core:', error);
         return null;
       }
     })();
