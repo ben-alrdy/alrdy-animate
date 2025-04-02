@@ -168,6 +168,9 @@ export function createSliderAnimations(gsap, Draggable) {
         proxy = document.createElement("div");
         let wrap = gsap.utils.wrap(0, 1),
           ratio, startProgress, draggable, dragSnap, lastSnap, initChangeX, wasPlaying,
+          startY,
+          startX,
+          isDragInitialized = false,
           align = () => tl.progress(wrap(startProgress + (draggable.startX - draggable.x) * ratio)),
           syncIndex = () => tl.closestIndex(true);
 
@@ -175,6 +178,8 @@ export function createSliderAnimations(gsap, Draggable) {
           trigger: items[0].parentNode,
           type: "x",
           onPressInit() {
+            startY = this.pointerY;
+            startX = this.pointerX;
             let x = this.x;
             gsap.killTweensOf(tl);
             wasPlaying = !tl.paused();
@@ -189,21 +194,18 @@ export function createSliderAnimations(gsap, Draggable) {
           onThrowUpdate: align,
           overshootTolerance: 0,
           inertia: true,
-          throwResistance: 3000,  // Higher number = less distance/speed (default is 0.55)
+          throwResistance: 3000,
           maxDuration: 1,
           minDuration: 0.3,
           snap(value) {
-            //note: if the user presses and releases in the middle of a throw, due to the sudden correction of proxy.x in the onPressInit(), the velocity could be very large, throwing off the snap. So sense that condition and adjust for it. We also need to set overshootTolerance to 0 to prevent the inertia from causing it to shoot past and come back
-
-            // Prevent rapid scrolling on quick taps/drags
             if (Math.abs(startProgress / -ratio - this.x) < 10) {
               return lastSnap + initChangeX;
             }
 
             let time = -(value * ratio) * tl.duration(),
-              wrappedTime = timeWrap(time),
-              snapTime = times[getClosest(times, wrappedTime, tl.duration())],
-              dif = snapTime - wrappedTime;
+                wrappedTime = timeWrap(time),
+                snapTime = times[getClosest(times, wrappedTime, tl.duration())],
+                dif = snapTime - wrappedTime;
 
             Math.abs(dif) > tl.duration() / 2 && (dif += dif < 0 ? tl.duration() : -tl.duration());
             lastSnap = (time + dif) / tl.duration() / -ratio;
@@ -214,17 +216,56 @@ export function createSliderAnimations(gsap, Draggable) {
             syncIndex();
             draggable.isThrowing && (indexIsDirty = true);
             if (config.reversed) {
-              tl.reversed(true);  // Force reversed state if configured
+              tl.reversed(true);
             }
           },
           onThrowComplete: () => {
             syncIndex();
             wasPlaying && tl.play();
             if (config.reversed) {
-              tl.reversed(true);  // Ensure reversed state after throw
+              tl.reversed(true);
             }
           }
         })[0];
+
+        // Add touch event handlers to the trigger element
+        const trigger = items[0].parentNode;
+        let touchStartY = 0;
+        let touchStartX = 0;
+
+        trigger.addEventListener('touchstart', (e) => {
+          touchStartY = e.touches[0].clientY;
+          touchStartX = e.touches[0].clientX;
+        }, { passive: false });
+
+        trigger.addEventListener('touchmove', (e) => {
+          if (!isDragInitialized) {
+            const deltaY = Math.abs(e.touches[0].clientY - touchStartY);
+            const deltaX = Math.abs(e.touches[0].clientX - touchStartX);
+
+            // If vertical scrolling is detected, prevent dragging
+            if (deltaY > deltaX) {
+              draggable.disable();
+            } else {
+              isDragInitialized = true;
+            }
+          }
+        }, { passive: false });
+
+        trigger.addEventListener('touchend', () => {
+          if (!isDragInitialized) {
+            draggable.enable();
+          }
+          isDragInitialized = false;
+        });
+
+        // Store cleanup function for touch events
+        tl.touchCleanup = () => {
+          trigger.removeEventListener('touchstart', handleTouchStart);
+          trigger.removeEventListener('touchmove', handleTouchMove);
+          trigger.removeEventListener('touchend', handleTouchEnd);
+        };
+
         tl.draggable = draggable;
       }
       tl.closestIndex(true);
@@ -827,6 +868,11 @@ export function createSliderAnimations(gsap, Draggable) {
           if (nextButton) nextButton.replaceWith(nextButton.cloneNode(true));
           if (prevButton) prevButton.replaceWith(prevButton.cloneNode(true));
           element._sliderNav = null;
+        }
+
+        // Clean up touch listeners if they exist
+        if (element._loop.touchCleanup) {
+          element._loop.touchCleanup();
         }
       }
     });
