@@ -194,8 +194,8 @@ export function createSliderAnimations(gsap, Draggable) {
           onThrowUpdate: align,
           overshootTolerance: 0,
           inertia: true,
-          throwResistance: 3000,
-          maxDuration: 1,
+          // throwResistance: 3000,
+          maxDuration: 1.5, 
           minDuration: 0.3,
           snap(value) {
             if (Math.abs(startProgress / -ratio - this.x) < 10) {
@@ -233,12 +233,13 @@ export function createSliderAnimations(gsap, Draggable) {
         let touchStartY = 0;
         let touchStartX = 0;
 
-        trigger.addEventListener('touchstart', (e) => {
+        // Define named handlers
+        const handleTouchStart = (e) => {
           touchStartY = e.touches[0].clientY;
           touchStartX = e.touches[0].clientX;
-        }, { passive: false });
+        };
 
-        trigger.addEventListener('touchmove', (e) => {
+        const handleTouchMove = (e) => {
           if (!isDragInitialized) {
             const deltaY = Math.abs(e.touches[0].clientY - touchStartY);
             const deltaX = Math.abs(e.touches[0].clientX - touchStartX);
@@ -250,14 +251,19 @@ export function createSliderAnimations(gsap, Draggable) {
               isDragInitialized = true;
             }
           }
-        }, { passive: false });
+        };
 
-        trigger.addEventListener('touchend', () => {
+        const handleTouchEnd = () => {
           if (!isDragInitialized) {
             draggable.enable();
           }
           isDragInitialized = false;
-        });
+        };
+
+        // Add event listeners using named handlers
+        trigger.addEventListener('touchstart', handleTouchStart, { passive: false });
+        trigger.addEventListener('touchmove', handleTouchMove, { passive: false });
+        trigger.addEventListener('touchend', handleTouchEnd);
 
         // Store cleanup function for touch events
         tl.touchCleanup = () => {
@@ -510,12 +516,12 @@ export function createSliderAnimations(gsap, Draggable) {
       lastIndex = curIndex;
       onChange && onChange(items[curIndex], curIndex);
       timeline = tl;
-      // return () => window.removeEventListener("resize", onResize); // cleanup
+      /* return () => window.removeEventListener("resize", onResize); // cleanup */
     });
     return timeline;
   }
 
-  function setupLoopAnimation(element, animationType, duration = 1, ease = "power2.inOut", delay = 2) {
+  function initializeSlider(element, animationType, duration, ease, delay) {
     const items = gsap.utils.toArray('[aa-slider-item]', element);
     if (items.length === 0) {
       console.warn('No items found with [aa-slider-item] attribute.');
@@ -523,7 +529,7 @@ export function createSliderAnimations(gsap, Draggable) {
     }
 
     // Create the loop configuration
-    const config = createLoopConfig(element, animationType, duration);
+    const config = setupSliderConfig(element, animationType, duration);
 
     // Add navigation controls if they exist
     setupNavigationControls(element, items, config);
@@ -539,17 +545,34 @@ export function createSliderAnimations(gsap, Draggable) {
     // Setup navigation listeners
     setupNavigationListeners(element, items, loop, duration, ease, config, animationType);
 
-    // Setup additional behaviors based on animation type
+    // Setup autoplay if needed
     if (animationType.includes('snap')) {
-      setupSnapBehavior(element, loop, animationType, duration, ease, delay);
-    } else if (animationType.includes('draggable')) {
+      setupAutoplay(element, loop, animationType, duration, ease, delay);
+    }
+
+    // Setup drag functionality if needed
+    if (animationType.includes('draggable')) {
       setupDragHandlers(element, loop, animationType);
+    }
+
+    // If it's a continuous loop animation
+    if (animationType.includes('loop')) {
+      // Create ScrollTrigger for visibility-based pausing
+      loop.scrollTrigger = ScrollTrigger.create({
+        trigger: element,
+        start: "top bottom",
+        end: "bottom top",
+        onEnter: () => loop.play(),
+        onLeave: () => loop.pause(),
+        onEnterBack: () => loop.play(),
+        onLeaveBack: () => loop.pause()
+      });
     }
 
     return loop;
   }
 
-  function createLoopConfig(element, animationType, duration) {
+  function setupSliderConfig(element, animationType, duration) {
     const config = {
       speed: duration,
       repeat: -1,
@@ -588,78 +611,57 @@ export function createSliderAnimations(gsap, Draggable) {
     return config;
   }
 
-  function setupSnapBehavior(element, loop, animationType, duration, ease, delay) {
-    loop._isSnapCycleActive = false;
+  function setupAutoplay(element, loop, animationType, duration, ease, delay) {
+    let autoplay;
 
-    loop.moveToNext = () => {
-        const direction = animationType.includes('reverse') ? 'previous' : 'next';
-        loop[direction]({
-            duration: duration,
-            ease: ease,
-            onComplete: () => {
-                if (loop._isSnapCycleActive) {
-                    gsap.delayedCall(delay, loop.moveToNext);
-                }
-            }
-        });
+    const startAutoplay = () => {
+      if (!autoplay) {
+        const repeat = () => {
+          const direction = animationType.includes('reverse') ? 'previous' : 'next';
+          loop[direction]({ duration, ease });
+          autoplay = gsap.delayedCall(delay, repeat);
+        };
+        autoplay = gsap.delayedCall(delay, repeat);
+      }
     };
 
-    // Store functions for snap cycle control
-    loop.startSnapCycle = () => {
-        if (loop._isSnapCycleActive) return;
-        loop._isSnapCycleActive = true;
-        gsap.delayedCall(delay, loop.moveToNext);
+    const stopAutoplay = () => {
+      if (autoplay) {
+        autoplay.kill();
+        autoplay = null;
+      }
     };
 
-    // Store function for stopping snap cycle on loop
-    loop.stopSnapCycle = () => {
-        loop._isSnapCycleActive = false;
-        gsap.killTweensOf(loop.moveToNext);
-    };
+    // Store functions for autoplay control
+    loop.startAutoplay = startAutoplay;
+    loop.stopAutoplay = stopAutoplay;
 
-    // Setup hover handlers for snap sliders on non-touch devices
+    // Setup hover handlers for non-touch devices
     if (!window.matchMedia('(hover: none)').matches) {
-        const handleMouseEnter = () => {
-            loop.stopSnapCycle();
-        };
-        
-        const handleMouseLeave = () => {
-            // Only restart if we're not currently dragging or throwing
-            if (!loop.draggable?.isDragging && !loop._isThrowing) {
-                loop.startSnapCycle();
-            }
-        };
-
-        // Add hover listeners
-        element.addEventListener('mouseenter', handleMouseEnter);
-        element.addEventListener('mouseleave', handleMouseLeave);
-
-        // Store cleanup function
-        loop._removeHoverListeners = () => {
-            element.removeEventListener('mouseenter', handleMouseEnter);
-            element.removeEventListener('mouseleave', handleMouseLeave);
-        };
+      element.addEventListener('mouseenter', stopAutoplay);
+      element.addEventListener('mouseleave', startAutoplay);
+      
+      // Store cleanup function
+      loop._removeHoverListeners = () => {
+        element.removeEventListener('mouseenter', stopAutoplay);
+        element.removeEventListener('mouseleave', startAutoplay);
+      };
     }
 
-    // Pause the loop initially; needed for reversed sliders
-    loop.pause(); 
+    // Setup ScrollTrigger for visibility-based autoplay
+    loop.scrollTrigger = ScrollTrigger.create({
+      trigger: element,
+      start: "top bottom",
+      end: "bottom top",
+      onEnter: startAutoplay,
+      onLeave: stopAutoplay,
+      onEnterBack: startAutoplay,
+      onLeaveBack: stopAutoplay
+    });
 
-    if (loop.draggable && animationType.includes('center')) {
-        // Fix for incorrect snap position with centered sliders
-        loop.toIndex(0, { 
-            duration: 0.1,
-            onComplete: () => {
-                loop.startSnapCycle();
-            }
-        });
-    } else {
-        gsap.delayedCall(0.01, loop.startSnapCycle);
-    }
-
-    // Handle dragging if enabled
-    if (loop.draggable) {
-        setupDragHandlers(element, loop, animationType);
-    }
+    // Start autoplay
+    loop.pause();
+    startAutoplay();
   }
 
   function setupDragHandlers(element, loop, animationType) {
@@ -669,7 +671,7 @@ export function createSliderAnimations(gsap, Draggable) {
       onThrowComplete: loop.draggable.vars.onThrowComplete
     };
 
-    if (animationType.includes('draggable') && (animationType.includes('loop') || animationType.includes('snap'))) {
+    if (animationType.includes('draggable')) {
       // Create all handlers
       const handlers = {
         onPressInit() {
@@ -677,22 +679,16 @@ export function createSliderAnimations(gsap, Draggable) {
             originalHandlers.onPressInit.call(this);
           }
 
-          // fix for loop not playing on click
-          if (loop.paused() && !animationType.includes('snap')) {
-            loop.play();
+          // Stop autoplay on drag start
+          if (loop.stopAutoplay) {
+            loop.stopAutoplay();
           }
         },
         onDragStart() {
           loop.pause();
           loop._isThrowing = false;
-
-          // Stop any active snap cycle
-          if (animationType.includes('snap')) {
-            loop.stopSnapCycle();
-          }
         },
         onDragEnd() {
-          // If there's inertia, the throw will begin
           if (this.tween && this.tween.isActive()) {
             loop._isThrowing = true;
           }
@@ -704,11 +700,12 @@ export function createSliderAnimations(gsap, Draggable) {
 
           loop._isThrowing = false;
 
-          if (loop.startSnapCycle) {
-            if (!element.matches(':hover') || window.matchMedia('(hover: none)').matches) {  // Only restart snap cycle if we're not currently being hovered or if it's a touch device
-              loop.startSnapCycle();
+          // Only restart autoplay if we're not being hovered and it's a snap-enabled slider
+          if (loop.startAutoplay && animationType.includes('snap')) {
+            if (!element.matches(':hover') || window.matchMedia('(hover: none)').matches) {
+              loop.startAutoplay();
             }
-          } else {
+          } else if (animationType.includes('loop')) {
             loop.play();
           }
         }
@@ -733,6 +730,44 @@ export function createSliderAnimations(gsap, Draggable) {
          ...document.querySelectorAll(`[aa-slider-button][aa-slider-target="${element.id}"]`)]
       : element.querySelectorAll('[aa-slider-button]');
 
+    // Setup ARIA attributes for slider
+    element.setAttribute('role', 'region');
+    element.setAttribute('aria-roledescription', 'carousel');
+
+    // Setup slides with proper ARIA attributes
+    items.forEach((slide, i) => {
+      slide.setAttribute('role', 'tabpanel');
+      slide.setAttribute('aria-roledescription', 'slide');
+      slide.setAttribute('aria-label', `Slide ${i + 1} of ${totalSlides}`);
+      slide.setAttribute('id', `${element.id || 'slider'}-slide-${i}`);
+    });
+
+    // Setup navigation buttons with ARIA
+    if (nextButton) {
+      nextButton.setAttribute('aria-label', 'Next slide');
+      nextButton.setAttribute('role', 'button');
+    }
+    if (prevButton) {
+      prevButton.setAttribute('aria-label', 'Previous slide');
+      prevButton.setAttribute('role', 'button');
+    }
+
+    // Setup slide buttons with ARIA
+    if (slideButtons.length > 0) {
+      const bulletList = slideButtons[0].parentElement;
+      if (bulletList) {
+        bulletList.setAttribute('role', 'tablist');
+        bulletList.setAttribute('aria-label', 'Slide navigation');
+      }
+      
+      slideButtons.forEach((button, i) => {
+        button.setAttribute('role', 'tab');
+        button.setAttribute('aria-label', `Go to slide ${i + 1}`);
+        button.setAttribute('aria-controls', `${element.id || 'slider'}-slide-${i}`);
+        button.setAttribute('tabindex', '0');
+      });
+    }
+
     // Update total if the element exists
     if (totalElement) {
       totalElement.textContent = totalSlides < 10 ? `0${totalSlides}` : totalSlides;
@@ -740,25 +775,24 @@ export function createSliderAnimations(gsap, Draggable) {
 
     // Set up the onChange handler
     config.onChange = (element, rawIndex) => {
-      // Handle active class for slides
-      const activeElement = element.parentElement.querySelector('.is-active');
-      if (activeElement) activeElement.classList.remove('is-active');
-      element.classList.add('is-active');
+      const index = ((rawIndex % totalSlides) + totalSlides) % totalSlides;
+      
+      // Handle active class and ARIA for slides
+      items.forEach((slide, i) => {
+        slide.classList.toggle('is-active', i === index);
+        slide.setAttribute('aria-hidden', i !== index ? 'true' : 'false');
+      });
 
-      // Handle active class for buttons
+      // Handle active class and ARIA for buttons
       if (slideButtons.length > 0) {
-        const activeButton = [...slideButtons].find(btn => btn.classList.contains('is-active'));
-        if (activeButton) activeButton.classList.remove('is-active');
-        
-        const index = ((rawIndex % totalSlides) + totalSlides) % totalSlides;
-        if (slideButtons[index]) {
-          slideButtons[index].classList.add('is-active');
-        }
+        slideButtons.forEach((button, i) => {
+          button.classList.toggle('is-active', i === index);
+          button.setAttribute('aria-selected', i === index ? 'true' : 'false');
+        });
       }
 
       // Handle counter if it exists
       if (currentElement) {
-        const index = ((rawIndex % totalSlides) + totalSlides) % totalSlides;
         currentElement.textContent = (index + 1) < 10 ? `0${index + 1}` : (index + 1);
       }
     };
@@ -831,8 +865,8 @@ export function createSliderAnimations(gsap, Draggable) {
     activeLoops.forEach(element => {
       if (element._loop) {
         // Stop any active snap cycles
-        if (element._loop.stopSnapCycle) {
-          element._loop.stopSnapCycle();
+        if (element._loop.stopAutoplay) {
+          element._loop.stopAutoplay();
         }
 
         // Remove hover listeners if they exist
@@ -845,6 +879,11 @@ export function createSliderAnimations(gsap, Draggable) {
           element._loop.draggable.kill();
         }
         
+        // Clean up ScrollTrigger if it exists
+        if (element._loop.scrollTrigger) {
+          element._loop.scrollTrigger.kill();
+        }
+        
         // Get all slider items
         const items = element.querySelectorAll('[aa-slider-item]');
         
@@ -854,7 +893,6 @@ export function createSliderAnimations(gsap, Draggable) {
         
         // Kill the loop timeline
         element._loop.kill();
-        element._loop = null;
         
         // Reset all GSAP properties on slider items
         gsap.set(items, { clearProps: "all" });
@@ -870,17 +908,19 @@ export function createSliderAnimations(gsap, Draggable) {
           element._sliderNav = null;
         }
 
-        // Clean up touch listeners if they exist
-        if (element._loop.touchCleanup) {
+        // Clean up touch listeners if they exist - with safety check
+        if (element._loop && typeof element._loop.touchCleanup === 'function') {
           element._loop.touchCleanup();
         }
+
+        element._loop = null;
       }
     });
     activeLoops.clear();
   }
 
   return {
-    slider: (element, animationType, duration, ease, delay) => setupLoopAnimation(element, animationType, duration, ease, delay),
+    slider: (element, animationType, duration, ease, delay) => initializeSlider(element, animationType, duration, ease, delay),
     cleanupLoops
   };
 }
