@@ -71,8 +71,8 @@
         <!-- Add the marquee sections here -->
         <section class="marquee-section">
             <!-- Left-moving marquee -->
-            <div aa-animate="marquee-left-hover" aa-duration="15" class="marquee">
-                <div aa-marquee-scroller>
+            <div aa-animate="marquee-left-hover" aa-duration="15" class="marquee" aa-scrub="smooth">
+                <div aa-marquee-scroller="20">
                     <div aa-marquee-items>
                         <div class="marquee__item">
                             <p>Scroll Effects & Animations - </p>
@@ -82,8 +82,44 @@
             </div>
 
             <!-- Right-moving marquee -->
-            <div aa-animate="marquee-right-hover" aa-duration="50" class="marquee">
-                <div aa-marquee-scroller="1">
+            <div aa-animate="marquee-right-hover" aa-duration="50" class="marquee" aa-scrub="smooth">
+                <div aa-marquee-scroller="0">
+                    <div aa-marquee-items>
+                        <div class="marquee__item">
+                            <div class="marquee__box"></div>
+                            <div class="marquee__box"></div>
+                            <div class="marquee__box"></div>
+                            <div class="marquee__box"></div>
+                            <div class="marquee__box"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="full-height-section">
+            <div class="container">
+                <h1>Scroll Effects</h1>
+                <p>Experience smooth background transitions and parallax effects as you scroll. Our scroll animations are optimized for performance while delivering stunning visual impact.</p>
+                <button class="button">Get Started</button>
+            </div>
+        </section>
+
+        <section class="marquee-section">
+            <!-- Left-moving marquee -->
+            <div aa-animate="marquee-left-paused" class="marquee" aa-scrub="smoother">
+                <div aa-marquee-scroller="20">
+                    <div aa-marquee-items>
+                        <div class="marquee__item">
+                            <p>Scroll Effects & Animations - </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right-moving marquee -->
+            <div aa-animate="marquee-right-paused" class="marquee" aa-scrub="smoother">
+                <div aa-marquee-scroller="10">
                     <div aa-marquee-items>
                         <div class="marquee__item">
                             <div class="marquee__box"></div>

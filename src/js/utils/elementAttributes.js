@@ -45,7 +45,7 @@ export function getElementSettings(element, settings) {
     animationType,
     ease: element.hasAttribute('aa-ease') ? element.getAttribute('aa-ease') : settings.ease,
     split: element.getAttribute('aa-split'),
-    scrub: element.getAttribute('aa-scrub'),
+    scrub: element.getAttribute('aa-scrub') || undefined,
     distance: element.hasAttribute('aa-distance') ? parseFloat(element.getAttribute('aa-distance')) : settings.distance,
 
     // Hover properties

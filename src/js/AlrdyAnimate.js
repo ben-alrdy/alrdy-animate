@@ -271,10 +271,10 @@ function setupGSAPAnimations(element, elementSettings, initOptions, isMobile, mo
       // end: isMobile ? "top 20%" : "top 40%",
       start: `top ${(viewportPercentage) * 100}%`,
       end: "top 40%",
-      scrub: scrub.includes('smoother') ? 4 :
-          scrub.includes('smooth') ? 2 :
-          scrub.includes('snap') ? { snap: 0.2 } :
-          true
+      scrub: scrub === 'smoother' ? 4 :
+             scrub === 'smooth' ? 2 :
+             scrub === 'snap' ? { snap: 0.2 } :
+             true
     } : {
       start: `top ${(viewportPercentage) * 100}%`
     }),
@@ -332,7 +332,7 @@ function setupGSAPAnimations(element, elementSettings, initOptions, isMobile, mo
         break;
 
       case 'marquee':
-        modules.animations.marquee(element, duration);
+        modules.animations.marquee(element, duration, scrub);
         break;
 
       case 'text':

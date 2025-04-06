@@ -397,11 +397,12 @@ function createCounterTimeline(element, gsap, duration, ease, delay) {
   );
 }
 
-function createMarqueeTimeline(element, gsap, ScrollTrigger, duration) {
+function createMarqueeTimeline(element, gsap, ScrollTrigger, duration, scrub) {
   // Parse animation settings from aa-animate attribute
   const animateAttr = element.getAttribute('aa-animate');
   const isRightDirection = animateAttr.includes('right');
   const hasHover = animateAttr.includes('hover');
+  const isPaused = animateAttr.includes('paused');
   
   const scrollContainer = element.querySelector('[aa-marquee-scroller]');
   const collection = element.querySelector('[aa-marquee-items]');
@@ -412,13 +413,10 @@ function createMarqueeTimeline(element, gsap, ScrollTrigger, duration) {
   }
 
   const speedMultiplier = window.innerWidth < 479 ? 0.5 : window.innerWidth < 991 ? 0.75 : 1;
-  const scrollSpeed = parseInt(scrollContainer.getAttribute('aa-marquee-scroller')) || 10;
+  const scrollSpeed = parseInt(scrollContainer.getAttribute('aa-marquee-scroller')) || 0;
   const baseSpeed = duration * (collection.offsetWidth / window.innerWidth) * speedMultiplier;
   
   const duplicates = parseInt(collection.getAttribute('aa-marquee-items')) || 2;
-  
-  scrollContainer.style.marginLeft = `-${scrollSpeed}%`;
-  scrollContainer.style.width = `${(scrollSpeed * 2) + 100}%`;
 
   const fragment = document.createDocumentFragment();
   for (let i = 0; i < duplicates; i++) {
@@ -429,82 +427,95 @@ function createMarqueeTimeline(element, gsap, ScrollTrigger, duration) {
   const marqueeItems = element.querySelectorAll('[aa-marquee-items]');
   const directionMultiplier = isRightDirection ? 1 : -1;
   
-  // Create animation first (always to -100)
-  const animation = gsap.to(marqueeItems, {
-    xPercent: -100,
-    repeat: -1,
-    duration: baseSpeed,
-    ease: 'linear'
-  }).totalProgress(0.5);
+  // Only create continuous marquee animation if direction is specified
+  if (!isPaused) {
+    // Create animation first (always to -100)
+    const animation = gsap.to(marqueeItems, {
+      xPercent: -100,
+      repeat: -1,
+      duration: baseSpeed,
+      ease: 'linear'
+    }).totalProgress(0.5);
 
-  // Set initial position based on direction
-  gsap.set(marqueeItems, { xPercent: directionMultiplier === 1 ? 100 : -100 });
-  
-  // Control direction with timeScale
-  animation.timeScale(directionMultiplier);
-  animation.play();
+    // Set initial position based on direction
+    gsap.set(marqueeItems, { xPercent: directionMultiplier === 1 ? 100 : -100 });
+    
+    // Control direction with timeScale
+    animation.timeScale(directionMultiplier);
+    animation.play();
 
-  // Add hover effect only if hover is specified
-  if (hasHover) {
-    let currentDirection = directionMultiplier;
+    // Add hover effect if specified
+    if (hasHover) {
+      let currentDirection = directionMultiplier;
 
-    // Update current direction when scroll direction changes
+      // Update current direction when scroll direction changes
+      ScrollTrigger.create({
+        trigger: element,
+        start: 'top bottom',
+        end: 'bottom top',
+        onUpdate: (self) => {
+          currentDirection = self.direction === 1 ? -directionMultiplier : directionMultiplier;
+        }
+      });
+
+      element.addEventListener('mouseenter', () => {
+        gsap.to(animation, {
+          timeScale: currentDirection / 4,
+          duration: 0.5
+        });
+      });
+
+      element.addEventListener('mouseleave', () => {
+        gsap.to(animation, {
+          timeScale: currentDirection,
+          duration: 0.5
+        });
+      });
+    }
+
+    // Set initial status
+    element.setAttribute('data-marquee-status', 'normal');
+
+    // Add scroll direction handling
     ScrollTrigger.create({
       trigger: element,
       start: 'top bottom',
       end: 'bottom top',
+      toggleActions: 'play pause resume pause',
       onUpdate: (self) => {
-        currentDirection = self.direction === 1 ? -directionMultiplier : directionMultiplier;
+        const isInverted = self.direction === 1;
+        const currentDirection = isInverted ? -directionMultiplier : directionMultiplier;
+        animation.timeScale(currentDirection);
+        element.setAttribute('data-marquee-status', isInverted ? 'normal' : 'inverted');
       }
-    });
-
-    element.addEventListener('mouseenter', () => {
-      gsap.to(animation, {
-        timeScale: currentDirection / 4,
-        duration: 0.5
-      });
-    });
-
-    element.addEventListener('mouseleave', () => {
-      gsap.to(animation, {
-        timeScale: currentDirection,
-        duration: 0.5
-      });
     });
   }
 
-  // Set initial status
-  element.setAttribute('data-marquee-status', 'normal');
+  // Only create scroll effect if scrollSpeed > 0
+  if (scrollSpeed > 0) {
+    scrollContainer.style.marginLeft = `-${scrollSpeed}%`;
+    scrollContainer.style.width = `${(scrollSpeed * 2) + 100}%`;
 
-  // Create scroll effect
-  const scrollTl = gsap.timeline({
-    scrollTrigger: {
-      trigger: element,
-      start: '0% 100%',
-      end: '100% 0%',
-      scrub: 0
-    }
-  });
+    console.log(scrub);
+    
+    const scrollTl = gsap.timeline({
+      scrollTrigger: {
+        trigger: element,
+        start: '0% 100%',
+        end: '100% 0%',
+        scrub: scrub === 'smoother' ? 4 :
+               scrub === 'smooth' ? 2 :
+               scrub === 'snap' ? { snap: 0.2 } :
+               scrub ? true : 0
+      }
+    });
 
-  const scrollStart = directionMultiplier === -1 ? scrollSpeed : -scrollSpeed;
-  scrollTl.fromTo(scrollContainer, 
-    { x: `${scrollStart}vw` }, 
-    { x: `${-scrollStart}vw`, ease: 'none' }
-  );
-
-  // Handle scroll direction changes and visibility
-  ScrollTrigger.create({
-    trigger: element,
-    start: 'top bottom',
-    end: 'bottom top',
-    toggleActions: 'play pause resume pause', // Play when entering, pause when leaving
-    onUpdate: (self) => {
-      const isInverted = self.direction === 1;
-      const currentDirection = isInverted ? -directionMultiplier : directionMultiplier;
-      animation.timeScale(currentDirection);
-      element.setAttribute('data-marquee-status', isInverted ? 'normal' : 'inverted');
-    }
-  });
+    const scrollStart = directionMultiplier === -1 ? scrollSpeed : -scrollSpeed;
+    scrollTl.fromTo(scrollContainer, 
+      { x: `${scrollStart}vw` }, 
+      { x: `${-scrollStart}vw`, ease: 'none' }
+    );
+  }
 }
 
 function createScrollAnimations(gsap, ScrollTrigger) {
@@ -533,8 +544,8 @@ function createScrollAnimations(gsap, ScrollTrigger) {
       return createCounterTimeline(element, gsap, duration, ease, delay);
     },
     
-    marquee: (element, duration) => {
-      return createMarqueeTimeline(element, gsap, ScrollTrigger, duration);
+    marquee: (element, duration, scrub) => {
+      return createMarqueeTimeline(element, gsap, ScrollTrigger, duration, scrub);
     }
   };
 }

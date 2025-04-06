@@ -289,18 +289,115 @@ function initializeCircleAnimation(element, gsap, settings) {
     element.addEventListener('mouseleave', event => handleCircleHover(event, false));
 }
 
+function initializeIconAnimation(element, gsap, settings) {
+    const {
+        hoverDuration: duration,
+        hoverEase: ease,
+        hoverDelay: delay,
+        hoverDistance: iconDelay,
+        hoverType
+    } = settings;
+
+    const icon = element.querySelector('[aa-hover-icon]');
+    if (!icon) return;
+
+    function setupIconPosition(direction) {
+        const iconClone = icon.cloneNode(true);
+        iconClone.style.position = 'absolute';
+        icon.after(iconClone);
+
+        // Default positions and animations
+        let positions = {
+            clone: { left: '-100%', top: '0' },
+            animation: {
+                icon: { xPercent: 100 },
+                clone: { xPercent: 100 }
+            }
+        };
+
+        switch (direction) {
+            case 'icon-right':
+                // Default values are already set
+                break;
+            case 'icon-left':
+                positions.clone = { left: '100%', top: '0' };
+                positions.animation = {
+                    icon: { xPercent: -100 },
+                    clone: { xPercent: -100 }
+                };
+                break;
+            case 'icon-up':
+                positions.clone = { left: '0', top: '100%' };
+                positions.animation = {
+                    icon: { yPercent: -100 },
+                    clone: { yPercent: -100 }
+                };
+                break;
+            case 'icon-down':
+                positions.clone = { left: '0', top: '-100%' };
+                positions.animation = {
+                    icon: { yPercent: 100 },
+                    clone: { yPercent: 100 }
+                };
+                break;
+            case 'icon-up-right':
+                positions.clone = { left: '-100%', top: '100%' };
+                positions.animation = {
+                    icon: { xPercent: 100, yPercent: -100 },
+                    clone: { xPercent: 100, yPercent: -100 }
+                };
+                break;
+            case 'icon-down-right':
+                positions.clone = { left: '-100%', top: '-100%' };
+                positions.animation = {
+                    icon: { xPercent: 100, yPercent: 100 },
+                    clone: { xPercent: 100, yPercent: 100 }
+                };
+                break;
+            case 'icon-up-left':
+                positions.clone = { left: '100%', top: '100%' };
+                positions.animation = {
+                    icon: { xPercent: -100, yPercent: -100 },
+                    clone: { xPercent: -100, yPercent: -100 }
+                };
+                break;
+            case 'icon-down-left':
+                positions.clone = { left: '100%', top: '-100%' };
+                positions.animation = {
+                    icon: { xPercent: -100, yPercent: 100 },
+                    clone: { xPercent: -100, yPercent: 100 }
+                };
+                break;
+        }
+
+        Object.assign(iconClone.style, positions.clone);
+        return { iconClone, ...positions.animation };
+    }
+
+    const { iconClone, icon: iconAnim, clone: cloneAnim } = setupIconPosition(hoverType);
+
+    const timeline = gsap.timeline({
+        defaults: { ease, duration, delay },
+        paused: true
+    });
+
+    timeline
+        .to(icon, iconAnim, 0)
+        .to(iconClone, cloneAnim, iconDelay);
+
+    element.addEventListener('mouseenter', () => timeline.play());
+    element.addEventListener('mouseleave', () => timeline.reverse());
+}
+
 function initializeExpandAnimation(element, gsap, settings) {
     const {
         hoverDuration: duration,
         hoverEase: ease,
         hoverDelay: delay,
-        hoverDirection: iconDirection,
-        hoverDistance: iconDelay,
         bg,
         isReverse
     } = settings;
 
-    const icon = element.querySelector('[aa-hover-icon]');
     const originalColors = storeOriginalColors(element);
 
     // Calculate optimal scale factor only if bg exists
@@ -313,53 +410,11 @@ function initializeExpandAnimation(element, gsap, settings) {
         scale = Math.ceil(elementDiagonal / bgWidth * 2);
     }
 
-    function setupIconPosition() {
-        if (!icon) return null;
-        
-        const iconClone = icon.cloneNode(true);
-        iconClone.style.position = 'absolute';
-        icon.after(iconClone);
-
-        switch (iconDirection) {
-            case 'right':
-                iconClone.style.left = '-100%';
-                iconClone.style.top = '0';
-                return {
-                    icon: { xPercent: 100 },
-                    clone: { xPercent: 100 }
-                };
-            case 'up-right':
-                iconClone.style.left = '-100%';
-                iconClone.style.top = '100%';
-                return {
-                    icon: { xPercent: 100, yPercent: -100 },
-                    clone: { xPercent: 100, yPercent: -100 }
-                };
-            case 'down-right':
-                iconClone.style.left = '-100%';
-                iconClone.style.top = '-100%';
-                return {
-                    icon: { xPercent: 100, yPercent: 100 },
-                    clone: { xPercent: 100, yPercent: 100 }
-                };
-            default:
-                iconClone.style.left = '-100%';
-                iconClone.style.top = '0';
-                return {
-                    icon: { xPercent: 100 },
-                    clone: { xPercent: 100 }
-                };
-        }
-    }
-
-    const iconAnimations = setupIconPosition();
-
     if (isReverse) {
-        // Create and setup reverse animation timeline
         const timelineIn = gsap.timeline({
             defaults: { ease, duration },
             paused: true,
-            data: { originalColors }  // Store original colors in timeline data
+            data: { originalColors }
         });
 
         setupColorAnimation(element, timelineIn, true, settings);
@@ -368,15 +423,8 @@ function initializeExpandAnimation(element, gsap, settings) {
             timelineIn.to(bg, { scale }, 0);
         }
 
-        if (iconAnimations) {
-            timelineIn
-                .to(icon, iconAnimations.icon, 0)
-                .to(icon.nextElementSibling, iconAnimations.clone, iconDelay);
-        }
-
         element.addEventListener('mouseenter', () => timelineIn.play());
         element.addEventListener('mouseleave', () => timelineIn.reverse());
-
     } else {
         const timelineIn = gsap.timeline({
             defaults: { ease, duration },
@@ -423,12 +471,6 @@ function initializeExpandAnimation(element, gsap, settings) {
         }
 
         setupColorAnimation(element, colorTimeline, true, settings);
-
-        if (iconAnimations) {
-            timelineIn
-                .to(icon, iconAnimations.icon, 0)
-                .to(icon.nextElementSibling, iconAnimations.clone, iconDelay);
-        }
 
         element.addEventListener('mouseenter', () => {
             timelineOut.pause(0);
@@ -626,6 +668,9 @@ function createHoverAnimations(gsap, splitText) {
                     break;
                 case 'expand':
                     initializeExpandAnimation(element, gsap, settings);
+                    break;
+                case 'icon':
+                    initializeIconAnimation(element, gsap, settings);
                     break;
             }
         }
