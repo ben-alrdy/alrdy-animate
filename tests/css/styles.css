@@ -295,6 +295,12 @@ button[aa-slider-next]:hover {
     position: relative;
     z-index: 1;
 }
+.is-text-hover-white {
+    transition: color 0.5s ease-in-out;
+}
+.is-text-hover-white:hover  {
+    color: white;
+}
 .is-icon {
     display: flex;
     align-items: center;
@@ -324,6 +330,9 @@ button[aa-slider-next]:hover {
     position: relative;
     z-index: 1;
     overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 [aa-hover-icon] {
     position: relative;

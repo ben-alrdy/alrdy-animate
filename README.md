@@ -388,9 +388,11 @@ Enables scroll-driven animations and effects.
 - Use `aa-animate="marquee-left"` or `aa-animate="marquee-right"` to create a left- or right-moving marquee
 - Important: Each item inside the `aa-marquee-items` wrapper needs to be spaced with `margin` (not `gap` of flexbox)
 - Add `-hover` to the animation type to create a marquee that slows down on hover, e.g. `aa-animate="marquee-left-hover"`
+- Add `-paused` to disabe the animation, e.g. `aa-animate="marquee-left-paused"` - use to only animate on scroll
 - Use `aa-duration` to set the duration of the animation
-- Use `aa-marquee-scroller` to mark the element that increases in speed on scroll; accepts integer to set the speed multiplier, e.g. `aa-marquee-scroller="10"` (defaults to 10, set to 1 for no scroll speed increase)
+- Use `aa-marquee-scroller` to mark the element that increases in speed on scroll; accepts integer to set the speed multiplier, e.g. `aa-marquee-scroller="10"` (defaults to 0, i.e. no speed increase on scroll)
 - Use `aa-marquee-items` to mark the element that contains the items to duplicate in the marquee; accepts integer to set the number of duplicates, e.g. `aa-marquee-items="3"` (defaults to 2)
+
 
 Example:
 ```html
@@ -496,13 +498,19 @@ The AlrdyAnimate library includes powerful hover animations using GSAP. These an
   - Optionally, you can define the hover direction with `aa-hover-direction` (possible values: `all`, `top`, `bottom`, `left`, `right`, `vertical`, `horizontal`).
 
 4. **Background Expand Animation** (`aa-hover="bg-expand"`)
-  - Expands a shape inside the elment to fill the element.
+  - Expands a shape inside the element to fill the element.
   - Requires a div nested inside the element, tagged with `aa-hover-bg`, that will expand to fill the element.
   - Optionally, you can add `-reverse` to `aa-hover` to play the animation in reverse when hovering out, e.g. `aa-hover="bg-expand-reverse"`.
-  - Optionally, you can add a tag with `aa-hover-icon` to animate an icon on hover (usually set on the svg element inside the embed; the embed div itself needs to be set to `position: relative` and `overflow: hidden`). Use `aa-distance` to set distance/delay between the original and cloned icon.
-    - Optionally, you can define direction of the icon animation with `aa-hover-direction` on the aa-hover element (possible values: `right`, `up-right`, `down-right`).
+
+5. **Icon Animations** (`aa-hover="icon-..."`)
+  - Animates an icon on hover.
+  - Requires an svg element nested inside the element, tagged with `aa-hover-icon`.
+  - Define direction of the icon animation with `aa-hover-direction` on the aa-hover element (possible values: `right`, `up-right`, `down-right`, `left`, `up-left`, `down-left`, `up`, `down`).
+  - Optionally, you can add `-reverse` to `aa-hover` to play the animation in reverse when hovering out, e.g. `aa-hover="icon-right-reverse"`.
 
 For all hover animations, you can optionally add `aa-hover-text-color` or `aa-hover-bg-color` to any element inside the aa-hover element to animate the text or background color. The text elements will be positioned relative with z-index set to 1.
+
+You can combine hover animations with the `&` operator, e.g. `aa-hover="bg-expand&icon-right"`.
 
 To set content above the background, add `aa-hover-content` to the respective element (or position it via CSS).
 

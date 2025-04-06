@@ -141,7 +141,7 @@
             <section class="animation-section">
                 <h2>Background Expand Animation</h2>
                 <div class="hover-grid">
-                    <div class="hover-button is-icon" aa-hover="bg-expand" aa-hover-direction="right" aa-duration="0.5" aa-delay="1">
+                    <div class="hover-button is-icon" aa-hover="bg-expand&icon-right" aa-duration="0.5" aa-delay="0.2">
                         <div aa-hover-text-color="white">With Icon</div>
                         <div class="icon-wrapper">
                             <div class="bg-expand" aa-hover-bg></div>
@@ -153,10 +153,10 @@
                         </div>
                     </div>
 
-                    <div class="hover-button is-icon" aa-hover="bg-expand-reverse" aa-hover-direction="right" aa-duration="0.5" aa-distance="0.1">
-                        <div aa-hover-text-color="white">With Icon Reverse</div>
+                    <div class="hover-button is-icon" aa-hover="bg-expand-reverse&icon-right" aa-duration="0.5" >
+                        <div aa-hover-text-color="white">With Icon</div>
                         <div class="icon-wrapper">
-                            <div class="bg-expand" aa-hover-bg></div>
+                            <div class="bg-expand" aa-hover-bg aa-hover-bg-color="black"></div>
                             <div class="icon-clip">
                                 <svg aa-hover-icon width="24" height="24" viewBox="0 0 24 24">
                                     <path d="M5 12h14M12 5l7 7-7 7" stroke="white" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -164,6 +164,24 @@
                             </div>
                         </div>
                     </div>
+                    <a href="#" aa-hover="grow-bounce" aa-duration="0.6" aa-ease="ease-in-out">
+                        <div class="hover-button is-icon is-text-hover-white" aa-hover="icon-right&bg-curve&text-slide-up-reverse" aa-split="words" aa-delay="0.2" aa-duration="0.5" aa-hover-direction="all">
+                            <div style="position: relative; overflow: hidden;">
+                                <div aa-hover-text >Fade Up Chars</div>
+                            </div>
+                            <div class="icon-wrapper">
+                                
+                                <div class="icon-clip"  >
+                                    <svg aa-hover-icon width="24" height="24" viewBox="0 0 24 24" >
+                                        <path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </div>
+                            </div>
+                            <svg class="bg-filler" viewBox="0 0 100 100" preserveAspectRatio="none" aa-hover-bg>
+                                <path d="M 0 100 V 0 Q 250 0 500 0 V 0 H 0 z" fill="currentColor"></path>
+                            </svg>
+                        </div>
+                    </a>
                     
                 </div>
             </section>
@@ -177,78 +195,55 @@
                 </div>
             </section>
 
-            <!-- Slide & Rotate Animations -->
+            <!-- Icon Hover Animations -->
             <section class="animation-section">
-                <h2>Slide & Rotate Hover Animations</h2>
+                <h2>Icon Hover Animations</h2>
                 <div class="hover-grid">
-                    <!-- Slide Animations -->
-                    <div class="hover-button" aa-hover="up" aa-duration="0.3" aa-distance="2">
-                        Slide Up
-                    </div>
-                    <div class="hover-button" aa-hover="down" aa-duration="0.3">
-                        Slide Down
-                    </div>
-                    <div class="hover-button" aa-hover="left" aa-duration="0.3">
-                        Slide Left
-                    </div>
-                    <div class="hover-button" aa-hover="right" aa-duration="0.3">
-                        Slide Right
-                    </div>
-
-                    <!-- Rotate Animations -->
-                    <div class="hover-button" aa-hover="rotate-cw-5" aa-duration="0.3">
-                        Rotate 5° CW
-                    </div>
-                    <div class="hover-button" aa-hover="rotate-ccw-15" aa-duration="0.3">
-                        Rotate 15° CCW
-                    </div>
-        
-                    <div class="hover-button" aa-hover="rotate-ccw-360" aa-duration="0.5">
-                        Rotate BL 360° CCW
-                    </div>
-                    <div class="hover-button" aa-hover="rotate-cw-720" aa-duration="0.8">
-                        Rotate 720° CW
-                    </div>
-
-                    <!-- Combined Animations -->
-                    <div class="hover-button rotated" aa-hover="up-0" aa-duration="0.3">
-                        Slide Up + Rotate 0
-                    </div>
-                    <div class="hover-button rotated" aa-hover="right-0" aa-duration="0.3">
-                        Slide Right + Rotate 0
-                    </div>
-
-                    <!-- Grow Combinations -->
-                    <div class="hover-button" aa-hover="grow-up" aa-duration="0.3" aa-distance="1.2">
-                        Grow + Slide Up
-                    </div>
-                    <div class="hover-button" aa-hover="grow-cw-5" aa-duration="0.3">
-                        Grow + Rotate 5
-                    </div>
-                    <div class="hover-button" aa-hover="grow-up-ccw-5" aa-duration="0.3">
-                        Grow + Slide Up + Rotate 5
-                    </div>
-
-                    <!-- Shrink Combinations -->
-                    <div class="hover-button" aa-hover="shrink-down" aa-duration="0.3">
-                        Shrink + Slide Down
-                    </div>
-                    <div class="hover-button rotated" aa-hover="shrink-0" aa-duration="0.3">
-                        Shrink + Rotate 0
-                    </div>
-                    <div class="hover-button rotated" aa-hover="shrink-right-0" aa-duration="0.3">
-                        Shrink + Slide Right + Rotate 0
-                    </div>
-
-                    <!-- More Complex Combinations -->
-                    <div class="hover-button" aa-hover="grow-up-cw-360" aa-duration="0.5">
-                        Grow + Slide Up + Rotate 360
-                    </div>
-                    <div class="hover-button" aa-hover="shrink-down-ccw-360" aa-duration="0.5">
-                        Shrink + Slide Down + Rotate -360
-                    </div>
+                    <a class="hover-button is-icon" aa-hover="icon-right&text-slide-up-reverse" aa-split="chars" aa-duration="0.5" aa-distance="0.1" href="#">
+                        <div style="position: relative; overflow: hidden;">
+                            <div aa-hover-text>Fade Up Chars</div>
+                        </div>
+                        <div class="icon-wrapper">
+                            <div class="icon-clip">
+                                <svg aa-hover-icon width="24" height="24" viewBox="0 0 24 24">
+                                    <path d="M5 12h14M12 5l7 7-7 7" stroke="black" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </div>
+                        </div>
+                    </a>
+                    <a class="hover-button is-icon" aa-hover="icon-up-right" aa-duration="0.5" aa-distance="0.1" href="#">
+                        <div aa-hover-text-color="white">Icon up right</div>
+                        <div class="icon-wrapper">
+                            <div class="icon-clip">
+                                <svg aa-hover-icon width="24" height="24" viewBox="0 0 24 24" style="transform: rotate(-45deg);">
+                                    <path d="M5 12h14M12 5l7 7-7 7" stroke="black" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </div>
+                        </div>
+                    </a>
+                    <a class="hover-button is-icon" aa-hover="icon-down-right" aa-duration="0.5" aa-distance="0.1" href="#">
+                        <div aa-hover-text-color="white">Icon down right</div>
+                        <div class="icon-wrapper">
+                            <div class="icon-clip">
+                                <svg aa-hover-icon width="24" height="24" viewBox="0 0 24 24" style="transform: rotate(45deg);">
+                                    <path d="M5 12h14M12 5l7 7-7 7" stroke="black" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </div>
+                        </div>
+                    </a>
+                    <a class="hover-button is-icon" aa-hover="icon-left" aa-duration="0.5" aa-distance="0.1" href="#">
+                        <div aa-hover-text-color="white">Icon left</div>
+                        <div class="icon-wrapper">
+                            <div class="icon-clip">
+                                <svg aa-hover-icon width="24" height="24" viewBox="0 0 24 24" style="transform: rotate(180deg);">
+                                    <path d="M5 12h14M12 5l7 7-7 7" stroke="black" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </div>
+                        </div>
+                    </a>
                 </div>
             </section>
+        </div>
         </div>
     </main>
 

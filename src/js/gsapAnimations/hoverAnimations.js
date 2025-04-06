@@ -295,7 +295,8 @@ function initializeIconAnimation(element, gsap, settings) {
         hoverEase: ease,
         hoverDelay: delay,
         hoverDistance: iconDelay,
-        hoverType
+        hoverType,
+        isReverse
     } = settings;
 
     const icon = element.querySelector('[aa-hover-icon]');
@@ -385,8 +386,10 @@ function initializeIconAnimation(element, gsap, settings) {
         .to(icon, iconAnim, 0)
         .to(iconClone, cloneAnim, iconDelay);
 
-    element.addEventListener('mouseenter', () => timeline.play());
-    element.addEventListener('mouseleave', () => timeline.reverse());
+    element.addEventListener('mouseenter', () => timeline.restart());
+    if (isReverse) {
+        element.addEventListener('mouseleave', () => timeline.reverse());
+    } 
 }
 
 function initializeExpandAnimation(element, gsap, settings) {
@@ -404,15 +407,29 @@ function initializeExpandAnimation(element, gsap, settings) {
     let scale;
     if (bg) {
         const elementRect = element.getBoundingClientRect();
-        const elementDiagonal = Math.sqrt(Math.pow(elementRect.width, 2) + Math.pow(elementRect.height, 2));
         const bgRect = bg.getBoundingClientRect();
+        
+        // Calculate relative center position (0 to 1)
+        const centerX = (bgRect.left + bgRect.width/2 - elementRect.left) / elementRect.width;
+        const centerY = (bgRect.top + bgRect.height/2 - elementRect.top) / elementRect.height;
+        
+        // Find the maximum distance using the largest possible distance
+        // This avoids expensive sqrt calculations for each corner
+        const distanceX = Math.max(centerX, 1 - centerX) * elementRect.width;
+        const distanceY = Math.max(centerY, 1 - centerY) * elementRect.height;
+        
+        // Use the larger of the two dimensions for scaling
+        // This ensures coverage without needing to calculate diagonal distances
+        const maxDistance = Math.max(distanceX, distanceY) * 2;
         const bgWidth = Math.max(bgRect.width, 1);
-        scale = Math.ceil(elementDiagonal / bgWidth * 2);
+        
+        // Add 5% buffer and round up
+        scale = Math.ceil((maxDistance / bgWidth) * 1.05 );
     }
 
     if (isReverse) {
         const timelineIn = gsap.timeline({
-            defaults: { ease, duration },
+            defaults: { ease, duration, delay },
             paused: true,
             data: { originalColors }
         });
@@ -427,7 +444,7 @@ function initializeExpandAnimation(element, gsap, settings) {
         element.addEventListener('mouseleave', () => timelineIn.reverse());
     } else {
         const timelineIn = gsap.timeline({
-            defaults: { ease, duration },
+            defaults: { ease, duration, delay },
             paused: true,
         });
 
@@ -669,10 +686,11 @@ function createHoverAnimations(gsap, splitText) {
                 case 'expand':
                     initializeExpandAnimation(element, gsap, settings);
                     break;
-                case 'icon':
-                    initializeIconAnimation(element, gsap, settings);
-                    break;
             }
+        },
+
+        initializeIconHover: (element, settings) => {
+            initializeIconAnimation(element, gsap, settings);
         }
     };
 }

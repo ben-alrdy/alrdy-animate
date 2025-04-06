@@ -398,18 +398,35 @@ function setupIntersectionObserver(element, elementSettings, initOptions) {
 
 function setupGSAPHoverAnimations(element, elementSettings, initOptions, isMobile, modules) {
   const { hoverType } = elementSettings;
-  const baseType = hoverType.includes('-') ? hoverType.split('-')[0] : hoverType;
-
-  // Map hover types to their initialization functions
-  switch (baseType) {
-    case 'text':
-      modules.animations.initializeTextHover(element, elementSettings);
-      break;
-    case 'bg':
-      const animationType = hoverType.split('-')[1]; // circle, curve, expand
-      modules.animations.initializeBackgroundHover(element, elementSettings, animationType);
-      break;
-  }
+  
+  // Split multiple hover types
+  const hoverTypes = hoverType.split('&');
+  
+  // Process each hover type
+  hoverTypes.forEach(type => {
+    const [baseType, ...subtypes] = type.split('-');
+    
+    switch (baseType) {
+      case 'text':
+        modules.animations.initializeTextHover(element, {
+          ...elementSettings,
+          hoverType: type
+        });
+        break;
+      case 'bg':
+        modules.animations.initializeBackgroundHover(element, {
+          ...elementSettings,
+          hoverType: type
+        }, subtypes[0]); // circle, curve, expand
+        break;
+      case 'icon':
+        modules.animations.initializeIconHover(element, {
+          ...elementSettings,
+          hoverType: type
+        });
+        break;
+    }
+  });
 }
 
 const AlrdyAnimate = {
