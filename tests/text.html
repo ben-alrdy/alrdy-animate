@@ -25,20 +25,27 @@
         </nav>
     </header>
 
-    <main>
+    <main style="overflow: hidden;">
         <div class="container">
             <h1>Text Animations</h1>
 
             <!-- Basic Text Slides -->
-            <section class="animation-section">
+            <section class="animation-section" >
                 <h2>Basic Text Slides</h2>
                 
-                <div class="text-container">
+                <div class="text-container" >
                     <h3 aa-animate="animationType:text-slide-up-clip; split:words; stagger:0.1;">
                         This text slides up word by word
                     </h3>
                     <h3 aa-animate="text-slide-down-clip" aa-split="words">
                         This text slides down word by word
+                    </h3>
+                    <h3 aa-animate="text-slide-left" aa-split="words" aa-stagger="0.02">
+                        This text slides left word by word This text slides down word by word This text slides down word by word
+                    </h3>
+                    <h3 aa-animate="text-slide-left" aa-split="lines&words" aa-stagger="0.04" >
+                        This text slides right word by word This text slides down word by word This text slides down word by word This text slides right word by word This text slides down word by word This text slides down word by word
+
                     </h3>
                 </div>
             </section>

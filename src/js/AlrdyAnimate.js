@@ -29,6 +29,7 @@ const defaultOptions = {
 const TEXT_ANIMATION_MAP = {
   'text-slide-up': 'slideUp',
   'text-slide-down': 'slideDown',
+  'text-slide-left': 'slideLeft',
   'text-tilt-up': 'tiltUp',
   'text-tilt-down': 'tiltDown',
   'text-rotate-soft': 'rotateSoft',

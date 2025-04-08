@@ -82,6 +82,11 @@ export function createTextAnimations(gsap) {
       defaults.slide
     ),
     
+    slideLeft: createAnimation(
+      { x: "100vw", opacity: 0 },
+      defaults.slide
+    ),
+    
     tiltUp: createAnimation(
       { y: "110%", opacity: 0, rotation: 10, transformOrigin: "bottom left" },
       defaults.slide
