@@ -38,8 +38,8 @@ export function splitText(element, split, hideFromScreenReaders = false) {
   }
 
   // Check if animation type includes 'clip'
-  const isClipped = element.settings?.animationType?.includes('-clip') || 
-                   element.getAttribute('aa-animate')?.includes('-clip');
+  const isClipped = (element.settings?.animationType?.includes('-clip') || 
+                   element.getAttribute('aa-animate')?.includes('-clip')) ?? false;
   
   // Add clip wrappers if needed
   if (isClipped && splitInstance.lines) {

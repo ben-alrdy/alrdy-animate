@@ -121,6 +121,10 @@ async function init(options = {}) {
                 if (moduleConfig.dependencies) {
                   const deps = await moduleConfig.dependencies();
                   Object.assign(modules, deps);
+                  // Add splitText to window if it's available (part of text feature)
+                  if (deps.splitText) {
+                    window.splitText = deps.splitText;
+                  }
                 }
 
                 if (moduleConfig.animations) {
@@ -432,9 +436,10 @@ function setupGSAPHoverAnimations(element, elementSettings, initOptions, isMobil
 
 const AlrdyAnimate = {
   init,
-  getGSAP: () => window.gsap,
-  getScrollTrigger: () => window.ScrollTrigger,
-  getDraggable: () => window.Draggable
+  gsap: window.gsap,
+  ScrollTrigger: window.ScrollTrigger,
+  Draggable: window.Draggable,
+  splitText: window.splitText  
 };
 
 // Export as a named export
