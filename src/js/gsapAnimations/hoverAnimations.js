@@ -531,7 +531,7 @@ function initializeTextHoverAnimation(element, gsap, splitText, settings) {
 
     // Split both original and clone using our textSplitter
     const { splitElements: originalSplit } = splitText(textElement, split);
-    const { splitElements: clonedSplit } = splitText(textClone, split);
+    const { splitElements: clonedSplit } = splitText(textClone, split, true);
 
     // Get the correct elements to animate
     const originalElements = originalSplit[split.split('&')[0]];
