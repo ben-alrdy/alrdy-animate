@@ -51,29 +51,60 @@ You can include AlrdyAnimate in your project using either CDN or npm.
 <!-- From UNPKG -->
 <!-- Latest version -->
 <link rel="stylesheet" href="https://unpkg.com/alrdy-animate/dist/AlrdyAnimate.css">
-<script src="https://unpkg.com/alrdy-animate/dist/AlrdyAnimate.js"></script>
+<script defer src="https://unpkg.com/alrdy-animate/dist/AlrdyAnimate.js"></script>
 
 <!-- Or specific version -->
 <link rel="stylesheet" href="https://unpkg.com/alrdy-animate@2.1.3/dist/AlrdyAnimate.css">
-<script src="https://unpkg.com/alrdy-animate@2.1.3/dist/AlrdyAnimate.js"></script>
+<script defer src="https://unpkg.com/alrdy-animate@2.1.3/dist/AlrdyAnimate.js"></script>
 
-<script>
-  document.addEventListener('DOMContentLoaded', function() {
+<!-- SCRIPT FOR MAIN CUSTOM CODE-->
+<script defer>
+  // Initialization tracking
+  window.alrdyInitialized = false;
+
+  window.initPageAnimations = function(callback) {
+    if (window.alrdyInitialized) {
+      // If already initialized, run immediately
+      callback();
+    } else {
+      // If not, wait for initialization
+      document.addEventListener('alrdy-init-complete', () => {
+        callback();
+      });
+    }
+  };
+  
+  // Initialize AlrdyAnimate
+  window.Webflow ||= [];
+  window.Webflow.push(() => {
+  	// Bulk set attributes
+  	document.querySelectorAll('h2').forEach((element) => {       
+      if (!element.hasAttribute('aa-animate')) {
+        element.setAttribute('aa-animate', 'text-slide-up-clip');
+        element.setAttribute('aa-split', 'words');  
+      }
+    });
+    
+    // Initialize AlrdyAnimate
     AlrdyAnimate.init({
       ease: 'ease-in-out',
-      again: false,
-      viewportPercentage: 0.9,
-      duration: 2,
-      delay: 0.5,
-      gsapFeatures: ['text', 'slider', 'scroll', 'hover']  // Specify which GSAP features to load
+      duration: 0.8,
+      hoverDuration: 0.6,
+      gsapFeatures: ['text', 'slider', 'scroll', 'hover']  
     }).then(() => {
-      // GSAP features are now available globally
-      console.log('GSAP features loaded successfully');
+      window.alrdyInitialized = true;
+      document.dispatchEvent(new Event('alrdy-init-complete'));
+    });
+  });
+</script>
+
+
+<!-- SCRIPT FOR PAGE CUSTOM CODE-->
+<script>
+  window.Webflow.push(() => {
+    window.initPageAnimations(() => {
+      //Custom Code
       
-      // You can now use:
-      // - gsap
-      // - ScrollTrigger
-      // - Draggable (if 'slider' feature was loaded)
     });
   });
 </script>
