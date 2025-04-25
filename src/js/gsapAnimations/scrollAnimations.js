@@ -495,8 +495,6 @@ function createMarqueeTimeline(element, gsap, ScrollTrigger, duration, scrub) {
   if (scrollSpeed > 0) {
     scrollContainer.style.marginLeft = `-${scrollSpeed}%`;
     scrollContainer.style.width = `${(scrollSpeed * 2) + 100}%`;
-
-    console.log(scrub);
     
     const scrollTl = gsap.timeline({
       scrollTrigger: {
