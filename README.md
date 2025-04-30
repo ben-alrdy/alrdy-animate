@@ -22,10 +22,12 @@
   - [Slider Animations](#slider-animations)
   - [Scroll Animations](#scroll-animations)
   - [Hover Animations](#hover-animations)
+- [Smooth Scrolling (Lenis)](#smooth-scrolling-lenis)
 - [Easing Functions](#easing-functions)
 - [Setting attributes via JavaScript](#setting-attributes-via-javascript)
 - [Contributing](#contributing)
 - [License](#license)
+
 
 ## Overview
 
@@ -565,8 +567,101 @@ To set content above the background, add `aa-hover-content` to the respective el
 ```
 
 
+## Smooth Scrolling (Lenis)
 
+AlrdyAnimate includes optional smooth scrolling powered by Lenis. To enable it, add the `smoothScroll` option to your initialization:
 
+```javascript
+AlrdyAnimate.init({
+  gsapFeatures: ['scroll', 'text'], // your features
+  smoothScroll: {
+    enabled: true,
+    options: {
+      lerp: 0.12,           // Lower = smoother scrolling
+      wheelMultiplier: 1,   // Adjust scroll speed (default = 1)
+      touchMultiplier: 2,   // Adjust touch speed (default = 2)
+      smoothWheel: true     // Enable smooth scrolling on mouse wheel
+    }
+  }
+});
+```
+
+### Configuration Options
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `lerp` | number | 0.12 | Controls smoothness (0.01 to 1) |
+| `wheelMultiplier` | number | 1 | Mouse wheel scroll speed |
+| `touchMultiplier` | number | 2 | Touch/trackpad scroll speed |
+| `smoothWheel` | boolean | true | Enable wheel smoothing |
+| `infinite` | boolean | false | Enable infinite scrolling |
+
+### Important Considerations
+
+#### Modals and Popups
+To prevent smooth scrolling within modals or other scrollable elements:
+
+```html
+<!-- Add data-lenis-prevent attribute -->
+<div class="modal" data-lenis-prevent>
+  <!-- Modal content -->
+</div>
+```
+
+#### Stop/Start Scrolling
+To disable scrolling (e.g., when opening a modal):
+
+```javascript
+// Stop scrolling
+window.lenis.stop();
+
+// Resume scrolling
+window.lenis.start();
+```
+
+#### Scroll To
+To programmatically scroll to elements:
+
+```javascript
+// Scroll to element
+window.lenis.scrollTo('#target');
+
+// Scroll with options
+window.lenis.scrollTo('#target', {
+  offset: 0,     // Offset from target (in pixels)
+  duration: 1.2, // Animation duration (in seconds)
+  immediate: false // Skip animation if true
+});
+```
+
+#### Nested Scrolling Elements
+For elements that need their own native scrolling (like carousels or code editors):
+
+```html
+<!-- Add data-lenis-prevent to keep native scrolling -->
+<div class="scrollable-element" data-lenis-prevent>
+  <!-- Scrollable content -->
+</div>
+```
+
+### Browser Support
+Lenis works in all modern browsers. For older browsers, it gracefully falls back to native scrolling.
+
+### GSAP Integration
+When enabled, Lenis automatically integrates with GSAP ScrollTrigger animations. No additional configuration is needed for your existing GSAP animations to work with smooth scrolling.
+
+### Performance Tips
+- Use `data-lenis-prevent` on heavy scroll containers
+- Adjust `lerp` value for balance between smoothness and performance
+- Consider increasing `wheelMultiplier` on longer pages
+- Use `immediate: true` with `scrollTo` for instant jumps
+
+### Troubleshooting
+If animations feel out of sync:
+1. Ensure ScrollTrigger is properly initialized
+2. Check for conflicting scroll libraries
+3. Try adjusting the `lerp` value
+4. Verify `data-lenis-prevent` on appropriate elements
 
 ## Easing Functions
 

@@ -21,8 +21,12 @@ const defaultOptions = {
   hoverDelay: 0, // 0 seconds
   hoverEase: "power3.out", // Default easing function for hover animations
   hoverDistance: 0.1, // Distance factor for the hover animations
-  gsapFeatures: [],  // Available: ['text', 'slider', 'hover', 'scroll']
-  debug: false // Set to true to see GSAP debug info
+  gsapFeatures: [],  
+  debug: false, // Set to true to see GSAP debug info
+  smoothScroll: {
+    enabled: false,
+    options: {} // Defined in smoothScroll/setup.js
+  }
 };
 
 // Map aa-animate attributes to GSAP animation names
@@ -46,8 +50,8 @@ const TEXT_ANIMATION_MAP = {
 // Initialize the animation script with the given options
 async function init(options = {}) {
   const initOptions = { ...defaultOptions, ...options };
+  let lenis = null;
 
-  // Just collect attribute-based elements
   let elements = [...document.querySelectorAll("[aa-animate], [aa-children], [aa-hover]")];
   
   allAnimatedElements = elements;
@@ -71,18 +75,15 @@ async function init(options = {}) {
   document.body.style.setProperty("--aa-default-hover-distance", `${initOptions.distance}`); // relevant for css hover animations; using the default distance of 1 instead of hoverDistance
   document.body.setAttribute("aa-ease", initOptions.ease);
 
-  // Start loading GSAP modules early if needed
   let gsapModulesPromise = null;
   let loadedModules = null;
 
+  // Initialize GSAP features if enabled
   if (enableGSAP) {
     gsapModulesPromise = (async () => {
       try {
         // Load GSAP and its modules
-        const { gsap, ScrollTrigger, gsapBundles } = await import(
-          /* webpackChunkName: "gsap-core" */
-          './gsapBundle'
-        );
+        const { gsap, ScrollTrigger, gsapBundles } = await import('./moduleBundle');
 
         const modules = { gsap, ScrollTrigger };
         const animations = {};
@@ -121,7 +122,6 @@ async function init(options = {}) {
                 if (moduleConfig.dependencies) {
                   const deps = await moduleConfig.dependencies();
                   Object.assign(modules, deps);
-                  // Add splitText to window if it's available (part of text feature)
                   if (deps.splitText) {
                     window.splitText = deps.splitText;
                   }
@@ -150,13 +150,11 @@ async function init(options = {}) {
                 }
               } catch (featureError) {
                 console.warn(`Failed to load feature ${feature}:`, featureError);
-                // Continue with other features
               }
             })
           );
         } catch (featuresError) {
           console.warn('Failed to load some GSAP features:', featuresError);
-          // Continue with partial functionality
         }
 
         modules.animations = animations;
@@ -166,6 +164,29 @@ async function init(options = {}) {
         return null;
       }
     })();
+  }
+
+  // Initialize Lenis if enabled (regardless of GSAP)
+  if (initOptions.smoothScroll?.enabled) {
+    try {
+      const { coreBundles } = await import('./moduleBundle');
+      const smoothScrollModule = coreBundles.smoothScroll;
+      
+      const [{ default: Lenis }, { initializeSmoothScroll }] = await Promise.all([
+        smoothScrollModule.plugins(),
+        smoothScrollModule.setup()
+      ]);
+
+      lenis = initializeSmoothScroll(
+        Lenis, 
+        window.gsap || null,  // Use window.gsap if available, otherwise null
+        window.ScrollTrigger || null,  // Use window.ScrollTrigger if available, otherwise null
+        initOptions.smoothScroll.options
+      );
+      window.lenis = lenis;
+    } catch (error) {
+      console.warn('Failed to initialize smooth scroll:', error);
+    }
   }
 
   return new Promise((resolve) => {
@@ -190,12 +211,10 @@ async function init(options = {}) {
             loadedModules.animations.nav?.(navElement, navType, navEase ?? 'back.inOut', navDuration ?? 0.4, navDistance ?? 1, navScrolled);
           }
 
-          // Now setup the actual animations
+          // Setup animations
           setupAnimations(allAnimatedElements, initOptions, isMobile, loadedModules);
           setupResizeHandler(loadedModules, initOptions, isMobile, setupGSAPAnimations);
           handleLazyLoadedImages(loadedModules.ScrollTrigger);
-
-          resolve({ gsap: loadedModules.gsap, ScrollTrigger: loadedModules.ScrollTrigger });
         } else {
           // Fallback if GSAP loading failed
           enableGSAP = false;
@@ -203,12 +222,16 @@ async function init(options = {}) {
             element.style.visibility = 'visible';
           });
           setupAnimations(allAnimatedElements, initOptions, isMobile, { gsap: null, ScrollTrigger: null });
-          resolve({ gsap: null, ScrollTrigger: null });
         }
       } else {
         setupAnimations(allAnimatedElements, initOptions, isMobile, { gsap: null, ScrollTrigger: null });
-        resolve({ gsap: null, ScrollTrigger: null });
       }
+
+      resolve({ 
+        gsap: loadedModules?.gsap || null, 
+        ScrollTrigger: loadedModules?.ScrollTrigger || null,
+        lenis: lenis
+      });
     });
   });
 }
@@ -439,7 +462,8 @@ const AlrdyAnimate = {
   gsap: window.gsap,
   ScrollTrigger: window.ScrollTrigger,
   Draggable: window.Draggable,
-  splitText: window.splitText  
+  splitText: window.splitText,
+  lenis: window.lenis
 };
 
 // Export as a named export

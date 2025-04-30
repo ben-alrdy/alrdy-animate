@@ -8,6 +8,7 @@ const sharedDependencies = {
     textSplitter: () => import(/* webpackChunkName: "gsap-text" */ './textSplitter')
 };
 
+// GSAP-related bundles
 export const gsapBundles = {
     text: {
         plugins: () => Promise.resolve([{ TextPlugin, SplitText }]),
@@ -27,11 +28,16 @@ export const gsapBundles = {
     hover: {
         animations: () => import(/* webpackChunkName: "gsap-hover" */ './gsapAnimations/hoverAnimations'),
         dependencies: sharedDependencies.textSplitter
-    },
+    }
+};
+
+// Non-GSAP bundles
+export const coreBundles = {
     smoothScroll: {
         plugins: () => import(/* webpackChunkName: "lenis" */ 'lenis'),
         setup: () => import(/* webpackChunkName: "lenis" */ './smoothScroll/setup')
     }
+    // Future non-GSAP features would go here
 };
 
-export { gsap, ScrollTrigger, TextPlugin, SplitText };
+export { gsap, ScrollTrigger, TextPlugin, SplitText }; 
