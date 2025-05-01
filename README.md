@@ -596,6 +596,14 @@ AlrdyAnimate.init({
 | `smoothWheel` | boolean | true | Enable wheel smoothing |
 | `infinite` | boolean | false | Enable infinite scrolling |
 
+### Scroll To
+The Scroll To feature allows you to create smooth scrolling animations to specific elements on your page. 
+
+- Add  `aa-scroll-target` attribute to any clickable element (like buttons or links) and include the ID of the target section, e.g. `aa-scroll-target="#my-section"`
+- Customize the scroll behavior with these optional attributes:
+   - `aa-duration`: Animation duration in seconds (default: 1.2)
+   - `aa-distance`: Offset distance in pixels (default: 0)
+
 ### Important Considerations
 
 #### Modals and Popups
@@ -617,21 +625,6 @@ window.lenis.stop();
 
 // Resume scrolling
 window.lenis.start();
-```
-
-#### Scroll To
-To programmatically scroll to elements:
-
-```javascript
-// Scroll to element
-window.lenis.scrollTo('#target');
-
-// Scroll with options
-window.lenis.scrollTo('#target', {
-  offset: 0,     // Offset from target (in pixels)
-  duration: 1.2, // Animation duration (in seconds)
-  immediate: false // Skip animation if true
-});
 ```
 
 #### Nested Scrolling Elements

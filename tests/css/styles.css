@@ -496,3 +496,29 @@ p {
     height: 18vw;
     margin: 1vw;
 }
+
+.scroll-nav {
+    padding: 2rem 0;
+    text-align: center;
+}
+
+.scroll-links {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    list-style: none;
+    padding: 0;
+    margin: 1rem 0;
+}
+
+.scroll-links a {
+    color: inherit;
+    text-decoration: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    transition: background-color 0.3s;
+}
+
+.scroll-links a:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+}

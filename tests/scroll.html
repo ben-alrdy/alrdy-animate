@@ -23,10 +23,37 @@
                 <li><a href="scroll.html" class="active">Scroll Effects</a></li>
             </ul>
         </nav>
+        
+        <!-- Add new scroll-to navigation -->
+        <div class="scroll-nav container">
+            <h2>Quick Navigation</h2>
+            <ul class="scroll-links">
+                <li>
+                    <a href="#intro" 
+                       aa-scroll-target="#intro" 
+                       aa-duration="1.2">Introduction</a>
+                </li>
+                <li>
+                    <a href="#background-transitions" 
+                       aa-scroll-target="#background-transitions" 
+                       aa-duration="1.2">Background Transitions</a>
+                </li>
+                <li>
+                    <a href="#marquee-hover" 
+                       aa-scroll-target="#marquee-hover" 
+                       aa-duration="3">Marquee with Hover</a>
+                </li>
+                <li>
+                    <a href="#marquee-scroll" 
+                       aa-scroll-target="#marquee-scroll" 
+                       aa-distance="-100">Marquee with Scroll</a>
+                </li>
+            </ul>
+        </div>
     </header>
 
     <main>
-        <section class="full-height-section">
+        <section id="intro" class="full-height-section">
             <div class="container">
                 <h1>Scroll Effects</h1>
                 <p>Experience smooth background transitions and parallax effects as you scroll. Our scroll animations are optimized for performance while delivering stunning visual impact.</p>
@@ -34,7 +61,7 @@
             </div>
         </section>
 
-        <div class="background-wrapper" aa-animate="background" aa-viewport="0.5" aa-scrub="smooth">
+        <div id="background-transitions" class="background-wrapper" aa-animate="background" aa-viewport="0.5" aa-scrub="smooth">
             <section class="full-height-section" aa-wrapper-colors="bg:#e1fe33;text:#2b1c50">
                 <div class="container">
                     <h1>Scroll Effects</h1>
@@ -68,8 +95,8 @@
             </section>
         </div>
 
-        <!-- Add the marquee sections here -->
-        <section class="marquee-section">
+        <!-- Add ID to first marquee section -->
+        <section id="marquee-hover" class="marquee-section">
             <!-- Left-moving marquee -->
             <div aa-animate="marquee-left-hover" aa-duration="15" class="marquee" aa-scrub="smooth">
                 <div aa-marquee-scroller="20">
@@ -97,15 +124,7 @@
             </div>
         </section>
 
-        <section class="full-height-section">
-            <div class="container">
-                <h1>Scroll Effects</h1>
-                <p>Experience smooth background transitions and parallax effects as you scroll. Our scroll animations are optimized for performance while delivering stunning visual impact.</p>
-                <button class="button">Get Started</button>
-            </div>
-        </section>
-
-        <section class="marquee-section">
+        <section id="marquee-scroll" class="marquee-section">
             <!-- Left-moving marquee -->
             <div aa-animate="marquee-left-paused" class="marquee" aa-scrub="smoother">
                 <div aa-marquee-scroller="20">
@@ -140,7 +159,6 @@
                 <button class="button">Get Started</button>
             </div>
         </section>
-    
     </main>
 
     <script src="../dist/AlrdyAnimate.js"></script>

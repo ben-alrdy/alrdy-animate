@@ -29,5 +29,27 @@ export function initializeSmoothScroll(Lenis, gsap, ScrollTrigger, options = {})
         requestAnimationFrame(raf);
     }
 
+    // Initialize scroll-to functionality
+    function initScrollToAnchors() {
+        document.querySelectorAll("[aa-scroll-target]").forEach(element => {
+            element.addEventListener("click", function(e) {
+                e.preventDefault();
+                
+                const targetSelector = this.getAttribute("aa-scroll-target");
+                const duration = parseFloat(this.getAttribute("aa-duration")) || 1.2;
+                const offset = parseFloat(this.getAttribute("aa-distance")) || 0;
+
+                lenis.scrollTo(targetSelector, {
+                    offset,
+                    duration,
+                    // Quartic easing function for smooth acceleration and deceleration
+                    easing: (x) => (x < 0.5 ? 8 * x * x * x * x : 1 - Math.pow(-2 * x + 2, 4) / 2)
+                });
+            });
+        });
+    }
+
+    initScrollToAnchors();
+
     return lenis;
 } 
