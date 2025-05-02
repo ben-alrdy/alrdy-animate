@@ -22,11 +22,12 @@ const defaultOptions = {
   hoverEase: "power3.out", // Default easing function for hover animations
   hoverDistance: 0.1, // Distance factor for the hover animations
   gsapFeatures: [],  
-  debug: false, // Set to true to see GSAP debug info
   smoothScroll: {
     enabled: false,
     options: {} // Defined in smoothScroll/setup.js
-  }
+  },
+  modals: false,
+  debug: false, // Set to true to see GSAP debug info
 };
 
 // Map aa-animate attributes to GSAP animation names
@@ -83,7 +84,7 @@ async function init(options = {}) {
     gsapModulesPromise = (async () => {
       try {
         // Load GSAP and its modules
-        const { gsap, ScrollTrigger, gsapBundles } = await import('./moduleBundle');
+        const { gsap, ScrollTrigger, gsapBundles } = await import('./utils/moduleBundle');
 
         const modules = { gsap, ScrollTrigger };
         const animations = {};
@@ -169,7 +170,7 @@ async function init(options = {}) {
   // Initialize Lenis if enabled (regardless of GSAP)
   if (initOptions.smoothScroll?.enabled) {
     try {
-      const { coreBundles } = await import('./moduleBundle');
+      const { coreBundles } = await import('./utils/moduleBundle');
       const smoothScrollModule = coreBundles.smoothScroll;
       
       const [{ default: Lenis }, { initializeSmoothScroll }] = await Promise.all([
@@ -186,6 +187,17 @@ async function init(options = {}) {
       window.lenis = lenis;
     } catch (error) {
       console.warn('Failed to initialize smooth scroll:', error);
+    }
+  }
+
+  // Initialize modals if enabled
+  if (initOptions.modals) {
+    try {
+      const { coreBundles } = await import('./utils/moduleBundle');
+      const { initializeModals } = await coreBundles.modals.setup();
+      initializeModals(lenis); 
+    } catch (error) {
+      console.warn('Failed to initialize modals:', error);
     }
   }
 

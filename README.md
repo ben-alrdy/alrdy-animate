@@ -23,6 +23,7 @@
   - [Scroll Animations](#scroll-animations)
   - [Hover Animations](#hover-animations)
 - [Smooth Scrolling (Lenis)](#smooth-scrolling-lenis)
+- [Modals](#modals)
 - [Easing Functions](#easing-functions)
 - [Setting attributes via JavaScript](#setting-attributes-via-javascript)
 - [Contributing](#contributing)
@@ -655,6 +656,17 @@ If animations feel out of sync:
 2. Check for conflicting scroll libraries
 3. Try adjusting the `lerp` value
 4. Verify `data-lenis-prevent` on appropriate elements
+
+## Modals
+AlrdyAnimate supports accessible, attribute-driven modals that work seamlessly with or without smooth scrolling (Lenis).
+
+- Trigger: 
+  - Use `aa-modal-target="unique-modal-name"` on any element that should open a modal.
+- Modal set up:
+  - Wrap all your modals in a container with `aa-modal-group`
+  - Each modal must have a unique `aa-modal-name="unique-modal-name"` attribute
+  - Any element inside the modal with `aa-modal-close` will close the modal when clicked (e.g., a close button or the backdrop).
+  - Apply `data-lenis-prevent`to the content div inside a modal to allow it to scroll
 
 ## Easing Functions
 

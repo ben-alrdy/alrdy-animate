@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,6 +8,7 @@
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="../dist/AlrdyAnimate.css">
 </head>
+
 <body>
     <header>
         <nav aa-nav="change-200" aa-distance="2">
@@ -34,14 +36,14 @@
                 <h2>Text Hover Animations</h2>
                 <div class="hover-grid">
                     <!-- Text Slide -->
-                    <a href="#" class="hover-button transparent" aa-hover="hoverType:text-slide-up; split:words;"  >
+                    <a href="#" class="hover-button transparent" aa-hover="hoverType:text-slide-up; split:words;">
                         <div style="position: relative; overflow: hidden; pointer-events: none;">
                             <div aa-hover-text>Slide Up Text</div>
                         </div>
                         <div aa-hover-bg aa-hover="shrink" aa-duration="0.7" aa-ease="power3.inOut"></div>
                     </a>
 
-                    <a href="#" class="hover-button transparent" aa-hover="text-slide-down" aa-split="words" >
+                    <a href="#" class="hover-button transparent" aa-hover="text-slide-down" aa-split="words">
                         <div style="position: relative; overflow: hidden; pointer-events: none;">
                             <div aa-hover-text>Slide Down Text</div>
                         </div>
@@ -55,7 +57,8 @@
                         </div>
                     </a>
 
-                    <a href="#" class="hover-button" style="padding: 0;" aa-hover="text-fade-down-reverse" aa-split="words" aa-stagger="0.1">
+                    <a href="#" class="hover-button" style="padding: 0;" aa-hover="text-fade-down-reverse"
+                        aa-split="words" aa-stagger="0.1">
                         <div style="position: relative; overflow: hidden;">
                             <div aa-hover-text style="padding: 1rem;">Fade Down Reverse</div>
                         </div>
@@ -104,7 +107,8 @@
                 <h2>Background Curve Animation</h2>
                 <div class="hover-grid">
                     <a href="#" aa-hover="grow-bounce" aa-duration="0.6" aa-ease="ease-in-out">
-                        <div class="hover-button" aa-hover="hoverType:bg-curve; hoverDirection:bottom; hoverDelay:0.3; hoverDuration:0.3; hoverEase:ease-in-out" >
+                        <div class="hover-button"
+                            aa-hover="hoverType:bg-curve; hoverDirection:bottom; hoverDelay:0.3; hoverDuration:0.3; hoverEase:ease-in-out">
                             <div aa-hover-text-color="white">Curve bottom</div>
                             <svg class="bg-filler" viewBox="0 0 100 100" preserveAspectRatio="none" aa-hover-bg>
                                 <path d="M 0 100 V 0 Q 250 0 500 0 V 0 H 0 z" fill="currentColor"></path>
@@ -113,7 +117,8 @@
                     </a>
 
                     <a href="#" aa-hover="shrink-bounce" aa-duration="0.5">
-                        <div class="hover-button" aa-hover="bg-curve" aa-hover-direction="all" aa-delay="0.2" aa-duration="0.3">
+                        <div class="hover-button" aa-hover="bg-curve" aa-hover-direction="all" aa-delay="0.2"
+                            aa-duration="0.3">
                             <div aa-hover-text-color="white">Curve all</div>
                             <svg class="bg-filler" viewBox="0 0 100 100" preserveAspectRatio="none" aa-hover-bg>
                                 <path d="M 0 100 V 0 Q 250 0 500 0 V 0 H 0 z" fill="currentColor"></path>
@@ -147,33 +152,38 @@
                             <div class="bg-expand" aa-hover-bg></div>
                             <div class="icon-clip">
                                 <svg aa-hover-icon width="24" height="24" viewBox="0 0 24 24">
-                                    <path d="M5 12h14M12 5l7 7-7 7" stroke="white" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M5 12h14M12 5l7 7-7 7" stroke="white" fill="none" stroke-width="2"
+                                        stroke-linecap="round" stroke-linejoin="round" />
                                 </svg>
                             </div>
                         </div>
                     </div>
 
-                    <div class="hover-button is-icon" aa-hover="bg-expand-reverse&icon-right" aa-duration="0.5" >
+                    <div class="hover-button is-icon" aa-hover="bg-expand-reverse&icon-right" aa-duration="0.5">
                         <div aa-hover-text-color="white">With Icon</div>
                         <div class="icon-wrapper">
                             <div class="bg-expand" aa-hover-bg aa-hover-bg-color="black"></div>
                             <div class="icon-clip">
                                 <svg aa-hover-icon width="24" height="24" viewBox="0 0 24 24">
-                                    <path d="M5 12h14M12 5l7 7-7 7" stroke="white" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M5 12h14M12 5l7 7-7 7" stroke="white" fill="none" stroke-width="2"
+                                        stroke-linecap="round" stroke-linejoin="round" />
                                 </svg>
                             </div>
                         </div>
                     </div>
                     <a href="#" aa-hover="grow-bounce" aa-duration="0.6" aa-ease="ease-in-out">
-                        <div class="hover-button is-icon is-text-hover-white" aa-hover="icon-right&bg-curve&text-slide-up-reverse" aa-split="words" aa-delay="0.2" aa-duration="0.5" aa-hover-direction="all">
+                        <div class="hover-button is-icon is-text-hover-white"
+                            aa-hover="icon-right&bg-curve&text-slide-up-reverse" aa-split="words" aa-delay="0.2"
+                            aa-duration="0.5" aa-hover-direction="all">
                             <div style="position: relative; overflow: hidden;">
-                                <div aa-hover-text >Fade Up Chars</div>
+                                <div aa-hover-text>Fade Up Chars</div>
                             </div>
                             <div class="icon-wrapper">
-                                
-                                <div class="icon-clip"  >
-                                    <svg aa-hover-icon width="24" height="24" viewBox="0 0 24 24" >
-                                        <path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+
+                                <div class="icon-clip">
+                                    <svg aa-hover-icon width="24" height="24" viewBox="0 0 24 24">
+                                        <path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" fill="none"
+                                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                                     </svg>
                                 </div>
                             </div>
@@ -182,7 +192,7 @@
                             </svg>
                         </div>
                     </a>
-                    
+
                 </div>
             </section>
 
@@ -190,8 +200,9 @@
             <section class="animation-section">
                 <h2>Underline Link Animations</h2>
                 <div class="hover-grid">
-                    <a href="#" class="hover-link" aa-hover="underline-in" >Underline</a>
-                    <a href="#" class="hover-link" aa-hover="underline" aa-distance="0.5" aa-duration="1">Underline Double</a>
+                    <a href="#" class="hover-link" aa-hover="underline-in">Underline</a>
+                    <a href="#" class="hover-link" aa-hover="underline" aa-distance="0.5" aa-duration="1">Underline
+                        Double</a>
                 </div>
             </section>
 
@@ -199,34 +210,42 @@
             <section class="animation-section">
                 <h2>Icon Hover Animations</h2>
                 <div class="hover-grid">
-                    <a class="hover-button is-icon" aa-hover="icon-right&text-slide-up-reverse" aa-split="chars" aa-duration="0.5" aa-distance="0.1" href="#">
+                    <a class="hover-button is-icon" aa-hover="icon-right&text-slide-up-reverse" aa-split="chars"
+                        aa-duration="0.5" aa-distance="0.1" href="#">
                         <div style="position: relative; overflow: hidden;">
                             <div aa-hover-text>Fade Up Chars</div>
                         </div>
                         <div class="icon-wrapper">
                             <div class="icon-clip">
                                 <svg aa-hover-icon width="24" height="24" viewBox="0 0 24 24">
-                                    <path d="M5 12h14M12 5l7 7-7 7" stroke="black" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M5 12h14M12 5l7 7-7 7" stroke="black" fill="none" stroke-width="2"
+                                        stroke-linecap="round" stroke-linejoin="round" />
                                 </svg>
                             </div>
                         </div>
                     </a>
-                    <a class="hover-button is-icon" aa-hover="icon-up-right" aa-duration="0.5" aa-distance="0.1" href="#">
+                    <a class="hover-button is-icon" aa-hover="icon-up-right" aa-duration="0.5" aa-distance="0.1"
+                        href="#">
                         <div aa-hover-text-color="white">Icon up right</div>
                         <div class="icon-wrapper">
                             <div class="icon-clip">
-                                <svg aa-hover-icon width="24" height="24" viewBox="0 0 24 24" style="transform: rotate(-45deg);">
-                                    <path d="M5 12h14M12 5l7 7-7 7" stroke="black" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <svg aa-hover-icon width="24" height="24" viewBox="0 0 24 24"
+                                    style="transform: rotate(-45deg);">
+                                    <path d="M5 12h14M12 5l7 7-7 7" stroke="black" fill="none" stroke-width="2"
+                                        stroke-linecap="round" stroke-linejoin="round" />
                                 </svg>
                             </div>
                         </div>
                     </a>
-                    <a class="hover-button is-icon" aa-hover="icon-down-right" aa-duration="0.5" aa-distance="0.1" href="#">
+                    <a class="hover-button is-icon" aa-hover="icon-down-right" aa-duration="0.5" aa-distance="0.1"
+                        href="#">
                         <div aa-hover-text-color="white">Icon down right</div>
                         <div class="icon-wrapper">
                             <div class="icon-clip">
-                                <svg aa-hover-icon width="24" height="24" viewBox="0 0 24 24" style="transform: rotate(45deg);">
-                                    <path d="M5 12h14M12 5l7 7-7 7" stroke="black" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <svg aa-hover-icon width="24" height="24" viewBox="0 0 24 24"
+                                    style="transform: rotate(45deg);">
+                                    <path d="M5 12h14M12 5l7 7-7 7" stroke="black" fill="none" stroke-width="2"
+                                        stroke-linecap="round" stroke-linejoin="round" />
                                 </svg>
                             </div>
                         </div>
@@ -235,19 +254,49 @@
                         <div aa-hover-text-color="white">Icon left</div>
                         <div class="icon-wrapper">
                             <div class="icon-clip">
-                                <svg aa-hover-icon width="24" height="24" viewBox="0 0 24 24" style="transform: rotate(180deg);">
-                                    <path d="M5 12h14M12 5l7 7-7 7" stroke="black" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <svg aa-hover-icon width="24" height="24" viewBox="0 0 24 24"
+                                    style="transform: rotate(180deg);">
+                                    <path d="M5 12h14M12 5l7 7-7 7" stroke="black" fill="none" stroke-width="2"
+                                        stroke-linecap="round" stroke-linejoin="round" />
                                 </svg>
                             </div>
                         </div>
                     </a>
                 </div>
             </section>
+            <section class="animation-section">
+                <!-- Modal Trigger Button -->
+                <button aa-modal-target="test-modal" class="hover-button" style="margin: 2rem 0;">
+                    Open Test Modal
+                </button>
+
+                <!-- Modal Group and Modal -->
+                <div aa-modal-group>
+                    <div class="modal-backdrop" aa-modal-close></div>
+                    <div aa-modal-name="test-modal" aa-modal-status="not-active" >
+                        <button aa-modal-close class="modal-close-btn" aria-label="Close modal">&times;</button>
+                        <div class="modal-scroll" data-lenis-prevent>
+                            <h2>Test Modal</h2>
+                            <p>This is a test modal for AlrdyAnimate. Press ESC or click outside to close.</p>
+                            <p>This is a test modal for AlrdyAnimate. Press ESC or click outside to close.</p>
+                            <p>This is a test modal for AlrdyAnimate. Press ESC or click outside to close.</p>
+                            <p>This is a test modal for AlrdyAnimate. Press ESC or click outside to close.</p>
+                            <p>This is a test modal for AlrdyAnimate. Press ESC or click outside to close.</p>
+                            <p>This is a test modal for AlrdyAnimate. Press ESC or click outside to close.</p>
+                            <p>This is a test modal for AlrdyAnimate. Press ESC or click outside to close.</p>
+                            <p>This is a test modal for AlrdyAnimate. Press ESC or click outside to close.</p>
+                            <p>This is a test modal for AlrdyAnimate. Press ESC or click outside to close.</p>
+
+                        </div>
+                    </div>
+                </div>
+            </section>
         </div>
-        </div>
+
     </main>
 
     <script src="../dist/AlrdyAnimate.js"></script>
     <script src="js/main.js"></script>
 </body>
-</html> 
+
+</html>
