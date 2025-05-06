@@ -111,6 +111,30 @@
     }
 
 
+    /**
+    * Blur animations
+    */
+
+    [aa-animate^='blur'][aa-animate^='blur'] {
+      transition-property: filter, opacity, transform;
+      transition-duration: var(--aa-duration);
+      transition-delay: var(--aa-delay);
+
+      filter: blur(10px);
+      opacity: 0;
+
+      &.in-view {
+        filter: blur(0);
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    [aa-animate='blur-in'] {
+      transform: scale(1.1);
+    }
+
+
 
 
     /**

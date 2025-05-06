@@ -4,6 +4,7 @@ export function splitText(element, split, hideFromScreenReaders = false) {
   // Define a mapping of split to SplitText options
   const splitMap = {
     'lines&words': { type: 'words,lines' },
+    'lines&chars': { type: 'chars,lines' },
     'chars': { type: 'chars,lines' },
     'words': { type: 'words,lines' },
     'lines': { type: 'lines' }

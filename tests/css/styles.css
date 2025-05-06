@@ -530,7 +530,7 @@ p {
     visibility: hidden;
     justify-content: center;
     align-items: center;
-    display: flex;
+    display: grid;
     position: fixed;
     inset: 0;
     transition: opacity 0.2s ease, visibility 0.2s ease;
@@ -558,6 +558,8 @@ p {
 }
 
 [aa-modal-name] {
+    grid-column: 1 / 1;
+    grid-row: 1 / 1;
     pointer-events: auto;
     display: flex;
     flex-direction: column;
@@ -566,7 +568,6 @@ p {
     width: 100%;
     max-width: 32em;
     max-height: 80vh;
-    padding: 0 2em;
     opacity: 0;
     overflow: hidden;
     position: relative;
@@ -579,7 +580,8 @@ p {
 .modal-scroll {
     overflow-y: scroll;
     flex: 1 1 auto;
-    min-height: 0;
+    min-height: 0; 
+    padding: 0 2em;
 }
 
 [aa-modal-name][aa-modal-status="active"] {

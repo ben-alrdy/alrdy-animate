@@ -40,6 +40,22 @@ export function createTextAnimations(gsap) {
       };
     }
 
+    // Handle lines&chars split type
+    if (split === 'lines&chars') {
+      return {
+        tl,
+        animate: (props) => {
+          splitElements.lines.forEach((line, index) => {
+            const charsInLine = splitElements.chars.filter(char => line.contains(char));
+            tl.from(charsInLine, {
+              ...baseProps,
+              ...props
+            }, index * stagger * 6);
+          });
+        }
+      };
+    }
+
     // Handle regular split types
     return {
       tl,
@@ -115,8 +131,7 @@ export function createTextAnimations(gsap) {
     blur: createAnimation(
       { 
         opacity: 0, 
-        filter: 'blur(10px)',
-        scale: 1.1  
+        filter: 'blur(10px)'  
       },
       defaults.blur
     ),

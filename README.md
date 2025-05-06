@@ -436,6 +436,9 @@ Example:
       <div class="marquee__item">
         <p>Scroll Effects & Animations</p> 
       </div>
+      <div class="marquee__item">
+        <p>Scroll Effects & Animations</p> 
+      </div>
     </div>
   </div>
 </div>
