@@ -425,6 +425,7 @@ Enables scroll-driven animations and effects.
 - Add `-paused` to disabe the animation, e.g. `aa-animate="marquee-left-paused"` - use to only animate on scroll
 - Use `aa-duration` to set the duration of the animation
 - Use `aa-marquee-scroller` to mark the element that increases in speed on scroll; accepts integer to set the speed multiplier, e.g. `aa-marquee-scroller="10"` (defaults to 0, i.e. no speed increase on scroll)
+ - Add `aa-scrub` to add scrubbing smoothness
 - Use `aa-marquee-items` to mark the element that contains the items to duplicate in the marquee; accepts integer to set the number of duplicates, e.g. `aa-marquee-items="3"` (defaults to 2)
 
 

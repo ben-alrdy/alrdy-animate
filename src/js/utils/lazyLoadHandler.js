@@ -8,7 +8,8 @@ export function handleLazyLoadedImages(ScrollTrigger, forceReset = false) {
     if (ScrollTrigger && needsRefresh) {
       // Refresh all ScrollTriggers except nav ones
       ScrollTrigger.getAll().forEach(st => {
-        if (!st.vars.trigger?.hasAttribute('aa-nav')) {
+        const trigger = st.vars.trigger;
+        if (!trigger || typeof trigger.hasAttribute !== "function" || !trigger.hasAttribute('aa-nav')) {
           st.refresh();
         }
       });

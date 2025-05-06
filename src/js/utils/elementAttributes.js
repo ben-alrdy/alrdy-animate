@@ -9,8 +9,7 @@ export function getElementSettings(element, settings) {
     try {      
       // Parse CSS-like syntax from either attribute
       const parsedSettings = {};
-      const settingsString = aaAnimate?.includes(':') || aaAnimate?.startsWith('{') ? 
-        aaAnimate : aaHover;
+      const settingsString = aaAnimate?.includes(':') ? aaAnimate : aaHover;
 
       settingsString.split(';').forEach(pair => {
         const [key, value] = pair.split(':').map(s => s.trim());

@@ -852,7 +852,7 @@ export function createSliderAnimations(gsap, Draggable) {
     }
 
     // Add click handlers for slider items unless on mobile
-    if (!animationType.includes('loop') && !animationType.includes('snap') && !window.matchMedia('(hover: none)').matches){ 
+    if (!animationType.includes('loop') && !window.matchMedia('(hover: none)').matches){ 
       items.forEach((slide, i) => {
         slide.addEventListener('click', () => {
           element._loop.toIndex(i, { ease, duration });
