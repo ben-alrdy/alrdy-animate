@@ -61,6 +61,34 @@
             </div>
         </section>
 
+        <section id="marquee-scroll" class="marquee-section">
+            <!-- Left-moving marquee -->
+            <div aa-animate="marquee-left-paused" class="marquee" aa-scrub="smoother">
+                <div aa-marquee-scroller="20">
+                    <div aa-marquee-items>
+                        <div class="marquee__item">
+                            <p>Scroll Effects & Animations - </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right-moving marquee -->
+            <div aa-animate="marquee-right-paused" class="marquee" aa-scrub="smoother">
+                <div aa-marquee-scroller="10">
+                    <div aa-marquee-items>
+                        <div class="marquee__item">
+                            <div class="marquee__box"></div>
+                            <div class="marquee__box"></div>
+                            <div class="marquee__box"></div>
+                            <div class="marquee__box"></div>
+                            <div class="marquee__box"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <div id="background-transitions" class="background-wrapper" aa-animate="background" aa-viewport="0.5" aa-scrub="smooth">
             <section class="full-height-section" aa-wrapper-colors="bg:#e1fe33;text:#2b1c50">
                 <div class="container">
@@ -98,7 +126,7 @@
         <!-- Add ID to first marquee section -->
         <section id="marquee-hover" class="marquee-section">
             <!-- Left-moving marquee -->
-            <div aa-animate="marquee-left-hover" aa-duration="15" class="marquee" aa-scrub="smooth">
+            <div aa-animate="marquee-left-switch" aa-duration="15" class="marquee" aa-scrub="smooth">
                 <div aa-marquee-scroller="20">
                     <div aa-marquee-items>
                         <div class="marquee__item">
@@ -109,7 +137,7 @@
             </div>
 
             <!-- Right-moving marquee -->
-            <div aa-animate="marquee-right-hover" aa-duration="50" class="marquee" aa-scrub="smooth">
+            <div aa-animate="marquee-right-switch" aa-duration="50" class="marquee" aa-scrub="smooth">
                 <div aa-marquee-scroller="0">
                     <div aa-marquee-items>
                         <div class="marquee__item">
@@ -124,33 +152,7 @@
             </div>
         </section>
 
-        <section id="marquee-scroll" class="marquee-section">
-            <!-- Left-moving marquee -->
-            <div aa-animate="marquee-left-paused" class="marquee" aa-scrub="smoother">
-                <div aa-marquee-scroller="20">
-                    <div aa-marquee-items>
-                        <div class="marquee__item">
-                            <p>Scroll Effects & Animations - </p>
-                        </div>
-                    </div>
-                </div>
-            </div>
 
-            <!-- Right-moving marquee -->
-            <div aa-animate="marquee-right-paused" class="marquee" aa-scrub="smoother">
-                <div aa-marquee-scroller="10">
-                    <div aa-marquee-items>
-                        <div class="marquee__item">
-                            <div class="marquee__box"></div>
-                            <div class="marquee__box"></div>
-                            <div class="marquee__box"></div>
-                            <div class="marquee__box"></div>
-                            <div class="marquee__box"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
 
         <section class="full-height-section">
             <div class="container">

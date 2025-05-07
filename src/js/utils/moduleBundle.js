@@ -2,6 +2,7 @@ import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { TextPlugin } from 'gsap/TextPlugin';
 import { SplitText } from 'gsap/SplitText';
+import { Flip } from 'gsap/Flip';
 
 // Define shared dependencies
 const sharedDependencies = {
@@ -28,7 +29,10 @@ export const gsapBundles = {
     hover: {
         animations: () => import(/* webpackChunkName: "gsap-hover" */ '../gsapAnimations/hoverAnimations'),
         dependencies: sharedDependencies.textSplitter
-    }
+    },
+    flip: {
+        plugins: () => Promise.resolve([{ Flip }]),
+    },
 };
 
 // Non-GSAP bundles
@@ -42,4 +46,4 @@ export const coreBundles = {
     }
 };
 
-export { gsap, ScrollTrigger, TextPlugin, SplitText }; 
+export { gsap, ScrollTrigger, TextPlugin, SplitText, Flip }; 

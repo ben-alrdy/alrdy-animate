@@ -419,14 +419,17 @@ Enables scroll-driven animations and effects.
 ```
 
 #### Marquee Animations
-- Use `aa-animate="marquee-left"` or `aa-animate="marquee-right"` to create a left- or right-moving marquee
-- Important: Each item inside the `aa-marquee-items` wrapper needs to be spaced with `margin` (not `gap` of flexbox)
-- Add `-hover` to the animation type to create a marquee that slows down on hover, e.g. `aa-animate="marquee-left-hover"`
-- Add `-paused` to disabe the animation, e.g. `aa-animate="marquee-left-paused"` - use to only animate on scroll
-- Use `aa-duration` to set the duration of the animation
-- Use `aa-marquee-scroller` to mark the element that increases in speed on scroll; accepts integer to set the speed multiplier, e.g. `aa-marquee-scroller="10"` (defaults to 0, i.e. no speed increase on scroll)
- - Add `aa-scrub` to add scrubbing smoothness
-- Use `aa-marquee-items` to mark the element that contains the items to duplicate in the marquee; accepts integer to set the number of duplicates, e.g. `aa-marquee-items="3"` (defaults to 2)
+- Set `aa-animate="marquee-left"` or `aa-animate="marquee-right"` to the parent element to create a left- or right-moving marquee
+  - Use `aa-duration` to set the duration of the animation
+- Set `aa-marquee-scroller` to mark the element that increases in speed on scroll; accepts integer to set the speed multiplier, e.g. `aa-marquee-scroller="10"` (defaults to 0, i.e. no speed increase on scroll)
+- Set `aa-marquee-items` to mark the wrapper that contains the items to duplicate in the marquee; accepts integer to set the number of duplicates, e.g. `aa-marquee-items="3"` (defaults to 2)
+  - Important: Each item inside the `aa-marquee-items` wrapper needs to be spaced with `margin` (not `gap` of flexbox)
+- Options:
+  - Add `-switch` to change marquee direction on scroll
+  - Add `-hover` to the animation type to create a marquee that slows down on hover, e.g. `aa-animate="marquee-left-hover"`
+  - Add `-paused` to disabe the animation, e.g. `aa-animate="marquee-left-paused"` - use to only animate on scroll
+    - Add `aa-scrub` with possible values snap, smooth, or smoother
+
 
 
 Example:

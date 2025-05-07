@@ -273,6 +273,11 @@
                     Open Test Modal 2
                 </button>
 
+                <!-- Box (Trigger) -->
+                <div class="modal-box" data-flip-id="modal-2" aa-modal-target="test-modal-2" style="padding: 2rem;">
+                    <p data-flip-id="modal-2-headline">Open Test Modal 2</p>
+                </div>
+
                 <!-- Modal Group and Modal -->
                 <div aa-modal-group>
                     <div class="modal-backdrop" aa-modal-close></div>
@@ -292,10 +297,10 @@
 
                         </div>
                     </div>
-                    <div aa-modal-name="test-modal-2" aa-modal-status="not-active" >
+                    <div aa-modal-name="test-modal-2" aa-modal-status="not-active" data-flip-id="modal-2">
                         <button aa-modal-close class="modal-close-btn" aria-label="Close modal">&times;</button>
                         <div class="modal-scroll" data-lenis-prevent>
-                            <h2>Test Modal</h2>
+                            <h2 data-flip-id="modal-headline">Test Modal</h2>
                             <p>This is a test modal for AlrdyAnimate. Press ESC or click outside to close.</p>
                             <p>This is a test modal for AlrdyAnimate. Press ESC or click outside to close.</p>
                             <p>This is a test modal for AlrdyAnimate. Press ESC or click outside to close.</p>

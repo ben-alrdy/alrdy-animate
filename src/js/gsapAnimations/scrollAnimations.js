@@ -403,6 +403,7 @@ function createMarqueeTimeline(element, gsap, ScrollTrigger, duration, scrub) {
   const isRightDirection = animateAttr.includes('right');
   const hasHover = animateAttr.includes('hover');
   const isPaused = animateAttr.includes('paused');
+  const hasSwitch = animateAttr.includes('switch');
   
   const scrollContainer = element.querySelector('[aa-marquee-scroller]');
   const collection = element.querySelector('[aa-marquee-items]');
@@ -476,19 +477,50 @@ function createMarqueeTimeline(element, gsap, ScrollTrigger, duration, scrub) {
     // Set initial status
     element.setAttribute('data-marquee-status', 'normal');
 
-    // Add scroll direction handling
-    ScrollTrigger.create({
-      trigger: element,
-      start: 'top bottom',
-      end: 'bottom top',
-      toggleActions: 'play pause resume pause',
-      onUpdate: (self) => {
-        const isInverted = self.direction === 1;
-        const currentDirection = isInverted ? -directionMultiplier : directionMultiplier;
-        animation.timeScale(currentDirection);
-        element.setAttribute('data-marquee-status', isInverted ? 'normal' : 'inverted');
-      }
-    });
+    // Add scroll direction handling only if switch is specified
+    if (hasSwitch) {
+      let isChangingDirection = false; // Lock to prevent multiple changes
+      let lastDirection = directionMultiplier;
+
+      ScrollTrigger.create({
+        trigger: element,
+        start: 'top bottom',
+        end: 'bottom top',
+        toggleActions: 'play pause resume pause',
+        onUpdate: (self) => {
+          const isInverted = self.direction === 1;
+          const currentDirection = isInverted ? -directionMultiplier : directionMultiplier;
+          
+          // Only change direction if:
+          // 1. We're not already changing direction
+          // 2. The direction is actually different
+          if (!isChangingDirection && currentDirection !== lastDirection) {
+            isChangingDirection = true;
+            lastDirection = currentDirection;
+
+            // First slow down
+            gsap.to(animation, {
+              timeScale: 0,
+              duration: 0.5,
+              ease: "power2.inOut",
+              onComplete: () => {
+                // Then speed up in new direction
+                gsap.to(animation, {
+                  timeScale: currentDirection,
+                  duration: 0.5,
+                  ease: "power2.inOut",
+                  onComplete: () => {
+                    isChangingDirection = false; // Release the lock
+                  }
+                });
+              }
+            });
+          }
+          
+          element.setAttribute('data-marquee-status', isInverted ? 'normal' : 'inverted');
+        }
+      });
+    }
   }
 
   // Only create scroll effect if scrollSpeed > 0

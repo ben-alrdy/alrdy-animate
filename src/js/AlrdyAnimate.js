@@ -28,6 +28,7 @@ const defaultOptions = {
   },
   modals: false,
   debug: false, // Set to true to see GSAP debug info
+  lazyLoadHandler: false, // default to false for backward compatibility
 };
 
 // Map aa-animate attributes to GSAP animation names
@@ -226,7 +227,11 @@ async function init(options = {}) {
           // Setup animations
           setupAnimations(allAnimatedElements, initOptions, isMobile, loadedModules);
           setupResizeHandler(loadedModules, initOptions, isMobile, setupGSAPAnimations);
-          handleLazyLoadedImages(loadedModules.ScrollTrigger);
+
+          // Only initialize lazy load handler if enabled
+          if (initOptions.lazyLoadHandler) {
+            handleLazyLoadedImages(loadedModules.ScrollTrigger);
+          }
         } else {
           // Fallback if GSAP loading failed
           enableGSAP = false;
