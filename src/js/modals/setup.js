@@ -69,6 +69,49 @@ function initializeModals(lenis = null) {
         if (!modalGroup) return;
         closeAllModals();
         const targetModal = modalGroup.querySelector(`[aa-modal-name="${targetName}"]`);
+
+        // FLIP logic if both trigger and modal have aa-flip
+        /* if (trigger.hasAttribute('aa-flip') && targetModal && targetModal.hasAttribute('aa-flip')) {
+          // Collect all data-flip-id values in trigger
+          const triggerFlipEls = trigger.querySelectorAll('[data-flip-id]');
+          const modalFlipEls = targetModal.querySelectorAll('[data-flip-id]');
+          // Build a map of flip-id to elements for both trigger and modal
+          const flipIds = new Set();
+          triggerFlipEls.forEach(el => flipIds.add(el.getAttribute('data-flip-id')));
+          modalFlipEls.forEach(el => flipIds.add(el.getAttribute('data-flip-id')));
+          // Collect all matching elements
+          const triggerEls = Array.from(flipIds).map(id => trigger.querySelector(`[data-flip-id="${id}"]`)).filter(Boolean);
+          const modalEls = Array.from(flipIds).map(id => targetModal.querySelector(`[data-flip-id="${id}"]`)).filter(Boolean);
+          // Record FLIP state
+          const state = window.Flip.getState([...triggerEls, ...modalEls]);
+          // Show modal, hide trigger (but keep in DOM for FLIP)
+          modalGroup.setAttribute('aa-modal-group-status', 'active');
+          targetModal.setAttribute('aa-modal-status', 'active');
+          
+          disableScroll();
+          activeModal = targetModal;
+          document.addEventListener('keydown', handleTabKey);
+          document.addEventListener('keydown', handleEscKey);
+          // Animate FLIP
+          window.Flip.from(state, {
+            duration: 0.7,
+            ease: 'power1.inOut',
+            absolute: true
+          });
+          // Focus first focusable element
+          const firstFocusable = targetModal.querySelector(
+            'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+          );
+          if (firstFocusable) firstFocusable.focus();
+          // Restore trigger visibility on modal close
+          const closeBtn = targetModal.querySelector('[aa-modal-close]');
+          if (closeBtn) {
+            closeBtn.addEventListener('click', () => {
+              trigger.style.visibility = '';
+            }, { once: true });
+          }
+        } else */ 
+        
         if (targetModal) {
           modalGroup.setAttribute('aa-modal-group-status', 'active');
           targetModal.setAttribute('aa-modal-status', 'active');

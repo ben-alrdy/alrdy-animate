@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', function() {
         ease: 'power2.inOut',
         duration: 1,
         again: true,
-        gsapFeatures: ['scroll', 'text', 'slider', 'hover'],
+        gsapFeatures: ['scroll', 'text', 'slider', 'hover', 'flip'],
         debug: true,
         modals: true,
         smoothScroll: {

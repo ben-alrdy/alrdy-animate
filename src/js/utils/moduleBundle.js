@@ -1,8 +1,6 @@
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { TextPlugin } from 'gsap/TextPlugin';
 import { SplitText } from 'gsap/SplitText';
-import { Flip } from 'gsap/Flip';
 
 // Define shared dependencies
 const sharedDependencies = {
@@ -21,8 +19,8 @@ export const gsapBundles = {
     },
     slider: {
         plugins: () => Promise.all([
-            import(/* webpackChunkName: "gsap-draggable" */ 'gsap/Draggable'),
-            import(/* webpackChunkName: "gsap-draggable" */ 'gsap/InertiaPlugin')
+            import('gsap/Draggable').then(mod => ({ Draggable: mod.Draggable })),
+            import('gsap/InertiaPlugin').then(mod => ({ InertiaPlugin: mod.InertiaPlugin }))
         ]),
         animations: () => import(/* webpackChunkName: "gsap-draggable" */ '../gsapAnimations/sliderAnimations')
     },
@@ -31,7 +29,7 @@ export const gsapBundles = {
         dependencies: sharedDependencies.textSplitter
     },
     flip: {
-        plugins: () => Promise.resolve([{ Flip }]),
+        plugins: () => import(/* webpackChunkName: "gsap-flip" */ 'gsap/Flip').then(mod => [{ Flip: mod.Flip }]),
     },
 };
 
@@ -46,4 +44,4 @@ export const coreBundles = {
     }
 };
 
-export { gsap, ScrollTrigger, TextPlugin, SplitText, Flip }; 
+export { gsap, ScrollTrigger, SplitText }; 

@@ -109,10 +109,7 @@ async function init(options = {}) {
                     try {
                       Object.entries(plugin).forEach(([key, value]) => {
                         gsap.registerPlugin(value);
-                        if (key === 'Draggable' || value.toString().includes('Draggable')) {
-                          window.Draggable = value;
-                          globalThis.Draggable = value;
-                        }
+                        window[key] = value;
                       });
                       Object.assign(modules, plugin);
                     } catch (pluginError) {

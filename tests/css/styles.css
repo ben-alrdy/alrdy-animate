@@ -541,7 +541,7 @@ p {
     pointer-events: auto;
 }
 
-.modal-backdrop {
+ .modal-backdrop{
     opacity: 0;
     pointer-events: auto;
     cursor: pointer;
@@ -578,15 +578,21 @@ p {
 }
 
 .modal-scroll {
-    overflow-y: scroll;
+    overflow: scroll;
     flex: 1 1 auto;
     min-height: 0; 
     padding: 0 2em;
+    text-align: center;
 }
 
+[aa-modal-name][aa-modal-status="not-active"] {
+    opacity: 0;
+    visibility: hidden;
+}
 [aa-modal-name][aa-modal-status="active"] {
-    opacity: 1;
     transform: translateY(0px);
+    opacity: 1;
+    visibility: visible;
 }
 
 .modal-close-btn {
