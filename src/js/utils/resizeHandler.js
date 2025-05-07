@@ -41,7 +41,6 @@ export function setupResizeHandler(modules, initOptions, isMobile, setupGSAPAnim
         }
       });
       
-      console.log('REBUILDING ANIMATIONS');
       // REMOVED SCROLLTRIGGER REFRESH BECAUSE GSAP IS HANDLING IT
       /* if (modules.ScrollTrigger) {
         modules.ScrollTrigger.refresh();

@@ -1,38 +1,4 @@
 export function getElementSettings(element, settings) {
-  // Check if aa-animate contains settings
-  const aaAnimate = element.getAttribute('aa-animate');
-  const aaHover = element.getAttribute('aa-hover');
-
-  // Check for settings in aa-animate or aa-hover
-  if ((aaAnimate && (aaAnimate.includes(':')))  ||
-      (aaHover && (aaHover.includes(':'))) ) {
-    try {      
-      // Parse CSS-like syntax from either attribute
-      const parsedSettings = {};
-      const settingsString = aaAnimate?.includes(':') ? aaAnimate : aaHover;
-
-      settingsString.split(';').forEach(pair => {
-        const [key, value] = pair.split(':').map(s => s.trim());
-        if (key && value) {
-          parsedSettings[key] = !isNaN(value) ? parseFloat(value) : value;
-        }
-      });
-      
-      return {
-        ...settings,
-        ...parsedSettings,
-        animationType: aaAnimate && !aaAnimate.includes(':') ? aaAnimate : parsedSettings.animationType,
-        hoverType: aaHover && !aaHover.includes(':') ? aaHover : parsedSettings.hoverType,
-        anchorSelector: parsedSettings.anchorSelector || null,
-        anchorElement: parsedSettings.anchorSelector ? document.querySelector(parsedSettings.anchorSelector) : element,
-        isReverse: parsedSettings.hoverType ? parsedSettings.hoverType.includes('reverse') : false,
-        bg: element.querySelector('[aa-hover-bg]')
-      };
-    } catch (e) {
-      console.warn('Invalid settings format:', e);
-    }
-  }
-
   // Handle mobile animations
   let animationType = element.getAttribute('aa-animate-original') || element.getAttribute('aa-animate');
   if (animationType && animationType.includes('|')) {

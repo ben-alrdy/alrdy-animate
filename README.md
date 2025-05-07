@@ -13,7 +13,7 @@
   - [Float Animations](#float-animations)
   - [Zoom Animations](#zoom-animations)
   - [Slide Animations](#slide-animations)
-  - [Blurred Slide Animations](#blurred-slide-animations)
+  - [Blurred Animations](#blur-animations)
   - [Rotate Animations](#rotate-animations)
   - [3D Animations](#3d-animations)
   - [Pseudo Overlay Reveal](#pseudo-overlay-reveal)
@@ -155,14 +155,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
-| `ease` | string | 'ease-in-out' | Animation easing function |
-| `again` | boolean | false | Whether animations should replay when scrolling up |
-| `viewportPercentage` | number | 0.6 | When element should start animating (0.0 - 1.0) |
 | `duration` | number | 1 | Animation duration in seconds |
 | `delay` | number | 0 | Animation delay in seconds |
+| `ease` | string | "ease-in-out" | Default easing function for animations |
+| `again` | boolean | true | Remove 'in-view' class when element is out of view |
+| `viewportPercentage` | number | 0.8 | Percentage of viewport height to trigger animation |
+| `distance` | number | 1 | Distance factor for animations |
 | `gsapFeatures` | array | [] | GSAP features to load: ['text', 'loop', 'scroll'] |
 | `debug` | boolean | false | Enable GSAP debug info |
+| `lazyLoadHandler` | boolean | false | Enable lazy loading handler for images |
+| `modals` | boolean | false | Enable modal functionality |
+| `smoothScroll` | object | { enabled: false, options: {} } | Configure smooth scrolling with Lenis |
+| `smoothScroll.options` | object | { lerp: 0.12, orientation: 'vertical', gestureOrientation: 'vertical', smoothWheel: true, wheelMultiplier: 1, touchMultiplier: 2, infinite: false } | Lenis smooth scroll options |
 
+#### Hover Animation Options
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `hoverDuration` | number | 0.3 | Duration for hover animations in seconds |
+| `hoverDelay` | number | 0 | Delay for hover animations in seconds |
+| `hoverEase` | string | "power3.out" | Easing function for hover animations |
+| `hoverDistance` | number | 0.1 | Distance factor for hover animations |
 
 ## CSS Animations triggered on scroll (via JS)
 Add the `aa-animate` attribute to the element you want to animate. Once it scrolls into view, JS will add an `in-view` class to the element and the animation will be triggered. You can also add optional attributes (see element attributes below) to customize the animation for individual elements.
@@ -210,6 +222,10 @@ Scale animations with optional directional movement:
 ### Slide Animations
 Pure sliding movements without opacity change:
 - `slide-up`, `slide-down`, `slide-left`, `slide-right` (available for aa-load)
+
+### Blur Animations
+Blur in the element
+- `blur`, `blur-in`
 
 
 ### Rotate Animations
