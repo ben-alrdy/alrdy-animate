@@ -33,11 +33,24 @@ export function getElementSettings(element, settings) {
     }
   }
 
-  const animationType = element.getAttribute('aa-animate');
+  // Handle mobile animations
+  let animationType = element.getAttribute('aa-animate-original') || element.getAttribute('aa-animate');
+  if (animationType && animationType.includes('|')) {
+    // Store original value if not already stored
+    if (!element.hasAttribute('aa-animate-original')) {
+      element.setAttribute('aa-animate-original', animationType);
+    }
+    
+    const [desktopAnim, mobileAnim] = animationType.split('|');
+    animationType = window.innerWidth < 768 ? mobileAnim : desktopAnim;
+    // Update the actual attribute for CSS animations
+    element.setAttribute('aa-animate', animationType);
+  }
+
   const hoverType = element.getAttribute('aa-hover');
   const anchorSelector = element.getAttribute("aa-anchor");
   const anchorElement = anchorSelector ? document.querySelector(anchorSelector) : element;
-  const pseudoColor = animationType?.includes('#') ? '#' + animationType.split('#')[1] : undefined; 
+  const pseudoColor = animationType?.includes('#') ? '#' + animationType.split('#')[1] : undefined;
 
   return {
     // Animation properties

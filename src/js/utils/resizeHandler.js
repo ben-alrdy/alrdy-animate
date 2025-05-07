@@ -1,5 +1,5 @@
 import { debounce } from './shared';
-import { handleLazyLoadedImages } from './lazyLoadHandler';
+import { getElementSettings } from './elementAttributes';
 
 export function setupResizeHandler(modules, initOptions, isMobile, setupGSAPAnimations) {
   let prevWidth = window.innerWidth;
@@ -15,26 +15,37 @@ export function setupResizeHandler(modules, initOptions, isMobile, setupGSAPAnim
         modules.animations.cleanupLoops();
       }
 
-      
-
-      // Only rebuild slider and text animations
-      document.querySelectorAll("[aa-animate]").forEach(element => {
-        const aaAnimate = element.getAttribute('aa-animate');
-        // Only rebuild slider and text animations
-        if (aaAnimate && (aaAnimate.includes('slider') || aaAnimate.includes('text'))) {
-          
+      // Rebuild animations for elements that need updating
+      document.querySelectorAll("[aa-animate], [aa-animate-original]").forEach(element => {
+        const animType = element.getAttribute('aa-animate');
+        const animTypeOriginal = element.getAttribute('aa-animate-original');
+        
+        // Rebuild if:
+        // 1. Has mobile/desktop variants (contains |)
+        // 2. Is a slider animation
+        // 3. Is a text animation
+        if ((animType && (
+          animType.includes('|') || 
+          animType.includes('slider') || 
+          animType.includes('text')
+        )) || animTypeOriginal) {
           // Clear existing split instance
           if (element.splitInstance) {
             element.splitInstance.revert();
           }
-          setupGSAPAnimations(element, element.settings, initOptions, isMobile, modules);
+          
+          // Get new settings with updated animation type
+          const settings = getElementSettings(element, initOptions);
+          element.settings = settings;
+          setupGSAPAnimations(element, settings, initOptions, isMobile, modules);
         }
       });
       
-      // modules.ScrollTrigger.refresh();
-      
-      // Check for new lazy loaded images
-      handleLazyLoadedImages(modules.ScrollTrigger, true);
+      console.log('REBUILDING ANIMATIONS');
+      // REMOVED SCROLLTRIGGER REFRESH BECAUSE GSAP IS HANDLING IT
+      /* if (modules.ScrollTrigger) {
+        modules.ScrollTrigger.refresh();
+      } */
       
       prevWidth = currentWidth;
     }
