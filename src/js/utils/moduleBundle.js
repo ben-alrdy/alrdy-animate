@@ -1,16 +1,16 @@
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { SplitText } from 'gsap/SplitText';
 
 // Define shared dependencies
 const sharedDependencies = {
-    textSplitter: () => import(/* webpackChunkName: "gsap-text" */ './textSplitter')
+    textSplitter: () => import(/* webpackChunkName: "gsap-text" */ './textSplitter'),
+    splitTextPlugin: () => import(/* webpackChunkName: "gsap-text" */ 'gsap/SplitText').then(mod => [{ SplitText: mod.SplitText }])
 };
 
 // GSAP-related bundles
 export const gsapBundles = {
     text: {
-        plugins: () => Promise.resolve([{ TextPlugin, SplitText }]),
+        plugins: sharedDependencies.splitTextPlugin,
         animations: () => import(/* webpackChunkName: "gsap-text" */ '../gsapAnimations/textAnimations'),
         dependencies: sharedDependencies.textSplitter
     },
@@ -25,6 +25,7 @@ export const gsapBundles = {
         animations: () => import(/* webpackChunkName: "gsap-draggable" */ '../gsapAnimations/sliderAnimations')
     },
     hover: {
+        plugins: sharedDependencies.splitTextPlugin,
         animations: () => import(/* webpackChunkName: "gsap-hover" */ '../gsapAnimations/hoverAnimations'),
         dependencies: sharedDependencies.textSplitter
     },
@@ -44,4 +45,4 @@ export const coreBundles = {
     }
 };
 
-export { gsap, ScrollTrigger, SplitText }; 
+export { gsap, ScrollTrigger }; 
