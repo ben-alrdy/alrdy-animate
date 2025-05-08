@@ -7,7 +7,8 @@
   --aa-ease: cubic-bezier(0.25, 0.1, 0.25, 1.0);
   --aa-distance: 2;
   --aa-stagger: 0.1s;
-  --aa-delay: 0.2s;
+  --aa-base-delay: 0.2s;
+  --aa-delay: var(--aa-base-delay);
 }
 
 /**
@@ -35,27 +36,27 @@
 
 
 /* Delay values from 0 to 2 seconds in 0.1 increments */
-[aa-load][aa-delay="0"] { --aa-delay: 0s; }
-[aa-load][aa-delay="0.1"] { --aa-delay: 0.1s; }
-[aa-load][aa-delay="0.2"] { --aa-delay: 0.2s; }
-[aa-load][aa-delay="0.3"] { --aa-delay: 0.3s; }
-[aa-load][aa-delay="0.4"] { --aa-delay: 0.4s; }
-[aa-load][aa-delay="0.5"] { --aa-delay: 0.5s; }
-[aa-load][aa-delay="0.6"] { --aa-delay: 0.6s; }
-[aa-load][aa-delay="0.7"] { --aa-delay: 0.7s; }
-[aa-load][aa-delay="0.8"] { --aa-delay: 0.8s; }
-[aa-load][aa-delay="0.9"] { --aa-delay: 0.9s; }
-[aa-load][aa-delay="1"] { --aa-delay: 1s; }
-[aa-load][aa-delay="1.1"] { --aa-delay: 1.1s; }
-[aa-load][aa-delay="1.2"] { --aa-delay: 1.2s; }
-[aa-load][aa-delay="1.3"] { --aa-delay: 1.3s; }
-[aa-load][aa-delay="1.4"] { --aa-delay: 1.4s; }
-[aa-load][aa-delay="1.5"] { --aa-delay: 1.5s; }
-[aa-load][aa-delay="1.6"] { --aa-delay: 1.6s; }
-[aa-load][aa-delay="1.7"] { --aa-delay: 1.7s; }
-[aa-load][aa-delay="1.8"] { --aa-delay: 1.8s; }
-[aa-load][aa-delay="1.9"] { --aa-delay: 1.9s; }
-[aa-load][aa-delay="2"] { --aa-delay: 2s; }
+[aa-load][aa-delay="0"] { --aa-delay: calc(var(--aa-base-delay) + 0s); }
+[aa-load][aa-delay="0.1"] { --aa-delay: calc(var(--aa-base-delay) + 0.1s); }
+[aa-load][aa-delay="0.2"] { --aa-delay: calc(var(--aa-base-delay) + 0.2s); }
+[aa-load][aa-delay="0.3"] { --aa-delay: calc(var(--aa-base-delay) + 0.3s); }
+[aa-load][aa-delay="0.4"] { --aa-delay: calc(var(--aa-base-delay) + 0.4s); }
+[aa-load][aa-delay="0.5"] { --aa-delay: calc(var(--aa-base-delay) + 0.5s); }
+[aa-load][aa-delay="0.6"] { --aa-delay: calc(var(--aa-base-delay) + 0.6s); }
+[aa-load][aa-delay="0.7"] { --aa-delay: calc(var(--aa-base-delay) + 0.7s); }
+[aa-load][aa-delay="0.8"] { --aa-delay: calc(var(--aa-base-delay) + 0.8s); }
+[aa-load][aa-delay="0.9"] { --aa-delay: calc(var(--aa-base-delay) + 0.9s); }
+[aa-load][aa-delay="1"] { --aa-delay: calc(var(--aa-base-delay) + 1s); }
+[aa-load][aa-delay="1.1"] { --aa-delay: calc(var(--aa-base-delay) + 1.1s); }
+[aa-load][aa-delay="1.2"] { --aa-delay: calc(var(--aa-base-delay) + 1.2s); }
+[aa-load][aa-delay="1.3"] { --aa-delay: calc(var(--aa-base-delay) + 1.3s); }
+[aa-load][aa-delay="1.4"] { --aa-delay: calc(var(--aa-base-delay) + 1.4s); }
+[aa-load][aa-delay="1.5"] { --aa-delay: calc(var(--aa-base-delay) + 1.5s); }
+[aa-load][aa-delay="1.6"] { --aa-delay: calc(var(--aa-base-delay) + 1.6s); }
+[aa-load][aa-delay="1.7"] { --aa-delay: calc(var(--aa-base-delay) + 1.7s); }
+[aa-load][aa-delay="1.8"] { --aa-delay: calc(var(--aa-base-delay) + 1.8s); }
+[aa-load][aa-delay="1.9"] { --aa-delay: calc(var(--aa-base-delay) + 1.9s); }
+[aa-load][aa-delay="2"] { --aa-delay: calc(var(--aa-base-delay) + 2s); }
 
 /**
  * Stagger Functionality for up to 10 children
