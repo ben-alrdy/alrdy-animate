@@ -1,16 +1,31 @@
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
-
 // Define shared dependencies
 const sharedDependencies = {
     textSplitter: () => import(/* webpackChunkName: "gsap-text" */ './textSplitter'),
-    splitTextPlugin: () => import(/* webpackChunkName: "gsap-text" */ 'gsap/SplitText').then(mod => [{ SplitText: mod.SplitText }])
+    splitTextPlugin: (includeGSAP) => includeGSAP ? 
+        import(/* webpackChunkName: "gsap-text" */ 'gsap/SplitText').then(mod => [{ SplitText: mod.SplitText }]) :
+        Promise.resolve([{ SplitText: window.SplitText }])
+};
+
+// Function to get GSAP modules
+export const getGSAPModules = async (includeGSAP = true) => {
+    if (includeGSAP) {
+        // Import GSAP from our bundle
+        const { gsap } = await import(/* webpackChunkName: "gsap-core" */ 'gsap');
+        const { ScrollTrigger } = await import(/* webpackChunkName: "gsap-core" */ 'gsap/ScrollTrigger');
+        return { gsap, ScrollTrigger };
+    } else {
+        // Use GSAP from Webflow
+        return {
+            gsap: window.gsap,
+            ScrollTrigger: window.ScrollTrigger
+        };
+    }
 };
 
 // GSAP-related bundles
 export const gsapBundles = {
     text: {
-        plugins: sharedDependencies.splitTextPlugin,
+        plugins: (includeGSAP) => sharedDependencies.splitTextPlugin(includeGSAP),
         animations: () => import(/* webpackChunkName: "gsap-text" */ '../gsapAnimations/textAnimations'),
         dependencies: sharedDependencies.textSplitter
     },
@@ -18,19 +33,26 @@ export const gsapBundles = {
         animations: () => import(/* webpackChunkName: "gsap-scroll" */ '../gsapAnimations/scrollAnimations')
     },
     slider: {
-        plugins: () => Promise.all([
-            import('gsap/Draggable').then(mod => ({ Draggable: mod.Draggable })),
-            import('gsap/InertiaPlugin').then(mod => ({ InertiaPlugin: mod.InertiaPlugin }))
-        ]),
+        plugins: (includeGSAP) => includeGSAP ? 
+            Promise.all([
+                import(/* webpackChunkName: "gsap-draggable" */ 'gsap/Draggable').then(mod => ({ Draggable: mod.Draggable })),
+                import(/* webpackChunkName: "gsap-draggable" */ 'gsap/InertiaPlugin').then(mod => ({ InertiaPlugin: mod.InertiaPlugin }))
+            ]) :
+            Promise.resolve([
+                { Draggable: window.Draggable },
+                { InertiaPlugin: window.InertiaPlugin }
+            ]),
         animations: () => import(/* webpackChunkName: "gsap-draggable" */ '../gsapAnimations/sliderAnimations')
     },
     hover: {
-        plugins: sharedDependencies.splitTextPlugin,
+        plugins: (includeGSAP) => sharedDependencies.splitTextPlugin(includeGSAP),
         animations: () => import(/* webpackChunkName: "gsap-hover" */ '../gsapAnimations/hoverAnimations'),
         dependencies: sharedDependencies.textSplitter
     },
     flip: {
-        plugins: () => import(/* webpackChunkName: "gsap-flip" */ 'gsap/Flip').then(mod => [{ Flip: mod.Flip }]),
+        plugins: (includeGSAP) => includeGSAP ?
+            import(/* webpackChunkName: "gsap-flip" */ 'gsap/Flip').then(mod => [{ Flip: mod.Flip }]) :
+            Promise.resolve([{ Flip: window.Flip }])
     },
 };
 
@@ -43,6 +65,4 @@ export const coreBundles = {
     modals: {
         setup: () => import(/* webpackChunkName: "modals" */ '../modals/setup')
     }
-};
-
-export { gsap, ScrollTrigger }; 
+}; 

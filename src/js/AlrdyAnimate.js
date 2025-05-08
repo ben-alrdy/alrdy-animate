@@ -22,6 +22,7 @@ const defaultOptions = {
   hoverEase: "power3.out", // Default easing function for hover animations
   hoverDistance: 0.1, // Distance factor for the hover animations
   gsapFeatures: [],  
+  includeGSAP: true, // Whether to include GSAP in the bundle or use Webflow's version
   smoothScroll: {
     enabled: false,
     options: {} // Defined in smoothScroll/setup.js
@@ -85,7 +86,8 @@ async function init(options = {}) {
     gsapModulesPromise = (async () => {
       try {
         // Load GSAP and its modules
-        const { gsap, ScrollTrigger, gsapBundles } = await import('./utils/moduleBundle');
+        const { getGSAPModules, gsapBundles } = await import('./utils/moduleBundle');
+        const { gsap, ScrollTrigger } = await getGSAPModules(initOptions.includeGSAP);
 
         const modules = { gsap, ScrollTrigger };
         const animations = {};
@@ -104,12 +106,16 @@ async function init(options = {}) {
                 if (!moduleConfig) return;
 
                 if (moduleConfig.plugins) {
-                  const plugins = await moduleConfig.plugins();
+                  const plugins = await moduleConfig.plugins(initOptions.includeGSAP);
                   plugins.forEach(plugin => {
                     try {
                       Object.entries(plugin).forEach(([key, value]) => {
-                        gsap.registerPlugin(value);
-                        window[key] = value;
+                        if (value) {  // Only register if the plugin exists
+                          gsap.registerPlugin(value);
+                          window[key] = value;
+                        } else {
+                          console.warn(`Plugin ${key} not available from ${initOptions.includeGSAP ? 'bundle' : 'Webflow'}`);
+                        }
                       });
                       Object.assign(modules, plugin);
                     } catch (pluginError) {

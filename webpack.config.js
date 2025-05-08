@@ -52,14 +52,14 @@ module.exports = {
       minSize: 20000,
       cacheGroups: {
         gsapCore: {
-          test: /[\\/]node_modules[\\/]gsap[\\/]/,
+          test: /[\\/]node_modules[\\/]gsap[\\/](?!Draggable|InertiaPlugin|SplitText)[\\/]/,
           name: 'gsap-core',
           chunks: 'async',
           priority: 20,
           enforce: true
         },
         text: {
-          test: /[\\/](gsapAnimations[\\/]textAnimations|textSplitter)[\\/]|[\\/]node_modules[\\/]split-type[\\/]/,
+          test: /[\\/](gsapAnimations[\\/]textAnimations|textSplitter)[\\/]|[\\/]node_modules[\\/](split-type|gsap[\\/]SplitText)[\\/]/,
           name: 'gsap-text',
           chunks: 'async',
           priority: 10,
