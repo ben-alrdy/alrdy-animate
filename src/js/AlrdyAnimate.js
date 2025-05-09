@@ -517,8 +517,11 @@ function initializePlayStateObserver() {
       const animations = element.getAnimations();
       
       animations.forEach(animation => {
-        // Set play state based on intersection
-        animation.playState = entry.isIntersecting ? 'running' : 'paused';
+        if (entry.isIntersecting) {
+          animation.play();
+        } else {
+          animation.pause();
+        }
       });
     });
   });
