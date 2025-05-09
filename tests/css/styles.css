@@ -618,3 +618,25 @@ p {
     align-items: center;
     justify-content: center;
 }
+
+.marquee {
+    overflow: hidden;
+    width: 100%;
+  }
+  
+.css-marquee {
+    display: flex;
+    animation: marquee-left 30s linear; /* Tweak this number in seconds */
+    animation-iteration-count: infinite;
+}
+
+.css-marquee > div {
+    flex: 0 0 auto; /* don't grow, don't shrink, auto basis */
+    min-width: 0; /* prevent flex items from overflowing */
+}
+
+@keyframes marquee-left { 
+    to {
+      transform: translateX(-100%);
+    }
+  }

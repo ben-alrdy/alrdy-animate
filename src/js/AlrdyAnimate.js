@@ -71,6 +71,9 @@ async function init(options = {}) {
   const initOptions = { ...defaultOptions, ...options };
   let lenis = null;
 
+  // Initialize play state observer first
+  initializePlayStateObserver();
+
   // Check for low power mode if enabled and on mobile device
   const isLowPower = initOptions.lowPowerAnimations && isMobileDevice() && await isLowPowerMode(initOptions.debug);
 
@@ -502,6 +505,27 @@ function setupGSAPHoverAnimations(element, elementSettings, initOptions, isMobil
         });
         break;
     }
+  });
+}
+
+// Function to initialize play state observer for CSS animations
+function initializePlayStateObserver() {
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      const element = entry.target;
+      // Get all animations on the element
+      const animations = element.getAnimations();
+      
+      animations.forEach(animation => {
+        // Set play state based on intersection
+        animation.playState = entry.isIntersecting ? 'running' : 'paused';
+      });
+    });
+  });
+
+  // Observe all elements with the attribute
+  document.querySelectorAll('[aa-toggle-playstate]').forEach(element => {
+    observer.observe(element);
   });
 }
 

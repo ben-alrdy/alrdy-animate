@@ -396,7 +396,7 @@ function createCounterTimeline(element, gsap, duration, ease, delay) {
   );
 }
 
-function createMarqueeTimeline(element, gsap, ScrollTrigger, duration, scrub) {
+function createMarqueeTimeline(element, gsap, duration, scrub) {
   // Parse animation settings from aa-animate attribute
   const animateAttr = element.getAttribute('aa-animate');
   const isRightDirection = animateAttr.includes('right');
@@ -566,7 +566,7 @@ function createScrollAnimations(gsap, ScrollTrigger) {
     },
     
     marquee: (element, duration, scrub) => {
-      return createMarqueeTimeline(element, gsap, ScrollTrigger, duration, scrub);
+      return createMarqueeTimeline(element, gsap, duration, scrub);
     }
   };
 }
