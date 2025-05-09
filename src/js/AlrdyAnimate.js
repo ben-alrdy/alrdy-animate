@@ -513,20 +513,25 @@ function initializePlayStateObserver() {
   const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
       const element = entry.target;
-      // Get all animations on the element
-      const animations = element.getAnimations();
+      // Get all children and filter those that have animations
+      const children = element.children;
       
-      animations.forEach(animation => {
-        if (entry.isIntersecting) {
-          animation.play();
-        } else {
-          animation.pause();
+      Array.from(children).forEach(child => {
+        const animations = child.getAnimations();
+        if (animations.length > 0) {
+          animations.forEach(animation => {
+            if (entry.isIntersecting) {
+              animation.play();
+            } else {
+              animation.pause();
+            }
+          });
         }
       });
     });
   });
 
-  // Observe all elements with the attribute
+  // Observe all containers with the attribute
   document.querySelectorAll('[aa-toggle-playstate]').forEach(element => {
     observer.observe(element);
   });
