@@ -41,6 +41,27 @@ body {
     visibility: hidden;
 }
 
+// Show all elements when in low power mode
+body.aa-low-power {
+    // Prevent all animations for our library elements
+    [aa-animate],
+    [aa-hover],
+    [aa-children]{
+        animation: none !important;
+        transition: none !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+        transform: none !important;
+        filter: none !important;
+    }
+
+    // Reset any pseudo-element animations
+    [aa-animate^="pseudo-reveal"]::before {
+        display: none !important;
+    }
+
+}
+
 // Since the text-fade start with 30% opacity, show the element
 [aa-animate^="text-fade-soft"] {
     visibility: visible;

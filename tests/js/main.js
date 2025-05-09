@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', function() {
         gsapFeatures: ['scroll', 'text', 'slider', 'hover', 'flip'],
         debug: true,
         modals: true,
+        lowPowerAnimations: true,
         smoothScroll: {
             enabled: false,
             options: {

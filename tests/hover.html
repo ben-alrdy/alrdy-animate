@@ -36,7 +36,7 @@
                 <h2>Text Hover Animations</h2>
                 <div class="hover-grid">
                     <!-- Text Slide -->
-                    <a href="#" class="hover-button transparent" aa-hover="hoverType:text-slide-up; split:words;">
+                    <a href="#" class="hover-button transparent" aa-hover="text-slide-up" aa-split="words">
                         <div style="position: relative; overflow: hidden; pointer-events: none;">
                             <div aa-hover-text>Slide Up Text</div>
                         </div>
@@ -107,8 +107,7 @@
                 <h2>Background Curve Animation</h2>
                 <div class="hover-grid">
                     <a href="#" aa-hover="grow-bounce" aa-duration="0.6" aa-ease="ease-in-out">
-                        <div class="hover-button"
-                            aa-hover="hoverType:bg-curve; hoverDirection:bottom; hoverDelay:0.3; hoverDuration:0.3; hoverEase:ease-in-out">
+                        <div class="hover-button" aa-hover="bg-curve" aa-hover-direction="bottom" aa-delay="0.2" aa-duration="0.3">
                             <div aa-hover-text-color="white">Curve bottom</div>
                             <svg class="bg-filler" viewBox="0 0 100 100" preserveAspectRatio="none" aa-hover-bg>
                                 <path d="M 0 100 V 0 Q 250 0 500 0 V 0 H 0 z" fill="currentColor"></path>
