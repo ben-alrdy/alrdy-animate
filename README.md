@@ -193,7 +193,7 @@ Add the `aa-animate` attribute to the element you want to animate. Once it scrol
 - **aa-distance**: The distance multiplier for the animation. Example: `aa-distance="1.5"`.
 
 ### Toggle Playstate Function
-By adding the attriute `aa-toggle-playstate` to an element, it's animation-playstate will be set to paused when out of view and to running if in view.
+By adding the attriute `aa-toggle-playstate` to an element, all first level children of that element that have animations will be set to `animation-playstate = running` when the element is in view, or to `paused` when out of view.
 
 ## CSS Animations triggered on load (CSS only)
 Add the `aa-load` attribute to the element you want to animate. The animation will be triggered immediately when the page loads. For best performance, use the CSS directly in Webflow.

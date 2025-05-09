@@ -20,7 +20,8 @@ function initializeScrollState() {
         lastScrollTop = currentScrollTop;
       }
     },
-    ignoreMobileResize: true
+    ignoreMobileResize: true,
+    invalidateOnRefresh: false
   });
 }
 
