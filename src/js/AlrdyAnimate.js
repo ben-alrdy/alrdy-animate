@@ -22,15 +22,15 @@ const defaultOptions = {
   hoverEase: "power3.out", // Default easing function for hover animations
   hoverDistance: 0.1, // Distance factor for the hover animations
   gsapFeatures: [],  
-  includeGSAP: true, // Whether to include GSAP in the bundle or use Webflow's version
+  includeGSAP: false, // Whether to include GSAP in the bundle or use Webflow's version
   smoothScroll: {
-    enabled: false,
+    enabled: true,
     options: {} // Defined in smoothScroll/setup.js
   },
   modals: false,
-  debug: false, // Set to true to see GSAP debug info
   lazyLoadHandler: false, // default to false for backward compatibility
-  lowPowerAnimations: false // Whether to disable animations in low power mode
+  lowPowerAnimations: true, // Whether to disable animations in low power mode
+  debug: false // Set to true to see GSAP debug info
 };
 
 // Map aa-animate attributes to GSAP animation names
@@ -252,7 +252,7 @@ async function init(options = {}) {
             const navScrolled = navType.includes('-') ? 
               parseInt(navType.split('-').pop()) || 100 : 
               100;
-            loadedModules.animations.nav?.(navElement, navType, navEase ?? 'back.inOut', navDuration ?? 0.4, navDistance ?? 1, navScrolled);
+            loadedModules.animations.nav?.(navElement, navType, navEase ?? 'power2.out', navDuration ?? 0.6, navDistance ?? 1, navScrolled);
           }
 
           // Setup animations

@@ -1,14 +1,35 @@
-function initializeNav(element, type, ease, duration, distance, scrolled) {
-  let isVisible = true;
+function initializeScrollState() {
   let lastScrollTop = 0;
-  const scrollThreshold = 20;
+  const threshold = 20;
+  const thresholdTop = 50;
 
+  ScrollTrigger.create({
+    start: "top top",
+    end: "max",
+    onUpdate: (self) => {
+      const currentScrollTop = self.scroll();
+      
+      if (Math.abs(currentScrollTop - lastScrollTop) >= threshold) {
+        const direction = currentScrollTop > lastScrollTop ? 'down' : 'up';
+        const hasScrolled = currentScrollTop > thresholdTop;
+        
+        // Update body attributes for global state
+        document.body.setAttribute('data-scroll-direction', direction);
+        document.body.setAttribute('data-scroll-started', hasScrolled ? 'true' : 'false');
+        
+        lastScrollTop = currentScrollTop;
+      }
+    },
+    ignoreMobileResize: true
+  });
+}
+
+function initializeNav(element, type, ease, duration, distance, scrolled) {
   // Track class state to avoid unnecessary DOM operations
   let hasScrolledClass = false;
 
   // Function to ensure nav is visible at top
   const showNavAtTop = () => {
-    isVisible = true;
     gsap.to(element, { y: '0%', duration, ease, overwrite: true });
   };
 
@@ -23,56 +44,34 @@ function initializeNav(element, type, ease, duration, distance, scrolled) {
     }
   };
 
-  ScrollTrigger.create({
-    start: "top top",
-    end: "max",
-    onUpdate: (self) => {
-      
-      let currentScrollTop = self.scroll();
-
-      // Update scrolled class state
-      if (type.includes('change')) {
-        updateScrolledClass(currentScrollTop);
-      }
-
-      if (type.includes('hide')) {
-
-        if (currentScrollTop <= 10) {
-          showNavAtTop();
-          lastScrollTop = currentScrollTop;
-          return;
-        }
-
-        let scrollDelta = currentScrollTop - lastScrollTop;
-
-        if (Math.abs(scrollDelta) > scrollThreshold) {
-          if (scrollDelta > 0 && isVisible) {
-            isVisible = false;
+  // Watch for scroll direction changes
+  const observer = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+      if (mutation.attributeName === 'data-scroll-direction') {
+        const direction = document.body.getAttribute('data-scroll-direction');
+        const scrollTop = window.scrollY;
+        
+        if (type.includes('hide')) {
+          if (direction === 'down') {
             gsap.to(element, { 
               y: `${-100 * distance}%`, 
               duration: duration * 2, 
               ease, 
               overwrite: true 
             });
-          } else if (scrollDelta < 0 && !isVisible) {
+          } else {
             showNavAtTop();
           }
-          lastScrollTop = currentScrollTop;
+        }
+        
+        if (type.includes('change')) {
+          updateScrolledClass(scrollTop);
         }
       }
-    },
-    onRefresh: (self) => {
-      let currentScrollTop = self.scroll();
-      
-      if (type.includes('change')) {
-        updateScrolledClass(currentScrollTop);
-      }
-      
-    },
-    ignoreMobileResize: true, // Ignore mobile browser address bar show/hide
-    onLeaveBack: type.includes('hide') ? showNavAtTop : undefined,
-    onLeave: type.includes('hide') ? showNavAtTop : undefined
+    });
   });
+
+  observer.observe(document.body, { attributes: true });
 }
 
 function initializeBackgroundColor(element, gsap, ScrollTrigger, duration, ease, viewportPercentage, debug = false) {
@@ -453,49 +452,46 @@ function createMarqueeTimeline(element, gsap, ScrollTrigger, duration, scrub) {
     let lastDirection = directionMultiplier;
     let currentDirection = directionMultiplier;
 
-    // Consolidated ScrollTrigger for both direction changes and hover
-    ScrollTrigger.create({
-      trigger: element,
-      start: 'top bottom',
-      end: 'bottom top',
-      toggleActions: 'play pause resume pause',
-      onUpdate: (self) => {
-        // Only process direction changes if the element is in view
-        if (self.isActive && hasSwitch) {
-          const isInverted = self.direction === 1;
-          currentDirection = isInverted ? -directionMultiplier : directionMultiplier;
+    // Watch for scroll direction changes
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.attributeName === 'data-scroll-direction') {
+          const direction = document.body.getAttribute('data-scroll-direction');
+          const isInverted = direction === 'down';
           
-          // Only change direction if:
-          // 1. We're not already changing direction
-          // 2. The direction is actually different
-          if (!isChangingDirection && currentDirection !== lastDirection) {
-            isChangingDirection = true;
-            lastDirection = currentDirection;
+          if (hasSwitch) {
+            // Update marquee direction based on scroll direction
+            currentDirection = isInverted ? -directionMultiplier : directionMultiplier;
+            
+            if (!isChangingDirection && currentDirection !== lastDirection) {
+              isChangingDirection = true;
+              lastDirection = currentDirection;
 
-            // Smooth direction change
-            gsap.to(animation, {
-              timeScale: 0,
-              duration: 0.5,
-              ease: "power2.inOut",
-              onComplete: () => {
-                gsap.to(animation, {
-                  timeScale: currentDirection,
-                  duration: 0.5,
-                  ease: "power2.inOut",
-                  onComplete: () => {
-                    isChangingDirection = false;
-                  }
-                });
-              }
-            });
+              gsap.to(animation, {
+                timeScale: 0,
+                duration: 0.5,
+                ease: "power2.inOut",
+                onComplete: () => {
+                  gsap.to(animation, {
+                    timeScale: currentDirection,
+                    duration: 0.5,
+                    ease: "power2.inOut",
+                    onComplete: () => {
+                      isChangingDirection = false;
+                    }
+                  });
+                }
+              });
+            }
+            
+            element.classList.toggle('marquee-normal', !isInverted);
+            element.classList.toggle('marquee-inverted', isInverted);
           }
-          
-          // Update state using classList instead of setAttribute
-          element.classList.toggle('marquee-normal', !isInverted);
-          element.classList.toggle('marquee-inverted', isInverted);
         }
-      }
+      });
     });
+
+    observer.observe(document.body, { attributes: true });
 
     // Only add hover listeners if hover is enabled
     if (hasHover) {
@@ -541,6 +537,9 @@ function createMarqueeTimeline(element, gsap, ScrollTrigger, duration, scrub) {
 }
 
 function createScrollAnimations(gsap, ScrollTrigger) {
+  // Initialize global scroll state first
+  initializeScrollState();
+  
   return {
     nav: (element, type, ease, duration, distance, scrolled) => {
       initializeNav(element, type, ease, duration, distance, scrolled);
