@@ -23,37 +23,36 @@ const predefinedThemes = {
       stagger: 0.03
     },
     'paragraph-style-normal': {
-      animationType: 'fade-up',
+      animationType: 'aa-fade-up',
       ease: 'power2.out',
-      duration: 0.7,
-      delay: 0.2
+      duration: 0.7
     }
   },
   'bouncy': {
     'headline-style-h1': {
-      animationType: 'text-slide-up',
+      animationType: 'text-slide-up|aa-fade-up',
       split: 'words',
-      ease: 'bounce.out',
+      ease: 'power2.out',
       duration: 1,
       stagger: 0.1
     },
     'headline-style-h2': {
       animationType: 'text-slide-up',
       split: 'words',
-      ease: 'bounce.out',
+      ease: 'power2.out',
       duration: 0.8,
       stagger: 0.08
     },
     'headline-style-h3': {
       animationType: 'text-slide-up',
       split: 'words',
-      ease: 'bounce.out',
+      ease: 'power2.out',
       duration: 0.6,
       stagger: 0.06
     },
     'paragraph-style-normal': {
-      animationType: 'fade-up',
-      ease: 'bounce.out',
+      animationType: 'aa-fade-up',
+      ease: 'power2.out',
       duration: 0.9,
       delay: 0.3
     }

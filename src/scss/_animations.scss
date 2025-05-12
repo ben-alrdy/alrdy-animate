@@ -6,48 +6,60 @@
 
 /*FADE WITH BACK BOUNCE ANIMATIONS – KEYFRAMES IN LOAD-ANIMATIONS.CSS*/
 
-[aa-animate^='float'] {
+[aa-animate^='float'],
+.aa-float-up,
+.aa-float-down,
+.aa-float-left,
+.aa-float-right {
   animation-delay: var(--aa-delay);
   animation-duration: var(--aa-duration);
   animation-fill-mode: forwards;
   opacity: 0;
 }
 
-[aa-animate="float-up"].in-view{ animation-name: floatUp; }
-[aa-animate="float-down"].in-view{ animation-name: floatDown; }
-[aa-animate="float-left"].in-view{ animation-name: floatLeft; }
-[aa-animate="float-right"].in-view{ animation-name: floatRight; }
+[aa-animate="float-up"].in-view,
+.aa-float-up.in-view { animation-name: floatUp; }
+[aa-animate="float-down"].in-view,
+.aa-float-down.in-view { animation-name: floatDown; }
+[aa-animate="float-left"].in-view,
+.aa-float-left.in-view { animation-name: floatLeft; }
+[aa-animate="float-right"].in-view,
+.aa-float-right.in-view { animation-name: floatRight; }
 
 /*3D SWING ANIMATIONS*/
-[aa-animate^='swing'] {
+[aa-animate^='swing'],
+.aa-swing-fwd,
+.aa-swing-bwd {
   transform-origin: 50% 0;
   opacity: 0;
-}
-
-[aa-animate^='swing'] {
   animation-delay: var(--aa-delay);
   animation-duration: var(--aa-duration);
   animation-fill-mode: forwards;
 }
 
-[aa-animate="swing-fwd"].in-view{ animation-name: swing-fwd; }
-[aa-animate="swing-bwd"].in-view{ animation-name: swing-bwd; }
-
+[aa-animate="swing-fwd"].in-view,
+.aa-swing-fwd.in-view { animation-name: swing-fwd; }
+[aa-animate="swing-bwd"].in-view,
+.aa-swing-bwd.in-view { animation-name: swing-bwd; }
 
 /*3D TURN ROTATION ANIMATIONS*/
 
-[aa-animate^='turn-3d']{
+[aa-animate^='turn-3d'],
+.aa-turn-3d-soft,
+.aa-turn-3d-soft-3em,
+.aa-turn-3d-elliptic {
   animation-delay: var(--aa-delay);
   animation-duration: var(--aa-duration);
   animation-fill-mode: forwards;
   opacity: 0;
 }
 
-[aa-animate="turn-3d-soft"].in-view{ animation-name: turn-3d-soft; }
-[aa-animate="turn-3d-soft-3em"].in-view{ animation-name: turn-3d-soft-3em; }
-[aa-animate="turn-3d-elliptic"].in-view{ animation-name: turn-3d-elliptic; }
-
-
+[aa-animate="turn-3d-soft"].in-view,
+.aa-turn-3d-soft.in-view { animation-name: turn-3d-soft; }
+[aa-animate="turn-3d-soft-3em"].in-view,
+.aa-turn-3d-soft-3em.in-view { animation-name: turn-3d-soft-3em; }
+[aa-animate="turn-3d-elliptic"].in-view,
+.aa-turn-3d-elliptic.in-view { animation-name: turn-3d-elliptic; }
 
 /*ROTATE ANIMATIONS*/
 
@@ -55,7 +67,17 @@
 $rotation-positions: ('br': (100% 100%), 'bl': (0 100%), 'tr': (100% 0), 'tl': (0 0), 'c': (50% 50%));
 
 // Base styles for rotate animations
-[aa-animate^='rotate-'] {
+[aa-animate^='rotate'],
+.aa-rotate-br-cw,
+.aa-rotate-br-ccw,
+.aa-rotate-bl-cw,
+.aa-rotate-bl-ccw,
+.aa-rotate-tr-cw,
+.aa-rotate-tr-ccw,
+.aa-rotate-tl-cw,
+.aa-rotate-tl-ccw,
+.aa-rotate-c-cw,
+.aa-rotate-c-ccw {
   animation-delay: var(--aa-delay);
   animation-duration: var(--aa-duration);
   animation-fill-mode: forwards;
@@ -64,7 +86,9 @@ $rotation-positions: ('br': (100% 100%), 'bl': (0 100%), 'tr': (100% 0), 'tl': (
 
 // Generate keyframes and animations for each position
 @each $pos, $origin in $rotation-positions {
-  [aa-animate^='rotate-#{$pos}'] {
+  [aa-animate^='rotate-#{$pos}'],
+  .aa-rotate-#{$pos}-cw,
+  .aa-rotate-#{$pos}-ccw {
     transform-origin: $origin;
   }
 
@@ -93,15 +117,16 @@ $rotation-positions: ('br': (100% 100%), 'bl': (0 100%), 'tr': (100% 0), 'tl': (
     }
   }
 
-  [aa-animate='rotate-#{$pos}-cw'].in-view {
+  [aa-animate='rotate-#{$pos}-cw'].in-view,
+  .aa-rotate-#{$pos}-cw.in-view {
     animation-name: rotate-#{$pos}-cw;
   }
 
-  [aa-animate='rotate-#{$pos}-ccw'].in-view {
+  [aa-animate='rotate-#{$pos}-ccw'].in-view,
+  .aa-rotate-#{$pos}-ccw.in-view {
     animation-name: rotate-#{$pos}-ccw;
   }
 }
-
 
 /**
  * ----------------------------------------
@@ -109,9 +134,8 @@ $rotation-positions: ('br': (100% 100%), 'bl': (0 100%), 'tr': (100% 0), 'tl': (
  * ----------------------------------------
  */
 
-
-
-[aa-hover="shrink-bounce"] {  
+[aa-hover="shrink-bounce"],
+.aa-hover-shrink-bounce {  
   &:hover {
     animation: shrinkBounce;
     animation-duration: var(--aa-duration);
@@ -119,7 +143,8 @@ $rotation-positions: ('br': (100% 100%), 'bl': (0 100%), 'tr': (100% 0), 'tl': (
   }
 }
 
-[aa-hover="grow-bounce"] {  
+[aa-hover="grow-bounce"],
+.aa-hover-grow-bounce {  
   &:hover {
     animation: growBounce;
     animation-duration: var(--aa-duration);

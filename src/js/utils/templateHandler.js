@@ -43,27 +43,41 @@ export function processTemplates(options) {
 export function getElementTemplateSettings(element) {
   if (!processedTemplates) return null;
 
-  // Get all classes of the element
-  const classes = Array.from(element.classList);
+  const className = element.className;
+  const template = processedTemplates[className];
   
-  // Find the first matching class in templates
-  const matchingClass = classes.find(cls => processedTemplates[cls]);
+  if (!template) return null;
   
-  if (!matchingClass) return null;
-
-  // Create a new settings object for this specific element
-  const templateSettings = { ...processedTemplates[matchingClass] };
+  // Create a new settings object
+  const settings = { ...template };
+  
+  // Check if it's a CSS animation (starts with aa-)
+  if (settings.animationType?.startsWith('aa-')) {
+    // Add the class directly (no need to modify the name)
+    element.classList.add(settings.animationType);
+    
+    // Set CSS custom properties only if they are defined
+    if (settings.duration) {
+      element.style.setProperty('--aa-duration', `${settings.duration}s`);
+    }
+    if (settings.delay) {
+      element.style.setProperty('--aa-delay', `${settings.delay}s`);
+    }
+    if (settings.distance) {
+      element.style.setProperty('--aa-distance', settings.distance);
+    }
+  }
   
   // Handle mobile/desktop animation split
-  if (templateSettings.animationType && templateSettings.animationType.includes('|')) {
-    const [desktopAnim, mobileAnim] = templateSettings.animationType.split('|');
-    templateSettings.animationType = window.innerWidth < 768 ? mobileAnim : desktopAnim;
+  if (settings.animationType && settings.animationType.includes('|')) {
+    const [desktopAnim, mobileAnim] = settings.animationType.split('|');
+    settings.animationType = window.innerWidth < 768 ? mobileAnim : desktopAnim;
   }
   
   // Add element-specific properties
-  templateSettings.anchorElement = element; // Each element is its own anchor
+  settings.anchorElement = element; // Each element is its own anchor
   
-  return templateSettings;
+  return settings;
 }
 
 /**

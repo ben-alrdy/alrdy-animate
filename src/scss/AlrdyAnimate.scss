@@ -4,22 +4,19 @@ html {
 }
 
 body {
-  // Set default pseudo color
-  --aa-pseudo-color: var(--background-color--background-primary, #000000);
-
   // Fix to reduce mobile viewport stuttering
   min-height: 100vh;
   /* mobile viewport bug fix */
   min-height: -webkit-fill-available;
-}
 
-// Base styles for all animated elements
-[aa-animate], [aa-instant] {
+  // Animation variables
   --aa-duration: var(--aa-default-duration);
   --aa-delay: var(--aa-default-delay);
   --aa-distance: var(--aa-default-distance);
+  --aa-pseudo-color: var(--background-color--background-primary, #000000);
 }
 
+// Hover-specific variables
 [aa-hover] {
   --aa-duration: var(--aa-default-hover-duration);
   --aa-delay: var(--aa-default-hover-delay);
@@ -46,7 +43,7 @@ body.aa-low-power {
     // Prevent all animations for our library elements
     [aa-animate],
     [aa-hover],
-    [aa-children]{
+    [aa-children] {
         animation: none !important;
         transition: none !important;
         opacity: 1 !important;
@@ -59,7 +56,6 @@ body.aa-low-power {
     [aa-animate^="pseudo-reveal"]::before {
         display: none !important;
     }
-
 }
 
 // Since the text-fade start with 30% opacity, show the element
