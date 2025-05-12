@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alrdy Animate - Templates Test</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        /* Initial states for template elements */
+        .headline-style-h1,
+        .headline-style-h2,
+        .headline-style-h3,
+        .paragraph-style-normal {
+            visibility: hidden;
+        }
+
+        /* Test page styles */
+        .section {
+            min-height: 100vh;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .test-case {
+            border: 1px solid #eee;
+            padding: 2rem;
+            border-radius: 8px;
+        }
+
+        .test-case h3 {
+            margin-bottom: 1rem;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="section">
+        <div class="test-case">
+            <h3>Predefined Theme: Floaty</h3>
+            <h1 class="headline-style-h1">This is a Headline H1</h1>
+            <h2 class="headline-style-h2">This is a Headline H2</h2>
+            <h3 class="headline-style-h3">This is a Headline H3</h3>
+            <p class="paragraph-style-normal">This is a normal paragraph with some text to demonstrate the animation effects. It should fade up smoothly when it comes into view.</p>
+        </div>
+
+        <div class="test-case">
+            <h3>Custom Template Override</h3>
+            <h2 class="headline-style-h2">This H2 has custom settings</h2>
+            <p class="paragraph-style-normal">This paragraph uses the default template settings</p>
+        </div>
+
+        <div class="test-case">
+            <h3>Attribute Override</h3>
+            <h1 class="headline-style-h1" aa-animate="text-slide-down" aa-split="words">This H1 has an attribute override</h1>
+            <h2 class="headline-style-h2">This H2 uses template settings</h2>
+        </div>
+    </div>
+
+    <script src="../dist/AlrdyAnimate.js"></script>
+    <script>
+        // Initialize AlrdyAnimate with templates
+        AlrdyAnimate.init({
+            ease: 'power2.out',
+            duration: 0.8,
+            gsapFeatures: ['text', 'scroll'],
+            includeGSAP: true,
+            templates: {
+                // Use predefined floaty theme
+                theme: 'floaty',
+                // Override some settings
+                custom: {
+                    'headline-style-h2': {
+                        animationType: 'text-slide-up|text-slide-down',
+                        split: 'words',
+                        ease: 'power3.out',
+                        duration: 0.7,
+                        stagger: 0.06
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html> 

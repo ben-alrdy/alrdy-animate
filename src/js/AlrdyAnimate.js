@@ -3,6 +3,7 @@ import { setupResizeHandler } from './utils/resizeHandler';
 import { handleLazyLoadedImages } from './utils/lazyLoadHandler';
 import { processChildren } from './utils/childrenHandler';
 import { getElementSettings, applyElementStyles } from './utils/elementAttributes';
+import { processTemplates, getFinalSettings, clearProcessedTemplates } from './utils/templateHandler';
 
 // Define these variables in the module scope
 let allAnimatedElements = null;
@@ -30,7 +31,8 @@ const defaultOptions = {
   modals: false,
   lazyLoadHandler: false, // default to false for backward compatibility
   lowPowerAnimations: true, // Whether to disable animations in low power mode
-  debug: false // Set to true to see GSAP debug info
+  debug: false, // Set to true to see GSAP debug info
+  templates: null // Template configuration for class-based animations
 };
 
 // Map aa-animate attributes to GSAP animation names
@@ -74,6 +76,9 @@ async function init(options = {}) {
   // Initialize play state observer first
   initializePlayStateObserver();
 
+  // Process templates if specified
+  const templates = processTemplates(initOptions);
+
   // Check for low power mode if enabled and on mobile device
   const isLowPower = initOptions.lowPowerAnimations && isMobileDevice() && await isLowPowerMode(initOptions.debug);
 
@@ -86,8 +91,21 @@ async function init(options = {}) {
     );
   }
 
+  // First get all elements with animation attributes
   let elements = [...document.querySelectorAll("[aa-animate], [aa-children], [aa-hover]")];
   
+  // If templates are enabled, add elements with matching classes
+  if (templates) {
+    // Create a single selector for all template classes
+    const templateSelectors = Object.keys(templates).map(className => 
+      `.${className}:not([aa-animate])`
+    ).join(',');
+    
+    // Get all template elements in a single query
+    const templateElements = document.querySelectorAll(templateSelectors);
+    elements = [...elements, ...templateElements];
+  }
+    
   allAnimatedElements = elements;
   isMobile = window.innerWidth < 768;
   enableGSAP = initOptions.gsapFeatures.length > 0;
@@ -278,6 +296,9 @@ async function init(options = {}) {
         setupAnimations(allAnimatedElements, initOptions, isMobile, { gsap: null, ScrollTrigger: null });
       }
 
+      // Clear processed templates after setup
+      clearProcessedTemplates();
+
       resolve({ 
         gsap: loadedModules?.gsap || null, 
         ScrollTrigger: loadedModules?.ScrollTrigger || null,
@@ -297,8 +318,12 @@ function setupAnimations(elements, initOptions, isMobile, modules) {
       return;
     }
 
-    // Get settings from attributes
-    const settings = getElementSettings(element, initOptions);
+    // Get settings from attributes or templates
+    const templateSettings = getFinalSettings(element, initOptions);
+    const settings = templateSettings || getElementSettings(element, initOptions);
+    
+    // Skip if no settings found
+    if (!settings) return;
     
     // Store settings on the element for resize handling
     element.settings = settings;
@@ -314,7 +339,7 @@ function setupAnimations(elements, initOptions, isMobile, modules) {
     }
 
     // Setup regular animations
-    if (element.hasAttribute('aa-animate')) {
+    if (element.hasAttribute('aa-animate') || templateSettings) {
       if (enableGSAP) {
         setupGSAPAnimations(element, settings, initOptions, isMobile, modules);
       } else {

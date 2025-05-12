@@ -28,6 +28,7 @@
 - [Setting attributes via JavaScript](#setting-attributes-via-javascript)
 - [Contributing](#contributing)
 - [License](#license)
+- [Templates](#templates)
 
 
 ## Overview
@@ -166,7 +167,7 @@ document.addEventListener('DOMContentLoaded', () => {
 | `lazyLoadHandler` | boolean | false | Enable lazy loading handler for images |
 | `modals` | boolean | false | Enable modal functionality |
 | `smoothScroll` | object | { enabled: false, options: {} } | Configure smooth scrolling with Lenis |
-| `smoothScroll.options` | object | { lerp: 0.12, orientation: 'vertical', gestureOrientation: 'vertical', smoothWheel: true, wheelMultiplier: 1, touchMultiplier: 2, infinite: false } | Lenis smooth scroll options |
+| `templates` | object | null | Template configuration for class-based animations |
 
 #### Hover Animation Options
 | Option | Type | Default | Description |
@@ -769,6 +770,70 @@ Contributions are welcome! Please fork the repository and submit pull requests f
 ## License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+
+## Templates
+
+AlrdyAnimate supports class-based animation templates, allowing you to define animations for specific classes without adding attributes to each element. This is particularly useful for consistent animations across multiple elements.
+
+### Basic Usage
+
+1. Define your templates in the init options:
+```javascript
+AlrdyAnimate.init({
+  templates: {
+    theme: 'floaty',  // Use a predefined theme
+    custom: {         // Add custom class animations
+      'my-headline': {
+        animationType: 'text-slide-up',
+        split: 'words',
+        ease: 'power2.out',
+        duration: 0.8,
+        stagger: 0.05
+      }
+    }
+  }
+});
+```
+
+2. Add the corresponding classes to your HTML elements:
+```html
+<h1 class="my-headline">This will animate automatically</h1>
+```
+
+### Predefined Themes
+
+AlrdyAnimate comes with predefined themes that you can use:
+- `floaty`: Smooth, floating animations
+- `bouncy`: Playful, bouncy animations
+
+### Template Settings
+
+Each template can include any animation settings that you would normally set via attributes:
+- `animationType`: The type of animation (e.g., 'text-slide-up', 'fade-up')
+- `split`: How to split text ('words', 'chars', 'lines')
+- `ease`: Easing function
+- `duration`: Animation duration
+- `delay`: Animation delay
+- `stagger`: Stagger timing for split text
+- `distance`: Animation distance multiplier
+
+### Mobile/Desktop Variants
+
+You can define different animations for mobile and desktop using the `|` separator:
+```javascript
+templates: {
+  custom: {
+    '.my-headline': {
+      animationType: 'text-slide-up|text-slide-down',  // desktop|mobile
+      split: 'words'
+    }
+  }
+}
+```
+
+### Priority
+
+Template animations have lower priority than attribute-based animations. If an element has both a template class and animation attributes, the attributes will take precedence.
 
 
 

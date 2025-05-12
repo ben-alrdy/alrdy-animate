@@ -1,5 +1,7 @@
 import { debounce } from './shared';
 import { getElementSettings } from './elementAttributes';
+import { getElementTemplateSettings } from './templateHandler';
+import { processTemplates } from './templateHandler';
 
 export function setupResizeHandler(modules, initOptions, isMobile, setupGSAPAnimations) {
   let prevWidth = window.innerWidth;
@@ -40,6 +42,36 @@ export function setupResizeHandler(modules, initOptions, isMobile, setupGSAPAnim
           setupGSAPAnimations(element, settings, initOptions, isMobile, modules);
         }
       });
+
+      // Rebuild template-based animations
+      if (initOptions.templates) {
+        // Process templates to get the final class names
+        const templates = processTemplates(initOptions);
+        if (templates) {
+          // Create a single selector for all template classes
+          const templateSelectors = Object.keys(templates).map(className => 
+            `.${className}:not([aa-animate])`
+          ).join(',');
+          
+          // Get all template elements in a single query
+          document.querySelectorAll(templateSelectors).forEach(element => {
+            const templateSettings = getElementTemplateSettings(element);
+            if (templateSettings?.animationType) {
+              // Clear existing split instance
+              if (element.splitInstance) {
+                element.splitInstance.revert();
+              }
+
+              // Update settings with new animation type
+              element.settings = {
+                ...element.settings,
+                ...templateSettings
+              };
+              setupGSAPAnimations(element, element.settings, initOptions, isMobile, modules);
+            }
+          });
+        }
+      }
       
       // REMOVED SCROLLTRIGGER REFRESH BECAUSE GSAP IS HANDLING IT
       /* if (modules.ScrollTrigger) {
