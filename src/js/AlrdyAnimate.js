@@ -30,7 +30,6 @@ const defaultOptions = {
   },
   modals: false,
   lazyLoadHandler: false, // default to false for backward compatibility
-  lowPowerAnimations: true, // Whether to disable animations in low power mode
   debug: false, // Set to true to see GSAP debug info
   templates: null // Template configuration for class-based animations
 };
@@ -53,21 +52,6 @@ const TEXT_ANIMATION_MAP = {
   'text-blur-down': 'blurDown'
 };
 
-// Function to detect if device is mobile
-const isMobileDevice = () => {
-  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-};
-
-// Function to detect battery saving mode
-const isLowPowerMode = (debug = false) => {
-  if ('getBattery' in navigator) {
-    return navigator.getBattery().then(battery => {
-      return battery.charging === false && battery.level <= (debug ? 1 : 0.2);
-    });
-  }
-  return Promise.resolve(false);
-};
-
 // Initialize the animation script with the given options
 async function init(options = {}) {
   const initOptions = { ...defaultOptions, ...options };
@@ -78,18 +62,6 @@ async function init(options = {}) {
 
   // Process templates if specified
   const templates = processTemplates(initOptions);
-
-  // Check for low power mode if enabled and on mobile device
-  const isLowPower = initOptions.lowPowerAnimations && isMobileDevice() && await isLowPowerMode(initOptions.debug);
-
-  // If in low power mode, add class to body and disable GSAP features
-  if (isLowPower) {
-    document.body.classList.add('aa-low-power');
-    // Filter out heavy animations from GSAP features
-    initOptions.gsapFeatures = initOptions.gsapFeatures.filter(feature => 
-      !['appear', 'reveal', 'counter', 'text', 'parallax'].includes(feature)
-    );
-  }
 
   // First get all elements with animation attributes
   let elements = [...document.querySelectorAll("[aa-animate], [aa-children], [aa-hover]")];

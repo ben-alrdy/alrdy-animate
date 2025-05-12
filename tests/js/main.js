@@ -9,7 +9,6 @@ document.addEventListener('DOMContentLoaded', function() {
         debug: true,
         modals: true,
         includeGSAP: true,
-        lowPowerAnimations: true,
         smoothScroll: {
             enabled: false,
             options: {
