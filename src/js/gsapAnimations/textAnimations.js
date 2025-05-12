@@ -1,5 +1,5 @@
 export function createTextAnimations(gsap) {
-  // Animation defaults - ease and duration won't actually be considered as they are set on the element or default to initOptions
+  // Animation defaults
   const defaults = {
     slide:        { duration: 0.5, stagger: 0.1, ease: 'back.out' },
     rotateSoft:   { duration: 1.2, stagger: 0.3, ease: 'circ.out' },
@@ -86,49 +86,49 @@ export function createTextAnimations(gsap) {
     };
   }
 
-  // Return all animations with their specific configurations
-  return {
-    slideUp: createAnimation(
+  // Define all text animations in one place
+  const textAnimations = {
+    'text-slide-up': createAnimation(
       { y: "110%", opacity: 0 },
       defaults.slide
     ),
     
-    slideDown: createAnimation(
+    'text-slide-down': createAnimation(
       { y: "-110%", opacity: 0 },
       defaults.slide
     ),
     
-    slideLeft: createAnimation(
+    'text-slide-left': createAnimation(
       { x: "100vw", opacity: 0 },
       defaults.slide
     ),
     
-    tiltUp: createAnimation(
+    'text-tilt-up': createAnimation(
       { y: "110%", opacity: 0, rotation: 10, transformOrigin: "bottom left" },
       defaults.slide
     ),
     
-    tiltDown: createAnimation(
+    'text-tilt-down': createAnimation(
       { y: "-110%", opacity: 0, rotation: -10, transformOrigin: "top left" },
       defaults.slide
     ),
 
-    fadeUp: createAnimation(
+    'text-fade-up': createAnimation(
       { y: "150%", x: "-20", opacity: 0 },
       defaults.slide
     ),
     
-    fadeSoft: createAnimation(
+    'text-fade-soft': createAnimation(
       { opacity: 0.3 },
       defaults.fade
     ),
     
-    fade: createAnimation(
+    'text-fade': createAnimation(
       { opacity: 0 },
       defaults.fade
     ),
     
-    blur: createAnimation(
+    'text-blur': createAnimation(
       { 
         opacity: 0, 
         filter: 'blur(10px)'  
@@ -136,7 +136,7 @@ export function createTextAnimations(gsap) {
       defaults.blur
     ),
 
-    blurLeft: createAnimation(
+    'text-blur-left': createAnimation(
       { 
         opacity: 0, 
         filter: 'blur(10px)',
@@ -145,7 +145,7 @@ export function createTextAnimations(gsap) {
       defaults.blur
     ),
 
-    blurRight: createAnimation(
+    'text-blur-right': createAnimation(
       { 
         opacity: 0, 
         filter: 'blur(10px)',
@@ -154,7 +154,7 @@ export function createTextAnimations(gsap) {
       defaults.blur
     ),
 
-    blurUp: createAnimation(
+    'text-blur-up': createAnimation(
       { 
         opacity: 0, 
         filter: 'blur(10px)',
@@ -163,7 +163,7 @@ export function createTextAnimations(gsap) {
       defaults.blur
     ),
 
-    blurDown: createAnimation(
+    'text-blur-down': createAnimation(
       { 
         opacity: 0, 
         filter: 'blur(10px)',
@@ -172,7 +172,7 @@ export function createTextAnimations(gsap) {
       defaults.blur
     ),
     
-    rotateSoft: (element, splitElements, split, duration, stagger, delay, ease) => {
+    'text-rotate-soft': (element, splitElements, split, duration, stagger, delay, ease) => {
       const tl = gsap.timeline();
       const animationTarget = splitElements[split];
 
@@ -215,6 +215,16 @@ export function createTextAnimations(gsap) {
       });
 
       return tl;
+    }
+  };
+
+  return {
+    // Return the animations object and a helper function to get animation by type
+    animations: textAnimations,
+    getAnimation: (type) => {
+      // Remove -clip suffix if present
+      const baseType = type.replace('-clip', '');
+      return textAnimations[baseType];
     }
   };
 }

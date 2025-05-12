@@ -34,24 +34,6 @@ const defaultOptions = {
   templates: null // Template configuration for class-based animations
 };
 
-// Map aa-animate attributes to GSAP animation names
-const TEXT_ANIMATION_MAP = {
-  'text-slide-up': 'slideUp',
-  'text-slide-down': 'slideDown',
-  'text-slide-left': 'slideLeft',
-  'text-tilt-up': 'tiltUp',
-  'text-tilt-down': 'tiltDown',
-  'text-rotate-soft': 'rotateSoft',
-  'text-fade-soft': 'fadeSoft',
-  'text-fade': 'fade',
-  'text-fade-up': 'fadeUp',
-  'text-blur': 'blur',
-  'text-blur-left': 'blurLeft',
-  'text-blur-right': 'blurRight',
-  'text-blur-up': 'blurUp',
-  'text-blur-down': 'blurDown'
-};
-
 // Initialize the animation script with the given options
 async function init(options = {}) {
   const initOptions = { ...defaultOptions, ...options };
@@ -415,9 +397,9 @@ function setupGSAPAnimations(element, elementSettings, initOptions, isMobile, mo
         const { splitElements, splitInstance } = modules.splitText(element, split);
         element.splitInstance = splitInstance;
 
-        const animationName = TEXT_ANIMATION_MAP[animationType.replace('-clip', '')];
-        if (animationName) {
-          tl.add(modules.animations[animationName](element, splitElements, split, duration, stagger, delay, ease));
+        const animation = modules.animations.getAnimation(animationType);
+        if (animation) {
+          tl.add(animation(element, splitElements, split, duration, stagger, delay, ease));
         }
         break;
 
