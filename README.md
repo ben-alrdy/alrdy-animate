@@ -26,9 +26,10 @@
 - [Modals](#modals)
 - [Easing Functions](#easing-functions)
 - [Setting attributes via JavaScript](#setting-attributes-via-javascript)
+- [Templates](#templates)
 - [Contributing](#contributing)
 - [License](#license)
-- [Templates](#templates)
+
 
 
 ## Overview
@@ -763,14 +764,6 @@ if ('scrollRestoration' in history) {
 window.scrollTo(0, 0);
 ```
 
-## Contributing
-
-Contributions are welcome! Please fork the repository and submit pull requests for any improvements.
-
-## License
-
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
-
 ## Templates
 
 AlrdyAnimate supports class-based animation templates, allowing you to define animations for specific classes without adding attributes to each element. This is particularly useful for consistent animations across multiple elements.
@@ -834,6 +827,16 @@ templates: {
 ### Priority
 
 Template animations have lower priority than attribute-based animations. If an element has both a template class and animation attributes, the attributes will take precedence.
+
+
+## Contributing
+
+Contributions are welcome! Please fork the repository and submit pull requests for any improvements.
+
+## License
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+
 
 
 

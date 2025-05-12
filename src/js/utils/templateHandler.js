@@ -81,15 +81,6 @@ export function getElementTemplateSettings(element) {
 }
 
 /**
- * Check if an element has any animation attributes
- * @param {HTMLElement} element - The element to check
- * @returns {boolean} True if element has animation attributes
- */
-export function hasAnimationAttributes(element) {
-  return element.hasAttribute('aa-animate');
-}
-
-/**
  * Get final settings for an element, merging template settings with default settings
  * @param {HTMLElement} element - The element to get settings for
  * @param {Object} defaultSettings - Default settings to merge with
@@ -97,7 +88,7 @@ export function hasAnimationAttributes(element) {
  */
 export function getFinalSettings(element, defaultSettings) {
   // If element has animation attributes, skip template processing
-  if (hasAnimationAttributes(element)) {
+  if (element.hasAttribute('aa-animate')) {
     return null;
   }
 

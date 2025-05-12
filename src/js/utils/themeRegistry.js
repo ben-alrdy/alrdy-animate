@@ -62,14 +62,6 @@ const predefinedThemes = {
 // Store for custom themes
 let customThemes = {};
 
-/**
- * Register a new theme or override an existing one
- * @param {string} name - Theme name
- * @param {Object} theme - Theme configuration
- */
-export function registerTheme(name, theme) {
-  customThemes[name] = theme;
-}
 
 /**
  * Get a theme by name
@@ -78,17 +70,6 @@ export function registerTheme(name, theme) {
  */
 export function getTheme(name) {
   return customThemes[name] || predefinedThemes[name] || null;
-}
-
-/**
- * Get all available themes (predefined and custom)
- * @returns {Object} All themes
- */
-export function getAllThemes() {
-  return {
-    ...predefinedThemes,
-    ...customThemes
-  };
 }
 
 /**
