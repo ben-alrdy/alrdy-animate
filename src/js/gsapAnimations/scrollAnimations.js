@@ -435,11 +435,17 @@ function createMarqueeTimeline(element, gsap, duration, scrub) {
       xPercent: -100,
       repeat: -1,
       duration: baseSpeed,
-      ease: 'linear'
+      ease: 'linear',
+      force3D: true, // Enable hardware acceleration
+      willChange: 'transform' // Hint to browser about animation
     }).totalProgress(0.5);
 
     // Set initial position based on direction
-    gsap.set(marqueeItems, { xPercent: directionMultiplier === 1 ? 100 : -100 });
+    gsap.set(marqueeItems, { 
+      xPercent: directionMultiplier === 1 ? 100 : -100,
+      force3D: true,
+      willChange: 'transform'
+    });
     
     // Control direction with timeScale
     animation.timeScale(directionMultiplier);
@@ -448,19 +454,26 @@ function createMarqueeTimeline(element, gsap, duration, scrub) {
     // Set initial state using class
     element.classList.add('marquee-normal');
 
-    // State variables for direction changes
-    let isChangingDirection = false;
-    let lastDirection = directionMultiplier;
-    let currentDirection = directionMultiplier;
+    // Only set up direction switching if needed
+    if (hasSwitch) {
+      // State variables for direction changes
+      let isChangingDirection = false;
+      let lastDirection = directionMultiplier;
+      let currentDirection = directionMultiplier;
+      let lastScrollTime = 0;
+      const scrollThrottle = 100; // Throttle scroll events to every 100ms
 
-    // Watch for scroll direction changes
-    const observer = new MutationObserver((mutations) => {
-      mutations.forEach((mutation) => {
-        if (mutation.attributeName === 'data-scroll-direction') {
-          const direction = document.body.getAttribute('data-scroll-direction');
-          const isInverted = direction === 'down';
-          
-          if (hasSwitch) {
+      // Watch for scroll direction changes
+      const observer = new MutationObserver((mutations) => {
+        const now = Date.now();
+        if (now - lastScrollTime < scrollThrottle) return;
+        lastScrollTime = now;
+
+        mutations.forEach((mutation) => {
+          if (mutation.attributeName === 'data-scroll-direction') {
+            const direction = document.body.getAttribute('data-scroll-direction');
+            const isInverted = direction === 'down';
+            
             // Update marquee direction based on scroll direction
             currentDirection = isInverted ? -directionMultiplier : directionMultiplier;
             
@@ -468,19 +481,13 @@ function createMarqueeTimeline(element, gsap, duration, scrub) {
               isChangingDirection = true;
               lastDirection = currentDirection;
 
+              // Use a single animation for smoother transition
               gsap.to(animation, {
-                timeScale: 0,
+                timeScale: currentDirection,
                 duration: 0.5,
                 ease: "power2.inOut",
                 onComplete: () => {
-                  gsap.to(animation, {
-                    timeScale: currentDirection,
-                    duration: 0.5,
-                    ease: "power2.inOut",
-                    onComplete: () => {
-                      isChangingDirection = false;
-                    }
-                  });
+                  isChangingDirection = false;
                 }
               });
             }
@@ -488,11 +495,11 @@ function createMarqueeTimeline(element, gsap, duration, scrub) {
             element.classList.toggle('marquee-normal', !isInverted);
             element.classList.toggle('marquee-inverted', isInverted);
           }
-        }
+        });
       });
-    });
 
-    observer.observe(document.body, { attributes: true });
+      observer.observe(document.body, { attributes: true });
+    }
 
     // Only add hover listeners if hover is enabled
     if (hasHover) {

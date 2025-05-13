@@ -563,7 +563,7 @@ The AlrdyAnimate library includes powerful hover animations using GSAP. These an
 5. **Icon Animations** (`aa-hover="icon-..."`)
   - Animates an icon on hover.
   - Requires an svg element nested inside the element, tagged with `aa-hover-icon`.
-  - Define direction of the icon animation with `aa-hover-direction` on the aa-hover element (possible values: `right`, `up-right`, `down-right`, `left`, `up-left`, `down-left`, `up`, `down`).
+  - Define direction of the icon animation by adding a direction, e.g. `aa-hover="icon-right"` (possible values: `right`, `up-right`, `down-right`, `left`, `up-left`, `down-left`, `up`, `down`).
   - Optionally, you can add `-reverse` to `aa-hover` to play the animation in reverse when hovering out, e.g. `aa-hover="icon-right-reverse"`.
 
 For all hover animations, you can optionally add `aa-hover-text-color` or `aa-hover-bg-color` to any element inside the aa-hover element to animate the text or background color. The text elements will be positioned relative with z-index set to 1.
