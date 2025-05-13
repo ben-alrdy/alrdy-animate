@@ -231,8 +231,8 @@ export function createTextAnimations(gsap) {
     // Return the animations object and a helper function to get animation by type
     animations: textAnimations,
     getAnimation: (type) => {
-      // Remove -clip suffix if present
-      const baseType = type.replace('-clip', '');
+      // Remove any mask suffix (-clip, -lines, -words, -chars)
+      const baseType = type.replace(/-clip|-lines|-words|-chars$/, '');
       return textAnimations[baseType];
     }
   };

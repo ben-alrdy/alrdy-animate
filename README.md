@@ -284,7 +284,7 @@ AlrdyAnimate supports several GSAP-powered features that can be enabled by inclu
 (`gsapFeatures: ['text']`)
 
 - Set the animation type with `aa-animate="text-..."`.
-  - Optionally, you can add `-clip` to wrap each line in a clip wrapper and prevent overflow, resulting in a clipping effect during the animation. Example: `aa-animate="text-slide-up-clip"`.
+  - Optionally, you can add `-clip` (or `-lines`, `-words`, `-chars`) to wrap each line in a clip wrapper and prevent overflow, resulting in a clipping effect during the animation. Example: `aa-animate="text-slide-up-clip"`.
 - Pair with `aa-split` to define how to split the text for animation:
   - There are 4 split types: `lines`, `words`, `chars` or `lines&words` (i.e. both lines and words will be animated simultaneously). 
 - Use `aa-scrub` to make the animation scroll-driven. There are two options: `aa-scrub="snap"` and `aa-scrub="smooth"`.

@@ -43,11 +43,6 @@ body {
     visibility: visible;
 }
 
-// clip the text animation to prevent overflow
-.aa-line-wrap{
-    overflow: hidden;
-}
-
 [aa-hover-text-color], [aa-hover-content] {
   position: relative;
   z-index: 1;
