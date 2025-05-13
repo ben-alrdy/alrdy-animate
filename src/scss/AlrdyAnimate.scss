@@ -39,12 +39,12 @@ body {
 }
 
 // Since the text-fade start with 30% opacity, show the element
-[aa-animate^="text-fade-soft"] {
+[aa-animate^="text-fade-"] {
     visibility: visible;
 }
 
 // clip the text animation to prevent overflow
-[aa-split] > .line-clip-wrapper,[aa-animate*="split"] > .line-clip-wrapper{
+.aa-line-wrap{
     overflow: hidden;
 }
 

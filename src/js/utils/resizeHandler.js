@@ -50,7 +50,7 @@ export function setupResizeHandler(modules, initOptions, isMobile, setupGSAPAnim
         if (templates) {
           // Create a single selector for all template classes
           const templateSelectors = Object.keys(templates).map(className => 
-            `.${className}:not([aa-animate])`
+            `.${className}:not([aa-animate]):not([aa-load])`
           ).join(',');
           
           // Get all template elements in a single query

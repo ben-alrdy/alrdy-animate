@@ -113,13 +113,22 @@ export function createTextAnimations(gsap) {
       defaults.slide
     ),
 
-    'text-fade-up': createAnimation(
-      { y: "150%", x: "-20", opacity: 0 },
+    'text-scale-up': createAnimation(
+      { 
+        y: "120%", 
+        opacity: 0, 
+        scale: 0.9,
+        transformOrigin: "left center"
+      },
       defaults.slide
     ),
-    
-    'text-fade-soft': createAnimation(
+  
+    'text-fade-30': createAnimation(
       { opacity: 0.3 },
+      defaults.fade
+    ),
+    'text-fade-10': createAnimation(
+      { opacity: 0.1 },
       defaults.fade
     ),
     
@@ -215,7 +224,7 @@ export function createTextAnimations(gsap) {
       });
 
       return tl;
-    }
+    },
   };
 
   return {

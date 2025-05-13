@@ -1,15 +1,15 @@
 // Predefined animation themes
 const predefinedThemes = {
-  'floaty': {
+  'floaty-fade': {
     'headline-style-h1': {
-      animationType: 'text-slide-up',
-      split: 'words',
-      ease: 'power2.out',
-      duration: 0.8,
-      stagger: 0.05
+      animationType: 'text-float-up',
+      split: 'lines',
+      ease: 'circ.out',
+      duration: 1.2,
+      stagger: 0.2
     },
     'headline-style-h2': {
-      animationType: 'text-slide-up',
+      animationType: 'text-fade',
       split: 'words',
       ease: 'power2.out',
       duration: 0.6,

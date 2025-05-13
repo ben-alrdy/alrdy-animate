@@ -46,7 +46,7 @@ export function splitText(element, split, hideFromScreenReaders = false) {
   if (isClipped && splitInstance.lines) {
     splitInstance.lines.forEach(line => {
       const wrapper = document.createElement('div');
-      wrapper.classList.add('line-clip-wrapper');
+      wrapper.classList.add('aa-line-wrap');
       line.parentNode.insertBefore(wrapper, line);
       wrapper.appendChild(line);
     });

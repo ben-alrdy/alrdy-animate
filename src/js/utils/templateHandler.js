@@ -87,11 +87,6 @@ export function getElementTemplateSettings(element) {
  * @returns {Object|null} Final settings or null if no settings found
  */
 export function getFinalSettings(element, defaultSettings) {
-  // If element has animation attributes, skip template processing
-  if (element.hasAttribute('aa-animate')) {
-    return null;
-  }
-
   // Get template settings if available
   const templateSettings = getElementTemplateSettings(element);
   if (!templateSettings) return null;
