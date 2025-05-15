@@ -111,8 +111,6 @@ For Webflow projects, add these scripts to your custom code section:
           element.style.visibility = 'visible';
           element.style.opacity = 1;
         });
-        window.alrdyInitialized = true;
-        document.dispatchEvent(new Event('alrdy-init-complete'));
       }
     }, 5000); // 5 second timeout
     
@@ -135,20 +133,18 @@ For Webflow projects, add these scripts to your custom code section:
         }
       }  
     }).then(() => {
-      clearTimeout(initTimeout); // Clear the timeout if initialization succeeds
+      clearTimeout(initTimeout);
       window.alrdyInitialized = true;
       document.dispatchEvent(new Event('alrdy-init-complete'));
     }).catch(error => {
       console.error('Error initializing AlrdyAnimate:', error);
+      clearTimeout(initTimeout);
       // Show all elements on error
       document.querySelectorAll('[aa-animate], [aa-children]').forEach((element) => {
         element.classList.add('in-view');
         element.style.visibility = 'visible';
         element.style.opacity = 1;
       });
-      clearTimeout(initTimeout);
-      window.alrdyInitialized = true;
-      document.dispatchEvent(new Event('alrdy-init-complete'));
     });
   });
 </script>
