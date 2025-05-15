@@ -3,8 +3,8 @@
 ## Table of Contents
 - [Overview](#overview)
 - [Installation](#installation)
-  - [Using CDN](#using-cdn)
-  - [Using NPM](#using-npm)
+  - [CDN Links](#cdn-links)
+  - [Initialization Scripts](#initialization-scripts)
   - [Configuration Options](#configuration-options)
 - [CSS Animations triggered on scroll (via JS)](#css-animations-triggered-on-scroll-via-js)
 - [CSS Animations triggered on load (CSS only)](#css-animations-triggered-on-load-css-only)
@@ -40,7 +40,7 @@ AlrdyAnimate is a lightweight JavaScript library for adding scroll-triggered ani
 
 You can include AlrdyAnimate in your project using either CDN or npm.
 
-### Using CDN
+### CDN Links
 
 ```html
 
@@ -60,6 +60,18 @@ You can include AlrdyAnimate in your project using either CDN or npm.
 
 <!-- Or specific version -->
 <link rel="stylesheet" href="https://unpkg.com/alrdy-animate@2.1.3/dist/AlrdyAnimate.css">
+<script defer src="https://unpkg.com/alrdy-animate@2.1.3/dist/AlrdyAnimate.js"></script>
+```
+
+### Initialization Scripts
+
+#### Webflow Implementation
+
+For Webflow projects, add these scripts to your custom code section:
+
+```html
+<link rel="stylesheet" href="https://unpkg.com/alrdy-animate@2.1.3/dist/AlrdyAnimate.css">
+
 <script defer src="https://unpkg.com/alrdy-animate@2.1.3/dist/AlrdyAnimate.js"></script>
 
 <!-- SCRIPT FOR MAIN CUSTOM CODE-->
@@ -82,8 +94,91 @@ You can include AlrdyAnimate in your project using either CDN or npm.
   // Initialize AlrdyAnimate
   window.Webflow ||= [];
   window.Webflow.push(() => {
-  	// Bulk set attributes
-  	document.querySelectorAll('h2').forEach((element) => {       
+    // Bulk set attributes
+    document.querySelectorAll('h2').forEach((element) => {       
+      if (!element.hasAttribute('aa-animate')) {
+        element.setAttribute('aa-animate', 'text-slide-up-clip');
+        element.setAttribute('aa-split', 'words');  
+      }
+    });
+    
+    // Set a timeout to show elements if initialization fails
+    const initTimeout = setTimeout(() => {
+      if (!window.alrdyInitialized) {
+        console.warn('AlrdyAnimate initialization timed out - showing all elements');
+        document.querySelectorAll('[aa-animate], [aa-children]').forEach((element) => {
+          element.classList.add('in-view');
+          element.style.visibility = 'visible';
+          element.style.opacity = 1;
+        });
+        window.alrdyInitialized = true;
+        document.dispatchEvent(new Event('alrdy-init-complete'));
+      }
+    }, 5000); // 5 second timeout
+    
+    // Initialize AlrdyAnimate
+    AlrdyAnimate.init({
+      ease: 'ease-in-out',
+      duration: 0.8,
+      hoverDuration: 0.6,
+      gsapFeatures: ['text', 'slider', 'scroll', 'hover'],
+      templates: {
+        theme: 'floaty',  
+        custom: {         
+          'my-headline': {
+            animationType: 'text-slide-up',
+            split: 'words',
+            ease: 'power2.out',
+            duration: 0.8,
+            stagger: 0.05
+          }
+        }
+      }  
+    }).then(() => {
+      clearTimeout(initTimeout); // Clear the timeout if initialization succeeds
+      window.alrdyInitialized = true;
+      document.dispatchEvent(new Event('alrdy-init-complete'));
+    }).catch(error => {
+      console.error('Error initializing AlrdyAnimate:', error);
+      // Show all elements on error
+      document.querySelectorAll('[aa-animate], [aa-children]').forEach((element) => {
+        element.classList.add('in-view');
+        element.style.visibility = 'visible';
+        element.style.opacity = 1;
+      });
+      clearTimeout(initTimeout);
+      window.alrdyInitialized = true;
+      document.dispatchEvent(new Event('alrdy-init-complete'));
+    });
+  });
+</script>
+
+<!-- SCRIPT FOR PAGE CUSTOM CODE-->
+<script defer>
+  window.Webflow.push(() => {
+    window.initPageAnimations(() => {
+      //Custom Code
+      
+    });
+  });
+</script>
+```
+
+#### Standard HTML/JavaScript Implementation
+
+For non-Webflow projects, you can initialize AlrdyAnimate in several ways:
+
+1. **Using CDN with DOMContentLoaded**:
+```html
+<!-- Add these in your HTML head -->
+<link rel="stylesheet" href="https://unpkg.com/alrdy-animate@2.1.3/dist/AlrdyAnimate.css">
+
+<!-- Add this before closing body tag -->
+<script defer src="https://unpkg.com/alrdy-animate@2.1.3/dist/AlrdyAnimate.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    // Bulk set attributes (optional)
+    document.querySelectorAll('h2').forEach((element) => {       
       if (!element.hasAttribute('aa-animate')) {
         element.setAttribute('aa-animate', 'text-slide-up-clip');
         element.setAttribute('aa-split', 'words');  
@@ -95,63 +190,101 @@ You can include AlrdyAnimate in your project using either CDN or npm.
       ease: 'ease-in-out',
       duration: 0.8,
       hoverDuration: 0.6,
-      gsapFeatures: ['text', 'slider', 'scroll', 'hover']  
+      gsapFeatures: ['text', 'slider', 'scroll', 'hover'],
+      templates: {
+        theme: 'floaty',
+        custom: {
+          'my-headline': {
+            animationType: 'text-slide-up',
+            split: 'words',
+            ease: 'power2.out',
+            duration: 0.8,
+            stagger: 0.05
+          }
+        }
+      }
     }).then(() => {
-      window.alrdyInitialized = true;
-      document.dispatchEvent(new Event('alrdy-init-complete'));
-    });
-  });
-</script>
-
-
-<!-- SCRIPT FOR PAGE CUSTOM CODE-->
-<script>
-  window.Webflow.push(() => {
-    window.initPageAnimations(() => {
-      //Custom Code
-      
+      console.log('AlrdyAnimate initialized successfully');
+    }).catch(error => {
+      console.error('Error initializing AlrdyAnimate:', error);
     });
   });
 </script>
 ```
 
-### Using NPM
+2. **Using async/await with window load**:
+```html
+<script>
+  window.addEventListener('load', async () => {
+    try {
+      // Bulk set attributes (optional)
+      document.querySelectorAll('h2').forEach((element) => {       
+        if (!element.hasAttribute('aa-animate')) {
+          element.setAttribute('aa-animate', 'text-slide-up-clip');
+          element.setAttribute('aa-split', 'words');  
+        }
+      });
+      
+      // Initialize AlrdyAnimate
+      await AlrdyAnimate.init({
+        ease: 'ease-in-out',
+        duration: 0.8,
+        hoverDuration: 0.6,
+        gsapFeatures: ['text', 'slider', 'scroll', 'hover']
+      });
+      
+      console.log('AlrdyAnimate initialized successfully');
+    } catch (error) {
+      console.error('Error initializing AlrdyAnimate:', error);
+    }
+  });
+</script>
+```
+
+3. **Using a Module Bundler (like Webpack or Vite)**:
+```javascript
+import { AlrdyAnimate } from 'alrdy-animate';
+import 'alrdy-animate/dist/AlrdyAnimate.css';
+
+// Wait for DOM to be ready
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initializeAlrdyAnimate);
+} else {
+  initializeAlrdyAnimate();
+}
+
+async function initializeAlrdyAnimate() {
+  try {
+    // Bulk set attributes (optional)
+    document.querySelectorAll('h2').forEach((element) => {       
+      if (!element.hasAttribute('aa-animate')) {
+        element.setAttribute('aa-animate', 'text-slide-up-clip');
+        element.setAttribute('aa-split', 'words');  
+      }
+    });
+    
+    // Initialize AlrdyAnimate
+    await AlrdyAnimate.init({
+      ease: 'ease-in-out',
+      duration: 0.8,
+      hoverDuration: 0.6,
+      gsapFeatures: ['text', 'slider', 'scroll', 'hover']
+    });
+    
+    console.log('AlrdyAnimate initialized successfully');
+  } catch (error) {
+    console.error('Error initializing AlrdyAnimate:', error);
+  }
+}
+```
+
 
 1. Install the package:
 ```bash
 npm install alrdy-animate
 ```
 
-2. Import and initialize:
-```javascript
-import { AlrdyAnimate } from 'alrdy-animate';
-import 'alrdy-animate/dist/AlrdyAnimate.css';
 
-document.addEventListener('DOMContentLoaded', () => {
-  try {
-    AlrdyAnimate.init({
-      ease: 'ease-in-out',
-      again: false,
-      viewportPercentage: 0.6,
-      duration: 2,
-      delay: 0.5,
-      gsapFeatures: ['text', 'loop', 'scroll']  // Specify which GSAP features to load
-    }).then(() => {
-      // GSAP features are now available globally
-      console.log('GSAP features loaded successfully');
-      
-      // You can now use:
-      // - gsap
-      // - ScrollTrigger
-      // - Draggable (if 'loop' feature was loaded)
-    }).catch(error => {
-      console.error('Error initializing AlrdyAnimate:', error);
-    });
-  } catch (error) {
-    console.error('Error during initialization setup:', error);
-  }
-});
-```
 
 ### Configuration Options
 

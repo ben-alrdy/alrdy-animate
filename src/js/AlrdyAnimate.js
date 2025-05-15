@@ -243,6 +243,7 @@ async function init(options = {}) {
           enableGSAP = false;
           allAnimatedElements.forEach((element) => {
             element.style.visibility = 'visible';
+            element.style.opacity = 1;
           });
           setupAnimations(allAnimatedElements, initOptions, isMobile, { gsap: null, ScrollTrigger: null });
         }
