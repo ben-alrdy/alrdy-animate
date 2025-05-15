@@ -25,17 +25,10 @@ export function setupResizeHandler(modules, initOptions, isMobile, setupGSAPAnim
         // Rebuild if:
         // 1. Has mobile/desktop variants (contains |)
         // 2. Is a slider animation
-        // 3. Is a text animation
         if ((animType && (
           animType.includes('|') || 
-          animType.includes('slider') || 
-          animType.includes('text')
+          animType.includes('slider')
         )) || animTypeOriginal) {
-          // Clear existing split instance
-          if (element.splitInstance) {
-            element.splitInstance.revert();
-          }
-          
           // Get new settings with updated animation type
           const settings = getElementSettings(element, initOptions);
           element.settings = settings;
@@ -57,26 +50,22 @@ export function setupResizeHandler(modules, initOptions, isMobile, setupGSAPAnim
           document.querySelectorAll(templateSelectors).forEach(element => {
             const templateSettings = getElementTemplateSettings(element);
             if (templateSettings?.animationType) {
-              // Clear existing split instance
-              if (element.splitInstance) {
-                element.splitInstance.revert();
+              // Skip text animations unless they have mobile/desktop variants
+              const isTextAnimation = templateSettings.animationType.startsWith('text-');
+              const hasMobileVariant = templateSettings.animationType.includes('|');
+              
+              if (!isTextAnimation || hasMobileVariant) {
+                // Update settings with new animation type
+                element.settings = {
+                  ...element.settings,
+                  ...templateSettings
+                };
+                setupGSAPAnimations(element, element.settings, initOptions, isMobile, modules);
               }
-
-              // Update settings with new animation type
-              element.settings = {
-                ...element.settings,
-                ...templateSettings
-              };
-              setupGSAPAnimations(element, element.settings, initOptions, isMobile, modules);
             }
           });
         }
       }
-      
-      // REMOVED SCROLLTRIGGER REFRESH BECAUSE GSAP IS HANDLING IT
-      /* if (modules.ScrollTrigger) {
-        modules.ScrollTrigger.refresh();
-      } */
       
       prevWidth = currentWidth;
     }

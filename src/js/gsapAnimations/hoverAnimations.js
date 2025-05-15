@@ -529,142 +529,121 @@ function initializeTextHoverAnimation(element, gsap, splitText, settings) {
     textClone.style.top = '0';
     textElement.after(textClone);
 
-    // Split both original and clone using our textSplitter
-    const { splitElements: originalSplit } = splitText(textElement, split);
-    const { splitElements: clonedSplit } = splitText(textClone, split, /* hideFromScreenReaders */ true);
+    // Create hover animation function
+    const createHoverAnimation = (self, isClone = false) => {
+        const tl = gsap.timeline({
+            defaults: { ease, duration, stagger },
+            paused: true,
+        });
 
-    // Get the correct elements to animate
-    const originalElements = originalSplit[split.split('&')[0]];
-    const clonedElements = clonedSplit[split.split('&')[0]];
-
-    // Create timeline
-    const timeline = gsap.timeline({
-        defaults: { ease, duration, stagger },
-        paused: true,
-    });
-
-    // Setup animation based on type
-    switch (animationType) {
-        case 'text-slide-up':
-            textClone.style.top = `${height}px`;
-            timeline
-                .fromTo(originalElements,
+        const elements = self[split.split('&')[0]];
+        
+        // Setup animation based on type
+        switch (animationType) {
+            case 'text-slide-up':
+                if (isClone) textClone.style.top = `${height}px`;
+                tl.fromTo(elements,
                     { y: 0 },
-                    { y: -height, delay }
-                )
-                .fromTo(clonedElements,
+                    { y: isClone ? -height : -height, delay: isClone ? textDelay : delay }
+                );
+                break;
+
+            case 'text-slide-down':
+                if (isClone) textClone.style.top = `-${height}px`;
+                tl.fromTo(elements,
                     { y: 0 },
-                    { y: -height, delay: textDelay },
-                    '<'
+                    { y: isClone ? height : height, delay: isClone ? textDelay : delay }
                 );
-            break;
+                break;
 
-        case 'text-slide-down':
-            textClone.style.top = `-${height}px`;
-            timeline
-                .fromTo(originalElements,
-                    { y: 0 },
-                    { y: height, delay }
-                )
-                .fromTo(clonedElements,
-                    { y: 0 },
-                    { y: height, delay: textDelay },
-                    '<'
-                );
-            break;
-
-        case 'text-slide-left':
-            textClone.style.left = `${width}px`;
-            timeline
-                .fromTo(originalElements,
+            case 'text-slide-left':
+                if (isClone) textClone.style.left = `${width}px`;
+                tl.fromTo(elements,
                     { x: 0 },
-                    { x: -width, delay }
-                )
-                .fromTo(clonedElements,
+                    { x: isClone ? -width : -width, delay: isClone ? textDelay : delay }
+                );
+                break;
+
+            case 'text-slide-right':
+                if (isClone) textClone.style.left = `-${width}px`;
+                tl.fromTo([...elements].reverse(),
                     { x: 0 },
-                    { x: -width, delay: textDelay },
-                    '<'
+                    { x: isClone ? width : width, delay: isClone ? textDelay : delay }
                 );
-            break;
+                break;
 
-        case 'text-slide-right':
-            textClone.style.left = `-${width}px`;
-            timeline
-                .fromTo([...originalElements].reverse(),
-                    { x: 0 },
-                    { x: width, delay }
-                )
-                .fromTo([...clonedElements].reverse(),
-                    { x: 0 },
-                    { x: width, delay: textDelay },
-                    '<'
+            case 'text-fade-up':
+                if (isClone) textClone.style.top = `${height / 3}px`;
+                tl.fromTo(elements,
+                    { y: 0, opacity: isClone ? 0 : 1 },
+                    { y: isClone ? -height/3 : -height/3, opacity: isClone ? 1 : 0, delay: isClone ? textDelay : delay }
                 );
-            break;
+                break;
 
-        case 'text-fade-up':
-            textClone.style.top = `${height / 3}px`;
-            timeline
-                .fromTo(originalElements,
-                    { y: 0, opacity: 1 },
-                    { y: -height / 3, opacity: 0, delay }
-                )
-                .fromTo(clonedElements,
-                    { y: 0, opacity: 0 },
-                    { y: -height / 3, opacity: 1, delay: textDelay },
-                    '<'
+            case 'text-fade-down':
+                if (isClone) textClone.style.top = `-${height / 3}px`;
+                tl.fromTo(elements,
+                    { y: 0, opacity: isClone ? 0 : 1 },
+                    { y: isClone ? height/3 : height/3, opacity: isClone ? 1 : 0, delay: isClone ? textDelay : delay }
                 );
-            break;
+                break;
 
-        case 'text-fade-down':
-            textClone.style.top = `-${height / 3}px`;
-            timeline
-                .fromTo(originalElements,
-                    { y: 0, opacity: 1 },
-                    { y: height / 3, opacity: 0, delay }
-                )
-                .fromTo(clonedElements,
-                    { y: 0, opacity: 0 },
-                    { y: height / 3, opacity: 1, delay: textDelay },
-                    '<'
+            case 'text-fade-left':
+                if (isClone) textClone.style.left = `${width / 3}px`;
+                tl.fromTo(elements,
+                    { x: 0, opacity: isClone ? 0 : 1 },
+                    { x: isClone ? -width/3 : -width/3, opacity: isClone ? 1 : 0, delay: isClone ? textDelay : delay }
                 );
-            break;
+                break;
 
-        case 'text-fade-left':
-            textClone.style.left = `${width / 3}px`;
-            timeline
-                .fromTo(originalElements,
-                    { x: 0, opacity: 1 },
-                    { x: -width / 3, opacity: 0, delay }
-                )
-                .fromTo(clonedElements,
-                    { x: 0, opacity: 0 },
-                    { x: -width / 3, opacity: 1, delay: textDelay },
-                    '<'
+            case 'text-fade-right':
+                if (isClone) textClone.style.left = `-${width / 3}px`;
+                tl.fromTo([...elements].reverse(),
+                    { x: 0, opacity: isClone ? 0 : 1 },
+                    { x: isClone ? width/3 : width/3, opacity: isClone ? 1 : 0, delay: isClone ? textDelay : delay }
                 );
-            break;
+                break;
+        }
 
-        case 'text-fade-right':
-            textClone.style.left = `-${width / 3}px`;
-            timeline
-                .fromTo([...originalElements].reverse(),
-                    { x: 0, opacity: 1 },
-                    { x: width / 3, opacity: 0, delay }
-                )
-                .fromTo([...clonedElements].reverse(),
-                    { x: 0, opacity: 0 },
-                    { x: width / 3, opacity: 1, delay: textDelay },
-                    '<'
-                );
-            break;
-    }
+        return tl;
+    };
 
+    // Split both original and clone with onSplit callbacks
+    const { splitInstance: originalInstance } = splitText(
+        textElement, 
+        split, 
+        false,
+        (self) => createHoverAnimation(self, false)
+    );
+
+    const { splitInstance: clonedInstance } = splitText(
+        textClone, 
+        split, 
+        true,
+        (self) => createHoverAnimation(self, true)
+    );
+
+    // Store instances for cleanup
+    element.splitInstances = [originalInstance, clonedInstance];
+
+    // Setup event listeners
     element.addEventListener('mouseenter', () => {
-        timeline.restart();
+        if (originalInstance.timeline) {
+            originalInstance.timeline.restart();
+        }
+        if (clonedInstance.timeline) {
+            clonedInstance.timeline.restart();
+        }
     });
 
     element.addEventListener('mouseleave', () => {
         if (isReverse) {
-            timeline.reverse();
+            if (originalInstance.timeline) {
+                originalInstance.timeline.reverse();
+            }
+            if (clonedInstance.timeline) {
+                clonedInstance.timeline.reverse();
+            }
         }
     });
 }

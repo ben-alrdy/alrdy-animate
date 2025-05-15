@@ -3,12 +3,12 @@
  * Customize these variables to change the default animation settings
  */
 :root {
-  --aa-duration: 1s;
-  --aa-ease: cubic-bezier(0.25, 0.1, 0.25, 1.0);
-  --aa-distance: 2;
-  --aa-stagger: 0.1s;
-  --aa-base-delay: 0.2s;
-  --aa-delay: var(--aa-base-delay);
+  --load-duration: 1s;
+  --load-ease: cubic-bezier(0.25, 0.1, 0.25, 1.0);
+  --load-distance: 2;
+  --load-stagger: 0.1s;
+  --load-base-delay: 0.2s;
+  --load-delay: var(--load-base-delay);
 }
 
 /**
@@ -16,74 +16,74 @@
  */
 [aa-load], 
 [aa-load][aa-stagger] > * {
-  animation-duration: var(--aa-duration);
-  animation-timing-function: var(--aa-ease);
+  animation-duration: var(--load-duration);
+  animation-timing-function: var(--load-ease);
   animation-fill-mode: both;
-  animation-delay: var(--aa-delay);
+  animation-delay: var(--load-delay);
 }
 
 /* Stagger values from 0.05 to 0.5 second in 0.05 increments */
-[aa-load][aa-stagger="0.05"] { --aa-stagger: 0.05s; }
-[aa-load][aa-stagger="0.1"] { --aa-stagger: 0.1s; }
-[aa-load][aa-stagger="0.15"] { --aa-stagger: 0.15s; }
-[aa-load][aa-stagger="0.2"] { --aa-stagger: 0.2s; }
-[aa-load][aa-stagger="0.25"] { --aa-stagger: 0.25s; }
-[aa-load][aa-stagger="0.3"] { --aa-stagger: 0.3s; }
-[aa-load][aa-stagger="0.35"] { --aa-stagger: 0.35s; }
-[aa-load][aa-stagger="0.4"] { --aa-stagger: 0.4s; }
-[aa-load][aa-stagger="0.45"] { --aa-stagger: 0.45s; }
-[aa-load][aa-stagger="0.5"] { --aa-stagger: 0.5s; }
+[aa-load][aa-stagger="0.05"] { --load-stagger: 0.05s; }
+[aa-load][aa-stagger="0.1"] { --load-stagger: 0.1s; }
+[aa-load][aa-stagger="0.15"] { --load-stagger: 0.15s; }
+[aa-load][aa-stagger="0.2"] { --load-stagger: 0.2s; }
+[aa-load][aa-stagger="0.25"] { --load-stagger: 0.25s; }
+[aa-load][aa-stagger="0.3"] { --load-stagger: 0.3s; }
+[aa-load][aa-stagger="0.35"] { --load-stagger: 0.35s; }
+[aa-load][aa-stagger="0.4"] { --load-stagger: 0.4s; }
+[aa-load][aa-stagger="0.45"] { --load-stagger: 0.45s; }
+[aa-load][aa-stagger="0.5"] { --load-stagger: 0.5s; }
 
 
 /* Delay values from 0 to 2 seconds in 0.1 increments */
-[aa-load][aa-delay="0"] { --aa-delay: calc(var(--aa-base-delay) + 0s); }
-[aa-load][aa-delay="0.1"] { --aa-delay: calc(var(--aa-base-delay) + 0.1s); }
-[aa-load][aa-delay="0.2"] { --aa-delay: calc(var(--aa-base-delay) + 0.2s); }
-[aa-load][aa-delay="0.3"] { --aa-delay: calc(var(--aa-base-delay) + 0.3s); }
-[aa-load][aa-delay="0.4"] { --aa-delay: calc(var(--aa-base-delay) + 0.4s); }
-[aa-load][aa-delay="0.5"] { --aa-delay: calc(var(--aa-base-delay) + 0.5s); }
-[aa-load][aa-delay="0.6"] { --aa-delay: calc(var(--aa-base-delay) + 0.6s); }
-[aa-load][aa-delay="0.7"] { --aa-delay: calc(var(--aa-base-delay) + 0.7s); }
-[aa-load][aa-delay="0.8"] { --aa-delay: calc(var(--aa-base-delay) + 0.8s); }
-[aa-load][aa-delay="0.9"] { --aa-delay: calc(var(--aa-base-delay) + 0.9s); }
-[aa-load][aa-delay="1"] { --aa-delay: calc(var(--aa-base-delay) + 1s); }
-[aa-load][aa-delay="1.1"] { --aa-delay: calc(var(--aa-base-delay) + 1.1s); }
-[aa-load][aa-delay="1.2"] { --aa-delay: calc(var(--aa-base-delay) + 1.2s); }
-[aa-load][aa-delay="1.3"] { --aa-delay: calc(var(--aa-base-delay) + 1.3s); }
-[aa-load][aa-delay="1.4"] { --aa-delay: calc(var(--aa-base-delay) + 1.4s); }
-[aa-load][aa-delay="1.5"] { --aa-delay: calc(var(--aa-base-delay) + 1.5s); }
-[aa-load][aa-delay="1.6"] { --aa-delay: calc(var(--aa-base-delay) + 1.6s); }
-[aa-load][aa-delay="1.7"] { --aa-delay: calc(var(--aa-base-delay) + 1.7s); }
-[aa-load][aa-delay="1.8"] { --aa-delay: calc(var(--aa-base-delay) + 1.8s); }
-[aa-load][aa-delay="1.9"] { --aa-delay: calc(var(--aa-base-delay) + 1.9s); }
-[aa-load][aa-delay="2"] { --aa-delay: calc(var(--aa-base-delay) + 2s); }
+[aa-load][aa-delay="0"] { --load-delay: calc(var(--load-base-delay) + 0s); }
+[aa-load][aa-delay="0.1"] { --load-delay: calc(var(--load-base-delay) + 0.1s); }
+[aa-load][aa-delay="0.2"] { --load-delay: calc(var(--load-base-delay) + 0.2s); }
+[aa-load][aa-delay="0.3"] { --load-delay: calc(var(--load-base-delay) + 0.3s); }
+[aa-load][aa-delay="0.4"] { --load-delay: calc(var(--load-base-delay) + 0.4s); }
+[aa-load][aa-delay="0.5"] { --load-delay: calc(var(--load-base-delay) + 0.5s); }
+[aa-load][aa-delay="0.6"] { --load-delay: calc(var(--load-base-delay) + 0.6s); }
+[aa-load][aa-delay="0.7"] { --load-delay: calc(var(--load-base-delay) + 0.7s); }
+[aa-load][aa-delay="0.8"] { --load-delay: calc(var(--load-base-delay) + 0.8s); }
+[aa-load][aa-delay="0.9"] { --load-delay: calc(var(--load-base-delay) + 0.9s); }
+[aa-load][aa-delay="1"] { --load-delay: calc(var(--load-base-delay) + 1s); }
+[aa-load][aa-delay="1.1"] { --load-delay: calc(var(--load-base-delay) + 1.1s); }
+[aa-load][aa-delay="1.2"] { --load-delay: calc(var(--load-base-delay) + 1.2s); }
+[aa-load][aa-delay="1.3"] { --load-delay: calc(var(--load-base-delay) + 1.3s); }
+[aa-load][aa-delay="1.4"] { --load-delay: calc(var(--load-base-delay) + 1.4s); }
+[aa-load][aa-delay="1.5"] { --load-delay: calc(var(--load-base-delay) + 1.5s); }
+[aa-load][aa-delay="1.6"] { --load-delay: calc(var(--load-base-delay) + 1.6s); }
+[aa-load][aa-delay="1.7"] { --load-delay: calc(var(--load-base-delay) + 1.7s); }
+[aa-load][aa-delay="1.8"] { --load-delay: calc(var(--load-base-delay) + 1.8s); }
+[aa-load][aa-delay="1.9"] { --load-delay: calc(var(--load-base-delay) + 1.9s); }
+[aa-load][aa-delay="2"] { --load-delay: calc(var(--load-base-delay) + 2s); }
 
 /**
  * Stagger Functionality for up to 10 children
  */
 [aa-load][aa-stagger] {
-  --aa-parent-delay: var(--aa-delay, 0s);
+  --load-parent-delay: var(--load-delay, 0s);
 }
 
-[aa-load][aa-stagger] > :nth-child(1) { --aa-delay: var(--aa-parent-delay); }
-[aa-load][aa-stagger] > :nth-child(2) { --aa-delay: calc(var(--aa-parent-delay) + var(--aa-stagger)); }
-[aa-load][aa-stagger] > :nth-child(3) { --aa-delay: calc(var(--aa-parent-delay) + (var(--aa-stagger) * 2)); }
-[aa-load][aa-stagger] > :nth-child(4) { --aa-delay: calc(var(--aa-parent-delay) + (var(--aa-stagger) * 3)); }
-[aa-load][aa-stagger] > :nth-child(5) { --aa-delay: calc(var(--aa-parent-delay) + (var(--aa-stagger) * 4)); }
-[aa-load][aa-stagger] > :nth-child(6) { --aa-delay: calc(var(--aa-parent-delay) + (var(--aa-stagger) * 5)); }
-[aa-load][aa-stagger] > :nth-child(7) { --aa-delay: calc(var(--aa-parent-delay) + (var(--aa-stagger) * 6)); }
-[aa-load][aa-stagger] > :nth-child(8) { --aa-delay: calc(var(--aa-parent-delay) + (var(--aa-stagger) * 7)); }
-[aa-load][aa-stagger] > :nth-child(9) { --aa-delay: calc(var(--aa-parent-delay) + (var(--aa-stagger) * 8)); }
-[aa-load][aa-stagger] > :nth-child(10) { --aa-delay: calc(var(--aa-parent-delay) + (var(--aa-stagger) * 9)); }
+[aa-load][aa-stagger] > :nth-child(1) { --load-delay: var(--load-parent-delay); }
+[aa-load][aa-stagger] > :nth-child(2) { --load-delay: calc(var(--load-parent-delay) + var(--load-stagger)); }
+[aa-load][aa-stagger] > :nth-child(3) { --load-delay: calc(var(--load-parent-delay) + (var(--load-stagger) * 2)); }
+[aa-load][aa-stagger] > :nth-child(4) { --load-delay: calc(var(--load-parent-delay) + (var(--load-stagger) * 3)); }
+[aa-load][aa-stagger] > :nth-child(5) { --load-delay: calc(var(--load-parent-delay) + (var(--load-stagger) * 4)); }
+[aa-load][aa-stagger] > :nth-child(6) { --load-delay: calc(var(--load-parent-delay) + (var(--load-stagger) * 5)); }
+[aa-load][aa-stagger] > :nth-child(7) { --load-delay: calc(var(--load-parent-delay) + (var(--load-stagger) * 6)); }
+[aa-load][aa-stagger] > :nth-child(8) { --load-delay: calc(var(--load-parent-delay) + (var(--load-stagger) * 7)); }
+[aa-load][aa-stagger] > :nth-child(9) { --load-delay: calc(var(--load-parent-delay) + (var(--load-stagger) * 8)); }
+[aa-load][aa-stagger] > :nth-child(10) { --load-delay: calc(var(--load-parent-delay) + (var(--load-stagger) * 9)); }
 
 /**
  * Fade Animations
  */
 @keyframes fade{from{opacity:0}to{opacity:1}}
-@keyframes fadeUp{from{opacity:0;transform:translate3d(0,calc(30px * var(--aa-distance)),0)}to{opacity:1;transform:translate3d(0,0,0)}}
-@keyframes fadeDown{from{opacity:0;transform:translate3d(0,calc(-30px * var(--aa-distance)),0)}to{opacity:1;transform:translate3d(0,0,0)}}
-@keyframes fadeLeft{from{opacity:0;transform:translate3d(calc(30px * var(--aa-distance)),0,0)}to{opacity:1;transform:translate3d(0,0,0)}}
-@keyframes fadeRight{from{opacity:0;transform:translate3d(calc(-30px * var(--aa-distance)),0,0)}to{opacity:1;transform:translate3d(0,0,0)}}
+@keyframes fadeUp{from{opacity:0;transform:translate3d(0,calc(30px * var(--load-distance)),0)}to{opacity:1;transform:translate3d(0,0,0)}}
+@keyframes fadeDown{from{opacity:0;transform:translate3d(0,calc(-30px * var(--load-distance)),0)}to{opacity:1;transform:translate3d(0,0,0)}}
+@keyframes fadeLeft{from{opacity:0;transform:translate3d(calc(30px * var(--load-distance)),0,0)}to{opacity:1;transform:translate3d(0,0,0)}}
+@keyframes fadeRight{from{opacity:0;transform:translate3d(calc(-30px * var(--load-distance)),0,0)}to{opacity:1;transform:translate3d(0,0,0)}}
 
 [aa-load="fade"], [aa-load="fade"][aa-stagger] > * { animation-name: fade; }
 [aa-load="fade-up"], [aa-load="fade-up"][aa-stagger] > * { animation-name: fadeUp; }
@@ -125,10 +125,10 @@
  * Float Animations
  */
 
- @keyframes floatUp {from {opacity: 0; transform: translateY(calc(30px * var(--aa-distance)));} 30% {opacity: 1; transform: translateY(calc(-10px * var(--aa-distance)));} to {opacity: 1; transform: translateY(0);}}
- @keyframes floatDown {from {opacity: 0; transform: translateY(calc(-30px * var(--aa-distance)));} 30% {opacity: 1; transform: translateY(calc(10px * var(--aa-distance)));} to {opacity: 1; transform: translateY(0);}}
- @keyframes floatRight {from {opacity: 0; transform: translateX(calc(-30px * var(--aa-distance)));} 30% {opacity: 1; transform: translateX(calc(5px * var(--aa-distance)));} to {opacity: 1; transform: translateX(0);}}
- @keyframes floatLeft {from {opacity: 0; transform: translateX(calc(30px * var(--aa-distance)));} 30% {opacity: 1; transform: translateX(calc(-5px * var(--aa-distance)));} to {opacity: 1; transform: translateX(0);}}
+ @keyframes floatUp {from {opacity: 0; transform: translateY(calc(30px * var(--load-distance)));} 30% {opacity: 1; transform: translateY(calc(-10px * var(--load-distance)));} to {opacity: 1; transform: translateY(0);}}
+ @keyframes floatDown {from {opacity: 0; transform: translateY(calc(-30px * var(--load-distance)));} 30% {opacity: 1; transform: translateY(calc(10px * var(--load-distance)));} to {opacity: 1; transform: translateY(0);}}
+ @keyframes floatRight {from {opacity: 0; transform: translateX(calc(-30px * var(--load-distance)));} 30% {opacity: 1; transform: translateX(calc(5px * var(--load-distance)));} to {opacity: 1; transform: translateX(0);}}
+ @keyframes floatLeft {from {opacity: 0; transform: translateX(calc(30px * var(--load-distance)));} 30% {opacity: 1; transform: translateX(calc(-5px * var(--load-distance)));} to {opacity: 1; transform: translateX(0);}}
 
  [aa-load="float-up"], [aa-load="float-up"][aa-stagger] > * { animation-name: floatUp; }
  [aa-load="float-down"], [aa-load="float-down"][aa-stagger] > * { animation-name: floatDown; }
@@ -139,10 +139,10 @@
  * Rotate Animations
  */
 
- @keyframes rotateBottomRightCW {from {opacity: 0; transform-origin: bottom right; transform: rotate(calc(5deg * var(--aa-distance)));} to {transform-origin: bottom right;}}
- @keyframes rotateBottomRightCCW {from {opacity: 0; transform-origin: bottom right; transform: rotate(calc(-5deg * var(--aa-distance)));} to {transform-origin: bottom right;}}
- @keyframes rotateBottomLeftCW {from {opacity: 0; transform-origin: bottom left; transform: rotate(calc(5deg * var(--aa-distance)));} to {transform-origin: bottom left;}}
- @keyframes rotateBottomLeftCCW {from {opacity: 0; transform-origin: bottom left; transform: rotate(calc(-5deg * var(--aa-distance)));} to {transform-origin: bottom left;}}
+ @keyframes rotateBottomRightCW {from {opacity: 0; transform-origin: bottom right; transform: rotate(calc(5deg * var(--load-distance)));} to {transform-origin: bottom right;}}
+ @keyframes rotateBottomRightCCW {from {opacity: 0; transform-origin: bottom right; transform: rotate(calc(-5deg * var(--load-distance)));} to {transform-origin: bottom right;}}
+ @keyframes rotateBottomLeftCW {from {opacity: 0; transform-origin: bottom left; transform: rotate(calc(5deg * var(--load-distance)));} to {transform-origin: bottom left;}}
+ @keyframes rotateBottomLeftCCW {from {opacity: 0; transform-origin: bottom left; transform: rotate(calc(-5deg * var(--load-distance)));} to {transform-origin: bottom left;}}
 
  [aa-load="rotate-br-cw"], [aa-load="rotate-br-cw"][aa-stagger] > * { animation-name: rotateBottomRightCW; }
  [aa-load="rotate-br-ccw"], [aa-load="rotate-br-ccw"][aa-stagger] > * { animation-name: rotateBottomRightCCW; }

@@ -38,7 +38,7 @@ body {
     visibility: hidden;
 }
 
-// Since the text-fade start with 30% opacity, show the element
+// Since the text-fade start with opacity >0, show the element
 [aa-animate^="text-fade-"] {
     visibility: visible;
 }

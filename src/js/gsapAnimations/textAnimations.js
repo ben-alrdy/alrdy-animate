@@ -8,9 +8,7 @@ export function createTextAnimations(gsap) {
   };
 
   // Helper function to create base animation configuration
-  function createBaseAnimation(element, splitElements, split, duration, stagger, delay, ease) {
-    const tl = gsap.timeline();
-    
+  function createBaseAnimation(element, split, duration, stagger, delay, ease, props) {
     const baseProps = {
       duration,
       stagger,
@@ -27,15 +25,16 @@ export function createTextAnimations(gsap) {
     // Handle lines&words split type
     if (split === 'lines&words') {
       return {
-        tl,
-        animate: (props) => {
-          splitElements.lines.forEach((line, index) => {
-            const wordsInLine = splitElements.words.filter(word => line.contains(word));
+        onSplit: (self) => {
+          const tl = gsap.timeline();
+          self.lines.forEach((line, index) => {
+            const wordsInLine = self.words.filter(word => line.contains(word));
             tl.from(wordsInLine, {
               ...baseProps,
               ...props
             }, index * stagger * 3);
           });
+          return tl;
         }
       };
     }
@@ -43,46 +42,45 @@ export function createTextAnimations(gsap) {
     // Handle lines&chars split type
     if (split === 'lines&chars') {
       return {
-        tl,
-        animate: (props) => {
-          splitElements.lines.forEach((line, index) => {
-            const charsInLine = splitElements.chars.filter(char => line.contains(char));
+        onSplit: (self) => {
+          const tl = gsap.timeline();
+          self.lines.forEach((line, index) => {
+            const charsInLine = self.chars.filter(char => line.contains(char));
             tl.from(charsInLine, {
               ...baseProps,
               ...props
             }, index * stagger * 6);
           });
+          return tl;
         }
       };
     }
 
     // Handle regular split types
     return {
-      tl,
-      animate: (props) => {
-        tl.from(splitElements[split], {
+      onSplit: (self) => {
+        const tl = gsap.timeline();
+        tl.from(self[split], {
           ...baseProps,
           ...props
         });
+        return tl;
       }
     };
   }
 
   // Create animation function with defaults
   function createAnimation(animationProps, defaultValues) {
-    return (element, splitElements, split, duration, stagger, delay, ease) => {
-      const { tl, animate } = createBaseAnimation(
+    return (element, split, duration, stagger, delay, ease) => {
+      return createBaseAnimation(
         element,
-        splitElements,
         split,
         duration ?? defaultValues.duration,
         stagger ?? defaultValues.stagger,
         delay,
-        ease ?? defaultValues.ease
+        ease ?? defaultValues.ease,
+        animationProps
       );
-
-      animate(animationProps);
-      return tl;
     };
   }
 
@@ -181,49 +179,53 @@ export function createTextAnimations(gsap) {
       defaults.blur
     ),
     
-    'text-rotate-soft': (element, splitElements, split, duration, stagger, delay, ease) => {
-      const tl = gsap.timeline();
-      const animationTarget = splitElements[split];
+    'text-rotate-soft': (element, split, duration, stagger, delay, ease) => {
+      return {
+        onSplit: (self) => {
+          const tl = gsap.timeline();
+          const animationTarget = self[split];
 
-      // Calculate perspective
-      const fontSize = parseFloat(window.getComputedStyle(element).fontSize);
-      const perspectiveInPixels = fontSize * 5;
+          // Calculate perspective
+          const fontSize = parseFloat(window.getComputedStyle(element).fontSize);
+          const perspectiveInPixels = fontSize * 5;
 
-      // Add perspective wrappers
-      animationTarget.forEach(line => {
-        const wrapper = document.createElement('div');
-        wrapper.classList.add('line-perspective-wrapper');
-        line.parentNode.insertBefore(wrapper, line);
-        wrapper.appendChild(line);
-      });
+          // Add perspective wrappers
+          animationTarget.forEach(line => {
+            const wrapper = document.createElement('div');
+            wrapper.classList.add('line-perspective-wrapper');
+            line.parentNode.insertBefore(wrapper, line);
+            wrapper.appendChild(line);
+          });
 
-      tl.set('.line-perspective-wrapper', {
-        transformStyle: 'preserve-3d',
-        perspective: perspectiveInPixels
-      })
-      .set(animationTarget, {
-        transformOrigin: '50% 0%'
-      });
+          tl.set('.line-perspective-wrapper', {
+            transformStyle: 'preserve-3d',
+            perspective: perspectiveInPixels
+          })
+          .set(animationTarget, {
+            transformOrigin: '50% 0%'
+          });
 
-      // Animate
-      tl.from(animationTarget, {
-        autoAlpha: 0,
-        rotateX: -90,
-        y: '100%',
-        scaleX: 0.75,
-        duration: duration ?? defaults.rotateSoft.duration,
-        stagger: stagger ?? defaults.rotateSoft.stagger,
-        ease: ease ?? defaults.rotateSoft.ease,
-        delay,
-        onStart: () => {
-          // Only set autoAlpha in onStart for non-scrubbed animations
-          if (!element.hasAttribute('aa-scrub')) {
-            gsap.set(element, { visibility: 'visible' });
-          }
+          // Animate
+          tl.from(animationTarget, {
+            autoAlpha: 0,
+            rotateX: -90,
+            y: '100%',
+            scaleX: 0.75,
+            duration: duration ?? defaults.rotateSoft.duration,
+            stagger: stagger ?? defaults.rotateSoft.stagger,
+            ease: ease ?? defaults.rotateSoft.ease,
+            delay,
+            onStart: () => {
+              // Only set autoAlpha in onStart for non-scrubbed animations
+              if (!element.hasAttribute('aa-scrub')) {
+                gsap.set(element, { visibility: 'visible' });
+              }
+            }
+          });
+
+          return tl;
         }
-      });
-
-      return tl;
+      };
     },
   };
 

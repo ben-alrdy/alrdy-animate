@@ -1,6 +1,4 @@
-import { SplitText } from 'gsap/SplitText';
-
-export function splitText(element, split, hideFromScreenReaders = false) {
+export function splitText(element, split, hideFromScreenReaders = false, onSplit) {
   // Define a mapping of split to SplitText options
   const splitMap = {
     'lines&words': { type: 'words,lines' },
@@ -28,15 +26,18 @@ export function splitText(element, split, hideFromScreenReaders = false) {
     splitConfig.mask = maskValue;
   }
   
+  // Add autoSplit and onSplit options
+  splitConfig.autoSplit = true;
+  if (onSplit) {
+    splitConfig.onSplit = (self) => {
+      const timeline = onSplit(self);
+      self.timeline = timeline; // Store the timeline on the SplitText instance
+      return timeline;
+    };
+  }
+  
   // Split the text using GSAP SplitText
   let splitInstance = new SplitText(element, splitConfig);
 
-  return {
-    splitElements: {
-      lines: splitInstance.lines || [],
-      words: splitInstance.words || [],
-      chars: splitInstance.chars || []
-    },
-    splitInstance  // Return the actual SplitText instance for cleanup
-  };
+  return { splitInstance }; // Only return the SplitText instance for cleanup
 }

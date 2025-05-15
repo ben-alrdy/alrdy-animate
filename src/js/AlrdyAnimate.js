@@ -394,13 +394,23 @@ function setupGSAPAnimations(element, elementSettings, initOptions, isMobile, mo
         break;
 
       case 'text':
-        const { splitElements, splitInstance } = modules.splitText(element, split);
+        const { splitInstance } = modules.splitText(
+          element, 
+          split,
+          false,
+          (self) => {
+            const animation = modules.animations.getAnimation(animationType);
+            if (animation) {
+              const timeline = animation(element, split, duration, stagger, delay, ease).onSplit(self);
+              if (timeline) {
+                tl.add(timeline); 
+              }
+              return timeline;
+            }
+            return null;
+          }
+        );
         element.splitInstance = splitInstance;
-
-        const animation = modules.animations.getAnimation(animationType);
-        if (animation) {
-          tl.add(animation(element, splitElements, split, duration, stagger, delay, ease));
-        }
         break;
 
       default:
@@ -532,4 +542,7 @@ export { AlrdyAnimate };
 if (typeof window !== 'undefined') {
   window.AlrdyAnimate = AlrdyAnimate;
 }
+
+
+
 
