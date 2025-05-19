@@ -296,94 +296,98 @@
     }
 
 
-    /*
-    *
-    * HOVER TRANSITIONS 
-    *
-    */
 
 
-     /*
-    Underline Link Animations
-    */
+    @media (hover:hover) and (pointer:fine){
+      /*
+      *
+      * HOVER TRANSITIONS 
+      *
+      */
 
-    [aa-hover^="underline"] {
-      position: relative;
+
+      /*
+      Underline Link Animations
+      */
       
-      &::before,
-      &::after {
-        content: "";
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        width: 100%;
-        height: calc(0.1em * var(--aa-distance));
-        background-color: currentColor;
-        transition: transform;
+
+      [aa-hover^="underline"] {
+        position: relative;
+        
+        &::before,
+        &::after {
+          content: "";
+          position: absolute;
+          bottom: 0;
+          left: 0;
+          width: 100%;
+          height: calc(0.1em * var(--aa-distance));
+          background-color: currentColor;
+          transition: transform;
+          transition-duration: var(--aa-duration);
+          transition-delay: var(--aa-delay);
+          transition-timing-function: cubic-bezier(0.625, 0.05, 0, 1);
+          transform-origin: right;
+          transform: scaleX(0) rotate(0.001deg);
+        }
+      }
+
+      // Single underline
+      [aa-hover="underline-in"] {
+        &:hover::before {
+          transform-origin: left;
+          transform: scaleX(1) rotate(0.001deg);
+        }
+      }
+
+      // Double underline (alt version)
+      [aa-hover="underline"] {
+        &::before {
+          transform-origin: left;
+          transform: scaleX(1) rotate(0.001deg);
+          transition-delay: 0.3s;
+        }
+
+        &:hover::before {
+          transform-origin: right;
+          transform: scaleX(0) rotate(0.001deg);
+          transition-delay: 0s;
+        }
+
+        &::after {
+          transform-origin: right;
+          transform: scaleX(0) rotate(0.001deg);
+          transition-delay: 0s;
+        }
+
+        &:hover::after {
+          transform-origin: left;
+          transform: scaleX(1) rotate(0.001deg);
+          transition-delay: 0.3s;
+        }
+      }
+
+
+      /*
+      Grow and shrink animations
+      */
+
+      // Base transition
+      [aa-hover="grow"],
+      [aa-hover="shrink"]{
+        transition-property: transform, box-shadow, background-color, color, border-color;
         transition-duration: var(--aa-duration);
         transition-delay: var(--aa-delay);
-        transition-timing-function: cubic-bezier(0.625, 0.05, 0, 1);
-        transform-origin: right;
-        transform: scaleX(0) rotate(0.001deg);
-      }
-    }
-
-    // Single underline
-    [aa-hover="underline-in"] {
-      &:hover::before {
-        transform-origin: left;
-        transform: scaleX(1) rotate(0.001deg);
-      }
-    }
-
-    // Double underline (alt version)
-    [aa-hover="underline"] {
-      &::before {
-        transform-origin: left;
-        transform: scaleX(1) rotate(0.001deg);
-        transition-delay: 0.3s;
       }
 
-      &:hover::before {
-        transform-origin: right;
-        transform: scaleX(0) rotate(0.001deg);
-        transition-delay: 0s;
+      [aa-hover="grow"]:hover {
+        transform: scale(calc(1.08 * var(--aa-distance)))
       }
 
-      &::after {
-        transform-origin: right;
-        transform: scaleX(0) rotate(0.001deg);
-        transition-delay: 0s;
+      [aa-hover="shrink"]:hover {
+        transform: scale(calc(0.92 * var(--aa-distance)))
       }
-
-      &:hover::after {
-        transform-origin: left;
-        transform: scaleX(1) rotate(0.001deg);
-        transition-delay: 0.3s;
-      }
-    }
-
-
-    /*
-    Grow and shrink animations
-    */
-
-    // Base transition
-    [aa-hover="grow"],
-    [aa-hover="shrink"]{
-      transition-property: transform, box-shadow, background-color, color, border-color;
-      transition-duration: var(--aa-duration);
-      transition-delay: var(--aa-delay);
-    }
-
-    [aa-hover="grow"]:hover {
-      transform: scale(calc(1.08 * var(--aa-distance)))
-    }
-
-    [aa-hover="shrink"]:hover {
-      transform: scale(calc(0.92 * var(--aa-distance)))
-    }
-    
+    }  
 
   }
 }

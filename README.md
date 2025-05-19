@@ -160,6 +160,100 @@ For Webflow projects, add these scripts to your custom code section:
 </script>
 ```
 
+#### ALTERNATIVE
+
+
+```html
+<script defer src="https://unpkg.com/alrdy-animate@6.7.1/dist/AlrdyAnimate.js"></script>
+
+<script defer>
+  // Initialization tracking
+  window.alrdyInitialized = false;
+
+  // Function to initialize AlrdyAnimate
+  function initializeAlrdyAnimate() {
+    // Reset initialization state
+    window.alrdyInitialized = false;
+    
+    // Set a timeout to show elements if initialization fails
+    const initTimeout = setTimeout(() => {
+      if (!window.alrdyInitialized) {
+        console.warn('AlrdyAnimate initialization timed out - showing all elements');
+        document.querySelectorAll('[aa-animate], [aa-children]').forEach((element) => {
+          element.classList.add('in-view');
+          element.style.visibility = 'visible';
+          element.style.opacity = 1;
+        });
+        window.alrdyInitialized = true;
+        document.dispatchEvent(new Event('alrdy-init-complete'));
+      }
+    }, 3000); // 3 second timeout
+    
+    // Initialize AlrdyAnimate
+    AlrdyAnimate.init({
+      ease: 'ease-in-out',
+      duration: 0.8,
+      modals: true,
+      gsapFeatures: ['text', 'slider', 'scroll'],
+      includeGSAP: true,
+      templates: {
+        custom: {         
+          'heading-style-h2': {
+            animationType: 'text-blur|text-fade',
+            split: 'lines&words',
+            stagger: 0.05
+          },
+          'heading-style-h3': {
+            animationType: 'aa-fade'
+          }
+        }
+      }
+    }).then(() => {
+      clearTimeout(initTimeout);
+      window.alrdyInitialized = true;
+      document.dispatchEvent(new Event('alrdy-init-complete'));
+    }).catch(error => {
+      console.error('Error initializing AlrdyAnimate:', error);
+      document.querySelectorAll('[aa-animate], [aa-children]').forEach((element) => {
+        element.classList.add('in-view');
+        element.style.visibility = 'visible';
+        element.style.opacity = 1;
+      });
+      clearTimeout(initTimeout);
+      window.alrdyInitialized = true;
+      document.dispatchEvent(new Event('alrdy-init-complete'));
+    });
+  }
+
+  // Helper function for page-specific animations
+  window.initPageAnimations = function(callback) {
+    if (window.alrdyInitialized) {
+      // If already initialized, run immediately
+      callback();
+    } else {
+      // If not, wait for initialization
+      document.addEventListener('alrdy-init-complete', () => {
+        callback();
+      });
+    }
+  };
+
+  // Event Listeners
+  // 1. Initial page load
+  document.addEventListener('DOMContentLoaded', initializeAlrdyAnimate);
+
+  // 2. Handle prefetched pages
+  window.addEventListener('pageshow', (event) => {
+    if (event.persisted) {
+      initializeAlrdyAnimate();
+    }
+  });
+
+  // 3. Handle browser back/forward navigation
+  window.addEventListener('popstate', initializeAlrdyAnimate);
+</script>
+```
+
 #### Standard HTML/JavaScript Implementation
 
 For non-Webflow projects, you can initialize AlrdyAnimate in several ways:

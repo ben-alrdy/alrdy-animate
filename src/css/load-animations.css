@@ -139,10 +139,10 @@
  * Rotate Animations
  */
 
- @keyframes rotateBottomRightCW {from {opacity: 0; transform-origin: bottom right; transform: rotate(calc(5deg * var(--load-distance)));} to {transform-origin: bottom right;}}
- @keyframes rotateBottomRightCCW {from {opacity: 0; transform-origin: bottom right; transform: rotate(calc(-5deg * var(--load-distance)));} to {transform-origin: bottom right;}}
- @keyframes rotateBottomLeftCW {from {opacity: 0; transform-origin: bottom left; transform: rotate(calc(5deg * var(--load-distance)));} to {transform-origin: bottom left;}}
- @keyframes rotateBottomLeftCCW {from {opacity: 0; transform-origin: bottom left; transform: rotate(calc(-5deg * var(--load-distance)));} to {transform-origin: bottom left;}}
+ @keyframes rotateBottomRightCW {from {opacity: 0; transform-origin: bottom right; transform: rotate(calc(-5deg * var(--load-distance)));} to {transform-origin: bottom right;}}
+ @keyframes rotateBottomRightCCW {from {opacity: 0; transform-origin: bottom right; transform: rotate(calc(5deg * var(--load-distance)));} to {transform-origin: bottom right;}}
+ @keyframes rotateBottomLeftCW {from {opacity: 0; transform-origin: bottom left; transform: rotate(calc(-5deg * var(--load-distance)));} to {transform-origin: bottom left;}}
+ @keyframes rotateBottomLeftCCW {from {opacity: 0; transform-origin: bottom left; transform: rotate(calc(5deg * var(--load-distance)));} to {transform-origin: bottom left;}}
 
  [aa-load="rotate-br-cw"], [aa-load="rotate-br-cw"][aa-stagger] > * { animation-name: rotateBottomRightCW; }
  [aa-load="rotate-br-ccw"], [aa-load="rotate-br-ccw"][aa-stagger] > * { animation-name: rotateBottomRightCCW; }

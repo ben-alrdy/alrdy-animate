@@ -288,7 +288,9 @@ function setupAnimations(elements, initOptions, isMobile, modules) {
 
     // Setup hover animations 
     if (element.hasAttribute('aa-hover')) {
-      if (enableGSAP && initOptions.gsapFeatures.includes('hover')) {
+      // Check if device supports hover
+      const hasHoverSupport = window.matchMedia('(hover: hover)').matches;
+      if (hasHoverSupport && enableGSAP && initOptions.gsapFeatures.includes('hover')) {
         setupGSAPHoverAnimations(element, settings, initOptions, isMobile, modules);
       } 
     }
