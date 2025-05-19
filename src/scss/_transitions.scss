@@ -297,6 +297,21 @@
 
 
 
+    // Default underline for non-hover devices
+    [aa-hover="underline"] {
+      position: relative;
+      
+      &::before {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: calc(0.1em * var(--aa-distance));
+        background-color: currentColor;
+        transform: scaleX(1);
+      }
+    }
 
     @media (hover:hover) and (pointer:fine){
       /*
@@ -309,7 +324,6 @@
       /*
       Underline Link Animations
       */
-      
 
       [aa-hover^="underline"] {
         position: relative;
