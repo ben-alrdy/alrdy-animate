@@ -9,7 +9,6 @@ function initializeScrollState() {
     if (currentScrollTop > thresholdTop) {
       document.body.setAttribute('data-scroll-direction', 'down');
       document.body.setAttribute('data-scroll-started', currentScrollTop > thresholdTop ? 'true' : 'false');
-      lastScrollTop = currentScrollTop;
     }
   });
 
