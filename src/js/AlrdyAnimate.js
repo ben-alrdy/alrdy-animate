@@ -545,7 +545,3 @@ export { AlrdyAnimate };
 if (typeof window !== 'undefined') {
   window.AlrdyAnimate = AlrdyAnimate;
 }
-
-
-
-

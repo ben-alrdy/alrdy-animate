@@ -3,6 +3,17 @@ function initializeScrollState() {
   const threshold = 20;
   const thresholdTop = 50;
 
+  // Check initial scroll position
+  requestAnimationFrame(() => {
+    const currentScrollTop = window.scrollY || document.documentElement.scrollTop;
+    if (currentScrollTop > thresholdTop) {
+      ScrollTrigger.refresh();
+      document.body.setAttribute('data-scroll-direction', 'down');
+      document.body.setAttribute('data-scroll-started', currentScrollTop > thresholdTop ? 'true' : 'false');
+      lastScrollTop = currentScrollTop;
+    }
+  });
+
   ScrollTrigger.create({
     start: "top top",
     end: "max",
@@ -44,6 +55,19 @@ function initializeNav(element, type, ease, duration, distance, scrolled) {
       hasScrolledClass = false;
     }
   };
+
+  // Check initial scroll position
+  requestAnimationFrame(() => {
+    const initialScrollTop = window.scrollY;
+    if (type.includes('change')) {
+      updateScrolledClass(initialScrollTop);
+    }
+    if (type.includes('hide') && initialScrollTop > 50) {
+      gsap.set(element, { 
+        y: `${-100 * distance}%` 
+      });
+    }
+  });
 
   // Watch for scroll direction changes
   const observer = new MutationObserver((mutations) => {
