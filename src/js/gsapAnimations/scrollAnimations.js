@@ -5,9 +5,8 @@ function initializeScrollState() {
 
   // Check initial scroll position
   requestAnimationFrame(() => {
-    const currentScrollTop = window.scrollY || document.documentElement.scrollTop;
+    const currentScrollTop = window.scrollY;
     if (currentScrollTop > thresholdTop) {
-      ScrollTrigger.refresh();
       document.body.setAttribute('data-scroll-direction', 'down');
       document.body.setAttribute('data-scroll-started', currentScrollTop > thresholdTop ? 'true' : 'false');
       lastScrollTop = currentScrollTop;
