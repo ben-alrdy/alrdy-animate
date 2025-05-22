@@ -71,186 +71,50 @@ For Webflow projects, add these scripts to your custom code section:
 
 ```html
 <link rel="stylesheet" href="https://unpkg.com/alrdy-animate@2.1.3/dist/AlrdyAnimate.css">
-
 <script defer src="https://unpkg.com/alrdy-animate@2.1.3/dist/AlrdyAnimate.js"></script>
 
 <!-- SCRIPT FOR MAIN CUSTOM CODE-->
 <script defer>
-  // Initialization tracking
-  window.alrdyInitialized = false;
-
-  window.initPageAnimations = function(callback) {
-    if (window.alrdyInitialized) {
-      // If already initialized, run immediately
-      callback();
-    } else {
-      // If not, wait for initialization
-      document.addEventListener('alrdy-init-complete', () => {
-        callback();
-      });
-    }
-  };
-  
-  // Initialize AlrdyAnimate
-  window.Webflow ||= [];
-  window.Webflow.push(() => {
-    // Bulk set attributes
-    document.querySelectorAll('h2').forEach((element) => {       
-      if (!element.hasAttribute('aa-animate')) {
-        element.setAttribute('aa-animate', 'text-slide-up-clip');
-        element.setAttribute('aa-split', 'words');  
-      }
-    });
-    
-    // Set a timeout to show elements if initialization fails
-    const initTimeout = setTimeout(() => {
-      if (!window.alrdyInitialized) {
-        console.warn('AlrdyAnimate initialization timed out - showing all elements');
-        document.querySelectorAll('[aa-animate], [aa-children]').forEach((element) => {
-          element.classList.add('in-view');
-          element.style.visibility = 'visible';
-          element.style.opacity = 1;
-        });
-      }
-    }, 5000); // 5 second timeout
-    
-    // Initialize AlrdyAnimate
-    AlrdyAnimate.init({
-      ease: 'ease-in-out',
-      duration: 0.8,
-      hoverDuration: 0.6,
-      gsapFeatures: ['text', 'slider', 'scroll', 'hover'],
-      templates: {
-        theme: 'floaty',  
-        custom: {         
-          'my-headline': {
-            animationType: 'text-slide-up',
-            split: 'words',
-            ease: 'power2.out',
-            duration: 0.8,
-            stagger: 0.05
+  // Function to initialize AlrdyAnimate with consistent options
+  function initAlrdyAnimate() {
+    if (!window.alrdyInitialized) {
+      AlrdyAnimate.init({
+        ease: 'ease-in-out',
+        duration: 0.8,
+        modals: true,
+        gsapFeatures: ['text', 'slider', 'scroll'],
+        templates: {
+          theme: 'floaty', 
+          custom: {         
+            'heading-style-h2': {
+              animationType: 'text-blur|text-fade',
+              split: 'lines&words',
+              stagger: 0.05
+            },
+            'heading-style-h3': {
+              animationType: 'aa-fade'
+            }
           }
         }
-      }  
-    }).then(() => {
-      clearTimeout(initTimeout);
-      window.alrdyInitialized = true;
-      document.dispatchEvent(new Event('alrdy-init-complete'));
-    }).catch(error => {
-      console.error('Error initializing AlrdyAnimate:', error);
-      clearTimeout(initTimeout);
-      // Show all elements on error
-      document.querySelectorAll('[aa-animate], [aa-children]').forEach((element) => {
-        element.classList.add('in-view');
-        element.style.visibility = 'visible';
-        element.style.opacity = 1;
       });
-    });
-  });
+    }
+  }
+
+  // 1. Initial page load
+  document.addEventListener('DOMContentLoaded', initAlrdyAnimate);
+  // 2. Handle prefetched pages
+  window.addEventListener('pageshow', (event) => { if (event.persisted) {initAlrdyAnimate();} });
+  // 3. Handle browser back/forward navigation
+  window.addEventListener('popstate', initAlrdyAnimate);
 </script>
 
 <!-- SCRIPT FOR PAGE CUSTOM CODE-->
 <script defer>
-  window.Webflow.push(() => {
-    window.initPageAnimations(() => {
-      //Custom Code
-      
+  document.addEventListener('DOMContentLoaded', () => {
+    AlrdyAnimate.initPageAnimations(() => {
+      // Your page-specific GSAP code here
     });
   });
-</script>
-```
-
-#### ALTERNATIVE
-
-
-```html
-<script defer src="https://unpkg.com/alrdy-animate@6.7.1/dist/AlrdyAnimate.js"></script>
-
-<script defer>
-  // Initialization tracking
-  window.alrdyInitialized = false;
-
-  // Function to initialize AlrdyAnimate
-  function initializeAlrdyAnimate() {
-    // Reset initialization state
-    window.alrdyInitialized = false;
-    
-    // Set a timeout to show elements if initialization fails
-    const initTimeout = setTimeout(() => {
-      if (!window.alrdyInitialized) {
-        console.warn('AlrdyAnimate initialization timed out - showing all elements');
-        document.querySelectorAll('[aa-animate], [aa-children]').forEach((element) => {
-          element.classList.add('in-view');
-          element.style.visibility = 'visible';
-          element.style.opacity = 1;
-        });
-        window.alrdyInitialized = true;
-        document.dispatchEvent(new Event('alrdy-init-complete'));
-      }
-    }, 3000); // 3 second timeout
-    
-    // Initialize AlrdyAnimate
-    AlrdyAnimate.init({
-      ease: 'ease-in-out',
-      duration: 0.8,
-      modals: true,
-      gsapFeatures: ['text', 'slider', 'scroll'],
-      includeGSAP: true,
-      templates: {
-        custom: {         
-          'heading-style-h2': {
-            animationType: 'text-blur|text-fade',
-            split: 'lines&words',
-            stagger: 0.05
-          },
-          'heading-style-h3': {
-            animationType: 'aa-fade'
-          }
-        }
-      }
-    }).then(() => {
-      clearTimeout(initTimeout);
-      window.alrdyInitialized = true;
-      document.dispatchEvent(new Event('alrdy-init-complete'));
-    }).catch(error => {
-      console.error('Error initializing AlrdyAnimate:', error);
-      document.querySelectorAll('[aa-animate], [aa-children]').forEach((element) => {
-        element.classList.add('in-view');
-        element.style.visibility = 'visible';
-        element.style.opacity = 1;
-      });
-      clearTimeout(initTimeout);
-      window.alrdyInitialized = true;
-      document.dispatchEvent(new Event('alrdy-init-complete'));
-    });
-  }
-
-  // Helper function for page-specific animations
-  window.initPageAnimations = function(callback) {
-    if (window.alrdyInitialized) {
-      // If already initialized, run immediately
-      callback();
-    } else {
-      // If not, wait for initialization
-      document.addEventListener('alrdy-init-complete', () => {
-        callback();
-      });
-    }
-  };
-
-  // Event Listeners
-  // 1. Initial page load
-  document.addEventListener('DOMContentLoaded', initializeAlrdyAnimate);
-
-  // 2. Handle prefetched pages
-  window.addEventListener('pageshow', (event) => {
-    if (event.persisted) {
-      initializeAlrdyAnimate();
-    }
-  });
-
-  // 3. Handle browser back/forward navigation
-  window.addEventListener('popstate', initializeAlrdyAnimate);
 </script>
 ```
 
@@ -263,71 +127,64 @@ For non-Webflow projects, you can initialize AlrdyAnimate in several ways:
 <!-- Add these in your HTML head -->
 <link rel="stylesheet" href="https://unpkg.com/alrdy-animate@2.1.3/dist/AlrdyAnimate.css">
 
-<!-- Add this before closing body tag -->
+<!-- Add these in your HTML end of body -->
 <script defer src="https://unpkg.com/alrdy-animate@2.1.3/dist/AlrdyAnimate.js"></script>
+
 <script>
-  document.addEventListener('DOMContentLoaded', () => {
-    // Bulk set attributes (optional)
-    document.querySelectorAll('h2').forEach((element) => {       
-      if (!element.hasAttribute('aa-animate')) {
-        element.setAttribute('aa-animate', 'text-slide-up-clip');
-        element.setAttribute('aa-split', 'words');  
-      }
-    });
-    
-    // Initialize AlrdyAnimate
-    AlrdyAnimate.init({
-      ease: 'ease-in-out',
-      duration: 0.8,
-      hoverDuration: 0.6,
-      gsapFeatures: ['text', 'slider', 'scroll', 'hover'],
-      templates: {
-        theme: 'floaty',
-        custom: {
-          'my-headline': {
-            animationType: 'text-slide-up',
-            split: 'words',
-            ease: 'power2.out',
-            duration: 0.8,
-            stagger: 0.05
+  // Function to initialize AlrdyAnimate with consistent options
+  function initAlrdyAnimate() {
+    if (!window.alrdyInitialized) {
+      AlrdyAnimate.init({
+        ease: 'ease-in-out',
+        duration: 0.8,
+        hoverDuration: 0.6,
+        gsapFeatures: ['text', 'slider', 'scroll', 'hover'],
+        templates: {
+          theme: 'floaty',
+          custom: {
+            'my-headline': {
+              animationType: 'text-slide-up',
+              split: 'words',
+              ease: 'power2.out',
+              duration: 0.8,
+              stagger: 0.05
+            }
           }
         }
-      }
-    }).then(() => {
-      console.log('AlrdyAnimate initialized successfully');
-    }).catch(error => {
-      console.error('Error initializing AlrdyAnimate:', error);
-    });
-  });
+      });
+    }
+  }
+
+  // 1. Initial page load
+  document.addEventListener('DOMContentLoaded', initAlrdyAnimate);
+  // 2. Handle prefetched pages
+  window.addEventListener('pageshow', (event) => { if (event.persisted) {initAlrdyAnimate();} });
+  // 3. Handle browser back/forward navigation
+  window.addEventListener('popstate', initAlrdyAnimate);
 </script>
 ```
 
 2. **Using async/await with window load**:
 ```html
 <script>
-  window.addEventListener('load', async () => {
-    try {
-      // Bulk set attributes (optional)
-      document.querySelectorAll('h2').forEach((element) => {       
-        if (!element.hasAttribute('aa-animate')) {
-          element.setAttribute('aa-animate', 'text-slide-up-clip');
-          element.setAttribute('aa-split', 'words');  
-        }
-      });
-      
-      // Initialize AlrdyAnimate
+  // Function to initialize AlrdyAnimate with consistent options
+  async function initAlrdyAnimate() {
+    if (!window.alrdyInitialized) {
       await AlrdyAnimate.init({
         ease: 'ease-in-out',
         duration: 0.8,
         hoverDuration: 0.6,
         gsapFeatures: ['text', 'slider', 'scroll', 'hover']
       });
-      
-      console.log('AlrdyAnimate initialized successfully');
-    } catch (error) {
-      console.error('Error initializing AlrdyAnimate:', error);
     }
-  });
+  }
+
+  // 1. Initial page load
+  window.addEventListener('load', initAlrdyAnimate);
+  // 2. Handle prefetched pages
+  window.addEventListener('pageshow', (event) => { if (event.persisted) {initAlrdyAnimate();} });
+  // 3. Handle browser back/forward navigation
+  window.addEventListener('popstate', initAlrdyAnimate);
 </script>
 ```
 
@@ -336,44 +193,29 @@ For non-Webflow projects, you can initialize AlrdyAnimate in several ways:
 import { AlrdyAnimate } from 'alrdy-animate';
 import 'alrdy-animate/dist/AlrdyAnimate.css';
 
-// Wait for DOM to be ready
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initializeAlrdyAnimate);
-} else {
-  initializeAlrdyAnimate();
-}
-
-async function initializeAlrdyAnimate() {
-  try {
-    // Bulk set attributes (optional)
-    document.querySelectorAll('h2').forEach((element) => {       
-      if (!element.hasAttribute('aa-animate')) {
-        element.setAttribute('aa-animate', 'text-slide-up-clip');
-        element.setAttribute('aa-split', 'words');  
-      }
-    });
-    
-    // Initialize AlrdyAnimate
+// Function to initialize AlrdyAnimate with consistent options
+async function initAlrdyAnimate() {
+  if (!window.alrdyInitialized) {
     await AlrdyAnimate.init({
       ease: 'ease-in-out',
       duration: 0.8,
       hoverDuration: 0.6,
       gsapFeatures: ['text', 'slider', 'scroll', 'hover']
     });
-    
-    console.log('AlrdyAnimate initialized successfully');
-  } catch (error) {
-    console.error('Error initializing AlrdyAnimate:', error);
   }
 }
+
+// 1. Initial page load
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initAlrdyAnimate);
+} else {
+  initAlrdyAnimate();
+}
+// 2. Handle prefetched pages
+window.addEventListener('pageshow', (event) => { if (event.persisted) {initAlrdyAnimate();} });
+// 3. Handle browser back/forward navigation
+window.addEventListener('popstate', initAlrdyAnimate);
 ```
-
-
-1. Install the package:
-```bash
-npm install alrdy-animate
-```
-
 
 
 ### Configuration Options
