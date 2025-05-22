@@ -566,6 +566,88 @@ function createMarqueeTimeline(element, gsap, duration, scrub) {
   }
 }
 
+function initializeClip(element) {
+  const triggers = Array.from(element.querySelectorAll('[aa-clip-trigger]'));
+  const contents = Array.from(element.querySelectorAll('[aa-clip-content]'));
+  const backgrounds = Array.from(element.querySelectorAll('[aa-clip-background]'));
+  const count = contents.length;
+
+  const clipStates = {
+    vertical: {
+      start: "polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)",
+      end: "polygon(0% 0%, 100% 0%, 100% 0%, 0% 0%)",
+      initial: "polygon(0% 100%, 100% 100%, 100% 100%, 0% 100%)"
+    },
+    right: {
+      start: "polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)",
+      end: "polygon(0% 0%, 0% 0%, 0% 100%, 0% 100%)",
+      initial: "polygon(100% 0%, 100% 0%, 100% 100%, 100% 100%)"
+    },
+    left: {
+      start: "polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)",
+      end: "polygon(100% 0%, 100% 0%, 100% 100%, 100% 100%)",
+      initial: "polygon(0% 0%, 0% 0%, 0% 100%, 0% 100%)"
+    }
+  };
+
+  triggers.forEach((trigger, i) => {
+    const content = contents[i];
+    const background = backgrounds[i];
+    if (!content) return;
+
+    content.style.zIndex = count - i;
+
+    const direction = content.getAttribute('aa-clip-content') || 'vertical';
+    const state = clipStates[direction];
+    const nextContent = contents[i + 1];
+    const nextDirection = nextContent ? (nextContent.getAttribute('aa-clip-content') || 'vertical') : null;
+    const nextState = nextDirection ? clipStates[nextDirection] : null;
+
+    const tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: trigger,
+        start: i === 0 ? "top top" : "top bottom",
+        end: i === count - 1 ? "bottom bottom" : "bottom top",
+        scrub: true
+      },
+      defaults: { ease: "none" }
+    });
+
+    if (i === 0) {
+      gsap.set(content, { clipPath: state.start });
+      if (nextDirection === direction) {
+        tl.to(content, { clipPath: state.end });
+      } else if (nextDirection && nextState) {
+        // Animate out using the next section's direction
+        tl.to(content, { clipPath: nextState.end });
+      }
+    } else if (i === count - 1) {
+      gsap.set(content, { clipPath: state.initial });
+      tl.to(content, { clipPath: state.start });
+    } else {
+      gsap.set(content, { clipPath: state.initial });
+      tl.to(content, { clipPath: state.start });
+      if (nextDirection === direction) {
+        tl.to(content, { clipPath: state.end });
+      } else if (nextDirection && nextState) {
+        tl.to(content, { clipPath: nextState.end });
+      }
+    }
+
+    if (background) {
+      gsap.timeline({
+        scrollTrigger: {
+          trigger: trigger,
+          start: "top top",
+          end: "bottom top",
+          scrub: true
+        },
+        defaults: { ease: "none" }
+      }).to(background, { yPercent: 50 });
+    }
+  });
+}
+
 function createScrollAnimations(gsap, ScrollTrigger) {
   // Initialize global scroll state first
   initializeScrollState();
@@ -597,6 +679,9 @@ function createScrollAnimations(gsap, ScrollTrigger) {
     
     marquee: (element, duration, scrub) => {
       return createMarqueeTimeline(element, gsap, duration, scrub);
+    },
+    clip: (element) => {
+      return initializeClip(element);
     }
   };
 }

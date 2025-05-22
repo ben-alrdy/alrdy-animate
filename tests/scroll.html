@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,6 +8,7 @@
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="../dist/AlrdyAnimate.css">
 </head>
+
 <body>
     <header>
         <nav aa-nav="hide-change-300" aa-distance="2">
@@ -23,30 +25,24 @@
                 <li><a href="scroll.html" class="active">Scroll Effects</a></li>
             </ul>
         </nav>
-        
+
         <!-- Add new scroll-to navigation -->
         <div class="scroll-nav container">
             <h2>Quick Navigation</h2>
             <ul class="scroll-links">
                 <li>
-                    <a href="#intro" 
-                       aa-scroll-target="#intro" 
-                       aa-duration="0">Introduction</a>
+                    <a href="#intro" aa-scroll-target="#intro" aa-duration="0">Introduction</a>
                 </li>
                 <li>
-                    <a href="#background-transitions" 
-                       aa-scroll-target="#background-transitions" 
-                       aa-duration="1.2">Background Transitions</a>
+                    <a href="#background-transitions" aa-scroll-target="#background-transitions"
+                        aa-duration="1.2">Background Transitions</a>
                 </li>
                 <li>
-                    <a href="#marquee-hover" 
-                       aa-scroll-target="#marquee-hover" 
-                       aa-duration="3">Marquee with Hover</a>
+                    <a href="#marquee-hover" aa-scroll-target="#marquee-hover" aa-duration="3">Marquee with Hover</a>
                 </li>
                 <li>
-                    <a href="#marquee-scroll" 
-                       aa-scroll-target="#marquee-scroll" 
-                       aa-distance="-100">Marquee with Scroll</a>
+                    <a href="#marquee-scroll" aa-scroll-target="#marquee-scroll" aa-distance="-100">Marquee with
+                        Scroll</a>
                 </li>
             </ul>
         </div>
@@ -56,8 +52,47 @@
         <section id="intro" class="full-height-section">
             <div class="container">
                 <h1>Scroll Effects</h1>
-                <p>Experience smooth background transitions and parallax effects as you scroll. Our scroll animations are optimized for performance while delivering stunning visual impact.</p>
+                <p>Experience smooth background transitions and parallax effects as you scroll. Our scroll animations
+                    are optimized for performance while delivering stunning visual impact.</p>
                 <button class="button">Get Started</button>
+            </div>
+        </section>
+
+        <!-- Stack Reveal Test Section -->
+        <section class="stack-reveal-wrapper" aa-animate="clip">
+            <div aa-clip-trigger>
+                <div aa-clip-background class=""></div>
+            </div>
+            <div aa-clip-trigger>
+                <div aa-clip-background class=""></div>
+            </div>
+            <div aa-clip-trigger>
+                <div aa-clip-background class=""></div>
+            </div>
+            <div aa-clip-trigger>
+                <div aa-clip-background class=""></div>
+            </div>
+            <div class="stack-reveal-stack">
+                <div class="stack-reveal-sticky">
+                    <div aa-clip-content class="stack-reveal-content stack-reveal-background--yellow">
+                        <h2>Stack Reveal 1</h2>
+                        <p>This is the first reveal section. It animates in as you scroll.</p>
+                    </div>
+                
+                    <div aa-clip-content="" class="stack-reveal-content stack-reveal-background--blue">
+                        <h2>Stack Reveal 2</h2>
+                        <p>This is the second reveal section. It also animates in as you scroll.</p>
+                    </div>
+                    <div aa-clip-content="" class="stack-reveal-content stack-reveal-background--lavender">
+                        <h2>Stack Reveal 3</h2>
+                        <p>This is the second reveal section. It also animates in as you scroll.</p>
+                    </div>
+               
+                    <div aa-clip-content class="stack-reveal-content stack-reveal-background--yellow">
+                        <h2>Stack Reveal 4</h2>
+                        <p>This is the third reveal section. Try scrolling to see the effect.</p>
+                    </div>
+                </div>
             </div>
         </section>
 
@@ -88,7 +123,7 @@
                 </div>
             </div>
 
-            <div class="marquee" >
+            <div class="marquee">
                 <div class="css-marquee">
                     <div aa-marquee-items>
                         <div class="marquee__item">
@@ -112,11 +147,13 @@
             </div>
         </section>
 
-        <div id="background-transitions" class="background-wrapper" aa-animate="background" aa-viewport="0.5" aa-scrub="smooth">
+        <div id="background-transitions" class="background-wrapper" aa-animate="background" aa-viewport="0.5"
+            aa-scrub="smooth">
             <section class="full-height-section" aa-wrapper-colors="bg:#e1fe33;text:#2b1c50">
                 <div class="container">
                     <h1>Scroll Effects</h1>
-                    <p>Experience smooth background transitions and parallax effects as you scroll. Our scroll animations are optimized for performance while delivering stunning visual impact.</p>
+                    <p>Experience smooth background transitions and parallax effects as you scroll. Our scroll
+                        animations are optimized for performance while delivering stunning visual impact.</p>
                     <button class="button">Get Started</button>
                 </div>
             </section>
@@ -124,7 +161,8 @@
             <section class="full-height-section" aa-wrapper-colors="bg:#2b1c50;text:#ffffff">
                 <div class="container">
                     <h2>Parallax Scrolling</h2>
-                    <p>Add depth to your designs with parallax scrolling effects. Create immersive experiences that respond naturally to user interaction.</p>
+                    <p>Add depth to your designs with parallax scrolling effects. Create immersive experiences that
+                        respond naturally to user interaction.</p>
                     <button class="button">Learn More</button>
                 </div>
             </section>
@@ -132,7 +170,8 @@
             <section class="full-height-section" aa-wrapper-colors="bg:#000000;text:#ffffff">
                 <div class="container">
                     <h2>Background Transitions</h2>
-                    <p>Seamless color transitions that transform your page as users scroll. Perfect for creating distinct sections while maintaining visual continuity.</p>
+                    <p>Seamless color transitions that transform your page as users scroll. Perfect for creating
+                        distinct sections while maintaining visual continuity.</p>
                     <button aa-item-colors="bg:white;text:black" class="button">Explore Effects</button>
                 </div>
             </section>
@@ -140,7 +179,8 @@
             <section class="full-height-section" aa-wrapper-colors="bg:#f1f0ff;text:#000000">
                 <div class="container">
                     <h2>Background Transitions</h2>
-                    <p>Seamless color transitions that transform your page as users scroll. Perfect for creating distinct sections while maintaining visual continuity.</p>
+                    <p>Seamless color transitions that transform your page as users scroll. Perfect for creating
+                        distinct sections while maintaining visual continuity.</p>
                     <button aa-item-colors="bg:white;text:black" class="button">Explore Effects</button>
                 </div>
             </section>
@@ -180,7 +220,8 @@
         <section class="full-height-section">
             <div class="container">
                 <h1>Scroll Effects</h1>
-                <p>Experience smooth background transitions and parallax effects as you scroll. Our scroll animations are optimized for performance while delivering stunning visual impact.</p>
+                <p>Experience smooth background transitions and parallax effects as you scroll. Our scroll animations
+                    are optimized for performance while delivering stunning visual impact.</p>
                 <button class="button">Get Started</button>
             </div>
         </section>
@@ -189,4 +230,5 @@
     <script src="../dist/AlrdyAnimate.js"></script>
     <script src="js/main.js"></script>
 </body>
-</html> 
+
+</html>

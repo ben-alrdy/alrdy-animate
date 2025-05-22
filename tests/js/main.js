@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', function() {
         duration: 1,
         again: true,
         gsapFeatures: ['scroll', 'text', 'slider', 'hover', 'flip'],
-        debug: true,
+        debug: false,
         modals: true,
         includeGSAP: true,
         smoothScroll: {
@@ -17,7 +17,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }).then(() => {
         console.log('AlrdyAnimate initialized successfully');
-    
     }).catch(error => {
         console.error('Error during AlrdyAnimate initialization:', error);
     });

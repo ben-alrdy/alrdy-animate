@@ -312,7 +312,7 @@ function setupGSAPAnimations(element, elementSettings, initOptions, isMobile, mo
   
   // 1. Variables setup
   const baseType = animationType.includes('-') ? animationType.split('-')[0] : animationType;
-  const gsapAnimations = ['appear', 'reveal', 'counter', 'text', 'slider', 'background', 'parallax', 'marquee'];
+  const gsapAnimations = ['appear', 'reveal', 'counter', 'text', 'slider', 'background', 'parallax', 'marquee', 'clip'];
 
   // Clear existing animations
   if (element.timeline) element.timeline.kill();
@@ -368,6 +368,10 @@ function setupGSAPAnimations(element, elementSettings, initOptions, isMobile, mo
   // 4. Handle GSAP animations
   requestAnimationFrame(() => {
     switch(baseType) {
+      case 'clip':
+        modules.animations.clip(element);
+        return;
+        
       case 'slider':
         modules.animations.slider(element, animationType, duration, ease, delay);
         break;
