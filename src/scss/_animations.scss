@@ -18,13 +18,13 @@
 }
 
 [aa-animate="float-up"].in-view,
-.aa-float-up.in-view { animation-name: floatUp; }
+.aa-float-up.in-view { animation-name: float-up; }
 [aa-animate="float-down"].in-view,
-.aa-float-down.in-view { animation-name: floatDown; }
+.aa-float-down.in-view { animation-name: float-down; }
 [aa-animate="float-left"].in-view,
-.aa-float-left.in-view { animation-name: floatLeft; }
+.aa-float-left.in-view { animation-name: float-left; }
 [aa-animate="float-right"].in-view,
-.aa-float-right.in-view { animation-name: floatRight; }
+.aa-float-right.in-view { animation-name: float-right; }
 
 /*3D SWING ANIMATIONS*/
 [aa-animate^='swing'],
