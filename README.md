@@ -70,8 +70,8 @@ You can include AlrdyAnimate in your project using either CDN or npm.
 For Webflow projects, add these scripts to your custom code section:
 
 ```html
-<link rel="stylesheet" href="https://unpkg.com/alrdy-animate@2.1.3/dist/AlrdyAnimate.css">
-<script defer src="https://unpkg.com/alrdy-animate@2.1.3/dist/AlrdyAnimate.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/alrdy-animate@6.8.0/dist/AlrdyAnimate.css">
+<script defer src="https://unpkg.com/alrdy-animate@6.8.0/dist/AlrdyAnimate.js"></script>
 
 <!-- SCRIPT FOR MAIN CUSTOM CODE-->
 <script defer>
@@ -113,6 +113,7 @@ For Webflow projects, add these scripts to your custom code section:
   document.addEventListener('DOMContentLoaded', () => {
     AlrdyAnimate.initPageAnimations(() => {
       // Your page-specific GSAP code here
+      
     });
   });
 </script>

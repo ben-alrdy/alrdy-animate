@@ -28,6 +28,7 @@ export function splitText(element, split, hideFromScreenReaders = false, onSplit
   
   // Add autoSplit and onSplit options
   splitConfig.autoSplit = true;
+  
   if (onSplit) {
     splitConfig.onSplit = (self) => {
       const timeline = onSplit(self);
