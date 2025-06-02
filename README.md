@@ -75,7 +75,6 @@ For Webflow projects, add these scripts to your custom code section:
 
 <!-- SCRIPT FOR MAIN CUSTOM CODE-->
 <script defer>
-  // Function to initialize AlrdyAnimate with consistent options
   function initAlrdyAnimate() {
     if (!window.alrdyInitialized) {
       AlrdyAnimate.init({
@@ -113,7 +112,6 @@ For Webflow projects, add these scripts to your custom code section:
   document.addEventListener('DOMContentLoaded', () => {
     AlrdyAnimate.initPageAnimations(() => {
       // Your page-specific GSAP code here
-      
     });
   });
 </script>
@@ -362,7 +360,7 @@ AlrdyAnimate supports several GSAP-powered features that can be enabled by inclu
 - `text-tilt-up/down`: Slides and rotates the text in.
 - `text-rotate-soft`: Rotates the text softly around the X axis. Best works with `aa-split="lines"`
 - `text-fade-30`: Fades the text in, starts with 30% opacity.
-- `text-fade-10`: Fades the text in, starts with 30% opacity.
+- `text-fade-10`: Fades the text in, starts with 10% opacity.
 - `text-fade`: Fades the text in, starts with 0% opacity.
 - `text-scale-up`: Fades and scales the text up.
 - `text-blur`: Blurs the text in.
@@ -484,7 +482,7 @@ Enables scroll-driven animations and effects.
 - Use `aa-animate="background"` on a wrapper element you want to animate when sections inside the wrapper scroll into view
   - Optionally set `aa-duration` to define the duration of the animation and `aa-ease` to define the easing.
 - Set `aa-viewport` to 0.5 to trigger the animation when the section is 50% in view.
-- Set `aa-scrub` to `smooth`, `snap` or `smoother` to make the animation scroll driven.
+- Set `aa-scrub=true` to make the animation scroll driven; optionally set a number (higher number = longer delay from scroll to animation), e.g `aa-scrub=1`.
 - Use `aa-wrapper-colors` with `bg` and `text` to define the background and text colors for the wrapper once the section is scrolled into view, e.g. `aa-wrapper-colors="bg:#f0f0f0;text:#000"`.
 - Use `aa-item-colors` with `bg` and `text` to change the background and text colors for child elements when they scroll into view, e.g. `aa-item-colors="bg:#ff0000;text:#fff"`.
 
@@ -511,7 +509,7 @@ Enables scroll-driven animations and effects.
   - Add `-switch` to change marquee direction on scroll
   - Add `-hover` to the animation type to create a marquee that slows down on hover, e.g. `aa-animate="marquee-left-hover"`
   - Add `-paused` to disabe the animation, e.g. `aa-animate="marquee-left-paused"` - use to only animate on scroll
-    - Add `aa-scrub` with possible values snap, smooth, or smoother
+    - Add `aa-scrub` to animate on scroll
 
 
 
@@ -536,18 +534,14 @@ Example:
 - The number (40) represents the movement distance in pixels
 - Add direction with `aa-animate="parallax-down-40"` (moves down while scrolling) or `parallax-up-40` (default, moves up)
 - Add `half` to end the parallax when the element reaches the middle of the page: `parallax-down-half-40`
-- Control smoothness with `aa-scrub`:
-  - `"smoother"`: Very lazy, smooth following (scrub: 5)
-  - `"smooth"`: Regular smooth following (scrub: 2)
-  - `"snap"`: Snaps to 20% increments
-  - No value: Direct 1:1 following
+- Control smoothness with `aa-scrub` (accepting numbers for the delay in scroll to animation)
 - If the parent element has `overflow: hidden`, the image will be scaled to fit the parent's height
 ```html
 <div style="height: 60vh; overflow: hidden">
   <img 
     src="image.jpg" 
     aa-animate="parallax-down-40" 
-    aa-scrub="smooth"
+    aa-scrub="3"
   >
 </div>
 ```
@@ -555,7 +549,7 @@ Example:
 #### Reveal & Appear Animations
 - Use `aa-animate="reveal-..."` for reveal animations that use a clip path to mask the content
 - Use `aa-animate="appear-..."` for appear animations that fade/slide in content
-- Optionally, add `aa-scrub` with the values `smooth`, `snap`, `smoother` or `true` to make the animation scroll-driven
+- Optionally, add `aa-scrub` to make the animation scroll driven
 
 Available animations:
 1. Reveal Animations (by animating a clip path)
@@ -580,7 +574,7 @@ Example usage:
 </div>
 
 <!-- Appear animation -->
-<div aa-animate="appear" aa-scrub="smooth">
+<div aa-animate="appear" aa-scrub="1">
   Content fades while scrolling
 </div>
 ```

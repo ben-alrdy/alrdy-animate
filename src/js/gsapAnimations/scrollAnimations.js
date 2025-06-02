@@ -122,11 +122,7 @@ function initializeBackgroundColor(element, gsap, ScrollTrigger, duration, ease,
   }
 
   // Get animation settings
-  const scrub = element.getAttribute('aa-scrub');
-  const scrubValue = scrub === 'smoother' ? 4 :
-                     scrub === 'smooth' ? 2 :
-                     scrub === 'snap' ? { snap: 0.2 } :
-                     scrub ? true : false;
+  const scrub = element.getAttribute('aa-scrub') ? (parseFloat(element.getAttribute('aa-scrub')) || true): false
 
   // Store and set initial colors (converting to hex)
   const computedStyle = getComputedStyle(element);
@@ -206,7 +202,7 @@ function initializeBackgroundColor(element, gsap, ScrollTrigger, duration, ease,
         trigger: section.element,
         start: `top ${viewportPercentage * 100}%`,
         end: `center ${viewportPercentage * 100}%`,
-        scrub: scrubValue,
+        scrub: scrub,
         animation: tl,
         markers: debug,
         invalidateOnRefresh: true,
@@ -272,7 +268,7 @@ function initializeBackgroundColor(element, gsap, ScrollTrigger, duration, ease,
   });
 }
 
-function initializeParallax(element, gsap, ScrollTrigger, scroll = 'smooth') {
+function initializeParallax(element, gsap, ScrollTrigger, scrub) {
   // Get configuration from attributes
   const parts = element.getAttribute('aa-animate').split('-');
   const isHalf = parts.includes('half');
@@ -299,9 +295,7 @@ function initializeParallax(element, gsap, ScrollTrigger, scroll = 'smooth') {
     trigger: element.parentElement,
     start: "top bottom",
     end: isHalf ? "center center" : "bottom top",
-    scrub: scroll.includes('smoother') ? 5 :
-           scroll.includes('smooth') ? 2 :
-           scroll.includes('snap') ? { snap: 0.2 } : true,
+    scrub: scrub ? (parseFloat(scrub) || true) : false,
     animation: tl
   });
 
@@ -551,10 +545,7 @@ function createMarqueeTimeline(element, gsap, duration, scrub) {
         trigger: element,
         start: '0% 100%',
         end: '100% 0%',
-        scrub: scrub === 'smoother' ? 4 :
-               scrub === 'smooth' ? 2 :
-               scrub === 'snap' ? { snap: 0.2 } :
-               scrub ? true : 0
+        scrub: scrub ? (parseFloat(scrub) || true) : false
       }
     });
 
@@ -648,6 +639,50 @@ function initializeClip(element) {
   });
 }
 
+function initializeStack(element, scrub, distance) {
+  const triggers = Array.from(element.querySelectorAll('[aa-stack-trigger]'));
+  const contents = Array.from(element.querySelectorAll('[aa-stack-content]'));
+  const count = contents.length;
+
+  // Set initial states
+  contents.forEach((content, i) => {
+    gsap.set(content, {
+      opacity: 0,
+      zIndex: count - i
+    });
+  });
+
+  triggers.forEach((trigger, i) => {
+    const content = contents[i];
+    if (!content) return;
+
+    const tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: trigger,
+        start: "top center",
+        end: "bottom center",
+        scrub: scrub ? (parseFloat(scrub) || true) : false
+      }
+    });
+
+    // Create a timeline with three parts:
+    // 1. First 10%: Fade in
+    // 2. Middle 80%: Stay visible
+    // 3. Last 10%: Fade out
+    tl.fromTo(content,
+      { opacity: 0, yPercent: 10*distance },
+      { opacity: 1, yPercent: 0, duration: 0.2 },
+      0
+    ).to(content,
+      { opacity: 1, yPercent: 0, duration: 0.6 },
+      0.2
+    ).to(content,
+      { opacity: 0, yPercent: -10*distance, duration: 0.2 },
+      0.8
+    );
+  });
+}
+
 function createScrollAnimations(gsap, ScrollTrigger) {
   // Initialize global scroll state first
   initializeScrollState();
@@ -661,8 +696,8 @@ function createScrollAnimations(gsap, ScrollTrigger) {
       initializeBackgroundColor(element, gsap, ScrollTrigger, duration, ease, viewportPercentage, debug);
     },
     
-    parallax: (element, scroll) => {
-      initializeParallax(element, gsap, ScrollTrigger, scroll);
+    parallax: (element, scrub) => {
+      initializeParallax(element, gsap, ScrollTrigger, scrub);
     },
     
     appear: (element, duration, ease, delay, distance) => {
@@ -682,6 +717,9 @@ function createScrollAnimations(gsap, ScrollTrigger) {
     },
     clip: (element) => {
       return initializeClip(element);
+    },
+    stack: (element, scrub, distance) => {
+      return initializeStack(element, scrub, distance);
     }
   };
 }

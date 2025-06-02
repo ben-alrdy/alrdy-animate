@@ -96,9 +96,57 @@
             </div>
         </section>
 
+        <!-- Stack Reveal Test Section -->
+        <section class="stack-reveal-wrapper" aa-animate="stack" aa-scrub="1" aa-distance="10">
+            <div aa-stack-trigger>
+                
+            </div>
+            <div aa-stack-trigger>
+                
+            </div>
+            <div aa-stack-trigger>
+                
+            </div>
+            <div aa-stack-trigger>
+            </div>
+            <div aa-stack-trigger>
+                
+            </div>
+            <div class="stack-reveal-stack">
+                <div class="stack-reveal-sticky">
+                    <div aa-stack-content class="stack-reveal-content">
+                        <div class="stack-reveal-content-inner stack-reveal-background--yellow">
+                            <h2>Stack Reveal 1</h2>
+                            <p>This is the first reveal section. It animates in as you scroll.</p>
+                        </div>
+                    </div>
+                
+                    <div aa-stack-content="" class="stack-reveal-content ">
+                        <div class="stack-reveal-content-inner stack-reveal-background--blue">
+                            <h2>Stack Reveal 2</h2>
+                            <p>This is the second reveal section. It also animates in as you scroll.</p>
+                        </div>
+                    </div>
+                    <div aa-stack-content="" class="stack-reveal-content ">
+                        <div class="stack-reveal-content-inner stack-reveal-background--lavender">
+                            <h2>Stack Reveal 3</h2>
+                            <p>This is the second reveal section. It also animates in as you scroll.</p>
+                        </div>
+                    </div>
+               
+                    <div aa-stack-content class="stack-reveal-content ">
+                        <div class="stack-reveal-content-inner stack-reveal-background--yellow">
+                            <h2>Stack Reveal 4</h2>
+                            <p>This is the third reveal section. Try scrolling to see the effect.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <section id="marquee-scroll" class="marquee-section">
             <!-- Left-moving marquee -->
-            <div aa-animate="marquee-left-paused" class="marquee" aa-scrub="smoother">
+            <div aa-animate="marquee-left-paused" class="marquee" aa-scrub="5">
                 <div aa-marquee-scroller="20">
                     <div aa-marquee-items>
                         <div class="marquee__item">
@@ -109,7 +157,7 @@
             </div>
 
             <!-- Right-moving marquee -->
-            <div aa-animate="marquee-right-paused" class="marquee" aa-scrub="smoother">
+            <div aa-animate="marquee-right-paused" class="marquee" aa-scrub="5">
                 <div aa-marquee-scroller="10">
                     <div aa-marquee-items>
                         <div class="marquee__item">
@@ -148,7 +196,7 @@
         </section>
 
         <div id="background-transitions" class="background-wrapper" aa-animate="background" aa-viewport="0.5"
-            aa-scrub="smooth">
+            aa-scrub="true">
             <section class="full-height-section" aa-wrapper-colors="bg:#e1fe33;text:#2b1c50">
                 <div class="container">
                     <h1>Scroll Effects</h1>

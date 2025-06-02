@@ -335,7 +335,7 @@ function setupGSAPAnimations(element, elementSettings, initOptions, isMobile, mo
   
   // 1. Variables setup
   const baseType = animationType.includes('-') ? animationType.split('-')[0] : animationType;
-  const gsapAnimations = ['appear', 'reveal', 'counter', 'text', 'slider', 'background', 'parallax', 'marquee', 'clip'];
+  const gsapAnimations = ['appear', 'reveal', 'counter', 'text', 'slider', 'background', 'parallax', 'marquee', 'clip', 'stack'];
 
   // Clear existing animations
   if (element.timeline) element.timeline.kill();
@@ -355,10 +355,9 @@ function setupGSAPAnimations(element, elementSettings, initOptions, isMobile, mo
       // end: isMobile ? "top 20%" : "top 40%",
       start: `top ${(viewportPercentage) * 100}%`,
       end: "top 40%",
-      scrub: scrub === 'smoother' ? 4 :
-             scrub === 'smooth' ? 2 :
-             scrub === 'snap' ? { snap: 0.2 } :
-             true
+      scrub: scrub ? 
+        (parseFloat(scrub) || true)
+      : false
     } : {
       start: `top ${(viewportPercentage) * 100}%`
     }),
@@ -393,6 +392,10 @@ function setupGSAPAnimations(element, elementSettings, initOptions, isMobile, mo
     switch(baseType) {
       case 'clip':
         modules.animations.clip(element);
+        return;
+
+      case 'stack':
+        modules.animations.stack(element, scrub, distance);
         return;
         
       case 'slider':
