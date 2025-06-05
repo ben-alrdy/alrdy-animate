@@ -294,7 +294,7 @@ function initializeParallax(element, gsap, ScrollTrigger, scrub) {
   ScrollTrigger.create({
     trigger: element.parentElement,
     start: "top bottom",
-    end: isHalf ? "center center" : "bottom top",
+    end: isHalf ? "top center" : "bottom top",
     scrub: scrub ? (parseFloat(scrub) || true) : false,
     animation: tl
   });
