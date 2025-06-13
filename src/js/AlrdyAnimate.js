@@ -4,7 +4,7 @@ import { handleLazyLoadedImages } from './utils/lazyLoadHandler';
 import { processChildren } from './utils/childrenHandler';
 import { getElementSettings, applyElementStyles } from './utils/elementAttributes';
 import { processTemplates, getFinalSettings, clearProcessedTemplates } from './utils/templateHandler';
-import { initializeScrollState, initializePlayStateObserver, initializeNav } from './core/initializers';
+import { initializeScrollState, initializePlayStateObserver, initializeNav } from './core/core';
 
 // Define these variables in the module scope
 let allAnimatedElements = null;
@@ -244,7 +244,7 @@ async function init(options = {}) {
             if (initOptions.lazyLoadHandler) {
               handleLazyLoadedImages(loadedModules.ScrollTrigger);
             }
-            
+
           } else {
             // Fallback if GSAP loading failed
             enableGSAP = false;
