@@ -1,38 +1,4 @@
-function initializeScrollState() {
-  let lastScrollTop = 0;
-  const threshold = 20;
-  const thresholdTop = 50;
 
-  // Check initial scroll position
-  requestAnimationFrame(() => {
-    const currentScrollTop = window.scrollY;
-    if (currentScrollTop > thresholdTop) {
-      document.body.setAttribute('data-scroll-direction', 'down');
-      document.body.setAttribute('data-scroll-started', currentScrollTop > thresholdTop ? 'true' : 'false');
-    }
-  });
-
-  ScrollTrigger.create({
-    start: "top top",
-    end: "max",
-    onUpdate: (self) => {
-      const currentScrollTop = self.scroll();
-      
-      if (Math.abs(currentScrollTop - lastScrollTop) >= threshold) {
-        const direction = currentScrollTop > lastScrollTop ? 'down' : 'up';
-        const hasScrolled = currentScrollTop > thresholdTop;
-        
-        // Update body attributes for global state
-        document.body.setAttribute('data-scroll-direction', direction);
-        document.body.setAttribute('data-scroll-started', hasScrolled ? 'true' : 'false');
-        
-        lastScrollTop = currentScrollTop;
-      }
-    },
-    ignoreMobileResize: true,
-    invalidateOnRefresh: false
-  });
-}
 
 function initializeNav(element, type, ease, duration, distance, scrolled) {
   // Track class state to avoid unnecessary DOM operations
@@ -684,8 +650,6 @@ function initializeStack(element, scrub, distance) {
 }
 
 function createScrollAnimations(gsap, ScrollTrigger) {
-  // Initialize global scroll state first
-  initializeScrollState();
   
   return {
     nav: (element, type, ease, duration, distance, scrolled) => {

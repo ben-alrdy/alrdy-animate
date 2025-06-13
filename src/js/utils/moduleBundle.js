@@ -49,6 +49,9 @@ export const gsapBundles = {
         animations: () => import(/* webpackChunkName: "gsap-hover" */ '../gsapAnimations/hoverAnimations'),
         dependencies: sharedDependencies.textSplitter
     },
+    nav: {
+        animations: () => import(/* webpackChunkName: "gsap-nav" */ '../gsapAnimations/navAnimations')
+    },
     flip: {
         plugins: (includeGSAP) => includeGSAP ?
             import(/* webpackChunkName: "gsap-flip" */ 'gsap/Flip').then(mod => [{ Flip: mod.Flip }]) :

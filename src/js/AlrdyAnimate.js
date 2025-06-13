@@ -4,6 +4,7 @@ import { handleLazyLoadedImages } from './utils/lazyLoadHandler';
 import { processChildren } from './utils/childrenHandler';
 import { getElementSettings, applyElementStyles } from './utils/elementAttributes';
 import { processTemplates, getFinalSettings, clearProcessedTemplates } from './utils/templateHandler';
+import { initializeScrollState, initializePlayStateObserver, initializeNav } from './core/initializers';
 
 // Define these variables in the module scope
 let allAnimatedElements = null;
@@ -53,7 +54,8 @@ async function init(options = {}) {
   }, initOptions.initTimeout);
 
   try {
-    // Initialize play state observer first
+    // Initialize core features
+    initializeScrollState();
     initializePlayStateObserver();
 
     // Process templates if specified
@@ -227,7 +229,7 @@ async function init(options = {}) {
           if (loadedModules) {
             // Setup nav animations
             const navElement = document.querySelector('[aa-nav]');
-            if (navElement) {
+            if (navElement && initOptions.gsapFeatures.includes('nav')) {
               const navType = navElement.getAttribute('aa-nav');
               const navEase = navElement.getAttribute('aa-ease');
               const navDuration = navElement.getAttribute('aa-duration');
@@ -237,6 +239,7 @@ async function init(options = {}) {
               const navScrolled = navType.includes('-') ? 
                 parseInt(navType.split('-').pop()) || 100 : 
                 100;
+              
               loadedModules.animations.nav?.(navElement, navType, navEase ?? 'power2.out', navDuration ?? 0.6, navDistance ?? 1, navScrolled);
             }
 
@@ -527,35 +530,6 @@ function setupGSAPHoverAnimations(element, elementSettings, initOptions, isMobil
         });
         break;
     }
-  });
-}
-
-// Function to initialize play state observer for CSS animations
-function initializePlayStateObserver() {
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      const element = entry.target;
-      // Get all children and filter those that have animations
-      const children = element.children;
-      
-      Array.from(children).forEach(child => {
-        const animations = child.getAnimations();
-        if (animations.length > 0) {
-          animations.forEach(animation => {
-            if (entry.isIntersecting) {
-              animation.play();
-            } else {
-              animation.pause();
-            }
-          });
-        }
-      });
-    });
-  });
-
-  // Observe all containers with the attribute
-  document.querySelectorAll('[aa-toggle-playstate]').forEach(element => {
-    observer.observe(element);
   });
 }
 
