@@ -164,6 +164,9 @@ async function init(options = {}) {
                       case 'hover':
                         moduleAnimations = animationModule.createHoverAnimations(modules.gsap, modules.splitText);
                         break;
+                      case 'nav':
+                        moduleAnimations = animationModule.createNavAnimations(modules.gsap);
+                        break;
                     }
 
                     Object.assign(animations, moduleAnimations);
@@ -227,20 +230,10 @@ async function init(options = {}) {
           loadedModules = await gsapModulesPromise;
 
           if (loadedModules) {
-            // Setup nav animations
-            const navElement = document.querySelector('[aa-nav]');
-            if (navElement && initOptions.gsapFeatures.includes('nav')) {
-              const navType = navElement.getAttribute('aa-nav');
-              const navEase = navElement.getAttribute('aa-ease');
-              const navDuration = navElement.getAttribute('aa-duration');
-              const navDistance = navElement.getAttribute('aa-distance');
-              
-              // Extract scroll value from navType if present, default to 100
-              const navScrolled = navType.includes('-') ? 
-                parseInt(navType.split('-').pop()) || 100 : 
-                100;
-              
-              loadedModules.animations.nav?.(navElement, navType, navEase ?? 'power2.out', navDuration ?? 0.6, navDistance ?? 1, navScrolled);
+
+            // Setup nav animations if feature is enabled
+            if (initOptions.gsapFeatures.includes('nav')) {
+              loadedModules.animations.nav();
             }
 
             // Setup animations
@@ -251,6 +244,7 @@ async function init(options = {}) {
             if (initOptions.lazyLoadHandler) {
               handleLazyLoadedImages(loadedModules.ScrollTrigger);
             }
+            
           } else {
             // Fallback if GSAP loading failed
             enableGSAP = false;
