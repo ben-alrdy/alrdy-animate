@@ -1,4 +1,4 @@
-export function getElementSettings(element, settings) {
+export function getElementSettings(element, settings, isMobile) {
   // Handle mobile animations
   let animationType = element.getAttribute('aa-animate-original') || element.getAttribute('aa-animate');
   if (animationType && animationType.includes('|')) {
@@ -8,7 +8,7 @@ export function getElementSettings(element, settings) {
     }
     
     const [desktopAnim, mobileAnim] = animationType.split('|');
-    animationType = window.innerWidth < 768 ? mobileAnim : desktopAnim;
+    animationType = isMobile ? mobileAnim : desktopAnim;
     // Update the actual attribute for CSS animations
     element.setAttribute('aa-animate', animationType);
   }

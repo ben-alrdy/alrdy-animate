@@ -40,7 +40,7 @@ export function processTemplates(options) {
  * @param {HTMLElement} element - The element to get settings for
  * @returns {Object|null} Animation settings or null if no match
  */
-export function getElementTemplateSettings(element) {
+export function getElementTemplateSettings(element, isMobile) {
   if (!processedTemplates) return null;
 
   const className = element.className;
@@ -71,7 +71,7 @@ export function getElementTemplateSettings(element) {
   // Handle mobile/desktop animation split
   if (settings.animationType && settings.animationType.includes('|')) {
     const [desktopAnim, mobileAnim] = settings.animationType.split('|');
-    settings.animationType = window.innerWidth < 768 ? mobileAnim : desktopAnim;
+    settings.animationType = isMobile ? mobileAnim : desktopAnim;
   }
   
   // Add element-specific properties
@@ -86,12 +86,12 @@ export function getElementTemplateSettings(element) {
  * @param {Object} defaultSettings - Default settings to merge with
  * @returns {Object|null} Final settings or null if no settings found
  */
-export function getFinalSettings(element, defaultSettings) {
+export function getFinalSettings(element, defaultSettings, isMobile) {
   // Skip template settings if element has aa-animate attribute
   if (element.hasAttribute('aa-animate')) return null;
 
   // Get template settings if available
-  const templateSettings = getElementTemplateSettings(element);
+  const templateSettings = getElementTemplateSettings(element, isMobile);
   if (!templateSettings) return null;
 
   // Merge with default settings, ensuring each element gets its own unique settings

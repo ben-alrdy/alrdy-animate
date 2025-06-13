@@ -297,8 +297,8 @@ function setupAnimations(elements, initOptions, isMobile, modules) {
     }
 
     // Get settings from attributes or templates
-    const templateSettings = getFinalSettings(element, initOptions);
-    const settings = templateSettings || getElementSettings(element, initOptions);
+    const templateSettings = getFinalSettings(element, initOptions, isMobile);
+    const settings = templateSettings || getElementSettings(element, initOptions, isMobile);
     
     // Skip if no settings found
     if (!settings) return;

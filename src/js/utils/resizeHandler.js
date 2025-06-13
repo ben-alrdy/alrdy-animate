@@ -30,7 +30,7 @@ export function setupResizeHandler(modules, initOptions, isMobile, setupGSAPAnim
           animType.includes('slider')
         )) || animTypeOriginal) {
           // Get new settings with updated animation type
-          const settings = getElementSettings(element, initOptions);
+          const settings = getElementSettings(element, initOptions, isMobile);
           element.settings = settings;
           setupGSAPAnimations(element, settings, initOptions, isMobile, modules);
         }
@@ -48,7 +48,7 @@ export function setupResizeHandler(modules, initOptions, isMobile, setupGSAPAnim
           
           // Get all template elements in a single query
           document.querySelectorAll(templateSelectors).forEach(element => {
-            const templateSettings = getElementTemplateSettings(element);
+            const templateSettings = getElementTemplateSettings(element, isMobile);
             if (templateSettings?.animationType) {
               // Skip text animations unless they have mobile/desktop variants
               const isTextAnimation = templateSettings.animationType.startsWith('text-');
