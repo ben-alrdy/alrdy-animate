@@ -69,13 +69,11 @@ export function createTextAnimations(gsap) {
         if (self._groups) {
           // Animate each group sequentially
           self._groups.forEach((group, index) => {
-            if (group.length > 0) {
-              tl.from(group, {
-                ...baseProps,
-                ...props,
-                stagger: 0 // No stagger within groups
-              }, index * stagger); // Only stagger between groups
-            }
+            tl.from(group, {
+              ...baseProps,
+              ...props,
+              stagger: 0 // No stagger within groups
+            }, index * stagger); // Only stagger between groups
           });
         } else {
           // Regular sequential animation

@@ -38,38 +38,23 @@ export function splitText(element, split, hideFromScreenReaders = false, onSplit
       if (randomMode) {
         // Get the base split type without any modifiers
         const baseSplitType = splitType.split('-')[0]; // Remove any suffixes like -clip
-        
         const elements = self[baseSplitType];
-        if (elements) {
-          if (randomMode === 'random') {
-            // Shuffle the elements
-            for (let i = elements.length - 1; i > 0; i--) {
-              const j = Math.floor(Math.random() * (i + 1));
-              [elements[i], elements[j]] = [elements[j], elements[i]];
-            }
-          } else if (!isNaN(parseInt(randomMode))) {
-            // Calculate steps and elements per step
-            const steps = parseInt(randomMode);
-            const elementsPerStep = Math.ceil(elements.length / steps);
-            const groups = Array.from({ length: steps }, () => []);
-            
-            // First shuffle
-            for (let i = elements.length - 1; i > 0; i--) {
-              const j = Math.floor(Math.random() * (i + 1));
-              [elements[i], elements[j]] = [elements[j], elements[i]];
-            }
-            
-            // Then distribute into steps
-            elements.forEach((element, index) => {
-              const stepIndex = Math.floor(index / elementsPerStep);
-              if (stepIndex < steps) {
-                groups[stepIndex].push(element);
-              }
-            });
-            
-            // Store the groups in a special property
-            self._groups = groups;
-          }
+        
+        // Shuffle the elements (needed for both random and grouped modes)
+        for (let i = elements.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [elements[i], elements[j]] = [elements[j], elements[i]];
+        }
+
+        // If we have a number, create groups
+        if (!isNaN(parseInt(randomMode))) {
+          const steps = parseInt(randomMode);
+          const elementsPerStep = Math.ceil(elements.length / steps);
+          
+          // Create and fill groups in one pass
+          self._groups = Array.from({ length: steps }, (_, stepIndex) => 
+            elements.slice(stepIndex * elementsPerStep, (stepIndex + 1) * elementsPerStep)
+          );
         }
       }
       
