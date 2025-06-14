@@ -37,7 +37,6 @@ const defaultOptions = {
   initTimeout: 3000 // 3 seconds timeout for initialization
 };
 
-// Initialize the animation script with the given options
 async function init(options = {}) {
   const initOptions = { ...defaultOptions, ...options };
   let lenis = null;
@@ -283,7 +282,6 @@ async function init(options = {}) {
   }
 }
 
-// Setup animations for elements
 function setupAnimations(elements, initOptions, isMobile, modules) {
   elements.forEach((element) => {
     // Process children elements
@@ -527,7 +525,6 @@ function setupGSAPHoverAnimations(element, elementSettings, initOptions, isMobil
   });
 }
 
-// Add this function before the init function
 function handleInitError(error, elements) {
   if (error) {
     console.error('Error initializing AlrdyAnimate:', error);
@@ -539,7 +536,7 @@ function handleInitError(error, elements) {
   });
 }
 
-// Add a new method for page-specific animations
+// Method for page-specific animations
 function initPageAnimations(callback) {
   if (window.alrdyInitialized) {
     callback();
@@ -560,7 +557,6 @@ const AlrdyAnimate = {
   lenis: window.lenis
 };
 
-// Export as a named export
 export { AlrdyAnimate };
 
 // Also attach to window for direct browser usage

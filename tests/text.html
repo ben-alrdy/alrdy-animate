@@ -41,13 +41,13 @@
                 
                 <div class="text-container" >
                     
-                    <h3 aa-animate="text-slide-down-clip|fade" aa-split="words">
+                    <h3 aa-animate="text-slide-down-clip|fade" aa-split="words|3" aa-stagger="0.3">
                         This text slides down <span style="color: red; text-decoration: underline;">red</span> word by word
                     </h3>
                     <h3 aa-animate="text-slide-left-words" aa-split="lines&words" aa-stagger="0.02">
                         This text slides left word by word This text slides down word by word This text slides down word by word
                     </h3>
-                    <h3 aa-animate="text-slide-left" aa-split="lines&words" aa-stagger="0.04" >
+                    <h3 aa-animate="text-slide-left" aa-split="lines" aa-stagger="0.04" >
                         This text slides right word by word This text slides down word by word This text slides down word by word This text slides right word by word This text slides down word by word This text slides down word by word
 
                     </h3>
@@ -60,7 +60,7 @@
                 
                 <div class="text-container">
 
-                    <h3 aa-animate="text-fade|fade" aa-split="lines&chars" aa-stagger="0.01" aa-duration="0.4" style="max-width: 500px;">
+                    <h3 aa-animate="text-blur|fade" aa-split="chars" aa-ease="linear" aa-stagger="0.05" aa-duration="0.5" style="max-width: 500px;">
                         This text blurs in word by word 
                         This text blurs in word by word 
                         This text blurs in word by word 
@@ -70,7 +70,7 @@
                     <h3 aa-animate="text-blur-right" aa-split="words">
                         This text blurs in word by word
                     </h3>
-                    <h3 aa-animate="text-blur-left" aa-split="chars">
+                    <h3 aa-animate="text-blur"  aa-split="chars|3" aa-ease="linear" aa-stagger="0.08" aa-duration="0.6" style="font-size: 5rem;">
                         This text blurs in character by character
                     </h3>
                     <h3 aa-animate="text-blur-right" aa-split="chars">

@@ -11,7 +11,6 @@ export function createTextAnimations(gsap) {
   function createBaseAnimation(element, split, duration, stagger, delay, ease, props) {
     const baseProps = {
       duration,
-      stagger,
       ease,
       delay,
       onStart: () => {
@@ -31,7 +30,8 @@ export function createTextAnimations(gsap) {
             const wordsInLine = self.words.filter(word => line.contains(word));
             tl.from(wordsInLine, {
               ...baseProps,
-              ...props
+              ...props,
+              stagger: stagger
             }, index * stagger * 3);
           });
           return tl;
@@ -48,7 +48,8 @@ export function createTextAnimations(gsap) {
             const charsInLine = self.chars.filter(char => line.contains(char));
             tl.from(charsInLine, {
               ...baseProps,
-              ...props
+              ...props,
+              stagger: stagger
             }, index * stagger * 6);
           });
           return tl;
@@ -60,10 +61,30 @@ export function createTextAnimations(gsap) {
     return {
       onSplit: (self) => {
         const tl = gsap.timeline();
-        tl.from(self[split], {
-          ...baseProps,
-          ...props
-        });
+        // Get the base split type without any modifiers
+        const baseSplitType = split.split('-')[0].split('|')[0];
+        const elements = self[baseSplitType];
+        
+        // Check if we have pre-created groups
+        if (self._groups) {
+          // Animate each group sequentially
+          self._groups.forEach((group, index) => {
+            if (group.length > 0) {
+              tl.from(group, {
+                ...baseProps,
+                ...props,
+                stagger: 0 // No stagger within groups
+              }, index * stagger); // Only stagger between groups
+            }
+          });
+        } else {
+          // Regular sequential animation
+          tl.from(elements, {
+            ...baseProps,
+            ...props,
+            stagger: stagger
+          });
+        }
         return tl;
       }
     };
@@ -183,7 +204,11 @@ export function createTextAnimations(gsap) {
       return {
         onSplit: (self) => {
           const tl = gsap.timeline();
-          const animationTarget = self[split];
+          // Get the base split type without any modifiers
+          const baseSplitType = split.split('-')[0].split('|')[0];
+          const animationTarget = self[baseSplitType];
+          
+          if (!animationTarget || animationTarget.length === 0) return tl;
 
           // Calculate perspective
           const fontSize = parseFloat(window.getComputedStyle(element).fontSize);
@@ -205,23 +230,46 @@ export function createTextAnimations(gsap) {
             transformOrigin: '50% 0%'
           });
 
-          // Animate
-          tl.from(animationTarget, {
-            autoAlpha: 0,
-            rotateX: -90,
-            y: '100%',
-            scaleX: 0.75,
-            duration: duration ?? defaults.rotateSoft.duration,
-            stagger: stagger ?? defaults.rotateSoft.stagger,
-            ease: ease ?? defaults.rotateSoft.ease,
-            delay,
-            onStart: () => {
-              // Only set autoAlpha in onStart for non-scrubbed animations
-              if (!element.hasAttribute('aa-scrub')) {
-                gsap.set(element, { visibility: 'visible' });
+          // Check if we have pre-created groups
+          if (self._groups) {
+            // Animate each step sequentially
+            self._groups.forEach((group, index) => {
+              if (group.length > 0) {
+                tl.from(group, {
+                  autoAlpha: 0,
+                  rotateX: -90,
+                  y: '100%',
+                  scaleX: 0.75,
+                  duration: duration ?? defaults.rotateSoft.duration,
+                  stagger: 0, // No stagger within groups
+                  ease: ease ?? defaults.rotateSoft.ease,
+                  delay,
+                  onStart: () => {
+                    if (!element.hasAttribute('aa-scrub')) {
+                      gsap.set(element, { visibility: 'visible' });
+                    }
+                  }
+                }, index * stagger); // Only stagger between groups
               }
-            }
-          });
+            });
+          } else {
+            // Regular sequential animation
+            tl.from(animationTarget, {
+              autoAlpha: 0,
+              rotateX: -90,
+              y: '100%',
+              scaleX: 0.75,
+              duration: duration ?? defaults.rotateSoft.duration,
+              stagger: stagger ?? defaults.rotateSoft.stagger,
+              ease: ease ?? defaults.rotateSoft.ease,
+              delay,
+              onStart: () => {
+                if (!element.hasAttribute('aa-scrub')) {
+                  gsap.set(element, { visibility: 'visible' });
+                }
+              }
+            });
+          }
 
           return tl;
         }
