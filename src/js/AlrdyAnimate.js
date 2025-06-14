@@ -4,7 +4,7 @@ import { handleLazyLoadedImages } from './utils/lazyLoadHandler';
 import { processChildren } from './utils/childrenHandler';
 import { getElementSettings, applyElementStyles } from './utils/elementAttributes';
 import { processTemplates, getFinalSettings, clearProcessedTemplates } from './utils/templateHandler';
-import { initializeScrollState, initializePlayStateObserver, initializeNav } from './core/core';
+import { initializeScrollState, initializePlayStateObserver } from './utils/defaultFeatures';
 
 // Define these variables in the module scope
 let allAnimatedElements = null;
