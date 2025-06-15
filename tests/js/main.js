@@ -9,6 +9,32 @@ document.addEventListener('DOMContentLoaded', function() {
         debug: false,
         modals: true,
         includeGSAP: true,
+        templates: {
+            theme: 'tilt',
+            custom: {
+                'heading-style-h2': {
+                animationType: 'text-tilt-up-lines',
+                split: 'lines',
+                ease: 'power4.out',
+                duration: 0.9,
+                stagger: 0.1,
+                },
+                'heading-style-h3': {
+                animationType: 'text-tilt-up-lines',
+                split: 'lines',
+                ease: 'power4.out',
+                duration: 0.7,
+                stagger: 0.1,
+                },
+                'text-size-medium': {
+                animationType: 'text-slide-up-lines',
+                split: 'lines',
+                ease: 'power4.out',
+                duration: 0.5,
+                stagger: 0.02,
+                }
+            }
+        },
         smoothScroll: {
             enabled: false,
             options: {

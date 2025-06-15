@@ -16,7 +16,7 @@ let initTimeoutId = null;
 const defaultOptions = {
   ease: "ease-in-out", // Default easing function for animations
   again: true, // True = removes 'in-view' class when element is out of view towards the bottom
-  viewportPercentage: 0.8, // Default percentage of the viewport height to trigger the animation
+  viewport: 0.8, // Default percentage of the viewport height to trigger the animation
   duration: 1, // 1 second
   delay: 0, // 0 seconds
   distance: 1, // Distance factor for the animations
@@ -326,7 +326,7 @@ function setupAnimations(elements, initOptions, isMobile, modules) {
 }
 
 function setupGSAPAnimations(element, elementSettings, initOptions, isMobile, modules) {
-  const { animationType, split, scrub, duration, stagger, delay, ease, distance, anchorElement, anchorSelector, viewportPercentage } = elementSettings;
+  const { animationType, split, scrub, duration, stagger, delay, ease, distance, anchorElement, anchorSelector, viewport } = elementSettings;
   
   // 1. Variables setup
   const baseType = animationType.includes('-') ? animationType.split('-')[0] : animationType;
@@ -346,15 +346,13 @@ function setupGSAPAnimations(element, elementSettings, initOptions, isMobile, mo
   modules.ScrollTrigger.create({
     trigger: anchorElement,
     ...(scrub ? {
-      // start: isMobile ? "top 40%" : `top ${(viewportPercentage) * 100}%`,
-      // end: isMobile ? "top 20%" : "top 40%",
-      start: `top ${(viewportPercentage) * 100}%`,
-      end: "top 40%",
+      start: `top ${(viewport) * 100}%`,
+      end: `bottom ${(viewport-0.1) * 100}%`,
       scrub: scrub ? 
         (parseFloat(scrub) || true)
       : false
     } : {
-      start: `top ${(viewportPercentage) * 100}%`
+      start: `top ${(viewport) * 100}%`
     }),
     animation: tl,
     onEnter: () => {
@@ -398,7 +396,7 @@ function setupGSAPAnimations(element, elementSettings, initOptions, isMobile, mo
         break;
 
       case 'background':
-        modules.animations.backgroundColor(element, duration, ease, viewportPercentage, initOptions.debug);
+        modules.animations.backgroundColor(element, duration, ease, viewport, initOptions.debug);
         break;
 
       case 'parallax':
@@ -449,8 +447,8 @@ function setupGSAPAnimations(element, elementSettings, initOptions, isMobile, mo
 }
 
 function setupIntersectionObserver(element, elementSettings, initOptions) {
-  const { anchorElement, anchorSelector, viewportPercentage } = elementSettings;
-  const bottomMargin = (1 - viewportPercentage) * 100;
+  const { anchorElement, anchorSelector, viewport } = elementSettings;
+  const bottomMargin = (1 - viewport) * 100;
   const rootMarginValue = `0px 0px -${bottomMargin}% 0px`;
 
   // Observer to add 'in-view' class

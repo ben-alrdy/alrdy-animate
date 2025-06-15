@@ -47,7 +47,7 @@ export function getElementSettings(element, settings, isMobile) {
     pseudoColor,
     
     // Viewport and anchoring
-    viewportPercentage: element.hasAttribute('aa-viewport') ? parseFloat(element.getAttribute('aa-viewport')) : settings.viewportPercentage,
+    viewport: element.hasAttribute('aa-viewport') ? parseFloat(element.getAttribute('aa-viewport')) : settings.viewport,
     anchorSelector,
     anchorElement,
     

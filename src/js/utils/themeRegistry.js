@@ -1,60 +1,49 @@
 // Predefined animation themes
 const predefinedThemes = {
-  'floaty-fade': {
-    'headline-style-h1': {
-      animationType: 'text-float-up',
-      split: 'lines',
-      ease: 'circ.out',
-      duration: 1.2,
-      stagger: 0.2
-    },
-    'headline-style-h2': {
-      animationType: 'text-fade',
-      split: 'words',
-      ease: 'power2.out',
-      duration: 0.6,
-      stagger: 0.04
-    },
-    'headline-style-h3': {
-      animationType: 'text-slide-up',
-      split: 'words',
-      ease: 'power2.out',
-      duration: 0.5,
-      stagger: 0.03
-    },
-    'paragraph-style-normal': {
-      animationType: 'aa-fade-up',
-      ease: 'power2.out',
-      duration: 0.7
-    }
-  },
-  'bouncy': {
-    'headline-style-h1': {
-      animationType: 'text-slide-up|aa-fade-up',
-      split: 'words',
-      ease: 'power2.out',
-      duration: 1,
+  'blur': {
+    'heading-style-h2': {
+      animationType: 'text-blur',
+      split: 'chars|3',
+      ease: 'power1.out',
+      duration: 0.8,
       stagger: 0.1
     },
-    'headline-style-h2': {
-      animationType: 'text-slide-up',
+    'heading-style-h3': {
+      animationType: 'text-blur',
       split: 'words',
-      ease: 'power2.out',
-      duration: 0.8,
+      ease: 'power1.out',
+      duration: 0.6,
       stagger: 0.08
     },
-    'headline-style-h3': {
-      animationType: 'text-slide-up',
-      split: 'words',
+    'text-size-medium': {
+      animationType: 'text-fade',
+      split: 'lines&words',
       ease: 'power2.out',
-      duration: 0.6,
-      stagger: 0.06
-    },
-    'paragraph-style-normal': {
-      animationType: 'aa-fade-up',
-      ease: 'power2.out',
+      duration: 1,
+      stagger: 0.02
+    }
+  },
+  'tilt': {
+    'heading-style-h2': {
+      animationType: 'text-tilt-up-lines',
+      split: 'lines',
+      ease: 'power4.out',
       duration: 0.9,
-      delay: 0.3
+      stagger: 0.1,
+    },
+    'heading-style-h3': {
+      animationType: 'text-tilt-up-lines',
+      split: 'lines',
+      ease: 'power4.out',
+      duration: 0.7,
+      stagger: 0.1,
+    },
+    'text-size-medium': {
+      animationType: 'text-slide-up-lines',
+      split: 'lines',
+      ease: 'power4.out',
+      duration: 0.5,
+      stagger: 0.02,
     }
   }
 };

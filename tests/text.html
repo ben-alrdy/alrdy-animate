@@ -6,6 +6,22 @@
     <title>Text Animations - AlrdyAnimate Tests</title>
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="../dist/AlrdyAnimate.css">
+    <style>
+        
+        .new-section {
+            min-height: 80vh;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .columns {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+    </style>
 </head>
 <body>
     <header>
@@ -25,15 +41,33 @@
         </nav>
     </header>
 
-    <style>
-        [aa-animate^="text-"],[aa-animate^="appear"],[aa-animate^="reveal"] {
-            visibility: hidden;
-        }
-    </style>
-
     <main style="overflow: hidden;">
         <div class="container">
             <h1>Text Animations</h1>
+
+            <div class="new-section">
+                <h2 class="heading-style-h2" >Welcome to Our Platform</h2>
+                <p class="text-size-medium" >We're building the future of digital experiences. Our platform combines cutting-edge technology with intuitive design to create seamless interactions that delight users and drive results. Join us on this journey as we redefine what's possible in the digital landscape.</p>
+            </div>
+
+            <div class="new-section">
+                <h2 class="heading-style-h2" style="max-width: 700px;">Our Core Features are some great stuff</h2>
+
+                <div class="columns">
+                    <div>
+                        <h3 class="heading-style-h3" >Innovation Timeline</h3>
+                        <p class="text-size-medium" >Pushing boundaries and exploring new possibilities. We're constantly innovating to stay ahead of the curve and deliver exceptional experiences.</p>
+                    </div>
+                    <div>
+                        <h3 class="heading-style-h3" >Reliability Live</h3>
+                        <p class="text-size-medium" >Built on a foundation of trust and stability. Our platform ensures your digital presence is always available and performing at its best.</p>
+                    </div>
+                    <div>
+                        <h3 class="heading-style-h3" >Simplicity Is Key</h3>
+                        <p class="text-size-medium" >Complex solutions made simple. We believe in creating intuitive experiences that anyone can use, regardless of technical expertise.</p>
+                    </div>
+                </div>
+            </div>
 
             <!-- Basic Text Slides -->
             <section class="animation-section" >
@@ -55,37 +89,37 @@
             </section>
 
              <!-- Blur Texts -->
-             <section class="animation-section">
-                <h2>Blur Texts</h2>
-                
-                <div class="text-container">
+              <section class="animation-section">
+                 <h2>Blur Texts</h2>
+                 
+                 <div class="text-container">
 
-                    <h3 aa-animate="text-blur|fade" aa-split="chars" aa-ease="linear" aa-stagger="0.05" aa-duration="0.5" style="max-width: 500px;">
-                        This text blurs in word by word 
-                        This text blurs in word by word 
-                        This text blurs in word by word 
-                        
-                    </h3>
-                  
-                    <h3 aa-animate="text-blur-right" aa-split="words">
-                        This text blurs in word by word
-                    </h3>
-                    <h3 aa-animate="text-blur"  aa-split="chars|3" aa-ease="linear" aa-stagger="0.08" aa-duration="0.6" style="font-size: 5rem;">
-                        This text blurs in character by character
-                    </h3>
-                    <h3 aa-animate="text-blur-right" aa-split="chars">
-                        This text blurs in character by character
-                    </h3>
-                    <h3 aa-animate="text-blur" aa-split="chars">
-                        This text blurs in character by character
-                    </h3>
-                    <h3 aa-animate="text-blur-up" aa-split="words" aa-stagger="0.05" aa-duration="0.6">
-                        This text blurs in word by word
-                    </h3>
-                    <h3 aa-animate="text-blur-down" aa-split="words" aa-stagger="0.05" aa-duration="0.6">
-                        This text blurs in word by word
-                    </h3>
-                </div>
+                     <h3 aa-animate="text-blur|fade" aa-split="chars" aa-ease="linear" aa-stagger="0.05" aa-duration="0.5" style="max-width: 500px;">
+                         This text blurs in word by word 
+                         This text blurs in word by word 
+                         This text blurs in word by word 
+                         
+                     </h3>
+                   
+                     <h3 aa-animate="text-blur-right" aa-split="words">
+                         This text blurs in word by word
+                     </h3>
+                     <h3 aa-animate="text-blur"  aa-split="chars|3" aa-ease="linear" aa-stagger="0.08" aa-duration="0.6" style="font-size: 5rem;">
+                         This text blurs in character by character
+                     </h3>
+                     <h3 aa-animate="text-blur-right" aa-split="chars">
+                         This text blurs in character by character
+                     </h3>
+                     <h3 aa-animate="text-blur" aa-split="chars">
+                         This text blurs in character by character
+                     </h3>
+                     <h3 aa-animate="text-blur-up" aa-split="words" aa-stagger="0.05" aa-duration="0.6">
+                         This text blurs in word by word
+                     </h3>
+                     <h3 aa-animate="text-blur-down" aa-split="words" aa-stagger="0.05" aa-duration="0.6">
+                         This text blurs in word by word
+                     </h3>
+                 </div>
             </section>
 
             <!-- Text Tilt Animations -->

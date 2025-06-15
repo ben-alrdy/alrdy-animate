@@ -66,13 +66,7 @@ export function getElementTemplateSettings(element, isMobile) {
     if (settings.distance) {
       element.style.setProperty('--aa-distance', settings.distance);
     }
-    if (settings.stagger) {
-      // Handle both old and new stagger format
-      const staggerValue = typeof settings.stagger === 'object' 
-        ? `${settings.stagger.timing}${settings.stagger.isRandom ? '|random' : ''}${settings.stagger.parallelStreams ? `|${settings.stagger.parallelStreams}` : ''}`
-        : settings.stagger;
-      element.style.setProperty('--aa-stagger', staggerValue);
-    }
+    
   }
   
   // Handle mobile/desktop animation split

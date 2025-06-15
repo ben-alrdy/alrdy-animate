@@ -83,7 +83,7 @@ For Webflow projects, add these scripts to your custom code section:
         modals: true,
         gsapFeatures: ['text', 'slider', 'scroll'],
         templates: {
-          theme: 'floaty', 
+          theme: 'blur', 
           custom: {         
             'heading-style-h2': {
               animationType: 'text-blur|text-fade',
@@ -225,7 +225,7 @@ window.addEventListener('popstate', initAlrdyAnimate);
 | `delay` | number | 0 | Animation delay in seconds |
 | `ease` | string | "ease-in-out" | Default easing function for animations |
 | `again` | boolean | true | Remove 'in-view' class when element is out of view |
-| `viewportPercentage` | number | 0.8 | Percentage of viewport height to trigger animation |
+| `viewport` | number | 0.8 | Percentage of viewport height to trigger animation |
 | `distance` | number | 1 | Distance factor for animations |
 | `gsapFeatures` | array | [] | GSAP features to load: ['text', 'loop', 'scroll'] |
 | `debug` | boolean | false | Enable GSAP debug info |
@@ -348,9 +348,10 @@ AlrdyAnimate supports several GSAP-powered features that can be enabled by inclu
 (`gsapFeatures: ['text']`)
 
 - Set the animation type with `aa-animate="text-..."`.
-  - Optionally, you can add `-clip` (or `-lines`, `-words`, `-chars`) to wrap each line in a clip wrapper and prevent overflow, resulting in a clipping effect during the animation. Example: `aa-animate="text-slide-up-clip"`.
+  - Optionally, you can add `-clip` (or `-lines`, `-words`, `-chars`) to wrap each element in a clip wrapper and prevent overflow, resulting in a clipping effect during the animation. Example: `aa-animate="text-slide-up-clip"`.
 - Pair with `aa-split` to define how to split the text for animation:
   - There are 4 split types: `lines`, `words`, `chars` or `lines&words` (i.e. both lines and words will be animated simultaneously). 
+  - Optionally, randomize the split elements by adding `random` or an integer value to `aa-split`, e.g. `aa-split=words|random` (integer values will result in specified amount of steps that the elements will appear)
 - Use `aa-scrub` to make the animation scroll-driven. There are two options: `aa-scrub="snap"` and `aa-scrub="smooth"`.
 - Use `aa-stagger` to set the stagger effect for split text animations, in seconds. Example: `aa-stagger="0.05"`.
 

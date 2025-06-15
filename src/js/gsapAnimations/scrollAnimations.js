@@ -1,4 +1,4 @@
-function initializeBackgroundColor(element, gsap, ScrollTrigger, duration, ease, viewportPercentage, debug = false) {
+function initializeBackgroundColor(element, gsap, ScrollTrigger, duration, ease, viewport, debug = false) {
   // Helper function to convert rgb to hex
   function rgbToHex(rgb) {
     // Extract r, g, b values from rgb(r, g, b) format
@@ -101,8 +101,8 @@ function initializeBackgroundColor(element, gsap, ScrollTrigger, duration, ease,
 
       ScrollTrigger.create({
         trigger: section.element,
-        start: `top ${viewportPercentage * 100}%`,
-        end: `center ${viewportPercentage * 100}%`,
+        start: `top ${viewport * 100}%`,
+        end: `center ${viewport * 100}%`,
         scrub: scrub,
         animation: tl,
         markers: debug,
@@ -156,7 +156,7 @@ function initializeBackgroundColor(element, gsap, ScrollTrigger, duration, ease,
 
       ScrollTrigger.create({
         trigger: section.element,
-        start: `top ${viewportPercentage * 100}%`,
+        start: `top ${viewport * 100}%`,
         onEnter: () => {
           tl.play();
         },
@@ -587,8 +587,8 @@ function initializeStack(element, scrub, distance) {
 function createScrollAnimations(gsap, ScrollTrigger) {
   
   return {
-    backgroundColor: (element, duration, ease, viewportPercentage, debug) => {
-      initializeBackgroundColor(element, gsap, ScrollTrigger, duration, ease, viewportPercentage, debug);
+    backgroundColor: (element, duration, ease, viewport, debug) => {
+      initializeBackgroundColor(element, gsap, ScrollTrigger, duration, ease, viewport, debug);
     },
     
     parallax: (element, scrub) => {
