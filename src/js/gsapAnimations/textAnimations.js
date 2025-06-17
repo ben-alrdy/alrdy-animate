@@ -140,10 +140,8 @@ export function createTextAnimations(gsap) {
         const tl = gsap.timeline({ delay });
         const color = element.getAttribute('aa-color') || '#000000';
         const { initialClip, revealClip, hideClip, textInit, textFinal } = config[direction];
-        const blocks = [];
-        const texts = [];
 
-        self.lines.forEach(line => {
+        self.lines.forEach((line, i) => {
           // Create background element
           const blockDiv = document.createElement('div');
           blockDiv.className = 'aa-block-bg';
@@ -159,34 +157,23 @@ export function createTextAnimations(gsap) {
           line.appendChild(blockDiv);
           line.appendChild(textDiv);
 
-          // Collect references
-          blocks.push(blockDiv);
-          texts.push(textDiv);
-
           // Set initial states
           gsap.set(blockDiv, { clipPath: initialClip });
           gsap.set(textDiv, { opacity: 0, ...textInit });
-        });
 
-        tl.to(blocks, {
-          clipPath: revealClip,
-          duration,
-          ease,
-          stagger
-        })
-        .to(blocks, {
-          clipPath: hideClip,
-          duration,
-          ease,
-          stagger
-        })
-        .to(texts, {
-          opacity: 1,
-          ...textFinal,
-          duration,
-          ease,
-          stagger
-        }, '<');
+          // Split duration among phases
+          const revealDur = duration * 0.4;
+          const shrinkDur = duration * 0.6;
+          const textDur   = duration * 0.4;
+
+          const lineTl = gsap.timeline();
+          lineTl
+            .to(blockDiv, { clipPath: revealClip, duration: revealDur, ease })
+            .to(blockDiv, { clipPath: hideClip, duration: shrinkDur, ease })
+            .to(textDiv, { opacity: 1, ...textFinal, duration: textDur, ease }, '<');
+
+          tl.add(lineTl, i * (stagger ?? 0));
+        });
 
         return tl;
       }
