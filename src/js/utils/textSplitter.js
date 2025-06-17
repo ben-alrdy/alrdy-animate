@@ -31,6 +31,8 @@ export function splitText(element, split, hideFromScreenReaders = false, onSplit
   
   // Add autoSplit and onSplit options
   splitConfig.autoSplit = true;
+
+  splitConfig.linesClass = 'aa-line';
   
   if (onSplit) {
     splitConfig.onSplit = (self) => {

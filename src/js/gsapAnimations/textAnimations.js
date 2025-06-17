@@ -103,6 +103,96 @@ export function createTextAnimations(gsap) {
     };
   }
 
+  // Block animation factory for left, right, up, down
+  function createBlockAnimation(direction) {
+    const config = {
+      left:  {
+        initialClip: 'inset(0% 0% 0% 100%)',
+        revealClip:  'inset(0% 0% 0% 0%)',
+        hideClip:    'inset(0% 100% 0% 0%)',
+        textInit:    { x: '0.6em', y: 0 },
+        textFinal:   { x: 0, y: 0 }
+      },
+      right: {
+        initialClip: 'inset(0% 100% 0% 0%)',
+        revealClip:  'inset(0% 0% 0% 0%)',
+        hideClip:    'inset(0% 0% 0% 100%)',
+        textInit:    { x: '-0.6em', y: 0 },
+        textFinal:   { x: 0, y: 0 }
+      },
+      up:    {
+        initialClip: 'inset(100% 0% 0% 0%)',
+        revealClip:  'inset(0% 0% 0% 0%)',
+        hideClip:    'inset(0% 0% 100% 0%)',
+        textInit:    { x: 0, y: '0.6em' },
+        textFinal:   { x: 0, y: 0 }
+      },
+      down:  {
+        initialClip: 'inset(0% 0% 100% 0%)',
+        revealClip:  'inset(0% 0% 0% 0%)',
+        hideClip:    'inset(100% 0% 0% 0%)',
+        textInit:    { x: 0, y: '-0.6em' },
+        textFinal:   { x: 0, y: 0 }
+      }
+    };
+    return (element, split, duration, stagger, delay, ease) => ({
+      onSplit: (self) => {
+        const tl = gsap.timeline({ delay });
+        const color = element.getAttribute('aa-color') || '#000000';
+        const { initialClip, revealClip, hideClip, textInit, textFinal } = config[direction];
+        const blocks = [];
+        const texts = [];
+
+        self.lines.forEach(line => {
+          // Create background element
+          const blockDiv = document.createElement('div');
+          blockDiv.className = 'aa-block-bg';
+          blockDiv.style.backgroundColor = color;
+
+          // Wrap text content in div
+          const textContent = line.innerHTML;
+          const textDiv = document.createElement('div');
+          textDiv.className = 'aa-block-text';
+          textDiv.innerHTML = textContent;
+
+          line.innerHTML = '';
+          line.appendChild(blockDiv);
+          line.appendChild(textDiv);
+
+          // Collect references
+          blocks.push(blockDiv);
+          texts.push(textDiv);
+
+          // Set initial states
+          gsap.set(blockDiv, { clipPath: initialClip });
+          gsap.set(textDiv, { opacity: 0, ...textInit });
+        });
+
+        tl.to(blocks, {
+          clipPath: revealClip,
+          duration,
+          ease,
+          stagger
+        })
+        .to(blocks, {
+          clipPath: hideClip,
+          duration,
+          ease,
+          stagger
+        })
+        .to(texts, {
+          opacity: 1,
+          ...textFinal,
+          duration,
+          ease,
+          stagger
+        }, '<');
+
+        return tl;
+      }
+    });
+  }
+
   // Define all text animations in one place
   const textAnimations = {
     'text-slide-up': createAnimation(
@@ -198,22 +288,24 @@ export function createTextAnimations(gsap) {
       defaults.blur
     ),
     
+    'text-block-left': createBlockAnimation('left'),
+    'text-block-right': createBlockAnimation('right'),
+    'text-block-up': createBlockAnimation('up'),
+    'text-block-down': createBlockAnimation('down'),
+    
     'text-rotate-soft': (element, split, duration, stagger, delay, ease) => {
       return {
         onSplit: (self) => {
           const tl = gsap.timeline();
-          // Get the base split type without any modifiers
-          const baseSplitType = split.split('-')[0].split('|')[0];
-          const animationTarget = self[baseSplitType];
           
-          if (!animationTarget || animationTarget.length === 0) return tl;
+          if (!self.lines || self.lines.length === 0) return tl;
 
           // Calculate perspective
           const fontSize = parseFloat(window.getComputedStyle(element).fontSize);
           const perspectiveInPixels = fontSize * 5;
 
           // Add perspective wrappers
-          animationTarget.forEach(line => {
+          self.lines.forEach(line => {
             const wrapper = document.createElement('div');
             wrapper.classList.add('line-perspective-wrapper');
             line.parentNode.insertBefore(wrapper, line);
@@ -224,50 +316,25 @@ export function createTextAnimations(gsap) {
             transformStyle: 'preserve-3d',
             perspective: perspectiveInPixels
           })
-          .set(animationTarget, {
+          .set(self.lines, {
             transformOrigin: '50% 0%'
           });
 
-          // Check if we have pre-created groups
-          if (self._groups) {
-            // Animate each step sequentially
-            self._groups.forEach((group, index) => {
-              if (group.length > 0) {
-                tl.from(group, {
-                  autoAlpha: 0,
-                  rotateX: -90,
-                  y: '100%',
-                  scaleX: 0.75,
-                  duration: duration ?? defaults.rotateSoft.duration,
-                  stagger: 0, // No stagger within groups
-                  ease: ease ?? defaults.rotateSoft.ease,
-                  delay,
-                  onStart: () => {
-                    if (!element.hasAttribute('aa-scrub')) {
-                      gsap.set(element, { visibility: 'visible' });
-                    }
-                  }
-                }, index * stagger); // Only stagger between groups
+          tl.from(self.lines, {
+            autoAlpha: 0,
+            rotateX: -90,
+            y: '100%',
+            scaleX: 0.75,
+            duration: duration ?? defaults.rotateSoft.duration,
+            stagger: stagger ?? defaults.rotateSoft.stagger,
+            ease: ease ?? defaults.rotateSoft.ease,
+            delay,
+            onStart: () => {
+              if (!element.hasAttribute('aa-scrub')) {
+                gsap.set(element, { visibility: 'visible' });
               }
-            });
-          } else {
-            // Regular sequential animation
-            tl.from(animationTarget, {
-              autoAlpha: 0,
-              rotateX: -90,
-              y: '100%',
-              scaleX: 0.75,
-              duration: duration ?? defaults.rotateSoft.duration,
-              stagger: stagger ?? defaults.rotateSoft.stagger,
-              ease: ease ?? defaults.rotateSoft.ease,
-              delay,
-              onStart: () => {
-                if (!element.hasAttribute('aa-scrub')) {
-                  gsap.set(element, { visibility: 'visible' });
-                }
-              }
-            });
-          }
+            }
+          });
 
           return tl;
         }
