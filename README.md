@@ -366,6 +366,7 @@ AlrdyAnimate supports several GSAP-powered features that can be enabled by inclu
 - `text-scale-up`: Fades and scales the text up.
 - `text-blur`: Blurs the text in.
 - `text-blur-left/right/up/down`: Blurs the text in with direction.
+- `text-block-left/right/up/down`: Shows a block that reveals the text, use aa-color with a hex code to define the block color
 
 
 ### Slider Animations 
