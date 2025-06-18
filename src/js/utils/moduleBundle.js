@@ -57,6 +57,9 @@ export const gsapBundles = {
             import(/* webpackChunkName: "gsap-flip" */ 'gsap/Flip').then(mod => [{ Flip: mod.Flip }]) :
             Promise.resolve([{ Flip: window.Flip }])
     },
+    modal: {
+        animations: () => import(/* webpackChunkName: "gsap-modal" */ '../gsapAnimations/modalAnimations')
+    }
 };
 
 // Non-GSAP bundles

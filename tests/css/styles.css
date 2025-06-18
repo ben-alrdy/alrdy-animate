@@ -528,95 +528,103 @@ p {
     background-color: rgba(0, 0, 0, 0.1);
 }
 
-/* Modal Styles */
+/* Modal System (GSAP/Attribute-based) */
 [aa-modal-group] {
-    z-index: 1000;
-    pointer-events: none;
-    visibility: hidden;
-    justify-content: center;
-    align-items: center;
-    display: grid;
-    position: fixed;
-    inset: 0;
-    transition: opacity 0.2s ease, visibility 0.2s ease;
+  z-index: 1000;
+  pointer-events: none;
+  visibility: hidden;
+  justify-content: center;
+  align-items: center;
+  display: none;
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
 }
-
 [aa-modal-group][aa-modal-group-status="active"] {
-    visibility: visible;
-    pointer-events: auto;
+  display: flex;
+  visibility: visible;
+  pointer-events: auto;
 }
 
- .modal-backdrop{
-    opacity: 0;
-    pointer-events: auto;
-    cursor: pointer;
-    background-color: #131313;
-    width: 100%;
-    height: 100%;
-    position: absolute;
-    top: 0; left: 0;
-    transition: opacity 0.2s ease;
-}
-
-[aa-modal-group][aa-modal-group-status="active"] .modal-backdrop {
-    opacity: 0.5;
+[aa-modal-backdrop] {
+  pointer-events: auto;
+  cursor: pointer;
+  background-color: rgba(0, 0, 0, 0.5);
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0; left: 0;
 }
 
 [aa-modal-name] {
-    grid-column: 1 / 1;
-    grid-row: 1 / 1;
-    pointer-events: auto;
-    display: flex;
-    flex-direction: column;
-    background-color: #fff;
-    border-radius: 1.5em;
-    width: 100%;
-    max-width: 32em;
-    max-height: 80vh;
-    opacity: 0;
-    overflow: hidden;
-    position: relative;
-    margin: auto;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.18);
-    transition: all 0.4s ease;
-    transform: translateY(-30px);
-}
-
-.modal-scroll {
-    overflow: scroll;
-    flex: 1 1 auto;
-    min-height: 0; 
-    padding: 0 2em;
-    text-align: center;
-}
-
-[aa-modal-name][aa-modal-status="not-active"] {
-    opacity: 0;
-    visibility: hidden;
+  pointer-events: auto;
+  background-color: #efeeec;
+  border-radius: 2em;
+  width: 100%;
+  max-width: 54em;
+  max-height: 100%;
+  padding: .75em;
+  display: none;
+  position: relative;
+  flex-direction: column;
 }
 [aa-modal-name][aa-modal-status="active"] {
-    transform: translateY(0px);
-    opacity: 1;
-    visibility: visible;
+  display: flex;
 }
 
-.modal-close-btn {
-    background: none;
-    border: none;
-    font-size: 2em;
-    cursor: pointer;
-    color: #333;
-    position: absolute;
-    top: 1em;
-    right: 1em;
-    z-index: 2;
-    line-height: 1;
-    padding: 0;
-    width: 2em;
-    height: 2em;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+.modal__scroll {
+  background-color: #e2e1df;
+  border-radius: 1.25em;
+  flex-flow: column;
+  width: 100%;
+  max-height: 100%;
+  display: flex;
+  position: relative;
+  overflow: auto;
+}
+
+.modal__content {
+  flex-flow: column;
+  padding: 2em;
+  display: flex;
+}
+
+.modal__h2 {
+  margin-top: 0;
+  margin-bottom: 0;
+  font-size: 2.5em;
+  font-weight: 500;
+  line-height: 1.175;
+}
+
+.modal__p {
+  margin-bottom: 0;
+  font-size: 1em;
+  line-height: 1.5;
+}
+
+.modal__btn-close {
+  background-color: #efeeec;
+  border-radius: 50%;
+  justify-content: center;
+  align-items: center;
+  width: 3.5em;
+  height: 3.5em;
+  display: flex;
+  position: absolute;
+  top: 2.5em;
+  right: 2.5em;
+  cursor: pointer;
+}
+.modal__btn-close-bar {
+  background-color: currentColor;
+  width: .125em;
+  height: 40%;
+  position: absolute;
+  transform: rotate(45deg);
+}
+.modal__btn-close-bar.is--second {
+  transform: rotate(-45deg);
 }
 
 .marquee {
@@ -704,4 +712,85 @@ p {
   align-items: center;
   justify-content: center;
   font-size: 2rem;
+}
+
+/* GSAP Modal Styles */
+.gsap-modal-group {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  pointer-events: none;
+}
+
+.gsap-modal-group[aa-modal-group-status="active"] {
+  pointer-events: auto;
+}
+
+.gsap-modal-backdrop {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  cursor: pointer;
+  z-index: 1;
+}
+
+.gsap-modal {
+  position: relative;
+  background: white;
+  border-radius: 8px;
+  padding: 2rem;
+  max-width: 90%;
+  width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  z-index: 2;
+}
+
+.gsap-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.gsap-modal-title {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.gsap-modal-close {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  line-height: 1;
+}
+
+
+
+/* Modal Variants */
+.gsap-modal.dark {
+  background: #1a1a1a;
+  color: white;
+}
+
+.gsap-modal.gradient {
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  color: white;
+}
+
+.gsap-modal-close:hover {
+  opacity: 0.7;
 }

@@ -263,8 +263,9 @@
                     </a>
                 </div>
             </section>
-            <section class="animation-section">
-                <!-- Modal Trigger Button -->
+
+            <!-- <section class="animation-section">
+       
                 <button aa-modal-target="test-modal" class="hover-button" style="margin: 2rem 0;">
                     Open Test Modal
                 </button>
@@ -272,7 +273,7 @@
                     Open Test Modal 2
                 </button>
 
-                <!-- Modal Group and Modal -->
+                
                 <div aa-modal-group>
                     <div class="modal-backdrop" aa-modal-close></div>
                     <div aa-modal-name="test-modal" aa-modal-status="not-active" >
@@ -310,6 +311,56 @@
                 </div>
 
                 
+            </section> -->
+
+            <section class="animation-section">
+                <!-- Modal Trigger Buttons -->
+                <div class="hover-grid">
+                    <button aa-modal-target="gsap-modal-1" class="hover-button">Open Standard Modal</button>
+                    <button aa-modal-target="gsap-modal-2" class="hover-button">Open Dark Modal</button>
+                    <button aa-modal-target="gsap-modal-3" class="hover-button">Open Gradient Modal</button>
+                </div>
+
+                <!-- GSAP Modal Group Wrapper -->
+                <div aa-modal-group aa-modal-group-status="not-active" style="display: none;">
+                    <div aa-modal-backdrop aa-modal-close class="modal__dark"></div>
+
+                    <div class="modal__card" aa-modal-name="gsap-modal-1" aa-modal-status="not-active" aa-modal-animate="scale" aa-modal-order="1-50" aa-duration="0.3">
+                        <div class="gsap-modal-header">
+                            <h3 class="gsap-modal-title" aa-modal-animate="fade-up" aa-modal-order="2-30">Standard Modal</h3>
+                            <button class="gsap-modal-close" aa-modal-close aa-modal-animate="fade" aa-modal-order="3">&times;</button>
+                        </div>
+                        <div class="gsap-modal-content" aa-modal-animate="text-slide-up-lines" aa-split="lines" aa-modal-order="4">
+                            This is a standard modal with a clean design. It uses GSAP animations for smooth transitions.
+                            The modal can be closed by clicking the close button, clicking outside, or pressing ESC.
+                            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                        </div>
+                    </div>
+
+                    <div class="modal__card" aa-modal-name="gsap-modal-2" aa-modal-status="not-active" aa-modal-animate="scale" aa-modal-order="1">
+                        <div class="gsap-modal-header" aa-modal-animate="fade-up" aa-modal-order="2">
+                            <h3 class="gsap-modal-title" aa-modal-animate="fade-up" aa-modal-order="3">Dark Modal</h3>
+                            <button class="gsap-modal-close" aa-modal-close aa-modal-animate="fade" aa-modal-order="4">&times;</button>
+                        </div>
+                        <div class="gsap-modal-content" aa-modal-animate="fade-up" aa-modal-order="5">
+                            <p>This is a dark modal. It uses GSAP animations for smooth transitions.</p>
+                            <p>The modal can be closed by clicking the close button, clicking outside, or pressing ESC.</p>
+                            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+                        </div>
+                    </div>
+
+                    <div class="modal__card" aa-modal-name="gsap-modal-3" aa-modal-status="not-active" aa-modal-animate="scale" aa-modal-order="1">
+                        <div class="gsap-modal-header" aa-modal-animate="fade-up" aa-modal-order="2">
+                            <h3 class="gsap-modal-title" aa-modal-animate="fade-up" aa-modal-order="3">Gradient Modal</h3>
+                            <button class="gsap-modal-close" aa-modal-close aa-modal-animate="fade" aa-modal-order="4">&times;</button>
+                        </div>
+                        <div class="gsap-modal-content" aa-modal-animate="fade-up" aa-modal-order="5">
+                            <p>This is a gradient modal. It uses GSAP animations for smooth transitions.</p>
+                            <p>The modal can be closed by clicking the close button, clicking outside, or pressing ESC.</p>
+                            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+                        </div>
+                    </div>
+                </div>
             </section>
         </div>
 

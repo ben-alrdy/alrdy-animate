@@ -5,9 +5,9 @@ document.addEventListener('DOMContentLoaded', function() {
         ease: 'power2.inOut',
         duration: 1,
         again: true,
-        gsapFeatures: ['scroll', 'text', 'slider', 'hover', 'nav'],
+        gsapFeatures: ['scroll', 'text', 'slider', 'hover', 'nav', 'modal'],
         debug: false,
-        modals: true,
+        modals: false,
         includeGSAP: true,
         templates: {
             theme: 'tilt',

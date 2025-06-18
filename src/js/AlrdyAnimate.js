@@ -153,6 +153,7 @@ async function init(options = {}) {
                     switch (feature) {
                       case 'text':
                         moduleAnimations = animationModule.createTextAnimations(modules.gsap);
+                        modules.animations = { ...modules.animations, text: moduleAnimations }; // Preserve existing animations
                         break;
                       case 'scroll':
                         moduleAnimations = animationModule.createScrollAnimations(modules.gsap, modules.ScrollTrigger);
@@ -165,6 +166,14 @@ async function init(options = {}) {
                         break;
                       case 'nav':
                         moduleAnimations = animationModule.createNavAnimations(modules.gsap);
+                        break;
+                      case 'modal':
+                        moduleAnimations = animationModule.createModalAnimations(
+                          modules.gsap, 
+                          lenis,
+                          modules.animations.text,
+                          modules.splitText
+                        );
                         break;
                     }
 
@@ -213,6 +222,7 @@ async function init(options = {}) {
 
     // Initialize modals if enabled
     if (initOptions.modals) {
+     
       try {
         const { coreBundles } = await import('./utils/moduleBundle');
         const { initializeModals } = await coreBundles.modals.setup();
@@ -229,10 +239,14 @@ async function init(options = {}) {
           loadedModules = await gsapModulesPromise;
 
           if (loadedModules) {
-
             // Setup nav animations if feature is enabled
             if (initOptions.gsapFeatures.includes('nav')) {
               loadedModules.animations.nav();
+            }
+
+            // Setup modal animations if feature is enabled
+            if (initOptions.gsapFeatures.includes('modal')) {
+              loadedModules.animations.modal();
             }
 
             // Setup animations
@@ -243,7 +257,6 @@ async function init(options = {}) {
             if (initOptions.lazyLoadHandler) {
               handleLazyLoadedImages(loadedModules.ScrollTrigger);
             }
-
           } else {
             // Fallback if GSAP loading failed
             enableGSAP = false;
