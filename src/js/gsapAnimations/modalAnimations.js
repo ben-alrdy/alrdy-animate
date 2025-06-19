@@ -195,15 +195,18 @@ function initializeModals(lenis = null, textAnimations = null, splitText = null,
       timelines.set(modal, tl);
     }
     
-    tl.timeScale(1).play();
-    
-    removeTabTrap = trapTab(modal);
-    setTimeout(() => {
+    // Reset any previous callbacks and set up new one
+    tl.eventCallback('onComplete', null);  // Clear previous callback
+    tl.eventCallback('onComplete', () => {
       const focusable = modal.querySelector(
         'input, select, textarea, [tabindex]:not([tabindex="-1"])'
       );
       if (focusable) focusable.focus();
-    }, 10);
+    });
+    
+    tl.timeScale(1).play();
+    
+    removeTabTrap = trapTab(modal);
   }
 
   triggers.forEach(trigger => {
