@@ -749,10 +749,32 @@ AlrdyAnimate supports accessible, attribute-driven modals that work seamlessly w
 - Trigger: 
   - Use `aa-modal-target="unique-modal-name"` on any element that should open a modal.
 - Modal set up:
-  - Wrap all your modals in a container with `aa-modal-group`
+  - Wrap all your modals in a container with `aa-modal-group` (if you have multiple groups, add a unique identifier each)
   - Each modal must have a unique `aa-modal-name="unique-modal-name"` attribute
   - Any element inside the modal with `aa-modal-close` will close the modal when clicked (e.g., a close button or the backdrop).
   - Apply `data-lenis-prevent`to the content div inside a modal to allow it to scroll
+
+### Modal Animations
+Add animations to your modals using these attributes:
+
+- `aa-modal-animate`: Add to any element in the modal to animate it. Available animations:
+  - Fade: `fade`, `fade-up`, `fade-down`, `fade-left`, `fade-right`
+  - Slide: `slide-up`, `slide-down`, `slide-left`, `slide-right`
+  - Scale: `scale`
+  - Custom: Use `custom-*` (e.g., `custom-slide`) to animate from CSS-defined positions to zero
+    ```css
+    [aa-modal-animate="custom-slide"] {
+      transform: translateX(500px);
+    }
+    ```
+
+- `aa-modal-order`: Control animation sequence
+  - Basic order: `aa-modal-order="1"` (elements animate in numeric order)
+  - Overlap: `aa-modal-order="1-50"` (second number is overlap percentage with previous animation)
+  - Example: `aa-modal-order="2-30"` means animate second, overlapping 30% with previous animation, starting when 30% of previous animation is still left
+
+- `aa-duration`: Set custom duration in seconds (default: 0.5)
+- `aa-ease`: Set custom easing (default: "power2.out")
 
 ## Easing Functions
 

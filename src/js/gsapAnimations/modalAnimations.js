@@ -1,28 +1,15 @@
 // Define modal animations
 const modalAnimations = {
-  'fade': {
-    opacity: 0
-  },
-  'fade-up': {
-    opacity: 0,
-    y: 20
-  },
-  'fade-down': {
-    opacity: 0,
-    y: -20
-  },
-  'slide-right': {
-    x: 100,
-    opacity: 0
-  },
-  'slide-left': {
-    x: -100,
-    opacity: 0
-  },
-  'scale': {
-    scale: 0.8,
-    opacity: 0
-  }
+  'fade': { opacity: 0 },
+  'fade-up': { opacity: 0, yPercent: 10 },
+  'fade-down': { opacity: 0, yPercent: -10 },
+  'fade-left': { opacity: 0, xPercent: 10 },
+  'fade-right': { opacity: 0, xPercent: -10 },
+  'slide-up': { yPercent: 110 },
+  'slide-down': { yPercent: -110 },
+  'slide-left': { xPercent: 110 },
+  'slide-right': { xPercent: -110 },
+  'scale': { scale: 0.8, opacity: 0 }
 };
 
 // Store parameters for initialization
@@ -101,8 +88,20 @@ function createModalTimeline(modal, backdrop, textAnimations, splitText) {
     } else {
       // Simple modal animations
       const animation = modalAnimations[animationAttr];
-      tl.from(element, { ...animation, duration, ease }, timelinePosition);
-      
+      if (animationAttr.includes('custom')) {
+        tl.to(element, { 
+          x: 0,
+          y: 0,
+          xPercent: 0, 
+          yPercent: 0, 
+          opacity: 1, 
+          scale: 1,
+          duration, 
+          ease 
+        }, timelinePosition);
+      } else {
+        tl.from(element, { ...animation, duration, ease }, timelinePosition);
+      }
     }
   });
   return tl;
@@ -175,8 +174,6 @@ function initializeModals(lenis = null, textAnimations = null, splitText = null,
       unlockScroll();
       if (removeTabTrap) removeTabTrap();
       activeModal = null;
-      // Reset timeline progress
-      tl.progress(0);
       tl.eventCallback('onReverseComplete', null);
     });
     tl.timeScale(2).reverse();
@@ -198,13 +195,12 @@ function initializeModals(lenis = null, textAnimations = null, splitText = null,
       timelines.set(modal, tl);
     }
     
-    // Reset and play timeline
-    tl.progress(0).timeScale(1).play();
+    tl.timeScale(1).play();
     
     removeTabTrap = trapTab(modal);
     setTimeout(() => {
       const focusable = modal.querySelector(
-        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        'input, select, textarea, [tabindex]:not([tabindex="-1"])'
       );
       if (focusable) focusable.focus();
     }, 10);
