@@ -153,7 +153,6 @@ async function init(options = {}) {
                     switch (feature) {
                       case 'text':
                         moduleAnimations = animationModule.createTextAnimations(modules.gsap);
-                        modules.animations = { ...modules.animations, text: moduleAnimations }; // Preserve existing animations
                         break;
                       case 'scroll':
                         moduleAnimations = animationModule.createScrollAnimations(modules.gsap, modules.ScrollTrigger);
@@ -166,14 +165,6 @@ async function init(options = {}) {
                         break;
                       case 'nav':
                         moduleAnimations = animationModule.createNavAnimations(modules.gsap);
-                        break;
-                      case 'modal':
-                        moduleAnimations = animationModule.createModalAnimations(
-                          modules.gsap, 
-                          lenis,
-                          modules.animations.text,
-                          modules.splitText
-                        );
                         break;
                     }
 
@@ -189,6 +180,30 @@ async function init(options = {}) {
           }
 
           modules.animations = animations;
+
+          // Initialize modal animations after all other animations are set up
+          if (initOptions.gsapFeatures.includes('modal')) {
+            try {
+              const modalModule = await gsapBundles.modal.animations();
+              
+              const modalAnimations = modalModule.createModalAnimations(
+                modules.gsap,
+                lenis,
+                modules.animations.text,
+                modules.splitText
+              );
+
+              // Store the modal animation function (like all other gsap animations)
+              modules.animations.modal = (group) => {
+                if (modalAnimations?.modal && typeof modalAnimations.modal === 'function') {
+                  return modalAnimations.modal(group);
+                }
+              };
+            } catch (modalError) {
+              console.warn('Failed to initialize modal animations:', modalError);
+            }
+          }
+
           return modules;
         } catch (error) {
           console.warn('Failed to load GSAP core:', error);
@@ -246,7 +261,12 @@ async function init(options = {}) {
 
             // Setup modal animations if feature is enabled
             if (initOptions.gsapFeatures.includes('modal')) {
-              loadedModules.animations.modal();
+              const modalGroups = document.querySelectorAll('[aa-modal-group]');
+              if (modalGroups.length > 0) {
+                modalGroups.forEach(group => {
+                  loadedModules.animations.modal(group);
+                });
+              }
             }
 
             // Setup animations
@@ -438,7 +458,9 @@ function setupGSAPAnimations(element, elementSettings, initOptions, isMobile, mo
           split,
           false,
           (self) => {
-            const animation = modules.animations.getAnimation(animationType);
+            // Strip suffixes to get baseType
+            const baseTextAnim = animationType.replace(/-clip|-lines|-words|-chars$/, '');
+            const animation = modules.animations.text[baseTextAnim];
             if (animation) {
               const timeline = animation(element, split, duration, stagger, delay, ease).onSplit(self);
               if (timeline) {

@@ -322,7 +322,7 @@
                 </div>
 
                 <!-- GSAP Modal Group Wrapper -->
-                <div aa-modal-group aa-modal-group-status="not-active" style="display: none;">
+                <div aa-modal-group="1" aa-modal-group-status="not-active" style="display: none;">
                     <div aa-modal-backdrop aa-modal-close class="modal__dark"></div>
 
                     <div class="modal__card" aa-modal-name="gsap-modal-1" aa-modal-status="not-active" aa-modal-animate="scale" aa-modal-order="1-50" aa-duration="0.3">
@@ -337,15 +337,14 @@
                         </div>
                     </div>
 
-                    <div class="modal__card" aa-modal-name="gsap-modal-2" aa-modal-status="not-active" aa-modal-animate="scale" aa-modal-order="1">
-                        <div class="gsap-modal-header" aa-modal-animate="fade-up" aa-modal-order="2">
-                            <h3 class="gsap-modal-title" aa-modal-animate="fade-up" aa-modal-order="3">Dark Modal</h3>
-                            <button class="gsap-modal-close" aa-modal-close aa-modal-animate="fade" aa-modal-order="4">&times;</button>
+                    <div class="modal__card" aa-modal-name="gsap-modal-2" aa-modal-status="not-active" aa-modal-animate="scale" aa-modal-order="1" aa-duration="2">
+                        <div class="gsap-modal-header" >
+                            <h3 class="gsap-modal-title" aa-modal-animate="text-fade" aa-split="chars" aa-stagger="0.1" aa-modal-order="2-20">Dark Modal</h3>
+                            <button class="gsap-modal-close" aa-modal-close aa-modal-animate="fade" aa-modal-order="3">&times;</button>
                         </div>
-                        <div class="gsap-modal-content" aa-modal-animate="fade-up" aa-modal-order="5">
-                            <p>This is a dark modal. It uses GSAP animations for smooth transitions.</p>
-                            <p>The modal can be closed by clicking the close button, clicking outside, or pressing ESC.</p>
-                            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+                        <div class="gsap-modal-content" aa-modal-animate="text-fade" aa-split="lines" aa-stagger="0.1" aa-modal-order="4">
+                            This is a standard modal with a clean design. It uses GSAP animations for smooth transitions.
+                            The modal can be closed by clicking the close button, clicking outside, or pressing ESC.
                         </div>
                     </div>
 

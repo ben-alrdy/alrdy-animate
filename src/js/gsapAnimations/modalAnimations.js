@@ -51,14 +51,17 @@ function createModalTimeline(modal, backdrop, textAnimations, splitText) {
       animationAttr: element.getAttribute('aa-modal-animate')
     };
   });
+
   // Sort by order
   elementData.sort((a, b) => a.order - b.order);
+
   // Build timeline
   elementData.forEach(({ element, percent, animationAttr }) => {
     const duration = parseFloat(element.getAttribute('aa-duration')) || 0.5;
     const ease = element.getAttribute('aa-ease') || 'power2.out';
     const timelinePosition = percent ? `>-${percent}%` : '<';
-    
+
+    // Text animations
     if (animationAttr && animationAttr.startsWith('text-') && textAnimations && splitText) {
       const split = element.getAttribute('aa-split') || 'lines';
       const stagger = parseFloat(element.getAttribute('aa-stagger')) || 0.01;
@@ -66,47 +69,40 @@ function createModalTimeline(modal, backdrop, textAnimations, splitText) {
       // Set up element settings for text splitter
       element.settings = {
         ...element.settings,
-        animationType: animationAttr,
-        split: split,
-        stagger: stagger,
-        duration: duration,
-        ease: ease
+        animationType: animationAttr
       };
       
-      // Get the animation function using getAnimation method
-      const animation = textAnimations.getAnimation(animationAttr);
+      // Get the animation function using baseType
+      const baseTextAnim = animationAttr.replace(/-clip|-lines|-words|-chars$/, '');
+      const animation = textAnimations[baseTextAnim];
       if (!animation) {
         console.warn('[ModalTimeline][Text] No animation found for:', animationAttr, 'Available:', Object.keys(textAnimations));
         return;
       }
       
-      // Create the animation configuration
+      // Create the animation configuration and add to timeline
       const animConfig = animation(element, split, duration, stagger, 0, ease);
       
-      // Use splitText with the animation configuration
-      const { splitInstance } = splitText(
-        element,
-        split,
-        false,
-        (self) => {
-          if (!animConfig || !animConfig.onSplit) {
-            console.warn('[ModalTimeline][Text] Invalid animation configuration:', animConfig);
-            return null;
-          }
-          const timeline = animConfig.onSplit(self);
-          if (timeline) {
-            tl.add(timeline, timelinePosition);
-          }
-          return timeline;
-        }
-      );
-      
-    } else {
-      // Modal animation as before
-      const animation = modalAnimations[animationAttr];
-      if (animation) {
-        tl.from(element, { ...animation, duration, ease }, timelinePosition);
+      // Calculate absolute position instead of using percentage
+      let position = '<';
+      if (percent) {
+        // Convert percentage to absolute time
+        const prevEndTime = tl.recent() ? tl.recent().endTime() : 0;
+        const prevStartTime = tl.recent() ? tl.recent().startTime() : 0;
+        const prevDuration = prevEndTime - prevStartTime;
+        position = prevStartTime + (prevDuration * (parseInt(percent) / 100));
       }
+
+      splitText(element, split, false, (self) => {
+        const timeline = animConfig.onSplit(self);
+        tl.add(timeline, position);
+        return timeline;
+      });
+    } else {
+      // Simple modal animations
+      const animation = modalAnimations[animationAttr];
+      tl.from(element, { ...animation, duration, ease }, timelinePosition);
+      
     }
   });
   return tl;
@@ -133,10 +129,9 @@ function trapTab(modal) {
   return () => document.removeEventListener('keydown', handler);
 }
 
-function initializeModals(lenis = null, textAnimations = null, splitText = null) {
-  const group = document.querySelector('[aa-modal-group]');
-  const backdrop = group ? group.querySelector('[aa-modal-backdrop]') : null;
-  const modals = group ? group.querySelectorAll('[aa-modal-name]') : [];
+function initializeModals(lenis = null, textAnimations = null, splitText = null, group = null) {
+  const backdrop = group.querySelector('[aa-modal-backdrop]');
+  const modals = group.querySelectorAll('[aa-modal-name]');
   const triggers = document.querySelectorAll('[aa-modal-target]');
   const timelines = new Map();
   let activeModal = null;
@@ -151,7 +146,7 @@ function initializeModals(lenis = null, textAnimations = null, splitText = null)
     modal.style.visibility = 'hidden';
     modal.style.display = 'none';
     modal.setAttribute('aa-modal-status', 'not-active');
-    timelines.set(modal, createModalTimeline(modal, backdrop, textAnimations, splitText));
+    timelines.set(modal, null); // Only create timeline on first open, cache it
   });
 
   function lockScroll() {
@@ -180,6 +175,8 @@ function initializeModals(lenis = null, textAnimations = null, splitText = null)
       unlockScroll();
       if (removeTabTrap) removeTabTrap();
       activeModal = null;
+      // Reset timeline progress
+      tl.progress(0);
       tl.eventCallback('onReverseComplete', null);
     });
     tl.timeScale(2).reverse();
@@ -193,7 +190,17 @@ function initializeModals(lenis = null, textAnimations = null, splitText = null)
     modal.setAttribute('aa-modal-status', 'active');
     lockScroll();
     activeModal = modal;
-    timelines.get(modal).timeScale(1).play(0);
+    
+    // Get or create timeline
+    let tl = timelines.get(modal);
+    if (!tl) {
+      tl = createModalTimeline(modal, backdrop, textAnimations, splitText);
+      timelines.set(modal, tl);
+    }
+    
+    // Reset and play timeline
+    tl.progress(0).timeScale(1).play();
+    
     removeTabTrap = trapTab(modal);
     setTimeout(() => {
       const focusable = modal.querySelector(
@@ -206,7 +213,7 @@ function initializeModals(lenis = null, textAnimations = null, splitText = null)
   triggers.forEach(trigger => {
     trigger.addEventListener('click', () => {
       const targetName = trigger.getAttribute('aa-modal-target');
-      const modal = group ? group.querySelector(`[aa-modal-name="${targetName}"]`) : null;
+      const modal = group.querySelector(`[aa-modal-name="${targetName}"]`);
       if (activeModal) closeModal(activeModal);
       if (modal) openModal(modal);
     });
@@ -236,7 +243,7 @@ function createModalAnimations(gsap, lenis, textAnimations, splitText) {
   storedParams = { gsap, lenis, textAnimations, splitText };
   
   return {
-    modal: () => initializeModals(storedParams.lenis, storedParams.textAnimations, storedParams.splitText)
+    modal: (group) => initializeModals(storedParams.lenis, storedParams.textAnimations, storedParams.splitText, group)
   };
 }
 
