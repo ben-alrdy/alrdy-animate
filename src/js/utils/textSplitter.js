@@ -1,4 +1,4 @@
-export function splitText(element, split, hideFromScreenReaders = false, onSplit) {
+export function splitText(element, split, hideFromScreenReaders = false, onSplit, animationType) {
   // Parse split value for random/grouping
   const [splitType, randomMode] = split?.split('|') || [];
   
@@ -18,7 +18,6 @@ export function splitText(element, split, hideFromScreenReaders = false, onSplit
   splitConfig.aria = hideFromScreenReaders ? 'hidden' : 'auto';
   
   // Check for mask type in animation
-  const animationType = element.settings?.animationType || '';
   const maskTypes = ['-clip', '-lines', '-words', '-chars'];
   const maskType = maskTypes.find(type => animationType.includes(type));
   

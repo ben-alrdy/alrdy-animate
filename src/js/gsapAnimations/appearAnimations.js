@@ -1,5 +1,5 @@
-function createAppearTimeline(element, gsap, duration, ease, delay, distance) {
-  const [_, direction] = element.getAttribute('aa-animate').split('-');
+function createAppearTimeline(element, gsap, duration, ease, delay, distance, animationType) {
+  const [_, direction] = animationType.split('-');
   
   // Set initial state based on direction
   const initialState = {
@@ -25,8 +25,8 @@ function createAppearTimeline(element, gsap, duration, ease, delay, distance) {
   return tl.fromTo(element, initialState, finalState);
 }
 
-function createRevealTimeline(element, gsap, duration, ease, delay) {
-  const [_, direction] = element.getAttribute('aa-animate').split('-');
+function createRevealTimeline(element, gsap, duration, ease, delay, animationType) {
+  const [_, direction] = animationType.split('-');
   
   const clipPaths = {
     up: {
@@ -67,8 +67,8 @@ function createRevealTimeline(element, gsap, duration, ease, delay) {
   });
 }
 
-function createCounterTimeline(element, gsap, duration, ease, delay) {
-  const [_, startValue] = element.getAttribute('aa-animate').split('-');
+function createCounterTimeline(element, gsap, duration, ease, delay, animationType) {
+  const [_, startValue] = animationType.split('-');
   const originalText = element.textContent;
   
   // Detect format: replace all thousand separators with nothing to get pure number
@@ -112,16 +112,16 @@ function createCounterTimeline(element, gsap, duration, ease, delay) {
 
 function createAppearAnimations(gsap, ScrollTrigger) {
   return {
-    appear: (element, duration, ease, delay, distance) => {
-      return createAppearTimeline(element, gsap, duration, ease, delay, distance);
+    appear: (element, duration, ease, delay, distance, animationType) => {
+      return createAppearTimeline(element, gsap, duration, ease, delay, distance, animationType);
     },
     
-    reveal: (element, duration, ease, delay) => {
-      return createRevealTimeline(element, gsap, duration, ease, delay);
+    reveal: (element, duration, ease, delay, animationType) => {
+      return createRevealTimeline(element, gsap, duration, ease, delay, animationType);
     },
     
-    counter: (element, duration, ease, delay) => {
-      return createCounterTimeline(element, gsap, duration, ease, delay);
+    counter: (element, duration, ease, delay, animationType) => {
+      return createCounterTimeline(element, gsap, duration, ease, delay, animationType);
     },
   };
 }

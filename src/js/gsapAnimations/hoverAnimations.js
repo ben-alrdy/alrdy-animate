@@ -613,14 +613,16 @@ function initializeTextHoverAnimation(element, gsap, splitText, settings) {
         textElement, 
         split, 
         false,
-        (self) => createHoverAnimation(self, false)
+        (self) => createHoverAnimation(self, false),
+        animationType
     );
 
     const { splitInstance: clonedInstance } = splitText(
         textClone, 
         split, 
         true,
-        (self) => createHoverAnimation(self, true)
+        (self) => createHoverAnimation(self, true),
+        animationType
     );
 
     // Store instances for cleanup

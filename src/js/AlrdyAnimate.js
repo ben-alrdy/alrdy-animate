@@ -195,7 +195,7 @@ async function init(options = {}) {
               const modalAnimations = modalModule.createModalAnimations(
                 modules.gsap,
                 lenis,
-                modules.animations.text,
+                modules.animations,
                 modules.splitText
               );
 
@@ -443,15 +443,15 @@ function setupGSAPAnimations(element, elementSettings, initOptions, isMobile, mo
         break;
 
       case 'appear':
-        tl.add(modules.animations.appear(element, duration, ease, delay, distance));
+        tl.add(modules.animations.appear(element, duration, ease, delay, distance, animationType));
         break;
 
       case 'reveal':
-        tl.add(modules.animations.reveal(element, duration, ease, delay));
+        tl.add(modules.animations.reveal(element, duration, ease, delay, animationType));
         break;
 
       case 'counter':
-        tl.add(modules.animations.counter(element, duration, ease, delay));
+        tl.add(modules.animations.counter(element, duration, ease, delay, animationType));
         break;
 
       case 'marquee':
@@ -475,7 +475,8 @@ function setupGSAPAnimations(element, elementSettings, initOptions, isMobile, mo
               return timeline;
             }
             return null;
-          }
+          },
+          animationType
         );
         element.splitInstance = splitInstance;
         break;

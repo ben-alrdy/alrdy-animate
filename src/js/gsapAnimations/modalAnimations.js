@@ -12,13 +12,7 @@ const modalAnimations = {
   'scale': { scale: 0.8, opacity: 0 }
 };
 
-// Store parameters for initialization
-let storedParams = null;
-
-// Usage: createModalAnimations(gsap, lenis, textAnimations, splitText)
-// Parameters are stored for later use during initialization
-
-function createModalTimeline(modal, backdrop, textAnimations, splitText) {
+function createModalTimeline(modal, backdrop, animations, splitText) {
   const tl = gsap.timeline({ paused: true, defaults: { ease: 'power2.inOut' } });
   if (backdrop) {
     tl.fromTo(backdrop, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.4, ease: 'none' });
@@ -35,7 +29,7 @@ function createModalTimeline(modal, backdrop, textAnimations, splitText) {
       element,
       order: parseInt(orderStr) || 0,
       percent: percentStr ? percentStr : null,
-      animationAttr: element.getAttribute('aa-modal-animate')
+      animationType: element.getAttribute('aa-modal-animate')
     };
   });
 
@@ -43,27 +37,24 @@ function createModalTimeline(modal, backdrop, textAnimations, splitText) {
   elementData.sort((a, b) => a.order - b.order);
 
   // Build timeline
-  elementData.forEach(({ element, percent, animationAttr }) => {
+  elementData.forEach(({ element, percent, animationType }) => {
     const duration = parseFloat(element.getAttribute('aa-duration')) || 0.5;
     const ease = element.getAttribute('aa-ease') || 'power2.out';
+    const delay = parseFloat(element.getAttribute('aa-delay')) || 0;
+    const distance = parseFloat(element.getAttribute('aa-distance')) || 1;
     const timelinePosition = percent ? `>-${percent}%` : '<';
+    const baseType = animationType ? (animationType.includes('-') ? animationType.split('-')[0] : animationType) : null;
 
-    // Text animations
-    if (animationAttr && animationAttr.startsWith('text-') && textAnimations && splitText) {
+
+    if (baseType === 'text' && animations && animations.text && splitText) {
       const split = element.getAttribute('aa-split') || 'lines';
       const stagger = parseFloat(element.getAttribute('aa-stagger')) || 0.01;
       
-      // Set up element settings for text splitter
-      element.settings = {
-        ...element.settings,
-        animationType: animationAttr
-      };
-      
       // Get the animation function using baseType
-      const baseTextAnim = animationAttr.replace(/-clip|-lines|-words|-chars$/, '');
-      const animation = textAnimations[baseTextAnim];
+      const baseTextAnim = animationType.replace(/-clip|-lines|-words|-chars$/, '');
+      const animation = animations.text[baseTextAnim];
       if (!animation) {
-        console.warn('[ModalTimeline][Text] No animation found for:', animationAttr, 'Available:', Object.keys(textAnimations));
+        console.warn('[ModalTimeline][Text] No animation found for:', animationType, 'Available:', Object.keys(animations.text));
         return;
       }
       
@@ -84,11 +75,27 @@ function createModalTimeline(modal, backdrop, textAnimations, splitText) {
         const timeline = animConfig.onSplit(self);
         tl.add(timeline, position);
         return timeline;
-      });
+      }, animationType);
+    } else if (animations && animations[baseType]) {
+      let animationTimeline;
+      switch (baseType) {
+        case 'appear':
+          animationTimeline = animations.appear(element, duration, ease, delay, distance, animationType);
+          break;
+        case 'reveal':
+          animationTimeline = animations.reveal(element, duration, ease, delay, animationType);
+          break;
+        case 'counter':
+          animationTimeline = animations.counter(element, duration, ease, delay, animationType);
+          break;
+      }
+      if (animationTimeline) {
+        tl.add(animationTimeline, timelinePosition);
+      }
     } else {
       // Simple modal animations
-      const animation = modalAnimations[animationAttr];
-      if (animationAttr.includes('custom')) {
+      const animation = modalAnimations[animationType];
+      if (animationType.includes('custom')) {
         tl.to(element, { 
           x: 0,
           y: 0,
@@ -99,7 +106,7 @@ function createModalTimeline(modal, backdrop, textAnimations, splitText) {
           duration, 
           ease 
         }, timelinePosition);
-      } else {
+      } else if (animation) {
         tl.from(element, { ...animation, duration, ease }, timelinePosition);
       }
     }
@@ -128,7 +135,7 @@ function trapTab(modal) {
   return () => document.removeEventListener('keydown', handler);
 }
 
-function initializeModals(lenis = null, textAnimations = null, splitText = null, group = null) {
+function initializeModals(lenis = null, animations = null, splitText = null, group = null) {
   const backdrop = group.querySelector('[aa-modal-backdrop]');
   const modals = group.querySelectorAll('[aa-modal-name]');
   const triggers = document.querySelectorAll('[aa-modal-target]');
@@ -191,7 +198,7 @@ function initializeModals(lenis = null, textAnimations = null, splitText = null,
     // Get or create timeline
     let tl = timelines.get(modal);
     if (!tl) {
-      tl = createModalTimeline(modal, backdrop, textAnimations, splitText);
+      tl = createModalTimeline(modal, backdrop, animations, splitText);
       timelines.set(modal, tl);
     }
     
@@ -237,12 +244,17 @@ function initializeModals(lenis = null, textAnimations = null, splitText = null,
   };
 }
 
-function createModalAnimations(gsap, lenis, textAnimations, splitText) {
+// Store parameters for initialization
+let storedParams = null;
+
+// Usage: createModalAnimations(gsap, lenis, animations, splitText)
+// Parameters are stored for later use during initialization
+function createModalAnimations(gsap, lenis, animations, splitText) {
   // Store parameters for later use
-  storedParams = { gsap, lenis, textAnimations, splitText };
+  storedParams = { gsap, lenis, animations, splitText };
   
   return {
-    modal: (group) => initializeModals(storedParams.lenis, storedParams.textAnimations, storedParams.splitText, group)
+    modal: (group) => initializeModals(storedParams.lenis, storedParams.animations, storedParams.splitText, group)
   };
 }
 
