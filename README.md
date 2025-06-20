@@ -532,19 +532,38 @@ Example:
 ```
 
 #### Parallax Scrolling
-- Use `aa-animate="parallax-40"` on an image to create a parallax scroll effect
-- The number (40) represents the movement distance in pixels
-- Add direction with `aa-animate="parallax-down-40"` (moves down while scrolling) or `parallax-up-40` (default, moves up)
-- Add `half` to end the parallax when the element reaches the middle of the page: `parallax-down-half-40`
-- Control smoothness with `aa-scrub` (accepting numbers for the delay in scroll to animation)
-- If the parent element has `overflow: hidden`, the image will be scaled to fit the parent's height
+
+Create a parallax scrolling effect on an element. The element's position will change as the user scrolls.
+
+-   `aa-animate="parallax"`: Apply a vertical parallax effect. For horizontal movement, use `parallax-horizontal`.
+-   `aa-parallax-start` (optional): The starting position of the parallax effect in percentage. Defaults to `20`.
+-   `aa-parallax-end` (optional): The ending position of the parallax effect in percentage. Defaults to `-20`.
+-   `aa-parallax-scroll-start` (optional): The scroll position where the animation starts (e.g., `top bottom`, `center center`). Defaults to `top bottom`, i.e. as soon as top of element reaches bottom of viewport.
+-   `aa-parallax-scroll-end` (optional): The scroll position where the animation ends. Defaults to `bottom top`, i.e. bottom of element reaches top of viewport.
+-   `aa-parallax-target` (optional): A selector for a child element to apply the parallax effect to. If not provided, the effect is applied to the element with `aa-animate`.
+-   `aa-scrub` (optional): Controls the smoothness of the animation. A higher value creates a longer delay between the scroll and the animation. Defaults to `true` for a direct mapping.
+
+##### Basic Example
+This will move the element vertically from 20% to -20% as it scrolls through the viewport.
 ```html
-<div style="height: 60vh; overflow: hidden">
-  <img 
-    src="image.jpg" 
-    aa-animate="parallax-down-40" 
-    aa-scrub="3"
-  >
+<div aa-animate="parallax">
+  <!-- Content -->
+</div>
+```
+
+##### Advanced Example
+This example moves a child element with the class `.image` horizontally from 50% to 0. The animation starts when the top of the trigger element reaches the center of the viewport and ends when the bottom of the trigger reaches the center, with a smooth scrub effect.
+```html
+<div 
+  aa-animate="parallax-horizontal" 
+  aa-parallax-target=".image"
+  aa-parallax-start="50"
+  aa-parallax-end="0"
+  aa-parallax-scroll-start="top center"
+  aa-parallax-scroll-end="bottom center"
+  aa-scrub="2"
+>
+  <img src="image.jpg" class="image">
 </div>
 ```
 

@@ -167,35 +167,47 @@ function initializeBackgroundColor(element, gsap, ScrollTrigger, duration, ease,
 }
 
 function initializeParallax(element, gsap, ScrollTrigger, scrub, animationType) {
-  // Get configuration from attributes
-  const parts = animationType.split('-');
-  const isHalf = parts.includes('half');
-  const isDownward = parts.includes('down');
-  const parallaxValue = parts.find(part => !isNaN(parseFloat(part))) || 40;
-  
-  // Check if parent has overflow:hidden
-  const parentStyle = window.getComputedStyle(element.parentElement);
-  const hasOverflowHidden = parentStyle.overflow === 'hidden';
+  // Determine target for animation
+  const target = element.querySelector('[aa-parallax-target]') || element;
 
-  if (hasOverflowHidden) {
-    // Calculate required scale based on parallax value
-    const scale = 1 + (2 * parallaxValue / element.offsetHeight);
-    gsap.set(element, { scale });
-  } 
-  
-  const tl = gsap.timeline({ paused: true });
-  tl.fromTo(element, 
-    { y: isDownward ? -parallaxValue : parallaxValue },
-    { y: isDownward ? parallaxValue : -parallaxValue, ease: "none" }
+  // Determine animation direction and property
+  const isHorizontal = animationType && animationType.includes('horizontal');
+  const prop = isHorizontal ? 'xPercent' : 'yPercent';
+
+  // Get scrub value
+  const scrubValue = scrub ? parseFloat(scrub) : true;
+
+  // Get the start position in %
+  const startAttr = element.getAttribute('aa-parallax-start');
+  const startVal = startAttr !== null ? parseFloat(startAttr) : 20;
+
+  // Get the end position in %
+  const endAttr = element.getAttribute('aa-parallax-end');
+  const endVal = endAttr !== null ? parseFloat(endAttr) : -20;
+
+  // Get the start value of the ScrollTrigger
+  const scrollStartRaw = element.getAttribute('aa-parallax-scroll-start') || 'top bottom';
+  const scrollStart = `clamp(${scrollStartRaw})`;
+
+  // Get the end value of the ScrollTrigger
+  const scrollEndRaw = element.getAttribute('aa-parallax-scroll-end') || 'bottom top';
+  const scrollEnd = `clamp(${scrollEndRaw})`;
+
+  // Create GSAP animation with ScrollTrigger
+  gsap.fromTo(
+    target,
+    { [prop]: startVal },
+    {
+      [prop]: endVal,
+      ease: 'none',
+      scrollTrigger: {
+        trigger: element,
+        start: scrollStart,
+        end: scrollEnd,
+        scrub: scrubValue,
+      },
+    }
   );
-  
-  ScrollTrigger.create({
-    trigger: element.parentElement,
-    start: "top bottom",
-    end: isHalf ? "top center" : "bottom top",
-    scrub: scrub ? (parseFloat(scrub) || true) : false,
-    animation: tl
-  });
 }
 
 function initializeClip(element) {
