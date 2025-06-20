@@ -1,4 +1,4 @@
-function initializeBackgroundColor(element, gsap, ScrollTrigger, duration, ease, viewport, debug = false) {
+function initializeBackgroundColor(element, gsap, ScrollTrigger, duration, ease, viewport, debug = false, scrub) {
   // Helper function to convert rgb to hex
   function rgbToHex(rgb) {
     // Extract r, g, b values from rgb(r, g, b) format
@@ -21,9 +21,6 @@ function initializeBackgroundColor(element, gsap, ScrollTrigger, duration, ease,
       return colors;
     }, {});
   }
-
-  // Get animation settings
-  const scrub = element.getAttribute('aa-scrub') ? (parseFloat(element.getAttribute('aa-scrub')) || true): false
 
   // Store and set initial colors (converting to hex)
   const computedStyle = getComputedStyle(element);
@@ -169,9 +166,9 @@ function initializeBackgroundColor(element, gsap, ScrollTrigger, duration, ease,
   });
 }
 
-function initializeParallax(element, gsap, ScrollTrigger, scrub) {
+function initializeParallax(element, gsap, ScrollTrigger, scrub, animationType) {
   // Get configuration from attributes
-  const parts = element.getAttribute('aa-animate').split('-');
+  const parts = animationType.split('-');
   const isHalf = parts.includes('half');
   const isDownward = parts.includes('down');
   const parallaxValue = parts.find(part => !isNaN(parseFloat(part))) || 40;
@@ -199,7 +196,6 @@ function initializeParallax(element, gsap, ScrollTrigger, scrub) {
     scrub: scrub ? (parseFloat(scrub) || true) : false,
     animation: tl
   });
-
 }
 
 function initializeClip(element) {
@@ -331,12 +327,12 @@ function initializeStack(element, scrub, distance) {
 function createSectionAnimations(gsap, ScrollTrigger) {
   
   return {
-    backgroundColor: (element, duration, ease, viewport, debug) => {
-      initializeBackgroundColor(element, gsap, ScrollTrigger, duration, ease, viewport, debug);
+    backgroundColor: (element, duration, ease, viewport, debug, scrub) => {
+      initializeBackgroundColor(element, gsap, ScrollTrigger, duration, ease, viewport, debug, scrub);
     },
     
-    parallax: (element, scrub) => {
-      initializeParallax(element, gsap, ScrollTrigger, scrub);
+    parallax: (element, scrub, animationType) => {
+      initializeParallax(element, gsap, ScrollTrigger, scrub, animationType);
     },
     
     clip: (element) => {

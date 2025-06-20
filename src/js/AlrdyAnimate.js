@@ -435,11 +435,11 @@ function setupGSAPAnimations(element, elementSettings, initOptions, isMobile, mo
         break;
 
       case 'background':
-        modules.animations.backgroundColor(element, duration, ease, viewport, initOptions.debug);
+        modules.animations.backgroundColor(element, duration, ease, viewport, initOptions.debug, scrub);
         break;
 
       case 'parallax':
-        modules.animations.parallax(element, scrub);
+        modules.animations.parallax(element, scrub, animationType);
         break;
 
       case 'appear':
@@ -455,7 +455,7 @@ function setupGSAPAnimations(element, elementSettings, initOptions, isMobile, mo
         break;
 
       case 'marquee':
-        modules.animations.marquee(element, duration, scrub);
+        modules.animations.marquee(element, duration, scrub, animationType);
         break;
 
       case 'text':

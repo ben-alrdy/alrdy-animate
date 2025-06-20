@@ -1,10 +1,9 @@
-function createMarqueeTimeline(element, gsap, duration, scrub) {
+function createMarqueeTimeline(element, gsap, duration, scrub, animationType) {
   // Parse animation settings from aa-animate attribute
-  const animateAttr = element.getAttribute('aa-animate');
-  const isRightDirection = animateAttr.includes('right');
-  const hasHover = animateAttr.includes('hover');
-  const isPaused = animateAttr.includes('paused');
-  const hasSwitch = animateAttr.includes('switch');
+  const isRightDirection = animationType.includes('right');
+  const hasHover = animationType.includes('hover');
+  const isPaused = animationType.includes('paused');
+  const hasSwitch = animationType.includes('switch');
   
   const scrollContainer = element.querySelector('[aa-marquee-scroller]');
   const collection = element.querySelector('[aa-marquee-items]');
@@ -144,8 +143,8 @@ function createMarqueeTimeline(element, gsap, duration, scrub) {
 
 function createMarqueeAnimations(gsap, ScrollTrigger) {
   return {
-    marquee: (element, duration, scrub) => {
-      return createMarqueeTimeline(element, gsap, duration, scrub);
+    marquee: (element, duration, scrub, animationType) => {
+      return createMarqueeTimeline(element, gsap, duration, scrub, animationType);
     },
   };
 }
