@@ -154,8 +154,14 @@ async function init(options = {}) {
                       case 'text':
                         moduleAnimations = animationModule.createTextAnimations(modules.gsap);
                         break;
-                      case 'scroll':
-                        moduleAnimations = animationModule.createScrollAnimations(modules.gsap, modules.ScrollTrigger);
+                      case 'section':
+                        moduleAnimations = animationModule.createSectionAnimations(modules.gsap, modules.ScrollTrigger);
+                        break;
+                      case 'appear':
+                        moduleAnimations = animationModule.createAppearAnimations(modules.gsap, modules.ScrollTrigger);
+                        break;
+                      case 'marquee':
+                        moduleAnimations = animationModule.createMarqueeAnimations(modules.gsap, modules.ScrollTrigger);
                         break;
                       case 'slider':
                         moduleAnimations = animationModule.createSliderAnimations(modules.gsap, modules.Draggable);

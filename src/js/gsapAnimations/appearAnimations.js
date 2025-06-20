@@ -1,0 +1,129 @@
+function createAppearTimeline(element, gsap, duration, ease, delay, distance) {
+  const [_, direction] = element.getAttribute('aa-animate').split('-');
+  
+  // Set initial state based on direction
+  const initialState = {
+    opacity: 0,
+    y: direction === 'up' ? 50 * distance : 
+       direction === 'down' ? -50 * distance : 0,
+    x: direction === 'left' ? 50 * distance : 
+       direction === 'right' ? -50 * distance : 0
+  };
+  
+  // Set final state
+  const finalState = {
+    opacity: 1,
+    y: 0,
+    x: 0,
+    duration,
+    ease,
+    delay
+  };
+  
+  // Create and return timeline
+  const tl = gsap.timeline();
+  return tl.fromTo(element, initialState, finalState);
+}
+
+function createRevealTimeline(element, gsap, duration, ease, delay) {
+  const [_, direction] = element.getAttribute('aa-animate').split('-');
+  
+  const clipPaths = {
+    up: {
+      start: 'inset(100% 0 0 0)',
+      end: 'inset(0% 0 0 0)'
+    },
+    down: {
+      start: 'inset(0 0 100% 0)',
+      end: 'inset(0 0 0% 0)'
+    },
+    left: {
+      start: 'inset(0 100% 0 0)',
+      end: 'inset(0 0% 0 0)'
+    },
+    right: {
+      start: 'inset(0 0 0 100%)',
+      end: 'inset(0 0 0 0%)'
+    },
+    center: {
+      start: 'circle(0% at 50% 50%)',
+      end: 'circle(150% at 50% 50%)'
+    }
+  };
+  
+  // Create and return timeline
+  const tl = gsap.timeline();
+  gsap.set(element, {
+    clipPath: clipPaths[direction]?.start || clipPaths.up.start,
+    opacity: direction === 'center' ? 0 : 1
+  });
+  
+  return tl.to(element, {
+    clipPath: clipPaths[direction]?.end || clipPaths.up.end,
+    opacity: 1,
+    duration,
+    ease,
+    delay
+  });
+}
+
+function createCounterTimeline(element, gsap, duration, ease, delay) {
+  const [_, startValue] = element.getAttribute('aa-animate').split('-');
+  const originalText = element.textContent;
+  
+  // Detect format: replace all thousand separators with nothing to get pure number
+  const cleanNumber = originalText.replace(/[,\.]/g, '');
+  const targetValue = parseFloat(cleanNumber);
+  const start = startValue ? parseFloat(startValue) : 0;
+  
+  // Determine the format (whether using . or , as thousand separator)
+  const usesComma = originalText.includes(',');
+  const usesDot = originalText.includes('.');
+  
+  if (isNaN(targetValue)) {
+    console.warn('Counter animation target must be a number');
+    return gsap.timeline();
+  }
+  
+  // Create and return timeline
+  const tl = gsap.timeline();
+  return tl.fromTo(element, 
+    { 
+      textContent: start 
+    },
+    {
+      textContent: targetValue,
+      duration,
+      ease,
+      delay,
+      snap: { textContent: 1 },
+      onUpdate: function() {
+        const value = this.targets()[0].textContent;
+        // Format based on original format
+        if (usesComma) {
+          this.targets()[0].textContent = Number(value).toLocaleString('en-US').replace(/,/g, ',');
+        } else if (usesDot) {
+          this.targets()[0].textContent = Number(value).toLocaleString('de-DE').replace(/\./g, '.');
+        }
+      }
+    }
+  );
+}
+
+function createAppearAnimations(gsap, ScrollTrigger) {
+  return {
+    appear: (element, duration, ease, delay, distance) => {
+      return createAppearTimeline(element, gsap, duration, ease, delay, distance);
+    },
+    
+    reveal: (element, duration, ease, delay) => {
+      return createRevealTimeline(element, gsap, duration, ease, delay);
+    },
+    
+    counter: (element, duration, ease, delay) => {
+      return createCounterTimeline(element, gsap, duration, ease, delay);
+    },
+  };
+}
+
+export { createAppearAnimations }; 

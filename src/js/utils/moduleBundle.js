@@ -29,8 +29,14 @@ export const gsapBundles = {
         animations: () => import(/* webpackChunkName: "gsap-text" */ '../gsapAnimations/textAnimations'),
         dependencies: sharedDependencies.textSplitter
     },
-    scroll: {
-        animations: () => import(/* webpackChunkName: "gsap-scroll" */ '../gsapAnimations/scrollAnimations')
+    section: {
+        animations: () => import(/* webpackChunkName: "gsap-section" */ '../gsapAnimations/sectionAnimations')
+    },
+    appear: {
+        animations: () => import(/* webpackChunkName: "gsap-appear" */ '../gsapAnimations/appearAnimations')
+    },
+    marquee: {
+        animations: () => import(/* webpackChunkName: "gsap-marquee" */ '../gsapAnimations/marqueeAnimations')
     },
     slider: {
         plugins: (includeGSAP) => includeGSAP ? 
