@@ -348,7 +348,7 @@ function setupAnimations(elements, initOptions, isMobile, modules) {
       // Check if device supports hover
       const hasHoverSupport = window.matchMedia('(hover: hover)').matches;
       if (hasHoverSupport && enableGSAP && initOptions.gsapFeatures.includes('hover')) {
-        setupGSAPHoverAnimations(element, settings, initOptions, isMobile, modules);
+        setupGSAPHoverAnimations(element, settings, modules);
       } 
     }
 
@@ -532,7 +532,7 @@ function setupIntersectionObserver(element, elementSettings, initOptions) {
   removeObserver.observe(anchorElement);
 }
 
-function setupGSAPHoverAnimations(element, elementSettings, initOptions, isMobile, modules) {
+function setupGSAPHoverAnimations(element, elementSettings, modules) {
   const { hoverType } = elementSettings;
   
   // Split multiple hover types
@@ -579,10 +579,14 @@ function handleInitError(error, elements) {
 // Method for page-specific animations
 function initPageAnimations(callback) {
   if (window.alrdyInitialized) {
-    callback();
+    if (callback && typeof callback === 'function') {
+      callback();
+    }
   } else {
     document.addEventListener('alrdy-init-complete', () => {
-      callback();
+      if (callback && typeof callback === 'function') {
+        callback();
+      }
     });
   }
 }

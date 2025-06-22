@@ -75,9 +75,13 @@ For Webflow projects, add these scripts to your custom code section:
 
 <!-- SCRIPT FOR MAIN CUSTOM CODE-->
 <script defer>
-  function initAlrdyAnimate() {
+  function initTabSystem() {
+    //custom code
+  }
+
+  async function initAlrdyAnimate() {
     if (!window.alrdyInitialized) {
-      AlrdyAnimate.init({
+      await AlrdyAnimate.init({
         ease: 'ease-in-out',
         duration: 0.8,
         modals: true,
@@ -96,6 +100,9 @@ For Webflow projects, add these scripts to your custom code section:
           }
         }
       });
+
+      //Initialize other functions
+      initTabSystem();
     }
   }
 
@@ -111,7 +118,8 @@ For Webflow projects, add these scripts to your custom code section:
 <script defer>
   document.addEventListener('DOMContentLoaded', () => {
     AlrdyAnimate.initPageAnimations(() => {
-      // Your page-specific GSAP code here
+     
+      
     });
   });
 </script>
@@ -789,8 +797,7 @@ Add animations to your modals using these attributes:
 
 - `aa-modal-order`: Control animation sequence
   - Basic order: `aa-modal-order="1"` (elements animate in numeric order)
-  - Overlap: `aa-modal-order="1-50"` (second number is overlap percentage with previous animation)
-  - Example: `aa-modal-order="2-30"` means animate second, overlapping 30% with previous animation, starting when 30% of previous animation is still left
+  - Start later: `aa-modal-order="1-30"` (second number sets the percentage of the previous animation as a start for this animation, e.g. start this animation after 30% of previous animation)
 
 - `aa-duration`: Set custom duration in seconds (default: 0.5)
 - `aa-ease`: Set custom easing (default: "power2.out")
