@@ -370,100 +370,107 @@ function setupGSAPAnimations(element, elementSettings, initOptions, isMobile, mo
   // 1. Variables setup
   const baseType = animationType.includes('-') ? animationType.split('-')[0] : animationType;
   const gsapAnimations = ['appear', 'reveal', 'counter', 'text', 'slider', 'background', 'parallax', 'marquee', 'clip', 'stack'];
+  
+  // 2. Determine if this animation type creates its own ScrollTriggers
+  const ownScrollTriggerAnimations = ['clip', 'stack', 'slider', 'background', 'parallax', 'marquee'];
+  const hasOwnScrollTrigger = ownScrollTriggerAnimations.includes(baseType);
 
   // Clear existing animations
   if (element.timeline) element.timeline.kill();
   if (element.splitInstance) element.splitInstance.revert();
 
-  // 2. Create timeline and ScrollTrigger setup
-  let tl = modules.gsap.timeline({
-    paused: !scrub
-  });
-  element.timeline = tl;
+  // 3. Create timeline and ScrollTrigger setup (only for animations that don't have their own ScrollTriggers)
+  let tl = null;
+  if (!hasOwnScrollTrigger) {
+    tl = modules.gsap.timeline({
+      paused: !scrub
+    });
+    element.timeline = tl;
 
-  //Create Animation ScrollTrigger
-  modules.ScrollTrigger.create({
-    trigger: anchorElement,
-    ...(scrub ? {
-      start: `top ${(viewport) * 100}%`,
-      end: `bottom ${(viewport-0.1*distance) * 100}%`,
-      scrub: scrub ? 
-        (parseFloat(scrub) || true)
-      : false,
-      invalidateOnRefresh: true
-    } : {
-      start: `top ${(viewport) * 100}%`
-    }),
-    animation: tl,
-    onEnter: () => {
-      element.classList.add("in-view");
-      gsap.set(element, { visibility: 'visible' });
-      if (!scrub) tl.play();
-    },
-    onRefresh: function() {
-      // For scrub animations, check if element should be visible on page load
-      if (scrub) {
+    //Create Animation ScrollTrigger
+    modules.ScrollTrigger.create({
+      trigger: anchorElement,
+      ...(scrub ? {
+        start: `top ${(viewport) * 100}%`,
+        end: `bottom ${(viewport-0.1*distance) * 100}%`,
+        stagger,
+        scrub: scrub ? 
+          (parseFloat(scrub) || true)
+        : false,
+        invalidateOnRefresh: true
+      } : {
+        start: `top ${(viewport) * 100}%`
+      }),
+      animation: tl,
+      onEnter: () => {
+        element.classList.add("in-view");
+        gsap.set(element, { visibility: 'visible' });
+        if (!scrub) tl.play();
+      },
+      onRefresh: function() {
+        // For scrub animations, check if element should be visible on page load
+        if (scrub) {
 
-        if (document.body.getAttribute('data-scroll-started') !== 'true') {
-          return;
-        }
-        
-        const elementRect = anchorElement.getBoundingClientRect();
-        const viewportHeight = window.innerHeight;
-        const triggerStart = viewportHeight * viewport;
-        
-        // If element is above the trigger start point, make it visible and set to end state
-        if (elementRect.bottom < triggerStart) {
-          element.classList.add("in-view");
-          gsap.set(element, { visibility: 'visible' });
+          if (document.body.getAttribute('data-scroll-started') !== 'true') {
+            return;
+          }
           
-          if (baseType === 'text') {
-            // We need to wait for the splitInstance to be available before setting the timeline to end state
-            const waitForSplitInstance = () => {
-              if (element.splitInstance) {
-                tl.progress(1); // Set timeline to end state
-              } else {
-                requestAnimationFrame(waitForSplitInstance);  // Keep checking until splitInstance is available
-              }
-            };
-            requestAnimationFrame(waitForSplitInstance);
+          const elementRect = anchorElement.getBoundingClientRect();
+          const viewportHeight = window.innerHeight;
+          const triggerStart = viewportHeight * viewport;
           
-          } else {
-            // For appear animations, wait for timeline to be properly initialized
-            const waitForTimeline = () => {
-              if (tl.duration() > 0) {
-                tl.progress(1);
-                gsap.set(element, { autoAlpha: 1 });
-              } else {
-                requestAnimationFrame(waitForTimeline);
-              }
-            };
-            requestAnimationFrame(waitForTimeline);
+          // If element is above the trigger start point, make it visible and set to end state
+          if (elementRect.bottom < triggerStart) {
+            element.classList.add("in-view");
+            gsap.set(element, { visibility: 'visible' });
+            
+            if (baseType === 'text') {
+              // We need to wait for the splitInstance to be available before setting the timeline to end state
+              const waitForSplitInstance = () => {
+                if (element.splitInstance) {
+                  tl.progress(1); // Set timeline to end state
+                } else {
+                  requestAnimationFrame(waitForSplitInstance);  // Keep checking until splitInstance is available
+                }
+              };
+              requestAnimationFrame(waitForSplitInstance);
+            
+            } else {
+              const waitForTimeline = () => {
+                if (tl.duration() > 0) {
+                  tl.progress(1);
+                  gsap.set(element, { autoAlpha: 1 });
+                } else {
+                  requestAnimationFrame(waitForTimeline);
+                }
+              };
+              requestAnimationFrame(waitForTimeline);
+            }
           }
         }
-      }
-    },
-    markers: initOptions.debug
-  });
+      },
+      markers: initOptions.debug
+    });
 
-  //Reset Animation ScrollTrigger
-  modules.ScrollTrigger.create({
-    trigger: anchorElement,
-    start: 'top 100%',
-    onLeaveBack: () => {
-      if (initOptions.again || anchorSelector) {
-        element.classList.remove("in-view");
-        tl.progress(0).pause();
+    //Reset Animation ScrollTrigger
+    modules.ScrollTrigger.create({
+      trigger: anchorElement,
+      start: 'top 100%',
+      onLeaveBack: () => {
+        if (initOptions.again || anchorSelector) {
+          element.classList.remove("in-view");
+          tl.progress(0).pause();
+        }
       }
-    }
-  });
+    });
+  }
 
-  // 3. Return early if not a GSAP animation
+  // 4. Return early if not a GSAP animation
   if (!gsapAnimations.includes(baseType)) {
     return;
   }
 
-  // 4. Handle GSAP animations
+  // 5. Handle GSAP animations
   requestAnimationFrame(() => {
     switch(baseType) {
       case 'clip':
@@ -486,6 +493,10 @@ function setupGSAPAnimations(element, elementSettings, initOptions, isMobile, mo
         modules.animations.parallax(element, scrub, animationType);
         break;
 
+      case 'marquee':
+        modules.animations.marquee(element, duration, scrub, animationType);
+        break;
+
       case 'appear':
         tl.add(modules.animations.appear(element, duration, ease, delay, distance, animationType));
         break;
@@ -496,10 +507,6 @@ function setupGSAPAnimations(element, elementSettings, initOptions, isMobile, mo
 
       case 'counter':
         tl.add(modules.animations.counter(element, duration, ease, delay, animationType));
-        break;
-
-      case 'marquee':
-        modules.animations.marquee(element, duration, scrub, animationType);
         break;
 
       case 'text':
