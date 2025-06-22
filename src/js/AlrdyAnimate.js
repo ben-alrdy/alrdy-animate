@@ -386,18 +386,62 @@ function setupGSAPAnimations(element, elementSettings, initOptions, isMobile, mo
     trigger: anchorElement,
     ...(scrub ? {
       start: `top ${(viewport) * 100}%`,
-      end: `bottom ${(viewport-0.1) * 100}%`,
+      end: `bottom ${(viewport-0.1*distance) * 100}%`,
       scrub: scrub ? 
         (parseFloat(scrub) || true)
-      : false
+      : false,
+      invalidateOnRefresh: true
     } : {
       start: `top ${(viewport) * 100}%`
     }),
     animation: tl,
     onEnter: () => {
       element.classList.add("in-view");
-      if (!scrub) tl.play();
       gsap.set(element, { visibility: 'visible' });
+      if (!scrub) tl.play();
+    },
+    onRefresh: function() {
+      // For scrub animations, check if element should be visible on page load
+      if (scrub) {
+
+        if (document.body.getAttribute('data-scroll-started') !== 'true') {
+          return;
+        }
+        
+        const elementRect = anchorElement.getBoundingClientRect();
+        const viewportHeight = window.innerHeight;
+        const triggerStart = viewportHeight * viewport;
+        
+        // If element is above the trigger start point, make it visible and set to end state
+        if (elementRect.bottom < triggerStart) {
+          element.classList.add("in-view");
+          gsap.set(element, { visibility: 'visible' });
+          
+          if (baseType === 'text') {
+            // We need to wait for the splitInstance to be available before setting the timeline to end state
+            const waitForSplitInstance = () => {
+              if (element.splitInstance) {
+                tl.progress(1); // Set timeline to end state
+              } else {
+                requestAnimationFrame(waitForSplitInstance);  // Keep checking until splitInstance is available
+              }
+            };
+            requestAnimationFrame(waitForSplitInstance);
+          
+          } else {
+            // For appear animations, wait for timeline to be properly initialized
+            const waitForTimeline = () => {
+              if (tl.duration() > 0) {
+                tl.progress(1);
+                gsap.set(element, { autoAlpha: 1 });
+              } else {
+                requestAnimationFrame(waitForTimeline);
+              }
+            };
+            requestAnimationFrame(waitForTimeline);
+          }
+        }
+      }
     },
     markers: initOptions.debug
   });
