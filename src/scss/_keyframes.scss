@@ -7,11 +7,11 @@
  @keyframes float-up {
   0% {
     opacity: 0;
-    transform: translateY(calc(30px * var(--aa-distance)));
+    transform: translateY(calc(2rem * var(--aa-distance)));
   }
   30% {
     opacity: 1;
-    transform: translateY(calc(-10px * var(--aa-distance)));
+    transform: translateY(calc(-0.6rem * var(--aa-distance)));
   }
   100% {
     opacity: 1;
@@ -22,11 +22,11 @@
 @keyframes float-down {
   0% {
     opacity: 0;
-    transform: translateY(calc(-30px * var(--aa-distance)));
+    transform: translateY(calc(-2rem * var(--aa-distance)));
   }
   30% {
     opacity: 1;
-    transform: translateY(calc(10px * var(--aa-distance)));
+    transform: translateY(calc(0.6rem * var(--aa-distance)));
   }
   100% {
     opacity: 1;
@@ -37,11 +37,11 @@
 @keyframes float-left {
   0% {
     opacity: 0;
-    transform: translateX(calc(-30px * var(--aa-distance)));
+    transform: translateX(calc(-2rem * var(--aa-distance)));
   }
   30% {
     opacity: 1;
-    transform: translateX(calc(5px * var(--aa-distance)));
+    transform: translateX(calc(0.3rem * var(--aa-distance)));
   }
   100% {
     opacity: 1;
@@ -52,11 +52,11 @@
 @keyframes float-right {
   0% {
     opacity: 0;
-    transform: translateX(calc(30px * var(--aa-distance)));
+    transform: translateX(calc(2rem * var(--aa-distance)));
   }
   30% {
     opacity: 1;
-    transform: translateX(calc(-5px * var(--aa-distance)));
+    transform: translateX(calc(-0.3rem * var(--aa-distance)));
   }
   100% {
     opacity: 1;

@@ -330,7 +330,7 @@ Requires a parent element to have a perspective set, e.g. `perspective: 1000px;`
 
 
 ### Pseudo Overlay Reveal
-Creates a pseudo element on top of the content and reveals it. Add the color you want to use as a pseudo color to the animation type, e.g. `aa-animate="pseudo-reveal-up-#cccccc"`. Defaults to `var(--background-color--background-primary)` or black.
+Creates a pseudo element on top of the content and reveals it. Add the color you want to use as a pseudo color to the animation type, e.g. `aa-animate="pseudo-reveal-up#cccccc"`. Defaults to `var(--background-color--background-primary)` or black.
 - `pseudo-reveal-up`, `pseudo-reveal-down`
 - `pseudo-reveal-right`, `pseudo-reveal-left`
 

@@ -16,7 +16,7 @@ export function getElementSettings(element, settings, isMobile) {
   const hoverType = element.getAttribute('aa-hover');
   const anchorSelector = element.getAttribute("aa-anchor");
   const anchorElement = anchorSelector ? document.querySelector(anchorSelector) : element;
-  const pseudoColor = animationType?.includes('#') ? '#' + animationType.split('#')[1] : undefined;
+  const color = animationType?.includes('#') ? '#' + animationType.split('#')[1] : undefined;
 
   return {
     // Animation properties
@@ -44,7 +44,7 @@ export function getElementSettings(element, settings, isMobile) {
     stagger: element.hasAttribute('aa-stagger') ? parseFloat(element.getAttribute('aa-stagger')) : undefined,
     
     // Colors
-    pseudoColor,
+    color,
     
     // Viewport and anchoring
     viewport: element.hasAttribute('aa-viewport') ? parseFloat(element.getAttribute('aa-viewport')) : settings.viewport,
@@ -58,7 +58,7 @@ export function getElementSettings(element, settings, isMobile) {
 }
 
 export function applyElementStyles(element, elementSettings, isMobile) {
-  const { duration, delay, distance, delayMobile, pseudoColor } = elementSettings;
+  const { duration, delay, distance, delayMobile, color } = elementSettings;
 
   // Set duration if specified on element
   if (element.hasAttribute('aa-duration')) {
@@ -77,6 +77,6 @@ export function applyElementStyles(element, elementSettings, isMobile) {
   }
 
   if (element.getAttribute('aa-animate')?.includes('#')) {
-    element.style.setProperty("--aa-pseudo-color", pseudoColor);
+    element.style.setProperty("--aa-pseudo-color", color);
   }
 } 

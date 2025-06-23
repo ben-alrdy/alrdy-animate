@@ -2,19 +2,12 @@ function createAppearTimeline(element, gsap, duration, ease, delay, distance, an
   const [_, direction] = animationType.split('-');
   
   // Set initial state based on direction
-  const initialState = {
+  const fromState = {
     opacity: 0,
-    y: direction === 'up' ? 50 * distance : 
-       direction === 'down' ? -50 * distance : 0,
-    x: direction === 'left' ? 50 * distance : 
-       direction === 'right' ? -50 * distance : 0
-  };
-  
-  // Set final state
-  const finalState = {
-    opacity: 1,
-    y: 0,
-    x: 0,
+    y: direction === 'up' ? `${3 * distance}rem` : 
+       direction === 'down' ? `${-3 * distance}rem` : 0,
+    x: direction === 'left' ? `${-3 * distance}rem` : 
+       direction === 'right' ? `${3 * distance}rem` : 0,
     duration,
     ease,
     delay
@@ -22,7 +15,7 @@ function createAppearTimeline(element, gsap, duration, ease, delay, distance, an
   
   // Create and return timeline
   const tl = gsap.timeline();
-  return tl.fromTo(element, initialState, finalState);
+  return tl.from(element, fromState);
 }
 
 function createRevealTimeline(element, gsap, duration, ease, delay, animationType) {
@@ -53,18 +46,19 @@ function createRevealTimeline(element, gsap, duration, ease, delay, animationTyp
   
   // Create and return timeline
   const tl = gsap.timeline();
-  gsap.set(element, {
-    clipPath: clipPaths[direction]?.start || clipPaths.up.start,
-    opacity: direction === 'center' ? 0 : 1
-  });
-  
-  return tl.to(element, {
-    clipPath: clipPaths[direction]?.end || clipPaths.up.end,
-    opacity: 1,
-    duration,
-    ease,
-    delay
-  });
+  return tl.fromTo(element, 
+    {
+      clipPath: clipPaths[direction]?.start || clipPaths.up.start,
+      opacity: direction === 'center' ? 0 : 1
+    },
+    {
+      clipPath: clipPaths[direction]?.end || clipPaths.up.end,
+      opacity: 1,
+      duration,
+      ease,
+      delay
+    }
+  );
 }
 
 function createCounterTimeline(element, gsap, duration, ease, delay, animationType) {

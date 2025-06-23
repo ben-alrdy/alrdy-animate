@@ -96,7 +96,7 @@ $rotation-positions: ('br': (100% 100%), 'bl': (0 100%), 'tr': (100% 0), 'tl': (
   @keyframes rotate-#{$pos}-cw {
     from {
       opacity: 0;
-      transform: translateY(calc(50px * var(--aa-distance))) 
+      transform: translateY(calc(3rem * var(--aa-distance))) 
                 rotate(calc(-5deg * var(--aa-distance, 1)));
     }
     to {
@@ -108,7 +108,7 @@ $rotation-positions: ('br': (100% 100%), 'bl': (0 100%), 'tr': (100% 0), 'tl': (
   @keyframes rotate-#{$pos}-ccw {
     from {
       opacity: 0;
-      transform: translateY(calc(50px * var(--aa-distance))) 
+      transform: translateY(calc(3rem * var(--aa-distance))) 
                 rotate(calc(5deg * var(--aa-distance, 1)));
     }
     to {
