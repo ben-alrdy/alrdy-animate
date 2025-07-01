@@ -233,7 +233,8 @@ window.addEventListener('popstate', initAlrdyAnimate);
 | `delay` | number | 0 | Animation delay in seconds |
 | `ease` | string | "ease-in-out" | Default easing function for animations |
 | `again` | boolean | true | Remove 'in-view' class when element is out of view |
-| `viewport` | number | 0.8 | Percentage of viewport height to trigger animation |
+| `scrollStart` | string | "top 80%" | Default scroll start position for animations |
+| `scrollEnd` | string | "bottom 70%" | Default scroll end position for scrub animations |
 | `distance` | number | 1 | Distance factor for animations |
 | `gsapFeatures` | array | [] | GSAP features to load: ['text', 'loop', 'scroll'] |
 | `debug` | boolean | false | Enable GSAP debug info |
@@ -255,6 +256,30 @@ Add the `aa-animate` attribute to the element you want to animate. Once it scrol
 
 - **aa-animate**: The animation type to apply. Example: `aa-animate="float-up"`.
 
+### Scroll Positioning System
+
+AlrdyAnimate uses a flexible scroll positioning system that allows precise control over when animations start and end:
+
+#### Basic Usage
+- `aa-scroll-start="top 80%"` - Animation starts when the top of the element reaches 80% down the viewport
+- `aa-scroll-end="bottom 70%"` - Animation ends when the bottom of the element reaches 70% down the viewport (for scrub animations)
+
+#### Advanced Positioning
+You can use any GSAP ScrollTrigger positioning syntax:
+- `aa-scroll-start="center center"` - Animation starts when the center of the element reaches the center of the viewport
+- `aa-scroll-start="top bottom"` - Animation starts when the top of the element reaches the bottom of the viewport
+- `aa-scroll-end="bottom top"` - Animation ends when the bottom of the element reaches the top of the viewport
+
+#### Mobile/Desktop Variants
+Use the `|` separator to define different positions for mobile and desktop:
+- `aa-scroll-start="top 80%|top 60%"` - 80% on desktop, 60% on mobile
+- `aa-scroll-end="bottom 70%|bottom 50%"` - 70% on desktop, 50% on mobile
+
+#### Legacy Support
+The old `aa-viewport` attribute is automatically converted to the new format:
+- `aa-viewport="0.6"` - Automatically becomes `aa-scroll-start="top 60%"`
+- No changes needed for existing code
+
 ### Element Attributes
 
 - **aa-children**: Accepts same values as `aa-animate`, but applies animation to all children if set. Use in conjunction with `aa-stagger` to set a staggered animation and `aa-delay` to set the starting point for all children. Example: `aa-children="fade-up"`.
@@ -263,7 +288,8 @@ Add the `aa-animate` attribute to the element you want to animate. Once it scrol
 - **aa-delay**: The animation delay for this element, in seconds. Example: `aa-delay="0.5"`.
 - **aa-delay-mobile**: If set, overwrites the delay on mobile devices. Example: `aa-delay-mobile="0.5s"`.
 - **aa-anchor**: Specify an anchor element to trigger the animation (useful for fixed elements that should be animated when the anchor scrolls into view). Example: `aa-anchor="#trigger"` on the element to be animated combined with `<div id="trigger">Headline</div>`.
-- **aa-viewport**: Override the global viewport percentage for this element. Example: `aa-viewport="0.6"`.
+- **aa-scroll-start**: Define when the animation starts. Uses GSAP ScrollTrigger syntax. Example: `aa-scroll-start="top 60%"` or `aa-scroll-start="center center"`. Supports mobile variants with `|`: `aa-scroll-start="top 80%|top 60%"`.
+- **aa-scroll-end**: Define when the animation ends (for scrub animations). Uses GSAP ScrollTrigger syntax. Example: `aa-scroll-end="bottom 40%"`. Supports mobile variants with `|`: `aa-scroll-end="bottom 70%|bottom 50%"`.
 - **aa-distance**: The distance multiplier for the animation. Example: `aa-distance="1.5"`.
 
 ### Toggle Playstate Function
@@ -491,14 +517,14 @@ Enables scroll-driven animations and effects.
 #### Background Color Transitions
 - Use `aa-animate="background"` on a wrapper element you want to animate when sections inside the wrapper scroll into view
   - Optionally set `aa-duration` to define the duration of the animation and `aa-ease` to define the easing.
-- Set `aa-viewport` to 0.5 to trigger the animation when the section is 50% in view.
+- Set `aa-scroll-start` to define when the animation triggers, e.g. `aa-scroll-start="center center"` to trigger when the section is 50% in view.
 - Set `aa-scrub=true` to make the animation scroll driven; optionally set a number (higher number = longer delay from scroll to animation), e.g `aa-scrub=1`.
 - Use `aa-wrapper-colors` with `bg` and `text` to define the background and text colors for the wrapper once the section is scrolled into view, e.g. `aa-wrapper-colors="bg:#f0f0f0;text:#000"`.
 - Use `aa-item-colors` with `bg` and `text` to change the background and text colors for child elements when they scroll into view, e.g. `aa-item-colors="bg:#ff0000;text:#fff"`.
 
 - Example:
 ```html
-<div class="wrapper" aa-animate="background" aa-viewport="0.5" aa-duration="0.8">
+<div class="wrapper" aa-animate="background" aa-scroll-start="center center" aa-duration="0.8">
   <div class="section" aa-wrapper-colors="bg:#f0f0f0;text:#000">
     Changes wrapper background to light gray and text to black
   </div>
@@ -546,8 +572,8 @@ Create a parallax scrolling effect on an element. The element's position will ch
 -   `aa-animate="parallax"`: Apply a vertical parallax effect. For horizontal movement, use `parallax-horizontal`.
 -   `aa-parallax-start` (optional): The starting position of the parallax effect in percentage. Defaults to `20`.
 -   `aa-parallax-end` (optional): The ending position of the parallax effect in percentage. Defaults to `-20`.
--   `aa-parallax-scroll-start` (optional): The scroll position where the animation starts (e.g., `top bottom`, `center center`). Defaults to `top bottom`, i.e. as soon as top of element reaches bottom of viewport.
--   `aa-parallax-scroll-end` (optional): The scroll position where the animation ends. Defaults to `bottom top`, i.e. bottom of element reaches top of viewport.
+-   `aa-scroll-start` (optional): The scroll position where the animation starts (e.g., `top bottom`, `center center`). Defaults to `top bottom`, i.e. as soon as top of element reaches bottom of viewport.
+-   `aa-scroll-end` (optional): The scroll position where the animation ends. Defaults to `bottom top`, i.e. bottom of element reaches top of viewport.
 -   `aa-parallax-target` (optional): A selector for a child element to apply the parallax effect to. If not provided, the effect is applied to the element with `aa-animate`.
 -   `aa-scrub` (optional): Controls the smoothness of the animation. A higher value creates a longer delay between the scroll and the animation. Defaults to `true` for a direct mapping.
 
@@ -567,8 +593,8 @@ This example moves a child element with the class `.image` horizontally from 50%
   aa-parallax-target=".image"
   aa-parallax-start="50"
   aa-parallax-end="0"
-  aa-parallax-scroll-start="top center"
-  aa-parallax-scroll-end="bottom center"
+  aa-scroll-start="top center"
+  aa-scroll-end="bottom center"
   aa-scrub="2"
 >
   <img src="image.jpg" class="image">

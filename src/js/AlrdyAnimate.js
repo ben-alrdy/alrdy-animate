@@ -16,7 +16,8 @@ let initTimeoutId = null;
 const defaultOptions = {
   ease: "ease-in-out", // Default easing function for animations
   again: true, // True = removes 'in-view' class when element is out of view towards the bottom
-  viewport: 0.8, // Default percentage of the viewport height to trigger the animation
+  scrollStart: "top 80%", // Default scroll start position
+  scrollEnd: "bottom 70%", // Default scroll end position
   duration: 1, // 1 second
   delay: 0, // 0 seconds
   distance: 1, // Distance factor for the animations
@@ -365,7 +366,7 @@ function setupAnimations(elements, initOptions, isMobile, modules) {
 }
 
 function setupGSAPAnimations(element, elementSettings, initOptions, isMobile, modules) {
-  const { animationType, split, scrub, duration, stagger, delay, ease, distance, anchorElement, anchorSelector, viewport } = elementSettings;
+  const { animationType, split, scrub, duration, stagger, delay, ease, distance, anchorElement, anchorSelector, scrollStart, scrollEnd } = elementSettings;
   
   // 1. Variables setup
   const baseType = animationType.includes('-') ? animationType.split('-')[0] : animationType;
@@ -391,15 +392,15 @@ function setupGSAPAnimations(element, elementSettings, initOptions, isMobile, mo
     modules.ScrollTrigger.create({
       trigger: anchorElement,
       ...(scrub ? {
-        start: `top ${(viewport) * 100}%`,
-        end: `bottom ${(viewport-0.1*distance) * 100}%`,
+        start: scrollStart,
+        end: scrollEnd,
         stagger,
         scrub: scrub ? 
           (parseFloat(scrub) || true)
         : false,
         invalidateOnRefresh: true
       } : {
-        start: `top ${(viewport) * 100}%`
+        start: scrollStart
       }),
       animation: tl,
       onEnter: () => {
@@ -417,7 +418,9 @@ function setupGSAPAnimations(element, elementSettings, initOptions, isMobile, mo
           
           const elementRect = anchorElement.getBoundingClientRect();
           const viewportHeight = window.innerHeight;
-          const triggerStart = viewportHeight * viewport;
+          // Parse scrollStart to get trigger position for legacy compatibility
+          const scrollStartMatch = scrollStart.match(/top\s+(\d+)%/);
+          const triggerStart = scrollStartMatch ? viewportHeight * (parseFloat(scrollStartMatch[1]) / 100) : viewportHeight * 0.8;
           
           // If element is above the trigger start point, make it visible and set to end state
           if (elementRect.bottom < triggerStart) {
@@ -486,7 +489,7 @@ function setupGSAPAnimations(element, elementSettings, initOptions, isMobile, mo
         break;
 
       case 'background':
-        modules.animations.backgroundColor(element, duration, ease, viewport, initOptions.debug, scrub);
+        modules.animations.backgroundColor(element, duration, ease, scrollStart, scrollEnd, initOptions.debug, scrub);
         break;
 
       case 'parallax':
@@ -540,8 +543,15 @@ function setupGSAPAnimations(element, elementSettings, initOptions, isMobile, mo
 }
 
 function setupIntersectionObserver(element, elementSettings, initOptions) {
-  const { anchorElement, anchorSelector, viewport } = elementSettings;
-  const bottomMargin = (1 - viewport) * 100;
+  const { anchorElement, anchorSelector, scrollStart } = elementSettings;
+  
+  // Parse scrollStart to get bottom margin for IntersectionObserver
+  let bottomMargin = 20; // default fallback
+  const scrollStartMatch = scrollStart.match(/top\s+(\d+)%/);
+  if (scrollStartMatch) {
+    bottomMargin = 100 - parseFloat(scrollStartMatch[1]);
+  }
+  
   const rootMarginValue = `0px 0px -${bottomMargin}% 0px`;
 
   // Observer to add 'in-view' class

@@ -18,6 +18,30 @@ export function getElementSettings(element, settings, isMobile) {
   const anchorElement = anchorSelector ? document.querySelector(anchorSelector) : element;
   const color = animationType?.includes('#') ? '#' + animationType.split('#')[1] : undefined;
 
+  // Parse scroll start/end attributes with mobile support
+  function parseScrollAttribute(attribute, defaultValue) {
+    if (!attribute) return defaultValue;
+    
+    if (attribute.includes('|')) {
+      const [desktop, mobile] = attribute.split('|');
+      return isMobile ? mobile.trim() : desktop.trim();
+    }
+    
+    return attribute.trim();
+  }
+
+  // Get scroll start/end values
+  const scrollStart = parseScrollAttribute(element.getAttribute('aa-scroll-start'),settings.scrollStart || 'top 80%');
+  
+  const scrollEnd = parseScrollAttribute(element.getAttribute('aa-scroll-end'), settings.scrollEnd || 'bottom 70%');
+
+  // Backward compatibility: convert aa-viewport to aa-scroll-start format
+  let finalScrollStart = scrollStart;
+  if (element.hasAttribute('aa-viewport') && !element.hasAttribute('aa-scroll-start')) {
+    const viewport = parseFloat(element.getAttribute('aa-viewport'));
+    finalScrollStart = `top ${viewport * 100}%`;
+  }
+
   return {
     // Animation properties
     animationType,
@@ -46,8 +70,11 @@ export function getElementSettings(element, settings, isMobile) {
     // Colors
     color,
     
-    // Viewport and anchoring
-    viewport: element.hasAttribute('aa-viewport') ? parseFloat(element.getAttribute('aa-viewport')) : settings.viewport,
+    // Scroll positioning (new system)
+    scrollStart: finalScrollStart,
+    scrollEnd: scrollEnd,
+    
+    // Anchoring
     anchorSelector,
     anchorElement,
     

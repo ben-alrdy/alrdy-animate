@@ -1,4 +1,4 @@
-function initializeBackgroundColor(element, gsap, ScrollTrigger, duration, ease, viewport, debug = false, scrub) {
+function initializeBackgroundColor(element, gsap, ScrollTrigger, duration, ease, scrollStart, scrollEnd, debug = false, scrub) {
   // Helper function to convert rgb to hex
   function rgbToHex(rgb) {
     // Extract r, g, b values from rgb(r, g, b) format
@@ -98,8 +98,8 @@ function initializeBackgroundColor(element, gsap, ScrollTrigger, duration, ease,
 
       ScrollTrigger.create({
         trigger: section.element,
-        start: `top ${viewport * 100}%`,
-        end: `center ${viewport * 100}%`,
+        start: scrollStart,
+        end: scrollEnd,
         scrub: scrub,
         animation: tl,
         markers: debug,
@@ -153,7 +153,7 @@ function initializeBackgroundColor(element, gsap, ScrollTrigger, duration, ease,
 
       ScrollTrigger.create({
         trigger: section.element,
-        start: `top ${viewport * 100}%`,
+        start: scrollStart,
         onEnter: () => {
           tl.play();
         },
@@ -185,13 +185,9 @@ function initializeParallax(element, gsap, ScrollTrigger, scrub, animationType) 
   const endAttr = element.getAttribute('aa-parallax-end');
   const endVal = endAttr !== null ? parseFloat(endAttr) : -20;
 
-  // Get the start value of the ScrollTrigger
-  const scrollStartRaw = element.getAttribute('aa-parallax-scroll-start') || 'top bottom';
-  const scrollStart = `clamp(${scrollStartRaw})`;
-
-  // Get the end value of the ScrollTrigger
-  const scrollEndRaw = element.getAttribute('aa-parallax-scroll-end') || 'bottom top';
-  const scrollEnd = `clamp(${scrollEndRaw})`;
+  // Get the start/end value of the ScrollTrigger
+  const scrollStart = element.getAttribute('aa-scroll-start') || 'top bottom';
+  const scrollEnd = element.getAttribute('aa-scroll-end') || 'bottom top';
 
   // Create GSAP animation with ScrollTrigger
   gsap.fromTo(
@@ -339,8 +335,8 @@ function initializeStack(element, scrub, distance) {
 function createSectionAnimations(gsap, ScrollTrigger) {
   
   return {
-    backgroundColor: (element, duration, ease, viewport, debug, scrub) => {
-      initializeBackgroundColor(element, gsap, ScrollTrigger, duration, ease, viewport, debug, scrub);
+    backgroundColor: (element, duration, ease, scrollStart, scrollEnd, debug, scrub) => {
+      initializeBackgroundColor(element, gsap, ScrollTrigger, duration, ease, scrollStart, scrollEnd, debug, scrub);
     },
     
     parallax: (element, scrub, animationType) => {
