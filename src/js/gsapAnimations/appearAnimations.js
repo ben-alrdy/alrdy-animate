@@ -6,8 +6,8 @@ function createAppearTimeline(element, gsap, duration, ease, delay, distance, an
     opacity: 0,
     y: direction === 'up' ? `${3 * distance}rem` : 
        direction === 'down' ? `${-3 * distance}rem` : 0,
-    x: direction === 'left' ? `${-3 * distance}rem` : 
-       direction === 'right' ? `${3 * distance}rem` : 0,
+    x: direction === 'left' ? `${3 * distance}rem` : 
+       direction === 'right' ? `${-3 * distance}rem` : 0,
     duration,
     ease,
     delay
