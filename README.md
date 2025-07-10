@@ -570,11 +570,12 @@ Example:
 Create a parallax scrolling effect on an element. The element's position will change as the user scrolls.
 
 -   `aa-animate="parallax"`: Apply a vertical parallax effect. For horizontal movement, use `parallax-horizontal`.
+-   `aa-parallax-target` (optional): A selector for a child element to apply the parallax effect to. If not provided, the effect is applied to the element with `aa-animate`.
 -   `aa-parallax-start` (optional): The starting position of the parallax effect in percentage. Defaults to `20`.
 -   `aa-parallax-end` (optional): The ending position of the parallax effect in percentage. Defaults to `-20`.
 -   `aa-scroll-start` (optional): The scroll position where the animation starts (e.g., `top bottom`, `center center`). Defaults to `top bottom`, i.e. as soon as top of element reaches bottom of viewport.
 -   `aa-scroll-end` (optional): The scroll position where the animation ends. Defaults to `bottom top`, i.e. bottom of element reaches top of viewport.
--   `aa-parallax-target` (optional): A selector for a child element to apply the parallax effect to. If not provided, the effect is applied to the element with `aa-animate`.
+
 -   `aa-scrub` (optional): Controls the smoothness of the animation. A higher value creates a longer delay between the scroll and the animation. Defaults to `true` for a direct mapping.
 
 ##### Basic Example

@@ -7,7 +7,14 @@ function createAppearTimeline(element, gsap, duration, ease, delay, distance, an
     y: direction === 'up' ? `${3 * distance}rem` : 
        direction === 'down' ? `${-3 * distance}rem` : 0,
     x: direction === 'left' ? `${3 * distance}rem` : 
-       direction === 'right' ? `${-3 * distance}rem` : 0,
+       direction === 'right' ? `${-3 * distance}rem` : 0
+  };
+
+  // Set end state (toState) to visible and no transform
+  const toState = {
+    opacity: 1,
+    y: 0,
+    x: 0,
     duration,
     ease,
     delay
@@ -15,7 +22,7 @@ function createAppearTimeline(element, gsap, duration, ease, delay, distance, an
   
   // Create and return timeline
   const tl = gsap.timeline();
-  return tl.from(element, fromState);
+  return tl.fromTo(element, fromState, toState);
 }
 
 function createRevealTimeline(element, gsap, duration, ease, delay, animationType) {
