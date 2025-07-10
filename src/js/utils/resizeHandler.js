@@ -5,13 +5,12 @@ import { processTemplates } from './templateHandler';
 
 export function setupResizeHandler(modules, initOptions, isMobile, setupGSAPAnimations) {
   let prevWidth = window.innerWidth;
-  let prevIsMobile = prevWidth < 768;
 
   const debouncedResize = debounce(() => {
     const currentWidth = window.innerWidth;
+    
     if (currentWidth !== prevWidth) {
       isMobile = currentWidth < 768;
-      const desktopMobileSwitched = isMobile !== prevIsMobile;
 
       // Cleanup existing animations
       if (modules.animations?.slider) {
@@ -22,15 +21,14 @@ export function setupResizeHandler(modules, initOptions, isMobile, setupGSAPAnim
       document.querySelectorAll("[aa-animate], [aa-animate-original]").forEach(element => {
         const animType = element.getAttribute('aa-animate');
         const animTypeOriginal = element.getAttribute('aa-animate-original');
-        const isSlider = animType && animType.includes('slider');
-        const hasVariant = animType && animType.includes('|');
-
-        // Only rebuild | animations if the variant changed
-        if (
-          (isSlider) ||
-          (hasVariant && desktopMobileSwitched) ||
-          (animTypeOriginal && desktopMobileSwitched)
-        ) {
+        
+        // Rebuild if:
+        // 1. Has mobile/desktop variants (contains |)
+        // 2. Is a slider animation
+        if ((animType && (
+          animType.includes('|') || 
+          animType.includes('slider')
+        )) || animTypeOriginal) {
           // Get new settings with updated animation type
           const settings = getElementSettings(element, initOptions, isMobile);
           element.settings = settings;
@@ -56,7 +54,7 @@ export function setupResizeHandler(modules, initOptions, isMobile, setupGSAPAnim
               const isTextAnimation = templateSettings.animationType.startsWith('text-');
               const hasMobileVariant = templateSettings.animationType.includes('|');
               
-              if (!isTextAnimation || (hasMobileVariant && desktopMobileSwitched)) {
+              if (!isTextAnimation || hasMobileVariant) {
                 // Update settings with new animation type
                 element.settings = {
                   ...element.settings,
@@ -70,7 +68,6 @@ export function setupResizeHandler(modules, initOptions, isMobile, setupGSAPAnim
       }
       
       prevWidth = currentWidth;
-      prevIsMobile = isMobile;
     }
   }, 250);
 

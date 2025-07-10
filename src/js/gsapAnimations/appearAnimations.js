@@ -1,6 +1,9 @@
 function createAppearTimeline(element, gsap, duration, ease, delay, distance, animationType) {
   const [_, direction] = animationType.split('-');
-  
+
+  // Cleanup: clear transform, opacity, and clip-path before setting up animation
+  gsap.set(element, { x: 0, y: 0, opacity: 1, clipPath: 'none' });
+
   // Set initial state based on direction
   const fromState = {
     opacity: 0,
@@ -27,7 +30,10 @@ function createAppearTimeline(element, gsap, duration, ease, delay, distance, an
 
 function createRevealTimeline(element, gsap, duration, ease, delay, animationType) {
   const [_, direction] = animationType.split('-');
-  
+
+  // Cleanup: clear transform, opacity, and clip-path before setting up animation
+  gsap.set(element, { x: 0, y: 0, opacity: 1, clipPath: 'none' });
+
   const clipPaths = {
     up: {
       start: 'inset(100% 0 0 0)',

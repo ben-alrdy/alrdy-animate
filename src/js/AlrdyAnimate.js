@@ -379,6 +379,11 @@ function setupGSAPAnimations(element, elementSettings, initOptions, isMobile, mo
   // Clear existing animations
   if (element.timeline) element.timeline.kill();
   if (element.splitInstance) element.splitInstance.revert();
+  // Kill old ScrollTriggers for this element
+  if (element.scrollTriggers) {
+    element.scrollTriggers.forEach(st => st.kill());
+    element.scrollTriggers = [];
+  }
 
   // 3. Create timeline and ScrollTrigger setup (only for animations that don't have their own ScrollTriggers)
   let tl = null;
@@ -388,8 +393,8 @@ function setupGSAPAnimations(element, elementSettings, initOptions, isMobile, mo
     });
     element.timeline = tl;
 
-    //Create Animation ScrollTrigger
-    modules.ScrollTrigger.create({
+    // Create and store new ScrollTriggers
+    const mainTrigger = modules.ScrollTrigger.create({
       trigger: anchorElement,
       ...(scrub ? {
         start: scrollStart,
@@ -455,8 +460,7 @@ function setupGSAPAnimations(element, elementSettings, initOptions, isMobile, mo
       markers: initOptions.debug
     });
 
-    //Reset Animation ScrollTrigger
-    modules.ScrollTrigger.create({
+    const resetTrigger = modules.ScrollTrigger.create({
       trigger: anchorElement,
       start: 'top 100%',
       onLeaveBack: () => {
@@ -466,6 +470,8 @@ function setupGSAPAnimations(element, elementSettings, initOptions, isMobile, mo
         }
       }
     });
+
+    element.scrollTriggers = [mainTrigger, resetTrigger];
   }
 
   // 4. Return early if not a GSAP animation
