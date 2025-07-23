@@ -186,8 +186,11 @@ function initializeParallax(element, gsap, ScrollTrigger, scrub, animationType) 
   const endVal = endAttr !== null ? parseFloat(endAttr) : -20;
 
   // Get the start/end value of the ScrollTrigger
-  const scrollStart = element.getAttribute('aa-scroll-start') || 'top bottom';
-  const scrollEnd = element.getAttribute('aa-scroll-end') || 'bottom top';
+  const scrollStartRaw = element.getAttribute('aa-scroll-start') || 'top bottom';
+  const scrollStart = `clamp(${scrollStartRaw})`;
+  
+  const scrollEndRaw = element.getAttribute('aa-scroll-end') || 'bottom top';
+  const scrollEnd = `clamp(${scrollEndRaw})`;
 
   // Create GSAP animation with ScrollTrigger
   gsap.fromTo(
