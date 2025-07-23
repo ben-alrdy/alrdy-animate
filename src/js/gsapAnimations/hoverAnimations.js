@@ -375,7 +375,11 @@ function initializeIconAnimation(element, gsap, settings) {
         return { iconClone, ...positions.animation };
     }
 
-    const { iconClone, icon: iconAnim, clone: cloneAnim } = setupIconPosition(hoverType);
+    // Get the base direction without any reverse suffix
+    const baseDirection = hoverType.replace('-reverse', '');
+    
+    // Setup positions for both enter and leave animations
+    const { iconClone, icon: iconAnim, clone: cloneAnim } = setupIconPosition(baseDirection);
 
     const timeline = gsap.timeline({
         defaults: { ease, duration, delay },
