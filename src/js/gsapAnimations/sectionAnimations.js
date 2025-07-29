@@ -1,14 +1,4 @@
 function initializeBackgroundColor(element, gsap, ScrollTrigger, duration, ease, scrollStart, scrollEnd, debug = false, scrub) {
-  // Helper function to convert rgb to hex
-  function rgbToHex(rgb) {
-    // Extract r, g, b values from rgb(r, g, b) format
-    const [r, g, b] = rgb.match(/\d+/g).map(Number);
-    
-    // Convert to hex and pad with zeros if needed
-    const toHex = (n) => n.toString(16).padStart(2, '0');
-    return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
-  }
-
   // Helper function to parse aa-colors attribute
   function parseColors(attribute) {
     if (!attribute) return {};
@@ -22,62 +12,116 @@ function initializeBackgroundColor(element, gsap, ScrollTrigger, duration, ease,
     }, {});
   }
 
-  // Store and set initial colors (converting to hex)
-  const computedStyle = getComputedStyle(element);
-  const initialColors = {
-    backgroundColor: rgbToHex(computedStyle.backgroundColor),
-    color: rgbToHex(computedStyle.color)
+  // Helper function to check if colors object has valid colors
+  function hasValidColors(colors) {
+    return Object.keys(colors).length > 0;
+  }
+
+  // Helper function to set colors with GSAP
+  function setColors(target, colors) {
+    if (hasValidColors(colors)) {
+      gsap.set(target, colors);
+    }
+  }
+
+  // Get the wrapper's initial colors from computed styles
+  const wrapperStyle = getComputedStyle(element);
+  const wrapperInitialColors = {
+    backgroundColor: wrapperStyle.backgroundColor,
+    color: wrapperStyle.color
   };
-  
-  // Explicitly set initial colors
-  gsap.set(element, initialColors);
 
   // Get and store all sections with their colors
   const sections = Array.from(element.querySelectorAll('[aa-wrapper-colors]')).map((section, i) => {
     const sectionColors = parseColors(section.getAttribute('aa-wrapper-colors'));
     
-    const items = Array.from(section.querySelectorAll('[aa-item-colors]')).map(item => {
+    // Get items from children AND the section itself if it has aa-item-colors
+    const childItems = Array.from(section.querySelectorAll('[aa-item-colors]')).map(item => {
       const itemColors = parseColors(item.getAttribute('aa-item-colors'));
-      const computedStyle = getComputedStyle(item);
-      const initialItemColors = {
-        backgroundColor: rgbToHex(computedStyle.backgroundColor),
-        color: rgbToHex(computedStyle.color)
-      };
       
       return {
         element: item,
-        initialColors: initialItemColors,
         colors: itemColors
       };
     });
 
+    // Check if the section itself has aa-item-colors
+    const sectionItemColors = parseColors(section.getAttribute('aa-item-colors'));
+    let sectionItem = null;
+    if (hasValidColors(sectionItemColors)) {
+      sectionItem = {
+        element: section,
+        colors: sectionItemColors
+      };
+    }
+
     return {
       element: section,
       colors: sectionColors,
-      items
+      items: sectionItem ? [sectionItem, ...childItems] : childItems
     };
   });
+
+  // Early return if no sections found
+  if (sections.length === 0) return;
+
+  // Check initial scroll position and set appropriate colors
+  const checkInitialPosition = () => {
+    const scrollY = window.scrollY;
+    const viewportHeight = window.innerHeight;
+    const triggerPoint = scrollY + viewportHeight * 0.5;
+    
+    // Find which section should be active based on current scroll position
+    let activeSectionIndex = -1;
+    
+    for (let i = 0; i < sections.length; i++) {
+      const section = sections[i];
+      const rect = section.element.getBoundingClientRect();
+      const triggerTop = rect.top + scrollY;
+      const triggerBottom = rect.bottom + scrollY;
+      
+      // Check if this section should be active (similar to ScrollTrigger logic)
+      if (triggerTop <= triggerPoint && triggerBottom >= triggerPoint) {
+        activeSectionIndex = i;
+        break; // Found the active section, no need to continue
+      }
+    }
+    
+    // Set colors based on active section
+    if (activeSectionIndex >= 0) {
+      const activeSection = sections[activeSectionIndex];
+      setColors(element, activeSection.colors);
+      
+      // Set item colors for active section
+      activeSection.items.forEach(item => {
+        setColors(item.element, item.colors);
+      });
+    } else {
+      // No active section, use wrapper initial colors
+      setColors(element, wrapperInitialColors);
+    }
+  };
+
+  // Check initial position after a short delay to ensure DOM is ready
+  setTimeout(checkInitialPosition, 100);
 
   // Create a ScrollTrigger for each section
   sections.forEach((section, index) => {
     const prevSection = index > 0 ? sections[index - 1] : null;
     
     if (scrub) {
-      // Force initial state globally
-      gsap.set(element, initialColors);
-      
       const tl = gsap.timeline({
         defaults: { duration: 1, ease: "none" },
         paused: true,
         data: { index }
       });
       
-      // Parent animation
-      if (Object.keys(section.colors).length > 0) {
+      // Parent animation - only animate if there are colors to animate to
+      if (hasValidColors(section.colors)) {
         const fromColors = prevSection ? {
           backgroundColor: prevSection.colors.backgroundColor,
           color: prevSection.colors.color
-        } : initialColors;
+        } : wrapperInitialColors;
         
         tl.fromTo(element,
           fromColors,
@@ -88,7 +132,7 @@ function initializeBackgroundColor(element, gsap, ScrollTrigger, duration, ease,
 
       // Item animations
       section.items.forEach(item => {
-        if (Object.keys(item.colors).length > 0) {
+        if (hasValidColors(item.colors)) {
           tl.to(item.element, {
             backgroundColor: item.colors.backgroundColor,
             color: item.colors.color
@@ -100,33 +144,12 @@ function initializeBackgroundColor(element, gsap, ScrollTrigger, duration, ease,
         trigger: section.element,
         start: scrollStart,
         end: scrollEnd,
-        scrub: scrub,
+        scrub: scrub ? (parseFloat(scrub) || true) : false,
         animation: tl,
         markers: debug,
         invalidateOnRefresh: true,
         fastScrollEnd: true,
-        preventOverlaps: true,
-        ...(scrub !== 'snap' && { snap: false }),
-        onRefresh: self => {
-          // Create a temporary trigger for the wrapper
-          const wrapperTrigger = ScrollTrigger.create({
-            trigger: element,
-            start: "top bottom", // When top of wrapper hits bottom of viewport
-          });
-          
-          const isAboveWrapper = !wrapperTrigger.isActive;
-          wrapperTrigger.kill(); // Clean up temporary trigger
-          
-          // Only reset colors if we're above the wrapper
-          if (isAboveWrapper) {
-            gsap.set(element, initialColors);
-            sections.forEach(section => {
-              section.items.forEach(item => {
-                gsap.set(item.element, item.initialColors);
-              });
-            });
-          }
-        }
+        preventOverlaps: true
       });
 
       // Store ScrollTrigger ID for reference
@@ -139,12 +162,12 @@ function initializeBackgroundColor(element, gsap, ScrollTrigger, duration, ease,
       });
 
       // Set up the forward animation
-      if (Object.keys(section.colors).length > 0) {
+      if (hasValidColors(section.colors)) {
         tl.to(element, section.colors);
       }
 
       section.items.forEach(item => {
-        if (Object.keys(item.colors).length > 0) {
+        if (hasValidColors(item.colors)) {
           tl.to(item.element, {
             ...item.colors
           }, "<");
