@@ -28,6 +28,10 @@ export function createNavAnimations(gsap) {
 
     // Get all scroll target elements and their corresponding sections
     const navigationItems = document.querySelectorAll("[aa-scroll-target]");
+    
+    // Early return if no navigation items found
+    if (navigationItems.length === 0) return;
+
     const sections = [];
     
     navigationItems.forEach(navItem => {
