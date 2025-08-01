@@ -264,6 +264,7 @@ async function init(options = {}) {
             // Setup nav animations if feature is enabled
             if (initOptions.gsapFeatures.includes('nav')) {
               loadedModules.animations.nav();
+              loadedModules.animations.initNavigationTracking(loadedModules.ScrollTrigger);
             }
 
             // Setup modal animations if feature is enabled

@@ -740,10 +740,14 @@ AlrdyAnimate.init({
 ### Scroll To
 The Scroll To feature allows you to create smooth scrolling animations to specific elements on your page. 
 
+When using scroll-to functionality, AlrdyAnimate automatically tracks which sections are in view and adds the `is-current` class to the corresponding navigation elements (triggered at 50% of the viewport). This works similarly to Webflow's default anchor link behavior.
+
 - Add  `aa-scroll-target` attribute to any clickable element (like buttons or links) and include the ID of the target section, e.g. `aa-scroll-target="#my-section"`
 - Customize the scroll behavior with these optional attributes:
    - `aa-duration`: Animation duration in seconds (default: 1.2)
    - `aa-distance`: Offset distance in pixels (default: 0)
+
+
 
 ### Important Considerations
 

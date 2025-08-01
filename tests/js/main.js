@@ -36,7 +36,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         },
         smoothScroll: {
-            enabled: false,
+            enabled: true,
             options: {
                 lerp: 0.12
             }

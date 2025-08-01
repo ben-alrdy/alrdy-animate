@@ -7,6 +7,20 @@
     <title>Scroll Effects - AlrdyAnimate Tests</title>
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="../dist/AlrdyAnimate.css">
+    <style>
+        .is-current {
+            color: red !important;
+        }
+        .scroll-nav {
+            position: fixed;
+            top: 5rem;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            z-index: 1000;
+            padding: 1rem;
+        }
+    </style>
 </head>
 
 <body>
@@ -28,14 +42,13 @@
 
         <!-- Add new scroll-to navigation -->
         <div class="scroll-nav container">
-            <h2>Quick Navigation</h2>
             <ul class="scroll-links">
                 <li>
                     <a href="#intro" aa-scroll-target="#intro" aa-duration="0">Introduction</a>
                 </li>
                 <li>
-                    <a href="#background-transitions" aa-scroll-target="#background-transitions"
-                        aa-duration="1.2">Background Transitions</a>
+                    <a href="#stack-reveal" aa-scroll-target="#stack-reveal"
+                        aa-duration="1.2">Stack Reveal</a>
                 </li>
                 <li>
                     <a href="#marquee-hover" aa-scroll-target="#marquee-hover" aa-duration="3">Marquee with Hover</a>
@@ -63,7 +76,7 @@
         </section>
 
         <!-- Stack Reveal Test Section -->
-        <section class="stack-reveal-wrapper" aa-animate="clip">
+        <section id="stack-reveal" class="stack-reveal-wrapper" aa-animate="clip">
             <div aa-clip-trigger>
                 <div aa-clip-background class=""></div>
             </div>
