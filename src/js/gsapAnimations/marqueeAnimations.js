@@ -54,12 +54,14 @@ function createMarqueeTimeline(element, gsap, duration, scrub, animationType) {
     // Set initial state using class
     element.classList.add('marquee-normal');
 
+    // Initialize currentDirection for hover functionality
+    let currentDirection = directionMultiplier;
+
     // Only set up direction switching if needed
     if (hasSwitch) {
       // State variables for direction changes
       let isChangingDirection = false;
       let lastDirection = directionMultiplier;
-      let currentDirection = directionMultiplier;
       let lastScrollTime = 0;
       const scrollThrottle = 100; // Throttle scroll events to every 100ms
 
