@@ -84,7 +84,7 @@ export function createNavAnimations(gsap) {
   };
 
   // Initialize nav animations
-  const initializeNav = () => {
+  const initializeNav = (ScrollTrigger) => {
     const navElement = document.querySelector('[aa-nav]');
     if (!navElement) return;
 
@@ -112,34 +112,35 @@ export function createNavAnimations(gsap) {
       }
     });
 
-    // Watch for scroll direction changes
-    const observer = new MutationObserver((mutations) => {
-      mutations.forEach((mutation) => {
-        if (mutation.attributeName === 'data-scroll-direction') {
-          const direction = document.body.getAttribute('data-scroll-direction');
-          const scrollTop = window.scrollY;
-          
-          if (navType.includes('hide')) {
-            if (direction === 'down') {
-              gsap.to(navElement, { 
-                y: `${-100 * navDistance}%`, 
-                duration: navDuration * 2, 
-                ease: navEase, 
-                overwrite: true 
-              });
-            } else {
-              showNavAtTop(navElement, navDuration, navEase);
-            }
-          }
-          
-          if (navType.includes('change')) {
-            updateScrolledClass(navElement, scrollTop, navScrolled);
+    // Use ScrollTrigger for better performance
+    ScrollTrigger.create({
+      trigger: document.body,
+      start: 'top top',
+      end: 'bottom bottom',
+      onUpdate: (self) => {
+        const direction = self.direction;
+        const scrollTop = window.scrollY;
+        
+        // Handle hide feature
+        if (navType.includes('hide')) {
+          if (direction === 1) { // Scrolling down
+            gsap.to(navElement, { 
+              y: `${-100 * navDistance}%`, 
+              duration: navDuration * 2, 
+              ease: navEase, 
+              overwrite: true 
+            });
+          } else { // Scrolling up
+            showNavAtTop(navElement, navDuration, navEase);
           }
         }
-      });
+        
+        // Handle change feature
+        if (navType.includes('change')) {
+          updateScrolledClass(navElement, scrollTop, navScrolled);
+        }
+      }
     });
-
-    observer.observe(document.body, { attributes: true });
   };
 
   return {

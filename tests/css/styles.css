@@ -496,6 +496,11 @@ p {
 
 .marquee__box {
     background-color: #131313;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: max(2em, 4vw);
     border-radius: 1vw;
     width: 18vw;
     height: 18vw;
