@@ -2,17 +2,25 @@
 
 export function initializeScrollState() {
   let lastScrollTop = 0;
-  const threshold = 20;
+  let lastScrollDirection = null;
+  let lastScrollStarted = null;
+  const threshold = 5;
   const thresholdTop = 50;
   let ticking = false;
 
   // Check initial scroll position
   requestAnimationFrame(() => {
-    const currentScrollTop = window.scrollY;
-    if (currentScrollTop > thresholdTop) {
+    if (!document.body.hasAttribute('data-scroll-direction')) {
       document.body.setAttribute('data-scroll-direction', 'down');
-      document.body.setAttribute('data-scroll-started', currentScrollTop > thresholdTop ? 'true' : 'false');
+      lastScrollDirection = 'down';
+    } else {
+      lastScrollDirection = document.body.getAttribute('data-scroll-direction');
     }
+    
+    const currentScrollTop = window.scrollY;
+    const scrollStarted = currentScrollTop > thresholdTop ? 'true' : 'false';
+    document.body.setAttribute('data-scroll-started', scrollStarted);
+    lastScrollStarted = scrollStarted;
   });
 
   window.addEventListener('scroll', () => {
@@ -25,10 +33,18 @@ export function initializeScrollState() {
         if (delta >= threshold) {
           const direction = currentScrollTop > lastScrollTop ? 'down' : 'up';
           const hasScrolled = currentScrollTop > thresholdTop;
+          const scrollStarted = hasScrolled ? 'true' : 'false';
           
-          // Update body attributes for global state
-          document.body.setAttribute('data-scroll-direction', direction);
-          document.body.setAttribute('data-scroll-started', hasScrolled ? 'true' : 'false');
+          // Only update attributes if they've changed
+          if (direction !== lastScrollDirection) {
+            document.body.setAttribute('data-scroll-direction', direction);
+            lastScrollDirection = direction;
+          }
+          
+          if (scrollStarted !== lastScrollStarted) {
+            document.body.setAttribute('data-scroll-started', scrollStarted);
+            lastScrollStarted = scrollStarted;
+          }
           
           lastScrollTop = currentScrollTop;
         }

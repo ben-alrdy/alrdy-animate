@@ -23,7 +23,7 @@
     </style>
 </head>
 
-<body>
+<body data-scroll-direction="down">
     <header>
         <nav aa-nav="hide-change-300" aa-distance="2">
             <div class="logo">
@@ -161,8 +161,8 @@
             </div>
         </section>
 
+        <!-- 
         <section id="marquee-scroll" class="marquee-section">
-            <!-- Left-moving marquee -->
             <div aa-animate="marquee-left-paused" class="marquee" aa-scrub="5">
                 <div aa-marquee-scroller="20">
                     <div aa-marquee-items>
@@ -173,7 +173,6 @@
                 </div>
             </div>
 
-            <!-- Right-moving marquee -->
             <div aa-animate="marquee-right-paused" class="marquee" aa-scrub="5">
                 <div aa-marquee-scroller="10">
                     <div aa-marquee-items>
@@ -210,7 +209,7 @@
                     </div>
                 </div>
             </div>
-        </section>
+        </section> -->
 
         <div id="background-transitions" class="background-wrapper" aa-animate="background" aa-scroll-start="top center"
             >
@@ -265,8 +264,8 @@
             </div>
 
             <!-- Right-moving marquee -->
-            <div aa-animate="marquee-right-switch" aa-duration="50" class="marquee" aa-scrub="smooth">
-                <div aa-marquee-scroller="0">
+            <div aa-animate="marquee-right-switch-hover" aa-duration="50" class="marquee" aa-scrub="smooth">
+                <div aa-marquee-scroller="10">
                     <div aa-marquee-items>
                         <div class="marquee__item">
                             <div class="marquee__box"></div>
