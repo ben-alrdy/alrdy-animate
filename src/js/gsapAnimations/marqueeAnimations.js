@@ -44,7 +44,7 @@ function createMarqueeTimeline(element, gsap, duration, scrub, animationType) {
 
     // Set initial position based on direction
     gsap.set(marqueeItems, {
-      xPercent: isRightDirection ? 100 : -100,
+      xPercent: isRightDirection ? -100 : 100,
       force3D: true,
       willChange: 'transform'
     });
