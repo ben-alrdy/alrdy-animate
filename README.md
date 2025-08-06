@@ -877,6 +877,9 @@ Link accordion content to visual elements that animate alongside:
   stroke-dasharray: 10000;
   stroke-dashoffset: 10000; /* Empty circle initially */
 }
+.autoplay-progress svg {
+  transform: rotate(-90deg); /* Start from top */
+}
 ```
 
 #### Available Inner Animations

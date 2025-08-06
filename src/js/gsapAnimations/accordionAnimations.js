@@ -551,7 +551,7 @@ function initializeAccordions(animations = null, splitText = null) {
     content.setAttribute('aa-accordion-status', 'inactive');
     toggle.setAttribute('aria-expanded', 'false');
 
-    const { duration, delay: accordionDelay } = getElementParams(content, 'accordion');
+    const { duration } = getElementParams(content, 'accordion');
     const { toggleId } = getElementParams(toggle, 'accordion');
     const connectedVisual = document.querySelector(`[aa-accordion-visual="${toggleId}"]`);
 
