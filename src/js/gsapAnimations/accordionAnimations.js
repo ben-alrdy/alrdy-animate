@@ -363,26 +363,57 @@ function initializeAccordions(animations = null, splitText = null) {
       if (progressTween) progressTween.kill();
       
       const toggle = toggles[index];
-      const progressElement = toggle.querySelector('[aa-accordion-progress]');
-      if (!progressElement) return;
       
-      const progressType = progressElement.getAttribute('aa-accordion-progress') || 'width';
-      const progressEase = progressElement.getAttribute('aa-ease') || 'power1.inOut';
-      
-      gsap.set(progressElement, { [progressType]: 0 });
-      
-      progressTween = gsap.to(progressElement, {
-        [progressType]: '100%',
-        duration,
-        ease: progressEase,
-        onComplete: () => {
-          if (scrollInstance?.isActive) {
-            const nextIndex = (index + 1) % toggles.length;
-            switchToAccordion(nextIndex);
-          }
-        },
-        paused: !scrollInstance?.isActive
-      });
+      // Check for circular progress first
+      const circle = toggle.querySelector('circle[aa-accordion-progress="circle"]');
+      if (circle) {
+        const progressEase = circle.getAttribute('aa-ease') || 'power1.inOut';
+        
+        // Calculate circumference for stroke-dasharray
+        const radius = parseFloat(circle.getAttribute('r')) || 25;
+        const circumference = 2 * Math.PI * radius;
+        
+        // Set initial state (empty circle)
+        gsap.set(circle, { 
+          strokeDasharray: circumference,
+          strokeDashoffset: circumference 
+        });
+        
+        progressTween = gsap.to(circle, {
+          strokeDashoffset: 0,
+          duration,
+          ease: progressEase,
+          onComplete: () => {
+            if (scrollInstance?.isActive) {
+              const nextIndex = (index + 1) % toggles.length;
+              switchToAccordion(nextIndex);
+            }
+          },
+          paused: !scrollInstance?.isActive
+        });
+      } else {
+        // Handle linear progress (width/height)
+        const progressElement = toggle.querySelector('[aa-accordion-progress]');
+        if (!progressElement) return;
+        
+        const progressType = progressElement.getAttribute('aa-accordion-progress') || 'width';
+        const progressEase = progressElement.getAttribute('aa-ease') || 'power1.inOut';
+        
+        gsap.set(progressElement, { [progressType]: 0 });
+        
+        progressTween = gsap.to(progressElement, {
+          [progressType]: '100%',
+          duration,
+          ease: progressEase,
+          onComplete: () => {
+            if (scrollInstance?.isActive) {
+              const nextIndex = (index + 1) % toggles.length;
+              switchToAccordion(nextIndex);
+            }
+          },
+          paused: !scrollInstance?.isActive
+        });
+      }
       
       if (scrollInstance?.isActive) {
         progressTween.play();
@@ -525,10 +556,19 @@ function initializeAccordions(animations = null, splitText = null) {
     const connectedVisual = document.querySelector(`[aa-accordion-visual="${toggleId}"]`);
 
     // Reset progress bar
-    const progressElement = toggle.querySelector('[aa-accordion-progress]');
-    if (progressElement) {
-      const progressType = progressElement.getAttribute('aa-accordion-progress') || 'width';
-      gsap.set(progressElement, { [progressType]: 0 });
+    const circle = toggle.querySelector('circle[aa-accordion-progress="circle"]');
+    if (circle) {
+      // Reset circular progress to empty using large values
+      gsap.set(circle, { 
+        strokeDasharray: 10000,
+        strokeDashoffset: 10000 
+      });
+    } else {
+      const progressElement = toggle.querySelector('[aa-accordion-progress]');
+      if (progressElement) {
+        const progressType = progressElement.getAttribute('aa-accordion-progress') || 'width';
+        gsap.set(progressElement, { [progressType]: 0 });
+      }
     }
 
     // Reverse content animations

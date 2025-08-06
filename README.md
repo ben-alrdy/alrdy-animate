@@ -730,7 +730,7 @@ Initializes the accordion component and wraps around **toggle**, **content** and
 - `aa-accordion-initial` - On load, activates this toggle and opens content and visual
 
 **Progress Attributes:**
-- `aa-accordion-progress` - Progress indicator type (possible values: "width", "height")
+- `aa-accordion-progress` - Progress indicator type (possible values: "width", "height", "circle")
 - `aa-ease` - Animation easing of progress indicator (default: "power4.out")
 
 **Content Attributes:**
@@ -842,6 +842,41 @@ Link accordion content to visual elements that animate alongside:
     <span>Visual 2</span>
   </div>
 </div>
+```
+
+#### Circle Progress
+
+```html
+<div class="autoplay-accordion" aa-animate="accordion-autoplay" aa-duration="3">
+    <div class="autoplay-toggle" aa-accordion-toggle="circle-1">
+        <div>
+            <span>Circular Progress Item</span>
+            <div class="autoplay-progress circular-progress">
+                <svg width="60" height="60" viewBox="0 0 60 60">
+                    <circle cx="30" cy="30" r="25" fill="none" stroke="#e0e0e0" stroke-width="4"/>
+                    <circle cx="30" cy="30" r="25" fill="none" stroke="#007bff" stroke-width="4" stroke-linecap="round" aa-accordion-progress="circle" aa-ease="power2.out"/>
+                </svg>
+            </div>
+        </div>
+        <span>▼</span>
+    </div>
+    <div class="autoplay-content" aa-accordion-content="circle-1">
+        <div class="autoplay-content-inner">
+            <div class="autoplay-content-wrapper">
+                <div aa-accordion-animate="text-slide-up-lines" aa-accordion-order="0" aa-split="words">
+                    <p>This uses a circular progress indicator instead of a bar.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+```
+
+```css
+[aa-accordion-progress="circle"] {
+  stroke-dasharray: 10000;
+  stroke-dashoffset: 10000; /* Empty circle initially */
+}
 ```
 
 #### Available Inner Animations

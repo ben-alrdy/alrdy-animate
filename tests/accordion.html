@@ -239,6 +239,25 @@
             width: 0%;
         }
         
+        /* Circular progress styling */
+        .autoplay-progress.circular-progress {
+            height: auto;
+            background: none;
+            border-radius: 0;
+            overflow: visible;
+        }
+        
+        .autoplay-progress svg {
+            transform: rotate(-90deg); /* Start from top */
+            display: block;
+            margin: 10px 0;
+        }
+        
+        .autoplay-progress circle:last-child {
+            stroke-dasharray: 1000;
+            stroke-dashoffset: 1000; /* Empty circle initially */
+        }
+        
         /* Responsive */
         @media (max-width: 768px) {
             .visual-container {
@@ -325,6 +344,55 @@
                         <div class="content-wrapper">
                             <div aa-accordion-animate="reveal-up" aa-accordion-order="0">
                                 <p>This one uses reveal-up animation.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Circular Progress Section -->
+        <div class="section">
+            <h2>Circular Progress Example</h2>
+            <div class="autoplay-accordion" aa-animate="accordion-autoplay" aa-duration="3">
+                <div class="autoplay-toggle" aa-accordion-toggle="circle-1">
+                    <div>
+                        <span>Circular Progress Item</span>
+                        <div class="autoplay-progress circular-progress">
+                            <svg width="60" height="60" viewBox="0 0 60 60">
+                                <circle cx="30" cy="30" r="25" fill="none" stroke="#e0e0e0" stroke-width="4"/>
+                                <circle cx="30" cy="30" r="25" fill="none" stroke="#007bff" stroke-width="4" stroke-linecap="round" aa-accordion-progress="circle" aa-ease="power2.out"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <span>▼</span>
+                </div>
+                <div class="autoplay-content" aa-accordion-content="circle-1">
+                    <div class="autoplay-content-inner">
+                        <div class="autoplay-content-wrapper">
+                            <div aa-accordion-animate="text-slide-up-lines" aa-accordion-order="0" aa-split="words">
+                                <p>This uses a circular progress indicator instead of a bar.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="autoplay-toggle" aa-accordion-toggle="circle-2">
+                    <div>
+                        <span>Circular Progress Item</span>
+                        <div class="autoplay-progress circular-progress">
+                            <svg width="60" height="60" viewBox="0 0 60 60">
+                                <circle cx="30" cy="30" r="25" fill="none" stroke="#e0e0e0" stroke-width="4"/>
+                                <circle cx="30" cy="30" r="25" fill="none" stroke="#007bff" stroke-width="4" stroke-linecap="round" aa-accordion-progress="circle" aa-ease="power2.out"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <span>▼</span>
+                </div>
+                <div class="autoplay-content" aa-accordion-content="circle-2">
+                    <div class="autoplay-content-inner">
+                        <div class="autoplay-content-wrapper">
+                            <div aa-accordion-animate="text-slide-up-lines" aa-accordion-order="0" aa-split="words">
+                                <p>This uses a circular progress indicator instead of a bar.</p>
                             </div>
                         </div>
                     </div>
