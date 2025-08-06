@@ -3,8 +3,8 @@ const accordionAnimations = {
   'fade': { opacity: 0 },
   'fade-up': { opacity: 0, yPercent: 10 },
   'fade-down': { opacity: 0, yPercent: -10 },
-  'fade-left': { opacity: 0, xPercent: 10 },
-  'fade-right': { opacity: 0, xPercent: -10 },
+  'fade-left': { opacity: 0, xPercent: 5 },
+  'fade-right': { opacity: 0, xPercent: -5 },
   'slide-up': { yPercent: 110 },
   'slide-down': { yPercent: -110 },
   'slide-left': { xPercent: 110 },
@@ -17,53 +17,51 @@ const CUSTOM_ANIMATION_PROPS = {
   x: 0, y: 0, xPercent: 0, yPercent: 0, opacity: 1, scale: 1
 };
 
-const INITIAL_CUSTOM_PROPS = {
-  x: 0, y: 0, xPercent: 0, yPercent: 0, opacity: 0, scale: 0.8
-};
-
 // Utility functions
-function parseElementOrder(element) {
+function getElementParams(element, type = 'animation') {
   const orderAttr = element.getAttribute('aa-accordion-order') || '';
   const [orderStr, percentStr] = orderAttr.split('-');
-  return {
-    order: parseInt(orderStr) || 0,
-    percent: percentStr ? percentStr : null
+  const order = parseInt(orderStr) || 0;
+  const percent = percentStr ? percentStr : null;
+  
+  const params = {
+    duration: parseFloat(element.getAttribute('aa-duration')) || 0.2,
+    ease: element.getAttribute('aa-ease') || 'power4.out',
+    timelinePosition: percent ? `>-${percent}%` : '<',
+    order,
+    percent,
+    animationType: element.getAttribute('aa-accordion-animate')
   };
+  
+  if (type === 'accordion') {
+    params.delay = parseFloat(element.getAttribute('aa-delay')) || 0;
+    params.toggleId = element.getAttribute('aa-accordion-toggle');
+    params.contentId = element.getAttribute('aa-accordion-content');
+  }
+  
+  return params;
 }
 
 function getElementData(elements) {
   return Array.from(elements).map(element => {
-    const { order, percent } = parseElementOrder(element);
+    const params = getElementParams(element, 'animation');
     return {
       element,
-      order,
-      percent,
-      animationType: element.getAttribute('aa-accordion-animate')
+      order: params.order,
+      percent: params.percent,
+      animationType: params.animationType,
+      duration: params.duration,
+      ease: params.ease,
+      timelinePosition: params.timelinePosition
     };
   }).sort((a, b) => a.order - b.order);
-}
-
-function getAnimationParams(element, defaultDuration = 0.4, defaultEase = 'power4.out') {
-  return {
-    duration: parseFloat(element.getAttribute('aa-duration')) || defaultDuration,
-    ease: element.getAttribute('aa-ease') || defaultEase,
-    distance: parseFloat(element.getAttribute('aa-distance')) || 1,
-    timelinePosition: parseElementOrder(element).percent ? `>-${parseElementOrder(element).percent}%` : '<'
-  };
 }
 
 function getBaseType(animationType) {
   return animationType ? (animationType.includes('-') ? animationType.split('-')[0] : animationType) : null;
 }
 
-function calculateTimelinePosition(tl, percent, timelinePosition) {
-  if (!percent) return timelinePosition;
-  
-  const prevEndTime = tl.recent() ? tl.recent().endTime() : 0;
-  const prevStartTime = tl.recent() ? tl.recent().startTime() : 0;
-  const prevDuration = prevEndTime - prevStartTime;
-  return prevStartTime + (prevDuration * (parseInt(percent) / 100));
-}
+
 
 function handleTextAnimation(element, animationType, animations, splitText, tl, position, duration, ease) {
   const split = element.getAttribute('aa-split') || 'lines';
@@ -86,7 +84,7 @@ function handleTextAnimation(element, animationType, animations, splitText, tl, 
   }, animationType);
 }
 
-function handleComplexAnimation(element, baseType, animations, timelinePosition, duration, ease, distance, animationType) {
+function handleComplexAnimation(element, baseType, animations, duration, ease, distance, animationType) {
   if (!animations || !animations[baseType]) return null;
   
   let animationTimeline;
@@ -130,21 +128,20 @@ function collectAnimatedElements(container, includeSelf = false) {
   return Array.from(elements);
 }
 
-function createTimeline(elements, animations, splitText, options = {}) {
-  const { defaultDuration = 0.4, defaultEase = 'power4.inOut', isVisual = false } = options;
+function createTimeline(container, animations, splitText, isVisual = false) {
+  const animatedElements = collectAnimatedElements(container, !isVisual);
   const tl = gsap.timeline({ paused: true, defaults: { ease: 'power4.inOut' } });
   
-  const elementData = getElementData(elements);
+  const elementData = getElementData(animatedElements);
   
-  elementData.forEach(({ element, percent, animationType }) => {
-    const { duration, ease, distance, timelinePosition } = getAnimationParams(element, defaultDuration, defaultEase);
+  elementData.forEach(({ element, animationType, duration, ease, timelinePosition }) => {
     const baseType = getBaseType(animationType);
-    const position = calculateTimelinePosition(tl, percent, timelinePosition);
 
     if (baseType === 'text' && animations?.text && splitText) {
-      handleTextAnimation(element, animationType, animations, splitText, tl, position, duration, ease);
+      handleTextAnimation(element, animationType, animations, splitText, tl, timelinePosition, duration, ease);
     } else if (animations && animations[baseType]) {
-      const animationTimeline = handleComplexAnimation(element, baseType, animations, timelinePosition, duration, ease, distance, animationType);
+      const distance = parseFloat(element.getAttribute('aa-distance')) || 1;
+      const animationTimeline = handleComplexAnimation(element, baseType, animations, duration, ease, distance, animationType);
       if (animationTimeline) {
         tl.add(animationTimeline, timelinePosition);
       }
@@ -156,32 +153,12 @@ function createTimeline(elements, animations, splitText, options = {}) {
   return tl;
 }
 
-function createAccordionTimeline(accordionContent, animations, splitText) {
-  const animatedElements = collectAnimatedElements(accordionContent, true);
-  
-  return createTimeline(animatedElements, animations, splitText, {
-    defaultDuration: 0.4,
-    defaultEase: 'power4.out',
-    isVisual: false
-  });
-}
-
-function createVisualInnerAnimationsTimeline(visualItem, animations, splitText) {
-  const animatedElements = collectAnimatedElements(visualItem, false);
-  
-  return createTimeline(animatedElements, animations, splitText, {
-    defaultDuration: 0.2,
-    defaultEase: 'power4.inOut',
-    isVisual: true
-  });
-}
-
 function setInitialElementState(element, animationType) {
+  if (!animationType) return;
+  
   const animation = accordionAnimations[animationType];
   
-  if (animationType.includes('custom')) {
-    gsap.set(element, INITIAL_CUSTOM_PROPS);
-  } else if (animation) {
+  if (animation && !animationType.includes('custom')) {
     gsap.set(element, animation);
   }
 }
@@ -219,10 +196,9 @@ function refreshScrollTrigger(duration) {
   });
 }
 
-function initializeAccordions(lenis = null, animations = null, splitText = null) {
+function initializeAccordions(animations = null, splitText = null) {
   const accordions = document.querySelectorAll('[aa-animate="accordion"], [aa-animate="accordion-multi"], [aa-animate="accordion-autoplay"]');
   const timelines = new Map();
-  let activeAccordions = new Set();
 
   accordions.forEach((accordion) => {
     const isMulti = accordion.getAttribute('aa-animate') === 'accordion-multi';
@@ -247,7 +223,7 @@ function initializeAccordions(lenis = null, animations = null, splitText = null)
       content.setAttribute('aa-accordion-status', 'inactive');
       
       // Create timeline and set initial state
-      const tl = createAccordionTimeline(content, animations, splitText);
+      const tl = createTimeline(content, animations, splitText, false);
       timelines.set(content, tl);
       
       // Set initial states
@@ -263,7 +239,7 @@ function initializeAccordions(lenis = null, animations = null, splitText = null)
         connectedVisual.setAttribute('aa-accordion-status', 'inactive');
         gsap.set(connectedVisual, { visibility: 'hidden' });
         
-        const visualTimeline = createVisualInnerAnimationsTimeline(connectedVisual, animations, splitText);
+        const visualTimeline = createTimeline(connectedVisual, animations, splitText, true);
         timelines.set(connectedVisual, visualTimeline);
         
         const visualAnimatedElements = collectAnimatedElements(connectedVisual, true);
@@ -441,12 +417,10 @@ function initializeAccordions(lenis = null, animations = null, splitText = null)
     toggle.setAttribute('aa-accordion-status', 'active');
     content.setAttribute('aa-accordion-status', 'active');
     toggle.setAttribute('aria-expanded', 'true');
-    activeAccordions.add(content);
 
-    const duration = parseFloat(content.getAttribute('aa-duration')) || 0.4;
+    const { duration } = getElementParams(content, 'accordion');
+    const { toggleId } = getElementParams(toggle, 'accordion');
     const accordionDelay = parseFloat(accordion.getAttribute('aa-delay')) || 0;
-    
-    const toggleId = toggle.getAttribute('aa-accordion-toggle');
     const connectedVisual = document.querySelector(`[aa-accordion-item="${toggleId}"]`);
     
     gsap.set(content, { gridTemplateRows: '1fr' });
@@ -463,51 +437,72 @@ function initializeAccordions(lenis = null, animations = null, splitText = null)
     }
     
     if (connectedVisual) {
-      connectedVisual.setAttribute('aa-accordion-status', 'active');
-      gsap.set(connectedVisual, { visibility: 'visible' });
-      
+      // Handle previous visual cleanup first
       const previouslyActiveVisual = accordion.querySelector('[aa-accordion-item][aa-accordion-status="active"]');
-      
-      // Handle main visual animation
-      const visualAnimationType = connectedVisual.getAttribute('aa-accordion-animate');
-      if (visualAnimationType) {
-        const visualDuration = parseFloat(connectedVisual.getAttribute('aa-duration')) || 0.4;
-        const visualEase = connectedVisual.getAttribute('aa-ease') || 'power4.inOut';
-        const visualAnimation = accordionAnimations[visualAnimationType];
+      if (previouslyActiveVisual && previouslyActiveVisual !== connectedVisual) {
+        previouslyActiveVisual.setAttribute('aa-accordion-status', 'inactive');
         
-        if (visualAnimation) {
-          gsap.fromTo(connectedVisual, 
-            { ...visualAnimation },
-            { 
-              opacity: 1, scale: 1, xPercent: 0, yPercent: 0,
-              duration: visualDuration, ease: visualEase
-            }
-          );
-        }
-      }
-      
-      // Handle inner animations
-      const innerTimeline = timelines.get(connectedVisual);
-      if (innerTimeline) {
-        const playInnerAnimation = () => {
-          if (accordionDelay > 0) {
-            gsap.delayedCall(accordionDelay, () => innerTimeline.play());
-          } else {
-            innerTimeline.play();
-          }
-        };
-        
-        if (previouslyActiveVisual && previouslyActiveVisual !== connectedVisual) {
-          previouslyActiveVisual.setAttribute('aa-accordion-status', 'inactive');
+        // Animate out the previous visual
+        const previousVisualAnimationType = previouslyActiveVisual.getAttribute('aa-accordion-animate');
+        if (previousVisualAnimationType) {
+          const { duration: prevDuration, ease: prevEase } = getElementParams(previouslyActiveVisual, 'animation');
+          const prevAnimation = accordionAnimations[previousVisualAnimationType];
           
-          const previousInnerTl = timelines.get(previouslyActiveVisual);
-          if (previousInnerTl) {
-            previousInnerTl.reverse();
-            previousInnerTl.eventCallback('onReverseComplete', playInnerAnimation);
+          if (prevAnimation) {
+            gsap.to(previouslyActiveVisual, { 
+              ...prevAnimation, duration: prevDuration, ease: prevEase,
+              onComplete: () => {
+                gsap.set(previouslyActiveVisual, { visibility: 'hidden' });
+                startNewVisualAnimation();
+              }
+            });
           } else {
-            playInnerAnimation();
+            gsap.set(previouslyActiveVisual, { visibility: 'hidden' });
+            startNewVisualAnimation();
           }
         } else {
+          gsap.set(previouslyActiveVisual, { visibility: 'hidden' });
+          startNewVisualAnimation();
+        }
+        
+        // Reverse previous inner timeline
+        const previousInnerTl = timelines.get(previouslyActiveVisual);
+        if (previousInnerTl) previousInnerTl.reverse();
+      } else {
+        startNewVisualAnimation();
+      }
+      
+      function startNewVisualAnimation() {
+        connectedVisual.setAttribute('aa-accordion-status', 'active');
+        gsap.set(connectedVisual, { visibility: 'visible' });
+        
+        // Handle main visual animation
+        const visualAnimationType = connectedVisual.getAttribute('aa-accordion-animate');
+        if (visualAnimationType) {
+          const { duration: visualDuration, ease: visualEase } = getElementParams(connectedVisual, 'animation');
+          const visualAnimation = accordionAnimations[visualAnimationType];
+          
+          if (visualAnimation) {
+            gsap.fromTo(connectedVisual, 
+              { ...visualAnimation },
+              { 
+                opacity: 1, scale: 1, xPercent: 0, yPercent: 0,
+                duration: visualDuration, ease: visualEase
+              }
+            );
+          }
+        }
+        
+        // Handle inner animations with delay
+        const innerTimeline = timelines.get(connectedVisual);
+        if (innerTimeline) {
+          const playInnerAnimation = () => {
+            if (accordionDelay > 0) {
+              gsap.delayedCall(accordionDelay, () => innerTimeline.play());
+            } else {
+              innerTimeline.play();
+            }
+          };
           playInnerAnimation();
         }
       }
@@ -520,12 +515,9 @@ function initializeAccordions(lenis = null, animations = null, splitText = null)
     toggle.setAttribute('aa-accordion-status', 'inactive');
     content.setAttribute('aa-accordion-status', 'inactive');
     toggle.setAttribute('aria-expanded', 'false');
-    activeAccordions.delete(content);
 
-    const duration = parseFloat(content.getAttribute('aa-duration')) || 0.4;
-    const accordionDelay = parseFloat(accordion.getAttribute('aa-delay')) || 0;
-
-    const toggleId = toggle.getAttribute('aa-accordion-toggle');
+    const { duration } = getElementParams(content, 'accordion');
+    const { toggleId } = getElementParams(toggle, 'accordion');
     const connectedVisual = document.querySelector(`[aa-accordion-item="${toggleId}"]`);
 
     // Reset progress bar
@@ -539,13 +531,12 @@ function initializeAccordions(lenis = null, animations = null, splitText = null)
     const tl = timelines.get(content);
     if (tl) tl.reverse();
 
-    // Hide connected visual
-    if (connectedVisual) {
-      const visualAnimationType = connectedVisual.getAttribute('aa-accordion-animate');
-      if (visualAnimationType) {
-        const visualDuration = parseFloat(connectedVisual.getAttribute('aa-duration')) || 0.4;
-        const visualEase = connectedVisual.getAttribute('aa-ease') || 'power4.inOut';
-        const visualAnimation = accordionAnimations[visualAnimationType];
+          // Hide connected visual
+      if (connectedVisual) {
+        const visualAnimationType = connectedVisual.getAttribute('aa-accordion-animate');
+        if (visualAnimationType) {
+          const { duration: visualDuration, ease: visualEase } = getElementParams(connectedVisual, 'animation');
+          const visualAnimation = accordionAnimations[visualAnimationType];
         
         if (visualAnimation) {
           gsap.to(connectedVisual, { 
@@ -580,14 +571,9 @@ function initializeAccordions(lenis = null, animations = null, splitText = null)
   };
 }
 
-// Store parameters for initialization
-let storedParams = null;
-
-function createAccordionAnimations(gsap, lenis, animations, splitText) {
-  storedParams = { gsap, lenis, animations, splitText };
-  
+function createAccordionAnimations(gsap, animations, splitText) {
   return {
-    accordion: () => initializeAccordions(storedParams.lenis, storedParams.animations, storedParams.splitText)
+    accordion: () => initializeAccordions(animations, splitText)
   };
 }
 

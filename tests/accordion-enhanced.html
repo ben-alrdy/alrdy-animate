@@ -249,6 +249,12 @@
                 grid-template-columns: 1fr;
             }
         }
+        [aa-accordion-animate="custom-slide"]{
+            transform: translateY(100%);
+            opacity: 0;
+            transition: transform 0.6s ease, opacity 0.6s ease;
+        }
+        
     </style>
 </head>
 <body>
@@ -283,7 +289,7 @@
                 <div class="accordion-content" aa-accordion-content="basic-2">
                     <div class="content-inner">
                         <div class="content-wrapper">
-                            <div aa-accordion-animate="appear-up" aa-accordion-order="0">
+                            <div aa-accordion-animate="custom-slide" aa-accordion-order="0">
                                 <p>This item uses appear-up animation.</p>
                             </div>
                         </div>
@@ -455,7 +461,7 @@
         <!-- Complex Example Section -->
         <div class="section">
             <h2>Complex Example: Autoplay with Visual Items</h2>
-            <div class="visual-container" aa-animate="accordion-autoplay" aa-duration="4" aa-delay="1.5">
+            <div class="visual-container" aa-animate="accordion-autoplay" aa-duration="10" aa-delay="0.5">
                 <div class="autoplay-accordion">
                     <div class="autoplay-toggle" aa-accordion-toggle="complex-1">
                         <div>
@@ -469,10 +475,10 @@
                     <div class="autoplay-content" aa-accordion-content="complex-1">
                         <div class="autoplay-content-inner">
                             <div class="autoplay-content-wrapper">
-                                <div aa-accordion-animate="text-slide-up" aa-accordion-order="0" aa-split="words">
+                                <div aa-accordion-animate="text-slide-up-lines" aa-accordion-order="0" aa-split="words">
                                     <p>Advanced text animations with word splitting.</p>
                                 </div>
-                                <div aa-accordion-animate="fade" aa-accordion-order="1">
+                                <div aa-accordion-animate="text-slide-up-lines" aa-accordion-order="1-70">
                                     <p>Multiple elements animate in sequence.</p>
                                 </div>
                             </div>
@@ -520,23 +526,24 @@
                     
                 </div>
                 <div class="visual-items">
-                        <div class="visual-item" aa-accordion-item="complex-1" aa-accordion-animate="fade-left">
-                            <div aa-accordion-animate="text-slide-up-words" aa-split="words" aa-stagger="0.05">
-                                <span>Text Animation</span>
+                        <div class="visual-item" aa-accordion-item="complex-1" aa-duration="0.3" aa-accordion-animate="fade-left" style="display: flex; flex-direction: column; gap: 10px;">
+                            <div aa-accordion-animate="text-slide-up-words" aa-accordion-order="0" aa-split="words" aa-stagger="0.05">
+                                Text Animation
                             </div>
-                            <div aa-accordion-animate="text-slide-up-words" aa-split="words" aa-stagger="0.05">
-                                <span>Text Animation</span>
+                            <div aa-accordion-animate="text-slide-up-words" aa-accordion-order="1-50" aa-split="words" aa-stagger="0.05">
+                                Text Animation
                             </div>
-                            <div aa-accordion-animate="text-slide-up-words" aa-split="words" aa-stagger="0.05">
-                                <span>Text Animation</span>
+                            <div aa-accordion-animate="text-slide-up-words" aa-accordion-order="2-10" aa-split="words" aa-stagger="0.05">
+                                Text Animation
                             </div>
+                            
                         </div>
-                        <div class="visual-item" aa-accordion-item="complex-2" aa-accordion-animate="fade-left">
+                        <div class="visual-item" aa-accordion-item="complex-2" aa-duration="0.3" aa-accordion-animate="fade-left">
                             <div aa-accordion-animate="appear">
                                 <span>Visual Effects</span>
                             </div>
                         </div>
-                        <div class="visual-item" aa-accordion-item="complex-3" aa-accordion-animate="fade-left">
+                        <div class="visual-item" aa-accordion-item="complex-3" aa-duration="0.3" aa-accordion-animate="fade-left">
                             <div aa-accordion-animate="reveal-left">
                                 <span>Reveal Effects</span>
                             </div>

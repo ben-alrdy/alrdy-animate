@@ -218,7 +218,6 @@ async function init(options = {}) {
               
               const accordionAnimations = accordionModule.createAccordionAnimations(
                 modules.gsap,
-                lenis,
                 modules.animations,
                 modules.splitText
               );
