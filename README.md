@@ -714,14 +714,53 @@ To set content above the background, add `aa-hover-content` to the respective el
 
 AlrdyAnimate includes accessible accordion functionality with GSAP animations. Create expandable/collapsible sections with smooth height animations and inner content animations.
 
+**Note:** The opening/closing of accordion content is animated via CSS transition of the grid `fr` unit, while inner content animations are handled by GSAP. This is why on aa-accordion-content, we also need the aa-animate attribute to set aa-duration and aa-ease.
+
+#### Available Attributes
+
+**Component Attributes:**
+Initializes the accordion component and wraps around **toggle**, **content** and **visual**
+- `aa-animate="accordion"` - Single accordion (only one open at a time)
+- `aa-animate="accordion-multi"` - Multi accordion (multiple can be open)
+- `aa-animate="accordion-autoplay"` - Autoplay accordion with progress indicators
+- `aa-duration` - Only relevant for autoplay, duration of progress until next accordion activates (also requires `aa-animate` attribute since it's a CSS animation)
+
+**Toggle Attributes:**
+- `aa-accordion-toggle=ID` - Marks the clickable toggle element
+- `aa-accordion-initial` - On load, activates this toggle and opens content and visual
+
+**Progress Attributes:**
+- `aa-accordion-progress` - Progress indicator type (possible values: "width", "height")
+- `aa-ease` - Animation easing of progress indicator (default: "power4.out")
+
+**Content Attributes:**
+- `aa-accordion-content=ID` - Marks the expandable content element
+- `aa-duration` - Duration of content opening/closing (also requires `aa-animate` attribute since it's a CSS animation)
+- `aa-ease` - Height animation easing (also requires `aa-animate` attribute since it's a CSS animation)
+- `aa-delay` - Delay before inner animations start (default: 0.3)
+
+**Visual Element Attributes:**
+- `aa-accordion-visual=ID` - Marks the visual content element
+- `aa-delay` - Delay before inner animations start (default: 0.3)
+
+**Inner Animation Attributes:**
+Inside of **content** and **visual**, elements can be animated as well
+- `aa-accordion-animate` - Animation type for inner elements
+- `aa-accordion-order` - Animation sequence order (e.g., "0", "1", "1-30"), second number defines the percentage of the previous animation at which this animation should trigger
+- `aa-duration` - Animation duration (default: 0.2)
+- `aa-ease` - Animation easing (default: "power4.out")
+- `aa-distance` - Distance for complex animations (default: 1)
+- `aa-split` - Text splitting method for text animations ("lines", "words", "chars")
+- `aa-stagger` - Stagger delay for text animations (default: 0.01)
+
 #### Basic Setup
 
 ```html
-<div aa-animate="accordion" aa-duration="0.6" aa-ease="power2.out">
-  <div aa-accordion-toggle>
+<div aa-animate="accordion">
+  <div aa-accordion-toggle="item-1">
     <h3>Accordion Item 1</h3>
   </div>
-  <div aa-accordion-content>
+  <div aa-accordion-content="item-1">
     <div aa-accordion-animate="fade" aa-accordion-order="0">
       <p>Content for item 1</p>
     </div>
@@ -730,10 +769,10 @@ AlrdyAnimate includes accessible accordion functionality with GSAP animations. C
     </div>
   </div>
   
-  <div aa-accordion-toggle>
+  <div aa-accordion-toggle="item-2">
     <h3>Accordion Item 2</h3>
   </div>
-  <div aa-accordion-content>
+  <div aa-accordion-content="item-2">
     <div aa-accordion-animate="appear-up" aa-accordion-order="0">
       <p>Content for item 2</p>
     </div>
@@ -741,61 +780,94 @@ AlrdyAnimate includes accessible accordion functionality with GSAP animations. C
 </div>
 ```
 
-#### Multi-Accordion Setup
+#### Autoplay Accordion
 
-Allow multiple accordions to be open simultaneously:
+Automatically cycle through accordion items with progress indicators:
 
 ```html
-<div aa-animate="accordion-multi" aa-duration="0.6" aa-delay="0.2">
-  <div aa-accordion-toggle>
-    <h3>Multi Accordion Item 1</h3>
+<div aa-animate="accordion-autoplay" aa-duration="5">
+  <div aa-accordion-toggle="autoplay-1">
+    <h3>Autoplay Item 1</h3>
+    <div aa-accordion-progress="width"></div>
   </div>
-  <div aa-accordion-content>
-    <div aa-accordion-animate="scale" aa-accordion-order="0">
-      <p>Content for multi item 1</p>
+  <div aa-accordion-content="autoplay-1" aa-animate aa-duration="0.5" aa-ease="power2.inOut">
+    <div aa-accordion-animate="fade" aa-accordion-order="0">
+      <p>Content for autoplay item 1</p>
     </div>
   </div>
   
-  <div aa-accordion-toggle>
-    <h3>Multi Accordion Item 2</h3>
+  <div aa-accordion-toggle="autoplay-2">
+    <h3>Autoplay Item 2</h3>
+    <div aa-accordion-progress="width"></div>
   </div>
-  <div aa-accordion-content>
-    <div aa-accordion-animate="reveal-up" aa-accordion-order="0">
-      <p>Content for multi item 2</p>
+  <div aa-accordion-content="autoplay-2" aa-animate aa-duration="0.5" aa-ease="power2.inOut">
+    <div aa-accordion-animate="appear" aa-accordion-order="0">
+      <p>Content for autoplay item 2</p>
     </div>
   </div>
 </div>
 ```
 
-#### Available Attributes
+#### Connected Visual Elements
 
-**Container Attributes:**
-- `aa-animate="accordion"` - Single accordion (only one open at a time)
-- `aa-animate="accordion-multi"` - Multi accordion (multiple can be open)
-- `aa-duration` - Height animation duration (default: 0.6)
-- `aa-ease` - Height animation easing (default: "power2.out")
-- `aa-delay` - Delay before inner animations start (default: 0)
+Link accordion content to visual elements that animate alongside:
 
-**Toggle/Content Attributes:**
-- `aa-accordion-toggle` - Marks the clickable toggle element
-- `aa-accordion-content` - Marks the expandable content element
+```html
+<div aa-animate="accordion">
+  <div aa-accordion-toggle="visual-1" aa-accordion-initial>
+    <h3>Visual Item 1</h3>
+  </div>
+  <div aa-accordion-content="visual-1" aa-delay="0.3">
+    <div aa-accordion-animate="fade" aa-accordion-order="0">
+      <p>This controls the visual on the right</p>
+    </div>
+  </div>
+  
+  <div aa-accordion-toggle="visual-2">
+    <h3>Visual Item 2</h3>
+  </div>
+  <div aa-accordion-content="visual-2" aa-delay="0.5">
+    <div aa-accordion-animate="text-slide-up" aa-accordion-order="0" aa-split="words">
+      <p>This controls another visual</p>
+    </div>
+  </div>
+</div>
 
-**Inner Animation Attributes:**
-- `aa-accordion-animate` - Animation type for inner elements
-- `aa-accordion-order` - Animation sequence order (e.g., "0", "1", "1-30")
+<!-- Connected visual elements -->
+<div class="visual-container">
+  <div aa-accordion-visual="visual-1" aa-accordion-animate="fade-left" aa-duration="0.4" aa-delay="0.2">
+    <span>Visual 1</span>
+  </div>
+  <div aa-accordion-visual="visual-2" aa-accordion-animate="fade-left" aa-duration="0.4" aa-delay="0.6">
+    <span>Visual 2</span>
+  </div>
+</div>
+```
 
 #### Available Inner Animations
 
-  - Fade: `fade`, `fade-up`, `fade-down`, `fade-left`, `fade-right`
-  - Slide: `slide-up`, `slide-down`, `slide-left`, `slide-right`
-  - Scale: `scale`
-  - Custom: Use `custom-*` (e.g., `custom-slide`) to animate from CSS-defined positions to zero
-    ```css
-    [aa-accordion-animate="custom-slide"] {
-      transform: translateX(500px);
-    }
-    ```
+**Simple Animations:**
+- Fade: `fade`, `fade-up`, `fade-down`, `fade-left`, `fade-right`
+- Slide: `slide-up`, `slide-down`, `slide-left`, `slide-right`
+- Scale: `scale`
 
+**Complex Animations (requires GSAP plugins):**
+- Appear: `appear`, `appear-up`, `appear-down`, `appear-left`, `appear-right`
+- Reveal: `reveal`, `reveal-up`, `reveal-down`, `reveal-left`, `reveal-right`
+- Counter: `counter`
+
+**Text Animations (requires splitText plugin):**
+- Text Slide: `text-slide-up`, `text-slide-down`, `text-slide-left`, `text-slide-right`
+- Text Appear: `text-appear`, `text-appear-up`, `text-appear-down`
+- Text Reveal: `text-reveal`, `text-reveal-up`, `text-reveal-down`
+
+**Custom Animations:**
+Use `custom-*` (e.g., `custom-slide`) to animate from CSS-defined positions to zero:
+```css
+[aa-accordion-animate="custom-slide"] {
+  transform: translateX(500px);
+}
+```
 
 #### Accessibility Features
 

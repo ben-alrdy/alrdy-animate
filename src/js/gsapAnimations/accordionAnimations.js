@@ -30,11 +30,11 @@ function getElementParams(element, type = 'animation') {
     timelinePosition: percent ? `>-${percent}%` : '<',
     order,
     percent,
-    animationType: element.getAttribute('aa-accordion-animate')
+    animationType: element.getAttribute('aa-accordion-animate'),
+    delay: parseFloat(element.getAttribute('aa-delay')) || 0.3
   };
   
   if (type === 'accordion') {
-    params.delay = parseFloat(element.getAttribute('aa-delay')) || 0;
     params.toggleId = element.getAttribute('aa-accordion-toggle');
     params.contentId = element.getAttribute('aa-accordion-content');
   }
@@ -229,12 +229,12 @@ function initializeAccordions(animations = null, splitText = null) {
       // Set initial states
       const animatedElements = collectAnimatedElements(content, true);
       animatedElements.forEach(element => {
-        const animationType = element.getAttribute('aa-accordion-animate');
+        const { animationType } = getElementParams(element, 'animation');
         setInitialElementState(element, animationType);
       });
       
       // Setup connected visual
-      const connectedVisual = document.querySelector(`[aa-accordion-item="${contentId}"]`);
+      const connectedVisual = document.querySelector(`[aa-accordion-visual="${contentId}"]`);
       if (connectedVisual) {
         connectedVisual.setAttribute('aa-accordion-status', 'inactive');
         gsap.set(connectedVisual, { visibility: 'hidden' });
@@ -244,7 +244,7 @@ function initializeAccordions(animations = null, splitText = null) {
         
         const visualAnimatedElements = collectAnimatedElements(connectedVisual, true);
         visualAnimatedElements.forEach(element => {
-          const animationType = element.getAttribute('aa-accordion-animate');
+          const { animationType } = getElementParams(element, 'animation');
           setInitialElementState(element, animationType);
         });
       }
@@ -270,6 +270,7 @@ function initializeAccordions(animations = null, splitText = null) {
         if (!content) return;
         
         const isActive = toggle.getAttribute('aa-accordion-status') === 'active';
+        const hasInitialToggle = accordion.querySelector('[aa-accordion-initial]');
         
         if (isAutoplay && progressTween?.isActive()) {
           const currentToggleIndex = Array.from(toggles).indexOf(toggle);
@@ -277,6 +278,11 @@ function initializeAccordions(animations = null, splitText = null) {
         }
         
         if (isAutoplay) stopAutoplay();
+        
+        // Prevent closing active accordion if it's autoplay or has initial toggle
+        if (isActive && (isAutoplay || hasInitialToggle)) {
+          return;
+        }
         
         if (isActive) {
           closeAccordion(toggle, content, accordion);
@@ -418,10 +424,9 @@ function initializeAccordions(animations = null, splitText = null) {
     content.setAttribute('aa-accordion-status', 'active');
     toggle.setAttribute('aria-expanded', 'true');
 
-    const { duration } = getElementParams(content, 'accordion');
+    const { duration, delay: accordionDelay } = getElementParams(content, 'accordion');
     const { toggleId } = getElementParams(toggle, 'accordion');
-    const accordionDelay = parseFloat(accordion.getAttribute('aa-delay')) || 0;
-    const connectedVisual = document.querySelector(`[aa-accordion-item="${toggleId}"]`);
+    const connectedVisual = document.querySelector(`[aa-accordion-visual="${toggleId}"]`);
     
     gsap.set(content, { gridTemplateRows: '1fr' });
     
@@ -438,14 +443,13 @@ function initializeAccordions(animations = null, splitText = null) {
     
     if (connectedVisual) {
       // Handle previous visual cleanup first
-      const previouslyActiveVisual = accordion.querySelector('[aa-accordion-item][aa-accordion-status="active"]');
+      const previouslyActiveVisual = accordion.querySelector('[aa-accordion-visual][aa-accordion-status="active"]');
       if (previouslyActiveVisual && previouslyActiveVisual !== connectedVisual) {
         previouslyActiveVisual.setAttribute('aa-accordion-status', 'inactive');
         
         // Animate out the previous visual
-        const previousVisualAnimationType = previouslyActiveVisual.getAttribute('aa-accordion-animate');
+        const { duration: prevDuration, ease: prevEase, animationType: previousVisualAnimationType } = getElementParams(previouslyActiveVisual, 'animation');
         if (previousVisualAnimationType) {
-          const { duration: prevDuration, ease: prevEase } = getElementParams(previouslyActiveVisual, 'animation');
           const prevAnimation = accordionAnimations[previousVisualAnimationType];
           
           if (prevAnimation) {
@@ -477,9 +481,8 @@ function initializeAccordions(animations = null, splitText = null) {
         gsap.set(connectedVisual, { visibility: 'visible' });
         
         // Handle main visual animation
-        const visualAnimationType = connectedVisual.getAttribute('aa-accordion-animate');
+        const { duration: visualDuration, ease: visualEase, animationType: visualAnimationType } = getElementParams(connectedVisual, 'animation');
         if (visualAnimationType) {
-          const { duration: visualDuration, ease: visualEase } = getElementParams(connectedVisual, 'animation');
           const visualAnimation = accordionAnimations[visualAnimationType];
           
           if (visualAnimation) {
@@ -496,9 +499,10 @@ function initializeAccordions(animations = null, splitText = null) {
         // Handle inner animations with delay
         const innerTimeline = timelines.get(connectedVisual);
         if (innerTimeline) {
+          const { delay: visualDelay } = getElementParams(connectedVisual, 'animation');
           const playInnerAnimation = () => {
-            if (accordionDelay > 0) {
-              gsap.delayedCall(accordionDelay, () => innerTimeline.play());
+            if (visualDelay > 0) {
+              gsap.delayedCall(visualDelay, () => innerTimeline.play());
             } else {
               innerTimeline.play();
             }
@@ -516,9 +520,9 @@ function initializeAccordions(animations = null, splitText = null) {
     content.setAttribute('aa-accordion-status', 'inactive');
     toggle.setAttribute('aria-expanded', 'false');
 
-    const { duration } = getElementParams(content, 'accordion');
+    const { duration, delay: accordionDelay } = getElementParams(content, 'accordion');
     const { toggleId } = getElementParams(toggle, 'accordion');
-    const connectedVisual = document.querySelector(`[aa-accordion-item="${toggleId}"]`);
+    const connectedVisual = document.querySelector(`[aa-accordion-visual="${toggleId}"]`);
 
     // Reset progress bar
     const progressElement = toggle.querySelector('[aa-accordion-progress]');
@@ -531,11 +535,10 @@ function initializeAccordions(animations = null, splitText = null) {
     const tl = timelines.get(content);
     if (tl) tl.reverse();
 
-          // Hide connected visual
+      // Hide connected visual
       if (connectedVisual) {
-        const visualAnimationType = connectedVisual.getAttribute('aa-accordion-animate');
+        const { duration: visualDuration, ease: visualEase, animationType: visualAnimationType } = getElementParams(connectedVisual, 'animation');
         if (visualAnimationType) {
-          const { duration: visualDuration, ease: visualEase } = getElementParams(connectedVisual, 'animation');
           const visualAnimation = accordionAnimations[visualAnimationType];
         
         if (visualAnimation) {

@@ -264,7 +264,7 @@
         <!-- Basic Accordion Section -->
         <div class="section">
             <h2>Basic Accordion</h2>
-            <div class="accordion-basic" aa-animate="accordion" aa-delay="0.3">
+            <div class="accordion-basic" aa-animate="accordion">
                 <div class="accordion-toggle" aa-accordion-toggle="basic-1">
                     <span>Basic Accordion Item 1</span>
                     <span>▼</span>
@@ -335,7 +335,7 @@
         <!-- Autoplay Accordion Section -->
         <div class="section">
             <h2>Autoplay Accordion with Progress</h2>
-            <div class="autoplay-accordion" aa-animate="accordion-autoplay" aa-duration="3" aa-delay="0.3">
+            <div class="autoplay-accordion" aa-animate="accordion-autoplay" aa-duration="3" >
                 <div class="autoplay-toggle" aa-accordion-toggle="autoplay-1">
                     <div>
                         <span>Autoplay Item 1</span>
@@ -345,7 +345,7 @@
                     </div>
                     <span>▼</span>
                 </div>
-                <div class="autoplay-content" aa-accordion-content="autoplay-1">
+                <div class="autoplay-content" aa-accordion-content="autoplay-1" >
                     <div class="autoplay-content-inner">
                         <div class="autoplay-content-wrapper">
                             <div aa-accordion-animate="text-slide-up-lines" aa-split="lines" aa-accordion-order="0">
@@ -400,7 +400,7 @@
             <h2>Accordion with Connected Visual Items</h2>
             <div class="visual-container" aa-animate="accordion">
                 <div class="accordion-section">
-                    <div class="accordion-toggle" aa-accordion-toggle="visual-1">
+                    <div class="accordion-toggle" aa-accordion-toggle="visual-1" aa-accordion-initial>
                         <span>Visual Item 1</span>
                         <span>▼</span>
                     </div>
@@ -445,13 +445,13 @@
                     
                 </div>
                 <div class="visual-items">
-                        <div class="visual-item" aa-accordion-item="visual-1" aa-accordion-animate="fade-left" aa-duration="0.1">
+                        <div class="visual-item" aa-accordion-visual="visual-1" aa-accordion-animate="fade-left" aa-duration="0.1">
                             <span>Visual 1</span>
                         </div>
-                        <div class="visual-item" aa-accordion-item="visual-2" aa-accordion-animate="fade-left" aa-duration="0.1">
+                        <div class="visual-item" aa-accordion-visual="visual-2" aa-accordion-animate="fade-left" aa-duration="0.1">
                             <span>Visual 2</span>
                         </div>
-                        <div class="visual-item" aa-accordion-item="visual-3" aa-accordion-animate="fade-left" aa-duration="0.1">
+                        <div class="visual-item" aa-accordion-visual="visual-3" aa-accordion-animate="fade-left" aa-duration="0.1">
                             <span>Visual 3</span>
                         </div>
                     </div>
@@ -461,7 +461,7 @@
         <!-- Complex Example Section -->
         <div class="section">
             <h2>Complex Example: Autoplay with Visual Items</h2>
-            <div class="visual-container" aa-animate="accordion-autoplay" aa-duration="10" aa-delay="0.5">
+            <div class="visual-container" aa-animate="accordion-autoplay" aa-duration="10" >
                 <div class="autoplay-accordion">
                     <div class="autoplay-toggle" aa-accordion-toggle="complex-1">
                         <div>
@@ -526,7 +526,7 @@
                     
                 </div>
                 <div class="visual-items">
-                        <div class="visual-item" aa-accordion-item="complex-1" aa-duration="0.3" aa-accordion-animate="fade-left" style="display: flex; flex-direction: column; gap: 10px;">
+                        <div class="visual-item" aa-accordion-visual="complex-1" aa-duration="0.3" aa-accordion-animate="fade-left" style="display: flex; flex-direction: column; gap: 10px;">
                             <div aa-accordion-animate="text-slide-up-words" aa-accordion-order="0" aa-split="words" aa-stagger="0.05">
                                 Text Animation
                             </div>
@@ -538,12 +538,12 @@
                             </div>
                             
                         </div>
-                        <div class="visual-item" aa-accordion-item="complex-2" aa-duration="0.3" aa-accordion-animate="fade-left">
+                        <div class="visual-item" aa-accordion-visual="complex-2" aa-duration="0.3" aa-accordion-animate="fade-left">
                             <div aa-accordion-animate="appear">
                                 <span>Visual Effects</span>
                             </div>
                         </div>
-                        <div class="visual-item" aa-accordion-item="complex-3" aa-duration="0.3" aa-accordion-animate="fade-left">
+                        <div class="visual-item" aa-accordion-visual="complex-3" aa-duration="0.3" aa-accordion-animate="fade-left">
                             <div aa-accordion-animate="reveal-left">
                                 <span>Reveal Effects</span>
                             </div>
