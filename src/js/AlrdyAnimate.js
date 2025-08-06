@@ -211,6 +211,29 @@ async function init(options = {}) {
             }
           }
 
+          // Initialize accordion animations after all other animations are set up
+          if (initOptions.gsapFeatures.includes('accordion')) {
+            try {
+              const accordionModule = await gsapBundles.accordion.animations();
+              
+              const accordionAnimations = accordionModule.createAccordionAnimations(
+                modules.gsap,
+                lenis,
+                modules.animations,
+                modules.splitText
+              );
+
+              // Store the accordion animation function (like all other gsap animations)
+              modules.animations.accordion = () => {
+                if (accordionAnimations?.accordion && typeof accordionAnimations.accordion === 'function') {
+                  return accordionAnimations.accordion();
+                }
+              };
+            } catch (accordionError) {
+              console.warn('Failed to initialize accordion animations:', accordionError);
+            }
+          }
+
           return modules;
         } catch (error) {
           console.warn('Failed to load GSAP core:', error);
@@ -275,6 +298,11 @@ async function init(options = {}) {
                   loadedModules.animations.modal(group);
                 });
               }
+            }
+
+            // Setup accordion animations if feature is enabled
+            if (initOptions.gsapFeatures.includes('accordion')) {
+              loadedModules.animations.accordion();
             }
 
             // Setup animations

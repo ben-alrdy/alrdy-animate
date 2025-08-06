@@ -13,7 +13,7 @@
   - [Float Animations](#float-animations)
   - [Zoom Animations](#zoom-animations)
   - [Slide Animations](#slide-animations)
-  - [Blurred Animations](#blur-animations)
+  - [Blur Animations](#blur-animations)
   - [Rotate Animations](#rotate-animations)
   - [3D Animations](#3d-animations)
   - [Pseudo Overlay Reveal](#pseudo-overlay-reveal)
@@ -22,8 +22,9 @@
   - [Slider Animations](#slider-animations)
   - [Scroll Animations](#scroll-animations)
   - [Hover Animations](#hover-animations)
+  - [Accordion Animations](#accordion-animations)
+  - [Modal Animations](#modal-animations)
 - [Smooth Scrolling (Lenis)](#smooth-scrolling-lenis)
-- [Modals](#modals)
 - [Easing Functions](#easing-functions)
 - [Setting attributes via JavaScript](#setting-attributes-via-javascript)
 - [Templates](#templates)
@@ -708,6 +709,173 @@ To set content above the background, add `aa-hover-content` to the respective el
 ```
 
 
+### Accordion Animations
+(`gsapFeatures: ['accordion']`)
+
+AlrdyAnimate includes accessible accordion functionality with GSAP animations. Create expandable/collapsible sections with smooth height animations and inner content animations.
+
+#### Basic Setup
+
+```html
+<div aa-animate="accordion" aa-duration="0.6" aa-ease="power2.out">
+  <div aa-accordion-toggle>
+    <h3>Accordion Item 1</h3>
+  </div>
+  <div aa-accordion-content>
+    <div aa-accordion-animate="fade" aa-accordion-order="0">
+      <p>Content for item 1</p>
+    </div>
+    <div aa-accordion-animate="text-slide-up" aa-accordion-order="1" aa-split="words">
+      <p>More content with text animation</p>
+    </div>
+  </div>
+  
+  <div aa-accordion-toggle>
+    <h3>Accordion Item 2</h3>
+  </div>
+  <div aa-accordion-content>
+    <div aa-accordion-animate="appear-up" aa-accordion-order="0">
+      <p>Content for item 2</p>
+    </div>
+  </div>
+</div>
+```
+
+#### Multi-Accordion Setup
+
+Allow multiple accordions to be open simultaneously:
+
+```html
+<div aa-animate="accordion-multi" aa-duration="0.6" aa-delay="0.2">
+  <div aa-accordion-toggle>
+    <h3>Multi Accordion Item 1</h3>
+  </div>
+  <div aa-accordion-content>
+    <div aa-accordion-animate="scale" aa-accordion-order="0">
+      <p>Content for multi item 1</p>
+    </div>
+  </div>
+  
+  <div aa-accordion-toggle>
+    <h3>Multi Accordion Item 2</h3>
+  </div>
+  <div aa-accordion-content>
+    <div aa-accordion-animate="reveal-up" aa-accordion-order="0">
+      <p>Content for multi item 2</p>
+    </div>
+  </div>
+</div>
+```
+
+#### Available Attributes
+
+**Container Attributes:**
+- `aa-animate="accordion"` - Single accordion (only one open at a time)
+- `aa-animate="accordion-multi"` - Multi accordion (multiple can be open)
+- `aa-duration` - Height animation duration (default: 0.6)
+- `aa-ease` - Height animation easing (default: "power2.out")
+- `aa-delay` - Delay before inner animations start (default: 0)
+
+**Toggle/Content Attributes:**
+- `aa-accordion-toggle` - Marks the clickable toggle element
+- `aa-accordion-content` - Marks the expandable content element
+
+**Inner Animation Attributes:**
+- `aa-accordion-animate` - Animation type for inner elements
+- `aa-accordion-order` - Animation sequence order (e.g., "0", "1", "1-30")
+
+#### Available Inner Animations
+
+  - Fade: `fade`, `fade-up`, `fade-down`, `fade-left`, `fade-right`
+  - Slide: `slide-up`, `slide-down`, `slide-left`, `slide-right`
+  - Scale: `scale`
+  - Custom: Use `custom-*` (e.g., `custom-slide`) to animate from CSS-defined positions to zero
+    ```css
+    [aa-accordion-animate="custom-slide"] {
+      transform: translateX(500px);
+    }
+    ```
+
+
+#### Accessibility Features
+
+- **Keyboard Navigation:** Tab to focus, Enter/Space to toggle
+- **ARIA Attributes:** Automatic `aria-expanded`, `aria-controls`, `aria-labelledby`
+- **Screen Reader Support:** Proper announcements and state changes
+- **Focus Management:** Maintains focus during interactions
+
+#### CSS Targeting
+
+Use the status attributes for styling:
+```css
+[aa-accordion-toggle="active"] {
+  /* Active toggle styles */
+}
+
+[aa-accordion-content="active"] {
+  /* Active content styles */
+}
+```
+
+
+### Modal Animations
+(`gsapFeatures: ['modal']`)
+
+AlrdyAnimate supports accessible, attribute-driven modals that work seamlessly with or without smooth scrolling (Lenis).
+
+#### Basic Setup
+
+- **Trigger:** Use `aa-modal-target="unique-modal-name"` on any element that should open a modal.
+- **Modal Setup:**
+  - Wrap all your modals in a container with `aa-modal-group` (if you have multiple groups, add a unique identifier each)
+  - Each modal must have a unique `aa-modal-name="unique-modal-name"` attribute
+  - Any element inside the modal with `aa-modal-close` will close the modal when clicked (e.g., a close button or the backdrop).
+  - Apply `data-lenis-prevent` to the content div inside a modal to allow it to scroll
+
+#### Modal Animations
+Add animations to your modals using these attributes:
+
+- `aa-modal-animate`: Add to any element in the modal to animate it. Available animations:
+  - Fade: `fade`, `fade-up`, `fade-down`, `fade-left`, `fade-right`
+  - Slide: `slide-up`, `slide-down`, `slide-left`, `slide-right`
+  - Scale: `scale`
+  - Custom: Use `custom-*` (e.g., `custom-slide`) to animate from CSS-defined positions to zero
+    ```css
+    [aa-modal-animate="custom-slide"] {
+      transform: translateX(500px);
+    }
+    ```
+
+- `aa-modal-order`: Control animation sequence
+  - Basic order: `aa-modal-order="1"` (elements animate in numeric order)
+  - Start later: `aa-modal-order="1-30"` (second number sets the percentage of the previous animation as a start for this animation, e.g. start this animation after 30% of previous animation)
+
+- `aa-duration`: Set custom duration in seconds (default: 0.5)
+- `aa-ease`: Set custom easing (default: "power2.out")
+
+#### Example
+
+```html
+<!-- Trigger -->
+<button aa-modal-target="my-modal">Open Modal</button>
+
+<!-- Modal Group -->
+<div aa-modal-group>
+  <div aa-modal-name="my-modal" class="modal">
+    <div class="modal-content" data-lenis-prevent>
+      <button aa-modal-close>Close</button>
+      
+      <h2 aa-modal-animate="fade-up" aa-modal-order="0">Modal Title</h2>
+      <p aa-modal-animate="fade" aa-modal-order="1">Modal content with animations</p>
+      <div aa-modal-animate="scale" aa-modal-order="2">
+        <img src="image.jpg" alt="Modal image">
+      </div>
+    </div>
+  </div>
+</div>
+```
+
+
 ## Smooth Scrolling (Lenis)
 
 AlrdyAnimate includes optional smooth scrolling powered by Lenis. To enable it, add the `smoothScroll` option to your initialization:
@@ -800,38 +968,6 @@ If animations feel out of sync:
 2. Check for conflicting scroll libraries
 3. Try adjusting the `lerp` value
 4. Verify `data-lenis-prevent` on appropriate elements
-
-## Modals
-AlrdyAnimate supports accessible, attribute-driven modals that work seamlessly with or without smooth scrolling (Lenis).
-
-- Trigger: 
-  - Use `aa-modal-target="unique-modal-name"` on any element that should open a modal.
-- Modal set up:
-  - Wrap all your modals in a container with `aa-modal-group` (if you have multiple groups, add a unique identifier each)
-  - Each modal must have a unique `aa-modal-name="unique-modal-name"` attribute
-  - Any element inside the modal with `aa-modal-close` will close the modal when clicked (e.g., a close button or the backdrop).
-  - Apply `data-lenis-prevent`to the content div inside a modal to allow it to scroll
-
-### Modal Animations
-Add animations to your modals using these attributes:
-
-- `aa-modal-animate`: Add to any element in the modal to animate it. Available animations:
-  - Fade: `fade`, `fade-up`, `fade-down`, `fade-left`, `fade-right`
-  - Slide: `slide-up`, `slide-down`, `slide-left`, `slide-right`
-  - Scale: `scale`
-  - Custom: Use `custom-*` (e.g., `custom-slide`) to animate from CSS-defined positions to zero
-    ```css
-    [aa-modal-animate="custom-slide"] {
-      transform: translateX(500px);
-    }
-    ```
-
-- `aa-modal-order`: Control animation sequence
-  - Basic order: `aa-modal-order="1"` (elements animate in numeric order)
-  - Start later: `aa-modal-order="1-30"` (second number sets the percentage of the previous animation as a start for this animation, e.g. start this animation after 30% of previous animation)
-
-- `aa-duration`: Set custom duration in seconds (default: 0.5)
-- `aa-ease`: Set custom easing (default: "power2.out")
 
 ## Easing Functions
 

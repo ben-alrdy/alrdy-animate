@@ -65,6 +65,9 @@ export const gsapBundles = {
     },
     modal: {
         animations: () => import(/* webpackChunkName: "gsap-modal" */ '../gsapAnimations/modalAnimations')
+    },
+    accordion: {
+        animations: () => import(/* webpackChunkName: "gsap-accordion" */ '../gsapAnimations/accordionAnimations')
     }
 };
 

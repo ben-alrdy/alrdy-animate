@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', function() {
         ease: 'power2.inOut',
         duration: 1,
         again: true,
-        gsapFeatures: ['section', 'appear', 'marquee', 'text', 'slider', 'hover', 'nav', 'modal'],
+        gsapFeatures: ['section', 'appear', 'marquee', 'text', 'slider', 'hover', 'nav', 'modal', 'accordion'],
         debug: false,
         modals: false,
         includeGSAP: true,
