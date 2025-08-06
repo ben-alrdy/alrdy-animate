@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced Accordion Test - AlrdyAnimate</title>
+    <link rel="stylesheet" href="../dist/AlrdyAnimate.css">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 40px;
+        }
+        
+        .section {
+            margin-bottom: 60px;
+        }
+        
+        .section h2 {
+            color: #555;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+            margin-bottom: 30px;
+        }
+        
+        /* Basic Accordion Styles */
+        .accordion-basic {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .accordion-toggle {
+            background: #f8f9fa;
+            padding: 20px;
+            cursor: pointer;
+            border: none;
+            text-align: left;
+            font-size: 16px;
+            font-weight: 500;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background-color 0.3s;
+        }
+        
+        .accordion-toggle:hover {
+            background: #e9ecef;
+        }
+        
+        .accordion-toggle[aa-accordion-status="active"] {
+            background: #007bff;
+            color: white;
+        }
+
+        .accordion-toggle span {
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .accordion-toggle[aa-accordion-status="active"] span:last-child {
+            transform: rotate(180deg);
+        }
+        
+        .accordion-content {
+            overflow: hidden;
+            /* transition: grid-template-rows 0.6s cubic-bezier(0.625, 0.05, 0, 1);
+            grid-template-rows: 0fr;
+            display: grid; */
+        }
+        
+        /* Remove default margins on paragraphs in accordion content to fix text clipping */
+        .accordion-content p,
+        .autoplay-content p {
+            margin: 0;
+        }
+        
+        .content-inner {
+            height: 100000%;
+            display: flex;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .content-wrapper {
+            padding: 20px;
+        }
+        
+        .accordion-animate {
+            margin-bottom: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 6px;
+        }
+        
+        /* Progress Bar Styles */
+        .progress-bar {
+            height: 4px;
+            background: #e9ecef;
+            border-radius: 2px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: #007bff;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        /* Visual Items Styles */
+        .visual-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin-top: 40px;
+            width: 100%;
+        }
+        
+        .accordion-section,
+        .autoplay-accordion {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+            width: 100%;
+        }
+        
+        .visual-items {
+            position: relative;
+            aspect-ratio: 16/9;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 2px solid #e9ecef;
+            width: 100%;
+        }
+        
+        .visual-item {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #f8f9fa;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 500;
+            color: #666;
+            border: 2px solid transparent;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .visual-item[aa-accordion-status="active"] {
+            visibility: visible;
+            border-color: #007bff;
+            background: #e3f2fd;
+            color: #007bff;
+        }
+        
+        /* Autoplay Accordion Styles */
+        .autoplay-accordion {
+            border: 2px solid #28a745;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .autoplay-toggle {
+            background: #f8f9fa;
+            padding: 20px;
+            cursor: pointer;
+            border: none;
+            width: 100%;
+            text-align: left;
+            font-size: 16px;
+            font-weight: 500;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background-color 0.3s;
+        }
+        
+        .autoplay-toggle:hover {
+            background: #e9ecef;
+        }
+        
+        .autoplay-toggle[aa-accordion-status="active"] {
+            background: #28a745;
+            color: white;
+        }
+        
+        .autoplay-content {
+            overflow: hidden;
+            transition: grid-template-rows 0.6s cubic-bezier(0.625, 0.05, 0, 1);
+            grid-template-rows: 0fr;
+            display: grid;
+        }
+        
+        .autoplay-content-inner {
+            height: 100000%;
+            display: flex;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .autoplay-content-wrapper {
+            padding: 20px;
+        }
+        
+        .autoplay-progress {
+            height: 4px;
+            background: #e9ecef;
+            border-radius: 2px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+        
+        .autoplay-fill {
+            height: 100%;
+            background: #28a745;
+            width: 0%;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .visual-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .visual-items {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Enhanced Accordion Features</h1>
+        
+        <!-- Basic Accordion Section -->
+        <div class="section">
+            <h2>Basic Accordion</h2>
+            <div class="accordion-basic" aa-animate="accordion" aa-delay="0.3">
+                <div class="accordion-toggle" aa-accordion-toggle="basic-1">
+                    <span>Basic Accordion Item 1</span>
+                    <span>▼</span>
+                </div>
+                <div class="accordion-content" aa-accordion-content="basic-1" aa-animate aa-duration="0.6" aa-ease="power4.inOut">
+                    <div class="content-inner">
+                        <div class="content-wrapper">
+                            <div aa-accordion-animate="text-slide-up-lines" aa-split="words" aa-accordion-order="0">
+                                <p>This is a basic accordion item with fade animation.</p>
+                            </div>
+                            <div aa-accordion-animate="text-slide-up-lines" aa-accordion-order="1" aa-split="words">
+                                <p>This text will animate with a slide-up effect.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="accordion-toggle" aa-accordion-toggle="basic-2">
+                    <span>Basic Accordion Item 2</span>
+                    <span>▼</span>
+                </div>
+                <div class="accordion-content" aa-accordion-content="basic-2">
+                    <div class="content-inner">
+                        <div class="content-wrapper">
+                            <div aa-accordion-animate="appear-up" aa-accordion-order="0">
+                                <p>This item uses appear-up animation.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Multi Accordion Section -->
+        <div class="section">
+            <h2>Multi Accordion (Multiple Open)</h2>
+            <div class="accordion-basic" aa-animate="accordion-multi">
+                <div class="accordion-toggle" aa-accordion-toggle="multi-1">
+                    <span>Multi Item 1</span>
+                    <span>▼</span>
+                </div>
+                <div class="accordion-content" aa-accordion-content="multi-1" aa-duration="0.6" aa-ease="power2.out">
+                    <div class="content-inner">
+                        <div class="content-wrapper">
+                            <div aa-accordion-animate="scale" aa-accordion-order="0">
+                                <p>Multiple accordions can be open at once.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="accordion-toggle" aa-accordion-toggle="multi-2">
+                    <span>Multi Item 2</span>
+                    <span>▼</span>
+                </div>
+                <div class="accordion-content" aa-accordion-content="multi-2" aa-duration="0.6" aa-ease="power2.out">
+                    <div class="content-inner">
+                        <div class="content-wrapper">
+                            <div aa-accordion-animate="reveal-up" aa-accordion-order="0">
+                                <p>This one uses reveal-up animation.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Autoplay Accordion Section -->
+        <div class="section">
+            <h2>Autoplay Accordion with Progress</h2>
+            <div class="autoplay-accordion" aa-animate="accordion-autoplay" aa-duration="3" aa-delay="0.3">
+                <div class="autoplay-toggle" aa-accordion-toggle="autoplay-1">
+                    <div>
+                        <span>Autoplay Item 1</span>
+                        <div class="autoplay-progress">
+                            <div class="autoplay-fill" aa-accordion-progress="width" aa-ease="power1.inOut"></div>
+                        </div>
+                    </div>
+                    <span>▼</span>
+                </div>
+                <div class="autoplay-content" aa-accordion-content="autoplay-1">
+                    <div class="autoplay-content-inner">
+                        <div class="autoplay-content-wrapper">
+                            <div aa-accordion-animate="text-slide-up-lines" aa-split="lines" aa-accordion-order="0">
+                                <p>This accordion automatically cycles through items every 3 seconds.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="autoplay-toggle" aa-accordion-toggle="autoplay-2" aa-accordion-initial>
+                    <div>
+                        <span>Autoplay Item 2</span>
+                        <div class="autoplay-progress">
+                            <div class="autoplay-fill" aa-accordion-progress="width" aa-ease="power1.inOut"></div>
+                        </div>
+                    </div>
+                    <span>▼</span>
+                </div>
+                <div class="autoplay-content" aa-accordion-content="autoplay-2">
+                    <div class="autoplay-content-inner">
+                        <div class="autoplay-content-wrapper">
+                            <div aa-accordion-animate="text-fade" aa-accordion-order="0" aa-split="words">
+                                <p>Click any item to stop the autoplay and take control.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="autoplay-toggle" aa-accordion-toggle="autoplay-3">
+                    <div>
+                        <span>Autoplay Item 3</span>
+                        <div class="autoplay-progress">
+                            <div class="autoplay-fill" aa-accordion-progress="width" aa-ease="power1.inOut"></div>
+                        </div>
+                    </div>
+                    <span>▼</span>
+                </div>
+                <div class="autoplay-content" aa-accordion-content="autoplay-3">
+                    <div class="autoplay-content-inner">
+                        <div class="autoplay-content-wrapper">
+                            <div aa-accordion-animate="appear" aa-accordion-order="0">
+                                <p>Progress bars show the timing for each item.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Connected Visual Items Section -->
+        <div class="section">
+            <h2>Accordion with Connected Visual Items</h2>
+            <div class="visual-container" aa-animate="accordion">
+                <div class="accordion-section">
+                    <div class="accordion-toggle" aa-accordion-toggle="visual-1">
+                        <span>Visual Item 1</span>
+                        <span>▼</span>
+                    </div>
+                    <div class="accordion-content" aa-accordion-content="visual-1" aa-duration="0.6" aa-ease="power2.out">
+                        <div class="content-inner">
+                            <div class="content-wrapper">
+                                <div aa-accordion-animate="fade" aa-accordion-order="0">
+                                    <p>This accordion controls the visual items on the right.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="accordion-toggle" aa-accordion-toggle="visual-2">
+                        <span>Visual Item 2</span>
+                        <span>▼</span>
+                    </div>
+                    <div class="accordion-content" aa-accordion-content="visual-2" aa-duration="0.6" aa-ease="power2.out">
+                        <div class="content-inner">
+                            <div class="content-wrapper">
+                                <div aa-accordion-animate="text-slide-up" aa-accordion-order="0" aa-split="words">
+                                    <p>Each accordion item is connected to a visual element.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="accordion-toggle" aa-accordion-toggle="visual-3">
+                        <span>Visual Item 3</span>
+                        <span>▼</span>
+                    </div>
+                    <div class="accordion-content" aa-accordion-content="visual-3" aa-duration="0.6" aa-ease="power2.out">
+                        <div class="content-inner">
+                            <div class="content-wrapper">
+                                <div aa-accordion-animate="appear-up" aa-accordion-order="0">
+                                    <p>Visual items animate in when their accordion opens.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    
+                </div>
+                <div class="visual-items">
+                        <div class="visual-item" aa-accordion-item="visual-1" aa-accordion-animate="fade-left" aa-duration="0.1">
+                            <span>Visual 1</span>
+                        </div>
+                        <div class="visual-item" aa-accordion-item="visual-2" aa-accordion-animate="fade-left" aa-duration="0.1">
+                            <span>Visual 2</span>
+                        </div>
+                        <div class="visual-item" aa-accordion-item="visual-3" aa-accordion-animate="fade-left" aa-duration="0.1">
+                            <span>Visual 3</span>
+                        </div>
+                    </div>
+            </div>
+        </div>
+        
+        <!-- Complex Example Section -->
+        <div class="section">
+            <h2>Complex Example: Autoplay with Visual Items</h2>
+            <div class="visual-container" aa-animate="accordion-autoplay" aa-duration="4" aa-delay="1.5">
+                <div class="autoplay-accordion">
+                    <div class="autoplay-toggle" aa-accordion-toggle="complex-1">
+                        <div>
+                            <span>Feature 1: Text Animations</span>
+                            <div class="autoplay-progress">
+                                <div class="autoplay-fill" aa-accordion-progress="width" aa-ease="power1.inOut"></div>
+                            </div>
+                        </div>
+                        <span>▼</span>
+                    </div>
+                    <div class="autoplay-content" aa-accordion-content="complex-1">
+                        <div class="autoplay-content-inner">
+                            <div class="autoplay-content-wrapper">
+                                <div aa-accordion-animate="text-slide-up" aa-accordion-order="0" aa-split="words">
+                                    <p>Advanced text animations with word splitting.</p>
+                                </div>
+                                <div aa-accordion-animate="fade" aa-accordion-order="1">
+                                    <p>Multiple elements animate in sequence.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="autoplay-toggle" aa-accordion-toggle="complex-2">
+                        <div>
+                            <span>Feature 2: Visual Effects</span>
+                            <div class="autoplay-progress">
+                                <div class="autoplay-fill" aa-accordion-progress="width" aa-ease="power1.inOut"></div>
+                            </div>
+                        </div>
+                        <span>▼</span>
+                    </div>
+                    <div class="autoplay-content" aa-accordion-content="complex-2">
+                        <div class="autoplay-content-inner">
+                            <div class="autoplay-content-wrapper">
+                                <div aa-accordion-animate="appear-up" aa-accordion-order="0">
+                                    <p>Smooth appear animations with custom timing.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="autoplay-toggle" aa-accordion-toggle="complex-3">
+                        <div>
+                            <span>Feature 3: Reveal Effects</span>
+                            <div class="autoplay-progress">
+                                <div class="autoplay-fill" aa-accordion-progress="width" aa-ease="power1.inOut"></div>
+                            </div>
+                        </div>
+                        <span>▼</span>
+                    </div>
+                    <div class="autoplay-content" aa-accordion-content="complex-3">
+                        <div class="autoplay-content-inner">
+                            <div class="autoplay-content-wrapper">
+                                <div aa-accordion-animate="reveal-up" aa-accordion-order="0">
+                                    <p>Clip-path reveal animations for dramatic effects.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    
+                </div>
+                <div class="visual-items">
+                        <div class="visual-item" aa-accordion-item="complex-1" aa-accordion-animate="fade-left">
+                            <div aa-accordion-animate="text-slide-up-words" aa-split="words" aa-stagger="0.05">
+                                <span>Text Animation</span>
+                            </div>
+                            <div aa-accordion-animate="text-slide-up-words" aa-split="words" aa-stagger="0.05">
+                                <span>Text Animation</span>
+                            </div>
+                            <div aa-accordion-animate="text-slide-up-words" aa-split="words" aa-stagger="0.05">
+                                <span>Text Animation</span>
+                            </div>
+                        </div>
+                        <div class="visual-item" aa-accordion-item="complex-2" aa-accordion-animate="fade-left">
+                            <div aa-accordion-animate="appear">
+                                <span>Visual Effects</span>
+                            </div>
+                        </div>
+                        <div class="visual-item" aa-accordion-item="complex-3" aa-accordion-animate="fade-left">
+                            <div aa-accordion-animate="reveal-left">
+                                <span>Reveal Effects</span>
+                            </div>
+                        </div>
+                    </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../dist/AlrdyAnimate.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html> 
