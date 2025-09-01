@@ -450,6 +450,11 @@ function initializeAccordions(animations = null, splitText = null) {
     }
   });
 
+  // Refresh ScrollTrigger after all accordions have been initialized
+  if (window.ScrollTrigger) {
+    window.ScrollTrigger.refresh();
+  }
+
   function openAccordion(toggle, content, accordion) {
     toggle.setAttribute('aa-accordion-status', 'active');
     content.setAttribute('aa-accordion-status', 'active');

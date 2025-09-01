@@ -761,11 +761,15 @@ Inside of **content** and **visual**, elements can be animated as well
     <h3>Accordion Item 1</h3>
   </div>
   <div aa-accordion-content="item-1">
-    <div aa-accordion-animate="fade" aa-accordion-order="0">
-      <p>Content for item 1</p>
-    </div>
-    <div aa-accordion-animate="text-slide-up" aa-accordion-order="1" aa-split="words">
-      <p>More content with text animation</p>
+    <div class="content-inner">
+      <div class="content-wrapper">
+        <div aa-accordion-animate="fade" aa-accordion-order="0">
+          <p>Content for item 1</p>
+        </div>
+        <div aa-accordion-animate="text-slide-up" aa-accordion-order="1" aa-split="words">
+          <p>More content with text animation</p>
+        </div>
+      </div>
     </div>
   </div>
   
@@ -773,8 +777,12 @@ Inside of **content** and **visual**, elements can be animated as well
     <h3>Accordion Item 2</h3>
   </div>
   <div aa-accordion-content="item-2">
-    <div aa-accordion-animate="appear-up" aa-accordion-order="0">
-      <p>Content for item 2</p>
+    <div class="content-inner">
+      <div class="content-wrapper">
+        <div aa-accordion-animate="appear-up" aa-accordion-order="0">
+          <p>Content for item 2</p>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -791,8 +799,12 @@ Automatically cycle through accordion items with progress indicators:
     <div aa-accordion-progress="width"></div>
   </div>
   <div aa-accordion-content="autoplay-1" aa-animate aa-duration="0.5" aa-ease="power2.inOut">
-    <div aa-accordion-animate="fade" aa-accordion-order="0">
-      <p>Content for autoplay item 1</p>
+    <div class="content-inner">
+      <div class="content-wrapper">
+        <div aa-accordion-animate="fade" aa-accordion-order="0">
+          <p>Content for autoplay item 1</p>
+        </div>
+      </div>
     </div>
   </div>
   
@@ -801,8 +813,12 @@ Automatically cycle through accordion items with progress indicators:
     <div aa-accordion-progress="width"></div>
   </div>
   <div aa-accordion-content="autoplay-2" aa-animate aa-duration="0.5" aa-ease="power2.inOut">
-    <div aa-accordion-animate="appear" aa-accordion-order="0">
-      <p>Content for autoplay item 2</p>
+    <div class="content-inner">
+      <div class="content-wrapper">
+        <div aa-accordion-animate="appear" aa-accordion-order="0">
+          <p>Content for autoplay item 2</p>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -818,8 +834,12 @@ Link accordion content to visual elements that animate alongside:
     <h3>Visual Item 1</h3>
   </div>
   <div aa-accordion-content="visual-1" aa-delay="0.3">
-    <div aa-accordion-animate="fade" aa-accordion-order="0">
-      <p>This controls the visual on the right</p>
+    <div class="content-inner">
+      <div class="content-wrapper">
+        <div aa-accordion-animate="fade" aa-accordion-order="0">
+          <p>This controls the visual on the right</p>
+        </div>
+      </div>
     </div>
   </div>
   
@@ -827,8 +847,12 @@ Link accordion content to visual elements that animate alongside:
     <h3>Visual Item 2</h3>
   </div>
   <div aa-accordion-content="visual-2" aa-delay="0.5">
-    <div aa-accordion-animate="text-slide-up" aa-accordion-order="0" aa-split="words">
-      <p>This controls another visual</p>
+    <div class="content-inner">
+      <div class="content-wrapper">
+        <div aa-accordion-animate="text-slide-up" aa-accordion-order="0" aa-split="words">
+          <p>This controls another visual</p>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -882,6 +906,18 @@ Link accordion content to visual elements that animate alongside:
 }
 ```
 
+**Note:** The accordion content structure requires specific CSS classes to work properly:
+- `.content-inner` - Required for the accordion animation system, needs:
+  ```css
+  height: 100000%;
+  display: flex;
+  position: relative;
+  overflow: hidden;
+  ```
+- `.content-wrapper` - Contains the actual content and provides padding for the content that is revealed
+
+These wrapper divs ensure proper height calculations and smooth animations.
+
 #### Available Inner Animations
 
 **Simple Animations:**
@@ -916,14 +952,14 @@ Use `custom-*` (e.g., `custom-slide`) to animate from CSS-defined positions to z
 
 #### CSS Targeting
 
-Use the status attributes for styling:
+Use the status attributes for styling (added to toggles, content and visual):
 ```css
-[aa-accordion-toggle="active"] {
-  /* Active toggle styles */
+[aa-accordion-status="active"] {
+  /* Active styles */
 }
 
-[aa-accordion-content="active"] {
-  /* Active content styles */
+[aa-accordion-toggle][aa-accordion-status="active"] {
+  /* Active toggle styles */
 }
 ```
 
