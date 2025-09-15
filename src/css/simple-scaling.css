@@ -1,0 +1,22 @@
+:root {
+--size-container-min: 992px;
+--size-container-max: 1920px;
+--size-container: clamp(var(--size-container-min), 100vw, var(--size-container-max));
+}
+
+.container-large {
+  max-width: var(--size-container);
+}
+
+.container-medium {
+  max-width: calc(var(--size-container) * 0.85);
+}
+
+.container-small {
+  max-width: calc(var(--size-container) * 0.7);
+}
+
+html { font-size: 125%; }
+@media screen and (max-width:1920px) { html { font-size: calc(25% + 0.8333333333333335vw); } }
+@media screen and (max-width:1440px) { html { font-size: calc(81.27% + 0.20811654526534862vw); } }
+@media screen and (max-width:479px) { html { font-size: calc(87.47% + 0.41841004184100417vw); } }

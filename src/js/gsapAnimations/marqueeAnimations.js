@@ -121,7 +121,7 @@ function createMarqueeTimeline(element, gsap, duration, scrub, animationType) {
         trigger: element,
         start: '0% 100%',
         end: '100% 0%',
-        scrub: scrub ? (parseFloat(scrub) || true) : false
+        scrub: scrub ? (parseFloat(scrub) || true) : true
       }
     });
 

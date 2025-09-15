@@ -497,7 +497,7 @@ Creates infinite scrolling, snapping, or static slider animations. To use:
   - `aa-slider-button` for specific buttons to jump to a certain slide
     - the number of buttons needs to match the number of slides
     - the slide that is active and the corresponding button get the class `is-active` so you can style them accordingly
-    - optionally, if the buttons don't live in the same wrapper as `aa-animate = slider`, you can add `aa-slider-target=id_of_slider` to each button to control a specific slider
+    - optionally, if the buttons don't live in the same wrapper as `aa-animate = slider`, you can add `aa-slider-target=id_of_slider` to each button to control a specific slider (then also set the ID for the slider)
 
 
 
