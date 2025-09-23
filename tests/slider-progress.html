@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Slider Progress Test</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .slider-wrapper {
+      background: white;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      margin-bottom: 40px;
+    }
+
+    .slider {
+      position: relative;
+      height: 400px;
+      overflow: hidden;
+    }
+
+    .slider-track {
+      display: flex;
+      height: 100%;
+    }
+
+    .slide {
+      min-width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      font-weight: bold;
+      color: white;
+    }
+
+    .slide:nth-child(1) { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+    .slide:nth-child(2) { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+    .slide:nth-child(3) { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+    .slide:nth-child(4) { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
+
+    /* Navigation */
+    .slider-nav {
+      padding: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: white;
+      border-top: 1px solid #e0e0e0;
+    }
+
+    .nav-button {
+      background: #667eea;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .nav-button:hover {
+      background: #5a67d8;
+    }
+
+    .slide-counter {
+      font-size: 14px;
+      color: #666;
+    }
+
+    /* Slider Buttons with Progress */
+    .slider-buttons {
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      background: white;
+      border-top: 1px solid #e0e0e0;
+    }
+
+    .slide-button {
+      position: relative;
+      width: 60px;
+      height: 60px;
+      border: 2px solid #e0e0e0;
+      border-radius: 50%;
+      background: white;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      color: #666;
+      transition: all 0.3s ease;
+    }
+
+    .slide-button:hover {
+      border-color: #667eea;
+      color: #667eea;
+    }
+
+    .slide-button.is-active {
+      border-color: #667eea;
+      color: #667eea;
+      background: #f0f2ff;
+    }
+
+    /* Width Progress Bar in Button */
+    .button-progress {
+      position: absolute;
+      bottom: -8px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 40px;
+      height: 4px;
+      background: #e0e0e0;
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .button-progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #667eea, #764ba2);
+      width: 0%;
+      border-radius: 2px;
+    }
+
+    /* Height Progress Bar in Button */
+    .button-progress-vertical {
+      position: absolute;
+      right: -8px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 4px;
+      height: 40px;
+      background: #e0e0e0;
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .button-progress-fill-vertical {
+      width: 100%;
+      background: linear-gradient(180deg, #f093fb, #f5576c);
+      height: 0%;
+      border-radius: 2px;
+      position: absolute;
+      bottom: 0;
+    }
+
+    h1, h2 {
+      text-align: center;
+      color: #333;
+    }
+
+    .description {
+      text-align: center;
+      color: #666;
+      margin-bottom: 40px;
+      line-height: 1.6;
+    }
+
+    .demo-note {
+      background: #f0f2ff;
+      border: 1px solid #667eea;
+      border-radius: 6px;
+      padding: 15px;
+      margin-bottom: 20px;
+      color: #333;
+    }
+
+    .demo-note strong {
+      color: #667eea;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Slider Progress Bar Test</h1>
+    <p class="description">
+      This test demonstrates the new <code>aa-slider-progress</code> feature. Progress bars are placed inside 
+      <code>aa-slider-button</code> elements and animate during the autoplay delay period for the active slide only.
+    </p>
+
+    <div class="demo-note">
+      <strong>How it works:</strong> Each slider button contains a progress bar that fills up when that slide is active. 
+      The progress animation uses the slider's <code>aa-delay</code> and <code>aa-ease</code> values.
+    </div>
+
+    <h2>Width Progress Bars</h2>
+    <div class="slider-wrapper" aa-animate="slider-snap-draggable" aa-delay="4" aa-ease="power2.out">
+      <div class="slider">
+        <div class="slider-track">
+          <div class="slide" aa-slider-item>Slide 1</div>
+          <div class="slide" aa-slider-item>Slide 2</div>
+          <div class="slide" aa-slider-item>Slide 3</div>
+          <div class="slide" aa-slider-item>Slide 4</div>
+        </div>
+      </div>
+      
+      <div class="slider-nav">
+        <button class="nav-button" aa-slider-prev>Previous</button>
+        <div class="slide-counter">
+          <span aa-slider-current>01</span> / <span aa-slider-total>04</span>
+        </div>
+        <button class="nav-button" aa-slider-next>Next</button>
+      </div>
+      
+      <div class="slider-buttons">
+        <button class="slide-button" aa-slider-button>
+          <span>1</span>
+          <div class="button-progress">
+            <div class="button-progress-fill" aa-slider-progress="width"></div>
+          </div>
+        </button>
+        <button class="slide-button" aa-slider-button>
+          <span>2</span>
+          <div class="button-progress">
+            <div class="button-progress-fill" aa-slider-progress="width"></div>
+          </div>
+        </button>
+        <button class="slide-button" aa-slider-button>
+          <span>3</span>
+          <div class="button-progress">
+            <div class="button-progress-fill" aa-slider-progress="width"></div>
+          </div>
+        </button>
+        <button class="slide-button" aa-slider-button>
+          <span>4</span>
+          <div class="button-progress">
+            <div class="button-progress-fill" aa-slider-progress="width"></div>
+          </div>
+        </button>
+      </div>
+    </div>
+
+    <h2>Height Progress Bars</h2>
+    <div class="slider-wrapper" aa-animate="slider-snap" aa-delay="3" >
+      <div class="slider">
+        <div class="slider-track">
+          <div class="slide" aa-slider-item>Slide A</div>
+          <div class="slide" aa-slider-item>Slide B</div>
+          <div class="slide" aa-slider-item>Slide C</div>
+          <div class="slide" aa-slider-item>Slide D</div>
+        </div>
+      </div>
+      
+      <div class="slider-nav">
+        <button class="nav-button" aa-slider-prev>Previous</button>
+        <div class="slide-counter">
+          <span aa-slider-current>01</span> / <span aa-slider-total>04</span>
+        </div>
+        <button class="nav-button" aa-slider-next>Next</button>
+      </div>
+      
+      <div class="slider-buttons">
+        <button class="slide-button" aa-slider-button>
+          <span>A</span>
+          <div class="button-progress-vertical">
+            <div class="button-progress-fill-vertical" aa-slider-progress="height"></div>
+          </div>
+        </button>
+        <button class="slide-button" aa-slider-button>
+          <span>B</span>
+          <div class="button-progress-vertical">
+            <div class="button-progress-fill-vertical" aa-slider-progress="height"></div>
+          </div>
+        </button>
+        <button class="slide-button" aa-slider-button>
+          <span>C</span>
+          <div class="button-progress-vertical">
+            <div class="button-progress-fill-vertical" aa-slider-progress="height"></div>
+          </div>
+        </button>
+        <button class="slide-button" aa-slider-button>
+          <span>D</span>
+          <div class="button-progress-vertical">
+            <div class="button-progress-fill-vertical" aa-slider-progress="height"></div>
+          </div>
+        </button>
+      </div>
+    </div>
+
+    <h2>Fast Slider (1 second delay)</h2>
+    <div class="slider-wrapper" aa-animate="slider-snap" aa-delay="1" aa-ease="bounce.out">
+      <div class="slider">
+        <div class="slider-track">
+          <div class="slide" aa-slider-item>Fast 1</div>
+          <div class="slide" aa-slider-item>Fast 2</div>
+          <div class="slide" aa-slider-item>Fast 3</div>
+        </div>
+      </div>
+      
+      <div class="slider-nav">
+        <button class="nav-button" aa-slider-prev>Previous</button>
+        <div class="slide-counter">
+          <span aa-slider-current>01</span> / <span aa-slider-total>03</span>
+        </div>
+        <button class="nav-button" aa-slider-next>Next</button>
+      </div>
+      
+      <div class="slider-buttons">
+        <button class="slide-button" aa-slider-button>
+          <span>1</span>
+          <div class="button-progress">
+            <div class="button-progress-fill" aa-slider-progress="width"></div>
+          </div>
+        </button>
+        <button class="slide-button" aa-slider-button>
+          <span>2</span>
+          <div class="button-progress">
+            <div class="button-progress-fill" aa-slider-progress="width"></div>
+          </div>
+        </button>
+        <button class="slide-button" aa-slider-button>
+          <span>3</span>
+          <div class="button-progress">
+            <div class="button-progress-fill" aa-slider-progress="width"></div>
+          </div>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="../dist/AlrdyAnimate.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
