@@ -445,7 +445,7 @@ Creates infinite scrolling, snapping, or static slider animations. To use:
 1. **Slider Animations** (`slider`)
    - Static slider that requires navigation
    - Combine with:
-     - Interaction: `-draggable` or `-snap`
+     - Interaction: `-draggable` 
      - Position: `-center` (defaults to left aligned)
    - Example: `slider-draggable-snap`
 
@@ -467,6 +467,7 @@ Creates infinite scrolling, snapping, or static slider animations. To use:
      - Interaction: `-draggable`
      - Position: `-center` (defaults to left aligned)
    - Example: `slider-snap-right-draggable`
+   - Has progress indicators with attribute `aa-slider-progress`, which accepts the value `width` or `height`, defaulting to width; during the time of `aa-delay`, the progress will grow from 0% to 100%
 
 
 
