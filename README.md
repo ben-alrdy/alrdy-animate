@@ -714,7 +714,7 @@ To set content above the background, add `aa-hover-content` to the respective el
 
 AlrdyAnimate includes accessible accordion functionality with GSAP animations. Create expandable/collapsible sections with smooth height animations and inner content animations.
 
-**Note:** The opening/closing of accordion content is animated via CSS transition of the grid `fr` unit, while inner content animations are handled by GSAP. This is why on aa-accordion-content, we also need the aa-animate attribute to set aa-duration and aa-ease.
+**Note:** The opening/closing of accordion content is animated via CSS transition of the grid `fr` unit, while inner content animations are handled by GSAP. This is why on `aa-accordion-content`, we also need the `aa-animate` attribute to set `aa-duration` and `aa-ease`.
 
 #### Available Attributes
 
@@ -723,7 +723,7 @@ Initializes the accordion component and wraps around **toggle**, **content** and
 - `aa-animate="accordion"` - Single accordion (only one open at a time)
 - `aa-animate="accordion-multi"` - Multi accordion (multiple can be open)
 - `aa-animate="accordion-autoplay"` - Autoplay accordion with progress indicators
-- `aa-duration` - Only relevant for autoplay, duration of progress until next accordion activates (also requires `aa-animate` attribute since it's a CSS animation)
+  - `aa-duration` - Only relevant for autoplay, duration of progress until next accordion activates
 
 **Toggle Attributes:**
 - `aa-accordion-toggle=ID` - Marks the clickable toggle element
@@ -760,7 +760,7 @@ Inside of **content** and **visual**, elements can be animated as well
   <div aa-accordion-toggle="item-1">
     <h3>Accordion Item 1</h3>
   </div>
-  <div aa-accordion-content="item-1">
+  <div aa-accordion-content="item-1" aa-animate>
     <div class="content-inner">
       <div class="content-wrapper">
         <div aa-accordion-animate="fade" aa-accordion-order="0">
@@ -776,7 +776,7 @@ Inside of **content** and **visual**, elements can be animated as well
   <div aa-accordion-toggle="item-2">
     <h3>Accordion Item 2</h3>
   </div>
-  <div aa-accordion-content="item-2">
+  <div aa-accordion-content="item-2" aa-animate>
     <div class="content-inner">
       <div class="content-wrapper">
         <div aa-accordion-animate="appear-up" aa-accordion-order="0">
@@ -855,15 +855,16 @@ Link accordion content to visual elements that animate alongside:
       </div>
     </div>
   </div>
-</div>
 
-<!-- Connected visual elements -->
-<div class="visual-container">
-  <div aa-accordion-visual="visual-1" aa-accordion-animate="fade-left" aa-duration="0.4" aa-delay="0.2">
-    <span>Visual 1</span>
-  </div>
-  <div aa-accordion-visual="visual-2" aa-accordion-animate="fade-left" aa-duration="0.4" aa-delay="0.6">
-    <span>Visual 2</span>
+
+  <!-- Connected visual elements -->
+  <div class="visual-container">
+    <div aa-accordion-visual="visual-1" aa-accordion-animate="fade-left" aa-duration="0.4" aa-delay="0.2">
+      <span>Visual 1</span>
+    </div>
+    <div aa-accordion-visual="visual-2" aa-accordion-animate="fade-left" aa-duration="0.4" aa-delay="0.6">
+      <span>Visual 2</span>
+    </div>
   </div>
 </div>
 ```

@@ -265,9 +265,24 @@ function initializeAccordions(animations = null, splitText = null) {
         setupAriaAttributes(toggle, connectedContent, toggleId);
       }
       
-      const handleToggle = () => {
+      // Setup connected visual even if there's no content
+      const connectedVisual = document.querySelector(`[aa-accordion-visual="${toggleId}"]`);
+      if (connectedVisual && !connectedContent) {
+        connectedVisual.setAttribute('aa-accordion-status', 'inactive');
+        gsap.set(connectedVisual, { visibility: 'hidden' });
+        
+        const visualTimeline = createTimeline(connectedVisual, animations, splitText, true);
+        timelines.set(connectedVisual, visualTimeline);
+        
+        const visualAnimatedElements = collectAnimatedElements(connectedVisual, true);
+        visualAnimatedElements.forEach(element => {
+          const { animationType } = getElementParams(element, 'animation');
+          setInitialElementState(element, animationType);
+        });
+      }
+      
+        const handleToggle = () => {
         const content = connectedContent;
-        if (!content) return;
         
         const isActive = toggle.getAttribute('aa-accordion-status') === 'active';
         const hasInitialToggle = accordion.querySelector('[aa-accordion-initial]');
@@ -292,7 +307,7 @@ function initializeAccordions(animations = null, splitText = null) {
               if (otherToggle !== toggle) {
                 const otherId = otherToggle.getAttribute('aa-accordion-toggle');
                 const otherContent = accordion.querySelector(`[aa-accordion-content="${otherId}"]`);
-                if (otherContent && otherToggle.getAttribute('aa-accordion-status') === 'active') {
+                if (otherToggle.getAttribute('aa-accordion-status') === 'active') {
                   closeAccordion(otherToggle, otherContent, accordion);
                 }
               }
@@ -316,10 +331,8 @@ function initializeAccordions(animations = null, splitText = null) {
     if (initialToggle) {
       const toggleId = initialToggle.getAttribute('aa-accordion-toggle');
       const initialContent = accordion.querySelector(`[aa-accordion-content="${toggleId}"]`);
-      if (initialContent) {
-        openAccordion(initialToggle, initialContent, accordion);
-        if (isAutoplay) currentlyOpenAccordion = initialToggle;
-      }
+      openAccordion(initialToggle, initialContent, accordion);
+      if (isAutoplay) currentlyOpenAccordion = initialToggle;
     }
     
     // Initialize autoplay
@@ -426,14 +439,11 @@ function initializeAccordions(animations = null, splitText = null) {
       const toggle = toggles[index];
       const toggleId = toggle.getAttribute('aa-accordion-toggle');
       const content = accordion.querySelector(`[aa-accordion-content="${toggleId}"]`);
-      if (!content) return;
       
       if (isAutoplay && currentlyOpenAccordion && currentlyOpenAccordion !== toggle) {
         const openToggleId = currentlyOpenAccordion.getAttribute('aa-accordion-toggle');
         const openContent = accordion.querySelector(`[aa-accordion-content="${openToggleId}"]`);
-        if (openContent) {
-          closeAccordion(currentlyOpenAccordion, openContent, accordion);
-        }
+        closeAccordion(currentlyOpenAccordion, openContent, accordion);
       }
       
       const isActive = toggle.getAttribute('aa-accordion-status') === 'active';
@@ -457,24 +467,28 @@ function initializeAccordions(animations = null, splitText = null) {
 
   function openAccordion(toggle, content, accordion) {
     toggle.setAttribute('aa-accordion-status', 'active');
-    content.setAttribute('aa-accordion-status', 'active');
+    if (content) {
+      content.setAttribute('aa-accordion-status', 'active');
+    }
     toggle.setAttribute('aria-expanded', 'true');
 
-    const { duration, delay: accordionDelay } = getElementParams(content, 'accordion');
+    const { duration, delay: accordionDelay } = content ? getElementParams(content, 'accordion') : getElementParams(toggle, 'accordion');
     const { toggleId } = getElementParams(toggle, 'accordion');
     const connectedVisual = document.querySelector(`[aa-accordion-visual="${toggleId}"]`);
     
-    gsap.set(content, { gridTemplateRows: '1fr' });
-    
-    const playContentAnimation = () => {
-      const tl = timelines.get(content);
-      if (tl) tl.play();
-    };
-    
-    if (accordionDelay > 0) {
-      gsap.delayedCall(accordionDelay, playContentAnimation);
-    } else {
-      playContentAnimation();
+    if (content) {
+      gsap.set(content, { gridTemplateRows: '1fr' });
+      
+      const playContentAnimation = () => {
+        const tl = timelines.get(content);
+        if (tl) tl.play();
+      };
+      
+      if (accordionDelay > 0) {
+        gsap.delayedCall(accordionDelay, playContentAnimation);
+      } else {
+        playContentAnimation();
+      }
     }
     
     if (connectedVisual) {
@@ -553,10 +567,12 @@ function initializeAccordions(animations = null, splitText = null) {
 
   function closeAccordion(toggle, content, accordion) {
     toggle.setAttribute('aa-accordion-status', 'inactive');
-    content.setAttribute('aa-accordion-status', 'inactive');
+    if (content) {
+      content.setAttribute('aa-accordion-status', 'inactive');
+    }
     toggle.setAttribute('aria-expanded', 'false');
 
-    const { duration } = getElementParams(content, 'accordion');
+    const { duration } = content ? getElementParams(content, 'accordion') : getElementParams(toggle, 'accordion');
     const { toggleId } = getElementParams(toggle, 'accordion');
     const connectedVisual = document.querySelector(`[aa-accordion-visual="${toggleId}"]`);
 
@@ -576,9 +592,11 @@ function initializeAccordions(animations = null, splitText = null) {
       }
     }
 
-    // Reverse content animations
-    const tl = timelines.get(content);
-    if (tl) tl.reverse();
+    // Reverse content animations if content exists
+    if (content) {
+      const tl = timelines.get(content);
+      if (tl) tl.reverse();
+    }
 
       // Hide connected visual
       if (connectedVisual) {
@@ -607,7 +625,9 @@ function initializeAccordions(animations = null, splitText = null) {
       if (innerTimeline) innerTimeline.reverse();
     }
 
-    gsap.set(content, { gridTemplateRows: '0fr' });
+    if (content) {
+      gsap.set(content, { gridTemplateRows: '0fr' });
+    }
     
     refreshScrollTrigger(duration);
   }

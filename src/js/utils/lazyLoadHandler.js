@@ -1,77 +1,63 @@
-import { debounce } from './shared';
+export function handleLazyLoadedImages(ScrollTrigger, config = {}) {
+  const {
+    lazy = true,
+    timeout = 0.5,
+    forceEagerAboveViewport = true,
+    excludeNavTriggers = true
+  } = config;
 
-export function handleLazyLoadedImages(ScrollTrigger, forceReset = false) {
-  let needsRefresh = false;
-  let forceLoadExecuted = forceReset ? false : false;
-
-  const debouncedRefresh = debounce(() => {
-    if (ScrollTrigger && needsRefresh) {
-      // Refresh all ScrollTriggers except nav ones
+  // Selective refresh function that excludes nav triggers
+  const refreshScrollTriggers = () => {
+    if (excludeNavTriggers) {
       ScrollTrigger.getAll().forEach(st => {
         const trigger = st.vars.trigger;
         if (!trigger || typeof trigger.hasAttribute !== "function" || !trigger.hasAttribute('aa-nav')) {
           st.refresh();
         }
       });
-      needsRefresh = false;
+    } else {
+      ScrollTrigger.refresh();
     }
-  }, 200);
+  };
 
-  // Force load images above viewport
-  const forceLoadAboveImages = () => {
-    if (forceLoadExecuted) return;
-    
-    const scrollTop = window.scrollY || document.documentElement.scrollTop;
-    const lazyImages = document.querySelectorAll('img[loading="lazy"]');
-    
-    let eagerLoadCount = 0;
-    let loadedCount = 0;
-    
-    lazyImages.forEach((img) => {
+  // Get all lazy images using GSAP's utility
+  const lazyImages = gsap.utils.toArray("img[loading='lazy']");
+  if (!lazyImages.length) return;
+
+  // Force load images above viewport if enabled
+  if (forceEagerAboveViewport && window.scrollY > 0) {
+    const scrollTop = window.scrollY;
+    lazyImages.forEach(img => {
       const rect = img.getBoundingClientRect();
       const absoluteTop = rect.top + scrollTop;
-      
       if (absoluteTop < scrollTop) {
-        eagerLoadCount++;
-        if (!img.complete) {
-          img.addEventListener('load', () => {
-            loadedCount++;
-            if (loadedCount === eagerLoadCount) {
-              ScrollTrigger.refresh();
-            }
-          }, { once: true });
-        } else {
-          loadedCount++;
-        }
         img.loading = 'eager';
       }
     });
-
-    // If all eager images were already loaded
-    if (eagerLoadCount > 0 && loadedCount === eagerLoadCount) {
-      ScrollTrigger.refresh(true);
-    }
-
-    forceLoadExecuted = true;
-  };
-
-  // Call immediately if page is scrolled
-  if (window.scrollY > 0) {
-    forceLoadAboveImages();
   }
 
-  const lazyImages = document.querySelectorAll('img[loading="lazy"]');
-  lazyImages.forEach((img) => {
-    if (!img.complete) {
-      img.addEventListener('load', () => {
-        needsRefresh = true;
-      }, { once: true });
-    }
-  });
+  // Set up throttled refresh using GSAP's delayedCall
+  const refreshTimeout = gsap.delayedCall(timeout, refreshScrollTriggers).pause();
+  let imgLoaded = lazyImages.length;
 
-  ScrollTrigger.addEventListener('scrollEnd', () => {
-    if (needsRefresh) {
-      debouncedRefresh();
+  const onImgLoad = () => {
+    if (lazy) {
+      // Restart the timeout - this throttles multiple rapid loads
+      refreshTimeout.restart(true);
+    } else {
+      // Immediate refresh when all images loaded
+      --imgLoaded || refreshScrollTriggers();
     }
+  };
+
+  // Process each image
+  lazyImages.forEach(img => {
+    // Convert to eager loading if lazy is false
+    if (!lazy) {
+      img.loading = "eager";
+    }
+    
+    // Check if already loaded or add load listener
+    img.naturalWidth ? onImgLoad() : img.addEventListener("load", onImgLoad, { once: true });
   });
 } 
