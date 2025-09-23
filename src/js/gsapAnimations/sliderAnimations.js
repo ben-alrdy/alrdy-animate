@@ -628,6 +628,7 @@ export function createSliderAnimations(gsap, Draggable) {
       progressAnimations = [];
       progressElements.forEach((progressEl, index) => {
         const progressType = progressEl.getAttribute('aa-slider-progress') || 'width';
+        const progressEase = progressEl.getAttribute('aa-ease') || ease; // Use element's ease or fallback to slider's ease
         const isWidth = progressType.toLowerCase() === 'width';
         const property = isWidth ? 'width' : 'height';
         
@@ -638,6 +639,7 @@ export function createSliderAnimations(gsap, Draggable) {
         progressAnimations.push({
           element: progressEl,
           property,
+          ease: progressEase,
           index,
           animation: null
         });
@@ -645,7 +647,7 @@ export function createSliderAnimations(gsap, Draggable) {
     };
 
     const updateProgressBars = (activeIndex) => {
-      progressAnimations.forEach(({ element: progressEl, property, index }) => {
+      progressAnimations.forEach(({ element: progressEl, property, ease: progressEase, index }) => {
         // Kill any existing progress animation
         gsap.killTweensOf(progressEl);
         
@@ -656,7 +658,7 @@ export function createSliderAnimations(gsap, Draggable) {
             { 
               [property]: '100%',
               duration: delay,
-              ease: ease,
+              ease: progressEase, // Use the progress element's specific ease
               overwrite: true
             }
           );
@@ -795,9 +797,8 @@ export function createSliderAnimations(gsap, Draggable) {
       onLeaveBack: stopAutoplay
     });
 
-    // Start autoplay
+    // ScrollTrigger will handle starting/stopping autoplay based on visibility
     loop.pause();
-    startAutoplay();
   }
 
   function setupDragHandlers(element, loop, animationType, sliderState) {

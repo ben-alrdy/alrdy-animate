@@ -467,7 +467,10 @@ Creates infinite scrolling, snapping, or static slider animations. To use:
      - Interaction: `-draggable`
      - Position: `-center` (defaults to left aligned)
    - Example: `slider-snap-right-draggable`
-   - Has progress indicators with attribute `aa-slider-progress`, which accepts the value `width` or `height`, defaulting to width; during the time of `aa-delay`, the progress will grow from 0% to 100%
+   - **Progress Indicators:**
+    - Use attribute `aa-slider-progress` on an element that should grow with a slide's progress until the next one is revealed (from `aa-delay`)
+    - Accepts values `width` or `height`, defaulting to width
+    - Use `aa-ease` to define the easing of the progress bar growth (defaults to the slider's easing function)
 
 
 
