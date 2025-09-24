@@ -67,6 +67,9 @@ export function getElementSettings(element, settings, isMobile) {
   // Handle accordion type
   const accordionType = parseResponsiveAttribute(element.getAttribute('aa-accordion'), null);
   
+  // Handle marquee type
+  const marqueeType = parseResponsiveAttribute(element.getAttribute('aa-marquee'), null);
+  
   const anchorSelector = element.getAttribute("aa-anchor");
   const anchorElement = anchorSelector ? document.querySelector(anchorSelector) : element;
   const color = animationType?.includes('#') ? '#' + animationType.split('#')[1] : undefined;
@@ -107,6 +110,9 @@ export function getElementSettings(element, settings, isMobile) {
     
     // Accordion properties
     accordionType,
+    
+    // Marquee properties
+    marqueeType,
 
     // Animation timing
     duration: element.hasAttribute('aa-duration') ? parseFloat(element.getAttribute('aa-duration')) : settings.duration,

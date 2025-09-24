@@ -224,8 +224,8 @@ AlrdyAnimate uses a consistent attribute naming system:
 |---------|---------|---------|
 | `aa-animate` | `aa-animate="fade-up"` | Primary animation type |
 | `aa-[property]` | `aa-duration="0.8"` | Animation properties |
-| `aa-[feature]` | `aa-slider="draggable"`, `aa-accordion="multi"` | Interactive component behavior |
-| `aa-[feature]-[element]` | `aa-slider-item`, `aa-accordion-toggle` | Feature-specific elements |
+| `aa-[feature]` | `aa-slider="draggable"`, `aa-accordion="multi"`, `aa-marquee="left"` | Interactive component behavior |
+| `aa-[feature]-[element]` | `aa-slider-item`, `aa-accordion-toggle`, `aa-marquee-scroller` | Feature-specific elements |
 
 ### Children & Anchor Animations
 
@@ -1087,17 +1087,17 @@ Use status attributes for styling:
 
 Scrolling text and content animations.
 
-**Setup:** `gsapFeatures: ['scroll']`
+**Setup:** `gsapFeatures: ['marquee']`
 
 **Available Types:**
-- **Basic**: `marquee-left`, `marquee-right`
-- **Interactive**: `marquee-[direction]-hover`, `marquee-[direction]-switch`
-- **Paused**: `marquee-[direction]-paused` (scroll-driven only)
+- **Basic**: `left`, `right`
+- **Interactive**: `left-hover`, `right-hover`, `left-switch`, `right-switch`
+- **Paused**: `left-paused`, `right-paused` (scroll-driven only)
 
 **Attributes & Defaults:**
 | Attribute | Values | Default | Description |
 |-----------|--------|---------|-------------|
-| `aa-animate` | Marquee type | - | Marquee animation |
+| `aa-marquee` | Marquee type | - | Marquee animation |
 | `aa-duration` | Number (seconds) | `15` | Animation duration |
 | `aa-marquee-scroller` | Number | `0` | Scroll speed multiplier |
 | `aa-marquee-items` | Number | `2` | Number of duplicates |
@@ -1106,7 +1106,7 @@ Scrolling text and content animations.
 **Examples:**
 ```html
 <!-- Basic marquee -->
-<div aa-animate="marquee-left" aa-duration="20">
+<div aa-marquee="left" aa-duration="20">
   <div aa-marquee-scroller="10">
     <div aa-marquee-items="3">
       <div class="item">Text 1</div>
@@ -1116,7 +1116,7 @@ Scrolling text and content animations.
 </div>
 
 <!-- Interactive marquee -->
-<div aa-animate="marquee-right-hover-switch" aa-duration="15">
+<div aa-marquee="right-hover-switch" aa-duration="15">
   <div aa-marquee-scroller="5">
     <div aa-marquee-items="4">
       <div class="item">Hover slows, scroll changes direction</div>

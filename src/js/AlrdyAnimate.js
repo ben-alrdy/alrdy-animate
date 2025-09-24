@@ -62,12 +62,12 @@ async function init(options = {}) {
     const templates = processTemplates(initOptions);
 
     // First get all elements with animation attributes
-    let elements = [...document.querySelectorAll("[aa-animate], [aa-children], [aa-hover], [aa-slider]")];
+    let elements = [...document.querySelectorAll("[aa-animate], [aa-children], [aa-hover], [aa-slider], [aa-accordion], [aa-marquee]")];
     
     // If templates are enabled, add elements with matching classes
     if (templates) {
       const templateSelectors = Object.keys(templates).map(className => 
-        `.${className}:not([aa-animate]):not([aa-load])`
+        `.${className}:not([aa-animate]):not([aa-load]):not([aa-slider]):not([aa-accordion]):not([aa-marquee])`
       ).join(',');
       
       const templateElements = document.querySelectorAll(templateSelectors);
@@ -381,8 +381,8 @@ function setupAnimations(elements, initOptions, isMobile, modules) {
       } 
     }
 
-    // Setup interactive components (sliders, accordions)
-    if (element.hasAttribute('aa-slider') || element.hasAttribute('aa-accordion')) {
+    // Setup interactive components (sliders, accordions, marquees)
+    if (element.hasAttribute('aa-slider') || element.hasAttribute('aa-accordion') || element.hasAttribute('aa-marquee')) {
       if (enableGSAP) {
         setupInteractiveComponent(element, settings, modules, initOptions);
       }
@@ -431,6 +431,21 @@ function setupInteractiveComponent(element, elementSettings, modules, initOption
       return;
     }
   }
+  
+  // Handle marquee components
+  if (element.hasAttribute('aa-marquee')) {
+    const { marqueeType, duration, scrub } = elementSettings;
+    
+    // Skip if marquee type is 'none' (useful for mobile variants)
+    if (!marqueeType || marqueeType === 'none') {
+      return;
+    }
+    
+    if (initOptions.gsapFeatures.includes('marquee')) {
+      // Pass the marquee type directly - the marquee system uses feature detection
+      modules.animations.marquee(element, duration, scrub, marqueeType);
+    }
+  }
 }
 
 function setupGSAPAnimations(element, elementSettings, initOptions, isMobile, modules) {
@@ -438,10 +453,10 @@ function setupGSAPAnimations(element, elementSettings, initOptions, isMobile, mo
   
   // 1. Variables setup
   const baseType = animationType.includes('-') ? animationType.split('-')[0] : animationType;
-  const gsapAnimations = ['appear', 'reveal', 'counter', 'text', 'background', 'parallax', 'marquee', 'clip', 'stack'];
+  const gsapAnimations = ['appear', 'reveal', 'counter', 'text', 'background', 'parallax', 'clip', 'stack'];
   
   // 2. Determine if this animation type creates its own ScrollTriggers
-  const ownScrollTriggerAnimations = ['clip', 'stack', 'background', 'parallax', 'marquee'];
+  const ownScrollTriggerAnimations = ['clip', 'stack', 'background', 'parallax'];
   const hasOwnScrollTrigger = ownScrollTriggerAnimations.includes(baseType);
 
   // Clear existing animations
@@ -565,10 +580,6 @@ function setupGSAPAnimations(element, elementSettings, initOptions, isMobile, mo
 
       case 'parallax':
         modules.animations.parallax(element, scrub, animationType);
-        break;
-
-      case 'marquee':
-        modules.animations.marquee(element, duration, scrub, animationType);
         break;
 
       case 'appear':

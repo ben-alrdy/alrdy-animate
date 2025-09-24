@@ -88,8 +88,8 @@ export function getElementTemplateSettings(element, isMobile) {
  * @returns {Object|null} Final settings or null if no settings found
  */
 export function getFinalSettings(element, defaultSettings, isMobile) {
-  // Skip template settings if element has aa-animate, aa-slider, or aa-accordion attributes
-  if (element.hasAttribute('aa-animate') || element.hasAttribute('aa-slider') || element.hasAttribute('aa-accordion')) return null;
+  // Skip template settings if element has aa-animate, aa-slider, aa-accordion, or aa-marquee attributes
+  if (element.hasAttribute('aa-animate') || element.hasAttribute('aa-slider') || element.hasAttribute('aa-accordion') || element.hasAttribute('aa-marquee')) return null;
 
   // Get template settings if available
   const templateSettings = getElementTemplateSettings(element, isMobile);
