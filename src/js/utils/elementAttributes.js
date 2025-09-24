@@ -63,6 +63,10 @@ export function getElementSettings(element, settings, isMobile) {
   
   // Handle mobile slider variants
   const sliderType = parseResponsiveAttribute(element.getAttribute('aa-slider'), null);
+  
+  // Handle accordion type
+  const accordionType = parseResponsiveAttribute(element.getAttribute('aa-accordion'), null);
+  
   const anchorSelector = element.getAttribute("aa-anchor");
   const anchorElement = anchorSelector ? document.querySelector(anchorSelector) : element;
   const color = animationType?.includes('#') ? '#' + animationType.split('#')[1] : undefined;
@@ -100,6 +104,9 @@ export function getElementSettings(element, settings, isMobile) {
 
     // Slider properties
     sliderType,
+    
+    // Accordion properties
+    accordionType,
 
     // Animation timing
     duration: element.hasAttribute('aa-duration') ? parseFloat(element.getAttribute('aa-duration')) : settings.duration,

@@ -197,12 +197,13 @@ function refreshScrollTrigger(duration) {
 }
 
 function initializeAccordions(animations = null, splitText = null) {
-  const accordions = document.querySelectorAll('[aa-animate="accordion"], [aa-animate="accordion-multi"], [aa-animate="accordion-autoplay"]');
+  const accordions = document.querySelectorAll('[aa-accordion]');
   const timelines = new Map();
 
   accordions.forEach((accordion) => {
-    const isMulti = accordion.getAttribute('aa-animate') === 'accordion-multi';
-    const isAutoplay = accordion.getAttribute('aa-animate') === 'accordion-autoplay';
+    const accordionType = accordion.getAttribute('aa-accordion');
+    const isMulti = accordionType === 'multi';
+    const isAutoplay = accordionType === 'autoplay';
     const toggles = accordion.querySelectorAll('[aa-accordion-toggle]');
     const contents = accordion.querySelectorAll('[aa-accordion-content]');
     

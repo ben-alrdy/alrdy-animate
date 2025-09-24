@@ -381,10 +381,10 @@ function setupAnimations(elements, initOptions, isMobile, modules) {
       } 
     }
 
-    // Setup interactive components (sliders)
-    if (element.hasAttribute('aa-slider')) {
-      if (enableGSAP && initOptions.gsapFeatures.includes('slider')) {
-        setupSliderComponent(element, settings, modules);
+    // Setup interactive components (sliders, accordions)
+    if (element.hasAttribute('aa-slider') || element.hasAttribute('aa-accordion')) {
+      if (enableGSAP) {
+        setupInteractiveComponent(element, settings, modules, initOptions);
       }
     }
 
@@ -400,16 +400,37 @@ function setupAnimations(elements, initOptions, isMobile, modules) {
   });
 }
 
-function setupSliderComponent(element, elementSettings, modules) {
-  const { sliderType, duration, ease, delay } = elementSettings;
-  
-  // Skip if slider type is 'none' (useful for mobile variants like 'draggable|none')
-  if (!sliderType || sliderType === 'none') {
-    return;
+function setupInteractiveComponent(element, elementSettings, modules, initOptions) {
+  // Handle slider components
+  if (element.hasAttribute('aa-slider')) {
+    const { sliderType, duration, ease, delay } = elementSettings;
+    
+    // Skip if slider type is 'none' (useful for mobile variants like 'draggable|none')
+    if (!sliderType || sliderType === 'none') {
+      return;
+    }
+    
+    if (initOptions.gsapFeatures.includes('slider')) {
+      // Pass the slider type directly - the slider system uses feature detection with .includes()
+      modules.animations.slider(element, sliderType, duration, ease, delay);
+    }
   }
   
-  // Pass the slider type directly - the slider system uses feature detection with .includes()
-  modules.animations.slider(element, sliderType, duration, ease, delay);
+  // Handle accordion components
+  if (element.hasAttribute('aa-accordion')) {
+    const { accordionType } = elementSettings;
+    
+    // Skip if accordion type is 'none' (useful for mobile variants)
+    if (!accordionType || accordionType === 'none') {
+      return;
+    }
+    
+    if (initOptions.gsapFeatures.includes('accordion')) {
+      // Accordion initialization is handled globally, not per element
+      // The accordion system will find all aa-accordion elements
+      return;
+    }
+  }
 }
 
 function setupGSAPAnimations(element, elementSettings, initOptions, isMobile, modules) {

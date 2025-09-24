@@ -224,8 +224,8 @@ AlrdyAnimate uses a consistent attribute naming system:
 |---------|---------|---------|
 | `aa-animate` | `aa-animate="fade-up"` | Primary animation type |
 | `aa-[property]` | `aa-duration="0.8"` | Animation properties |
-| `aa-[feature]` | `aa-slider="draggable"` | Interactive component behavior |
-| `aa-[feature]-[action]` | `aa-slider-item` | Feature-specific elements |
+| `aa-[feature]` | `aa-slider="draggable"`, `aa-accordion="multi"` | Interactive component behavior |
+| `aa-[feature]-[element]` | `aa-slider-item`, `aa-accordion-toggle` | Feature-specific elements |
 
 ### Children & Anchor Animations
 
@@ -873,9 +873,9 @@ Accessible accordion functionality with GSAP animations. Create expandable/colla
 #### Component Structure
 
 **Main Component Attributes:**
-- `aa-animate="accordion"` - Single accordion (only one open at a time)
-- `aa-animate="accordion-multi"` - Multi accordion (multiple can be open)
-- `aa-animate="accordion-autoplay"` - Autoplay accordion with progress indicators
+- `aa-accordion` - Single accordion (only one open at a time)
+- `aa-accordion="multi"` - Multi accordion (multiple can be open)
+- `aa-accordion="autoplay"` - Autoplay accordion with progress indicators
 
 **Element Attributes:**
 - `aa-accordion-toggle=ID` - Marks the clickable toggle element
@@ -912,7 +912,7 @@ Use `custom-*` to animate from CSS-defined positions to zero:
 **Attributes & Defaults:**
 | Attribute | Values | Default | Description |
 |-----------|--------|---------|-------------|
-| `aa-animate` | Accordion type | - | Accordion behavior |
+| `aa-accordion` | Accordion type | - | Accordion behavior |
 | `aa-duration` | Number (seconds) | `5` (autoplay), `0.2` (inner) | Duration |
 | `aa-ease` | Easing function | `power4.out` | Animation easing |
 | `aa-delay` | Number (seconds) | `0.3` | Delay before inner animations |
@@ -931,7 +931,7 @@ Use `custom-*` to animate from CSS-defined positions to zero:
 
 #### Basic Accordion
 ```html
-<div aa-animate="accordion">
+<div aa-accordion>
   <div aa-accordion-toggle="item-1" aa-accordion-initial>
     <h3>Accordion Item 1</h3>
   </div>
@@ -965,7 +965,7 @@ Use `custom-*` to animate from CSS-defined positions to zero:
 
 #### Autoplay with Progress
 ```html
-<div aa-animate="accordion-autoplay" aa-duration="5">
+<div aa-accordion="autoplay" aa-duration="5">
   <div aa-accordion-toggle="autoplay-1">
     <h3>Autoplay Item 1</h3>
     <div aa-accordion-progress="width"></div>
@@ -984,7 +984,7 @@ Use `custom-*` to animate from CSS-defined positions to zero:
 
 #### Connected Visual Elements
 ```html
-<div aa-animate="accordion">
+<div aa-accordion>
   <div aa-accordion-toggle="visual-1" aa-accordion-initial>
     <h3>Visual Item 1</h3>
   </div>
@@ -1009,7 +1009,7 @@ Use `custom-*` to animate from CSS-defined positions to zero:
 
 #### Circular Progress
 ```html
-<div aa-animate="accordion-autoplay" aa-duration="3">
+<div aa-accordion="autoplay" aa-duration="3">
   <div aa-accordion-toggle="circle-1">
     <div>
       <span>Circular Progress Item</span>
