@@ -1103,6 +1103,23 @@ Scrolling text and content animations.
 | `aa-marquee-items` | Number | `2` | Number of duplicates |
 | `aa-scrub` | `true`, number | - | Scroll-driven (for paused) |
 
+**CSS Requirements:**
+- Container with `aa-marquee-items` needs `display: flex`
+- **Important**: Use `margin-right` (or `margin-left`) on items for spacing, NOT `gap`
+- Items should not have `flex-shrink: 0` (unlike sliders)
+
+```css
+[aa-marquee-items] {
+  display: flex;
+  /* Do NOT use gap - use margin on items instead */
+}
+
+[aa-marquee-items] .item {
+  margin-right: 2rem; /* Use margin for spacing */
+  /* Do NOT use flex-shrink: 0 */
+}
+```
+
 **Examples:**
 ```html
 <!-- Basic marquee -->
