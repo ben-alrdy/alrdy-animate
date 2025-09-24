@@ -645,10 +645,12 @@ function setupGSAPHoverAnimations(element, elementSettings, modules) {
         });
         break;
       case 'bg':
+        // Extract base type (circle, curve, expand) from bg-[type]-[direction]
+        const bgType = subtypes[0]; // Get the first subtype (circle, curve, expand)
         modules.animations.initializeBackgroundHover(element, {
           ...elementSettings,
           hoverType: type
-        }, subtypes[0]); // circle, curve, expand
+        }, bgType);
         break;
       case 'icon':
         modules.animations.initializeIconHover(element, {

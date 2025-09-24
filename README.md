@@ -1,767 +1,862 @@
-# AlrdyAnimate Library
+# AlrdyAnimate v2 - Complete Animation Library
+
+A powerful, lightweight JavaScript library for creating scroll-triggered and interactive animations. Built with performance in mind, featuring both CSS-only animations and advanced GSAP-powered effects.
 
 ## Table of Contents
-- [Overview](#overview)
-- [Installation](#installation)
-  - [CDN Links](#cdn-links)
-  - [Initialization Scripts](#initialization-scripts)
-  - [Configuration Options](#configuration-options)
-- [CSS Animations triggered on scroll (via JS)](#css-animations-triggered-on-scroll-via-js)
-- [CSS Animations triggered on load (CSS only)](#css-animations-triggered-on-load-css-only)
+
+- [Installation & Setup](#installation--setup)
+- [Core Concepts](#core-concepts)
 - [Animation Types](#animation-types)
-  - [Fade Animations](#fade-animations)
-  - [Float Animations](#float-animations)
-  - [Zoom Animations](#zoom-animations)
-  - [Slide Animations](#slide-animations)
-  - [Blur Animations](#blur-animations)
-  - [Rotate Animations](#rotate-animations)
-  - [3D Animations](#3d-animations)
-  - [Pseudo Overlay Reveal](#pseudo-overlay-reveal)
-- [GSAP Features](#gsap-features)
-  - [Text Animations](#text-animations)
-  - [Slider Animations](#slider-animations)
-  - [Scroll Animations](#scroll-animations)
-  - [Hover Animations](#hover-animations)
-  - [Accordion Animations](#accordion-animations)
-  - [Modal Animations](#modal-animations)
-- [Smooth Scrolling (Lenis)](#smooth-scrolling-lenis)
-- [Easing Functions](#easing-functions)
-- [Setting attributes via JavaScript](#setting-attributes-via-javascript)
-- [Templates](#templates)
+  - [1. Scroll Animations](#1-scroll-animations)
+    - [1.1 CSS Animations](#11-css-animations)
+    - [1.2 Load Animations (CSS-Only)](#12-load-animations-css-only)
+    - [1.3 Text Animations](#13-text-animations)
+    - [1.4 Appear Animations](#14-appear-animations)
+    - [1.5 Parallax](#15-parallax)
+    - [1.6 Section Background Color](#16-section-background-color)
+    - [1.7 Section Clip](#17-section-clip)
+    - [1.8 Section Stack](#18-section-stack)
+  - [2. Hover Animations](#2-hover-animations)
+  - [3. Interactive Components](#3-interactive-components)
+    - [3.1 Slider](#31-slider)
+    - [3.2 Accordion](#32-accordion)
+    - [3.3 Marquee](#33-marquee)
+    - [3.4 Modal](#34-modal)
+    - [3.5 Navigation](#35-navigation)
+- [Advanced Features](#advanced-features)
+- [Configuration Reference](#configuration-reference)
+- [Performance & Accessibility](#performance--accessibility)
 - [Contributing](#contributing)
 - [License](#license)
 
+---
 
+## Installation & Setup
 
-## Overview
+### CDN Installation 
 
-AlrdyAnimate is a lightweight JavaScript library for adding scroll-triggered animations to your web pages. It provides easy-to-use options for customizing animation behavior and supports IntersectionObserver for efficient performance. With version 2.0.0, it now includes optional GSAP integration for more powerful animations.
-
-## Installation
-
-You can include AlrdyAnimate in your project using either CDN or npm.
-
-### CDN Links
-
+#### UNPKG (Recommended)
 ```html
+<!-- Latest version -->
+<link rel="stylesheet" href="https://unpkg.com/alrdy-animate@latest/dist/AlrdyAnimate.css">
+<script src="https://unpkg.com/alrdy-animate@latest/dist/AlrdyAnimate.js"></script>
 
-<!-- From GitHub  -->
-<!-- Latest version-->
+<!-- Specific version (recommended for production) -->
+<link rel="stylesheet" href="https://unpkg.com/alrdy-animate@6.12.1/dist/AlrdyAnimate.css">
+<script src="https://unpkg.com/alrdy-animate@6.12.1/dist/AlrdyAnimate.js"></script>
+```
+
+#### GitHub CDN (Alternative)
+```html
+<!-- Latest version -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/ben-alrdy/alrdy-animate@latest/cdn/AlrdyAnimate.css">
 <script src="https://cdn.jsdelivr.net/gh/ben-alrdy/alrdy-animate@latest/cdn/AlrdyAnimate.js"></script>
 
-<!-- Or specific version -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/ben-alrdy/alrdy-animate@2.1.3/cdn/v2.1.3/AlrdyAnimate.css">
-<script src="https://cdn.jsdelivr.net/gh/ben-alrdy/alrdy-animate@2.1.3/cdn/v2.1.3/AlrdyAnimate.js"></script>
-
-<!-- From UNPKG -->
-<!-- Latest version -->
-<link rel="stylesheet" href="https://unpkg.com/alrdy-animate/dist/AlrdyAnimate.css">
-<script defer src="https://unpkg.com/alrdy-animate/dist/AlrdyAnimate.js"></script>
-
-<!-- Or specific version -->
-<link rel="stylesheet" href="https://unpkg.com/alrdy-animate@2.1.3/dist/AlrdyAnimate.css">
-<script defer src="https://unpkg.com/alrdy-animate@2.1.3/dist/AlrdyAnimate.js"></script>
+<!-- Specific version -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/ben-alrdy/alrdy-animate@6.12.1/cdn/v6.12.1/AlrdyAnimate.css">
+<script src="https://cdn.jsdelivr.net/gh/ben-alrdy/alrdy-animate@6.12.1/cdn/v6.12.1/AlrdyAnimate.js"></script>
 ```
 
-### Initialization Scripts
 
-#### Webflow Implementation
+### Webflow Integration
 
-For Webflow projects, add these scripts to your custom code section:
+#### Basic Setup
+Perfect for simple animations and getting started quickly:
 
 ```html
-<link rel="stylesheet" href="https://unpkg.com/alrdy-animate@6.8.0/dist/AlrdyAnimate.css">
-<script defer src="https://unpkg.com/alrdy-animate@6.8.0/dist/AlrdyAnimate.js"></script>
+<!-- In site-wide custom code (head) -->
+<link rel="stylesheet" href="https://unpkg.com/alrdy-animate@6.12.1/dist/AlrdyAnimate.css">
 
-<!-- SCRIPT FOR MAIN CUSTOM CODE-->
-<script defer>
-  function initTabSystem() {
-    //custom code
-  }
-
+<!-- In site-wide custom code (before </body>) -->
+<script src="https://unpkg.com/alrdy-animate@6.12.1/dist/AlrdyAnimate.js"></script>
+<script>
   async function initAlrdyAnimate() {
     if (!window.alrdyInitialized) {
       await AlrdyAnimate.init({
-        ease: 'ease-in-out',
+        // Animation defaults
+        ease: 'power2.inOut',
         duration: 0.8,
-        modals: true,
-        gsapFeatures: ['text', 'slider', 'scroll'],
+        scrollStart: "top 80%",
+        
+        // Enable GSAP features
+        gsapFeatures: ['text', 'slider', 'nav', 'accordion'],
+        
+        // Template system for class-based animations
         templates: {
-          theme: 'blur', 
-          custom: {         
+          custom: {
             'heading-style-h2': {
               animationType: 'text-blur|text-fade',
               split: 'lines&words',
               stagger: 0.05
             },
             'heading-style-h3': {
-              animationType: 'aa-fade'
+              animationType: 'fade-up'
+            }
+          }
+        }
+      });
+    }
+  }
+
+  // Handle all navigation scenarios
+  document.addEventListener('DOMContentLoaded', initAlrdyAnimate);
+  window.addEventListener('pageshow', (e) => { if (e.persisted) initAlrdyAnimate(); });
+  window.addEventListener('popstate', initAlrdyAnimate);
+</script>
+```
+
+#### Complete Setup
+Full-featured setup with GSAP animations, smooth scrolling, and modals:
+
+```html
+<!-- In site-wide custom code (head) -->
+<link rel="stylesheet" href="https://unpkg.com/alrdy-animate@6.12.1/dist/AlrdyAnimate.css">
+
+<!-- In site-wide custom code (before </body>) -->
+<script src="https://unpkg.com/alrdy-animate@6.12.1/dist/AlrdyAnimate.js"></script>
+<script>
+  
+  function initCustomFunction() {
+    // Custom functions (if needed)
+  }
+
+  async function initAlrdyAnimate() {
+    if (!window.alrdyInitialized) {
+      await AlrdyAnimate.init({
+        // Animation defaults
+        ease: 'power2.inOut',
+        duration: 0.8,
+        scrollStart: "top 80%",
+        
+        // Enable GSAP features
+        gsapFeatures: ['text', 'slider', 'nav', 'accordion'],
+        
+        // Enable smooth scroll
+        smoothScroll: {
+          enabled: true,
+          options: {
+            lerp: 0.12,
+            wheelMultiplier: 1
+          }
+        },
+        
+        // Template system for class-based animations
+        templates: {
+          theme: 'blur',
+          custom: {
+            'heading-style-h2': {
+              animationType: 'text-blur|text-fade',
+              split: 'lines&words',
+              stagger: 0.05
+            },
+            'heading-style-h3': {
+              animationType: 'fade-up'
             }
           }
         }
       });
 
-      //Initialize other functions
-      initTabSystem();
+      // Initialize custom functions after AlrdyAnimate
+      initCustomFunction();
     }
   }
 
-  // 1. Initial page load
+  // Handle all navigation scenarios
   document.addEventListener('DOMContentLoaded', initAlrdyAnimate);
-  // 2. Handle prefetched pages
-  window.addEventListener('pageshow', (event) => { if (event.persisted) {initAlrdyAnimate();} });
-  // 3. Handle browser back/forward navigation
+  window.addEventListener('pageshow', (e) => { if (e.persisted) initAlrdyAnimate(); });
   window.addEventListener('popstate', initAlrdyAnimate);
 </script>
 
-<!-- SCRIPT FOR PAGE CUSTOM CODE-->
-<script defer>
+<!-- In page-specific custom code -->
+<script>
   document.addEventListener('DOMContentLoaded', () => {
     AlrdyAnimate.initPageAnimations(() => {
-     
       
     });
   });
 </script>
 ```
 
-#### Standard HTML/JavaScript Implementation
+---
 
-For non-Webflow projects, you can initialize AlrdyAnimate in several ways:
+## Core Concepts
 
-1. **Using CDN with DOMContentLoaded**:
-```html
-<!-- Add these in your HTML head -->
-<link rel="stylesheet" href="https://unpkg.com/alrdy-animate@2.1.3/dist/AlrdyAnimate.css">
+### Animation Triggers
 
-<!-- Add these in your HTML end of body -->
-<script defer src="https://unpkg.com/alrdy-animate@2.1.3/dist/AlrdyAnimate.js"></script>
+AlrdyAnimate supports multiple animation triggers:
 
-<script>
-  // Function to initialize AlrdyAnimate with consistent options
-  function initAlrdyAnimate() {
-    if (!window.alrdyInitialized) {
-      AlrdyAnimate.init({
-        ease: 'ease-in-out',
-        duration: 0.8,
-        hoverDuration: 0.6,
-        gsapFeatures: ['text', 'slider', 'scroll', 'hover'],
-        templates: {
-          theme: 'floaty',
-          custom: {
-            'my-headline': {
-              animationType: 'text-slide-up',
-              split: 'words',
-              ease: 'power2.out',
-              duration: 0.8,
-              stagger: 0.05
-            }
-          }
-        }
-      });
-    }
-  }
-
-  // 1. Initial page load
-  document.addEventListener('DOMContentLoaded', initAlrdyAnimate);
-  // 2. Handle prefetched pages
-  window.addEventListener('pageshow', (event) => { if (event.persisted) {initAlrdyAnimate();} });
-  // 3. Handle browser back/forward navigation
-  window.addEventListener('popstate', initAlrdyAnimate);
-</script>
-```
-
-2. **Using async/await with window load**:
-```html
-<script>
-  // Function to initialize AlrdyAnimate with consistent options
-  async function initAlrdyAnimate() {
-    if (!window.alrdyInitialized) {
-      await AlrdyAnimate.init({
-        ease: 'ease-in-out',
-        duration: 0.8,
-        hoverDuration: 0.6,
-        gsapFeatures: ['text', 'slider', 'scroll', 'hover']
-      });
-    }
-  }
-
-  // 1. Initial page load
-  window.addEventListener('load', initAlrdyAnimate);
-  // 2. Handle prefetched pages
-  window.addEventListener('pageshow', (event) => { if (event.persisted) {initAlrdyAnimate();} });
-  // 3. Handle browser back/forward navigation
-  window.addEventListener('popstate', initAlrdyAnimate);
-</script>
-```
-
-3. **Using a Module Bundler (like Webpack or Vite)**:
-```javascript
-import { AlrdyAnimate } from 'alrdy-animate';
-import 'alrdy-animate/dist/AlrdyAnimate.css';
-
-// Function to initialize AlrdyAnimate with consistent options
-async function initAlrdyAnimate() {
-  if (!window.alrdyInitialized) {
-    await AlrdyAnimate.init({
-      ease: 'ease-in-out',
-      duration: 0.8,
-      hoverDuration: 0.6,
-      gsapFeatures: ['text', 'slider', 'scroll', 'hover']
-    });
-  }
-}
-
-// 1. Initial page load
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initAlrdyAnimate);
-} else {
-  initAlrdyAnimate();
-}
-// 2. Handle prefetched pages
-window.addEventListener('pageshow', (event) => { if (event.persisted) {initAlrdyAnimate();} });
-// 3. Handle browser back/forward navigation
-window.addEventListener('popstate', initAlrdyAnimate);
-```
-
-
-### Configuration Options
-
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `duration` | number | 1 | Animation duration in seconds |
-| `delay` | number | 0 | Animation delay in seconds |
-| `ease` | string | "ease-in-out" | Default easing function for animations |
-| `again` | boolean | true | Remove 'in-view' class when element is out of view |
-| `scrollStart` | string | "top 80%" | Default scroll start position for animations |
-| `scrollEnd` | string | "bottom 70%" | Default scroll end position for scrub animations |
-| `distance` | number | 1 | Distance factor for animations |
-| `gsapFeatures` | array | [] | GSAP features to load: ['text', 'loop', 'scroll'] |
-| `debug` | boolean | false | Enable GSAP debug info |
-| `lazyLoadHandler` | boolean | false | Enable lazy loading handler for images |
-| `modals` | boolean | false | Enable modal functionality |
-| `smoothScroll` | object | { enabled: false, options: {} } | Configure smooth scrolling with Lenis |
-| `templates` | object | null | Template configuration for class-based animations |
-
-#### Hover Animation Options
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `hoverDuration` | number | 0.3 | Duration for hover animations in seconds |
-| `hoverDelay` | number | 0 | Delay for hover animations in seconds |
-| `hoverEase` | string | "power3.out" | Easing function for hover animations |
-| `hoverDistance` | number | 0.1 | Distance factor for hover animations |
-
-## CSS Animations triggered on scroll (via JS)
-Add the `aa-animate` attribute to the element you want to animate. Once it scrolls into view, JS will add an `in-view` class to the element and the animation will be triggered. You can also add optional attributes (see element attributes below) to customize the animation for individual elements.
-
-- **aa-animate**: The animation type to apply. Example: `aa-animate="float-up"`.
+| Trigger | Attribute | Description | Use Case |
+|---------|-----------|-------------|----------|
+| **Scroll** | `aa-animate` | Triggers when element enters viewport | Most common animations |
+| **Load** | `aa-load` | Triggers immediately on page load | Hero sections, above-fold content |
+| **Hover** | `aa-hover` | Triggers on mouse hover | Interactive elements, buttons |
 
 ### Scroll Positioning System
 
-AlrdyAnimate uses a flexible scroll positioning system that allows precise control over when animations start and end:
+Control exactly when animations trigger using GSAP ScrollTrigger syntax:
 
-#### Basic Usage
-- `aa-scroll-start="top 80%"` - Animation starts when the top of the element reaches 80% down the viewport
-- `aa-scroll-end="bottom 70%"` - Animation ends when the bottom of the element reaches 70% down the viewport (for scrub animations)
-
-#### Advanced Positioning
-You can use any GSAP ScrollTrigger positioning syntax:
-- `aa-scroll-start="center center"` - Animation starts when the center of the element reaches the center of the viewport
-- `aa-scroll-start="top bottom"` - Animation starts when the top of the element reaches the bottom of the viewport
-- `aa-scroll-end="bottom top"` - Animation ends when the bottom of the element reaches the top of the viewport
-
-#### Mobile/Desktop Variants
-Use the `|` separator to define different positions for mobile and desktop:
-- `aa-scroll-start="top 80%|top 60%"` - 80% on desktop, 60% on mobile
-- `aa-scroll-end="bottom 70%|bottom 50%"` - 70% on desktop, 50% on mobile
-
-#### Legacy Support
-The old `aa-viewport` attribute is automatically converted to the new format:
-- `aa-viewport="0.6"` - Automatically becomes `aa-scroll-start="top 60%"`
-- No changes needed for existing code
-
-### Element Attributes
-
-- **aa-children**: Accepts same values as `aa-animate`, but applies animation to all children if set. Use in conjunction with `aa-stagger` to set a staggered animation and `aa-delay` to set the starting point for all children. Example: `aa-children="fade-up"`.
-- **aa-ease**: Overwrites the global easing function for this element. Example: `aa-ease="ease-in-out"`.
-- **aa-duration**: The animation duration for this element, in seconds. Example: `aa-duration="2"`.
-- **aa-delay**: The animation delay for this element, in seconds. Example: `aa-delay="0.5"`.
-- **aa-delay-mobile**: If set, overwrites the delay on mobile devices. Example: `aa-delay-mobile="0.5s"`.
-- **aa-anchor**: Specify an anchor element to trigger the animation (useful for fixed elements that should be animated when the anchor scrolls into view). Example: `aa-anchor="#trigger"` on the element to be animated combined with `<div id="trigger">Headline</div>`.
-- **aa-scroll-start**: Define when the animation starts. Uses GSAP ScrollTrigger syntax. Example: `aa-scroll-start="top 60%"` or `aa-scroll-start="center center"`. Supports mobile variants with `|`: `aa-scroll-start="top 80%|top 60%"`.
-- **aa-scroll-end**: Define when the animation ends (for scrub animations). Uses GSAP ScrollTrigger syntax. Example: `aa-scroll-end="bottom 40%"`. Supports mobile variants with `|`: `aa-scroll-end="bottom 70%|bottom 50%"`.
-- **aa-distance**: The distance multiplier for the animation. Example: `aa-distance="1.5"`.
-
-### Toggle Playstate Function
-By adding the attriute `aa-toggle-playstate` to an element, all first level children of that element that have animations will be set to `animation-playstate = running` when the element is in view, or to `paused` when out of view.
-
-## CSS Animations triggered on load (CSS only)
-Add the `aa-load` attribute to the element you want to animate. The animation will be triggered immediately when the page loads. For best performance, use the CSS directly in Webflow.
-
-- **aa-load**: The animation type to apply. Example: `aa-load="fade-up"`.
-
-### Staggering
-- You can combine the `aa-load` attribute with the `aa-stagger` attribute on a parent element to stagger the animation for up to 10 child elements. Example: `aa-stagger="0.5"`.
-
-## CSS Animation Types
-
-AlrdyAnimate provides a wide variety of CSS animations that can be applied using the `aa-load` attribute.
-
-### Fade Animations
-Simple fade animations with optional directional movement:
-- `fade` (available for aa-load)
-- `fade-up`, `fade-down`, `fade-left`, `fade-right` (available for aa-load)
-
-### Float Animations
-Fade animations with a smooth back-bounce effect:
-- `float-up`, `float-down`, `float-left`, `float-right` (available for aa-load)
-
-### Zoom Animations
-Scale animations with optional directional movement:
-- `zoom-in`, `zoom-out` (available for aa-load)
-- `zoom-in-up`, `zoom-in-down`, `zoom-in-left`, `zoom-in-right` 
-- `zoom-out-up`, `zoom-out-down`, `zoom-out-left`, `zoom-out-right` 
-
-### Slide Animations
-Pure sliding movements without opacity change:
-- `slide-up`, `slide-down`, `slide-left`, `slide-right` (available for aa-load)
-
-### Blur Animations
-Blur in the element
-- `blur`, `blur-in`
-
-
-### Rotate Animations
-Rotate animations from bottom right (br) and bottom left (bl) corners, clockwise (cw) and counter-clockwise (ccw).The base roation degree is 5 which you can multiply with the aa-distance attribute. 
-- `rotate-br-cw`, `rotate-br-ccw` (available for aa-load)
-- `rotate-bl-cw`, `rotate-bl-ccw` (available for aa-load)
-
-### 3D Animations
-
-#### Flip Animations
-3D flip effects:
-- `flip-left`, `flip-right`, `flip-up`, `flip-down`
-
-#### Swing Animations
-Requires a parent element to have a perspective set, e.g. `perspective: 1000px;`.
-3D swing effects (anchored to top):
-- `swing-fwd`, `swing-bwd` (available for aa-load)
-
-#### Forward Turn Animations
-Requires a parent element to have a perspective set, e.g. `perspective: 1000px;`.
-3D rotation effects (available for aa-load):
-- `turn-3d-soft`: Soft rotation around X axis
-- `turn-3d-soft-3em`: Same as rotate-soft but with built-in perspective
-- `turn-3d-elliptic`: Stronger elliptic rotation around X axis
-
-
-### Pseudo Overlay Reveal
-Creates a pseudo element on top of the content and reveals it. Add the color you want to use as a pseudo color to the animation type, e.g. `aa-animate="pseudo-reveal-up#cccccc"`. Defaults to `var(--background-color--background-primary)` or black.
-- `pseudo-reveal-up`, `pseudo-reveal-down`
-- `pseudo-reveal-right`, `pseudo-reveal-left`
-
-
-Example usage:
 ```html
-<div 
-  aa-animate="fade-up" 
-  aa-duration="0.6" 
-  aa-delay="0.2" 
-  aa-distance-factor="1.5"
->
-  Animated content
+<!-- Basic usage -->
+<div aa-animate="fade-up" aa-scroll-start="top 80%">
+  Animates when element's top reaches 80% down the viewport
+</div>
+
+<!-- Advanced positioning -->
+<div aa-animate="slide-left" 
+     aa-scroll-start="center center" 
+     aa-scroll-end="bottom top">
+  Precise control over animation timing
+</div>
+
+<!-- Mobile/Desktop variants -->
+<div aa-animate="fade-up" 
+     aa-scroll-start="top 80%|top 60%"
+     aa-delay="0.2|0.1">
+  Different behavior on mobile vs desktop
 </div>
 ```
 
+### Attribute System
 
-## GSAP Features
+AlrdyAnimate uses a consistent attribute naming system:
 
-AlrdyAnimate supports several GSAP-powered features that can be enabled by including them in the `gsapFeatures` array during initialization:
+| Pattern | Example | Purpose |
+|---------|---------|---------|
+| `aa-animate` | `aa-animate="fade-up"` | Primary animation type |
+| `aa-[property]` | `aa-duration="0.8"` | Animation properties |
+| `aa-[feature]-[action]` | `aa-slider-item` | Feature-specific elements |
+| `aa-[feature]-[property]` | `aa-scroll-start="top 80%"` | Feature-specific properties |
 
-### Text Animations 
-(`gsapFeatures: ['text']`)
+### Children & Anchor Animations
 
-- Set the animation type with `aa-animate="text-..."`.
-  - Optionally, you can add `-clip` (or `-lines`, `-words`, `-chars`) to wrap each element in a clip wrapper and prevent overflow, resulting in a clipping effect during the animation. Example: `aa-animate="text-slide-up-clip"`.
-- Pair with `aa-split` to define how to split the text for animation:
-  - There are 4 split types: `lines`, `words`, `chars` or `lines&words` (i.e. both lines and words will be animated simultaneously). 
-  - Optionally, randomize the split elements by adding `random` or an integer value to `aa-split`, e.g. `aa-split=words|random` (integer values will result in specified amount of steps that the elements will appear)
-- Use `aa-scrub` to make the animation scroll-driven. There are two options: `aa-scrub="snap"` and `aa-scrub="smooth"`.
-- Use `aa-stagger` to set the stagger effect for split text animations, in seconds. Example: `aa-stagger="0.05"`.
-
-#### Available Text Animations
-
-- `text-slide-up/down/left`: Slides the text in.
-- `text-tilt-up/down`: Slides and rotates the text in.
-- `text-rotate-soft`: Rotates the text softly around the X axis. Best works with `aa-split="lines"`
-- `text-fade-30`: Fades the text in, starts with 30% opacity.
-- `text-fade-10`: Fades the text in, starts with 10% opacity.
-- `text-fade`: Fades the text in, starts with 0% opacity.
-- `text-scale-up`: Fades and scales the text up.
-- `text-blur`: Blurs the text in.
-- `text-blur-left/right/up/down`: Blurs the text in with direction.
-- `text-block-left/right/up/down`: Shows a block that reveals the text, use aa-color with a hex code to define the block color
-
-
-### Slider Animations 
-(`gsapFeatures: ['slider']`)
-
-Creates infinite scrolling, snapping, or static slider animations. To use:
-
-1. Add `aa-animate="slider"` to the container element. (By default, the slider will animate horizontally, but you can add `-vertical` to animate vertically.)
-2. Add `aa-slider-item` attribute to each element that should be animated
-
-#### Basic Setup
+#### Children Animations
+Apply animations to all child elements with staggering:
 
 ```html
-<div aa-animate="slider">
-  <div class="slider-container">
-    <div class="slider-item" aa-slider-item>
-      <div class="slider-item-content">Item 1</div>
-    </div>
-    <div class="slider-item" aa-slider-item>
-      <div class="slider-item-content">Item 2</div>
-    </div>
-    <!-- Add more items as needed -->
-  </div>
-
-  <!-- Navigation Controls -->
-      <button aa-slider-prev>Previous</button>
-      <button aa-slider-next>Next</button>
-
-      <!-- Counter -->
-      <div class="counter">
-        <span aa-slider-current>01</span>
-        <span>/</span>
-        <span aa-slider-total>06</span>
-      </div>
+<!-- Apply same animation to all children -->
+<div aa-children="fade-up" aa-stagger="0.1" aa-delay="0.2">
+  <div>Child 1 (animates at 0.2s)</div>
+  <div>Child 2 (animates at 0.3s)</div>
+  <div>Child 3 (animates at 0.4s)</div>
 </div>
 ```
 
+#### Anchor-Triggered Animations
+Trigger animations based on other elements scrolling into view:
 
-#### Animation Types
+```html
+<!-- Animation triggered by anchor element -->
+<div aa-animate="slide-left" aa-anchor="#trigger">
+  This animates when the trigger element comes into view
+</div>
 
-1. **Slider Animations** (`slider`)
-   - Static slider that requires navigation
-   - Combine with:
-     - Interaction: `-draggable` 
-     - Position: `-center` (defaults to left aligned)
-   - Example: `slider-draggable-snap`
+<!-- Trigger element (can be anywhere on page) -->
+<div id="trigger">Trigger Element</div>
 
-2. **Loop Animations** (`slider-loop`)
-   - Continuous infinite scrolling
-   - `aa-duration`: Inversely affects speed (1 is slower than 2)
-   - Combine with:
-     - Direction: defaults to left, add `-reverse` to animate right
-     - Interaction: `-draggable`
-     - Position: `-center` (defaults to left aligned)
-   - Example: `slider-loop-left-draggable`
-
-3. **Snap Animations** (`slider-snap`)
-   - Snaps from one item to the next
-   - `aa-duration`: Duration of each snap animation
-   - `aa-delay`: Pause duration between snaps
-   - Combine with:
-     - Direction: defaults to left, add `-reverse` to animate right
-     - Interaction: `-draggable`
-     - Position: `-center` (defaults to left aligned)
-   - Example: `slider-snap-right-draggable`
-   - **Progress Indicators:**
-    - Use attribute `aa-slider-progress` on an element that should grow with a slide's progress until the next one is revealed (from `aa-delay`)
-    - Accepts values `width` or `height`, defaulting to width
-    - Use `aa-ease` to define the easing of the progress bar growth (defaults to the slider's easing function)
-
-
-
-#### CSS Requirements
-- Container needs `display: flex` and `gap` set
-- Items need fixed width (percentage or pixels) and `flex-shrink: 0`
-- Important: The items cannot have a border or padding; if you need such styles, nest another div inside the item and apply the styles to that nested div.
-- Animations can be added to elements within items, but not directly on items
-
-
-```css
-.slider-container {
-  display: flex;
-  gap: 2rem;
-}
-
-.slider-item {
-  width: 300px;
-  flex-shrink: 0;
-}
+<!-- Works with classes too -->
+<div aa-animate="fade-up" aa-anchor=".my-trigger">
+  Triggered by any element with class "my-trigger"
+</div>
+<div class="my-trigger">Another trigger</div>
 ```
 
-#### Navigation Controls
+**Use Cases:**
+- Fixed elements that should animate based on content
+- Coordinated animations across different page sections
+- Complex animation sequences
 
-- Optionally, add navigation controls for the slider (These elements need to located inside the element with `aa-animate="slider"`):
-  - `aa-slider-prev` and `aa-slider-next` for navigation buttons to show previous and next slide
-  - `aa-slider-current` and `aa-slider-total` to display the current and total number of slides
-  - `aa-slider-button` for specific buttons to jump to a certain slide
-    - the number of buttons needs to match the number of slides
-    - the slide that is active and the corresponding button get the class `is-active` so you can style them accordingly
-    - optionally, if the buttons don't live in the same wrapper as `aa-animate = slider`, you can add `aa-slider-target=id_of_slider` to each button to control a specific slider (then also set the ID for the slider)
+---
 
+## Animation Types
 
+## 1. Scroll Animations
 
-### Scroll Animations 
-(`gsapFeatures: ['scroll']`)
-Enables scroll-driven animations and effects. 
+### 1.1 CSS Animations
 
-#### Sticky Navigation
-- Your nav element needs to have `position: fixed` set so it is sticky.
-- Use `aa-nav="change"` to add the class `is-scrolled` to the nav element when scrolling down and remove it when scrolling up. 
-- Use `aa-nav="hide"` to create a sticky navigation bar that slides out of view when scrolling down and slides back in when scrolling up
-  - Use `aa-ease` to set the easing. Defaults to `back.inOut`
-  - Use `aa-duration` to set the duration. Defaults to `0.4s`
-  - Use `aa-distance` to set the distance multiplier that the nav element will move. Example: `aa-distance="1.5"`.
-- Use `aa-nav="hide-change"` to combine both effects
-- Add an integer to `aa-nav` to define after how many pixels the the effect should be triggered. Example: `aa-nav="hide-change-50"`. Defaults to `100px`.
+Lightweight, performant animations triggered when elements scroll into view.
 
-#### Background Color Transitions
-- Use `aa-animate="background"` on a wrapper element you want to animate when sections inside the wrapper scroll into view
-  - Optionally set `aa-duration` to define the duration of the animation and `aa-ease` to define the easing.
-- Set `aa-scroll-start` to define when the animation triggers, e.g. `aa-scroll-start="center center"` to trigger when the section is 50% in view.
-- Set `aa-scrub=true` to make the animation scroll driven; optionally set a number (higher number = longer delay from scroll to animation), e.g `aa-scrub=1`.
-- Use `aa-wrapper-colors` with `bg` and `text` to define the background and text colors for the wrapper once the section is scrolled into view, e.g. `aa-wrapper-colors="bg:#f0f0f0;text:#000"`.
-- Use `aa-item-colors` with `bg` and `text` to change the background and text colors for child elements when they scroll into view, e.g. `aa-item-colors="bg:#ff0000;text:#fff"`.
+**Available Animations:**
+- **Fade**: `fade`, `fade-[direction]` where `[direction]` = `up`, `down`, `left`, `right`
+- **Float**: `float-[direction]` (with bounce) where `[direction]` = `up`, `down`, `left`, `right`
+- **Slide**: `slide-[direction]` where `[direction]` = `up`, `down`, `left`, `right`
+- **Zoom**: `zoom-in`, `zoom-out`, `zoom-in-[direction]`, `zoom-out-[direction]` where `[direction]` = `up`, `down`, `left`, `right`
+- **Rotate**: `rotate-[position]-[rotation]` where `[position]` = `br`, `bl`, `tr`, `tl`, `c` and `[rotation]` = `cw`, `ccw`
+  - **Base rotation**: 5 degrees (multiply with `aa-distance` for stronger effect)
+  - **Position**: `br` = bottom-right, `bl` = bottom-left, `tr` = top-right, `tl` = top-left, `c` = center
+  - **Rotation**: `cw` = clockwise, `ccw` = counter clockwise
+- **3D**: `swing-fwd`, `swing-bwd`, `turn-3d-soft`, `turn-3d-elliptic`, `flip-[direction]` where `[direction]` = `up`, `down`, `left`, `right`
+- **Blur**: `blur`, `blur-in`
+- **Pseudo Reveal**: `pseudo-reveal-[direction]#color` where `[direction]` = `up`, `down`, `left`, `right`
 
-- Example:
+**Attributes & Defaults:**
+| Attribute | Values | Default | Description |
+|-----------|--------|---------|-------------|
+| `aa-animate` | Animation name | - | Animation type |
+| `aa-duration` | Number (seconds) | `1` | Animation duration |
+| `aa-delay` | Number (seconds) | `0` | Animation delay |
+| `aa-delay-mobile` | Number (seconds) | - | Mobile-specific delay |
+| `aa-distance` | Number | `1` | Distance multiplier |
+| `aa-ease` | Easing function | `ease-in-out` | Animation easing |
+| `aa-scroll-start` | Position | `top 80%` | When animation starts |
+| `aa-anchor` | CSS selector | - | Trigger element |
+
+**Examples:**
 ```html
-<div class="wrapper" aa-animate="background" aa-scroll-start="center center" aa-duration="0.8">
-  <div class="section" aa-wrapper-colors="bg:#f0f0f0;text:#000">
-    Changes wrapper background to light gray and text to black
-  </div>
-  <div class="section" aa-wrapper-colors="bg:#000;text:#fff" aa-item-colors="bg:#ff0000;text:#fff">
-    Changes wrapper background to dark theme and self to red
-    <div class="item" aa-item-colors="bg:#ff0000;text:#fff">Changes item background to red and text to white</div>
-  </div>
+<div aa-animate="fade-up" aa-duration="0.8" aa-delay="0.2">Basic fade up</div>
+<div aa-animate="float-left" aa-distance="2" aa-ease="back.out">Stronger float</div>
+<div aa-animate="zoom-in-up" aa-scroll-start="top 90%">Zoom with slide</div>
+<div aa-animate="rotate-br-cw" aa-distance="3">Rotate from bottom-right</div>
+```
+
+
+---
+
+### 1.2 Load Animations (CSS-Only)
+
+Animations that trigger immediately when the page loads, without JavaScript initialization.
+
+**Setup:** Use `aa-load` attribute (no `AlrdyAnimate.init()` required)
+
+**Available Animations:** Similar to the above CSS animations, check the code file in Webflow
+
+**Attributes & Defaults:**
+| Attribute | Values | Default | Description |
+|-----------|--------|---------|-------------|
+| `aa-load` | Animation name | - | Animation triggered on page load |
+| `aa-stagger` | Number (seconds) | - | (Parent) Stagger child animations |
+| `aa-delay` | Number (seconds) | - | Delay for animation |
+| `aa-duration` | Number (seconds) | - | Duration for animation |
+
+**Examples:**
+```html
+<!-- Single load animation -->
+<div aa-load="fade-up">
+  Fades up immediately on page load
+</div>
+
+<!-- Staggered load animations (up to 10 children) -->
+<div aa-load="fade-up" aa-stagger="0.2">
+  <div>Item 1 (0s)</div>
+  <div>Item 2 (0.2s)</div>
+  <div>Item 3 (0.4s)</div>
+  <div>Item 4 (0.6s)</div>
 </div>
 ```
 
-#### Marquee Animations
-- Set `aa-animate="marquee-left"` or `aa-animate="marquee-right"` to the parent element to create a left- or right-moving marquee
-  - Use `aa-duration` to set the duration of the animation
-- Set `aa-marquee-scroller` to mark the element that increases in speed on scroll; accepts integer to set the speed multiplier, e.g. `aa-marquee-scroller="10"` (defaults to 0, i.e. no speed increase on scroll)
-- Set `aa-marquee-items` to mark the wrapper that contains the items to duplicate in the marquee; accepts integer to set the number of duplicates, e.g. `aa-marquee-items="3"` (defaults to 2)
-  - Important: Each item inside the `aa-marquee-items` wrapper needs to be spaced with `margin` (not `gap` of flexbox)
-- Options:
-  - Add `-switch` to change marquee direction on scroll
-  - Add `-hover` to the animation type to create a marquee that slows down on hover, e.g. `aa-animate="marquee-left-hover"`
-  - Add `-paused` to disabe the animation, e.g. `aa-animate="marquee-left-paused"` - use to only animate on scroll
-    - Add `aa-scrub` to animate on scroll
+---
 
+### 1.3 Text Animations
 
+Advanced text splitting and animation effects.
 
-Example:
+**Setup:** `gsapFeatures: ['text']`
+
+**Available Animations:**
+- **Slide**: `text-slide-[direction]` where `[direction]` = `up`, `down`, `left`, `right`
+- **Tilt**: `text-tilt-[direction]` where `[direction]` = `up`, `down`
+- **Fade**: `text-fade`, `text-fade-30`, `text-fade-10` (opacity-only animations)
+- **Scale**: `text-scale-up`
+- **Blur**: `text-blur`, `text-blur-[direction]` where `[direction]` = `up`, `down`, `left`, `right`
+- **Rotate**: `text-rotate-soft` (3D rotation around X-axis)
+- **Block**: `text-block-[direction]` where `[direction]` = `up`, `down`, `left`, `right`
+
+**Attributes & Defaults:**
+| Attribute | Values | Default | Description |
+|-----------|--------|---------|-------------|
+| `aa-animate` | `text-[type]` | - | Text animation type |
+| `aa-split` | `words`, `chars`, `lines`, `lines&words` | `words` | How to split text |
+| `aa-stagger` | Number (seconds) | `0.05` | Delay between split elements |
+| `aa-duration` | Number (seconds) | `0.8` | Animation duration |
+| `aa-scrub` | `true`, number | - | Scroll-driven animation. `true` = direct mapping, number = lag (higher = more lag) |
+| `aa-color` | Hex color | - | Block color for text-block animation |
+
+**Examples:**
 ```html
-<div aa-animate="marquee-left-hover" aa-duration="15" class="marquee">
-  <div aa-marquee-scroller="10">
-    <div aa-marquee-items>
-      <div class="marquee__item">
-        <p>Scroll Effects & Animations</p> 
-      </div>
-      <div class="marquee__item">
-        <p>Scroll Effects & Animations</p> 
-      </div>
-    </div>
-  </div>
-</div>
+<h1 aa-animate="text-slide-up" aa-split="words" aa-stagger="0.05">Word by word</h1>
+<p aa-animate="text-fade" aa-split="chars" aa-stagger="0.02">Character reveal</p>
+<div aa-animate="text-tilt-up-clip" aa-split="lines">Clipped lines</div>
+<span aa-animate="text-blur-up" aa-split="words|random">Random order</span>
 ```
 
-#### Parallax Scrolling
+---
 
-Create a parallax scrolling effect on an element. The element's position will change as the user scrolls.
+### 1.4 Appear Animations
 
--   `aa-animate="parallax"`: Apply a vertical parallax effect. For horizontal movement, use `parallax-horizontal`.
--   `aa-parallax-target` (optional): A selector for a child element to apply the parallax effect to. If not provided, the effect is applied to the element with `aa-animate`.
--   `aa-parallax-start` (optional): The starting position of the parallax effect in percentage. Defaults to `20`.
--   `aa-parallax-end` (optional): The ending position of the parallax effect in percentage. Defaults to `-20`.
--   `aa-scroll-start` (optional): The scroll position where the animation starts (e.g., `top bottom`, `center center`). Defaults to `top bottom`, i.e. as soon as top of element reaches bottom of viewport.
--   `aa-scroll-end` (optional): The scroll position where the animation ends. Defaults to `bottom top`, i.e. bottom of element reaches top of viewport.
+Smooth transitions and reveals with GSAP.
 
--   `aa-scrub` (optional): Controls the smoothness of the animation. A higher value creates a longer delay between the scroll and the animation. Defaults to `true` for a direct mapping.
+**Setup:** `gsapFeatures: ['scroll']`
 
-##### Basic Example
-This will move the element vertically from 20% to -20% as it scrolls through the viewport.
+**Available Animations:**
+- **Appear**: `appear`, `appear-up/down/left/right`
+- **Reveal**: `reveal-up/down/left/right/center` (clip path)
+- **Counter**: `counter`, `counter-[startNumber]`
+
+**Attributes & Defaults:**
+| Attribute | Values | Default | Description |
+|-----------|--------|---------|-------------|
+| `aa-animate` | Animation name | - | Animation type |
+| `aa-duration` | Number (seconds) | `0.8` | Animation duration |
+| `aa-delay` | Number (seconds) | `0` | Animation delay |
+| `aa-distance` | Number | `1` | Distance multiplier |
+| `aa-scrub` | `true`, number | - | Scroll-driven animation. `true` = direct mapping, number = lag (higher = more lag) |
+
+**Examples:**
+```html
+<div aa-animate="appear-left" aa-duration="1.2">Smooth appear</div>
+<img aa-animate="reveal-center" aa-scrub="1" src="image.jpg">
+<span aa-animate="counter">1,250</span>
+<span aa-animate="counter-100" aa-scrub="2">500</span>
+```
+
+---
+
+### 1.5 Parallax
+
+Scroll-driven movement effects.
+
+**Setup:** `gsapFeatures: ['scroll']`
+
+**Attributes & Defaults:**
+| Attribute | Values | Default | Description |
+|-----------|--------|---------|-------------|
+| `aa-animate` | `parallax`, `parallax-horizontal` | - | Parallax type |
+| `aa-parallax-target` | CSS selector | Self | Element to animate |
+| `aa-parallax-start` | Number (%) | `20` | Start position |
+| `aa-parallax-end` | Number (%) | `-20` | End position |
+| `aa-scroll-start` | Position | `top bottom` | When to start |
+| `aa-scroll-end` | Position | `bottom top` | When to end |
+| `aa-scrub` | `true`, number | `true` | Scroll-driven animation. `true` = direct mapping, number = lag (higher = more lag) |
+
+**Examples:**
 ```html
 <div aa-animate="parallax">
-  <!-- Content -->
+  <img src="bg.jpg" alt="Background">
+</div>
+
+<div aa-animate="parallax-horizontal" 
+     aa-parallax-target=".inner" 
+     aa-parallax-start="50" 
+     aa-parallax-end="-30">
+  <div class="inner">Horizontal movement</div>
 </div>
 ```
 
-##### Advanced Example
-This example moves a child element with the class `.image` horizontally from 50% to 0. The animation starts when the top of the trigger element reaches the center of the viewport and ends when the bottom of the trigger reaches the center, with a smooth scrub effect.
+---
+
+### 1.6 Section Background Color
+
+Animated background transitions between sections.
+
+**Setup:** `gsapFeatures: ['scroll']`
+
+**Attributes & Defaults:**
+| Attribute | Values | Default | Description |
+|-----------|--------|---------|-------------|
+| `aa-animate` | `background` | - | Background transition |
+| `aa-duration` | Number (seconds) | `0.8` | Transition duration |
+| `aa-ease` | Easing function | `power2.inOut` | Transition easing |
+| `aa-scrub` | `true`, number | - | Scroll-driven animation. `true` = direct mapping, number = lag (higher = more lag) |
+| `aa-wrapper-colors` | `bg:color;text:color` | - | Wrapper colors |
+| `aa-item-colors` | `bg:color;text:color` | - | Item colors |
+
+**Examples:**
 ```html
-<div 
-  aa-animate="parallax-horizontal" 
-  aa-parallax-target=".image"
-  aa-parallax-start="50"
-  aa-parallax-end="0"
-  aa-scroll-start="top center"
-  aa-scroll-end="bottom center"
-  aa-scrub="2"
->
-  <img src="image.jpg" class="image">
+<div aa-animate="background" aa-duration="0.8">
+  <section aa-wrapper-colors="bg:#f0f0f0;text:#000">Light section</section>
+  <section aa-wrapper-colors="bg:#000;text:#fff">Dark section</section>
 </div>
 ```
 
-#### Reveal & Appear Animations
-- Use `aa-animate="reveal-..."` for reveal animations that use a clip path to mask the content
-- Use `aa-animate="appear-..."` for appear animations that fade/slide in content
-- Optionally, add `aa-scrub` to make the animation scroll driven
+---
 
-Available animations:
-1. Reveal Animations (by animating a clip path)
-   - `reveal-up`: Reveals content with clip path sliding up
-   - `reveal-down`: Reveals content with clip path sliding down
-   - `reveal-left`: Reveals content with clip path sliding left
-   - `reveal-right`: Reveals content with clip path sliding right
-   - `reveal-center`: Reveals content with clip path splitting from center in a circle shape
+### 1.7 Section Clip
 
-2. Appear Animations (clean transitions)
-   - `appear`: Simple fade in
-   - `appear-up`: Fades in while sliding up
-   - `appear-down`: Fades in while sliding down
-   - `appear-left`: Fades in while sliding left
-   - `appear-right`: Fades in while sliding right
+Clip path animations for sections.
 
-Example usage:
+**Setup:** `gsapFeatures: ['scroll']`
+
+**Attributes & Defaults:**
+| Attribute | Values | Default | Description |
+|-----------|--------|---------|-------------|
+| `aa-animate` | `clip` | - | Clip animation |
+| `aa-scroll-start` | Position | `top bottom` | When to start |
+| `aa-scroll-end` | Position | `bottom top` | When to end |
+
+**Examples:**
 ```html
-<!-- Reveal animation -->
-<div>
-  <img src="image.jpg" aa-animate="reveal-up" aa-duration="1.2" aa-ease="power2.inOut">
-</div>
-
-<!-- Appear animation -->
-<div aa-animate="appear" aa-scrub="1">
-  Content fades while scrolling
-</div>
+<div aa-animate="clip">Section with clip animation</div>
 ```
 
-#### Counter Animations
-Animate a number from 0 to the value of the element (it needs to be a number and can include a comma or dot as thousand separator).
+---
 
-- Use `aa-animate="counter"` to animate a number from 0 to the target number
-- Use `aa-animate="counter-10"` to animate a number from 10 to the target number
-- Optionally, add `aa-scrub` to make the animation scroll-driven
+### 1.8 Section Stack
 
-### Hover Animations
+Stacking scroll effects.
 
-The AlrdyAnimate library includes powerful hover animations using GSAP. These animations can be applied to elements by adding the `aa-hover` attribute. Generally, you can use `aa-delay` and `aa-duration` to set the delay and duration of the animation.
+**Setup:** `gsapFeatures: ['scroll']`
 
-#### Available Hover Animations
+**Attributes & Defaults:**
+| Attribute | Values | Default | Description |
+|-----------|--------|---------|-------------|
+| `aa-animate` | `stack` | - | Stack animation |
+| `aa-distance` | Number | `1` | Stack distance |
+| `aa-scrub` | `true`, number | `true` | Scroll-driven |
 
+**Examples:**
+```html
+<div aa-animate="stack" aa-distance="2">Stacking section</div>
+```
 
-1. **Text Animations** (`aa-hover="text-..."`) 
-  - Animate text elements with sliding or fading effects. 
-  - Mark the text you want to animate with `aa-hover-text`.
-  - Requires a wrapper element around the `aa-hover-text` that has position set to `relative` or `absolute` and overflow set to `hidden`.
-  - Requires `aa-split` attribute to be set (e.g. `aa-split="words"`), optionally add `aa-stagger` 
-  - use `aa-distance` to set distance/delay between the original and the clone.
-  - Available animations:
-    - Text Sliding: `text-slide-up`, `text-slide-down`, `text-slide-left`, `text-slide-right`
-    - Text Fading: `text-fade-up`, `text-fade-down`, `text-fade-left`, `text-fade-right`
-      - For fading effects, the element with `aa-hover-text` should include padding to make room for the fade effect.
-    - add `-reverse` to the animation type to play the animation in reverse when hovering out, e.g. `aa-hover="text-slide-up-reverse"`.
+---
 
-2. **Background Circle Animation** (`aa-hover="bg-circle"`)
-  - Expands a circle from the hover point.
-  - Requires a circle SVG path in the background, tagged with `aa-hover-bg`.
-  - Optionally, you can define the hover direction with `aa-hover-direction` (possible values: `all`, `top`, `bottom`, `left`, `right`, `vertical`, `horizontal`).
+## 2. Hover Animations
 
-3. **Background Curve Animation** (`aa-hover="bg-curve"`)
-  - Animates an SVG path to create a wave effect.
-  - Requires an SVG path in the background, tagged with `aa-hover-bg`.
-  - Optionally, you can define the hover direction with `aa-hover-direction` (possible values: `all`, `top`, `bottom`, `left`, `right`, `vertical`, `horizontal`).
+Interactive hover effects with sophisticated animations and state management.
 
-4. **Background Expand Animation** (`aa-hover="bg-expand"`)
-  - Expands a shape inside the element to fill the element.
-  - Requires a div nested inside the element, tagged with `aa-hover-bg`, that will expand to fill the element.
-  - Optionally, you can add `-reverse` to `aa-hover` to play the animation in reverse when hovering out, e.g. `aa-hover="bg-expand-reverse"`.
+**Setup:** `gsapFeatures: ['hover']`
 
-5. **Icon Animations** (`aa-hover="icon-..."`)
-  - Animates an icon on hover.
-  - Requires an svg element nested inside the element, tagged with `aa-hover-icon`.
-  - Define direction of the icon animation by adding a direction, e.g. `aa-hover="icon-right"` (possible values: `right`, `up-right`, `down-right`, `left`, `up-left`, `down-left`, `up`, `down`).
-  - Optionally, you can add `-reverse` to `aa-hover` to play the animation in reverse when hovering out, e.g. `aa-hover="icon-right-reverse"`.
+### Animation Types & Element Tags
 
-For all hover animations, you can optionally add `aa-hover-text-color` or `aa-hover-bg-color` to any element inside the aa-hover element to animate the text or background color. The text elements will be positioned relative with z-index set to 1.
+Hover animations require specific element tags to identify what should be animated:
 
-You can combine hover animations with the `&` operator, e.g. `aa-hover="bg-expand&icon-right"`.
+#### Text Animations
+**Available Animations:**
+- **Slide**: `text-slide-[direction]` where `[direction]` = `up`, `down`, `left`, `right`
+- **Fade**: `text-fade-[direction]` where `[direction]` = `up`, `down`, `left`, `right`
 
-To set content above the background, add `aa-hover-content` to the respective element (or position it via CSS).
+**Required Element Tags:**
+- `aa-hover-text` - Marks the text element to animate
 
+**Requirements:**
+- Parent wrapper with `position: relative` and `overflow: hidden`
+- Use `aa-split` to define text splitting method
+- Add `-reverse` suffix for exit animation (e.g., `text-slide-up-reverse`)
 
-#### HTML Examples
+#### Background Animations  
+**Available Animations:**
+- **Circle**: `bg-circle` - Expands circle from hover point
+  - **Direction Control**: Include direction in animation name (e.g., `bg-circle-vertical`)
+  - **Options**: `all` (default), `vertical`, `horizontal`, `top`, `bottom`, `left`, `right`
+- **Curve**: `bg-curve` - Animates SVG path for wave effects
+  - **Direction Control**: Include direction in animation name (e.g., `bg-curve-up`, `bg-curve-horizontal`)
+  - **Options**: `all` (default), `vertical`, `horizontal`, `top`, `bottom`, `left`, `right`
+- **Expand**: `bg-expand` - Expands shape to fill element
+
+**Required Element Tags:**
+- `aa-hover-bg` - Marks the background element (SVG or div)
+- `aa-hover-content` - Optional, marks content to position above background
+
+**Background Options:**
+- Add `-reverse` suffix for exit animation (e.g., `bg-expand-reverse`)
+
+#### Icon Animations
+**Available Animations:**
+- **Directional**: `icon-[direction]` where `[direction]` = `right`, `left`, `up`, `down`, `up-right`, `up-left`, `down-right`, `down-left`
+
+**Required Element Tags:**
+- `aa-hover-icon` - Marks the icon element (usually SVG)
+
+**Icon Options:**
+- Add `-reverse` suffix for exit animation (e.g., `icon-right-reverse`)
+
+### Combining Animations
+
+Use the `&` operator to combine multiple hover effects:
 
 ```html
-<a class="button" href="#" aa-hover="bg-circle" aa-hover-direction="all" aa-duration="1">
-  <div aa-hover-text>Circle button</div>
-  <svg class="bg-filler" viewBox="0 0 1 1" preserveAspectRatio="xMidYMid slice" aa-hover-bg>
+<!-- Text + Icon -->
+<a aa-hover="text-slide-up&icon-right">
+  <span aa-hover-text>Learn More</span>
+  <svg aa-hover-icon><!-- arrow icon --></svg>
+</a>
+
+<!-- Background + Text + Icon -->
+<button aa-hover="bg-circle-vertical&text-fade-up&icon-right">
+  <span aa-hover-content>
+    <span aa-hover-text>Multi-Effect Button</span>
+    <svg aa-hover-icon><!-- icon --></svg>
+  </span>
+  <svg aa-hover-bg viewBox="0 0 1 1">
     <circle cx="0.5" cy="0.5" r="0" fill="currentColor"></circle>
   </svg>
+</button>
+```
+
+### Color Animations
+
+Add color changes to any hover animation:
+
+**Color Element Tags:**
+- `aa-hover-text-color="color"` - Changes text color on hover
+- `aa-hover-bg-color="color"` - Changes background color on hover
+
+### Attributes & Defaults
+
+| Attribute | Values | Default | Description |
+|-----------|--------|---------|-------------|
+| `aa-hover` | Animation type(s) | - | Hover animation(s), combine with `&` |
+| `aa-duration` | Number (seconds) | `0.3` | Animation duration |
+| `aa-delay` | Number (seconds) | `0` | Animation delay |
+| `aa-split` | `words`, `chars`, `lines` | `words` | Text splitting method |
+| `aa-stagger` | Number (seconds) | `0.03` | Stagger between text elements |
+| `aa-distance` | Number (seconds) | `0.1` | Delay between original and clone text |
+| `aa-hover-text-color` | Color | - | Text color on hover |
+| `aa-hover-bg-color` | Color | - | Background color on hover |
+
+### Complete Examples
+
+#### Text Slide Animation
+```html
+<a aa-hover="text-slide-up-reverse" aa-split="words" aa-stagger="0.02">
+  <div style="position: relative; overflow: hidden;">
+    <span aa-hover-text>Hover for sliding text</span>
+  </div>
+</a>
+```
+
+#### Circle Background Animation
+```html
+<button aa-hover="bg-circle-vertical" aa-duration="0.8">
+  <span aa-hover-content>Circle Button</span>
+  <svg aa-hover-bg viewBox="0 0 1 1" class="absolute inset-0 w-full h-full">
+    <circle cx="0.5" cy="0.5" r="0" fill="currentColor"></circle>
+  </svg>
+</button>
+```
+
+#### Wave Background Animation
+```html
+
+<a aa-hover="bg-curve-horizontal" aa-duration="0.6">
+  <span aa-hover-content>Horizontal Wave</span>
+  <svg aa-hover-bg viewBox="0 0 100 100" class="absolute inset-0 w-full h-full">
+    <path d="M 0 100 V 0 Q 50 0 100 0 V 100 z" fill="currentColor"></path>
+  </svg>
 </a>
 
-<a class="button" href="#" aa-hover="bg-curve" aa-hover-direction="vertical" aa-duration="0.8">
-  <div aa-hover-text>Vertical Only</div>
-  <svg class="bg-filler" viewBox="0 0 100 100" preserveAspectRatio="none" aa-hover-bg>
-    <path d="M 0 100 V 0 Q 250 0 500 0 V 0 H 0 z" fill="currentColor"></path>
+<a aa-hover="bg-curve-bottom" aa-duration="0.6">
+  <span aa-hover-content">Bottom Wave Only</span>
+  <svg aa-hover-bg viewBox="0 0 100 100" class="absolute inset-0 w-full h-full">
+    <path d="M 0 100 V 0 Q 50 0 100 0 V 100 z" fill="currentColor"></path>
   </svg>
 </a>
 ```
 
+#### Expand Background Animation
+```html
+<div aa-hover="bg-expand-reverse" aa-duration="0.5">
+  <span aa-hover-content>Expanding Background</span>
+  <div aa-hover-bg class="absolute inset-0 bg-blue-500 scale-0"></div>
+</div>
+```
 
-### Accordion Animations
-(`gsapFeatures: ['accordion']`)
+#### Icon Animation
+```html
+<a aa-hover="icon-up-right-reverse" aa-duration="0.4">
+  <span>Learn More</span>
+  <svg aa-hover-icon class="w-4 h-4">
+    <path d="M5 12h14m-7-7l7 7-7 7"/>
+  </svg>
+</a>
+```
 
-AlrdyAnimate includes accessible accordion functionality with GSAP animations. Create expandable/collapsible sections with smooth height animations and inner content animations.
+#### Advanced Combined Animation
+```html
+<button aa-hover="bg-expand-reverse&text-slide-up&icon-right" 
+        aa-split="chars" 
+        aa-stagger="0.01" 
+        aa-duration="0.6">
+  <span aa-hover-content>
+    <span aa-hover-text aa-hover-text-color="#ffffff">
+      Multi-Effect Button
+    </span>
+    <svg aa-hover-icon class="w-4 h-4">
+      <path d="M5 12h14m-7-7l7 7-7 7"/>
+    </svg>
+  </span>
+  <div aa-hover-bg aa-hover-bg-color="#000000" 
+       class="absolute inset-0 scale-0"></div>
+</button>
+```
 
-**Note:** The opening/closing of accordion content is animated via CSS transition of the grid `fr` unit, while inner content animations are handled by GSAP. This is why on `aa-accordion-content`, we also need the `aa-animate` attribute to set `aa-duration` and `aa-ease`.
+#### Character-by-Character Text Animation
+```html
+<h2 aa-hover="text-fade-right" aa-split="chars" aa-stagger="0.01">
+  <div style="position: relative; overflow: hidden; padding: 0.5em;">
+    <span aa-hover-text>Character Animation</span>
+  </div>
+</h2>
+```
 
-#### Available Attributes
+### CSS Requirements
 
-**Component Attributes:**
-Initializes the accordion component and wraps around **toggle**, **content** and **visual**
+#### Text Animations
+```css
+.text-hover-wrapper {
+  position: relative;
+  overflow: hidden;
+}
+
+/* For fade effects, add padding to make room */
+.text-fade-wrapper {
+  padding: 0.5em;
+}
+```
+
+#### Background Animations
+```css
+.hover-element {
+  position: relative;
+}
+
+[aa-hover-bg] {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+[aa-hover-content] {
+  position: relative;
+  z-index: 1;
+}
+```
+
+---
+
+## 3. Interactive Components
+
+### 3.1 Slider
+
+Infinite scrolling, snapping, and static slider animations.
+
+**Setup:** `gsapFeatures: ['slider']`
+
+**Available Types:**
+- **Static**: `slider`, `slider-center`, `slider-draggable`
+- **Loop**: `slider-loop`, `slider-loop-reverse`, `slider-loop-vertical`
+- **Snap**: `slider-snap`, `slider-snap-reverse`, `slider-snap-draggable`
+
+**Attributes & Defaults:**
+| Attribute | Values | Default | Description |
+|-----------|--------|---------|-------------|
+| `aa-animate` | Slider type | - | Slider animation type |
+| `aa-duration` | Number (seconds) | `20` (loop), `0.8` (snap) | Speed/duration |
+| `aa-delay` | Number (seconds) | `3` | Pause between snaps |
+| `aa-slider-item` | - | - | Marks slider items |
+| `aa-slider-prev` | - | - | Previous button |
+| `aa-slider-next` | - | - | Next button |
+| `aa-slider-current` | - | - | Current slide number |
+| `aa-slider-total` | - | - | Total slide count |
+| `aa-slider-button` | - | - | Pagination button |
+| `aa-slider-target` | Slider ID | - | Target slider for external controls |
+| `aa-slider-progress` | `width`, `height`, `circle` | - | Progress indicator type |
+
+**Examples:**
+```html
+<!-- Static slider -->
+<div aa-animate="slider-center-draggable" id="main-slider">
+  <div class="slider-container">
+    <div aa-slider-item>Item 1</div>
+    <div aa-slider-item>Item 2</div>
+  </div>
+  <button aa-slider-prev>←</button>
+  <button aa-slider-next>→</button>
+</div>
+
+<!-- Loop slider -->
+<div aa-animate="slider-loop-reverse" aa-duration="25">
+  <div class="slider-container">
+    <div aa-slider-item>Item 1</div>
+    <div aa-slider-item>Item 2</div>
+  </div>
+</div>
+
+<!-- Snap slider with progress -->
+<div aa-animate="slider-snap" aa-duration="0.6" aa-delay="4">
+  <div class="slider-container">
+    <div aa-slider-item>Item 1</div>
+    <div aa-slider-item>Item 2</div>
+  </div>
+  <div aa-slider-progress="width" class="progress-bar"></div>
+</div>
+```
+
+---
+
+### 3.2 Accordion
+
+Accessible accordion functionality with GSAP animations. Create expandable/collapsible sections with smooth height animations and inner content animations.
+
+**Setup:** `gsapFeatures: ['accordion']`
+
+**Note:** Opening/closing is animated via CSS transition of the grid `fr` unit, while inner content animations are handled by GSAP. This is why `aa-accordion-content` needs the `aa-animate` attribute to set `aa-duration` and `aa-ease`.
+
+#### Component Structure
+
+**Main Component Attributes:**
 - `aa-animate="accordion"` - Single accordion (only one open at a time)
 - `aa-animate="accordion-multi"` - Multi accordion (multiple can be open)
 - `aa-animate="accordion-autoplay"` - Autoplay accordion with progress indicators
-  - `aa-duration` - Only relevant for autoplay, duration of progress until next accordion activates
 
-**Toggle Attributes:**
+**Element Attributes:**
 - `aa-accordion-toggle=ID` - Marks the clickable toggle element
-- `aa-accordion-initial` - On load, activates this toggle and opens content and visual
-
-**Progress Attributes:**
-- `aa-accordion-progress` - Progress indicator type (possible values: "width", "height", "circle")
-- `aa-ease` - Animation easing of progress indicator (default: "power4.out")
-
-**Content Attributes:**
 - `aa-accordion-content=ID` - Marks the expandable content element
-- `aa-duration` - Duration of content opening/closing (also requires `aa-animate` attribute since it's a CSS animation)
-- `aa-ease` - Height animation easing (also requires `aa-animate` attribute since it's a CSS animation)
-- `aa-delay` - Delay before inner animations start (default: 0.3)
+- `aa-accordion-visual=ID` - Marks connected visual content element
+- `aa-accordion-initial` - On load, activates this toggle and opens content
 
-**Visual Element Attributes:**
-- `aa-accordion-visual=ID` - Marks the visual content element
-- `aa-delay` - Delay before inner animations start (default: 0.3)
+**Progress Indicators (Autoplay):**
+- `aa-accordion-progress` - Progress indicator type: `width`, `height`, `circle`
 
-**Inner Animation Attributes:**
-Inside of **content** and **visual**, elements can be animated as well
-- `aa-accordion-animate` - Animation type for inner elements
-- `aa-accordion-order` - Animation sequence order (e.g., "0", "1", "1-30"), second number defines the percentage of the previous animation at which this animation should trigger
-- `aa-duration` - Animation duration (default: 0.2)
-- `aa-ease` - Animation easing (default: "power4.out")
-- `aa-distance` - Distance for complex animations (default: 1)
-- `aa-split` - Text splitting method for text animations ("lines", "words", "chars")
-- `aa-stagger` - Stagger delay for text animations (default: 0.01)
+#### Available Inner Animations
 
-#### Basic Setup
+**Simple Animations:**
+- **Fade**: `fade`, `fade-up`, `fade-down`, `fade-left`, `fade-right`
+- **Slide**: `slide-up`, `slide-down`, `slide-left`, `slide-right`
+- **Scale**: `scale`
 
+**Complex Animations (requires GSAP plugins):**
+- **Appear**: All [Appear animations](#14-appear-animations) available
+- **Reveal**: All [Appear animations](#14-appear-animations) available (reveal variants)
+- **Counter**: All [Appear animations](#14-appear-animations) available (counter variants)
+
+**Text Animations (requires splitText plugin):**
+- **Text Animations**: All [Text animations](#13-text-animations) available
+
+**Custom Animations:**
+Use `custom-*` to animate from CSS-defined positions to zero:
+```css
+[aa-accordion-animate="custom-slide"] {
+  transform: translateX(500px);
+}
+```
+
+**Attributes & Defaults:**
+| Attribute | Values | Default | Description |
+|-----------|--------|---------|-------------|
+| `aa-animate` | Accordion type | - | Accordion behavior |
+| `aa-duration` | Number (seconds) | `5` (autoplay), `0.2` (inner) | Duration |
+| `aa-ease` | Easing function | `power4.out` | Animation easing |
+| `aa-delay` | Number (seconds) | `0.3` | Delay before inner animations |
+| `aa-accordion-toggle` | ID | - | Toggle element |
+| `aa-accordion-content` | ID | - | Content element |
+| `aa-accordion-visual` | ID | - | Connected visual |
+| `aa-accordion-initial` | - | - | Initially open |
+| `aa-accordion-animate` | Animation type | - | Inner animation |
+| `aa-accordion-order` | Number or `number-percent` | `0` | Animation sequence |
+| `aa-accordion-progress` | `width`, `height`, `circle` | - | Progress type |
+| `aa-split` | `words`, `chars`, `lines` | - | Text splitting method |
+| `aa-stagger` | Number (seconds) | `0.01` | Text stagger delay |
+| `aa-distance` | Number | `1` | Distance for complex animations |
+
+**Examples:**
+
+#### Basic Accordion
 ```html
 <div aa-animate="accordion">
-  <div aa-accordion-toggle="item-1">
+  <div aa-accordion-toggle="item-1" aa-accordion-initial>
     <h3>Accordion Item 1</h3>
   </div>
   <div aa-accordion-content="item-1" aa-animate>
@@ -792,10 +887,7 @@ Inside of **content** and **visual**, elements can be animated as well
 </div>
 ```
 
-#### Autoplay Accordion
-
-Automatically cycle through accordion items with progress indicators:
-
+#### Autoplay with Progress
 ```html
 <div aa-animate="accordion-autoplay" aa-duration="5">
   <div aa-accordion-toggle="autoplay-1">
@@ -811,27 +903,10 @@ Automatically cycle through accordion items with progress indicators:
       </div>
     </div>
   </div>
-  
-  <div aa-accordion-toggle="autoplay-2">
-    <h3>Autoplay Item 2</h3>
-    <div aa-accordion-progress="width"></div>
-  </div>
-  <div aa-accordion-content="autoplay-2" aa-animate aa-duration="0.5" aa-ease="power2.inOut">
-    <div class="content-inner">
-      <div class="content-wrapper">
-        <div aa-accordion-animate="appear" aa-accordion-order="0">
-          <p>Content for autoplay item 2</p>
-        </div>
-      </div>
-    </div>
-  </div>
 </div>
 ```
 
 #### Connected Visual Elements
-
-Link accordion content to visual elements that animate alongside:
-
 ```html
 <div aa-animate="accordion">
   <div aa-accordion-toggle="visual-1" aa-accordion-initial>
@@ -847,60 +922,59 @@ Link accordion content to visual elements that animate alongside:
     </div>
   </div>
   
-  <div aa-accordion-toggle="visual-2">
-    <h3>Visual Item 2</h3>
-  </div>
-  <div aa-accordion-content="visual-2" aa-delay="0.5">
-    <div class="content-inner">
-      <div class="content-wrapper">
-        <div aa-accordion-animate="text-slide-up" aa-accordion-order="0" aa-split="words">
-          <p>This controls another visual</p>
-        </div>
-      </div>
-    </div>
-  </div>
-
-
   <!-- Connected visual elements -->
   <div class="visual-container">
     <div aa-accordion-visual="visual-1" aa-accordion-animate="fade-left" aa-duration="0.4" aa-delay="0.2">
       <span>Visual 1</span>
     </div>
-    <div aa-accordion-visual="visual-2" aa-accordion-animate="fade-left" aa-duration="0.4" aa-delay="0.6">
-      <span>Visual 2</span>
+  </div>
+</div>
+```
+
+#### Circular Progress
+```html
+<div aa-animate="accordion-autoplay" aa-duration="3">
+  <div aa-accordion-toggle="circle-1">
+    <div>
+      <span>Circular Progress Item</span>
+      <div class="autoplay-progress circular-progress">
+        <svg width="60" height="60" viewBox="0 0 60 60">
+          <circle cx="30" cy="30" r="25" fill="none" stroke="#e0e0e0" stroke-width="4"/>
+          <circle cx="30" cy="30" r="25" fill="none" stroke="#007bff" stroke-width="4" 
+                  stroke-linecap="round" aa-accordion-progress="circle" aa-ease="power2.out"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+  <div aa-accordion-content="circle-1">
+    <div class="content-inner">
+      <div class="content-wrapper">
+        <div aa-accordion-animate="text-slide-up" aa-accordion-order="0" aa-split="words">
+          <p>This uses a circular progress indicator.</p>
+        </div>
+      </div>
     </div>
   </div>
 </div>
 ```
 
-#### Circle Progress
+#### Required CSS Structure
 
-```html
-<div class="autoplay-accordion" aa-animate="accordion-autoplay" aa-duration="3">
-    <div class="autoplay-toggle" aa-accordion-toggle="circle-1">
-        <div>
-            <span>Circular Progress Item</span>
-            <div class="autoplay-progress circular-progress">
-                <svg width="60" height="60" viewBox="0 0 60 60">
-                    <circle cx="30" cy="30" r="25" fill="none" stroke="#e0e0e0" stroke-width="4"/>
-                    <circle cx="30" cy="30" r="25" fill="none" stroke="#007bff" stroke-width="4" stroke-linecap="round" aa-accordion-progress="circle" aa-ease="power2.out"/>
-                </svg>
-            </div>
-        </div>
-        <span>▼</span>
-    </div>
-    <div class="autoplay-content" aa-accordion-content="circle-1">
-        <div class="autoplay-content-inner">
-            <div class="autoplay-content-wrapper">
-                <div aa-accordion-animate="text-slide-up-lines" aa-accordion-order="0" aa-split="words">
-                    <p>This uses a circular progress indicator instead of a bar.</p>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+**Content Structure:**
+```css
+.content-inner {
+  height: 100000%;
+  display: flex;
+  position: relative;
+  overflow: hidden;
+}
+
+.content-wrapper {
+  /* Contains actual content and provides padding */
+}
 ```
 
+**Circular Progress:**
 ```css
 [aa-accordion-progress="circle"] {
   stroke-dasharray: 10000;
@@ -911,53 +985,16 @@ Link accordion content to visual elements that animate alongside:
 }
 ```
 
-**Note:** The accordion content structure requires specific CSS classes to work properly:
-- `.content-inner` - Required for the accordion animation system, needs:
-  ```css
-  height: 100000%;
-  display: flex;
-  position: relative;
-  overflow: hidden;
-  ```
-- `.content-wrapper` - Contains the actual content and provides padding for the content that is revealed
-
-These wrapper divs ensure proper height calculations and smooth animations.
-
-#### Available Inner Animations
-
-**Simple Animations:**
-- Fade: `fade`, `fade-up`, `fade-down`, `fade-left`, `fade-right`
-- Slide: `slide-up`, `slide-down`, `slide-left`, `slide-right`
-- Scale: `scale`
-
-**Complex Animations (requires GSAP plugins):**
-- Appear: `appear`, `appear-up`, `appear-down`, `appear-left`, `appear-right`
-- Reveal: `reveal`, `reveal-up`, `reveal-down`, `reveal-left`, `reveal-right`
-- Counter: `counter`
-
-**Text Animations (requires splitText plugin):**
-- Text Slide: `text-slide-up`, `text-slide-down`, `text-slide-left`, `text-slide-right`
-- Text Appear: `text-appear`, `text-appear-up`, `text-appear-down`
-- Text Reveal: `text-reveal`, `text-reveal-up`, `text-reveal-down`
-
-**Custom Animations:**
-Use `custom-*` (e.g., `custom-slide`) to animate from CSS-defined positions to zero:
-```css
-[aa-accordion-animate="custom-slide"] {
-  transform: translateX(500px);
-}
-```
-
 #### Accessibility Features
 
-- **Keyboard Navigation:** Tab to focus, Enter/Space to toggle
-- **ARIA Attributes:** Automatic `aria-expanded`, `aria-controls`, `aria-labelledby`
-- **Screen Reader Support:** Proper announcements and state changes
-- **Focus Management:** Maintains focus during interactions
+- **Keyboard Navigation**: Tab to focus, Enter/Space to toggle
+- **ARIA Attributes**: Automatic `aria-expanded`, `aria-controls`, `aria-labelledby`
+- **Screen Reader Support**: Proper announcements and state changes
+- **Focus Management**: Maintains focus during interactions
 
 #### CSS Targeting
 
-Use the status attributes for styling (added to toggles, content and visual):
+Use status attributes for styling:
 ```css
 [aa-accordion-status="active"] {
   /* Active styles */
@@ -968,299 +1005,542 @@ Use the status attributes for styling (added to toggles, content and visual):
 }
 ```
 
+---
 
-### Modal Animations
-(`gsapFeatures: ['modal']`)
+### 3.3 Marquee
 
-AlrdyAnimate supports accessible, attribute-driven modals that work seamlessly with or without smooth scrolling (Lenis).
+Scrolling text and content animations.
 
-#### Basic Setup
+**Setup:** `gsapFeatures: ['scroll']`
 
-- **Trigger:** Use `aa-modal-target="unique-modal-name"` on any element that should open a modal.
-- **Modal Setup:**
-  - Wrap all your modals in a container with `aa-modal-group` (if you have multiple groups, add a unique identifier each)
-  - Each modal must have a unique `aa-modal-name="unique-modal-name"` attribute
-  - Any element inside the modal with `aa-modal-close` will close the modal when clicked (e.g., a close button or the backdrop).
-  - Apply `data-lenis-prevent` to the content div inside a modal to allow it to scroll
+**Available Types:**
+- **Basic**: `marquee-left`, `marquee-right`
+- **Interactive**: `marquee-[direction]-hover`, `marquee-[direction]-switch`
+- **Paused**: `marquee-[direction]-paused` (scroll-driven only)
 
-#### Modal Animations
-Add animations to your modals using these attributes:
+**Attributes & Defaults:**
+| Attribute | Values | Default | Description |
+|-----------|--------|---------|-------------|
+| `aa-animate` | Marquee type | - | Marquee animation |
+| `aa-duration` | Number (seconds) | `15` | Animation duration |
+| `aa-marquee-scroller` | Number | `0` | Scroll speed multiplier |
+| `aa-marquee-items` | Number | `2` | Number of duplicates |
+| `aa-scrub` | `true`, number | - | Scroll-driven (for paused) |
 
-- `aa-modal-animate`: Add to any element in the modal to animate it. Available animations:
-  - Fade: `fade`, `fade-up`, `fade-down`, `fade-left`, `fade-right`
-  - Slide: `slide-up`, `slide-down`, `slide-left`, `slide-right`
-  - Scale: `scale`
-  - Custom: Use `custom-*` (e.g., `custom-slide`) to animate from CSS-defined positions to zero
-    ```css
-    [aa-modal-animate="custom-slide"] {
-      transform: translateX(500px);
-    }
-    ```
-
-- `aa-modal-order`: Control animation sequence
-  - Basic order: `aa-modal-order="1"` (elements animate in numeric order)
-  - Start later: `aa-modal-order="1-30"` (second number sets the percentage of the previous animation as a start for this animation, e.g. start this animation after 30% of previous animation)
-
-- `aa-duration`: Set custom duration in seconds (default: 0.5)
-- `aa-ease`: Set custom easing (default: "power2.out")
-
-#### Example
-
+**Examples:**
 ```html
-<!-- Trigger -->
-<button aa-modal-target="my-modal">Open Modal</button>
+<!-- Basic marquee -->
+<div aa-animate="marquee-left" aa-duration="20">
+  <div aa-marquee-scroller="10">
+    <div aa-marquee-items="3">
+      <div class="item">Text 1</div>
+      <div class="item">Text 2</div>
+    </div>
+  </div>
+</div>
 
-<!-- Modal Group -->
-<div aa-modal-group>
-  <div aa-modal-name="my-modal" class="modal">
-    <div class="modal-content" data-lenis-prevent>
-      <button aa-modal-close>Close</button>
-      
-      <h2 aa-modal-animate="fade-up" aa-modal-order="0">Modal Title</h2>
-      <p aa-modal-animate="fade" aa-modal-order="1">Modal content with animations</p>
-      <div aa-modal-animate="scale" aa-modal-order="2">
-        <img src="image.jpg" alt="Modal image">
-      </div>
+<!-- Interactive marquee -->
+<div aa-animate="marquee-right-hover-switch" aa-duration="15">
+  <div aa-marquee-scroller="5">
+    <div aa-marquee-items="4">
+      <div class="item">Hover slows, scroll changes direction</div>
     </div>
   </div>
 </div>
 ```
 
+---
 
-## Smooth Scrolling (Lenis)
+### 3.4 Modal
 
-AlrdyAnimate includes optional smooth scrolling powered by Lenis. To enable it, add the `smoothScroll` option to your initialization:
+Accessible, attribute-driven modals that work seamlessly with or without smooth scrolling (Lenis).
 
-```javascript
-AlrdyAnimate.init({
-  gsapFeatures: ['scroll', 'text'], // your features
-  smoothScroll: {
-    enabled: true,
-    options: {
-      lerp: 0.12,           // Lower = smoother scrolling
-      wheelMultiplier: 1,   // Adjust scroll speed (default = 1)
-      touchMultiplier: 2,   // Adjust touch speed (default = 2)
-      smoothWheel: true     // Enable smooth scrolling on mouse wheel
-    }
-  }
-});
-```
+**Setup:** `gsapFeatures: ['modal']` and `modals: true`
 
-### Configuration Options
+#### Basic Structure
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `lerp` | number | 0.12 | Controls smoothness (0.01 to 1) |
-| `wheelMultiplier` | number | 1 | Mouse wheel scroll speed |
-| `touchMultiplier` | number | 2 | Touch/trackpad scroll speed |
-| `smoothWheel` | boolean | true | Enable wheel smoothing |
-| `infinite` | boolean | false | Enable infinite scrolling |
+- **Trigger**: Use `aa-modal-target="unique-modal-name"` on any element that should open a modal
+- **Modal Container**: Wrap all modals in a container with `aa-modal-group` (add unique identifier for multiple groups)
+- **Modal Element**: Each modal needs a unique `aa-modal-name="unique-modal-name"` attribute  
+- **Close Elements**: Any element with `aa-modal-close` will close the modal when clicked (buttons, backdrop, etc.)
+- **Scrollable Content**: Apply `data-lenis-prevent` to content areas that need independent scrolling
 
-### Scroll To
-The Scroll To feature allows you to create smooth scrolling animations to specific elements on your page. 
+#### Available Animations
 
-When using scroll-to functionality, AlrdyAnimate automatically tracks which sections are in view and adds the `is-current` class to the corresponding navigation elements (triggered at 50% of the viewport). This works similarly to Webflow's default anchor link behavior.
+**Simple Animations:**
+- **Fade**: `fade`, `fade-up`, `fade-down`, `fade-left`, `fade-right`
+- **Slide**: `slide-up`, `slide-down`, `slide-left`, `slide-right`
+- **Scale**: `scale`
 
-- Add  `aa-scroll-target` attribute to any clickable element (like buttons or links) and include the ID of the target section, e.g. `aa-scroll-target="#my-section"`
-- Customize the scroll behavior with these optional attributes:
-   - `aa-duration`: Animation duration in seconds (default: 1.2)
-   - `aa-distance`: Offset distance in pixels (default: 0)
+**Complex Animations (requires GSAP plugins):**
+- **Appear**: All [Appear animations](#14-appear-animations) available
+- **Reveal**: All [Appear animations](#14-appear-animations) available (reveal variants)
+- **Counter**: All [Appear animations](#14-appear-animations) available (counter variants)
 
+**Text Animations (requires splitText plugin):**
+- **Text Animations**: All [Text animations](#13-text-animations) available
 
-
-### Important Considerations
-
-#### Modals and Popups
-To prevent smooth scrolling within modals or other scrollable elements:
-
-```html
-<!-- Add data-lenis-prevent attribute -->
-<div class="modal" data-lenis-prevent>
-  <!-- Modal content -->
-</div>
-```
-
-#### Stop/Start Scrolling
-To disable scrolling (e.g., when opening a modal):
-
-```javascript
-// Stop scrolling
-window.lenis.stop();
-
-// Resume scrolling
-window.lenis.start();
-```
-
-#### Nested Scrolling Elements
-For elements that need their own native scrolling (like carousels or code editors):
-
-```html
-<!-- Add data-lenis-prevent to keep native scrolling -->
-<div class="scrollable-element" data-lenis-prevent>
-  <!-- Scrollable content -->
-</div>
-```
-
-### Browser Support
-Lenis works in all modern browsers. For older browsers, it gracefully falls back to native scrolling.
-
-### GSAP Integration
-When enabled, Lenis automatically integrates with GSAP ScrollTrigger animations. No additional configuration is needed for your existing GSAP animations to work with smooth scrolling.
-
-### Performance Tips
-- Use `data-lenis-prevent` on heavy scroll containers
-- Adjust `lerp` value for balance between smoothness and performance
-- Consider increasing `wheelMultiplier` on longer pages
-- Use `immediate: true` with `scrollTo` for instant jumps
-
-### Troubleshooting
-If animations feel out of sync:
-1. Ensure ScrollTrigger is properly initialized
-2. Check for conflicting scroll libraries
-3. Try adjusting the `lerp` value
-4. Verify `data-lenis-prevent` on appropriate elements
-
-## Easing Functions
-
-AlrdyAnimate supports a variety of easing functions for both CSS and GSAP animations. Here's a quick reference:
-
-### Standard Easings
-- `linear`: No easing, no acceleration
-- `ease`: Slight acceleration at the beginning, then deceleration (default CSS easing)
-- `ease-in`: Gradual acceleration from zero velocity
-- `ease-out`: Gradual deceleration to zero velocity
-- `ease-in-out`: Acceleration until halfway, then deceleration
-
-### Power Easings (GSAP style)
-- `power1.in`, `power1.out`, `power1.inOut`: Subtle easing (equivalent to Quad)
-- `power2.in`, `power2.out`, `power2.inOut`: Moderate easing (equivalent to Cubic)
-- `power3.in`, `power3.out`, `power3.inOut`: Strong easing (equivalent to Quart)
-- `power4.in`, `power4.out`, `power4.inOut`: More pronounced easing (equivalent to Quint)
-
-### Specific Named Easings
-- `back.in`, `back.out`, `back.inOut`: Slightly overshoots, then returns
-- `circ.in`, `circ.out`, `circ.inOut`: Circular motion feel
-- `expo.in`, `expo.out`, `expo.inOut`: Exponential acceleration or deceleration
-- `sine.in`, `sine.out`, `sine.inOut`: Sinusoidal easing, smooth and gentle
-
-### Easing Suffixes
-- `.in`: Easing starts slowly and accelerates
-- `.out`: Easing starts quickly and decelerates
-- `.inOut`: Easing starts slowly, accelerates in the middle, then decelerates
-
-Note: 'Elastic' and 'Bounce' easings are available when using GSAP but not for CSS animations.
-
-Usage example:
-```html
-<div aa-animate="fade-up" aa-ease="back.out">Animated content</div>
-```
-
-This will apply a fade-up animation with a 'back out' easing, which means it will slightly overshoot and then settle into place.
-
-
-## Setting attributes via JavaScript
-
-If you'd like to set the same animation on a certain class or element, you can do so via JavaScript:
-
-```javascript
-document.addEventListener('DOMContentLoaded', function() {
-  document.querySelectorAll('h1').forEach((element) => {       //or querySelectorAll('.my-class')
-    if (!element.hasAttribute('aa-animate')) {
-      element.setAttribute('aa-animate', 'text-tilt-up');
-      element.setAttribute('aa-split', 'words'); 
-      element.setAttribute('aa-duration', '0.5');  
-    }
-  });
-  
-  AlrdyAnimate.init({
-    easing: 'power1.out',
-    again: true,
-    useGSAP: true  
-  });
-});
-```
-
-If you want a page refresh to always start from the top, you can add this script to the head tag, so it runs before the page loads:
-```javascript
-if ('scrollRestoration' in history) {
-  history.scrollRestoration = 'manual';
+**Custom Animations:**
+Use `custom-*` to animate from CSS-defined positions to zero:
+```css
+[aa-modal-animate="custom-slide"] {
+  transform: translateX(500px);
 }
-window.scrollTo(0, 0);
 ```
 
-## Templates
+**Attributes & Defaults:**
+| Attribute | Values | Default | Description |
+|-----------|--------|---------|-------------|
+| `aa-modal-group` | Optional ID | - | Modal container (for multiple groups) |
+| `aa-modal-target` | Modal name | - | Opens specified modal |
+| `aa-modal-name` | Unique name | - | Modal identifier |
+| `aa-modal-close` | - | - | Closes modal when clicked |
+| `aa-modal-animate` | Animation type | - | Element animation |
+| `aa-modal-order` | Number or `number-percent` | `0` | Animation sequence |
+| `aa-duration` | Number (seconds) | `0.5` | Animation duration |
+| `aa-ease` | Easing function | `power2.out` | Animation easing |
 
-AlrdyAnimate supports class-based animation templates, allowing you to define animations for specific classes without adding attributes to each element. This is particularly useful for consistent animations across multiple elements.
+#### Animation Sequencing
 
-### Basic Usage
+- **Basic order**: `aa-modal-order="1"` (elements animate in numeric order)
+- **Overlapping**: `aa-modal-order="1-30"` (starts at 30% of previous animation)
 
-1. Define your templates in the init options:
+**Examples:**
+```html
+<!-- Trigger -->
+<button aa-modal-target="example-modal">Open Modal</button>
+
+<!-- Modal system -->
+<div aa-modal-group>
+  <div aa-modal-name="example-modal" class="modal">
+    <!-- Backdrop closes modal -->
+    <div class="modal-backdrop" aa-modal-close></div>
+    
+    <!-- Content with independent scrolling -->
+    <div class="modal-content" data-lenis-prevent>
+      <button aa-modal-close class="close-btn">×</button>
+      
+      <!-- Animated content -->
+      <h2 aa-modal-animate="fade-up" aa-modal-order="0">Modal Title</h2>
+      <p aa-modal-animate="fade" aa-modal-order="1">Modal content with animations</p>
+      <div aa-modal-animate="scale" aa-modal-order="2">
+        <img src="image.jpg" alt="Modal image">
+      </div>
+      
+      <!-- Text animation -->
+      <p aa-modal-animate="text-slide-up" aa-modal-order="1-50" aa-split="words">
+        Text with word-by-word animation
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- Multiple modal groups -->
+<div aa-modal-group="gallery">
+  <div aa-modal-name="image-1" class="modal">
+    <div class="modal-content" data-lenis-prevent>
+      <!-- Gallery modal content -->
+    </div>
+  </div>
+</div>
+```
+
+#### Important Notes
+
+- **Lenis Integration**: Use `data-lenis-prevent` on modal content to allow independent scrolling
+- **Accessibility**: Built-in keyboard navigation (Escape to close) and focus management
+- **Multiple Groups**: Use `aa-modal-group="group-name"` for organizing different modal groups
+- **Custom Animations**: Define starting positions in CSS for `custom-*` animations
+
+---
+
+### 3.5 Navigation
+
+Scroll-responsive navigation with animations.
+
+**Setup:** `gsapFeatures: ['nav']`
+
+**Available Types:**
+- **Hide**: `hide` (hide on scroll down, show on scroll up)
+- **Change**: `change` (adds `is-scrolled` class after threshold)
+- **Combined**: `hide-change` (both effects)
+- **Threshold**: Add number for pixel threshold when to trigger `change` effect (e.g., `change-100`, `hide-change-50`); defaults to 100px
+
+**Attributes & Defaults:**
+| Attribute | Values | Default | Description |
+|-----------|--------|---------|-------------|
+| `aa-nav` | Navigation type | - | Navigation behavior |
+| `aa-duration` | Number (seconds) | `0.4` | Animation duration |
+| `aa-ease` | Easing function | `back.inOut` | Animation easing |
+| `aa-distance` | Number | `1` | Movement multiplier |
+
+**Examples:**
+```html
+<!-- Hide/show navigation -->
+<nav aa-nav="hide" aa-duration="0.4" aa-ease="back.inOut" style="position: fixed;">
+  Navigation content
+</nav>
+
+<!-- Class change navigation -->
+<nav aa-nav="change-100" style="position: fixed;">
+  Adds 'is-scrolled' class after 100px scroll
+</nav>
+
+<!-- Combined effects -->
+<nav aa-nav="hide-change-50" aa-distance="2" style="position: fixed;">
+  Hide/show + 'is-scrolled' class after 50px
+</nav>
+
+<!-- Default threshold -->
+<nav aa-nav="change" style="position: fixed;">
+  Adds 'is-scrolled' class after 100px scroll (default)
+</nav>
+```
+
+---
+
+## Advanced Features
+
+### Template System
+Define animations for CSS classes instead of individual elements.
+
 ```javascript
 AlrdyAnimate.init({
   templates: {
-    theme: 'floaty',  // Use a predefined theme
-    custom: {         // Add custom class animations
-      'my-headline': {
-        animationType: 'text-slide-up',
-        split: 'words',
-        ease: 'power2.out',
+    theme: 'blur', // Use predefined theme
+    custom: {
+      'hero-title': {
+        animationType: 'text-slide-up-clip',
+        split: 'lines',
+        stagger: 0.1,
         duration: 0.8,
-        stagger: 0.05
+        ease: 'back.out'
+      },
+      'card-item': {
+        animationType: 'fade-up',
+        duration: 0.6,
+        delay: 0.2
       }
     }
   }
 });
 ```
 
-2. Add the corresponding classes to your HTML elements:
 ```html
-<h1 class="my-headline">This will animate automatically</h1>
+<!-- No attributes needed - animations applied by class -->
+<h1 class="hero-title">Automatically animated</h1>
+<div class="card-item">Also animated</div>
 ```
 
-### Predefined Themes
+**Available Themes:**
+- `blur` - Blur-based text animations
+- `tilt` - Tilt and slide animations
 
-AlrdyAnimate comes with predefined themes that you can use:
-- `floaty`: Smooth, floating animations
-- `bouncy`: Playful, bouncy animations
-
-### Template Settings
-
-Each template can include any animation settings that you would normally set via attributes:
-- `animationType`: The type of animation (e.g., 'text-slide-up', 'fade-up')
-- `split`: How to split text ('words', 'chars', 'lines')
-- `ease`: Easing function
-- `duration`: Animation duration
-- `delay`: Animation delay
-- `stagger`: Stagger timing for split text
-- `distance`: Animation distance multiplier
-
-### Mobile/Desktop Variants
-
-You can define different animations for mobile and desktop using the `|` separator:
+### Smooth Scrolling (Lenis)
 ```javascript
-templates: {
-  custom: {
-    '.my-headline': {
-      animationType: 'text-slide-up|text-slide-down',  // desktop|mobile
-      split: 'words'
+AlrdyAnimate.init({
+  smoothScroll: {
+    enabled: true,
+    options: {
+      lerp: 0.12,        // Smoothness (0.01-1)
+      wheelMultiplier: 1, // Mouse wheel speed
+      touchMultiplier: 2, // Touch scroll speed
+      smoothWheel: true   // Enable smooth wheel
     }
   }
+});
+```
+
+#### Navigation Tracking with `is-current`
+
+When using scroll-to functionality with Lenis, AlrdyAnimate automatically tracks which sections are in view and adds the `is-current` class to corresponding navigation elements.
+
+```html
+<!-- Navigation links -->
+<nav>
+  <a href="#section1" aa-scroll-target="#section1">Section 1</a>
+  <a href="#section2" aa-scroll-target="#section2">Section 2</a>
+  <a href="#section3" aa-scroll-target="#section3">Section 3</a>
+</nav>
+
+<!-- Sections -->
+<section id="section1">Content 1</section>
+<section id="section2">Content 2</section>
+<section id="section3">Content 3</section>
+```
+
+**How it works:**
+- Triggers when section reaches 50% of viewport
+- Automatically adds `is-current` class to corresponding nav link
+- Removes class when section leaves view
+
+**CSS Example:**
+```css
+nav a.is-current {
+  color: #007bff;
+  font-weight: bold;
 }
 ```
 
-### Priority
+#### Lenis Control & Features
 
-Template animations have lower priority than attribute-based animations. If an element has both a template class and animation attributes, the attributes will take precedence.
+**Prevent Smooth Scrolling:**
+```html
+<div data-lenis-prevent>
+  <!-- Native scrolling within this element -->
+</div>
+```
 
+**Programmatic Control:**
+```javascript
+// Stop/start scrolling
+window.lenis.stop();
+window.lenis.start();
+
+// Scroll to element
+window.lenis.scrollTo('#target', {
+  duration: 1.5,
+  easing: t => 1 - Math.pow(1 - t, 3)
+});
+```
+
+### CSS Animation Playstate Control
+
+Control CSS animation playback based on element visibility.
+
+```html
+<!-- Pause/play animations based on visibility -->
+<div aa-toggle-playstate>
+  <div class="play-icon-pulse">Child 1</div>
+  <div class="play-icon-blink">Child 2</div>
+</div>
+```
+
+**How it works:**
+- Adds `aa-toggle-playstate` to parent element
+- All first-level children with animations will be controlled
+- `animation-play-state: running` when parent is in view
+- `animation-play-state: paused` when parent is out of view
+- Only affects CSS animations (not GSAP animations)
+
+### Mobile Responsive Features
+
+AlrdyAnimate provides comprehensive mobile support with automatic detection and responsive behavior.
+
+#### Mobile Detection
+- **Breakpoint**: `768px` (mobile = `< 768px`)
+- **Automatic**: Detects on initialization and window resize
+- **Rebuilds**: Animations automatically rebuild when crossing breakpoint
+
+#### Mobile Variants (Desktop|Mobile)
+
+Use the `|` separator to define different values for desktop and mobile, available for `aa-animate` and `aa-scroll-start/end`:
+
+**Animation Types:**
+```html
+<!-- Different animations for desktop vs mobile -->
+<div aa-animate="text-slide-up|fade-up">
+  Desktop: text slides up, Mobile: simple fade up
+</div>
+
+<div aa-animate="zoom-in-left|slide-up">
+  Desktop: zoom with slide, Mobile: slide only
+</div>
+```
+
+**Scroll Positioning:**
+```html
+<!-- Different scroll triggers -->
+<div aa-animate="fade-up" 
+     aa-scroll-start="top 80%|top 60%"
+     aa-scroll-end="bottom 70%|bottom 50%">
+  Desktop: 80%/70%, Mobile: 60%/50%
+</div>
+
+<!-- Center positioning variants -->
+<div aa-animate="parallax" 
+     aa-scroll-start="center center|top bottom">
+  Desktop: center trigger, Mobile: top trigger
+</div>
+```
+
+**Mobile Delay Override:**
+```html
+<!-- Use aa-delay-mobile to override delay on mobile only -->
+<div aa-animate="slide-up" 
+     aa-delay="0.8" 
+     aa-delay-mobile="0.3">
+  Desktop: 0.8s delay, Mobile: 0.3s delay
+</div>
+
+<!-- Disable delay on mobile -->
+<div aa-animate="fade-up" 
+     aa-delay="0.5" 
+     aa-delay-mobile="0">
+  Desktop: 0.5s delay, Mobile: no delay
+</div>
+```
+
+### Performance Features
+
+#### Lazy Loading Handler
+```javascript
+AlrdyAnimate.init({
+  lazyLoadHandler: true // Optimizes images and ScrollTrigger
+});
+```
+
+#### Resize Optimization
+Automatic handling of window resize events for optimal performance.
+
+#### Animation Cleanup
+Automatic cleanup of animations and ScrollTriggers when elements are removed.
+
+---
+
+## Configuration Reference
+
+### Initialization Options
+
+```javascript
+AlrdyAnimate.init({
+  // Animation defaults
+  duration: 1,              // Default animation duration (seconds)
+  delay: 0,                 // Default animation delay (seconds)
+  ease: "ease-in-out",      // Default easing function
+  distance: 1,              // Distance multiplier for animations
+  again: true,              // Remove 'in-view' when out of view
+  
+  // Scroll positioning
+  scrollStart: "top 80%",   // Default scroll start position
+  scrollEnd: "bottom 70%",  // Default scroll end position
+  
+  // Hover animations
+  hoverDuration: 0.3,       // Hover animation duration
+  hoverDelay: 0,            // Hover animation delay
+  hoverEase: "power3.out",  // Hover easing function
+  hoverDistance: 0.1,       // Hover distance multiplier
+  
+  // Feature enabling
+  gsapFeatures: [],         // GSAP features to load
+  modals: false,            // Enable modal system
+  lazyLoadHandler: false,   // Enable lazy loading optimization
+  debug: false,             // Show GSAP debug markers
+  
+  // Advanced options
+  includeGSAP: false,       // Include GSAP in bundle vs use Webflow's
+  initTimeout: 3000,        // Initialization timeout (ms)
+  
+  // Smooth scrolling
+  smoothScroll: {
+    enabled: false,
+    options: {
+      lerp: 0.12,
+      wheelMultiplier: 1,
+      touchMultiplier: 2,
+      smoothWheel: true
+    }
+  },
+  
+  // Template system
+  templates: {
+    theme: null,            // Predefined theme name
+    custom: {}              // Custom class animations
+  }
+});
+```
+
+### Common Attributes Reference
+
+| Attribute | Values | Description |
+|-----------|--------|-------------|
+| `aa-animate` | Animation name | Primary animation type |
+| `aa-duration` | Number (seconds) | Animation duration |
+| `aa-delay` | Number (seconds) | Animation delay |
+| `aa-delay-mobile` | Number (seconds) | Mobile-specific delay override |
+| `aa-ease` | Easing function | Animation easing |
+| `aa-distance` | Number | Distance multiplier |
+| `aa-scroll-start` | ScrollTrigger position | When animation starts |
+| `aa-scroll-end` | ScrollTrigger position | When animation ends (for scrub) |
+| `aa-scrub` | `true` or Number | Scroll-driven animation |
+| `aa-children` | Animation name | Apply animation to all children |
+| `aa-stagger` | Number (seconds) | Stagger delay between children |
+| `aa-anchor` | CSS selector | Element that triggers this animation |
+| `aa-toggle-playstate` | - | Pause/play CSS animations based on visibility |
+
+### Text-Specific Attributes
+
+| Attribute | Values | Description |
+|-----------|--------|-------------|
+| `aa-split` | `words`, `chars`, `lines`, `lines&words` | Text splitting method |
+| `aa-stagger` | Number (seconds) | Delay between split elements |
+
+### Mobile/Desktop Variants
+Many attributes support mobile/desktop variants using the `|` separator:
+
+```html
+<div aa-animate="fade-up|slide-up" 
+     aa-duration="0.8|0.6" 
+     aa-delay="0.2|0.1">
+  Different animations for mobile vs desktop
+</div>
+```
+
+---
+
+## Performance & Accessibility
+
+### Performance Best Practices
+
+1. **Use CSS animations for simple effects** - Better performance than JavaScript
+2. **Enable lazy loading** - `lazyLoadHandler: true` for image optimization
+3. **Limit simultaneous animations** - Use staggering for multiple elements
+4. **Optimize scroll triggers** - Use appropriate `aa-scroll-start` values
+5. **Clean up on navigation** - Library handles this automatically
+
+### Accessibility Features
+
+1. **Reduced motion support** - Respects `prefers-reduced-motion`
+2. **Keyboard navigation** - Full keyboard support for interactive components
+3. **Screen reader friendly** - Proper ARIA attributes on components
+4. **Focus management** - Maintains focus during animations
+5. **Semantic HTML** - Works with any HTML structure
+
+### Browser Support
+
+- **Modern browsers**: Full feature support
+- **IE11+**: Basic CSS animations only
+- **Mobile**: Optimized for touch interactions
+- **Progressive enhancement**: Graceful fallbacks
+
+---
 
 ## Contributing
 
-Contributions are welcome! Please fork the repository and submit pull requests for any improvements.
+We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
+
+### Development Setup
+```bash
+git clone https://github.com/ben-alrdy/alrdy-animate.git
+cd alrdy-animate
+npm install
+npm run dev
+```
+
+### Testing
+```bash
+npm run test
+npm run test:accessibility
+npm run test:performance
+```
+
+---
 
 ## License
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+MIT License - see [LICENSE](LICENSE) file for details.
 
 
+---
 
-
+*Made with ❤️ by the Alrdy team*

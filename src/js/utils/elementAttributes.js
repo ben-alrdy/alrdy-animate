@@ -1,3 +1,35 @@
+// Parse direction from hover type (e.g., "bg-circle-vertical" -> "vertical")
+function parseHoverDirection(hoverType) {
+  if (!hoverType) return null;
+  
+  // Handle multiple hover types separated by &
+  const types = hoverType.split('&');
+  
+  for (const type of types) {
+    // Only parse direction for background animations
+    if (type.startsWith('bg-')) {
+      const parts = type.split('-');
+      
+      // For bg-[type]-[direction] format
+      if (parts.length >= 3) {
+        const direction = parts.slice(2).join('-'); // Handle multi-part directions like "up-right"
+        
+        // Valid direction values
+        const validDirections = [
+          'all', 'vertical', 'horizontal', 'top', 'bottom', 'left', 'right',
+          'up', 'down', 'up-right', 'up-left', 'down-right', 'down-left'
+        ];
+        
+        if (validDirections.includes(direction)) {
+          return direction;
+        }
+      }
+    }
+  }
+  
+  return null;
+}
+
 export function getElementSettings(element, settings, isMobile) {
   // Handle mobile animations
   let animationType = element.getAttribute('aa-animate-original') || element.getAttribute('aa-animate');
@@ -52,7 +84,7 @@ export function getElementSettings(element, settings, isMobile) {
 
     // Hover properties
     hoverType,
-    hoverDirection: element.getAttribute('aa-hover-direction') || 'all',
+    hoverDirection: hoverType ? (parseHoverDirection(hoverType) || element.getAttribute('aa-hover-direction') || 'all') : 'all',
     isReverse: hoverType ? hoverType.includes('reverse') : false,
     hoverDuration: element.hasAttribute('aa-duration') ? parseFloat(element.getAttribute('aa-duration')) : settings.hoverDuration,
     hoverDelay: element.hasAttribute('aa-delay') ? parseFloat(element.getAttribute('aa-delay')) : settings.hoverDelay,
