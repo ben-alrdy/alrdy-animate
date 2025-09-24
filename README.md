@@ -517,8 +517,6 @@ Interactive hover effects with sophisticated animations and state management.
 
 ### Animation Types & Element Tags
 
-Hover animations require specific element tags to identify what should be animated:
-
 #### Text Animations
 **Available Animations:**
 - **Slide**: `text-slide-[direction]` where `[direction]` = `up`, `down`, `left`, `right`
