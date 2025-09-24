@@ -31,27 +31,8 @@ function parseHoverDirection(hoverType) {
 }
 
 export function getElementSettings(element, settings, isMobile) {
-  // Handle mobile animations
-  let animationType = element.getAttribute('aa-animate-original') || element.getAttribute('aa-animate');
-  if (animationType && animationType.includes('|')) {
-    // Store original value if not already stored
-    if (!element.hasAttribute('aa-animate-original')) {
-      element.setAttribute('aa-animate-original', animationType);
-    }
-    
-    const [desktopAnim, mobileAnim] = animationType.split('|');
-    animationType = isMobile ? mobileAnim : desktopAnim;
-    // Update the actual attribute for CSS animations
-    element.setAttribute('aa-animate', animationType);
-  }
-
-  const hoverType = element.getAttribute('aa-hover');
-  const anchorSelector = element.getAttribute("aa-anchor");
-  const anchorElement = anchorSelector ? document.querySelector(anchorSelector) : element;
-  const color = animationType?.includes('#') ? '#' + animationType.split('#')[1] : undefined;
-
-  // Parse scroll start/end attributes with mobile support
-  function parseScrollAttribute(attribute, defaultValue) {
+  // Parse attributes with mobile/desktop variants (desktop|mobile)
+  function parseResponsiveAttribute(attribute, defaultValue) {
     if (!attribute) return defaultValue;
     
     if (attribute.includes('|')) {
@@ -62,10 +43,34 @@ export function getElementSettings(element, settings, isMobile) {
     return attribute.trim();
   }
 
-  // Get scroll start/end values
-  const scrollStart = parseScrollAttribute(element.getAttribute('aa-scroll-start'),settings.scrollStart || 'top 80%');
+  // Handle mobile animations
+  const originalAnimationType = element.getAttribute('aa-animate-original') || element.getAttribute('aa-animate');
+  let animationType = originalAnimationType;
   
-  const scrollEnd = parseScrollAttribute(element.getAttribute('aa-scroll-end'), settings.scrollEnd || 'bottom 70%');
+  if (originalAnimationType && originalAnimationType.includes('|')) {
+    // Store original value if not already stored
+    if (!element.hasAttribute('aa-animate-original')) {
+      element.setAttribute('aa-animate-original', originalAnimationType);
+    }
+    
+    // Use the responsive parsing function
+    animationType = parseResponsiveAttribute(originalAnimationType, null);
+    // Update the actual attribute for CSS animations
+    element.setAttribute('aa-animate', animationType);
+  }
+
+  const hoverType = element.getAttribute('aa-hover');
+  
+  // Handle mobile slider variants
+  const sliderType = parseResponsiveAttribute(element.getAttribute('aa-slider'), null);
+  const anchorSelector = element.getAttribute("aa-anchor");
+  const anchorElement = anchorSelector ? document.querySelector(anchorSelector) : element;
+  const color = animationType?.includes('#') ? '#' + animationType.split('#')[1] : undefined;
+
+  // Get scroll start/end values
+  const scrollStart = parseResponsiveAttribute(element.getAttribute('aa-scroll-start'),settings.scrollStart || 'top 80%');
+  
+  const scrollEnd = parseResponsiveAttribute(element.getAttribute('aa-scroll-end'), settings.scrollEnd || 'bottom 70%');
 
   // Backward compatibility: convert aa-viewport to aa-scroll-start format
   let finalScrollStart = scrollStart;
@@ -92,6 +97,9 @@ export function getElementSettings(element, settings, isMobile) {
     hoverDistance: element.hasAttribute('aa-distance') ? parseFloat(element.getAttribute('aa-distance')) : settings.hoverDistance,
     hoverStagger: element.hasAttribute('aa-stagger') ? parseFloat(element.getAttribute('aa-stagger')) : 0.03,
     bg: element.querySelector('[aa-hover-bg]'),
+
+    // Slider properties
+    sliderType,
 
     // Animation timing
     duration: element.hasAttribute('aa-duration') ? parseFloat(element.getAttribute('aa-duration')) : settings.duration,

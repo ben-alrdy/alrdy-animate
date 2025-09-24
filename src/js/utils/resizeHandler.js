@@ -14,25 +14,36 @@ export function setupResizeHandler(modules, initOptions, isMobile, setupGSAPAnim
 
       // Cleanup existing animations
       if (modules.animations?.slider) {
-        modules.animations.cleanupLoops();
+        modules.animations.cleanupSliders();
       }
 
-      // Rebuild animations for elements that need updating
+      // Rebuild scroll animations for elements that need updating
       document.querySelectorAll("[aa-animate], [aa-animate-original]").forEach(element => {
         const animType = element.getAttribute('aa-animate');
         const animTypeOriginal = element.getAttribute('aa-animate-original');
         
-        // Rebuild if:
-        // 1. Has mobile/desktop variants (contains |)
-        // 2. Is a slider animation
-        if ((animType && (
-          animType.includes('|') || 
-          animType.includes('slider')
-        )) || animTypeOriginal) {
+        // Rebuild if has mobile/desktop variants (contains |)
+        if ((animType && animType.includes('|')) || animTypeOriginal) {
           // Get new settings with updated animation type
           const settings = getElementSettings(element, initOptions, isMobile);
           element.settings = settings;
           setupGSAPAnimations(element, settings, initOptions, isMobile, modules);
+        }
+      });
+
+      // Rebuild ALL slider components (since they all get cleaned up)
+      document.querySelectorAll("[aa-slider]").forEach(element => {
+        const sliderType = element.getAttribute('aa-slider');
+        
+        if (sliderType) {
+          // Get new settings with updated slider type
+          const settings = getElementSettings(element, initOptions, isMobile);
+          element.settings = settings;
+          
+          // Use the slider component setup function
+          if (modules.animations?.slider && settings.sliderType && settings.sliderType !== 'none') {
+            modules.animations.slider(element, settings.sliderType, settings.duration, settings.ease, settings.delay);
+          }
         }
       });
 

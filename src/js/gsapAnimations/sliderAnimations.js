@@ -1,5 +1,5 @@
 export function createSliderAnimations(gsap, Draggable) {
-  const activeLoops = new Set();
+  const activeSliders = new Set();
 
   function horizontalLoop(items, config) {
     /*
@@ -533,48 +533,48 @@ export function createSliderAnimations(gsap, Draggable) {
       isHovering: false
     };
 
-    // Create the loop configuration
+    // Create the slider configuration
     const config = setupSliderConfig(element, animationType, duration);
 
     // Add navigation controls if they exist
     setupNavigationControls(element, items, config);
 
-    // Initialize the loop based on direction
-    const loop = animationType.includes('vertical') 
+    // Initialize the slider based on direction
+    const slider = animationType.includes('vertical') 
       ? verticalLoop(items, config) 
       : horizontalLoop(items, config);
     
-    element._loop = loop;
-    activeLoops.add(element);
+    element._slider = slider;
+    activeSliders.add(element);
 
     // Setup navigation listeners
-    setupNavigationListeners(element, items, loop, duration, ease, config, animationType, sliderState);
+    setupNavigationListeners(element, items, slider, duration, ease, config, animationType, sliderState);
 
     // Setup autoplay if needed
     if (animationType.includes('snap')) {
-      setupAutoplay(element, loop, animationType, duration, ease, delay, sliderState);
+      setupAutoplay(element, slider, animationType, duration, ease, delay, sliderState);
     }
 
     // Setup drag functionality if needed
     if (animationType.includes('draggable')) {
-      setupDragHandlers(element, loop, animationType, sliderState);
+      setupDragHandlers(element, slider, animationType, sliderState);
     }
 
     // If it's a continuous loop animation
     if (animationType.includes('loop')) {
       // Create ScrollTrigger for visibility-based pausing
-      loop.scrollTrigger = ScrollTrigger.create({
+      slider.scrollTrigger = ScrollTrigger.create({
         trigger: element,
         start: "top bottom",
         end: "bottom top",
-        onEnter: () => loop.play(),
-        onLeave: () => loop.pause(),
-        onEnterBack: () => loop.play(),
-        onLeaveBack: () => loop.pause()
+        onEnter: () => slider.play(),
+        onLeave: () => slider.pause(),
+        onEnterBack: () => slider.play(),
+        onLeaveBack: () => slider.pause()
       });
     }
 
-    return loop;
+    return slider;
   }
 
   function setupSliderConfig(element, animationType, duration) {
@@ -616,7 +616,7 @@ export function createSliderAnimations(gsap, Draggable) {
     return config;
   }
 
-  function setupAutoplay(element, loop, animationType, duration, ease, delay, sliderState) {
+  function setupAutoplay(element, slider, animationType, duration, ease, delay, sliderState) {
     let autoplay;
     let progressAnimations = [];
     let isPausedByHover = false;
@@ -699,17 +699,17 @@ export function createSliderAnimations(gsap, Draggable) {
       if (!autoplay) {
         const repeat = () => {
           const direction = animationType.includes('reverse') ? 'previous' : 'next';
-          loop[direction]({ duration, ease });
+          slider[direction]({ duration, ease });
           
           // Update progress bars for the new active slide
-          const currentIndex = loop.current();
+          const currentIndex = slider.current();
           updateProgressBars(currentIndex);
           
           autoplay = gsap.delayedCall(delay, repeat);
         };
         
         // Start initial progress animation for current slide
-        const currentIndex = loop.current();
+        const currentIndex = slider.current();
         updateProgressBars(currentIndex);
         
         autoplay = gsap.delayedCall(delay, repeat);
@@ -746,14 +746,14 @@ export function createSliderAnimations(gsap, Draggable) {
     setupProgressAnimations();
 
     // Store functions for autoplay control
-    loop.startAutoplay = startAutoplay;
-    loop.stopAutoplay = stopAutoplay;
-    loop.pauseAutoplay = pauseAutoplay;
-    loop.resumeAutoplay = resumeAutoplay;
+    slider.startAutoplay = startAutoplay;
+    slider.stopAutoplay = stopAutoplay;
+    slider.pauseAutoplay = pauseAutoplay;
+    slider.resumeAutoplay = resumeAutoplay;
     
     // Store progress control functions
-    loop.updateProgressBars = updateProgressBars;
-    loop.resetAllProgressBars = resetAllProgressBars;
+    slider.updateProgressBars = updateProgressBars;
+    slider.resetAllProgressBars = resetAllProgressBars;
 
     // Setup hover handlers for non-touch devices
     if (!window.matchMedia('(hover: none)').matches) {
@@ -769,7 +769,7 @@ export function createSliderAnimations(gsap, Draggable) {
         if (isPausedByHover) {
           // We were paused by hover, so resume
           resumeAutoplay();
-        } else if (!autoplay && animationType.includes('snap') && !loop._isThrowing) {
+        } else if (!autoplay && animationType.includes('snap') && !slider._isThrowing) {
           // No autoplay exists (after navigation), start fresh
           // But only if we're not in the middle of dragging/inertia
           startAutoplay();
@@ -780,14 +780,14 @@ export function createSliderAnimations(gsap, Draggable) {
       element.addEventListener('mouseleave', handleMouseLeave);
       
       // Store cleanup function
-      loop._removeHoverListeners = () => {
+      slider._removeHoverListeners = () => {
         element.removeEventListener('mouseenter', handleMouseEnter);
         element.removeEventListener('mouseleave', handleMouseLeave);
       };
     }
 
     // Setup ScrollTrigger for visibility-based autoplay
-    loop.scrollTrigger = ScrollTrigger.create({
+    slider.scrollTrigger = ScrollTrigger.create({
       trigger: element,
       start: "top bottom",
       end: "bottom top",
@@ -798,14 +798,14 @@ export function createSliderAnimations(gsap, Draggable) {
     });
 
     // ScrollTrigger will handle starting/stopping autoplay based on visibility
-    loop.pause();
+    slider.pause();
   }
 
-  function setupDragHandlers(element, loop, animationType, sliderState) {
+  function setupDragHandlers(element, slider, animationType, sliderState) {
     const originalHandlers = {
-      onPressInit: loop.draggable.vars.onPressInit,
-      onRelease: loop.draggable.vars.onRelease,
-      onThrowComplete: loop.draggable.vars.onThrowComplete
+      onPressInit: slider.draggable.vars.onPressInit,
+      onRelease: slider.draggable.vars.onRelease,
+      onThrowComplete: slider.draggable.vars.onThrowComplete
     };
 
     if (animationType.includes('draggable')) {
@@ -818,17 +818,17 @@ export function createSliderAnimations(gsap, Draggable) {
 
         },
         onDragStart() {
-          loop.pause();
-          loop._isThrowing = true;
+          slider.pause();
+          slider._isThrowing = true;
           
           // Stop autoplay and reset progress when actual drag starts
-          if (loop.stopAutoplay) {
-            loop.stopAutoplay();
+          if (slider.stopAutoplay) {
+            slider.stopAutoplay();
           }
         },
         onDragEnd() {
           if (this.tween && this.tween.isActive()) {
-            loop._isThrowing = true;
+            slider._isThrowing = true;
           }
         },
         onThrowComplete() {
@@ -836,24 +836,24 @@ export function createSliderAnimations(gsap, Draggable) {
             originalHandlers.onThrowComplete.call(this);
           }
 
-          loop._isThrowing = false;
+          slider._isThrowing = false;
 
           // Restart autoplay after drag/inertia is complete
-          if (loop.startAutoplay && animationType.includes('snap')) {
+          if (slider.startAutoplay && animationType.includes('snap')) {
             // Only start autoplay if not hovering
             if (!sliderState.isHovering) {
-              loop.startAutoplay();
+              slider.startAutoplay();
             }
             // If hovering, autoplay will start when user hovers out
           } else if (animationType.includes('loop')) {
-            loop.play();
+            slider.play();
           }
         }
       };
 
       // Update the draggable instance with all handlers at once
-      loop.draggable.vars = {...loop.draggable.vars, ...handlers};
-      loop.draggable.enable(); // Re-enable to apply the new handlers
+      slider.draggable.vars = {...slider.draggable.vars, ...handlers};
+      slider.draggable.enable(); // Re-enable to apply the new handlers
     }
   }
 
@@ -947,38 +947,38 @@ export function createSliderAnimations(gsap, Draggable) {
     };
   }
 
-  function setupNavigationListeners(element, items, loop, duration, ease, config, animationType, sliderState) {
+  function setupNavigationListeners(element, items, slider, duration, ease, config, animationType, sliderState) {
     if (element._sliderNav) {
       const { nextButton, prevButton, slideButtons } = element._sliderNav;
 
       const handleNavigation = (direction, targetIndex = null) => {
         // Check if we're navigating to the same slide
-        if (targetIndex !== null && targetIndex === loop.current()) {
+        if (targetIndex !== null && targetIndex === slider.current()) {
           return; // Don't reset autoplay if clicking on the same slide
         }
 
         // Stop current autoplay and reset progress (this clears isPausedByHover)
-        if (loop.stopAutoplay) {
-          loop.stopAutoplay();
+        if (slider.stopAutoplay) {
+          slider.stopAutoplay();
         }
 
         // Perform the navigation
         if (targetIndex !== null) {
-          loop.toIndex(targetIndex, { ease, duration });
+          slider.toIndex(targetIndex, { ease, duration });
         } else {
-          loop[direction]({ ease, duration });
+          slider[direction]({ ease, duration });
         }
 
         // Handle post-navigation logic
         gsap.delayedCall(0.1, () => {
           if (animationType.includes('loop')) {
             gsap.delayedCall(1, () => {
-              loop.resume();
+              slider.resume();
             });
           } else if (animationType.includes('snap')) {
             // Only start autoplay if not hovering
             if (!sliderState.isHovering) {
-              loop.startAutoplay();
+              slider.startAutoplay();
             }
             // If hovering, autoplay will start when user hovers out
           }
@@ -1008,17 +1008,17 @@ export function createSliderAnimations(gsap, Draggable) {
       items.forEach((slide, i) => {
         slide.addEventListener('click', (event) => {
           // Check if we're clicking on the active slide
-          const currentIndex = loop.current();
+          const currentIndex = slider.current();
           if (i === currentIndex) {
             return; // Don't reset autoplay if clicking on the active slide
           }
 
           // Use the same navigation logic as buttons
-          if (loop.stopAutoplay) {
-            loop.stopAutoplay();
+          if (slider.stopAutoplay) {
+            slider.stopAutoplay();
           }
           
-          loop.toIndex(i, { ease, duration });
+          slider.toIndex(i, { ease, duration });
           
           // Start autoplay for the new active slide (only if not hovering)
           gsap.delayedCall(0.1, () => {
@@ -1026,7 +1026,7 @@ export function createSliderAnimations(gsap, Draggable) {
               // Check hover state through the element's current hover status
               const currentlyHovering = element.matches(':hover') && !window.matchMedia('(hover: none)').matches;
               if (!currentlyHovering) {
-                loop.startAutoplay();
+                slider.startAutoplay();
               }
             }
           });
@@ -1035,47 +1035,52 @@ export function createSliderAnimations(gsap, Draggable) {
     }
   }
 
-  function cleanupLoops() {
-    activeLoops.forEach(element => {
-      if (element._loop) {
+  function cleanupSliders() {
+    activeSliders.forEach(element => {
+      if (element._slider) {
         // Stop any active snap cycles
-        if (element._loop.stopAutoplay) {
-          element._loop.stopAutoplay();
+        if (element._slider.stopAutoplay) {
+          element._slider.stopAutoplay();
         }
 
         // Remove hover listeners if they exist
-        if (element._loop._removeHoverListeners) {
-          element._loop._removeHoverListeners();
+        if (element._slider._removeHoverListeners) {
+          element._slider._removeHoverListeners();
         }
         
         // Clean up draggable if it exists
-        if (element._loop.draggable) {
-          element._loop.draggable.kill();
+        if (element._slider.draggable) {
+          element._slider.draggable.kill();
         }
         
         // Clean up ScrollTrigger if it exists
-        if (element._loop.scrollTrigger) {
-          element._loop.scrollTrigger.kill();
+        if (element._slider.scrollTrigger) {
+          element._slider.scrollTrigger.kill();
         }
         
         // Get all slider items and progress elements
         const items = element.querySelectorAll('[aa-slider-item]');
         const progressElements = element.querySelectorAll('[aa-slider-button] [aa-slider-progress]');
         
-        // Kill any existing GSAP tweens on the items, progress elements, and the loop
-        gsap.killTweensOf(items);
-        gsap.killTweensOf(progressElements);
-        gsap.killTweensOf(element._loop.moveToNext);
+        // Kill any existing GSAP tweens on the items, progress elements, and the slider
+        if (items.length > 0) {
+          gsap.killTweensOf(items);
+          gsap.set(items, { clearProps: "all" });
+          // Remove active classes if they exist
+          items.forEach(item => item.classList.remove('active'));
+        }
         
-        // Kill the loop timeline
-        element._loop.kill();
+        if (progressElements.length > 0) {
+          gsap.killTweensOf(progressElements);
+          gsap.set(progressElements, { clearProps: "all" });
+        }
         
-        // Reset all GSAP properties on slider items and progress elements
-        gsap.set(items, { clearProps: "all" });
-        gsap.set(progressElements, { clearProps: "all" });
+        if (element._slider.moveToNext) {
+          gsap.killTweensOf(element._slider.moveToNext);
+        }
         
-        // Remove active classes if they exist
-        items.forEach(item => item.classList.remove('active'));
+        // Kill the slider timeline
+        element._slider.kill();
         
         // Clean up navigation event listeners if they exist
         if (element._sliderNav) {
@@ -1086,18 +1091,18 @@ export function createSliderAnimations(gsap, Draggable) {
         }
 
         // Clean up touch listeners if they exist - with safety check
-        if (element._loop && typeof element._loop.touchCleanup === 'function') {
-          element._loop.touchCleanup();
+        if (element._slider && typeof element._slider.touchCleanup === 'function') {
+          element._slider.touchCleanup();
         }
 
-        element._loop = null;
+        element._slider = null;
       }
     });
-    activeLoops.clear();
+    activeSliders.clear();
   }
 
   return {
     slider: (element, animationType, duration, ease, delay) => initializeSlider(element, animationType, duration, ease, delay),
-    cleanupLoops
+    cleanupSliders
   };
 }

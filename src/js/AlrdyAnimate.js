@@ -62,7 +62,7 @@ async function init(options = {}) {
     const templates = processTemplates(initOptions);
 
     // First get all elements with animation attributes
-    let elements = [...document.querySelectorAll("[aa-animate], [aa-children], [aa-hover]")];
+    let elements = [...document.querySelectorAll("[aa-animate], [aa-children], [aa-hover], [aa-slider]")];
     
     // If templates are enabled, add elements with matching classes
     if (templates) {
@@ -381,6 +381,13 @@ function setupAnimations(elements, initOptions, isMobile, modules) {
       } 
     }
 
+    // Setup interactive components (sliders)
+    if (element.hasAttribute('aa-slider')) {
+      if (enableGSAP && initOptions.gsapFeatures.includes('slider')) {
+        setupSliderComponent(element, settings, modules);
+      }
+    }
+
     // Setup regular animations
     if (element.hasAttribute('aa-animate') || templateSettings) {
       if (enableGSAP) {
@@ -393,15 +400,27 @@ function setupAnimations(elements, initOptions, isMobile, modules) {
   });
 }
 
+function setupSliderComponent(element, elementSettings, modules) {
+  const { sliderType, duration, ease, delay } = elementSettings;
+  
+  // Skip if slider type is 'none' (useful for mobile variants like 'draggable|none')
+  if (!sliderType || sliderType === 'none') {
+    return;
+  }
+  
+  // Pass the slider type directly - the slider system uses feature detection with .includes()
+  modules.animations.slider(element, sliderType, duration, ease, delay);
+}
+
 function setupGSAPAnimations(element, elementSettings, initOptions, isMobile, modules) {
   const { animationType, split, scrub, duration, stagger, delay, ease, distance, anchorElement, anchorSelector, scrollStart, scrollEnd } = elementSettings;
   
   // 1. Variables setup
   const baseType = animationType.includes('-') ? animationType.split('-')[0] : animationType;
-  const gsapAnimations = ['appear', 'reveal', 'counter', 'text', 'slider', 'background', 'parallax', 'marquee', 'clip', 'stack'];
+  const gsapAnimations = ['appear', 'reveal', 'counter', 'text', 'background', 'parallax', 'marquee', 'clip', 'stack'];
   
   // 2. Determine if this animation type creates its own ScrollTriggers
-  const ownScrollTriggerAnimations = ['clip', 'stack', 'slider', 'background', 'parallax', 'marquee'];
+  const ownScrollTriggerAnimations = ['clip', 'stack', 'background', 'parallax', 'marquee'];
   const hasOwnScrollTrigger = ownScrollTriggerAnimations.includes(baseType);
 
   // Clear existing animations
@@ -518,9 +537,6 @@ function setupGSAPAnimations(element, elementSettings, initOptions, isMobile, mo
         modules.animations.stack(element, scrub, distance);
         return;
         
-      case 'slider':
-        modules.animations.slider(element, animationType, duration, ease, delay);
-        break;
 
       case 'background':
         modules.animations.backgroundColor(element, duration, ease, scrollStart, scrollEnd, initOptions.debug, scrub);

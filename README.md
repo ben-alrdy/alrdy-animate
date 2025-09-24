@@ -224,8 +224,8 @@ AlrdyAnimate uses a consistent attribute naming system:
 |---------|---------|---------|
 | `aa-animate` | `aa-animate="fade-up"` | Primary animation type |
 | `aa-[property]` | `aa-duration="0.8"` | Animation properties |
+| `aa-[feature]` | `aa-slider="draggable"` | Interactive component behavior |
 | `aa-[feature]-[action]` | `aa-slider-item` | Feature-specific elements |
-| `aa-[feature]-[property]` | `aa-scroll-start="top 80%"` | Feature-specific properties |
 
 ### Children & Anchor Animations
 
@@ -734,15 +734,23 @@ Infinite scrolling, snapping, and static slider animations.
 
 **Setup:** `gsapFeatures: ['slider']`
 
-**Available Types:**
-- **Static**: `slider`, `slider-center`, `slider-draggable`
-- **Loop**: `slider-loop`, `slider-loop-reverse`, `slider-loop-vertical`
-- **Snap**: `slider-snap`, `slider-snap-reverse`, `slider-snap-draggable`
+**Initialization:**
+Add `aa-slider` to the wrapper that contains the slider elements. Optionally, add the below features to the attribute.
+
+**Feature Detection:**
+The slider system detects features by checking for keywords in the type:
+- `center` - Centers the active slide
+- `draggable` - Enables drag/swipe functionality
+- `loop` - Creates continuous looping animation
+- `snap` - Enables autoplay with snapping between slides
+- `reverse` - Reverses the animation direction
+- `vertical` - Creates vertical slider instead of horizontal
+- `none` - Useful in combination with the `|` separator for responsive deactivation, e.g. `aa-slider=none|draggable-center`
 
 **Attributes & Defaults:**
 | Attribute | Values | Default | Description |
 |-----------|--------|---------|-------------|
-| `aa-animate` | Slider type | - | Slider animation type |
+| `aa-slider` | Slider type | - | Slider animation type |
 | `aa-duration` | Number (seconds) | `20` (loop), `0.8` (snap) | Speed/duration |
 | `aa-delay` | Number (seconds) | `3` | Pause between snaps |
 | `aa-slider-item` | - | - | Marks slider items |
@@ -754,33 +762,101 @@ Infinite scrolling, snapping, and static slider animations.
 | `aa-slider-target` | Slider ID | - | Target slider for external controls |
 | `aa-slider-progress` | `width`, `height`, `circle` | - | Progress indicator type |
 
+**CSS Requirements:**
+- Container needs `display: flex` and `gap` set for spacing between slides
+- Items need fixed width (percentage or pixels) and `flex-shrink: 0`
+- **Important**: The slider items cannot have border or padding; if you need such styles, nest another div inside the item and apply the styles to that nested div
+- Animations can be added to elements within items, but not directly on the slider items themselves
+
+```css
+.slider-container {
+  display: flex;
+  gap: 2rem; /* This gap is automatically detected and used for spacing */
+}
+
+.slider-item {
+  width: 300px; /* Fixed width required */
+  flex-shrink: 0; /* Prevents items from shrinking */
+}
+
+/* Apply styling to nested elements, not the slider item directly */
+.slider-item-content {
+  border: 1px solid #ccc;
+  padding: 2rem;
+  border-radius: 8px;
+}
+```
+
+**Mobile Variants:**
+Use the `|` separator to define different slider behavior for desktop and mobile:
+```html
+<!-- Desktop: no slider, Mobile: draggable slider -->
+<div aa-slider="none|draggable">
+  <div aa-slider-item>Item 1</div>
+  <div aa-slider-item>Item 2</div>
+</div>
+
+<!-- Desktop: center slider, Mobile: no slider -->
+<div aa-slider="center|none">
+  <div aa-slider-item>Item 1</div>
+  <div aa-slider-item>Item 2</div>
+</div>
+```
+
 **Examples:**
 ```html
 <!-- Static slider -->
-<div aa-animate="slider-center-draggable" id="main-slider">
+<div aa-slider="center-draggable" id="main-slider">
   <div class="slider-container">
-    <div aa-slider-item>Item 1</div>
-    <div aa-slider-item>Item 2</div>
+    <div aa-slider-item class="slider-item">
+      <div class="slider-item-content">Item 1 Content</div>
+    </div>
+    <div aa-slider-item class="slider-item">
+      <div class="slider-item-content">Item 2 Content</div>
+    </div>
   </div>
   <button aa-slider-prev>←</button>
   <button aa-slider-next>→</button>
 </div>
 
 <!-- Loop slider -->
-<div aa-animate="slider-loop-reverse" aa-duration="25">
+<div aa-slider="loop-reverse" aa-duration="25">
   <div class="slider-container">
-    <div aa-slider-item>Item 1</div>
-    <div aa-slider-item>Item 2</div>
+    <div aa-slider-item class="slider-item">
+      <div class="slider-item-content">Item 1</div>
+    </div>
+    <div aa-slider-item class="slider-item">
+      <div class="slider-item-content">Item 2</div>
+    </div>
   </div>
 </div>
 
 <!-- Snap slider with progress -->
-<div aa-animate="slider-snap" aa-duration="0.6" aa-delay="4">
+<div aa-slider="snap" aa-duration="0.6" aa-delay="4">
   <div class="slider-container">
-    <div aa-slider-item>Item 1</div>
-    <div aa-slider-item>Item 2</div>
+    <div aa-slider-item class="slider-item">
+      <div class="slider-item-content">Item 1</div>
+    </div>
+    <div aa-slider-item class="slider-item">
+      <div class="slider-item-content">Item 2</div>
+    </div>
   </div>
   <div aa-slider-progress="width" class="progress-bar"></div>
+</div>
+
+<!-- Mobile variant slider -->
+<div aa-slider="none|draggable">
+  <div class="slider-container">
+    <div aa-slider-item class="slider-item">
+      <div class="slider-item-content">Item 1</div>
+    </div>
+    <div aa-slider-item class="slider-item">
+      <div class="slider-item-content">Item 2</div>
+    </div>
+    <div aa-slider-item class="slider-item">
+      <div class="slider-item-content">Item 3</div>
+    </div>
+  </div>
 </div>
 ```
 

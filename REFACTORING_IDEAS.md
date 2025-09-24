@@ -12,7 +12,7 @@
 - **Suggestion**: Standardize to either:
   - Option A: `aa-animate` for everything with sub-attributes for specifics
   - Option B: Feature-specific main attributes (`aa-slider`, `aa-accordion`, etc.)
-  - refactor aa-hover-direction and combine it with the aa-hover attribute for background animations (similar to other directional features)
+
 
 ### 2. Scroll Positioning Inconsistencies
 - **Current**: Mix of `aa-scroll-start`, `aa-scroll-end`, and legacy `aa-viewport`
