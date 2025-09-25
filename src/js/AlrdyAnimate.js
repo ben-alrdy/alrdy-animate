@@ -449,7 +449,7 @@ function setupInteractiveComponent(element, elementSettings, modules, initOption
 }
 
 function setupGSAPAnimations(element, elementSettings, initOptions, isMobile, modules) {
-  const { animationType, split, scrub, duration, stagger, delay, ease, distance, anchorElement, anchorSelector, scrollStart, scrollEnd } = elementSettings;
+  const { animationType, split, scrub, duration, stagger, delay, ease, opacity, distance, anchorElement, anchorSelector, scrollStart, scrollEnd } = elementSettings;
   
   // 1. Variables setup
   const baseType = animationType.includes('-') ? animationType.split('-')[0] : animationType;
@@ -583,11 +583,11 @@ function setupGSAPAnimations(element, elementSettings, initOptions, isMobile, mo
         break;
 
       case 'appear':
-        tl.add(modules.animations.appear(element, duration, ease, delay, distance, animationType));
+        tl.add(modules.animations.appear(element, duration, ease, delay, distance, animationType, opacity));
         break;
 
       case 'reveal':
-        tl.add(modules.animations.reveal(element, duration, ease, delay, animationType));
+        tl.add(modules.animations.reveal(element, duration, ease, delay, animationType, opacity));
         break;
 
       case 'counter':

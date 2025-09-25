@@ -20,7 +20,7 @@
       transition-delay: var(--aa-delay);       
 
       &.in-view {
-        opacity: 1;
+        opacity: var(--aa-opacity, 1);
         transform: none;
       }
     }
@@ -65,7 +65,7 @@
       transition-delay: var(--aa-delay);  
 
       &.in-view {
-        opacity: 1;
+        opacity: var(--aa-opacity, 1);
         transform: translate3d(0, 0, 0) scale(1);
       }
     }
@@ -155,7 +155,7 @@
 
       &.in-view {
         filter: blur(0);
-        opacity: 1;
+        opacity: var(--aa-opacity, 1);
         transform: scale(1);
       }
     }

@@ -27,6 +27,7 @@ function getElementParams(element, type = 'animation') {
   const params = {
     duration: parseFloat(element.getAttribute('aa-duration')) || 0.2,
     ease: element.getAttribute('aa-ease') || 'power4.out',
+    opacity: parseFloat(element.getAttribute('aa-opacity')) || 1,
     timelinePosition: percent ? `>-${percent}%` : '<',
     order,
     percent,
@@ -52,6 +53,7 @@ function getElementData(elements) {
       animationType: params.animationType,
       duration: params.duration,
       ease: params.ease,
+      opacity: params.opacity,
       timelinePosition: params.timelinePosition
     };
   }).sort((a, b) => a.order - b.order);
@@ -84,16 +86,16 @@ function handleTextAnimation(element, animationType, animations, splitText, tl, 
   }, animationType);
 }
 
-function handleComplexAnimation(element, baseType, animations, duration, ease, distance, animationType) {
+function handleComplexAnimation(element, baseType, animations, duration, ease, distance, animationType, opacity = 1) {
   if (!animations || !animations[baseType]) return null;
   
   let animationTimeline;
   switch (baseType) {
     case 'appear':
-      animationTimeline = animations.appear(element, duration, ease, 0, distance, animationType);
+      animationTimeline = animations.appear(element, duration, ease, 0, distance, animationType, opacity);
       break;
     case 'reveal':
-      animationTimeline = animations.reveal(element, duration, ease, 0, animationType);
+      animationTimeline = animations.reveal(element, duration, ease, 0, animationType, opacity);
       break;
     case 'counter':
       animationTimeline = animations.counter(element, duration, ease, 0, animationType);
@@ -134,14 +136,14 @@ function createTimeline(container, animations, splitText, isVisual = false) {
   
   const elementData = getElementData(animatedElements);
   
-  elementData.forEach(({ element, animationType, duration, ease, timelinePosition }) => {
+  elementData.forEach(({ element, animationType, duration, ease, opacity, timelinePosition }) => {
     const baseType = getBaseType(animationType);
 
     if (baseType === 'text' && animations?.text && splitText) {
-      handleTextAnimation(element, animationType, animations, splitText, tl, timelinePosition, duration, ease);
+        handleTextAnimation(element, animationType, animations, splitText, tl, timelinePosition, duration, ease);
     } else if (animations && animations[baseType]) {
       const distance = parseFloat(element.getAttribute('aa-distance')) || 1;
-      const animationTimeline = handleComplexAnimation(element, baseType, animations, duration, ease, distance, animationType);
+      const animationTimeline = handleComplexAnimation(element, baseType, animations, duration, ease, distance, animationType, opacity);
       if (animationTimeline) {
         tl.add(animationTimeline, timelinePosition);
       }

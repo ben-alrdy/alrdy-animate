@@ -296,6 +296,7 @@ Lightweight, performant animations triggered when elements scroll into view.
 | `aa-delay` | Number (seconds) | `0` | Animation delay |
 | `aa-delay-mobile` | Number (seconds) | - | Mobile-specific delay |
 | `aa-distance` | Number | `1` | Distance multiplier |
+| `aa-opacity` | Number (0-1) | `1` | Final opacity value, use for `css`, `appear` and `reveal` animations |
 | `aa-ease` | Easing function | `ease-in-out` | Animation easing |
 | `aa-scroll-start` | Position | `top 80%` | When animation starts |
 | `aa-anchor` | CSS selector | - | Trigger element |
@@ -306,6 +307,7 @@ Lightweight, performant animations triggered when elements scroll into view.
 <div aa-animate="float-left" aa-distance="2" aa-ease="back.out">Stronger float</div>
 <div aa-animate="zoom-in-up" aa-scroll-start="top 90%">Zoom with slide</div>
 <div aa-animate="rotate-br-cw" aa-distance="3">Rotate from bottom-right</div>
+<div aa-animate="fade-up" aa-opacity="0.8">Fade to 80% opacity</div>
 ```
 
 

@@ -66,6 +66,9 @@ export function getElementTemplateSettings(element, isMobile) {
     if (settings.distance) {
       element.style.setProperty('--aa-distance', settings.distance);
     }
+    if (settings.opacity !== undefined) {
+      element.style.setProperty('--aa-opacity', settings.opacity);
+    }
     
   }
   

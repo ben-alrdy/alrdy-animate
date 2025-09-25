@@ -119,6 +119,7 @@ export function getElementSettings(element, settings, isMobile) {
     delay: element.hasAttribute('aa-delay') ? parseFloat(element.getAttribute('aa-delay')) : settings.delay,
     delayMobile: element.hasAttribute('aa-delay-mobile') ? parseFloat(element.getAttribute('aa-delay-mobile')) : undefined,
     stagger: element.hasAttribute('aa-stagger') ? parseFloat(element.getAttribute('aa-stagger')) : undefined,
+    opacity: element.hasAttribute('aa-opacity') ? parseFloat(element.getAttribute('aa-opacity')) : 1,
     
     // Colors
     color,
@@ -138,7 +139,7 @@ export function getElementSettings(element, settings, isMobile) {
 }
 
 export function applyElementStyles(element, elementSettings, isMobile) {
-  const { duration, delay, distance, delayMobile, color } = elementSettings;
+  const { duration, delay, distance, delayMobile, color, opacity } = elementSettings;
 
   // Set duration if specified on element
   if (element.hasAttribute('aa-duration')) {
@@ -154,6 +155,11 @@ export function applyElementStyles(element, elementSettings, isMobile) {
   // Set distance if specified on element
   if (element.hasAttribute('aa-distance')) {
     element.style.setProperty("--aa-distance", `${distance}`);
+  }
+
+  // Set opacity if specified on element
+  if (element.hasAttribute('aa-opacity')) {
+    element.style.setProperty("--aa-opacity", `${opacity}`);
   }
 
   if (element.getAttribute('aa-animate')?.includes('#')) {

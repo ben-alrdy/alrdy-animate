@@ -1,8 +1,8 @@
-function createAppearTimeline(element, gsap, duration, ease, delay, distance, animationType) {
+function createAppearTimeline(element, gsap, duration, ease, delay, distance, animationType, opacity = 1) {
   const [_, direction] = animationType.split('-');
 
   // Cleanup: clear transform, opacity, and clip-path before setting up animation
-  gsap.set(element, { x: 0, y: 0, opacity: 1, clipPath: 'none' });
+  gsap.set(element, { x: 0, y: 0, opacity, clipPath: 'none' });
 
   // Set initial state based on direction
   const fromState = {
@@ -15,7 +15,7 @@ function createAppearTimeline(element, gsap, duration, ease, delay, distance, an
 
   // Set end state (toState) to visible and no transform
   const toState = {
-    opacity: 1,
+    opacity,
     y: 0,
     x: 0,
     duration,
@@ -28,11 +28,11 @@ function createAppearTimeline(element, gsap, duration, ease, delay, distance, an
   return tl.fromTo(element, fromState, toState);
 }
 
-function createRevealTimeline(element, gsap, duration, ease, delay, animationType) {
+function createRevealTimeline(element, gsap, duration, ease, delay, animationType, opacity = 1) {
   const [_, direction] = animationType.split('-');
 
   // Cleanup: clear transform, opacity, and clip-path before setting up animation
-  gsap.set(element, { x: 0, y: 0, opacity: 1, clipPath: 'none' });
+  gsap.set(element, { x: 0, y: 0, opacity, clipPath: 'none' });
 
   const clipPaths = {
     up: {
@@ -62,11 +62,11 @@ function createRevealTimeline(element, gsap, duration, ease, delay, animationTyp
   return tl.fromTo(element, 
     {
       clipPath: clipPaths[direction]?.start || clipPaths.up.start,
-      opacity: direction === 'center' ? 0 : 1
+      opacity: direction === 'center' ? 0 : opacity
     },
     {
       clipPath: clipPaths[direction]?.end || clipPaths.up.end,
-      opacity: 1,
+      opacity,
       duration,
       ease,
       delay
@@ -119,12 +119,12 @@ function createCounterTimeline(element, gsap, duration, ease, delay, animationTy
 
 function createAppearAnimations(gsap, ScrollTrigger) {
   return {
-    appear: (element, duration, ease, delay, distance, animationType) => {
-      return createAppearTimeline(element, gsap, duration, ease, delay, distance, animationType);
+    appear: (element, duration, ease, delay, distance, animationType, opacity = 1) => {
+      return createAppearTimeline(element, gsap, duration, ease, delay, distance, animationType, opacity);
     },
     
-    reveal: (element, duration, ease, delay, animationType) => {
-      return createRevealTimeline(element, gsap, duration, ease, delay, animationType);
+    reveal: (element, duration, ease, delay, animationType, opacity = 1) => {
+      return createRevealTimeline(element, gsap, duration, ease, delay, animationType, opacity);
     },
     
     counter: (element, duration, ease, delay, animationType) => {

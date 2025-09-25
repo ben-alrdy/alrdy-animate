@@ -42,6 +42,7 @@ function createModalTimeline(modal, backdrop, animations, splitText) {
     const ease = element.getAttribute('aa-ease') || 'power2.out';
     const delay = parseFloat(element.getAttribute('aa-delay')) || 0;
     const distance = parseFloat(element.getAttribute('aa-distance')) || 1;
+    const opacity = element.hasAttribute('aa-opacity') ? parseFloat(element.getAttribute('aa-opacity')) : 1;
     const timelinePosition = percent ? `>-${percent}%` : '<';
     const baseType = animationType ? (animationType.includes('-') ? animationType.split('-')[0] : animationType) : null;
 
@@ -80,10 +81,10 @@ function createModalTimeline(modal, backdrop, animations, splitText) {
       let animationTimeline;
       switch (baseType) {
         case 'appear':
-          animationTimeline = animations.appear(element, duration, ease, delay, distance, animationType);
+          animationTimeline = animations.appear(element, duration, ease, delay, distance, animationType, opacity);
           break;
         case 'reveal':
-          animationTimeline = animations.reveal(element, duration, ease, delay, animationType);
+          animationTimeline = animations.reveal(element, duration, ease, delay, animationType, opacity);
           break;
         case 'counter':
           animationTimeline = animations.counter(element, duration, ease, delay, animationType);
@@ -101,7 +102,7 @@ function createModalTimeline(modal, backdrop, animations, splitText) {
           y: 0,
           xPercent: 0, 
           yPercent: 0, 
-          opacity: 1, 
+          opacity, 
           scale: 1,
           duration, 
           ease 

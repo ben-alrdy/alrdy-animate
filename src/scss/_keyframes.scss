@@ -10,11 +10,11 @@
     transform: translateY(calc(2rem * var(--aa-distance)));
   }
   30% {
-    opacity: 1;
+    opacity: var(--aa-opacity, 1);
     transform: translateY(calc(-0.6rem * var(--aa-distance)));
   }
   100% {
-    opacity: 1;
+    opacity: var(--aa-opacity, 1);
     transform: translateY(0);
   }
 }
@@ -25,11 +25,11 @@
     transform: translateY(calc(-2rem * var(--aa-distance)));
   }
   30% {
-    opacity: 1;
+    opacity: var(--aa-opacity, 1);
     transform: translateY(calc(0.6rem * var(--aa-distance)));
   }
   100% {
-    opacity: 1;
+    opacity: var(--aa-opacity, 1);
     transform: translateY(0);
   }
 }
@@ -40,11 +40,11 @@
     transform: translateX(calc(-2rem * var(--aa-distance)));
   }
   30% {
-    opacity: 1;
+    opacity: var(--aa-opacity, 1);
     transform: translateX(calc(0.3rem * var(--aa-distance)));
   }
   100% {
-    opacity: 1;
+    opacity: var(--aa-opacity, 1);
     transform: translateX(0);
   }
 }
@@ -55,11 +55,11 @@
     transform: translateX(calc(2rem * var(--aa-distance)));
   }
   30% {
-    opacity: 1;
+    opacity: var(--aa-opacity, 1);
     transform: translateX(calc(-0.3rem * var(--aa-distance)));
   }
   100% {
-    opacity: 1;
+    opacity: var(--aa-opacity, 1);
     transform: translateX(0);
   }
 }
@@ -79,7 +79,7 @@
   100% {
     transform: rotateX(0deg);
     transform-origin: top;
-    opacity: 1;
+    opacity: var(--aa-opacity, 1);
   }
 }
 
@@ -92,7 +92,7 @@
   100% {
     transform: rotateX(0deg);
     transform-origin: top;
-    opacity: 1;
+    opacity: var(--aa-opacity, 1);
   }
 }
 
@@ -103,7 +103,7 @@
   }
   100% {
     transform: rotate3d(0, 0, 0, 0) translateZ(0) scaleZ(1);
-    opacity: 1;
+    opacity: var(--aa-opacity, 1);
   }
 }
 
@@ -115,7 +115,7 @@
   }
   100% {
     transform: perspective(3em) rotate3d(0, 0, 0, 0) translateZ(0) scaleZ(1);
-    opacity: 1;
+    opacity: var(--aa-opacity, 1);
   }
 }
 
@@ -128,7 +128,7 @@
   100% {
     transform: translateY(0) rotateX(0) scale(1);
     transform-origin: 50% 1400px;
-    opacity: 1;
+    opacity: var(--aa-opacity, 1);
   }
 }
 
