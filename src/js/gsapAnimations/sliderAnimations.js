@@ -894,12 +894,31 @@ export function createSliderAnimations(gsap, Draggable) {
 
     // Setup slide buttons with ARIA
     if (slideButtons.length > 0) {
-      const bulletList = slideButtons[0].parentElement;
-      if (bulletList) {
-        bulletList.setAttribute('role', 'tablist');
-        bulletList.setAttribute('aria-label', 'Slide navigation');
+      // Check if tablist role already exists within the slider
+      const existingTablist = element.querySelector('[role="tablist"]');
+      
+      if (!existingTablist) {
+        // Look for existing list role within the slider container (Webflow sets this by default)
+        let tablistContainer = slideButtons[0].closest('[role="list"]');
+        
+        // Ensure the found container is within the slider element
+        if (tablistContainer && !element.contains(tablistContainer)) {
+          tablistContainer = null;
+        }
+        
+        // Fallback: if no list role found within slider, use the direct parent
+        if (!tablistContainer) {
+          tablistContainer = slideButtons[0].parentElement;
+        }
+        
+        // Set tablist role on the container (this overrides Webflow's role="list" for carousel navigation)
+        if (tablistContainer) {
+          tablistContainer.setAttribute('role', 'tablist');
+          tablistContainer.setAttribute('aria-label', 'Slide navigation');
+        }
       }
       
+      // Set tab role on each button
       slideButtons.forEach((button, i) => {
         button.setAttribute('role', 'tab');
         button.setAttribute('aria-label', `Go to slide ${i + 1}`);
