@@ -11,6 +11,11 @@
   --load-delay: var(--load-base-delay);
 }
 
+/* Custom easings */
+[aa-load][aa-ease="power4.inOut"]{
+	animation-timing-function: cubic-bezier(0.86, 0, 0.07, 1);
+}
+
 /**
  * Base Animation Settings; applied both on [aa-load] elements as well as children of [aa-load][aa-stagger] elements
  */
@@ -47,11 +52,6 @@
 [aa-load][aa-duration="1.4"] { --load-duration: 1.4s; }
 [aa-load][aa-duration="1.5"] { --load-duration: 1.5s; }
 
-/* Custom easings */
-[aa-load][aa-ease="power4.inOut"]{
-	animation-timing-function: cubic-bezier(0.86, 0, 0.07, 1);
-}
-
 /* Delay values from 0 to 2 seconds in 0.1 increments */
 [aa-load][aa-delay="0"] { --load-delay: calc(var(--load-base-delay) + 0s); }
 [aa-load][aa-delay="0.1"] { --load-delay: calc(var(--load-base-delay) + 0.1s); }
@@ -75,6 +75,21 @@
 [aa-load][aa-delay="1.9"] { --load-delay: calc(var(--load-base-delay) + 1.9s); }
 [aa-load][aa-delay="2"] { --load-delay: calc(var(--load-base-delay) + 2s); }
 
+/* Opacity values from 0.1 to 0.9 in 0.1 increments */
+[aa-load][aa-opacity="0.1"] { --load-opacity: 0.1; }
+[aa-load][aa-opacity="0.2"] { --load-opacity: 0.2; }
+[aa-load][aa-opacity="0.3"] { --load-opacity: 0.3; }
+[aa-load][aa-opacity="0.4"] { --load-opacity: 0.4; }
+[aa-load][aa-opacity="0.5"] { --load-opacity: 0.5; }
+[aa-load][aa-opacity="0.6"] { --load-opacity: 0.6; }
+[aa-load][aa-opacity="0.7"] { --load-opacity: 0.7; }
+[aa-load][aa-opacity="0.8"] { --load-opacity: 0.8; }
+[aa-load][aa-opacity="0.9"] { --load-opacity: 0.9; }
+
+/* Distance values */
+[aa-load][aa-distance="0.5"] { --load-distance: 0.5; }
+[aa-load][aa-distance="1.5"] { --load-distance: 1.5; }
+
 /**
  * Stagger Functionality for up to 10 children
  */
@@ -96,11 +111,11 @@
 /**
  * Fade Animations
  */
-@keyframes fade{from{opacity:0}to{opacity:1}}
-@keyframes fadeUp{from{opacity:0;transform:translate3d(0,calc(30px * var(--load-distance)),0)}to{opacity:1;transform:translate3d(0,0,0)}}
-@keyframes fadeDown{from{opacity:0;transform:translate3d(0,calc(-30px * var(--load-distance)),0)}to{opacity:1;transform:translate3d(0,0,0)}}
-@keyframes fadeLeft{from{opacity:0;transform:translate3d(calc(30px * var(--load-distance)),0,0)}to{opacity:1;transform:translate3d(0,0,0)}}
-@keyframes fadeRight{from{opacity:0;transform:translate3d(calc(-30px * var(--load-distance)),0,0)}to{opacity:1;transform:translate3d(0,0,0)}}
+@keyframes fade{from{opacity:0}to{opacity:var(--load-opacity, 1)}}
+@keyframes fadeUp{from{opacity:0;transform:translate3d(0,calc(2rem * var(--load-distance)),0)}to{opacity:var(--load-opacity, 1);transform:translate3d(0,0,0)}}
+@keyframes fadeDown{from{opacity:0;transform:translate3d(0,calc(-2rem * var(--load-distance)),0)}to{opacity:var(--load-opacity, 1);transform:translate3d(0,0,0)}}
+@keyframes fadeLeft{from{opacity:0;transform:translate3d(calc(2rem * var(--load-distance)),0,0)}to{opacity:var(--load-opacity, 1);transform:translate3d(0,0,0)}}
+@keyframes fadeRight{from{opacity:0;transform:translate3d(calc(-2rem * var(--load-distance)),0,0)}to{opacity:var(--load-opacity, 1);transform:translate3d(0,0,0)}}
 
 [aa-load="fade"], [aa-load="fade"][aa-stagger] > * { animation-name: fade; }
 [aa-load="fade-up"], [aa-load="fade-up"][aa-stagger] > * { animation-name: fadeUp; }
@@ -124,12 +139,12 @@
 /**
  * Zoom Animations
  */
-@keyframes zoomIn{from{opacity:0;transform:scale(0.6)}70%{opacity:1}}
-@keyframes zoomOut{from{opacity:0;transform:scale(1.5)}70%{opacity:1}}
-@keyframes zoomInOver{from{opacity:0;transform:scale(0.1)}70%{opacity:1;transform:scale(1.1)}to{transform:scale(1)}}
-@keyframes zoomOutOver{from{opacity:0;transform:scale(1.5)}70%{opacity:1;transform:scale(0.9)}to{transform:scale(1)}}
-@keyframes zoomInOverUp{from{opacity:0;transform:scale(0.1) translate3d(0,1000px,0)}60%{opacity:1;transform:scale(.5) translate3d(0,-60px,0)}to{transform:scale(1) translate3d(0,0,0)}}
-@keyframes zoomInOverDown{from{opacity:0;transform:scale(0.1) translate3d(0,-1000px,0)}60%{opacity:1;transform:scale(.5) translate3d(0,60px,0)}to{transform:scale(1) translate3d(0,0,0)}}
+@keyframes zoomIn{from{opacity:0;transform:scale(0.6)}70%{opacity:var(--load-opacity, 1)}}
+@keyframes zoomOut{from{opacity:0;transform:scale(1.2)}70%{opacity:var(--load-opacity, 1)}}
+@keyframes zoomInOver{from{opacity:0;transform:scale(0.1)}70%{opacity:var(--load-opacity, 1);transform:scale(1.1)}to{transform:scale(1)}}
+@keyframes zoomOutOver{from{opacity:0;transform:scale(1.2)}70%{opacity:var(--load-opacity, 1);transform:scale(0.9)}to{transform:scale(1)}}
+@keyframes zoomInOverUp{from{opacity:0;transform:scale(0.1) translate3d(0,1000px,0)}60%{opacity:var(--load-opacity, 1);transform:scale(.5) translate3d(0,-60px,0)}to{transform:scale(1) translate3d(0,0,0)}}
+@keyframes zoomInOverDown{from{opacity:0;transform:scale(0.1) translate3d(0,-1000px,0)}60%{opacity:var(--load-opacity, 1);transform:scale(.5) translate3d(0,60px,0)}to{transform:scale(1) translate3d(0,0,0)}}
 
 [aa-load="zoom-in"], [aa-load="zoom-in"][aa-stagger] > * { animation-name: zoomIn; }
 [aa-load="zoom-out"], [aa-load="zoom-out"][aa-stagger] > * { animation-name: zoomOut; }
@@ -142,10 +157,10 @@
  * Float Animations
  */
 
- @keyframes floatUp {from {opacity: 0; transform: translateY(calc(30px * var(--load-distance)));} 30% {opacity: 1; transform: translateY(calc(-10px * var(--load-distance)));} to {opacity: 1; transform: translateY(0);}}
- @keyframes floatDown {from {opacity: 0; transform: translateY(calc(-30px * var(--load-distance)));} 30% {opacity: 1; transform: translateY(calc(10px * var(--load-distance)));} to {opacity: 1; transform: translateY(0);}}
- @keyframes floatRight {from {opacity: 0; transform: translateX(calc(-30px * var(--load-distance)));} 30% {opacity: 1; transform: translateX(calc(5px * var(--load-distance)));} to {opacity: 1; transform: translateX(0);}}
- @keyframes floatLeft {from {opacity: 0; transform: translateX(calc(30px * var(--load-distance)));} 30% {opacity: 1; transform: translateX(calc(-5px * var(--load-distance)));} to {opacity: 1; transform: translateX(0);}}
+ @keyframes floatUp {from {opacity: 0; transform: translateY(calc(2rem * var(--load-distance)));} 30% {opacity: var(--load-opacity, 1); transform: translateY(calc(-10px * var(--load-distance)));} to {opacity: var(--load-opacity, 1); transform: translateY(0);}}
+ @keyframes floatDown {from {opacity: 0; transform: translateY(calc(-2rem * var(--load-distance)));} 30% {opacity: var(--load-opacity, 1); transform: translateY(calc(10px * var(--load-distance)));} to {opacity: var(--load-opacity, 1); transform: translateY(0);}}
+ @keyframes floatRight {from {opacity: 0; transform: translateX(calc(-2rem * var(--load-distance)));} 30% {opacity: var(--load-opacity, 1); transform: translateX(calc(5px * var(--load-distance)));} to {opacity: var(--load-opacity, 1); transform: translateX(0);}}
+ @keyframes floatLeft {from {opacity: 0; transform: translateX(calc(2rem * var(--load-distance)));} 30% {opacity: var(--load-opacity, 1); transform: translateX(calc(-5px * var(--load-distance)));} to {opacity: var(--load-opacity, 1); transform: translateX(0);}}
 
  [aa-load="float-up"], [aa-load="float-up"][aa-stagger] > * { animation-name: floatUp; }
  [aa-load="float-down"], [aa-load="float-down"][aa-stagger] > * { animation-name: floatDown; }
@@ -156,10 +171,10 @@
  * Rotate Animations
  */
 
- @keyframes rotateBottomRightCCW {from {opacity: 0; transform-origin: bottom right; transform: rotate(calc(5deg * var(--load-distance)));} to {transform-origin: bottom right;}}
- @keyframes rotateBottomRightCW {from {opacity: 0; transform-origin: bottom right; transform: rotate(calc(-5deg * var(--load-distance)));} to {transform-origin: bottom right;}}
- @keyframes rotateBottomLeftCCW {from {opacity: 0; transform-origin: bottom left; transform: rotate(calc(5deg * var(--load-distance)));} to {transform-origin: bottom left;}}
- @keyframes rotateBottomLeftCW {from {opacity: 0; transform-origin: bottom left; transform: rotate(calc(-5deg * var(--load-distance)));} to {transform-origin: bottom left;}}
+ @keyframes rotateBottomRightCCW {from {opacity: 0; transform-origin: bottom right; transform: rotate(calc(5deg * var(--load-distance)));} to {opacity: var(--load-opacity, 1); transform-origin: bottom right;}}
+ @keyframes rotateBottomRightCW {from {opacity: 0; transform-origin: bottom right; transform: rotate(calc(-5deg * var(--load-distance)));} to {opacity: var(--load-opacity, 1); transform-origin: bottom right;}}
+ @keyframes rotateBottomLeftCCW {from {opacity: 0; transform-origin: bottom left; transform: rotate(calc(5deg * var(--load-distance)));} to {opacity: var(--load-opacity, 1); transform-origin: bottom left;}}
+ @keyframes rotateBottomLeftCW {from {opacity: 0; transform-origin: bottom left; transform: rotate(calc(-5deg * var(--load-distance)));} to {opacity: var(--load-opacity, 1); transform-origin: bottom left;}}
 
  [aa-load="rotate-br-cw"], [aa-load="rotate-br-cw"][aa-stagger] > * { animation-name: rotateBottomRightCW; }
  [aa-load="rotate-br-ccw"], [aa-load="rotate-br-ccw"][aa-stagger] > * { animation-name: rotateBottomRightCCW; }
@@ -170,9 +185,9 @@
 * Puff in Animations
 */
 
- @keyframes puffIn {from {opacity: 0; filter: blur(8px); transform: scale(2);}}
- @keyframes puffInTop {from {opacity: 0; filter: blur(8px); transform: scale(2); transform-origin: top;} to {transform-origin: top;}}
- @keyframes puffInBottom {from {opacity: 0; filter: blur(8px); transform: scale(2); transform-origin: bottom;} to {transform-origin: bottom;}}
+ @keyframes puffIn {from {opacity: 0; filter: blur(8px); transform: scale(2);} to {opacity: var(--load-opacity, 1);}}
+ @keyframes puffInTop {from {opacity: 0; filter: blur(8px); transform: scale(2); transform-origin: top;} to {opacity: var(--load-opacity, 1); transform-origin: top;}}
+ @keyframes puffInBottom {from {opacity: 0; filter: blur(8px); transform: scale(2); transform-origin: bottom;} to {opacity: var(--load-opacity, 1); transform-origin: bottom;}}
 
  [aa-load="puff-in"], [aa-load="puff-in"][aa-stagger] > * { animation-name: puffIn; }
  [aa-load="puff-in-top"], [aa-load="puff-in-top"][aa-stagger] > * { animation-name: puffInTop; }

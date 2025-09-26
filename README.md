@@ -513,7 +513,7 @@ Stacking scroll effects.
 
 ## 2. Hover Animations
 
-Interactive hover effects with sophisticated animations and state management.
+Interactive hover effects with sophisticated animations and state management. Add `aa-hover` to an element to get started.
 
 **Setup:** `gsapFeatures: ['hover']`
 
@@ -768,6 +768,12 @@ The slider system detects features by checking for keywords in the type:
 - **Important**: The slider items cannot have border or padding; if you need such styles, nest another div inside the item and apply the styles to that nested div
 - Animations can be added to elements within items, but not directly on the slider items themselves
 
+**Active Classes:**
+The slider automatically adds/removes the following classes:
+- **Slider items**: `is-active` class is added to the currently visible slide
+- **Navigation buttons**: `is-active` class is added to the corresponding pagination button
+- **ARIA attributes**: `aria-hidden="false"` for active slide, `aria-selected="true"` for active button
+
 ```css
 .slider-container {
   display: flex;
@@ -784,6 +790,17 @@ The slider system detects features by checking for keywords in the type:
   border: 1px solid #ccc;
   padding: 2rem;
   border-radius: 8px;
+}
+
+/* Style active states */
+.slider-item.is-active .slider-item-content {
+  border-color: #007bff;
+  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.15);
+}
+
+.slider-button.is-active {
+  background-color: #007bff;
+  color: white;
 }
 ```
 

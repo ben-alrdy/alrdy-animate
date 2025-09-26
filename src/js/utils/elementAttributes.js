@@ -61,14 +61,20 @@ export function getElementSettings(element, settings, isMobile) {
 
   const hoverType = element.getAttribute('aa-hover');
   
-  // Handle mobile slider variants
-  const sliderType = parseResponsiveAttribute(element.getAttribute('aa-slider'), null);
+  // Handle slider type
+  const sliderType = element.hasAttribute('aa-slider') 
+    ? parseResponsiveAttribute(element.getAttribute('aa-slider'), 'basic') // Default to basic slider if no type is specified
+    : null;
   
   // Handle accordion type
-  const accordionType = parseResponsiveAttribute(element.getAttribute('aa-accordion'), null);
+  const accordionType = element.hasAttribute('aa-accordion') 
+    ? parseResponsiveAttribute(element.getAttribute('aa-accordion'), null) 
+    : null;
   
   // Handle marquee type
-  const marqueeType = parseResponsiveAttribute(element.getAttribute('aa-marquee'), null);
+  const marqueeType = element.hasAttribute('aa-marquee') 
+    ? parseResponsiveAttribute(element.getAttribute('aa-marquee'), null) 
+    : null;
   
   const anchorSelector = element.getAttribute("aa-anchor");
   const anchorElement = anchorSelector ? document.querySelector(anchorSelector) : element;

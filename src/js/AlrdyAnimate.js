@@ -406,7 +406,7 @@ function setupInteractiveComponent(element, elementSettings, modules, initOption
     const { sliderType, duration, ease, delay } = elementSettings;
     
     // Skip if slider type is 'none' (useful for mobile variants like 'draggable|none')
-    if (!sliderType || sliderType === 'none') {
+    if (sliderType === 'none') {
       return;
     }
     
