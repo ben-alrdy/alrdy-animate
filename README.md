@@ -893,15 +893,30 @@ Accessible accordion functionality with GSAP animations. Create expandable/colla
 - `aa-accordion` - Single accordion (only one open at a time)
 - `aa-accordion="multi"` - Multi accordion (multiple can be open)
 - `aa-accordion="autoplay"` - Autoplay accordion with progress indicators
+  - Add `aa-duration` to define how long one autoplay cycle takes
+  - Optionally add `aa-accordion-progress` to another element to visualize the progress; accepts values `width`, `height`, `circle`
 
 **Element Attributes:**
-- `aa-accordion-toggle=ID` - Marks the clickable toggle element
-- `aa-accordion-content=ID` - Marks the expandable content element
-- `aa-accordion-visual=ID` - Marks connected visual content element
-- `aa-accordion-initial` - On load, activates this toggle and opens content
+- `aa-accordion-toggle=ID` - Marks the clickable toggle element (ID optional - auto-generated if not provided)
+- `aa-accordion-content=ID` - Marks the expandable content element (ID optional - auto-generated if not provided)
+- `aa-accordion-visual=ID` - Marks connected visual content element (ID optional - auto-generated if not provided)
+- `aa-accordion-initial` - On load, activates this toggle, opens content, shows visual
 
-**Progress Indicators (Autoplay):**
-- `aa-accordion-progress` - Progress indicator type: `width`, `height`, `circle`
+**Auto-Generated IDs:**
+When no IDs are provided, the accordion system automatically assigns sequential IDs:
+- First toggle/content pair: `accordion-0`
+- Second toggle/content pair: `accordion-1`
+- Third toggle/content pair: `accordion-2`
+- And so on...
+
+Manual IDs take precedence over auto-generated ones.
+
+
+
+#### Accordion Opening Animation
+- Add `aa-duration` and `aa-ease` to `aa-accordion-content` to define it's opening animation; it requires `aa-animate` to be present as well because the opening animation is done via css when changing the grid column.
+- Add `aa-delay` to define when inner animations should play out (see below)
+
 
 #### Available Inner Animations
 

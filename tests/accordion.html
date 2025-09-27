@@ -619,6 +619,220 @@
                     </div>
             </div>
         </div>
+        
+        <!-- Auto-Generated IDs Section -->
+        <div class="section">
+            <h2>Auto-Generated IDs (No Manual IDs Required)</h2>
+            <p>This accordion demonstrates the new auto-ID feature. No manual IDs are provided - they are automatically generated as auto-0, auto-1, auto-2, etc.</p>
+            <div class="accordion-basic" aa-accordion>
+                <div class="accordion-toggle" aa-accordion-toggle>
+                    <span>Auto-Generated Item 1</span>
+                    <span>▼</span>
+                </div>
+                <div class="accordion-content" aa-accordion-content aa-animate aa-duration="0.6" aa-ease="power4.inOut">
+                    <div class="content-inner">
+                        <div class="content-wrapper">
+                            <div aa-accordion-animate="fade-up" aa-accordion-order="0">
+                                <p>This content has auto-generated ID "auto-0".</p>
+                            </div>
+                            <div aa-accordion-animate="slide-up" aa-accordion-order="1">
+                                <p>No manual IDs needed - they're automatically assigned!</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="accordion-toggle" aa-accordion-toggle>
+                    <span>Auto-Generated Item 2</span>
+                    <span>▼</span>
+                </div>
+                <div class="accordion-content" aa-accordion-content aa-animate aa-duration="0.6" aa-ease="power4.inOut">
+                    <div class="content-inner">
+                        <div class="content-wrapper">
+                            <div aa-accordion-animate="text-slide-up" aa-accordion-order="0" aa-split="words">
+                                <p>This content has auto-generated ID "auto-1".</p>
+                            </div>
+                            <div aa-accordion-animate="scale" aa-accordion-order="1">
+                                <p>Works with all animation types!</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="accordion-toggle" aa-accordion-toggle aa-accordion-initial>
+                    <span>Auto-Generated Item 3 (Initially Open)</span>
+                    <span>▼</span>
+                </div>
+                <div class="accordion-content" aa-accordion-content aa-animate aa-duration="0.6" aa-ease="power4.inOut">
+                    <div class="content-inner">
+                        <div class="content-wrapper">
+                            <div aa-accordion-animate="appear-up" aa-accordion-order="0">
+                                <p>This content has auto-generated ID "auto-2" and is initially open.</p>
+                            </div>
+                            <div aa-accordion-animate="text-fade" aa-accordion-order="1" aa-split="chars">
+                                <p>Even complex animations work with auto-generated IDs!</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Mixed Manual and Auto IDs Section -->
+        <div class="section">
+            <h2>Mixed Manual and Auto-Generated IDs</h2>
+            <p>This accordion shows that manual IDs take precedence over auto-generated ones.</p>
+            <div class="accordion-basic" aa-accordion>
+                <div class="accordion-toggle" aa-accordion-toggle="manual-1">
+                    <span>Manual ID: "manual-1"</span>
+                    <span>▼</span>
+                </div>
+                <div class="accordion-content" aa-accordion-content="manual-1" aa-animate aa-duration="0.6" aa-ease="power4.inOut">
+                    <div class="content-inner">
+                        <div class="content-wrapper">
+                            <div aa-accordion-animate="fade" aa-accordion-order="0">
+                                <p>This uses the manual ID "manual-1".</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="accordion-toggle" aa-accordion-toggle>
+                    <span>Auto-Generated ID (would be "auto-0" but manual ID above takes precedence)</span>
+                    <span>▼</span>
+                </div>
+                <div class="accordion-content" aa-accordion-content aa-animate aa-duration="0.6" aa-ease="power4.inOut">
+                    <div class="content-inner">
+                        <div class="content-wrapper">
+                            <div aa-accordion-animate="slide-up" aa-accordion-order="0">
+                                <p>This gets auto-generated ID "auto-1" (since manual-1 is already taken).</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Multiple Accordions Section -->
+        <div class="section">
+            <h2>Multiple Accordions with Auto-Generated IDs</h2>
+            <p>This section demonstrates that multiple accordions work independently with auto-generated IDs. Each accordion has its own set of auto-0, auto-1, auto-2, etc.</p>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem;">
+                <div>
+                    <h3>Accordion 1</h3>
+                    <div class="accordion-basic" aa-accordion>
+                        <div class="accordion-toggle" aa-accordion-toggle aa-accordion-initial>
+                            <span>Item 1 (auto-0)</span>
+                            <span>▼</span>
+                        </div>
+                        <div class="accordion-content" aa-accordion-content aa-animate aa-duration="0.6" aa-ease="power4.inOut">
+                            <div class="content-inner">
+                                <div class="content-wrapper">
+                                    <div aa-accordion-animate="fade" aa-accordion-order="0">
+                                        <p>Content for Accordion 1, Item 1 (auto-0)</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="accordion-toggle" aa-accordion-toggle>
+                            <span>Item 2 (auto-1)</span>
+                            <span>▼</span>
+                        </div>
+                        <div class="accordion-content" aa-accordion-content aa-animate aa-duration="0.6" aa-ease="power4.inOut">
+                            <div class="content-inner">
+                                <div class="content-wrapper">
+                                    <div aa-accordion-animate="slide-up" aa-accordion-order="0">
+                                        <p>Content for Accordion 1, Item 2 (auto-1)</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div>
+                    <h3>Accordion 2</h3>
+                    <div class="accordion-basic" aa-accordion>
+                        <div class="accordion-toggle" aa-accordion-toggle>
+                            <span>Item 1 (auto-0)</span>
+                            <span>▼</span>
+                        </div>
+                        <div class="accordion-content" aa-accordion-content aa-animate aa-duration="0.6" aa-ease="power4.inOut">
+                            <div class="content-inner">
+                                <div class="content-wrapper">
+                                    <div aa-accordion-animate="scale" aa-accordion-order="0">
+                                        <p>Content for Accordion 2, Item 1 (auto-0)</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="accordion-toggle" aa-accordion-toggle aa-accordion-initial>
+                            <span>Item 2 (auto-1)</span>
+                            <span>▼</span>
+                        </div>
+                        <div class="accordion-content" aa-accordion-content aa-animate aa-duration="0.6" aa-ease="power4.inOut">
+                            <div class="content-inner">
+                                <div class="content-wrapper">
+                                    <div aa-accordion-animate="text-slide-up" aa-accordion-order="0" aa-split="words">
+                                        <p>Content for Accordion 2, Item 2 (auto-1)</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="accordion-toggle" aa-accordion-toggle>
+                            <span>Item 3 (auto-2)</span>
+                            <span>▼</span>
+                        </div>
+                        <div class="accordion-content" aa-accordion-content aa-animate aa-duration="0.6" aa-ease="power4.inOut">
+                            <div class="content-inner">
+                                <div class="content-wrapper">
+                                    <div aa-accordion-animate="appear-up" aa-accordion-order="0">
+                                        <p>Content for Accordion 2, Item 3 (auto-2)</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div>
+                <h3>Accordion 3 (Multi-accordion)</h3>
+                <div class="accordion-basic" aa-accordion="multi">
+                    <div class="accordion-toggle" aa-accordion-toggle>
+                        <span>Multi Item 1 (auto-0)</span>
+                        <span>▼</span>
+                    </div>
+                    <div class="accordion-content" aa-accordion-content aa-animate aa-duration="0.6" aa-ease="power4.inOut">
+                        <div class="content-inner">
+                            <div class="content-wrapper">
+                                <div aa-accordion-animate="fade-up" aa-accordion-order="0">
+                                    <p>Multi-accordion allows multiple items to be open simultaneously.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="accordion-toggle" aa-accordion-toggle>
+                        <span>Multi Item 2 (auto-1)</span>
+                        <span>▼</span>
+                    </div>
+                    <div class="accordion-content" aa-accordion-content aa-animate aa-duration="0.6" aa-ease="power4.inOut">
+                        <div class="content-inner">
+                            <div class="content-wrapper">
+                                <div aa-accordion-animate="slide-left" aa-accordion-order="0">
+                                    <p>Each accordion maintains its own auto-generated ID sequence.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script src="../dist/AlrdyAnimate.js"></script>

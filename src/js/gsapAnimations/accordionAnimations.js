@@ -209,6 +209,27 @@ function initializeAccordions(animations = null, splitText = null) {
     const toggles = accordion.querySelectorAll('[aa-accordion-toggle]');
     const contents = accordion.querySelectorAll('[aa-accordion-content]');
     
+    // Auto-assign IDs if not provided
+    toggles.forEach((toggle, index) => {
+      if (!toggle.getAttribute('aa-accordion-toggle')) {
+        toggle.setAttribute('aa-accordion-toggle', `accordion-${index}`);
+      }
+    });
+    
+    contents.forEach((content, index) => {
+      if (!content.getAttribute('aa-accordion-content')) {
+        content.setAttribute('aa-accordion-content', `accordion-${index}`);
+      }
+    });
+    
+    // Auto-assign visual IDs if not provided (scoped to this accordion)
+    const visuals = accordion.querySelectorAll('[aa-accordion-visual]');
+    visuals.forEach((visual, index) => {
+      if (!visual.getAttribute('aa-accordion-visual')) {
+        visual.setAttribute('aa-accordion-visual', `accordion-${index}`);
+      }
+    });
+    
     // Autoplay variables
     let progressTween = null;
     let currentAutoplayIndex = 0;
@@ -218,10 +239,6 @@ function initializeAccordions(animations = null, splitText = null) {
     // Initialize accordion content
     contents.forEach((content) => {
       const contentId = content.getAttribute('aa-accordion-content');
-      if (!contentId) {
-        console.warn('Accordion content missing ID:', content);
-        return;
-      }
       
       content.setAttribute('aa-accordion-status', 'inactive');
       
@@ -237,7 +254,7 @@ function initializeAccordions(animations = null, splitText = null) {
       });
       
       // Setup connected visual
-      const connectedVisual = document.querySelector(`[aa-accordion-visual="${contentId}"]`);
+      const connectedVisual = accordion.querySelector(`[aa-accordion-visual="${contentId}"]`);
       if (connectedVisual) {
         connectedVisual.setAttribute('aa-accordion-status', 'inactive');
         gsap.set(connectedVisual, { visibility: 'hidden' });
@@ -256,10 +273,6 @@ function initializeAccordions(animations = null, splitText = null) {
     // Initialize toggles
     toggles.forEach((toggle) => {
       const toggleId = toggle.getAttribute('aa-accordion-toggle');
-      if (!toggleId) {
-        console.warn('Accordion toggle missing ID:', toggle);
-        return;
-      }
       
       toggle.setAttribute('aa-accordion-status', 'inactive');
       const connectedContent = accordion.querySelector(`[aa-accordion-content="${toggleId}"]`);
@@ -269,7 +282,7 @@ function initializeAccordions(animations = null, splitText = null) {
       }
       
       // Setup connected visual even if there's no content
-      const connectedVisual = document.querySelector(`[aa-accordion-visual="${toggleId}"]`);
+      const connectedVisual = accordion.querySelector(`[aa-accordion-visual="${toggleId}"]`);
       if (connectedVisual && !connectedContent) {
         connectedVisual.setAttribute('aa-accordion-status', 'inactive');
         gsap.set(connectedVisual, { visibility: 'hidden' });
@@ -477,7 +490,7 @@ function initializeAccordions(animations = null, splitText = null) {
 
     const { duration, delay: accordionDelay } = content ? getElementParams(content, 'accordion') : getElementParams(toggle, 'accordion');
     const { toggleId } = getElementParams(toggle, 'accordion');
-    const connectedVisual = document.querySelector(`[aa-accordion-visual="${toggleId}"]`);
+    const connectedVisual = accordion.querySelector(`[aa-accordion-visual="${toggleId}"]`);
     
     if (content) {
       gsap.set(content, { gridTemplateRows: '1fr' });
@@ -577,7 +590,7 @@ function initializeAccordions(animations = null, splitText = null) {
 
     const { duration } = content ? getElementParams(content, 'accordion') : getElementParams(toggle, 'accordion');
     const { toggleId } = getElementParams(toggle, 'accordion');
-    const connectedVisual = document.querySelector(`[aa-accordion-visual="${toggleId}"]`);
+    const connectedVisual = accordion.querySelector(`[aa-accordion-visual="${toggleId}"]`);
 
     // Reset progress bar
     const circle = toggle.querySelector('circle[aa-accordion-progress="circle"]');
