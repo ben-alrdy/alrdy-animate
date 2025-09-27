@@ -895,6 +895,15 @@ Accessible accordion functionality with GSAP animations. Create expandable/colla
 - `aa-accordion="autoplay"` - Autoplay accordion with progress indicators
   - Add `aa-duration` to define how long one autoplay cycle takes
   - Optionally add `aa-accordion-progress` to another element to visualize the progress; accepts values `width`, `height`, `circle`
+- `aa-accordion="scroll"` - Scroll-driven sticky accordion
+  - Accordion becomes pinned when scrolled into view
+  - Opens accordions sequentially as user scrolls
+  - Progress bars fill based on scroll position
+  - Toggle elements are not clickable (controlled by scroll only)
+  - Use `aa-distance` to define scroll distance per accordion in viewport height units (default: 100, meaning 100vh)
+  - Use `aa-scroll-start` to control when pinning starts (default: "top 20%")
+  - Use `aa-scrub` to control scroll scrubbing behavior (default: true, accepts true/false or number)
+  - Use `aa-accordion-initial` on the first accordion to have it open before reaching the trigger
 
 **Element Attributes:**
 - `aa-accordion-toggle=ID` - Marks the clickable toggle element (ID optional - auto-generated if not provided)
@@ -945,9 +954,12 @@ Use `custom-*` to animate from CSS-defined positions to zero:
 | Attribute | Values | Default | Description |
 |-----------|--------|---------|-------------|
 | `aa-accordion` | Accordion type | - | Accordion behavior |
-| `aa-duration` | Number (seconds) | `5` (autoplay), `0.2` (inner) | Duration |
+| `aa-duration` | Number (seconds) | `5` (autoplay), `0.2` (inner) | Duration for autoplay and inner animations |
+| `aa-distance` | Number (vh units) | `100` (scroll) | Scroll distance per accordion (scroll accordion only) |
 | `aa-ease` | Easing function | `power4.out` | Animation easing |
 | `aa-delay` | Number (seconds) | `0.3` | Delay before inner animations |
+| `aa-scroll-start` | Position | `top 20%` (scroll) | When pinning starts (scroll accordion) |
+| `aa-pin-spacing` | Boolean | `true` | Pin spacing (scroll accordion) |
 | `aa-accordion-toggle` | ID | - | Toggle element |
 | `aa-accordion-content` | ID | - | Content element |
 | `aa-accordion-visual` | ID | - | Connected visual |
