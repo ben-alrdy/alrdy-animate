@@ -296,6 +296,12 @@
     }
 
 
+    /*
+    *
+    * HOVER TRANSITIONS 
+    *
+    */
+
 
     // Default underline for non-hover devices
     [aa-hover="underline"] {
@@ -314,11 +320,6 @@
     }
 
     @media (hover:hover) and (pointer:fine){
-      /*
-      *
-      * HOVER TRANSITIONS 
-      *
-      */
 
 
       /*
