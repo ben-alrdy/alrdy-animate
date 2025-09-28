@@ -314,6 +314,18 @@ function updateProgressBars(toggles, activeIndex, progress, accordionCount) {
   });
 }
 
+function parseResponsiveAttribute(attribute, defaultValue) {
+  if (!attribute) return defaultValue;
+  
+  if (attribute.includes('|')) {
+    const [desktop, mobile] = attribute.split('|');
+    const isMobile = window.innerWidth < 768;
+    return isMobile ? mobile.trim() : desktop.trim();
+  }
+  
+  return attribute.trim();
+}
+
 
 // 
 // Core accordion functions (used by all types)
@@ -748,8 +760,9 @@ function initializeAutoplayAccordion(accordion, toggles, timelines) {
 function initializeScrollAccordion(accordion, toggles, timelines) {
   if (!window.ScrollTrigger) return;
   
-  // Get configuration
-  const scrollStart = accordion.getAttribute('aa-scroll-start') || 'top 20%';
+  // Get configuration with mobile support
+  const scrollStartAttr = accordion.getAttribute('aa-scroll-start') || 'top 20%';
+  const scrollStart = parseResponsiveAttribute(scrollStartAttr, 'top 20%');
   const distanceAttr = accordion.getAttribute('aa-distance') || '100';
   const scrubValue = accordion.getAttribute('aa-scrub') || 'true';
   const accordionCount = toggles.length;
@@ -816,7 +829,7 @@ function initializeScrollAccordion(accordion, toggles, timelines) {
   });
   
   // Create ScrollTrigger to scrub the progress tween
-  ScrollTrigger.create({
+  const scrollTrigger = ScrollTrigger.create({
     trigger: accordion,
     start: scrollStart,
     end: `+=${totalScrollDistance}`,
@@ -825,6 +838,42 @@ function initializeScrollAccordion(accordion, toggles, timelines) {
     scrub: scrubValue ? (parseFloat(scrubValue) || true) : true,
     animation: progressTween
   });
+  
+  // Handle responsive updates for aa-scroll-start
+  if (scrollStartAttr.includes('|')) {
+    let prevWidth = window.innerWidth;
+    
+    const handleResize = () => {
+      const currentWidth = window.innerWidth;
+      const crossedBreakpoint = (prevWidth >= 768 && currentWidth < 768) || (prevWidth < 768 && currentWidth >= 768);
+      
+      if (crossedBreakpoint) {
+        const newScrollStart = parseResponsiveAttribute(scrollStartAttr, 'top 20%');
+        
+        // Update ScrollTrigger with new start position
+        scrollTrigger.vars.start = newScrollStart;
+        scrollTrigger.refresh();
+        
+        prevWidth = currentWidth;
+      }
+    };
+    
+    // Use debounced resize handler
+    let resizeTimeout;
+    const debouncedResize = () => {
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(handleResize, 250);
+    };
+    
+    window.addEventListener('resize', debouncedResize);
+    
+    // Handle orientation change on mobile
+    if (window.matchMedia('(hover: none)').matches) {
+      window.addEventListener('orientationchange', () => {
+        setTimeout(debouncedResize, 100);
+      });
+    }
+  }
 }
 
 // 
