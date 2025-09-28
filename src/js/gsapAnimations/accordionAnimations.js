@@ -511,7 +511,7 @@ function closeAccordion(toggle, content, accordion, timelines) {
 // 
 
 // Initialize basic/multi accordion
-function initializeBasicAccordion(accordion, toggles, timelines, isMulti) {
+function initializeBasicAccordion(accordion, toggles, timelines, isMulti, animations, splitText) {
   toggles.forEach((toggle) => {
     const toggleId = toggle.getAttribute('aa-accordion-toggle');
     
@@ -565,7 +565,7 @@ function initializeBasicAccordion(accordion, toggles, timelines, isMulti) {
 }
 
 // Initialize autoplay accordion
-function initializeAutoplayAccordion(accordion, toggles, timelines) {
+function initializeAutoplayAccordion(accordion, toggles, timelines, animations, splitText) {
   let progressTween = null;
   let currentAutoplayIndex = 0;
   let currentlyOpenAccordion = null;
@@ -902,9 +902,9 @@ function initializeAccordions(animations = null, splitText = null) {
      if (isScroll) {
        initializeScrollAccordion(accordion, toggles, timelines);
      } else if (isAutoplay) {
-       initializeAutoplayAccordion(accordion, toggles, timelines);
+       initializeAutoplayAccordion(accordion, toggles, timelines, animations, splitText);
      } else {
-       initializeBasicAccordion(accordion, toggles, timelines, isMulti);
+       initializeBasicAccordion(accordion, toggles, timelines, isMulti, animations, splitText);
      }
   });
 
