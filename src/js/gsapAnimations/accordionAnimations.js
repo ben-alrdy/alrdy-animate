@@ -271,7 +271,11 @@ function initializeAccordionElements(accordion, toggles, contents, timelines, an
   if (initialToggle) {
     const initialToggleId = initialToggle.getAttribute('aa-accordion-toggle');
     const initialContent = accordion.querySelector(`[aa-accordion-content="${initialToggleId}"]`);
-    openAccordion(initialToggle, initialContent, accordion, timelines);
+    
+    // Add a small delay to ensure all timelines are properly set up before opening
+    gsap.delayedCall(0.1, () => {
+      openAccordion(initialToggle, initialContent, accordion, timelines);
+    });
   }
 }
 // Helper function to update progress bars for type "scroll"
@@ -415,14 +419,11 @@ function openAccordion(toggle, content, accordion, timelines) {
       const innerTimeline = timelines.get(connectedVisual);
       if (innerTimeline) {
         const { delay: visualDelay } = getElementParams(connectedVisual, 'animation');
-        const playInnerAnimation = () => {
-          if (visualDelay > 0) {
-            gsap.delayedCall(visualDelay, () => innerTimeline.play());
-          } else {
-            innerTimeline.play();
-          }
-        };
-        playInnerAnimation();
+        if (visualDelay > 0) {
+          gsap.delayedCall(visualDelay, () => innerTimeline.play());
+        } else {
+          innerTimeline.play();
+        }
       }
     }
   }
