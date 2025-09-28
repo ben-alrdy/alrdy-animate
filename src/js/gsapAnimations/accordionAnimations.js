@@ -17,7 +17,9 @@ const CUSTOM_ANIMATION_PROPS = {
   x: 0, y: 0, xPercent: 0, yPercent: 0, opacity: 1, scale: 1
 };
 
-// Utility functions
+//
+// Helper Functions
+//
 function getElementParams(element, type = 'animation') {
   const orderAttr = element.getAttribute('aa-accordion-order') || '';
   const [orderStr, percentStr] = orderAttr.split('-');
@@ -188,7 +190,6 @@ function setupElementEventListeners(toggle, handleToggle) {
   });
 }
 
-
 function autoAssignIds(accordion) {
   const toggles = accordion.querySelectorAll('[aa-accordion-toggle]');
   const contents = accordion.querySelectorAll('[aa-accordion-content]');
@@ -213,8 +214,110 @@ function autoAssignIds(accordion) {
   });
 }
 
+function initializeAccordionElements(accordion, toggles, contents, timelines, animations, splitText) {
+  const initialToggle = accordion.querySelector('[aa-accordion-initial]');
+  
+  // Set all toggles to inactive initially
+  toggles.forEach((toggle) => {
+    const toggleId = toggle.getAttribute('aa-accordion-toggle');
+    const content = accordion.querySelector(`[aa-accordion-content="${toggleId}"]`);
+    const visual = accordion.querySelector(`[aa-accordion-visual="${toggleId}"]`);
+    
+    // Set initial states
+    toggle.setAttribute('aa-accordion-status', 'inactive');
+    toggle.setAttribute('aria-expanded', 'false');
+    
+    if (content) {
+      content.setAttribute('aa-accordion-status', 'inactive');
+    }
+    
+    if (visual) {
+      visual.setAttribute('aa-accordion-status', 'inactive');
+      gsap.set(visual, { visibility: 'hidden' });
+    }
+  });
+  
+  // Initialize content timelines and animations
+  contents.forEach((content) => {
+    const contentId = content.getAttribute('aa-accordion-content');
+    
+    // Create timeline and set initial state for content
+    const tl = createTimeline(content, animations, splitText, false);
+    timelines.set(content, tl);
+    
+    // Set initial animation states for content elements
+    const animatedElements = collectAnimatedElements(content, true);
+    animatedElements.forEach(element => {
+      const { animationType } = getElementParams(element, 'animation');
+      setInitialElementState(element, animationType);
+    });
+    
+    // Setup connected visual timeline
+    const connectedVisual = accordion.querySelector(`[aa-accordion-visual="${contentId}"]`);
+    if (connectedVisual) {
+      const visualTimeline = createTimeline(connectedVisual, animations, splitText, true);
+      timelines.set(connectedVisual, visualTimeline);
+      
+      // Set initial animation states for visual elements
+      const visualAnimatedElements = collectAnimatedElements(connectedVisual, true);
+      visualAnimatedElements.forEach(element => {
+        const { animationType } = getElementParams(element, 'animation');
+        setInitialElementState(element, animationType);
+      });
+    }
+  });
+  
+  // Open initial accordion if specified
+  if (initialToggle) {
+    const initialToggleId = initialToggle.getAttribute('aa-accordion-toggle');
+    const initialContent = accordion.querySelector(`[aa-accordion-content="${initialToggleId}"]`);
+    openAccordion(initialToggle, initialContent, accordion, timelines);
+  }
+}
+// Helper function to update progress bars for type "scroll"
+function updateProgressBars(toggles, activeIndex, progress, accordionCount) {
+  toggles.forEach((toggle, index) => {
+    const progressElement = toggle.querySelector('[aa-accordion-progress]');
+    if (!progressElement) return;
+    
+    const progressType = progressElement.getAttribute('aa-accordion-progress') || 'width';
+    
+    if (index === activeIndex) {
+      // Calculate progress for current accordion
+      const accordionProgress = (progress * accordionCount) - index;
+      const clampedProgress = Math.max(0, Math.min(1, accordionProgress));
+      
+      if (progressType === 'circle') {
+        const circle = progressElement.querySelector('circle[aa-accordion-progress="circle"]');
+        if (circle) {
+          const radius = parseFloat(circle.getAttribute('r')) || 25;
+          const circumference = 2 * Math.PI * radius;
+          const offset = circumference - (clampedProgress * circumference);
+          circle.style.strokeDashoffset = offset;
+        }
+      } else {
+        progressElement.style[progressType] = `${clampedProgress * 100}%`;
+      }
+    } else {
+      // Reset progress for inactive accordions
+      if (progressType === 'circle') {
+        const circle = progressElement.querySelector('circle[aa-accordion-progress="circle"]');
+        if (circle) {
+          const radius = parseFloat(circle.getAttribute('r')) || 25;
+          const circumference = 2 * Math.PI * radius;
+          circle.style.strokeDashoffset = circumference;
+        }
+      } else {
+        progressElement.style[progressType] = '0%';
+      }
+    }
+  });
+}
 
+
+// 
 // Core accordion functions (used by all types)
+// 
 function openAccordion(toggle, content, accordion, timelines) {
   toggle.setAttribute('aa-accordion-status', 'active');
   if (content) {
@@ -390,41 +493,10 @@ function closeAccordion(toggle, content, accordion, timelines) {
   });
 }
 
-// Initialize accordion content and visuals
-function initializeAccordionElements(accordion, contents, timelines, animations, splitText) {
-  contents.forEach((content) => {
-    const contentId = content.getAttribute('aa-accordion-content');
-    
-    content.setAttribute('aa-accordion-status', 'inactive');
-    
-    // Create timeline and set initial state
-    const tl = createTimeline(content, animations, splitText, false);
-    timelines.set(content, tl);
-    
-    // Set initial states
-    const animatedElements = collectAnimatedElements(content, true);
-    animatedElements.forEach(element => {
-      const { animationType } = getElementParams(element, 'animation');
-      setInitialElementState(element, animationType);
-    });
-    
-    // Setup connected visual
-    const connectedVisual = accordion.querySelector(`[aa-accordion-visual="${contentId}"]`);
-    if (connectedVisual) {
-      connectedVisual.setAttribute('aa-accordion-status', 'inactive');
-      gsap.set(connectedVisual, { visibility: 'hidden' });
-      
-      const visualTimeline = createTimeline(connectedVisual, animations, splitText, true);
-      timelines.set(connectedVisual, visualTimeline);
-      
-      const visualAnimatedElements = collectAnimatedElements(connectedVisual, true);
-      visualAnimatedElements.forEach(element => {
-        const { animationType } = getElementParams(element, 'animation');
-        setInitialElementState(element, animationType);
-      });
-    }
-  });
-}
+
+// 
+// Main accordion types
+// 
 
 // Initialize basic/multi accordion
 function initializeBasicAccordion(accordion, toggles, timelines, isMulti) {
@@ -490,8 +562,6 @@ function initializeAutoplayAccordion(accordion, toggles, timelines) {
   // Set up toggles
   toggles.forEach((toggle) => {
     const toggleId = toggle.getAttribute('aa-accordion-toggle');
-    
-    toggle.setAttribute('aa-accordion-status', 'inactive');
     const connectedContent = accordion.querySelector(`[aa-accordion-content="${toggleId}"]`);
     
     if (connectedContent) {
@@ -501,9 +571,6 @@ function initializeAutoplayAccordion(accordion, toggles, timelines) {
     // Setup connected visual even if there's no content
     const connectedVisual = accordion.querySelector(`[aa-accordion-visual="${toggleId}"]`);
     if (connectedVisual && !connectedContent) {
-      connectedVisual.setAttribute('aa-accordion-status', 'inactive');
-      gsap.set(connectedVisual, { visibility: 'hidden' });
-      
       const visualTimeline = createTimeline(connectedVisual, animations, splitText, true);
       timelines.set(connectedVisual, visualTimeline);
       
@@ -677,7 +744,6 @@ function initializeAutoplayAccordion(accordion, toggles, timelines) {
   }
 }
 
-
 // Initialize scroll accordion with optimized approach
 function initializeScrollAccordion(accordion, toggles, timelines) {
   if (!window.ScrollTrigger) return;
@@ -697,13 +763,6 @@ function initializeScrollAccordion(accordion, toggles, timelines) {
   
   // Track current active accordion
   let currentActiveIndex = hasInitialAccordion ? 0 : -1;
-  
-  // Open initial accordion if specified
-  if (hasInitialAccordion) {
-    const initialToggleId = initialAccordion.getAttribute('aa-accordion-toggle');
-    const initialContent = accordion.querySelector(`[aa-accordion-content="${initialToggleId}"]`);
-    openAccordion(initialAccordion, initialContent, accordion, timelines);
-  }
   
   // Disable click functionality for scroll-driven accordions
   toggles.forEach((toggle) => {
@@ -768,47 +827,10 @@ function initializeScrollAccordion(accordion, toggles, timelines) {
   });
 }
 
-// Helper function to update progress bars efficiently
-function updateProgressBars(toggles, activeIndex, progress, accordionCount) {
-  toggles.forEach((toggle, index) => {
-    const progressElement = toggle.querySelector('[aa-accordion-progress]');
-    if (!progressElement) return;
-    
-    const progressType = progressElement.getAttribute('aa-accordion-progress') || 'width';
-    
-    if (index === activeIndex) {
-      // Calculate progress for current accordion
-      const accordionProgress = (progress * accordionCount) - index;
-      const clampedProgress = Math.max(0, Math.min(1, accordionProgress));
-      
-      if (progressType === 'circle') {
-        const circle = progressElement.querySelector('circle[aa-accordion-progress="circle"]');
-        if (circle) {
-          const radius = parseFloat(circle.getAttribute('r')) || 25;
-          const circumference = 2 * Math.PI * radius;
-          const offset = circumference - (clampedProgress * circumference);
-          circle.style.strokeDashoffset = offset;
-        }
-      } else {
-        progressElement.style[progressType] = `${clampedProgress * 100}%`;
-      }
-    } else {
-      // Reset progress for inactive accordions
-      if (progressType === 'circle') {
-        const circle = progressElement.querySelector('circle[aa-accordion-progress="circle"]');
-        if (circle) {
-          const radius = parseFloat(circle.getAttribute('r')) || 25;
-          const circumference = 2 * Math.PI * radius;
-          circle.style.strokeDashoffset = circumference;
-        }
-      } else {
-        progressElement.style[progressType] = '0%';
-      }
-    }
-  });
-}
-
+// 
 // Main initialization function
+// 
+
 function initializeAccordions(animations = null, splitText = null) {
   const accordions = document.querySelectorAll('[aa-accordion]');
   const timelines = new Map();
@@ -824,16 +846,8 @@ function initializeAccordions(animations = null, splitText = null) {
     // Auto-assign IDs if not provided
     autoAssignIds(accordion);
     
-    // Initialize accordion content and visuals
-    initializeAccordionElements(accordion, contents, timelines, animations, splitText);
-    
-    // Set initial active accordion
-    const initialToggle = accordion.querySelector('[aa-accordion-initial]');
-    if (initialToggle) {
-      const toggleId = initialToggle.getAttribute('aa-accordion-toggle');
-      const initialContent = accordion.querySelector(`[aa-accordion-content="${toggleId}"]`);
-      openAccordion(initialToggle, initialContent, accordion, timelines);
-    }
+    // Initialize accordion elements: states, timelines, and animations
+    initializeAccordionElements(accordion, toggles, contents, timelines, animations, splitText);
     
      // Initialize based on accordion type
      if (isScroll) {
