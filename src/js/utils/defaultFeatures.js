@@ -99,56 +99,44 @@ export function initializeFormSubmitButton() {
     }
 
     // Detect element type and set appropriate attributes
-    const isAnchor = button.tagName.toLowerCase() === 'a';
-    const isButton = button.tagName.toLowerCase() === 'button';
+    const tagName = button.tagName.toLowerCase();
+    const isAnchor = tagName === 'a';
+    const isButton = tagName === 'button';
 
     // Set proper attributes based on element type
     if (isAnchor) {
-      // Remove href to prevent navigation
       button.removeAttribute('href');
-      // Add role for accessibility
       button.setAttribute('role', 'button');
-      // Add tabindex if not present
       if (!button.hasAttribute('tabindex')) {
         button.setAttribute('tabindex', '0');
       }
     } else if (isButton) {
-      // Ensure button has proper type
       if (!button.hasAttribute('type')) {
         button.setAttribute('type', 'button');
       }
     } else {
-      console.warn('[AlrdyAnimate] Unsupported element type for form submit:', button.tagName);
+      console.warn('[AlrdyAnimate] Unsupported element type for form submit:', tagName);
       return;
     }
 
-    // Optional sub-elements inside the button for fine-grained control
+    // Cache DOM queries and configuration
     const loadElement = button.querySelector('[aa-submit-load]');
     const loadIndicator = button.querySelector('[aa-submit-load-indicator]');
-
+    const loadingDelay = button.hasAttribute('aa-submit-loading-delay') ? parseFloat(button.getAttribute('aa-submit-loading-delay')) : 0.3;
+    const successDelay = button.hasAttribute('aa-submit-success-delay') ? parseFloat(button.getAttribute('aa-submit-success-delay')) : 1.2;
+    const errorDelay = button.hasAttribute('aa-submit-error-delay') ? parseFloat(button.getAttribute('aa-submit-error-delay')) : 1.2;
+    const useWebflowSuccess = button.getAttribute('aa-submit-webflow-success') !== 'false';
+    
     // State classes (customize in your CSS)
     const loadingClass = 'is-loading';
     const successClass = 'is-success';
     const errorClass = 'is-error';
-
-    // Timings (overridable via data-attributes on the button)
-    const loadingDelay = getNumberAttr(button, 'aa-submit-loading-delay', 300);
-    const successDelay = getNumberAttr(button, 'aa-submit-success-delay', 1200);
-    const errorDelay = getNumberAttr(button, 'aa-submit-error-delay', 1200);
     
-    // Webflow success handling (default: true)
-    const useWebflowSuccess = button.getAttribute('aa-submit-webflow-success') !== 'false';
-
-    // Webflow form elements
+    // Webflow form elements - cache these lookups
     const formWrapper = form.closest('.w-form');
     const successMessage = formWrapper?.querySelector('.w-form-done');
     const errorMessage = formWrapper?.querySelector('.w-form-fail');
 
-    function getNumberAttr(element, attrName, fallback) {
-      const val = element.getAttribute(attrName);
-      const num = Number(val);
-      return Number.isFinite(num) ? num : fallback;
-    }
 
     function beginLoading() {
       // Handle disabled state differently for anchors vs buttons
@@ -188,17 +176,7 @@ export function initializeFormSubmitButton() {
         form.style.display = 'none';
       }
 
-      setTimeout(() => {
-        button.classList.remove(successClass);
-        
-        // Re-enable button
-        if (isAnchor) {
-          button.style.pointerEvents = 'auto';
-          button.removeAttribute('aria-disabled');
-        } else {
-          button.disabled = false;
-        }
-      }, successDelay);
+      setTimeout(() => resetButton(), successDelay);
     }
 
     function handleError() {
@@ -209,31 +187,33 @@ export function initializeFormSubmitButton() {
         errorMessage.style.display = 'block';
       }
 
-      setTimeout(() => {
-        button.classList.remove(errorClass);
-        
-        // Re-enable button
-        if (isAnchor) {
-          button.style.pointerEvents = 'auto';
-          button.removeAttribute('aria-disabled');
-        } else {
-          button.disabled = false;
-        }
-      }, errorDelay);
+      setTimeout(() => resetButton(), errorDelay);
+    }
+
+    function resetButton() {
+      button.classList.remove(successClass, errorClass);
+      
+      // Re-enable button
+      if (isAnchor) {
+        button.style.pointerEvents = 'auto';
+        button.removeAttribute('aria-disabled');
+      } else {
+        button.disabled = false;
+      }
     }
 
     function submitForm() {
       const action = form.getAttribute('action') || window.location.href;
       const method = (form.getAttribute('method') || 'POST').toUpperCase();
 
-      let fetchOptions = {
+      // Prepare fetch options
+      const fetchOptions = {
         method,
-        headers: {
-          'Accept': 'application/json'
-        }
+        headers: { 'Accept': 'application/json' }
       };
 
-      // Handle GET requests differently - append form data to URL
+      // Handle GET vs POST differently
+      let url = action;
       if (method === 'GET') {
         const formData = new FormData(form);
         const params = new URLSearchParams();
@@ -245,64 +225,40 @@ export function initializeFormSubmitButton() {
         
         // Append params to URL
         const separator = action.includes('?') ? '&' : '?';
-        const url = `${action}${separator}${params.toString()}`;
-        
-        fetchOptions = {
-          method: 'GET',
-          headers: {
-            'Accept': 'application/json'
-          }
-        };
-        
-        fetch(url, fetchOptions)
-          .then((response) => {
-            setTimeout(() => endLoading(), loadingDelay);
-
-            if (!response.ok) {
-              return response
-                .json()
-                .catch(() => ({ success: false }))
-                .then((data) => {
-                  throw { networkError: true, data, statusText: response.statusText };
-                });
-            }
-            return response.json().catch(() => ({ success: true }));
-          })
-          .then((data) => {
-            const ok = (typeof data?.success === 'boolean') ? data.success : true;
-            setTimeout(() => (ok ? handleSuccess() : handleError()), 0);
-          })
-          .catch((err) => {
-            console.error('[AlrdyAnimate] Form submit error:', err);
-            setTimeout(() => handleError(), 0);
-          });
+        url = `${action}${separator}${params.toString()}`;
       } else {
-        // Handle POST requests with body
         fetchOptions.body = new FormData(form);
-        
-        fetch(action, fetchOptions)
-          .then((response) => {
-            setTimeout(() => endLoading(), loadingDelay);
+      }
+      
+      // Single fetch handler for both GET and POST
+      fetch(url, fetchOptions)
+        .then(handleResponse)
+        .then(handleSuccessResponse)
+        .catch(handleFetchError);
+    }
 
-            if (!response.ok) {
-              return response
-                .json()
-                .catch(() => ({ success: false }))
-                .then((data) => {
-                  throw { networkError: true, data, statusText: response.statusText };
-                });
-            }
-            return response.json().catch(() => ({ success: true }));
-          })
+    function handleResponse(response) {
+      setTimeout(() => endLoading(), loadingDelay * 1000);
+
+      if (!response.ok) {
+        return response
+          .json()
+          .catch(() => ({ success: false }))
           .then((data) => {
-            const ok = (typeof data?.success === 'boolean') ? data.success : true;
-            setTimeout(() => (ok ? handleSuccess() : handleError()), 0);
-          })
-          .catch((err) => {
-            console.error('[AlrdyAnimate] Form submit error:', err);
-            setTimeout(() => handleError(), 0);
+            throw { networkError: true, data, statusText: response.statusText };
           });
       }
+      return response.json().catch(() => ({ success: true }));
+    }
+
+    function handleSuccessResponse(data) {
+      const ok = (typeof data?.success === 'boolean') ? data.success : true;
+      setTimeout(() => (ok ? handleSuccess() : handleError()), 0);
+    }
+
+    function handleFetchError(err) {
+      console.error('[AlrdyAnimate] Form submit error:', err);
+      setTimeout(() => handleError(), 0);
     }
 
     function handleClick(event) {

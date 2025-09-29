@@ -1470,9 +1470,9 @@ Replace default Webflow form submit buttons with custom styled buttons while mai
 | Attribute | Values | Default | Description |
 |-----------|--------|---------|-------------|
 | `aa-submit-button` | - | - | Enables custom submit button |
-| `aa-submit-loading-delay` | Number (ms) | `300` | How long to show loading state after response |
-| `aa-submit-success-delay` | Number (ms) | `1200` | How long to show success state |
-| `aa-submit-error-delay` | Number (ms) | `1200` | How long to show error state |
+| `aa-submit-loading-delay` | Number (seconds) | `0.3` | How long to show loading state after response |
+| `aa-submit-success-delay` | Number (seconds) | `1.2` | How long to show success state |
+| `aa-submit-error-delay` | Number (seconds) | `1.2` | How long to show error state |
 | `aa-submit-webflow-success` | `true`, `false` | `true` | Use Webflow's success handling (hide form, show success message) |
 | `aa-submit-load` | - | - | Element shown during loading |
 | `aa-submit-load-indicator` | - | - | Additional loading indicator |
@@ -1512,9 +1512,9 @@ Replace default Webflow form submit buttons with custom styled buttons while mai
     
     <!-- Custom submit button with loading states -->
     <button aa-submit-button 
-            aa-submit-loading-delay="500"
-            aa-submit-success-delay="2000"
-            aa-submit-error-delay="1500">
+            aa-submit-loading-delay="0.5"
+            aa-submit-success-delay="2"
+            aa-submit-error-delay="1.5">
       <span>Send Message</span>
       <span aa-submit-load hidden>Sending...</span>
       <div aa-submit-load-indicator hidden>⏳</div>
@@ -1543,8 +1543,8 @@ Replace default Webflow form submit buttons with custom styled buttons while mai
 <!-- Button that shows success/error states visually -->
 <button aa-submit-button 
         aa-submit-webflow-success="false"
-        aa-submit-success-delay="3000"
-        aa-submit-error-delay="3000">
+        aa-submit-success-delay="3"
+        aa-submit-error-delay="3">
   <span class="button-text">Send Message</span>
   <span aa-submit-load hidden>Sending...</span>
   <span class="button-success" hidden>✓ Message Sent!</span>
