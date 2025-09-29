@@ -4,7 +4,7 @@ import { handleLazyLoadedImages } from './utils/lazyLoadHandler';
 import { processChildren } from './utils/childrenHandler';
 import { getElementSettings, applyElementStyles } from './utils/elementAttributes';
 import { processTemplates, getFinalSettings, clearProcessedTemplates } from './utils/templateHandler';
-import { initializeScrollState, initializePlayStateObserver } from './utils/defaultFeatures';
+import { initializeScrollState, initializePlayStateObserver, initializeFormSubmitButton } from './utils/defaultFeatures';
 
 // Define these variables in the module scope
 let allAnimatedElements = null;
@@ -57,6 +57,7 @@ async function init(options = {}) {
     // Initialize core features
     initializeScrollState();
     initializePlayStateObserver();
+    initializeFormSubmitButton();
 
     // Process templates if specified
     const templates = processTemplates(initOptions);
