@@ -521,6 +521,27 @@ export function createSliderAnimations(gsap, Draggable) {
     return timeline;
   }
 
+  function normalizeAnimationType(animationType) {
+    // Normalize animation types and create a clear configuration object
+    return {
+      // Animation behavior
+      isLoop: animationType.includes('loop'),
+      isAutoplay: animationType.includes('snap') || animationType.includes('autoplay'),
+
+      // Direction
+      isVertical: animationType.includes('vertical'),
+      isReverse: animationType.includes('reverse'),
+      isCenter: animationType.includes('center'),
+      
+      // Interaction
+      isDraggable: animationType.includes('draggable'),
+      isHover: animationType.includes('hover'),
+      
+      // Original type for reference
+      originalType: animationType
+    };
+  }
+
   function initializeSlider(element, animationType, duration, ease, delay) {
     const items = gsap.utils.toArray('[aa-slider-item]', element);
     if (items.length === 0) {
@@ -528,19 +549,22 @@ export function createSliderAnimations(gsap, Draggable) {
       return;
     }
 
+    // Normalize animation types and create configuration
+    const sliderType = normalizeAnimationType(animationType);
+
     // Create shared state for hover tracking
     const sliderState = {
       isHovering: false
     };
 
     // Create the slider configuration
-    const config = setupSliderConfig(element, animationType, duration);
+    const config = setupSliderConfig(element, sliderType, duration);
 
     // Add navigation controls if they exist
     setupNavigationControls(element, items, config);
 
     // Initialize the slider based on direction
-    const slider = animationType.includes('vertical') 
+    const slider = sliderType.isVertical 
       ? verticalLoop(items, config) 
       : horizontalLoop(items, config);
     
@@ -548,20 +572,20 @@ export function createSliderAnimations(gsap, Draggable) {
     activeSliders.add(element);
 
     // Setup navigation listeners
-    setupNavigationListeners(element, items, slider, duration, ease, config, animationType, sliderState);
+    setupNavigationListeners(element, items, slider, duration, ease, config, sliderType, sliderState);
 
     // Setup autoplay if needed
-    if (animationType.includes('snap')) {
-      setupAutoplay(element, slider, animationType, duration, ease, delay, sliderState);
+    if (sliderType.isAutoplay) {
+      setupAutoplay(element, slider, sliderType, duration, ease, delay, sliderState);
     }
 
     // Setup drag functionality if needed
-    if (animationType.includes('draggable')) {
-      setupDragHandlers(element, slider, animationType, sliderState);
+    if (sliderType.isDraggable) {
+      setupDragHandlers(element, slider, sliderType, sliderState);
     }
 
     // If it's a continuous loop animation
-    if (animationType.includes('loop')) {
+    if (sliderType.isLoop) {
       // Create ScrollTrigger for visibility-based pausing
       slider.scrollTrigger = ScrollTrigger.create({
         trigger: element,
@@ -577,7 +601,7 @@ export function createSliderAnimations(gsap, Draggable) {
     return slider;
   }
 
-  function setupSliderConfig(element, animationType, duration) {
+  function setupSliderConfig(element, sliderType, duration) {
     const config = {
       speed: duration,
       repeat: -1,
@@ -591,32 +615,32 @@ export function createSliderAnimations(gsap, Draggable) {
     const gap = parseFloat(window.getComputedStyle(sliderItem.parentElement).gap) || 0;
 
     // Set padding based on direction
-    if (animationType.includes('vertical')) {
+    if (sliderType.isVertical) {
       config.paddingBottom = gap;
     } else {
       config.paddingRight = gap;
     }
 
-    if (animationType.includes('draggable')) {
+    if (sliderType.isDraggable) {
       config.draggable = true;
     }
 
-    if (animationType.includes('loop')) {
+    if (sliderType.isLoop) {
       config.paused = false;
     }
 
-    if (animationType.includes('reverse')) {
+    if (sliderType.isReverse) {
       config.reversed = true;
     }
 
-    if (animationType.includes('center')) {
+    if (sliderType.isCenter) {
       config.center = true;
     }
 
     return config;
   }
 
-  function setupAutoplay(element, slider, animationType, duration, ease, delay, sliderState) {
+  function setupAutoplay(element, slider, sliderType, duration, ease, delay, sliderState) {
     let autoplay;
     let progressAnimations = [];
     let isPausedByHover = false;
@@ -698,7 +722,7 @@ export function createSliderAnimations(gsap, Draggable) {
     const startAutoplay = () => {
       if (!autoplay) {
         const repeat = () => {
-          const direction = animationType.includes('reverse') ? 'previous' : 'next';
+          const direction = sliderType.isReverse ? 'previous' : 'next';
           
           slider[direction]({ duration, ease });
           
@@ -758,8 +782,8 @@ export function createSliderAnimations(gsap, Draggable) {
     slider.updateProgressBars = updateProgressBars;
     slider.resetAllProgressBars = resetAllProgressBars;
 
-    // Setup hover handlers for non-touch devices
-    if (!window.matchMedia('(hover: none)').matches) {
+    // Setup hover handlers for non-touch devices (only if hover is enabled)
+    if (!window.matchMedia('(hover: none)').matches && sliderType.isHover) {
       const handleMouseEnter = () => {
         sliderState.isHovering = true;
         if (autoplay && !autoplay.paused()) {
@@ -772,7 +796,7 @@ export function createSliderAnimations(gsap, Draggable) {
         if (isPausedByHover) {
           // We were paused by hover, so resume
           resumeAutoplay();
-        } else if (!autoplay && animationType.includes('snap') && !slider._isThrowing) {
+        } else if (!autoplay && sliderType.isAutoplay && !slider._isThrowing) {
           // No autoplay exists (after navigation), start fresh
           // But only if we're not in the middle of dragging/inertia
           startAutoplay();
@@ -804,14 +828,14 @@ export function createSliderAnimations(gsap, Draggable) {
     slider.pause();
   }
 
-  function setupDragHandlers(element, slider, animationType, sliderState) {
+  function setupDragHandlers(element, slider, sliderType, sliderState) {
     const originalHandlers = {
       onPressInit: slider.draggable.vars.onPressInit,
       onRelease: slider.draggable.vars.onRelease,
       onThrowComplete: slider.draggable.vars.onThrowComplete
     };
 
-    if (animationType.includes('draggable')) {
+    if (sliderType.isDraggable) {
       // Create all handlers
       const handlers = {
         onPressInit() {
@@ -842,13 +866,13 @@ export function createSliderAnimations(gsap, Draggable) {
           slider._isThrowing = false;
 
           // Restart autoplay after drag/inertia is complete
-          if (slider.startAutoplay && animationType.includes('snap')) {
+          if (slider.startAutoplay && sliderType.isAutoplay) {
             // Only start autoplay if not hovering
             if (!sliderState.isHovering) {
               slider.startAutoplay();
             }
             // If hovering, autoplay will start when user hovers out
-          } else if (animationType.includes('loop')) {
+          } else if (sliderType.isLoop) {
             slider.play();
           }
         }
@@ -969,7 +993,7 @@ export function createSliderAnimations(gsap, Draggable) {
     };
   }
 
-  function setupNavigationListeners(element, items, slider, duration, ease, config, animationType, sliderState) {
+  function setupNavigationListeners(element, items, slider, duration, ease, config, sliderType, sliderState) {
     if (element._sliderNav) {
       const { nextButton, prevButton, slideButtons } = element._sliderNav;
 
@@ -993,11 +1017,11 @@ export function createSliderAnimations(gsap, Draggable) {
 
         // Handle post-navigation logic
         gsap.delayedCall(0.1, () => {
-          if (animationType.includes('loop')) {
+          if (sliderType.isLoop) {
             gsap.delayedCall(1, () => {
               slider.resume();
             });
-          } else if (animationType.includes('snap')) {
+          } else if (sliderType.isAutoplay) {
             // Only start autoplay if not hovering
             if (!sliderState.isHovering) {
               slider.startAutoplay();
@@ -1026,7 +1050,7 @@ export function createSliderAnimations(gsap, Draggable) {
     }
 
     // Add click handlers for slider items unless on mobile
-    if (!animationType.includes('loop') && !window.matchMedia('(hover: none)').matches){ 
+    if (!sliderType.isLoop && !window.matchMedia('(hover: none)').matches){ 
       items.forEach((slide, i) => {
         slide.addEventListener('click', (event) => {
           // Check if we're clicking on the active slide
@@ -1044,7 +1068,7 @@ export function createSliderAnimations(gsap, Draggable) {
           
           // Start autoplay for the new active slide (only if not hovering)
           gsap.delayedCall(0.1, () => {
-            if (animationType.includes('snap')) {
+            if (sliderType.isAutoplay) {
               // Check hover state through the element's current hover status
               const currentlyHovering = element.matches(':hover') && !window.matchMedia('(hover: none)').matches;
               if (!currentlyHovering) {

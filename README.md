@@ -739,10 +739,11 @@ Add `aa-slider` to the wrapper that contains the slider elements. Optionally, ad
 
 **Feature Detection:**
 The slider system detects features by checking for keywords in the type:
-- `center` - Centers the active slide
-- `draggable` - Enables drag/swipe functionality
 - `loop` - Creates continuous looping animation
-- `snap` - Enables autoplay with snapping between slides
+- `autoplay` - Enables autoplay with snapping between slides (legacy term: `snap`)
+- `hover` - Pauses autoplay on hover (only works with `autoplay` type)
+- `draggable` - Enables drag/swipe functionality
+- `center` - Centers the active slide
 - `reverse` - Reverses the animation direction
 - `vertical` - Creates vertical slider instead of horizontal
 - `none` - Useful in combination with the `|` separator for responsive deactivation, e.g. `aa-slider=none|draggable-center`
@@ -751,7 +752,7 @@ The slider system detects features by checking for keywords in the type:
 | Attribute | Values | Default | Description |
 |-----------|--------|---------|-------------|
 | `aa-slider` | Slider type | - | Slider animation type |
-| `aa-duration` | Number (seconds) | `20` (loop), `0.8` (snap) | Speed/duration |
+| `aa-duration` | Number (seconds) | `20` (loop), `0.8` (autoplay) | Speed/duration |
 | `aa-delay` | Number (seconds) | `3` | Pause between snaps |
 | `aa-slider-item` | - | - | Marks slider items |
 | `aa-slider-prev` | - | - | Previous button |
@@ -848,8 +849,8 @@ Use the `|` separator to define different slider behavior for desktop and mobile
   </div>
 </div>
 
-<!-- Snap slider with progress -->
-<div aa-slider="snap" aa-duration="0.6" aa-delay="4">
+<!-- Autoplay slider with progress -->
+<div aa-slider="autoplay" aa-duration="0.6" aa-delay="4">
   <div class="slider-container">
     <div aa-slider-item class="slider-item">
       <div class="slider-item-content">Item 1</div>
