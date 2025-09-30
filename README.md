@@ -1471,15 +1471,17 @@ Replace default Webflow form submit buttons with custom styled buttons while mai
 | Attribute | Values | Default | Description |
 |-----------|--------|---------|-------------|
 | `aa-submit-button` | - | - | Enables custom submit button |
-| `aa-submit-loading-delay` | Number (seconds) | `0.3` | How long to show loading state after response |
-| `aa-submit-success-delay` | Number (seconds) | `1.2` | How long to show success state |
-| `aa-submit-error-delay` | Number (seconds) | `1.2` | How long to show error state |
-| `aa-submit-webflow-success` | `true`, `false` | `true` | Use Webflow's success handling (hide form, show success message) |
+| `aa-submit-loading-duration` | Number (seconds) | `0.3` | How long to show loading state |
+| `aa-submit-success-duration` | Number (seconds) | `1.2` | How long to show success state |
+| `aa-submit-error-duration` | Number (seconds) | `1.2` | How long to show error state |
+| `aa-submit-logic` | `default`, `custom` | `default` | How to handle form states and messages |
+| `aa-submit-debug` | - | - | Enable detailed console logging for debugging |
 
 **CSS Classes Applied:**
-- `is-loading` - Applied during form submission
-- `is-success` - Applied on successful submission  
-- `is-error` - Applied on failed submission
+- **Button**: `is-loading`, `is-success`, `is-error`
+- **Form Wrapper (.w-form)**: `is-loading`, `is-success`, `is-error`
+- **Success Message (.w-form-done)**: `is-success`
+- **Error Message (.w-form-fail)**: `is-error`
 
 **Simple Example:**
 ```html
@@ -1501,22 +1503,14 @@ Replace default Webflow form submit buttons with custom styled buttons while mai
 </div>
 ```
 
-**Custom Success Handling:**
-```html
-<!-- Button-only success state (form stays visible) -->
-<button aa-submit-button aa-submit-webflow-success="false">
-  Submit
-</button>
-```
-
 **Advanced Example with Animated Loading States:**
 ```html
 <!-- Button with smooth transitions and loading spinner -->
 <button aa-submit-button 
-        aa-submit-webflow-success="false"
-        aa-submit-loading-delay="0.5"
-        aa-submit-success-delay="2"
-        aa-submit-error-delay="1.5"
+        aa-submit-logic="custom"
+        aa-submit-loading-duration="0.5"
+        aa-submit-success-duration="2"
+        aa-submit-error-duration="1.5"
         class="animated-submit-button">
   <span class="button-text">Send Message</span>
   <span class="button-loading">

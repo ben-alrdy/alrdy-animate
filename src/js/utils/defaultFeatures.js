@@ -90,7 +90,9 @@ export function initializeFormSubmitButton() {
   // Progressive enhancement: only run if fetch() exists
   if (!("fetch" in window)) return;
 
-  document.querySelectorAll('[aa-submit-button]').forEach(button => {
+  const submitButtons = document.querySelectorAll('[aa-submit-button]');
+  
+  submitButtons.forEach((button, index) => {
     const form = button.closest('form');
     
     if (!form) {
@@ -120,10 +122,20 @@ export function initializeFormSubmitButton() {
     }
 
     // Cache configuration
-    const loadingDelay = button.hasAttribute('aa-submit-loading-delay') ? parseFloat(button.getAttribute('aa-submit-loading-delay')) : 0.3;
-    const successDelay = button.hasAttribute('aa-submit-success-delay') ? parseFloat(button.getAttribute('aa-submit-success-delay')) : 1.2;
-    const errorDelay = button.hasAttribute('aa-submit-error-delay') ? parseFloat(button.getAttribute('aa-submit-error-delay')) : 1.2;
-    const useWebflowSuccess = button.getAttribute('aa-submit-webflow-success') !== 'false';
+    const loadingDuration = button.hasAttribute('aa-submit-loading-duration') ? parseFloat(button.getAttribute('aa-submit-loading-duration')) : 0.3;
+    const successDuration = button.hasAttribute('aa-submit-success-duration') ? parseFloat(button.getAttribute('aa-submit-success-duration')) : 1.2;
+    const errorDuration = button.hasAttribute('aa-submit-error-duration') ? parseFloat(button.getAttribute('aa-submit-error-duration')) : 1.2;
+    const submitLogic = button.getAttribute('aa-submit-logic') || 'default';
+    const debugMode = button.hasAttribute('aa-submit-debug');
+    
+    if (debugMode) {
+      console.log('[AlrdyAnimate] Button configuration:', {
+        loadingDuration,
+        successDuration,
+        errorDuration,
+        submitLogic
+      });
+    }
     
     // State classes (customize in your CSS)
     const loadingClass = 'is-loading';
@@ -134,9 +146,20 @@ export function initializeFormSubmitButton() {
     const formWrapper = form.closest('.w-form');
     const successMessage = formWrapper?.querySelector('.w-form-done');
     const errorMessage = formWrapper?.querySelector('.w-form-fail');
+    
+    if (debugMode) {
+      console.log('[AlrdyAnimate] Webflow elements found:', {
+        formWrapper: !!formWrapper,
+        successMessage: !!successMessage,
+        errorMessage: !!errorMessage
+      });
+    }
 
 
     function beginLoading() {
+      // Reset all states when starting a new submission
+      resetAllStates();
+      
       // Handle disabled state differently for anchors vs buttons
       if (isAnchor) {
         button.style.pointerEvents = 'none';
@@ -145,41 +168,56 @@ export function initializeFormSubmitButton() {
         button.disabled = true;
       }
       
-      button.classList.remove(successClass, errorClass);
       button.classList.add(loadingClass);
       button.setAttribute('aria-busy', 'true');
 
-      // Hide Webflow messages if they exist
-      if (successMessage) successMessage.style.display = 'none';
-      if (errorMessage) errorMessage.style.display = 'none';
+      // Apply loading state to form wrapper
+      if (formWrapper) {
+        formWrapper.classList.add(loadingClass);
+      }
     }
 
     function endLoading() {
       button.classList.remove(loadingClass);
       button.removeAttribute('aria-busy');
+      
+      // Remove loading state from form wrapper
+      if (formWrapper) {
+        formWrapper.classList.remove(loadingClass);
+      }
     }
 
     function handleSuccess() {
       button.classList.add(successClass);
       
-      // Show Webflow success message and hide form only if Webflow success handling is enabled
-      if (useWebflowSuccess && successMessage) {
-        successMessage.style.display = 'block';
+      if (submitLogic === 'default') {
+        // Default behavior: hide form, show success message
         form.style.display = 'none';
+        successMessage?.style.setProperty('display', 'block');
+      } else {
+        // Custom logic: apply classes to all elements
+        formWrapper?.classList.remove(loadingClass, errorClass);
+        formWrapper?.classList.add(successClass);
+        successMessage?.classList.add(successClass);
       }
 
-      setTimeout(() => resetButton(), successDelay);
+      setTimeout(() => resetButton(), successDuration * 1000);
     }
 
     function handleError() {
       button.classList.add(errorClass);
       
-      // Show Webflow error message if it exists
-      if (errorMessage) {
-        errorMessage.style.display = 'block';
+      if (submitLogic === 'default') {
+        // Default behavior: show error message
+        errorMessage?.style.setProperty('display', 'block');
+      } else {
+        // Custom logic: apply classes to all elements
+        formWrapper?.classList.remove(loadingClass, successClass);
+        formWrapper?.classList.add(errorClass);
+        errorMessage?.classList.add(errorClass);
       }
 
-      setTimeout(() => resetButton(), errorDelay);
+      setTimeout(() => resetButton(), errorDuration * 1000);
     }
 
     function resetButton() {
@@ -192,6 +230,23 @@ export function initializeFormSubmitButton() {
       } else {
         button.disabled = false;
       }
+    }
+
+    function resetAllStates() {
+      if (submitLogic === 'default') {
+        // Default behavior: show form, hide messages
+        form.style.display = 'block';
+        successMessage?.style.setProperty('display', 'none');
+        errorMessage?.style.setProperty('display', 'none');
+      } else {
+        // Custom logic: reset classes on all elements
+        formWrapper?.classList.remove(loadingClass, successClass, errorClass);
+        successMessage?.classList.remove(successClass);
+        errorMessage?.classList.remove(errorClass);
+      }
+      
+      // Reset button
+      resetButton();
     }
 
     function submitForm() {
@@ -222,29 +277,81 @@ export function initializeFormSubmitButton() {
         fetchOptions.body = new FormData(form);
       }
       
-      // Single fetch handler for both GET and POST
+      // Track when request completes and when delay completes
+      let requestCompleted = false;
+      let delayCompleted = false;
+      let requestResult = null;
+      
+      const checkAndApplyResult = () => {
+        if (requestCompleted && delayCompleted) {
+          endLoading();
+          if (requestResult) {
+            handleSuccess();
+          } else {
+            handleError();
+          }
+        }
+      };
+      
+      // Handle request completion
       fetch(url, fetchOptions)
         .then(handleResponse)
-        .then(handleSuccessResponse)
-        .catch(handleFetchError);
+        .then(data => {
+          requestCompleted = true;
+          requestResult = data;
+          checkAndApplyResult();
+        })
+        .catch(err => {
+          requestCompleted = true;
+          requestResult = null;
+          checkAndApplyResult();
+        });
+      
+      // Handle delay completion
+      setTimeout(() => {
+        delayCompleted = true;
+        checkAndApplyResult();
+      }, loadingDuration * 1000);
     }
 
     function handleResponse(response) {
-      setTimeout(() => endLoading(), loadingDelay * 1000);
+      // Always log response type for debugging
+      console.log('[AlrdyAnimate] Form response received:', {
+        status: response.status,
+        statusText: response.statusText,
+        contentType: response.headers.get('content-type') || 'unknown'
+      });
 
       if (!response.ok) {
         return response
           .json()
           .catch(() => ({ success: false }))
           .then((data) => {
+            if (debugMode) {
+              console.log('[AlrdyAnimate] Form error response:', data);
+            }
             throw { networkError: true, data, statusText: response.statusText };
           });
       }
-      return response.json().catch(() => ({ success: true }));
+      
+      // Try to parse JSON response
+      return response.json().catch((error) => {
+        if (debugMode) {
+          console.log('[AlrdyAnimate] Non-JSON response, treating as success based on HTTP status');
+        }
+        // If we get a 200 status, treat as success regardless of content type
+        return { success: true };
+      });
     }
 
     function handleSuccessResponse(data) {
+      if (debugMode) {
+        console.log('[AlrdyAnimate] Success response data:', data);
+      }
       const ok = (typeof data?.success === 'boolean') ? data.success : true;
+      if (debugMode) {
+        console.log('[AlrdyAnimate] Will call', ok ? 'handleSuccess' : 'handleError');
+      }
       setTimeout(() => (ok ? handleSuccess() : handleError()), 0);
     }
 
