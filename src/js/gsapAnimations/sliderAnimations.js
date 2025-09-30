@@ -699,16 +699,19 @@ export function createSliderAnimations(gsap, Draggable) {
       if (!autoplay) {
         const repeat = () => {
           const direction = animationType.includes('reverse') ? 'previous' : 'next';
+          
           slider[direction]({ duration, ease });
           
-          // Update progress bars for the new active slide
-          const currentIndex = slider.current();
-          updateProgressBars(currentIndex);
+          // Update progress bars for the new active slide with half the slider duration
+          gsap.delayedCall(duration/2, () => {
+            const currentIndex = slider.current();
+            updateProgressBars(currentIndex);
+          });
           
-          autoplay = gsap.delayedCall(delay, repeat);
+          autoplay = gsap.delayedCall(duration + delay, repeat);
         };
         
-        // Start initial progress animation for current slide
+        // Start initial progress animation for current slide immediately
         const currentIndex = slider.current();
         updateProgressBars(currentIndex);
         

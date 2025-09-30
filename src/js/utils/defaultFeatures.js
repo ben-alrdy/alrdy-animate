@@ -119,9 +119,7 @@ export function initializeFormSubmitButton() {
       return;
     }
 
-    // Cache DOM queries and configuration
-    const loadElement = button.querySelector('[aa-submit-load]');
-    const loadIndicator = button.querySelector('[aa-submit-load-indicator]');
+    // Cache configuration
     const loadingDelay = button.hasAttribute('aa-submit-loading-delay') ? parseFloat(button.getAttribute('aa-submit-loading-delay')) : 0.3;
     const successDelay = button.hasAttribute('aa-submit-success-delay') ? parseFloat(button.getAttribute('aa-submit-success-delay')) : 1.2;
     const errorDelay = button.hasAttribute('aa-submit-error-delay') ? parseFloat(button.getAttribute('aa-submit-error-delay')) : 1.2;
@@ -151,10 +149,6 @@ export function initializeFormSubmitButton() {
       button.classList.add(loadingClass);
       button.setAttribute('aria-busy', 'true');
 
-      // Show optional loading elements
-      if (loadElement) loadElement.hidden = false;
-      if (loadIndicator) loadIndicator.hidden = false;
-
       // Hide Webflow messages if they exist
       if (successMessage) successMessage.style.display = 'none';
       if (errorMessage) errorMessage.style.display = 'none';
@@ -163,8 +157,6 @@ export function initializeFormSubmitButton() {
     function endLoading() {
       button.classList.remove(loadingClass);
       button.removeAttribute('aria-busy');
-      if (loadElement) loadElement.hidden = true;
-      if (loadIndicator) loadIndicator.hidden = true;
     }
 
     function handleSuccess() {

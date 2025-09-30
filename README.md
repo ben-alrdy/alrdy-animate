@@ -1474,8 +1474,6 @@ Replace default Webflow form submit buttons with custom styled buttons while mai
 | `aa-submit-success-delay` | Number (seconds) | `1.2` | How long to show success state |
 | `aa-submit-error-delay` | Number (seconds) | `1.2` | How long to show error state |
 | `aa-submit-webflow-success` | `true`, `false` | `true` | Use Webflow's success handling (hide form, show success message) |
-| `aa-submit-load` | - | - | Element shown during loading |
-| `aa-submit-load-indicator` | - | - | Additional loading indicator |
 
 **CSS Classes Applied:**
 - `is-loading` - Applied during form submission
@@ -1502,34 +1500,6 @@ Replace default Webflow form submit buttons with custom styled buttons while mai
 </div>
 ```
 
-**Full Example with Loading States:**
-```html
-<div class="w-form">
-  <form data-name="Contact Form">
-    <input type="text" name="name" placeholder="Your Name" required>
-    <input type="email" name="email" placeholder="Your Email" required>
-    <textarea name="message" placeholder="Your Message" required></textarea>
-    
-    <!-- Custom submit button with loading states -->
-    <button aa-submit-button 
-            aa-submit-loading-delay="0.5"
-            aa-submit-success-delay="2"
-            aa-submit-error-delay="1.5">
-      <span>Send Message</span>
-      <span aa-submit-load hidden>Sending...</span>
-      <div aa-submit-load-indicator hidden>⏳</div>
-    </button>
-  </form>
-  
-  <div class="w-form-done" style="display: none;">
-    <div>Thank you! Your submission has been received!</div>
-  </div>
-  <div class="w-form-fail" style="display: none;">
-    <div>Oops! Something went wrong while submitting the form.</div>
-  </div>
-</div>
-```
-
 **Custom Success Handling:**
 ```html
 <!-- Button-only success state (form stays visible) -->
@@ -1538,63 +1508,126 @@ Replace default Webflow form submit buttons with custom styled buttons while mai
 </button>
 ```
 
-**Button with Success/Error States:**
+**Advanced Example with Animated Loading States:**
 ```html
-<!-- Button that shows success/error states visually -->
+<!-- Button with smooth transitions and loading spinner -->
 <button aa-submit-button 
         aa-submit-webflow-success="false"
-        aa-submit-success-delay="3"
-        aa-submit-error-delay="3">
+        aa-submit-loading-delay="0.5"
+        aa-submit-success-delay="2"
+        aa-submit-error-delay="1.5"
+        class="animated-submit-button">
   <span class="button-text">Send Message</span>
-  <span aa-submit-load hidden>Sending...</span>
-  <span class="button-success" hidden>✓ Message Sent!</span>
-  <span class="button-error" hidden>✗ Send Failed</span>
-  <div aa-submit-load-indicator hidden>⏳</div>
+  <span class="button-loading">
+    <span class="spinner"></span>
+    Sending...
+  </span>
+  <span class="button-success">✓ Message Sent!</span>
+  <span class="button-error">✗ Send Failed</span>
 </button>
 ```
 
-**CSS for Button States:**
+**CSS for Advanced Animated Button States:**
 ```css
-/* Default state */
-button[aa-submit-button] {
+.animated-submit-button {
   position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  min-width: 140px; /* Prevent button width changes */
+}
+
+.animated-submit-button > span {
+  display: inline-block;
   transition: all 0.3s ease;
 }
 
-/* Loading state */
-button[aa-submit-button].is-loading {
-  opacity: 0.7;
-  pointer-events: none;
+/* Default state - show only button text */
+.animated-submit-button .button-text {
+  opacity: 1;
+  transform: translateY(0);
 }
 
-/* Success state */
-button[aa-submit-button].is-success {
+.animated-submit-button .button-loading,
+.animated-submit-button .button-success,
+.animated-submit-button .button-error {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%) translateY(100%);
+  opacity: 0;
+  white-space: nowrap;
+}
+
+/* Loading spinner */
+.spinner {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid transparent;
+  border-top: 2px solid currentColor;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Loading state - fade out text, fade in loading */
+.animated-submit-button.is-loading {
+  cursor: not-allowed;
+}
+
+.animated-submit-button.is-loading .button-text {
+  opacity: 0;
+  transform: translateY(-100%);
+}
+
+.animated-submit-button.is-loading .button-loading {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.animated-submit-button.is-loading .button-success,
+.animated-submit-button.is-loading .button-error {
+  opacity: 0;
+  transform: translateX(-50%) translateY(100%);
+}
+
+/* Success state - fade out loading, fade in success */
+.animated-submit-button.is-success {
   background-color: #28a745;
   color: white;
 }
 
-button[aa-submit-button].is-success .button-text,
-button[aa-submit-button].is-success [aa-submit-load] {
-  display: none;
+.animated-submit-button.is-success .button-text,
+.animated-submit-button.is-success .button-loading {
+  opacity: 0;
+  transform: translateY(-100%);
 }
 
-button[aa-submit-button].is-success .button-success {
-  display: inline !important;
+.animated-submit-button.is-success .button-success {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
 }
 
-/* Error state */
-button[aa-submit-button].is-error {
+/* Error state - fade out loading, fade in error */
+.animated-submit-button.is-error {
   background-color: #dc3545;
   color: white;
 }
 
-button[aa-submit-button].is-error .button-text,
-button[aa-submit-button].is-error [aa-submit-load] {
-  display: none;
+.animated-submit-button.is-error .button-text,
+.animated-submit-button.is-error .button-loading {
+  opacity: 0;
+  transform: translateY(-100%);
 }
 
-button[aa-submit-button].is-error .button-error {
-  display: inline !important;
+.animated-submit-button.is-error .button-error {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
 }
 ```
 
