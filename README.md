@@ -386,7 +386,7 @@ Advanced text splitting and animation effects.
 
 Smooth transitions and reveals with GSAP.
 
-**Setup:** `gsapFeatures: ['scroll']`
+**Setup:** `gsapFeatures: ['section']`
 
 **Available Animations:**
 - **Appear**: `appear`, `appear-up/down/left/right`
@@ -416,7 +416,7 @@ Smooth transitions and reveals with GSAP.
 
 Scroll-driven movement effects.
 
-**Setup:** `gsapFeatures: ['scroll']`
+**Setup:** `gsapFeatures: ['section']`
 
 **Attributes & Defaults:**
 | Attribute | Values | Default | Description |
@@ -449,7 +449,7 @@ Scroll-driven movement effects.
 
 Animated background transitions between sections.
 
-**Setup:** `gsapFeatures: ['scroll']`
+**Setup:** `gsapFeatures: ['section']`
 
 **Attributes & Defaults:**
 | Attribute | Values | Default | Description |
@@ -475,7 +475,7 @@ Animated background transitions between sections.
 
 Clip path animations for sections.
 
-**Setup:** `gsapFeatures: ['scroll']`
+**Setup:** `gsapFeatures: ['section']`
 
 **Attributes & Defaults:**
 | Attribute | Values | Default | Description |
@@ -495,7 +495,7 @@ Clip path animations for sections.
 
 Stacking scroll effects.
 
-**Setup:** `gsapFeatures: ['scroll']`
+**Setup:** `gsapFeatures: ['section']`
 
 **Attributes & Defaults:**
 | Attribute | Values | Default | Description |
@@ -1463,7 +1463,7 @@ Control CSS animation playback based on element visibility.
 
 ### Custom Form Submit Buttons
 
-Replace default Webflow form submit buttons with custom styled buttons while maintaining form functionality.
+Replace default Webflow form submit buttons with custom styled buttons while maintaining form functionality. The custom logic only works if form data is sent to a 3rd party.
 
 **Setup:** Automatically enabled with AlrdyAnimate initialization
 

@@ -11,6 +11,7 @@ let allAnimatedElements = null;
 let isMobile = false;
 let enableGSAP = false;
 let initTimeoutId = null;
+let isReducedMotion = false;
 
 // Default options for the animation settings
 const defaultOptions = {
@@ -35,12 +36,54 @@ const defaultOptions = {
   lazyLoadHandler: false, // default to false for backward compatibility
   debug: false, // Set to true to see GSAP debug info
   templates: null, // Template configuration for class-based animations
-  initTimeout: 3000 // 3 seconds timeout for initialization
+  initTimeout: 3000, // 3 seconds timeout for initialization
+  enforceReducedMotion: false // Force reduced motion mode for testing
 };
+
+// Function to apply reduced motion by replacing animation attributes
+function applyReducedMotionAttributes() {
+  // Find all elements with aa-animate or aa-children attributes
+  const animatedElements = document.querySelectorAll('[aa-animate], [aa-children]');
+  
+  animatedElements.forEach((element) => {
+    const currentAnimate = element.getAttribute('aa-animate');
+    
+    // Skip complex GSAP animations that should be preserved
+    if (currentAnimate && ['background', 'clip', 'stack'].includes(currentAnimate)) {
+      return; // Skip this element
+    }
+    
+    // Replace aa-animate with fade
+    if (element.hasAttribute('aa-animate')) {
+      element.setAttribute('aa-animate', 'fade');
+    }
+    
+    // Replace aa-children with fade
+    if (element.hasAttribute('aa-children')) {
+      element.setAttribute('aa-children', 'fade');
+    }
+    
+    // Set reduced motion duration and easing
+    element.setAttribute('aa-duration', '0.3');
+    element.setAttribute('aa-ease', 'ease');
+  });
+}
 
 async function init(options = {}) {
   const initOptions = { ...defaultOptions, ...options };
   let lenis = null;
+
+  // Check for reduced motion preference
+  isReducedMotion = initOptions.enforceReducedMotion || 
+    (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  
+  // If reduced motion is detected, replace animation attributes and disable templates
+  if (isReducedMotion) {
+    console.log('AlrdyAnimate: Reduced motion detected, replacing animations with fade-only');
+    applyReducedMotionAttributes();
+    // Disable template system for reduced motion
+    initOptions.templates = null;
+  }
 
   // Set initialization state
   window.alrdyInitialized = false;

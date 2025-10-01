@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', function() {
         gsapFeatures: ['section', 'appear', 'marquee', 'text', 'slider', 'hover', 'nav', 'modal', 'accordion'],
         debug: false,
         modals: false,
+        enforceReducedMotion: false,
         includeGSAP: true,
         templates: {
             theme: 'tilt',
