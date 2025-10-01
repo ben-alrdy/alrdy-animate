@@ -86,6 +86,23 @@ export function initializePlayStateObserver() {
 }
 
 // Custom form submit button handler for Webflow forms
+/**
+ * Form Submit Button
+ * 
+ * Enhances form buttons with loading, success, and error states.
+ * 
+ * Behavior:
+ * - If form has NO action attribute: Uses native Webflow submission (only adds loading state to button)
+ * - If form has action attribute: Custom fetch submission with full state management
+ * 
+ * Attributes:
+ * - aa-submit-button: Add to button/link to enable enhancement
+ * - aa-submit-loading-duration: Loading animation duration in seconds (default: 0.3)
+ * - aa-submit-success-duration: Success state duration in seconds (default: 1.2)
+ * - aa-submit-error-duration: Error state duration in seconds (default: 1.2)
+ * - aa-submit-logic: "default" or "custom" (controls form/message visibility)
+ * - aa-submit-debug: Enable debug logging
+ */
 export function initializeFormSubmitButton() {
   // Progressive enhancement: only run if fetch() exists
   if (!("fetch" in window)) return;
@@ -250,9 +267,16 @@ export function initializeFormSubmitButton() {
     }
 
     function submitForm() {
-      const action = form.getAttribute('action') || window.location.href;
+      const action = form.getAttribute('action');
       const method = (form.getAttribute('method') || 'POST').toUpperCase();
 
+      if (debugMode) {
+        console.log('[AlrdyAnimate] Form submission:', { action, method });
+      }
+
+      // Prepare FormData
+      const formData = new FormData(form);
+      
       // Prepare fetch options
       const fetchOptions = {
         method,
@@ -262,7 +286,6 @@ export function initializeFormSubmitButton() {
       // Handle GET vs POST differently
       let url = action;
       if (method === 'GET') {
-        const formData = new FormData(form);
         const params = new URLSearchParams();
         
         // Convert FormData to URLSearchParams
@@ -274,7 +297,8 @@ export function initializeFormSubmitButton() {
         const separator = action.includes('?') ? '&' : '?';
         url = `${action}${separator}${params.toString()}`;
       } else {
-        fetchOptions.body = new FormData(form);
+        // POST: send FormData in body
+        fetchOptions.body = formData;
       }
       
       // Track when request completes and when delay completes
@@ -315,12 +339,13 @@ export function initializeFormSubmitButton() {
     }
 
     function handleResponse(response) {
-      // Always log response type for debugging
-      console.log('[AlrdyAnimate] Form response received:', {
-        status: response.status,
-        statusText: response.statusText,
-        contentType: response.headers.get('content-type') || 'unknown'
-      });
+      if (debugMode) {
+        console.log('[AlrdyAnimate] Form response:', {
+          status: response.status,
+          statusText: response.statusText,
+          contentType: response.headers.get('content-type') || 'unknown'
+        });
+      }
 
       if (!response.ok) {
         return response
@@ -328,48 +353,63 @@ export function initializeFormSubmitButton() {
           .catch(() => ({ success: false }))
           .then((data) => {
             if (debugMode) {
-              console.log('[AlrdyAnimate] Form error response:', data);
+              console.log('[AlrdyAnimate] Error response:', data);
             }
             throw { networkError: true, data, statusText: response.statusText };
           });
       }
       
       // Try to parse JSON response
-      return response.json().catch((error) => {
+      return response.json().catch(() => {
         if (debugMode) {
-          console.log('[AlrdyAnimate] Non-JSON response, treating as success based on HTTP status');
+          console.log('[AlrdyAnimate] Non-JSON response, treating as success');
         }
-        // If we get a 200 status, treat as success regardless of content type
         return { success: true };
       });
     }
 
-    function handleSuccessResponse(data) {
-      if (debugMode) {
-        console.log('[AlrdyAnimate] Success response data:', data);
-      }
-      const ok = (typeof data?.success === 'boolean') ? data.success : true;
-      if (debugMode) {
-        console.log('[AlrdyAnimate] Will call', ok ? 'handleSuccess' : 'handleError');
-      }
-      setTimeout(() => (ok ? handleSuccess() : handleError()), 0);
-    }
-
-    function handleFetchError(err) {
-      console.error('[AlrdyAnimate] Form submit error:', err);
-      setTimeout(() => handleError(), 0);
-    }
-
     function handleClick(event) {
-      // Prevent default behavior
-      event.preventDefault();
-      
       // Check if form is valid
       if (!form.checkValidity()) {
+        event.preventDefault();
         form.reportValidity();
         return;
       }
       
+      const action = form.getAttribute('action');
+      
+      // If no action URL, use native Webflow submission
+      if (!action || action.trim() === '') {
+        if (debugMode) {
+          console.log('[AlrdyAnimate] No form action - delegating to Webflow native submission');
+        }
+        
+        // Only add loading class to button (Webflow handles the rest)
+        button.classList.add(loadingClass);
+        if (isAnchor) {
+          button.style.pointerEvents = 'none';
+          button.setAttribute('aria-disabled', 'true');
+        } else {
+          button.disabled = true;
+        }
+        
+        // Find or create a native submit button for Webflow to intercept
+        let nativeSubmitter = form.querySelector('input[type="submit"]');
+        if (!nativeSubmitter) {
+          nativeSubmitter = document.createElement('input');
+          nativeSubmitter.type = 'submit';
+          nativeSubmitter.style.display = 'none';
+          form.appendChild(nativeSubmitter);
+        }
+        
+        // Trigger native submission (let event bubble to Webflow's handler)
+        // Don't preventDefault - let Webflow handle it
+        nativeSubmitter.click();
+        return;
+      }
+      
+      // Custom submission with full state management
+      event.preventDefault();
       beginLoading();
       submitForm();
     }
