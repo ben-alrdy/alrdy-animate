@@ -41,16 +41,21 @@ export function createTextAnimations(gsap) {
       }
     };
 
+    // Parse aa-color and add to animation from props
+    const colorProps = element.hasAttribute('aa-color') ? parseColorAttribute(element.getAttribute('aa-color')) : {};
+
     // Handle lines&words split type
     if (split === 'lines&words') {
       return {
         onSplit: (self) => {
           const tl = gsap.timeline();
+          
           self.lines.forEach((line, index) => {
             const wordsInLine = self.words.filter(word => line.contains(word));
             tl.from(wordsInLine, {
               ...baseProps,
               ...props,
+              ...colorProps, // Add aa-color values to animate from
               stagger: stagger
             }, index * stagger * 3);
           });
@@ -64,11 +69,13 @@ export function createTextAnimations(gsap) {
       return {
         onSplit: (self) => {
           const tl = gsap.timeline();
+          
           self.lines.forEach((line, index) => {
             const charsInLine = self.chars.filter(char => line.contains(char));
             tl.from(charsInLine, {
               ...baseProps,
               ...props,
+              ...colorProps, // Add aa-color values to animate from
               stagger: stagger
             }, index * stagger * 6);
           });
@@ -81,6 +88,7 @@ export function createTextAnimations(gsap) {
     return {
       onSplit: (self) => {
         const tl = gsap.timeline();
+        
         // Get the base split type without any modifiers
         const baseSplitType = split.split('-')[0].split('|')[0];
         const elements = self[baseSplitType];
@@ -92,6 +100,7 @@ export function createTextAnimations(gsap) {
             tl.from(group, {
               ...baseProps,
               ...props,
+              ...colorProps, // Add aa-color values to animate from
               stagger: 0 // No stagger within groups
             }, index * stagger); // Only stagger between groups
           });
@@ -100,6 +109,7 @@ export function createTextAnimations(gsap) {
           tl.from(elements, {
             ...baseProps,
             ...props,
+            ...colorProps, // Add aa-color values to animate from
             stagger: stagger
           });
         }
@@ -158,20 +168,11 @@ export function createTextAnimations(gsap) {
     return (element, split, duration, stagger, delay, ease) => ({
       onSplit: (self) => {
         const tl = gsap.timeline({ delay });
-        const colorAttr = element.getAttribute('aa-color') || '#000000';
         
-        // Determine block background color:
-        // - If colorAttr is just a hex value (e.g., "#000"), use it directly
-        // - If colorAttr is in new format (e.g., "bg:#000" or "bg:#000 text:#fff"), extract bg value
-        let color;
-        if (colorAttr.includes(':')) {
-          // New format - parse and extract background color only
-          const parsedColors = parseColorAttribute(colorAttr);
-          color = parsedColors.backgroundColor || '#000000';
-        } else {
-          // Legacy format - treat entire value as background color
-          color = colorAttr;
-        }
+        // Parse aa-color - must be in format "bg:#hex" or "bg:#hex text:#hex"
+        const parsedColors = element.hasAttribute('aa-color') ? parseColorAttribute(element.getAttribute('aa-color')) : {};
+        const blockColor = parsedColors.backgroundColor || '#000000'; // Default if not specified
+        const textColor = parsedColors.color; // Optional text color
         
         const { initialClip, revealClip, hideClip, textInit, textFinal } = config[direction];
 
@@ -179,7 +180,7 @@ export function createTextAnimations(gsap) {
           // Create background element
           const blockDiv = document.createElement('div');
           blockDiv.className = 'aa-block-bg';
-          blockDiv.style.backgroundColor = color;
+          blockDiv.style.backgroundColor = blockColor;
 
           // Wrap text content in div
           const textContent = line.innerHTML;
@@ -193,7 +194,6 @@ export function createTextAnimations(gsap) {
 
           // Set initial states
           gsap.set(blockDiv, { clipPath: initialClip });
-          gsap.set(textDiv, { opacity: 0, ...textInit });
 
           // Split duration among phases
           const revealDur = duration * 0.4;
@@ -201,10 +201,17 @@ export function createTextAnimations(gsap) {
           const textDur   = duration * 0.4;
 
           const lineTl = gsap.timeline();
+          
+          // Text animation FROM props (includes color if specified)
+          const textFromProps = { opacity: 0, ...textInit };
+          if (textColor) {
+            textFromProps.color = textColor; // Animate from aa-color to original
+          }
+          
           lineTl
             .to(blockDiv, { clipPath: revealClip, duration: revealDur, ease })
             .to(blockDiv, { clipPath: hideClip, duration: shrinkDur, ease })
-            .to(textDiv, { opacity: 1, ...textFinal, duration: textDur, ease }, '<');
+            .from(textDiv, { ...textFromProps, duration: textDur, ease }, '<');
 
           tl.add(lineTl, i * (stagger ?? 0));
         });
@@ -251,19 +258,22 @@ export function createTextAnimations(gsap) {
       defaults.slide
     ),
   
-    'text-fade-30': createAnimation(
-      { opacity: 0.3 },
-      defaults.fade
-    ),
-    'text-fade-10': createAnimation(
-      { opacity: 0.1 },
-      defaults.fade
-    ),
-    
-    'text-fade': createAnimation(
-      { opacity: 0 },
-      defaults.fade
-    ),
+    'text-fade': (element, split, duration, stagger, delay, ease) => {
+      // Extract opacity value from animation type (e.g., text-fade-30 → 0.3)
+      const parts = element.settings.animationType.split('-');
+      const opacityPercent = parseInt(parts[2]); // Get the number after 'text-fade-'
+      const opacity = isNaN(opacityPercent) ? 0 : opacityPercent / 100; // Default to 0 if no number
+      
+      return createBaseAnimation(
+        element,
+        split,
+        duration ?? defaults.fade.duration,
+        stagger ?? defaults.fade.stagger,
+        delay,
+        ease ?? defaults.fade.ease,
+        { opacity }
+      );
+    },
     
     'text-blur': createAnimation(
       { 
@@ -321,6 +331,9 @@ export function createTextAnimations(gsap) {
           
           if (!self.lines || self.lines.length === 0) return tl;
 
+          // Parse aa-color
+          const colorProps = element.hasAttribute('aa-color') ? parseColorAttribute(element.getAttribute('aa-color')) : {};
+
           // Calculate perspective
           const fontSize = parseFloat(window.getComputedStyle(element).fontSize);
           const perspectiveInPixels = fontSize * 5;
@@ -346,6 +359,7 @@ export function createTextAnimations(gsap) {
             rotateX: -90,
             y: '100%',
             scaleX: 0.75,
+            ...colorProps, // Add aa-color values to animate from
             duration: duration ?? defaults.rotateSoft.duration,
             stagger: stagger ?? defaults.rotateSoft.stagger,
             ease: ease ?? defaults.rotateSoft.ease,

@@ -121,22 +121,22 @@
 
     [aa-animate='slide-up'],
     .aa-slide-up {
-      transform: translate3d(0, 100%, 0);
+      transform: translate3d(0, calc(100% * var(--aa-distance)), 0);
     }
 
     [aa-animate='slide-down'],
     .aa-slide-down {
-      transform: translate3d(0, -100%, 0);
+      transform: translate3d(0, calc(-100% * var(--aa-distance)), 0);
     }
 
     [aa-animate='slide-right'],
     .aa-slide-right {
-      transform: translate3d(-100%, 0, 0);
+      transform: translate3d(calc(-100% * var(--aa-distance)), 0, 0);
     }
 
     [aa-animate='slide-left'],
     .aa-slide-left {
-      transform: translate3d(100%, 0, 0);
+      transform: translate3d(calc(100% * var(--aa-distance)), 0, 0);
     }
 
 

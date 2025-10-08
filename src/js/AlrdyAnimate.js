@@ -650,7 +650,13 @@ function setupGSAPAnimations(element, elementSettings, initOptions, isMobile, mo
           (self) => {
             // Strip suffixes to get baseType
             const baseTextAnim = animationType.replace(/-clip|-lines|-words|-chars$/, '');
-            const animation = modules.animations.text[baseTextAnim];
+            
+            // Try to get animation, fallback to text-fade for text-fade-[number] pattern
+            let animation = modules.animations.text[baseTextAnim];
+            if (!animation && baseTextAnim.startsWith('text-fade-')) {
+              animation = modules.animations.text['text-fade'];
+            }
+            
             if (animation) {
               const timeline = animation(element, split, duration, stagger, delay, ease).onSplit(self);
               if (timeline) {

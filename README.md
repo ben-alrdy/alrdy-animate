@@ -356,13 +356,17 @@ Advanced text splitting and animation effects.
 **Available Animations:**
 - **Slide**: `text-slide-[direction]` where `[direction]` = `up`, `down`, `left`, `right`
 - **Tilt**: `text-tilt-[direction]` where `[direction]` = `up`, `down`
-- **Fade**: `text-fade`, `text-fade-30`, `text-fade-10` (opacity-only animations)
+- **Fade**: `text-fade`, `text-fade-[number]` (opacity-only animations)
+  - Use any number 0-100 for starting opacity (e.g., `text-fade-5`, `text-fade-50`, `text-fade-99`)
 - **Scale**: `text-scale-up`
 - **Blur**: `text-blur`, `text-blur-[direction]` where `[direction]` = `up`, `down`, `left`, `right`
 - **Rotate**: `text-rotate-soft` (3D rotation around X-axis)
 - **Block**: `text-block-[direction]` where `[direction]` = `up`, `down`, `left`, `right`
-  - Use `aa-color` attribute to define the block background color
-  - Format: `aa-color="bg:#hexcolor"` or legacy `aa-color="#hexcolor"`
+  - Use `aa-color` to define block background and optional text color
+  - Format: `aa-color="bg:#hex"` or `aa-color="bg:#hex text:#hex"`
+
+**Color Transitions:**
+All text animations support the `aa-color` attribute for smooth color transitions. Colors animate **from** the specified `aa-color` values **to** the original element colors.
 
 **Attributes & Defaults:**
 | Attribute | Values | Default | Description |
@@ -372,18 +376,29 @@ Advanced text splitting and animation effects.
 | `aa-stagger` | Number (seconds) | `0.05` | Delay between split elements |
 | `aa-duration` | Number (seconds) | `0.8` | Animation duration |
 | `aa-scrub` | `true`, number | - | Scroll-driven animation. `true` = direct mapping, number = lag (higher = more lag) |
-| `aa-color` | `bg:#hex` or `#hex` | #000000 | Block color for text-block animations |
+| `aa-color` | `text:#hex bg:#hex border:#hex` | - | Color transitions (animates from these colors to original) |
 
 **Examples:**
 ```html
+<!-- Basic text animations -->
 <h1 aa-animate="text-slide-up" aa-split="words" aa-stagger="0.05">Word by word</h1>
 <p aa-animate="text-fade" aa-split="chars" aa-stagger="0.02">Character reveal</p>
-<div aa-animate="text-tilt-up-clip" aa-split="lines">Clipped lines</div>
+<div aa-animate="text-tilt-up" aa-split="lines">Clipped lines</div>
 <span aa-animate="text-blur-up" aa-split="words|random">Random order</span>
 
-<!-- Text block animations with color -->
+<!-- Text animations with color transitions -->
+<h2 aa-animate="text-slide-up" aa-color="text:#ff0000" aa-split="words">
+  Animates from red to original text color
+</h2>
+<p aa-animate="text-fade" aa-color="bg:#000000 text:#ffffff" aa-split="chars">
+  Animates from black background and white text to original colors
+</p>
+
+<!-- Text block animations -->
 <h2 aa-animate="text-block-left" aa-color="bg:#ff0000">Red block animation</h2>
-<h2 aa-animate="text-block-up" aa-color="#000000">Black block (legacy format)</h2>
+<h2 aa-animate="text-block-up" aa-color="bg:#000000 text:#ffffff">
+  Black block with white text
+</h2>
 ```
 
 ---
