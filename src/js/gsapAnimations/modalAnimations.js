@@ -89,6 +89,9 @@ function createModalTimeline(modal, backdrop, animations, splitText) {
         case 'counter':
           animationTimeline = animations.counter(element, duration, ease, delay, animationType);
           break;
+        case 'grow':
+          animationTimeline = animations.grow(element, duration, ease, delay, animationType);
+          break;
       }
       if (animationTimeline) {
         tl.add(animationTimeline, timelinePosition);

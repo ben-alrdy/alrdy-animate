@@ -497,7 +497,7 @@ function setupGSAPAnimations(element, elementSettings, initOptions, isMobile, mo
   
   // 1. Variables setup
   const baseType = animationType.includes('-') ? animationType.split('-')[0] : animationType;
-  const gsapAnimations = ['appear', 'reveal', 'counter', 'text', 'background', 'parallax', 'clip', 'stack'];
+  const gsapAnimations = ['appear', 'reveal', 'counter', 'grow', 'text', 'background', 'parallax', 'clip', 'stack'];
   
   // 2. Determine if this animation type creates its own ScrollTriggers
   const ownScrollTriggerAnimations = ['clip', 'stack', 'background', 'parallax'];
@@ -636,6 +636,10 @@ function setupGSAPAnimations(element, elementSettings, initOptions, isMobile, mo
 
       case 'counter':
         tl.add(modules.animations.counter(element, duration, ease, delay, animationType));
+        break;
+
+      case 'grow':
+        tl.add(modules.animations.grow(element, duration, ease, delay, animationType));
         break;
 
       case 'text':

@@ -74,6 +74,79 @@ function createRevealTimeline(element, gsap, duration, ease, delay, animationTyp
   );
 }
 
+// Helper to parse aa-color attribute
+function parseColorAttribute(attribute) {
+  if (!attribute) return {};
+  
+  return attribute.split(' ').reduce((colors, current) => {
+    const [type, value] = current.split(':').map(s => s.trim());
+    if (type && value) {
+      const colorMap = {
+        'bg': 'backgroundColor',
+        'text': 'color',
+        'border': 'borderColor'
+      };
+      if (colorMap[type]) {
+        colors[colorMap[type]] = value;
+      }
+    }
+    return colors;
+  }, {});
+}
+
+function createGrowTimeline(element, gsap, duration, ease, delay, animationType) {
+  const [_, direction] = animationType.split('-');
+  
+  // Parse aa-color attribute
+  const colorAttr = element.getAttribute('aa-color');
+  const targetColors = parseColorAttribute(colorAttr);
+  
+  // Store original colors
+  const computedStyle = window.getComputedStyle(element);
+  const originalColors = {};
+  if (targetColors.backgroundColor !== undefined) {
+    originalColors.backgroundColor = computedStyle.backgroundColor;
+  }
+  if (targetColors.color !== undefined) {
+    originalColors.color = computedStyle.color;
+  }
+  if (targetColors.borderColor !== undefined) {
+    originalColors.borderColor = computedStyle.borderColor;
+  }
+  
+  // Determine which dimension to animate
+  const isHorizontal = direction === 'horizontal';
+  const property = isHorizontal ? 'width' : 'height';
+  
+  // Get the natural size (auto)
+  const originalSize = element.style[property];
+  element.style[property] = 'auto';
+  const autoSize = isHorizontal ? element.offsetWidth : element.offsetHeight;
+  element.style[property] = originalSize;
+  
+  // Create initial state
+  const fromState = {
+    [property]: 0,
+    ...targetColors // Start with aa-color values
+  };
+  
+  // Create end state
+  const toState = {
+    [property]: autoSize,
+    ...originalColors, // End with original colors
+    duration,
+    ease,
+    delay
+  };
+  
+  // Cleanup: set initial state
+  gsap.set(element, fromState);
+  
+  // Create and return timeline
+  const tl = gsap.timeline();
+  return tl.to(element, toState);
+}
+
 function createCounterTimeline(element, gsap, duration, ease, delay, animationType) {
   const [_, startValue] = animationType.split('-');
   const originalText = element.textContent;
@@ -129,6 +202,10 @@ function createAppearAnimations(gsap, ScrollTrigger) {
     
     counter: (element, duration, ease, delay, animationType) => {
       return createCounterTimeline(element, gsap, duration, ease, delay, animationType);
+    },
+    
+    grow: (element, duration, ease, delay, animationType) => {
+      return createGrowTimeline(element, gsap, duration, ease, delay, animationType);
     },
   };
 }

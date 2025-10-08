@@ -100,6 +100,9 @@ function handleComplexAnimation(element, baseType, animations, duration, ease, d
     case 'counter':
       animationTimeline = animations.counter(element, duration, ease, 0, animationType);
       break;
+    case 'grow':
+      animationTimeline = animations.grow(element, duration, ease, 0, animationType);
+      break;
   }
   
   return animationTimeline;

@@ -398,6 +398,7 @@ Smooth transitions and reveals with GSAP.
 - **Appear**: `appear`, `appear-up/down/left/right`
 - **Reveal**: `reveal-up/down/left/right/center` (clip path)
 - **Counter**: `counter`, `counter-[startNumber]`
+- **Grow**: `grow-horizontal`, `grow-vertical` (animates from 0 to auto size with optional color transitions)
 
 **Attributes & Defaults:**
 | Attribute | Values | Default | Description |
@@ -407,6 +408,7 @@ Smooth transitions and reveals with GSAP.
 | `aa-delay` | Number (seconds) | `0` | Animation delay |
 | `aa-distance` | Number | `1` | Distance multiplier |
 | `aa-scrub` | `true`, number | - | Scroll-driven animation. `true` = direct mapping, number = lag (higher = more lag) |
+| `aa-color` | `bg:#hex text:#hex border:#hex` | - | Color transitions for grow animation |
 
 **Examples:**
 ```html
@@ -414,6 +416,13 @@ Smooth transitions and reveals with GSAP.
 <img aa-animate="reveal-center" aa-scrub="1" src="image.jpg">
 <span aa-animate="counter">1,250</span>
 <span aa-animate="counter-100" aa-scrub="2">500</span>
+
+<!-- Grow animations -->
+<div aa-animate="grow-horizontal" aa-duration="1">Grows width from 0 to auto</div>
+<div aa-animate="grow-vertical" aa-duration="1.2">Grows height from 0 to auto</div>
+<div aa-animate="grow-horizontal" aa-color="bg:#ff0000 text:#ffffff" aa-scrub="1">
+  Grows with color transition
+</div>
 ```
 
 ---
@@ -948,9 +957,7 @@ Manual IDs take precedence over auto-generated ones.
 - **Scale**: `scale`
 
 **Complex Animations (requires GSAP plugins):**
-- **Appear**: All [Appear animations](#14-appear-animations) available
-- **Reveal**: All [Appear animations](#14-appear-animations) available (reveal variants)
-- **Counter**: All [Appear animations](#14-appear-animations) available (counter variants)
+- Appear, Reveal, Grow and Counter [Appear animations](#14-appear-animations) available
 
 **Text Animations (requires splitText plugin):**
 - **Text Animations**: All [Text animations](#13-text-animations) available
@@ -1223,9 +1230,7 @@ Accessible, attribute-driven modals that work seamlessly with or without smooth 
 - **Scale**: `scale`
 
 **Complex Animations (requires GSAP plugins):**
-- **Appear**: All [Appear animations](#14-appear-animations) available
-- **Reveal**: All [Appear animations](#14-appear-animations) available (reveal variants)
-- **Counter**: All [Appear animations](#14-appear-animations) available (counter variants)
+- Appear, Reveal, Grow and Counter [Appear animations](#14-appear-animations) available
 
 **Text Animations (requires splitText plugin):**
 - **Text Animations**: All [Text animations](#13-text-animations) available
