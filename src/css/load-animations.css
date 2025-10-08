@@ -7,18 +7,38 @@
   --load-ease: cubic-bezier(0.25, 0.1, 0.25, 1.0);
   --load-distance: 1;
   --load-stagger: 0.1s;
-  --load-base-delay: 0.2s;
+  --load-base-delay: 0.4s;
   --load-delay: var(--load-base-delay);
 }
 
-/* Custom easings */
-[aa-load][aa-ease="power4.inOut"]{
-	animation-timing-function: cubic-bezier(0.86, 0, 0.07, 1);
+/**
+ * Initial Hidden State - prevents FOUC
+ * ONLY hide elements that have both aa-load AND aa-animate (hybrid elements)
+ * Pure aa-load elements animate immediately without waiting for JS
+ * 
+ * Important: Use opacity instead of visibility so CSS animations can show the element
+ * even if JS never loads. Visibility hidden would keep them hidden forever.
+ */
+body:not([aa-js-ready]) [aa-load][aa-animate], 
+body:not([aa-js-ready]) [aa-load][aa-stagger][aa-animate] > * {
+  opacity: 0;
 }
 
 /**
- * Base Animation Settings; applied both on [aa-load] elements as well as children of [aa-load][aa-stagger] elements
+ * When JS is ready, it adds aa-js-ready attribute to body
+ * Disable CSS animations ONLY for hybrid elements (those with both aa-load and aa-animate)
+ * This allows pure aa-load elements to animate normally without JS interference
+ * Reset opacity to initial so GSAP can control it from its own initial state
  */
+body[aa-js-ready] [aa-load][aa-animate],
+body[aa-js-ready] [aa-load][aa-stagger][aa-animate] > * {
+  animation: none !important;
+  opacity: initial !important;
+}
+
+/**
+* Base Animation Settings; applied both on [aa-load] elements as well as children of [aa-load][aa-stagger] elements
+*/
 [aa-load], 
 [aa-load][aa-stagger] > * {
   animation-duration: var(--load-duration);
@@ -26,6 +46,12 @@
   animation-fill-mode: both;
   animation-delay: var(--load-delay);
 }
+
+/* Custom easings */
+[aa-load][aa-ease="power4.inOut"]{
+	animation-timing-function: cubic-bezier(0.86, 0, 0.07, 1);
+}
+
 
 /* Stagger values from 0.05 to 0.5 second in 0.05 increments */
 [aa-load][aa-stagger="0.05"] { --load-stagger: 0.05s; }

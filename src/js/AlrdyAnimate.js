@@ -38,7 +38,8 @@ const defaultOptions = {
   templates: null, // Template configuration for class-based animations
   initTimeout: 3000, // 3 seconds timeout for initialization
   reducedMotionDuration: 0.3, // Duration for reduced motion animations
-  reducedMotionEase: "ease" // Easing for reduced motion animations
+  reducedMotionEase: "ease", // Easing for reduced motion animations
+  loadGracePeriod: 350 // Grace period in ms for hybrid aa-load + aa-animate elements (should be slightly shorter than --load-base-delay)
 };
 
 // Function to apply reduced motion by replacing animation attributes
@@ -87,6 +88,16 @@ async function init(options = {}) {
 
   // Set initialization state
   window.alrdyInitialized = false;
+
+  // Set grace period timer - fires exactly when CSS animations would start
+  // This ensures grace period attribute is set on time, not when JS finishes loading
+  setTimeout(() => {
+    if (!document.body.hasAttribute('aa-js-ready')) {
+      // JS hasn't finished loading yet, grace period has expired
+      document.body.setAttribute('aa-load-grace-expired', 'true');
+      console.warn(`AlrdyAnimate: Loading grace period expired (${initOptions.loadGracePeriod}ms) - hybrid loading elements will use CSS animations`);
+    }
+  }, initOptions.loadGracePeriod);
 
   // Set timeout for initialization
   initTimeoutId = setTimeout(() => {
@@ -372,6 +383,9 @@ async function init(options = {}) {
         // Clear processed templates after setup
         clearProcessedTemplates();
 
+        // Mark body as JS-ready and log status
+        document.body.setAttribute('aa-js-ready', 'true');
+
         // Clear timeout and set initialization state
         clearTimeout(initTimeoutId);
         window.alrdyInitialized = true;
@@ -494,6 +508,19 @@ function setupInteractiveComponent(element, elementSettings, modules, initOption
 
 function setupGSAPAnimations(element, elementSettings, initOptions, isMobile, modules) {
   const { animationType, split, scrub, duration, stagger, delay, ease, opacity, distance, anchorElement, anchorSelector, scrollStart, scrollEnd } = elementSettings;
+  
+  // 0. Check if this is a hybrid element (has both aa-load and aa-animate)
+  const isHybridElement = element.hasAttribute('aa-load') && element.hasAttribute('aa-animate');
+  const gracePeriodExpired = document.body.hasAttribute('aa-load-grace-expired');
+  
+  // If hybrid element and grace period expired, CSS animations have taken over - skip GSAP
+  if (isHybridElement && gracePeriodExpired) {
+    if (initOptions.debug) {
+      console.log('AlrdyAnimate: Loading grace period expired, CSS load animations run instead of GSAP');
+    }
+    element.style.visibility = 'visible';
+    return;
+  }
   
   // 1. Variables setup
   const baseType = animationType.includes('-') ? animationType.split('-')[0] : animationType;
@@ -770,8 +797,6 @@ function handleInitError(error, elements) {
   }
   elements.forEach((element) => {
     element.classList.add('in-view');
-    element.style.visibility = 'visible';
-    element.style.opacity = 1;
   });
 }
 

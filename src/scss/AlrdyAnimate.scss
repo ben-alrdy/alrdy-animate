@@ -33,15 +33,7 @@ body {
     opacity: 0;
 }
 
-// Hide the text animations initially
-[aa-animate^="text-"],[aa-animate^="appear"],[aa-animate^="reveal"] {
-    visibility: hidden;
-}
 
-// Since the text-fade start with opacity >0, show the element
-[aa-animate^="text-fade-"] {
-    visibility: visible;
-}
 
 [aa-hover-text-color], [aa-hover-content] {
   position: relative;

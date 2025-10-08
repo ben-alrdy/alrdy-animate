@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', function() {
         modals: false,
         enforceReducedMotion: false,
         includeGSAP: true,
+        loadGracePeriod: 500,
         templates: {
             theme: 'tilt',
             custom: {

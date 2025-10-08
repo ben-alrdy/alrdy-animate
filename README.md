@@ -321,6 +321,8 @@ Animations that trigger immediately when the page loads, without JavaScript init
 
 **Available Animations:** Similar to the above CSS animations, check the code file in Webflow
 
+**Hybrid Mode:** Combine `aa-load` with `aa-animate` for automatic fallback (see [Hybrid Load Animations](#hybrid-load-animations-css-fallback--gsap-enhancement) in Advanced Features)
+
 **Attributes & Defaults:**
 | Attribute | Values | Default | Description |
 |-----------|--------|---------|-------------|
@@ -1371,6 +1373,55 @@ Scroll-responsive navigation with animations.
 
 ## Advanced Features
 
+### Hybrid Load Animations (CSS Fallback + GSAP Enhancement)
+
+Combine `aa-load` (CSS) with `aa-animate` (GSAP) for above the fold loading animations. If page load speed is too slow, animations will fallback to CSS.
+
+**How to Use:**
+```html
+
+<div aa-load="fade-up" aa-animate="text-slide-up-lines" aa-split="chars" aa-duration="0.8">
+  Enhanced content with fallback
+</div>
+
+```
+
+**How It Works:**
+  - Hybrid element hidden initially (prevents FOUC)
+  - If JS loads within grace period (< 500ms): GSAP animation plays
+  - If JS is slow (> 400ms): CSS animation plays as fallback
+  - **Prevents double animation** - only one system animates per element
+
+**Configuration:**
+
+The grace period must match in both CSS and JavaScript (default: 200ms):
+
+```css
+/* In your custom CSS or Webflow's custom code */
+:root {
+  --load-base-delay: 0.4s; /* 200ms - adjust based on your JS load time */
+}
+```
+
+```javascript
+AlrdyAnimate.init({
+  loadGracePeriod: 350, // Should be slightly earlier than the --load-base-delay
+  gsapFeatures: ['appear', 'text'],
+  // ... other options
+});
+```
+
+**Recommendations:**
+- Use pure `aa-load` for critical above-the-fold content (hero, headlines, CTAs)
+- Use hybrid for below-the-fold content where you want GSAP features with CSS fallback
+- Match animation styles (e.g., `aa-load="fade-up"` with `aa-animate="appear-up"`)
+- Test with throttled network (DevTools → Slow 3G) to verify fallback behavior
+
+**Performance Notes:**
+- **Pure `aa-load`**: 0ms to animate - no hiding, no waiting for JS
+- **Hybrid elements**: Hidden until JS ready or grace period expires (200ms)
+- **Body attributes**: `aa-js-ready` (JS loaded), `aa-load-grace-expired` (CSS owns hybrid elements)
+
 ### Template System
 Define animations for CSS classes instead of individual elements.
 
@@ -1776,7 +1827,8 @@ AlrdyAnimate.init({
   
   // Advanced options
   includeGSAP: false,       // Include GSAP in bundle vs use Webflow's
-  initTimeout: 3000,        // Initialization timeout (ms)
+  initTimeout: 3000,        // Initialization timeout (ms), shows all elements after this time
+  loadGracePeriod: 350,     // Grace period for hybrid aa-load + aa-animate (ms)
   
   // Smooth scrolling
   smoothScroll: {
