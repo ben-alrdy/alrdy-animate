@@ -37,11 +37,12 @@ const defaultOptions = {
   debug: false, // Set to true to see GSAP debug info
   templates: null, // Template configuration for class-based animations
   initTimeout: 3000, // 3 seconds timeout for initialization
-  enforceReducedMotion: false // Force reduced motion mode for testing
+  reducedMotionDuration: 0.3, // Duration for reduced motion animations
+  reducedMotionEase: "ease" // Easing for reduced motion animations
 };
 
 // Function to apply reduced motion by replacing animation attributes
-function applyReducedMotionAttributes() {
+function applyReducedMotionAttributes(duration, ease) {
   // Find all elements with aa-animate or aa-children attributes
   const animatedElements = document.querySelectorAll('[aa-animate], [aa-children]');
   
@@ -63,9 +64,9 @@ function applyReducedMotionAttributes() {
       element.setAttribute('aa-children', 'fade');
     }
     
-    // Set reduced motion duration and easing
-    element.setAttribute('aa-duration', '0.3');
-    element.setAttribute('aa-ease', 'ease');
+    // Set reduced motion duration and easing from options
+    element.setAttribute('aa-duration', String(duration));
+    element.setAttribute('aa-ease', ease);
   });
 }
 
@@ -74,13 +75,12 @@ async function init(options = {}) {
   let lenis = null;
 
   // Check for reduced motion preference
-  isReducedMotion = initOptions.enforceReducedMotion || 
-    (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  isReducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   
   // If reduced motion is detected, replace animation attributes and disable templates
   if (isReducedMotion) {
     console.log('AlrdyAnimate: Reduced motion detected, replacing animations with fade-only');
-    applyReducedMotionAttributes();
+    applyReducedMotionAttributes(initOptions.reducedMotionDuration, initOptions.reducedMotionEase);
     // Disable template system for reduced motion
     initOptions.templates = null;
   }

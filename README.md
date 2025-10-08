@@ -1764,6 +1764,10 @@ AlrdyAnimate.init({
   hoverEase: "power3.out",  // Hover easing function
   hoverDistance: 0.1,       // Hover distance multiplier
   
+  // Reduced motion settings
+  reducedMotionDuration: 0.3, // Duration for reduced motion animations
+  reducedMotionEase: "ease",  // Easing for reduced motion animations
+  
   // Feature enabling
   gsapFeatures: [],         // GSAP features to load
   modals: false,            // Enable modal system
@@ -1848,7 +1852,8 @@ Many attributes support mobile/desktop variants using the `|` separator:
    - Preserves section animations: background, clip, stack
    - Interactive components (sliders, accordions) continue to work normally
    - Disables template system for consistent behavior
-   - Use `enforceReducedMotion: true` for testing
+   - Configurable duration and easing via `reducedMotionDuration` and `reducedMotionEase` options
+   - Test by enabling reduced motion in your system settings (macOS: System Preferences → Accessibility → Display → Reduce motion)
 2. **Keyboard navigation** - Full keyboard support for interactive components
 3. **Screen reader friendly** - Proper ARIA attributes on components
 4. **Focus management** - Maintains focus during animations
