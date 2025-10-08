@@ -192,4 +192,25 @@
  [aa-load="puff-in"], [aa-load="puff-in"][aa-stagger] > * { animation-name: puffIn; }
  [aa-load="puff-in-top"], [aa-load="puff-in-top"][aa-stagger] > * { animation-name: puffInTop; }
  [aa-load="puff-in-bottom"], [aa-load="puff-in-bottom"][aa-stagger] > * { animation-name: puffInBottom; }
+
+/**
+ * Reduced Motion Support
+ * When user prefers reduced motion, all animations fallback to simple fade
+ */
+@media (prefers-reduced-motion: reduce) {
+  /* Override all animation names to use fade animation */
+  [aa-load], [aa-load][aa-stagger] > * {
+    animation-name: fade !important;
+  }
+  
+  /* Reduce animation duration for better accessibility */
+  [aa-load], [aa-load][aa-stagger] > * {
+    animation-duration: 0.3s !important;
+  }
+  
+  /* Disable any transform animations that might cause motion */
+  [aa-load], [aa-load][aa-stagger] > * {
+    animation-timing-function: ease !important;
+  }
+}
  

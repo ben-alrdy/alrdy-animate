@@ -361,6 +361,8 @@ Advanced text splitting and animation effects.
 - **Blur**: `text-blur`, `text-blur-[direction]` where `[direction]` = `up`, `down`, `left`, `right`
 - **Rotate**: `text-rotate-soft` (3D rotation around X-axis)
 - **Block**: `text-block-[direction]` where `[direction]` = `up`, `down`, `left`, `right`
+  - Use `aa-color` attribute to define the block background color
+  - Format: `aa-color="bg:#hexcolor"` or legacy `aa-color="#hexcolor"`
 
 **Attributes & Defaults:**
 | Attribute | Values | Default | Description |
@@ -370,7 +372,7 @@ Advanced text splitting and animation effects.
 | `aa-stagger` | Number (seconds) | `0.05` | Delay between split elements |
 | `aa-duration` | Number (seconds) | `0.8` | Animation duration |
 | `aa-scrub` | `true`, number | - | Scroll-driven animation. `true` = direct mapping, number = lag (higher = more lag) |
-| `aa-color` | Hex color | - | Block color for text-block animation |
+| `aa-color` | `bg:#hex` or `#hex` | #000000 | Block color for text-block animations |
 
 **Examples:**
 ```html
@@ -378,6 +380,10 @@ Advanced text splitting and animation effects.
 <p aa-animate="text-fade" aa-split="chars" aa-stagger="0.02">Character reveal</p>
 <div aa-animate="text-tilt-up-clip" aa-split="lines">Clipped lines</div>
 <span aa-animate="text-blur-up" aa-split="words|random">Random order</span>
+
+<!-- Text block animations with color -->
+<h2 aa-animate="text-block-left" aa-color="bg:#ff0000">Red block animation</h2>
+<h2 aa-animate="text-block-up" aa-color="#000000">Black block (legacy format)</h2>
 ```
 
 ---
@@ -584,11 +590,18 @@ Use the `&` operator to combine multiple hover effects:
 
 ### Color Animations
 
-Add color changes to any hover animation:
+Add color changes to any hover animation using the unified `aa-color` attribute on child elements.
 
-**Color Element Tags:**
-- `aa-hover-text-color="color"` - Changes text color on hover
-- `aa-hover-bg-color="color"` - Changes background color on hover
+**Unified Color Attribute:**
+- `aa-color="text:#hex"` - Changes text color on hover
+- `aa-color="bg:#hex"` - Changes background color on hover
+- `aa-color="bg:#hex text:#hex"` - Changes multiple properties
+- `aa-color="bg:#hex text:#hex border:#hex"` - All three properties
+
+**How it works:**
+- Apply `aa-color` to child elements within the hover container
+- Only properties defined in `aa-color` will be animated
+- Original colors are automatically stored and restored on mouse leave
 
 ### Attributes & Defaults
 
@@ -600,8 +613,7 @@ Add color changes to any hover animation:
 | `aa-split` | `words`, `chars`, `lines` | `words` | Text splitting method |
 | `aa-stagger` | Number (seconds) | `0.03` | Stagger between text elements |
 | `aa-distance` | Number (seconds) | `0.1` | Delay between original and clone text |
-| `aa-hover-text-color` | Color | - | Text color on hover |
-| `aa-hover-bg-color` | Color | - | Background color on hover |
+| `aa-color` | `text:#hex bg:#hex border:#hex` | - | Color changes on hover (on child elements) |
 
 ### Complete Examples
 
@@ -667,14 +679,14 @@ Add color changes to any hover animation:
         aa-stagger="0.01" 
         aa-duration="0.6">
   <span aa-hover-content>
-    <span aa-hover-text aa-hover-text-color="#ffffff">
+    <span aa-hover-text aa-color="text:#ffffff">
       Multi-Effect Button
     </span>
     <svg aa-hover-icon class="w-4 h-4">
       <path d="M5 12h14m-7-7l7 7-7 7"/>
     </svg>
   </span>
-  <div aa-hover-bg aa-hover-bg-color="#000000" 
+  <div aa-hover-bg aa-color="bg:#000000" 
        class="absolute inset-0 scale-0"></div>
 </button>
 ```
@@ -1811,7 +1823,12 @@ Many attributes support mobile/desktop variants using the `|` separator:
 
 ### Accessibility Features
 
-1. **Reduced motion support** - Respects `prefers-reduced-motion`
+1. **Reduced motion support** - Automatically detects and respects `prefers-reduced-motion: reduce`
+   - Replaces animations with simple fade effects
+   - Preserves section animations: background, clip, stack
+   - Interactive components (sliders, accordions) continue to work normally
+   - Disables template system for consistent behavior
+   - Use `enforceReducedMotion: true` for testing
 2. **Keyboard navigation** - Full keyboard support for interactive components
 3. **Screen reader friendly** - Proper ARIA attributes on components
 4. **Focus management** - Maintains focus during animations

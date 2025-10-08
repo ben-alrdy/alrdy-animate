@@ -7,6 +7,26 @@ export function createTextAnimations(gsap) {
     blur:         { duration: 0.4, stagger: 0.02, ease: 'ease-out' },
   };
 
+  // Helper to parse aa-color attribute
+  function parseColorAttribute(attribute) {
+    if (!attribute) return {};
+    
+    return attribute.split(' ').reduce((colors, current) => {
+      const [type, value] = current.split(':').map(s => s.trim());
+      if (type && value) {
+        const colorMap = {
+          'bg': 'backgroundColor',
+          'text': 'color',
+          'border': 'borderColor'
+        };
+        if (colorMap[type]) {
+          colors[colorMap[type]] = value;
+        }
+      }
+      return colors;
+    }, {});
+  }
+
   // Helper function to create base animation configuration
   function createBaseAnimation(element, split, duration, stagger, delay, ease, props) {
     const baseProps = {
@@ -138,7 +158,21 @@ export function createTextAnimations(gsap) {
     return (element, split, duration, stagger, delay, ease) => ({
       onSplit: (self) => {
         const tl = gsap.timeline({ delay });
-        const color = element.getAttribute('aa-color') || '#000000';
+        const colorAttr = element.getAttribute('aa-color') || '#000000';
+        
+        // Determine block background color:
+        // - If colorAttr is just a hex value (e.g., "#000"), use it directly
+        // - If colorAttr is in new format (e.g., "bg:#000" or "bg:#000 text:#fff"), extract bg value
+        let color;
+        if (colorAttr.includes(':')) {
+          // New format - parse and extract background color only
+          const parsedColors = parseColorAttribute(colorAttr);
+          color = parsedColors.backgroundColor || '#000000';
+        } else {
+          // Legacy format - treat entire value as background color
+          color = colorAttr;
+        }
+        
         const { initialClip, revealClip, hideClip, textInit, textFinal } = config[direction];
 
         self.lines.forEach((line, i) => {

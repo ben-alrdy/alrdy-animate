@@ -40,7 +40,7 @@
                         <div style="position: relative; overflow: hidden; pointer-events: none;">
                             <div aa-hover-text>Slide Up Text</div>
                         </div>
-                        <div aa-hover-bg aa-hover="shrink" aa-duration="0.7" aa-ease="power3.inOut"></div>
+                        <div aa-hover-bg  aa-hover="shrink" aa-duration="0.7" aa-ease="power3.inOut"></div>
                     </a>
 
                     <a href="#" class="hover-button transparent" aa-hover="text-slide-down" aa-split="words">
@@ -71,21 +71,21 @@
                 <h2>Background Circle Animation</h2>
                 <div class="hover-grid">
                     <a href="#" class="hover-button" aa-hover="bg-circle"  aa-duration="1">
-                        <div aa-hover-text-color="white">Circle All</div>
+                        <div aa-color="text:#fff">Circle All</div>
                         <svg class="bg-filler" viewBox="0 0 1 1" preserveAspectRatio="xMidYMid slice" aa-hover-bg>
                             <circle cx="0.5" cy="0.5" r="0" fill="currentColor"></circle>
                         </svg>
                     </a>
 
                     <a href="#" class="hover-button" aa-hover="bg-circle-bottom" aa-duration="1">
-                        <div aa-hover-text-color="white">Circle Bottom</div>
+                        <div aa-color="text:#fff">Circle Bottom</div>
                         <svg class="bg-filler" viewBox="0 0 1 1" preserveAspectRatio="xMidYMid slice" aa-hover-bg>
                             <circle cx="0.5" cy="0.5" r="0" fill="currentColor"></circle>
                         </svg>
                     </a>
                     <a href="#" aa-hover="grow-bounce" aa-duration="0.5" aa-ease="ease-in-out">
                         <div class="hover-button" aa-hover="bg-circle" aa-hover-direction="bottom" aa-duration="1">
-                            <div aa-hover-text-color="white">Circle Bottom grow</div>
+                            <div aa-color="text:#fff">Circle Bottom grow</div>
                             <svg class="bg-filler" viewBox="0 0 1 1" preserveAspectRatio="xMidYMid slice" aa-hover-bg>
                                 <circle cx="0.5" cy="0.5" r="0" fill="currentColor"></circle>
                             </svg>
@@ -93,7 +93,7 @@
                     </a>
                     <a href="#" aa-hover="shrink-bounce" aa-duration="0.5" aa-ease="ease-in-out">
                         <div class="hover-button" aa-hover="bg-circle" aa-hover-direction="bottom" aa-duration="1">
-                            <div aa-hover-text-color="white">Circle Bottom shrink</div>
+                            <div aa-color="text:#fff">Circle Bottom shrink</div>
                             <svg class="bg-filler" viewBox="0 0 1 1" preserveAspectRatio="xMidYMid slice" aa-hover-bg>
                                 <circle cx="0.5" cy="0.5" r="0" fill="currentColor"></circle>
                             </svg>
@@ -108,7 +108,7 @@
                 <div class="hover-grid">
                     <a href="#" aa-hover="grow-bounce" aa-duration="0.6" aa-ease="ease-in-out">
                         <div class="hover-button" aa-hover="bg-curve" aa-hover-direction="bottom" aa-delay="0.2" aa-duration="0.3">
-                            <div aa-hover-text-color="white">Curve bottom</div>
+                            <div aa-color="text:#fff">Curve bottom</div>
                             <svg class="bg-filler" viewBox="0 0 100 100" preserveAspectRatio="none" aa-hover-bg>
                                 <path d="M 0 100 V 0 Q 250 0 500 0 V 0 H 0 z" fill="currentColor"></path>
                             </svg>
@@ -118,7 +118,7 @@
                     <a href="#" aa-hover="shrink-bounce" aa-duration="0.5">
                         <div class="hover-button" aa-hover="bg-curve" aa-hover-direction="all" aa-delay="0.2"
                             aa-duration="0.3">
-                            <div aa-hover-text-color="white">Curve all</div>
+                            <div aa-color="text:#fff">Curve all</div>
                             <svg class="bg-filler" viewBox="0 0 100 100" preserveAspectRatio="none" aa-hover-bg>
                                 <path d="M 0 100 V 0 Q 250 0 500 0 V 0 H 0 z" fill="currentColor"></path>
                             </svg>
@@ -146,9 +146,9 @@
                 <h2>Background Expand Animation</h2>
                 <div class="hover-grid">
                     <div class="hover-button is-icon" aa-hover="bg-expand&icon-right" aa-duration="0.5" aa-delay="0.2">
-                        <div aa-hover-text-color="white">With Icon</div>
+                        <div aa-color="text:#fff">With Icon</div>
                         <div class="icon-wrapper">
-                            <div class="bg-expand" aa-hover-bg></div>
+                            <div class="bg-expand" aa-hover-bg ></div>
                             <div class="icon-clip">
                                 <svg aa-hover-icon width="24" height="24" viewBox="0 0 24 24">
                                     <path d="M5 12h14M12 5l7 7-7 7" stroke="white" fill="none" stroke-width="2"
@@ -159,9 +159,9 @@
                     </div>
 
                     <div class="hover-button is-icon" aa-hover="bg-expand-reverse&icon-right" aa-duration="0.5">
-                        <div aa-hover-text-color="white">With Icon</div>
+                        <div aa-color="text:#fff">With Icon</div>
                         <div class="icon-wrapper">
-                            <div class="bg-expand" aa-hover-bg aa-hover-bg-color="black"></div>
+                            <div class="bg-expand" aa-hover-bg aa-color="bg:#000"></div>
                             <div class="icon-clip">
                                 <svg aa-hover-icon width="24" height="24" viewBox="0 0 24 24">
                                     <path d="M5 12h14M12 5l7 7-7 7" stroke="white" fill="none" stroke-width="2"
@@ -225,7 +225,7 @@
                     </a>
                     <a class="hover-button is-icon" aa-hover="icon-up-right-reverse" aa-duration="0.5" aa-distance="0.1"
                         href="#">
-                        <div aa-hover-text-color="white">Icon up right</div>
+                        <div aa-color="text:#fff">Icon up right</div>
                         <div class="icon-wrapper">
                             <div class="icon-clip">
                                 <svg aa-hover-icon width="24" height="24" viewBox="0 0 24 24"
@@ -238,7 +238,7 @@
                     </a>
                     <a class="hover-button is-icon" aa-hover="icon-down-right-reverse" aa-duration="0.5" aa-distance="0.1"
                         href="#">
-                        <div aa-hover-text-color="white">Icon down right</div>
+                        <div aa-color="text:#fff">Icon down right</div>
                         <div class="icon-wrapper">
                             <div class="icon-clip">
                                 <svg aa-hover-icon width="24" height="24" viewBox="0 0 24 24"
@@ -250,7 +250,7 @@
                         </div>
                     </a>
                     <a class="hover-button is-icon" aa-hover="icon-left-reverse" aa-duration="0.5" aa-distance="0.1" href="#">
-                        <div aa-hover-text-color="white">Icon left</div>
+                        <div aa-color="text:#fff">Icon left</div>
                         <div class="icon-wrapper">
                             <div class="icon-clip">
                                 <svg aa-hover-icon width="24" height="24" viewBox="0 0 24 24"

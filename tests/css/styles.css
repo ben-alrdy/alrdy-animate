@@ -296,7 +296,7 @@ button[aa-slider-next]:hover {
     color: var(--primary-color);
 }
 
-[aa-hover-text] {
+[aa-hover-text], [aa-color*="text"] {
     position: relative;
     z-index: 1;
 }

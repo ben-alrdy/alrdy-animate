@@ -89,71 +89,76 @@ function getAdjustedDirection(mouseDirection, hoverDirection, isEnter) {
     return direction;
 }
 
-function storeOriginalColors(element) {
-    const colorElements = {
-        text: element.querySelectorAll('[aa-hover-text-color]'),
-        background: element.querySelectorAll('[aa-hover-bg-color]')
-    };
+// Helper to parse aa-color attribute
+function parseColorAttribute(attribute) {
+    if (!attribute) return {};
     
-    const originalColors = {
-        text: [],
-        background: []
-    };
+    return attribute.split(' ').reduce((colors, current) => {
+        const [type, value] = current.split(':').map(s => s.trim());
+        if (type && value) {
+            const colorMap = {
+                'bg': 'backgroundColor',
+                'text': 'color',
+                'border': 'borderColor'
+            };
+            if (colorMap[type]) {
+                colors[colorMap[type]] = value;
+            }
+        }
+        return colors;
+    }, {});
+}
 
-    if (colorElements.text.length) {
-        originalColors.text = Array.from(colorElements.text).map(el => 
-            window.getComputedStyle(el).color
-        );
-    }
-
-    if (colorElements.background.length) {
-        originalColors.background = Array.from(colorElements.background).map(el => 
-            window.getComputedStyle(el).backgroundColor
-        );
-    }
+function storeOriginalColors(element) {
+    const colorElements = element.querySelectorAll('[aa-color]');
+    
+    // Store original colors for each element with aa-color
+    const originalColors = Array.from(colorElements).map(el => {
+        const aaColorAttr = el.getAttribute('aa-color');
+        const targetColors = parseColorAttribute(aaColorAttr);
+        const computedStyle = window.getComputedStyle(el);
+        
+        // Only store original values for properties that are defined in aa-color
+        const originalValues = {};
+        if (targetColors.backgroundColor !== undefined) {
+            originalValues.backgroundColor = computedStyle.backgroundColor;
+        }
+        if (targetColors.color !== undefined) {
+            originalValues.color = computedStyle.color;
+        }
+        if (targetColors.borderColor !== undefined) {
+            originalValues.borderColor = computedStyle.borderColor;
+        }
+        
+        return {
+            element: el,
+            targetColors,
+            originalColors: originalValues
+        };
+    });
 
     return originalColors;
 }
 
 function setupColorAnimation(element, timeline, isEnter, settings) {
     const { hoverDelay: delay = 0 } = settings;
+    const originalColors = timeline.data?.originalColors;
 
-    // Handle text color animations
-    const textElements = element.querySelectorAll('[aa-hover-text-color]');
-    textElements.forEach((el, index) => {
-        const targetColor = el.getAttribute('aa-hover-text-color');
-        const originalColor = timeline.data?.originalColors?.text?.[index];
-        
-        if (targetColor) {
-            timeline.to(
-                el,
-                { 
-                    color: isEnter ? targetColor : originalColor,
-                    delay: isEnter ? delay : 0,
-                    overwrite: true
-                },
-                0 // Start at beginning of timeline
-            );
-        }
-    });
+    if (!originalColors || originalColors.length === 0) return;
 
-    // Handle background color animations
-    const bgElements = element.querySelectorAll('[aa-hover-bg-color]');
-    bgElements.forEach((el, index) => {
-        const targetColor = el.getAttribute('aa-hover-bg-color');
-        const originalColor = timeline.data?.originalColors?.background?.[index];
-        
-        if (targetColor) {
-            timeline.to(
-                el,
-                { 
-                    backgroundColor: isEnter ? targetColor : originalColor,
-                    delay: isEnter ? delay : 0,
-                    overwrite: true
-                },
-                0 // Start at beginning of timeline
-            );
-        }
+    // Animate each element with aa-color
+    originalColors.forEach(({ element: el, targetColors, originalColors: origValues }) => {
+        const animProps = {
+            delay: isEnter ? delay : 0,
+            overwrite: true
+        };
+
+        // Animate only the properties defined in aa-color
+        Object.keys(targetColors).forEach(prop => {
+            animProps[prop] = isEnter ? targetColors[prop] : origValues[prop];
+        });
+
+        timeline.to(el, animProps, 0); // Start at beginning of timeline
     });
 }
 
