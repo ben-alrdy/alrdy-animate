@@ -428,7 +428,7 @@ function setupAnimations(elements, initOptions, isMobile, modules) {
     element.settings = settings;
 
     // Apply styles (duration, delay, colors)
-    applyElementStyles(element, settings, isMobile);
+    applyElementStyles(element, settings, isMobile, initOptions.loadGracePeriod);
 
     // Setup hover animations 
     if (element.hasAttribute('aa-hover')) {

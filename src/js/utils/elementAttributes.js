@@ -144,7 +144,7 @@ export function getElementSettings(element, settings, isMobile) {
   };
 }
 
-export function applyElementStyles(element, elementSettings, isMobile) {
+export function applyElementStyles(element, elementSettings, isMobile, loadGracePeriod) {
   const { duration, delay, distance, delayMobile, color, opacity } = elementSettings;
 
   // Set duration if specified on element
@@ -153,8 +153,17 @@ export function applyElementStyles(element, elementSettings, isMobile) {
   }
 
   // Set delay if specified on element, and handle mobile delay if defined
-  if (element.hasAttribute('aa-delay')) {
-    const finalDelay = isMobile && delayMobile !== undefined ? delayMobile : delay;
+  // For hybrid elements (aa-load + aa-animate), add grace period to give JS time to initialize
+  const isHybrid = element.hasAttribute('aa-load') && element.hasAttribute('aa-animate');
+  
+  if (element.hasAttribute('aa-delay') || isHybrid) {
+    const baseDelay = isMobile && delayMobile !== undefined ? delayMobile : delay;
+    
+    // For hybrid elements, add grace period to the delay
+    const finalDelay = isHybrid && loadGracePeriod > 0 
+      ? baseDelay + (loadGracePeriod / 1000) 
+      : baseDelay;
+    
     element.style.setProperty("--aa-delay", `${finalDelay}s`);
   }
 

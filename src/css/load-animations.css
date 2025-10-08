@@ -19,8 +19,7 @@
  * Important: Use opacity instead of visibility so CSS animations can show the element
  * even if JS never loads. Visibility hidden would keep them hidden forever.
  */
-body:not([aa-js-ready]) [aa-load][aa-animate], 
-body:not([aa-js-ready]) [aa-load][aa-stagger][aa-animate] > * {
+body:not([aa-js-ready]) [aa-load][aa-animate] {
   opacity: 0;
 }
 
@@ -30,17 +29,17 @@ body:not([aa-js-ready]) [aa-load][aa-stagger][aa-animate] > * {
  * This allows pure aa-load elements to animate normally without JS interference
  * Reset opacity to initial so GSAP can control it from its own initial state
  */
-body[aa-js-ready] [aa-load][aa-animate],
-body[aa-js-ready] [aa-load][aa-stagger][aa-animate] > * {
+body[aa-js-ready] [aa-load][aa-animate] {
   animation: none !important;
   opacity: initial !important;
 }
 
 /**
 * Base Animation Settings; applied both on [aa-load] elements as well as children of [aa-load][aa-stagger] elements
+* For stagger: exclude hybrid elements (those with aa-animate) - GSAP will handle their stagger
 */
 [aa-load], 
-[aa-load][aa-stagger] > * {
+[aa-load][aa-stagger]:not([aa-animate]) > * {
   animation-duration: var(--load-duration);
   animation-timing-function: var(--load-ease);
   animation-fill-mode: both;
@@ -118,21 +117,23 @@ body[aa-js-ready] [aa-load][aa-stagger][aa-animate] > * {
 
 /**
  * Stagger Functionality for up to 10 children
+ * Only applies to pure aa-load elements (not hybrid with aa-animate)
+ * GSAP handles stagger for hybrid elements
  */
-[aa-load][aa-stagger] {
+[aa-load][aa-stagger]:not([aa-animate]) {
   --load-parent-delay: var(--load-delay, 0s);
 }
 
-[aa-load][aa-stagger] > :nth-child(1) { --load-delay: var(--load-parent-delay); }
-[aa-load][aa-stagger] > :nth-child(2) { --load-delay: calc(var(--load-parent-delay) + var(--load-stagger)); }
-[aa-load][aa-stagger] > :nth-child(3) { --load-delay: calc(var(--load-parent-delay) + (var(--load-stagger) * 2)); }
-[aa-load][aa-stagger] > :nth-child(4) { --load-delay: calc(var(--load-parent-delay) + (var(--load-stagger) * 3)); }
-[aa-load][aa-stagger] > :nth-child(5) { --load-delay: calc(var(--load-parent-delay) + (var(--load-stagger) * 4)); }
-[aa-load][aa-stagger] > :nth-child(6) { --load-delay: calc(var(--load-parent-delay) + (var(--load-stagger) * 5)); }
-[aa-load][aa-stagger] > :nth-child(7) { --load-delay: calc(var(--load-parent-delay) + (var(--load-stagger) * 6)); }
-[aa-load][aa-stagger] > :nth-child(8) { --load-delay: calc(var(--load-parent-delay) + (var(--load-stagger) * 7)); }
-[aa-load][aa-stagger] > :nth-child(9) { --load-delay: calc(var(--load-parent-delay) + (var(--load-stagger) * 8)); }
-[aa-load][aa-stagger] > :nth-child(10) { --load-delay: calc(var(--load-parent-delay) + (var(--load-stagger) * 9)); }
+[aa-load][aa-stagger]:not([aa-animate]) > :nth-child(1) { --load-delay: var(--load-parent-delay); }
+[aa-load][aa-stagger]:not([aa-animate]) > :nth-child(2) { --load-delay: calc(var(--load-parent-delay) + var(--load-stagger)); }
+[aa-load][aa-stagger]:not([aa-animate]) > :nth-child(3) { --load-delay: calc(var(--load-parent-delay) + (var(--load-stagger) * 2)); }
+[aa-load][aa-stagger]:not([aa-animate]) > :nth-child(4) { --load-delay: calc(var(--load-parent-delay) + (var(--load-stagger) * 3)); }
+[aa-load][aa-stagger]:not([aa-animate]) > :nth-child(5) { --load-delay: calc(var(--load-parent-delay) + (var(--load-stagger) * 4)); }
+[aa-load][aa-stagger]:not([aa-animate]) > :nth-child(6) { --load-delay: calc(var(--load-parent-delay) + (var(--load-stagger) * 5)); }
+[aa-load][aa-stagger]:not([aa-animate]) > :nth-child(7) { --load-delay: calc(var(--load-parent-delay) + (var(--load-stagger) * 6)); }
+[aa-load][aa-stagger]:not([aa-animate]) > :nth-child(8) { --load-delay: calc(var(--load-parent-delay) + (var(--load-stagger) * 7)); }
+[aa-load][aa-stagger]:not([aa-animate]) > :nth-child(9) { --load-delay: calc(var(--load-parent-delay) + (var(--load-stagger) * 8)); }
+[aa-load][aa-stagger]:not([aa-animate]) > :nth-child(10) { --load-delay: calc(var(--load-parent-delay) + (var(--load-stagger) * 9)); }
 
 /**
  * Fade Animations
@@ -143,41 +144,41 @@ body[aa-js-ready] [aa-load][aa-stagger][aa-animate] > * {
 @keyframes fadeLeft{from{opacity:0;transform:translate3d(calc(2rem * var(--load-distance)),0,0)}to{opacity:var(--load-opacity, 1);transform:translate3d(0,0,0)}}
 @keyframes fadeRight{from{opacity:0;transform:translate3d(calc(-2rem * var(--load-distance)),0,0)}to{opacity:var(--load-opacity, 1);transform:translate3d(0,0,0)}}
 
-[aa-load="fade"], [aa-load="fade"][aa-stagger] > * { animation-name: fade; }
-[aa-load="fade-up"], [aa-load="fade-up"][aa-stagger] > * { animation-name: fadeUp; }
-[aa-load="fade-down"], [aa-load="fade-down"][aa-stagger] > * { animation-name: fadeDown; }
-[aa-load="fade-left"], [aa-load="fade-left"][aa-stagger] > * { animation-name: fadeLeft; }
-[aa-load="fade-right"], [aa-load="fade-right"][aa-stagger] > * { animation-name: fadeRight; }
+[aa-load="fade"], [aa-load="fade"][aa-stagger]:not([aa-animate]) > * { animation-name: fade; }
+[aa-load="fade-up"], [aa-load="fade-up"][aa-stagger]:not([aa-animate]) > * { animation-name: fadeUp; }
+[aa-load="fade-down"], [aa-load="fade-down"][aa-stagger]:not([aa-animate]) > * { animation-name: fadeDown; }
+[aa-load="fade-left"], [aa-load="fade-left"][aa-stagger]:not([aa-animate]) > * { animation-name: fadeLeft; }
+[aa-load="fade-right"], [aa-load="fade-right"][aa-stagger]:not([aa-animate]) > * { animation-name: fadeRight; }
 
 /**
  * Slide Animations
  */
-@keyframes slideUp{from{transform:translate3d(0,100%,0)}to{transform:translate3d(0,0,0)}}
-@keyframes slideDown{from{transform:translate3d(0,-100%,0)}to{transform:translate3d(0,0,0)}}
-@keyframes slideLeft{from{transform:translate3d(100%,0,0)}to{transform:translate3d(0,0,0)}}
-@keyframes slideRight{from{transform:translate3d(-100%,0,0)}to{transform:translate3d(0,0,0)}}
+@keyframes slideUp{from{opacity:var(--load-opacity, 1);transform:translate3d(0,100%,0)}to{opacity:var(--load-opacity, 1);transform:translate3d(0,0,0)}}
+@keyframes slideDown{from{opacity:var(--load-opacity, 1);transform:translate3d(0,-100%,0)}to{opacity:var(--load-opacity, 1);transform:translate3d(0,0,0)}}
+@keyframes slideLeft{from{opacity:var(--load-opacity, 1);transform:translate3d(100%,0,0)}to{opacity:var(--load-opacity, 1);transform:translate3d(0,0,0)}}
+@keyframes slideRight{from{opacity:var(--load-opacity, 1);transform:translate3d(-100%,0,0)}to{opacity:var(--load-opacity, 1);transform:translate3d(0,0,0)}}
 
-[aa-load="slide-up"], [aa-load="slide-up"][aa-stagger] > * { animation-name: slideUp; }
-[aa-load="slide-down"], [aa-load="slide-down"][aa-stagger] > * { animation-name: slideDown; }
-[aa-load="slide-left"], [aa-load="slide-left"][aa-stagger] > * { animation-name: slideLeft; }
-[aa-load="slide-right"], [aa-load="slide-right"][aa-stagger] > * { animation-name: slideRight; }
+[aa-load="slide-up"], [aa-load="slide-up"][aa-stagger]:not([aa-animate]) > * { animation-name: slideUp; }
+[aa-load="slide-down"], [aa-load="slide-down"][aa-stagger]:not([aa-animate]) > * { animation-name: slideDown; }
+[aa-load="slide-left"], [aa-load="slide-left"][aa-stagger]:not([aa-animate]) > * { animation-name: slideLeft; }
+[aa-load="slide-right"], [aa-load="slide-right"][aa-stagger]:not([aa-animate]) > * { animation-name: slideRight; }
 
 /**
  * Zoom Animations
  */
 @keyframes zoomIn{from{opacity:0;transform:scale(0.6)}70%{opacity:var(--load-opacity, 1)}}
-@keyframes zoomOut{from{opacity:0;transform:scale(1.2)}70%{opacity:var(--load-opacity, 1)}}
+@keyframes zoomOut{from{opacity:0;transform:scale(1.1)}70%{opacity:var(--load-opacity, 1)}}
 @keyframes zoomInOver{from{opacity:0;transform:scale(0.1)}70%{opacity:var(--load-opacity, 1);transform:scale(1.1)}to{transform:scale(1)}}
-@keyframes zoomOutOver{from{opacity:0;transform:scale(1.2)}70%{opacity:var(--load-opacity, 1);transform:scale(0.9)}to{transform:scale(1)}}
+@keyframes zoomOutOver{from{opacity:0;transform:scale(1.1)}70%{opacity:var(--load-opacity, 1);transform:scale(0.9)}to{transform:scale(1)}}
 @keyframes zoomInOverUp{from{opacity:0;transform:scale(0.1) translate3d(0,1000px,0)}60%{opacity:var(--load-opacity, 1);transform:scale(.5) translate3d(0,-60px,0)}to{transform:scale(1) translate3d(0,0,0)}}
 @keyframes zoomInOverDown{from{opacity:0;transform:scale(0.1) translate3d(0,-1000px,0)}60%{opacity:var(--load-opacity, 1);transform:scale(.5) translate3d(0,60px,0)}to{transform:scale(1) translate3d(0,0,0)}}
 
-[aa-load="zoom-in"], [aa-load="zoom-in"][aa-stagger] > * { animation-name: zoomIn; }
-[aa-load="zoom-out"], [aa-load="zoom-out"][aa-stagger] > * { animation-name: zoomOut; }
-[aa-load="zoom-in-over"], [aa-load="zoom-in-over"][aa-stagger] > * { animation-name: zoomInOver; }
-[aa-load="zoom-out-over"], [aa-load="zoom-out-over"][aa-stagger] > * { animation-name: zoomOutOver; }
-[aa-load="zoom-in-over-up"], [aa-load="zoom-in-over-up"][aa-stagger] > * { animation-name: zoomInOverUp; }
-[aa-load="zoom-in-over-down"], [aa-load="zoom-in-over-down"][aa-stagger] > * { animation-name: zoomInOverDown; }
+[aa-load="zoom-in"], [aa-load="zoom-in"][aa-stagger]:not([aa-animate]) > * { animation-name: zoomIn; }
+[aa-load="zoom-out"], [aa-load="zoom-out"][aa-stagger]:not([aa-animate]) > * { animation-name: zoomOut; }
+[aa-load="zoom-in-over"], [aa-load="zoom-in-over"][aa-stagger]:not([aa-animate]) > * { animation-name: zoomInOver; }
+[aa-load="zoom-out-over"], [aa-load="zoom-out-over"][aa-stagger]:not([aa-animate]) > * { animation-name: zoomOutOver; }
+[aa-load="zoom-in-over-up"], [aa-load="zoom-in-over-up"][aa-stagger]:not([aa-animate]) > * { animation-name: zoomInOverUp; }
+[aa-load="zoom-in-over-down"], [aa-load="zoom-in-over-down"][aa-stagger]:not([aa-animate]) > * { animation-name: zoomInOverDown; }
 
 /**
  * Float Animations
@@ -188,10 +189,10 @@ body[aa-js-ready] [aa-load][aa-stagger][aa-animate] > * {
  @keyframes floatRight {from {opacity: 0; transform: translateX(calc(-2rem * var(--load-distance)));} 30% {opacity: var(--load-opacity, 1); transform: translateX(calc(5px * var(--load-distance)));} to {opacity: var(--load-opacity, 1); transform: translateX(0);}}
  @keyframes floatLeft {from {opacity: 0; transform: translateX(calc(2rem * var(--load-distance)));} 30% {opacity: var(--load-opacity, 1); transform: translateX(calc(-5px * var(--load-distance)));} to {opacity: var(--load-opacity, 1); transform: translateX(0);}}
 
- [aa-load="float-up"], [aa-load="float-up"][aa-stagger] > * { animation-name: floatUp; }
- [aa-load="float-down"], [aa-load="float-down"][aa-stagger] > * { animation-name: floatDown; }
- [aa-load="float-left"], [aa-load="float-left"][aa-stagger] > * { animation-name: floatLeft; }
- [aa-load="float-right"], [aa-load="float-right"][aa-stagger] > * { animation-name: floatRight; }
+ [aa-load="float-up"], [aa-load="float-up"][aa-stagger]:not([aa-animate]) > * { animation-name: floatUp; }
+ [aa-load="float-down"], [aa-load="float-down"][aa-stagger]:not([aa-animate]) > * { animation-name: floatDown; }
+ [aa-load="float-left"], [aa-load="float-left"][aa-stagger]:not([aa-animate]) > * { animation-name: floatLeft; }
+ [aa-load="float-right"], [aa-load="float-right"][aa-stagger]:not([aa-animate]) > * { animation-name: floatRight; }
 
  /**
  * Rotate Animations
@@ -202,10 +203,10 @@ body[aa-js-ready] [aa-load][aa-stagger][aa-animate] > * {
  @keyframes rotateBottomLeftCCW {from {opacity: 0; transform-origin: bottom left; transform: rotate(calc(5deg * var(--load-distance)));} to {opacity: var(--load-opacity, 1); transform-origin: bottom left;}}
  @keyframes rotateBottomLeftCW {from {opacity: 0; transform-origin: bottom left; transform: rotate(calc(-5deg * var(--load-distance)));} to {opacity: var(--load-opacity, 1); transform-origin: bottom left;}}
 
- [aa-load="rotate-br-cw"], [aa-load="rotate-br-cw"][aa-stagger] > * { animation-name: rotateBottomRightCW; }
- [aa-load="rotate-br-ccw"], [aa-load="rotate-br-ccw"][aa-stagger] > * { animation-name: rotateBottomRightCCW; }
- [aa-load="rotate-bl-cw"], [aa-load="rotate-bl-cw"][aa-stagger] > * { animation-name: rotateBottomLeftCW; }
- [aa-load="rotate-bl-ccw"], [aa-load="rotate-bl-ccw"][aa-stagger] > * { animation-name: rotateBottomLeftCCW; }
+ [aa-load="rotate-br-cw"], [aa-load="rotate-br-cw"][aa-stagger]:not([aa-animate]) > * { animation-name: rotateBottomRightCW; }
+ [aa-load="rotate-br-ccw"], [aa-load="rotate-br-ccw"][aa-stagger]:not([aa-animate]) > * { animation-name: rotateBottomRightCCW; }
+ [aa-load="rotate-bl-cw"], [aa-load="rotate-bl-cw"][aa-stagger]:not([aa-animate]) > * { animation-name: rotateBottomLeftCW; }
+ [aa-load="rotate-bl-ccw"], [aa-load="rotate-bl-ccw"][aa-stagger]:not([aa-animate]) > * { animation-name: rotateBottomLeftCCW; }
 
 /*
 * Puff in Animations
@@ -215,27 +216,28 @@ body[aa-js-ready] [aa-load][aa-stagger][aa-animate] > * {
  @keyframes puffInTop {from {opacity: 0; filter: blur(8px); transform: scale(2); transform-origin: top;} to {opacity: var(--load-opacity, 1); transform-origin: top;}}
  @keyframes puffInBottom {from {opacity: 0; filter: blur(8px); transform: scale(2); transform-origin: bottom;} to {opacity: var(--load-opacity, 1); transform-origin: bottom;}}
 
- [aa-load="puff-in"], [aa-load="puff-in"][aa-stagger] > * { animation-name: puffIn; }
- [aa-load="puff-in-top"], [aa-load="puff-in-top"][aa-stagger] > * { animation-name: puffInTop; }
- [aa-load="puff-in-bottom"], [aa-load="puff-in-bottom"][aa-stagger] > * { animation-name: puffInBottom; }
+ [aa-load="puff-in"], [aa-load="puff-in"][aa-stagger]:not([aa-animate]) > * { animation-name: puffIn; }
+ [aa-load="puff-in-top"], [aa-load="puff-in-top"][aa-stagger]:not([aa-animate]) > * { animation-name: puffInTop; }
+ [aa-load="puff-in-bottom"], [aa-load="puff-in-bottom"][aa-stagger]:not([aa-animate]) > * { animation-name: puffInBottom; }
 
 /**
  * Reduced Motion Support
  * When user prefers reduced motion, all animations fallback to simple fade
+ * Stagger rules only apply to pure aa-load elements (GSAP handles hybrid)
  */
 @media (prefers-reduced-motion: reduce) {
   /* Override all animation names to use fade animation */
-  [aa-load], [aa-load][aa-stagger] > * {
+  [aa-load], [aa-load][aa-stagger]:not([aa-animate]) > * {
     animation-name: fade !important;
   }
   
   /* Reduce animation duration for better accessibility */
-  [aa-load], [aa-load][aa-stagger] > * {
+  [aa-load], [aa-load][aa-stagger]:not([aa-animate]) > * {
     animation-duration: 0.3s !important;
   }
   
   /* Disable any transform animations that might cause motion */
-  [aa-load], [aa-load][aa-stagger] > * {
+  [aa-load], [aa-load][aa-stagger]:not([aa-animate]) > * {
     animation-timing-function: ease !important;
   }
 }
