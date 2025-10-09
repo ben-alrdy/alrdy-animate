@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AlrdyAnimate - Pin Tests (New API)</title>
+  <link rel="stylesheet" href="../dist/AlrdyAnimate.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      line-height: 1.6;
+    }
+
+    .spacer {
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      font-size: 2rem;
+    }
+
+    /* Test 1: Simple Pin */
+    .test-section {
+      margin: 4rem 0;
+      padding: 0 2rem;
+    }
+
+    .test-title {
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+      color: #333;
+    }
+
+    .pin-example {
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      color: white;
+      padding: 2rem;
+      border-radius: 1rem;
+      margin: 2rem 0;
+    }
+
+    .content-section {
+      height: 150vh;
+      background: #f8f9fa;
+      padding: 2rem;
+    }
+
+    /* Test 2: Pin Stack */
+    .pin-stack-section {
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #f0f0f0;
+      padding: 4rem 2rem;
+    }
+
+    .pin-stack-wrapper {
+      width: 60vw;
+      max-width: 800px;
+      display: grid;
+      gap: 2rem;
+    }
+
+    .card {
+      height: 80vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 1rem;
+      color: white;
+      font-size: 2rem;
+      font-weight: bold;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+    }
+
+    .card:nth-child(1) {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .card:nth-child(2) {
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    }
+
+    .card:nth-child(3) {
+      background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    }
+
+    .card:nth-child(4) {
+      background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+    }
+
+    .card:nth-child(5) {
+      background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+    }
+
+    .card-content {
+      text-align: center;
+    }
+
+    .card-content h2 {
+      font-size: 3rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .card-content p {
+      font-size: 1.2rem;
+      opacity: 0.9;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="spacer">
+    <h1>AlrdyAnimate Pin Tests (New API)</h1>
+  </div>
+
+  <!-- Test 1: Simple Pin -->
+  <section class="test-section">
+    <h2 class="test-title">Test 1: Simple Pin</h2>
+    <p style="margin-bottom: 1rem; color: #666;">Use <code>aa-animate="pin"</code> to pin an element during scroll.</p>
+    
+    <div class="pin-example" 
+         aa-animate="pin" 
+         aa-scroll-start="top 5%" 
+         aa-scroll-end="+=100%">
+      <h3>I stay pinned!</h3>
+      <p>This element is pinned for 200% of its height.</p>
+      <p>Scroll to see the effect.</p>
+    </div>
+    
+    <div class="content-section">
+      <p>This is regular content that scrolls normally...</p>
+      <p>The pinned element above stays fixed until you've scrolled 200% of its height.</p>
+    </div>
+  </section>
+
+  <div class="spacer">
+    <h2>Pin Stack Demos ↓</h2>
+  </div>
+
+  <!-- Test 2: Pin Stack - Simple (no in/out animations) -->
+  <section class="test-section">
+    <h2 aa-animate="fade-up" class="test-title">Test 2: Pin Stack - Simple</h2>
+    <p style="margin-bottom: 2rem; color: #666;">
+      Use <code>aa-animate="pin-stack"</code> for a simple card reveal stack effect.
+    </p>
+    
+    <div class="pin-stack-wrapper" 
+         aa-animate="pin-stack" 
+         aa-scroll-start="top 5%" 
+         aa-scroll-end="+=200%"
+         aa-pin-out="scale">
+      <div class="card">
+        <div class="card-content">
+          <h2>Card 1</h2>
+          <p>Simple slide up animation</p>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-content">
+          <h2>Card 2</h2>
+          <p>Cards stack on top</p>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-content">
+          <h2>Card 3</h2>
+          <p>Clean and smooth</p>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-content">
+          <h2>Card 4</h2>
+          <p>Final card!</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="spacer"></div>
+
+  <!-- Test 3: Pin Stack - Fade In -->
+  <section class="test-section">
+    <h2 aa-animate="fade-up" class="test-title">Test 3: Pin Stack - Fade In</h2>
+    <p style="margin-bottom: 2rem; color: #666;">
+      Use <code>aa-pin-in="fade"</code> to fade cards in as they appear.
+    </p>
+    
+    <div class="pin-stack-wrapper" 
+         aa-animate="pin-stack" 
+         aa-pin-in="fade"
+         aa-scroll-start="top 5%" 
+         aa-scroll-end="+=1000">
+      <div class="card">
+        <div class="card-content">
+          <h2>Card 1</h2>
+          <p>Fades in smoothly</p>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-content">
+          <h2>Card 2</h2>
+          <p>Gentle appearance</p>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-content">
+          <h2>Card 3</h2>
+          <p>Subtle transition</p>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-content">
+          <h2>Card 4</h2>
+          <p>Final card!</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="spacer"></div>
+
+  <!-- Test 4: Pin Stack - Scale In -->
+  <section class="test-section">
+    <h2 class="test-title">Test 4: Pin Stack - Scale In</h2>
+    <p style="margin-bottom: 2rem; color: #666;">
+      Use <code>aa-pin-in="scale"</code> for cards that scale up as they appear.
+    </p>
+    
+    <div class="pin-stack-wrapper" 
+         aa-animate="pin-stack" 
+         aa-pin-in="scale"
+         aa-scroll-start="top 5%" 
+         aa-scroll-end="+=1000">
+      <div class="card">
+        <div class="card-content">
+          <h2>Card 1</h2>
+          <p>Scales from small to full size</p>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-content">
+          <h2>Card 2</h2>
+          <p>Grows into view</p>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-content">
+          <h2>Card 3</h2>
+          <p>Dynamic entrance</p>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-content">
+          <h2>Card 4</h2>
+          <p>Final card!</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="spacer"></div>
+
+  <!-- Test 5: Pin Stack - Rotate In -->
+  <section class="test-section">
+    <h2 class="test-title">Test 5: Pin Stack - Rotate In</h2>
+    <p style="margin-bottom: 2rem; color: #666;">
+      Use <code>aa-pin-in="rotate"</code> for cards that rotate as they slide up.
+    </p>
+    
+    <div class="pin-stack-wrapper" 
+         aa-animate="pin-stack" 
+         aa-pin-in="rotate"
+         aa-scroll-start="top 5%" 
+         aa-scroll-end="+=1000">
+      <div class="card">
+        <div class="card-content">
+          <h2>Card 1</h2>
+          <p>Rotates into position</p>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-content">
+          <h2>Card 2</h2>
+          <p>Alternating rotation</p>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-content">
+          <h2>Card 3</h2>
+          <p>Playful movement</p>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-content">
+          <h2>Card 4</h2>
+          <p>Final card!</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="spacer"></div>
+
+  <!-- Test 6: Pin Stack - Perspective Out -->
+  <section class="test-section">
+    <h2 class="test-title">Test 6: Pin Stack - Perspective Out</h2>
+    <p style="margin-bottom: 2rem; color: #666;">
+      Use <code>aa-pin-out="perspective"</code> for 3D perspective effect as cards get covered.
+    </p>
+    
+    <div class="pin-stack-wrapper" 
+         aa-animate="pin-stack" 
+         aa-pin-out="perspective"
+         aa-scroll-start="top 5%" 
+         aa-scroll-end="+=1000">
+      <div class="card">
+        <div class="card-content">
+          <h2>Card 1</h2>
+          <p>Tilts back when Card 2 appears</p>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-content">
+          <h2>Card 2</h2>
+          <p>Tilts back when Card 3 appears</p>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-content">
+          <h2>Card 3</h2>
+          <p>Tilts back when Card 4 appears</p>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-content">
+          <h2>Card 4</h2>
+          <p>Stays in place (last card)</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="spacer"></div>
+
+  <!-- Test 7: Pin Stack - Combined In + Out -->
+  <section class="test-section">
+    <h2 class="test-title">Test 7: Pin Stack - Fade In + Perspective Out</h2>
+    <p style="margin-bottom: 2rem; color: #666;">
+      Combine <code>aa-pin-in="fade"</code> and <code>aa-pin-out="perspective"</code> for complex effects.
+    </p>
+    
+    <div class="pin-stack-wrapper" 
+         aa-animate="pin-stack" 
+         aa-pin-in="fade"
+         aa-pin-out="perspective"
+         aa-scroll-start="top 5%" 
+         aa-scroll-end="+=1000">
+      <div class="card">
+        <div class="card-content">
+          <h2>Card 1</h2>
+          <p>Fades in, then tilts back</p>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-content">
+          <h2>Card 2</h2>
+          <p>Fades in, then tilts back</p>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-content">
+          <h2>Card 3</h2>
+          <p>Fades in, then tilts back</p>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-content">
+          <h2>Card 4</h2>
+          <p>Fades in, stays in place</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="spacer"></div>
+
+  <!-- Test 8: Pin Stack - Scale In + Scale Out -->
+  <section class="test-section">
+    <h2 class="test-title">Test 8: Pin Stack - Scale In + Scale Out</h2>
+    <p style="margin-bottom: 2rem; color: #666;">
+      Combine <code>aa-pin-in="scale"</code> and <code>aa-pin-out="scale"</code>.
+    </p>
+    
+    <div class="pin-stack-wrapper" 
+         aa-animate="pin-stack" 
+         aa-pin-in="scale"
+         aa-pin-out="scale"
+         aa-scroll-start="top 5%" 
+         aa-scroll-end="+=1000">
+      <div class="card">
+        <div class="card-content">
+          <h2>Card 1</h2>
+          <p>Scales in, then scales down</p>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-content">
+          <h2>Card 2</h2>
+          <p>Scales in, then scales down</p>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-content">
+          <h2>Card 3</h2>
+          <p>Scales in, then scales down</p>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-content">
+          <h2>Card 4</h2>
+          <p>Scales in, stays full size</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="spacer">
+    <h2>With Content Inside ↓</h2>
+  </div>
+
+  <!-- Test 3: Pin with Animations Inside -->
+  <section class="test-section">
+    <h2 class="test-title">Test 3: Pin with Animations</h2>
+    <p style="margin-bottom: 1rem; color: #666;">Combine pinning with other animations.</p>
+    
+    <div class="pin-example" 
+         aa-animate="pin" 
+         aa-scroll-start="top top" 
+         aa-scroll-end="+=300%">
+      <h2 aa-animate="fade-up">Pinned Content</h2>
+      <p aa-animate="fade-up" aa-delay="0.2">This entire section is pinned...</p>
+      <p aa-animate="fade-up" aa-delay="0.4">But content inside can still animate!</p>
+      <p aa-animate="fade-up" aa-delay="0.6">Perfect for storytelling! ✨</p>
+    </div>
+    
+    <div class="content-section">
+      <p>More content below...</p>
+    </div>
+  </section>
+
+  <div class="spacer">
+    <h1>End of Demo</h1>
+  </div>
+
+  <script src="../dist/AlrdyAnimate.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
+

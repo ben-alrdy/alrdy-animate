@@ -16,6 +16,7 @@ A powerful, lightweight JavaScript library for creating scroll-triggered and int
     - [1.6 Section Background Color](#16-section-background-color)
     - [1.7 Section Clip](#17-section-clip)
     - [1.8 Section Stack](#18-section-stack)
+    - [1.9 Pin (GSAP-Powered Sticky)](#19-pin-gsap-powered-sticky)
   - [2. Hover Animations](#2-hover-animations)
   - [3. Interactive Components](#3-interactive-components)
     - [3.1 Slider](#31-slider)
@@ -455,8 +456,8 @@ Scroll-driven movement effects.
 |-----------|--------|---------|-------------|
 | `aa-animate` | `parallax`, `parallax-horizontal` | - | Parallax type |
 | `aa-parallax-target` | CSS selector | Self | Element to animate |
-| `aa-parallax-start` | Number (%) | `20` | Start position |
-| `aa-parallax-end` | Number (%) | `-20` | End position |
+| `aa-parallax-start` | Number (%) | `10` | Start position |
+| `aa-parallax-end` | Number (%) | `-10` | End position |
 | `aa-scroll-start` | Position | `top bottom` | When to start |
 | `aa-scroll-end` | Position | `bottom top` | When to end |
 | `aa-scrub` | `true`, number | `true` | Scroll-driven animation. `true` = direct mapping, number = lag (higher = more lag) |
@@ -540,6 +541,115 @@ Stacking scroll effects.
 ```html
 <div aa-animate="stack" aa-distance="2">Stacking section</div>
 ```
+
+---
+
+### 1.9 Pin (GSAP-Powered Sticky)
+
+Pin elements during scroll using GSAP's ScrollTrigger. This is **superior to CSS `position: sticky`** when working with ScrollTrigger animations because:
+- ✅ ScrollTrigger is aware of pinned elements and adjusts calculations automatically
+- ✅ Creates spacer elements to maintain document flow
+- ✅ All ScrollTriggers coordinate seamlessly
+
+**Setup:** `gsapFeatures: ['section']`
+
+#### Simple Pin
+
+Pin a single element during scroll.
+
+**Attributes & Defaults:**
+| Attribute | Values | Default | Description |
+|-----------|--------|---------|-------------|
+| `aa-animate` | `pin` | - | Pins element during scroll |
+| `aa-scroll-start` | ScrollTrigger position | `top 80%` | When pinning starts |
+| `aa-scroll-end` | ScrollTrigger position | `bottom 70%` | When pinning ends |
+
+**Examples:**
+```html
+<!-- Pin at top of viewport -->
+<section aa-animate="pin" aa-scroll-start="top 5%" aa-scroll-end="+=100%">
+  <h2 aa-animate="fade-up">I stay pinned!</h2>
+</section>
+
+<!-- Pin for specific scroll distance -->
+<div aa-animate="pin" aa-scroll-start="top 10%" aa-scroll-end="+=2000">
+  <h3>Pinned for 2000px of scroll</h3>
+</div>
+```
+
+#### Pin Stack - Card Reveal Animations
+
+Create stunning card reveal effects where cards slide up and stack on top of each other. Separate control over "in" animations (how cards appear) and "out" animations (how cards react when covered).
+
+**How It Works:**
+1. Parent element gets pinned and becomes a grid container
+2. Children are positioned to overlap using `grid-area`
+3. Each child animates from below into stacked position
+4. Gap from CSS `row-gap` is automatically respected
+
+**Attributes & Defaults:**
+| Attribute | Values | Default | Description |
+|-----------|--------|---------|-------------|
+| `aa-animate` | `pin-stack` | - | Enables pin-stack animation |
+| `aa-pin-in` | `fade`, `scale`, `rotate`, or `null` | `null` (simple slide) | How cards appear from below |
+| `aa-pin-out` | `perspective`, `scale`, `fade`, `blur`, or `null` | `null` (no effect) | How cards react when next card appears |
+| `aa-scroll-start` | ScrollTrigger position | `top 80%` | When animation starts |
+| `aa-scroll-end` | ScrollTrigger position | `bottom 70%` | When animation ends |
+
+**In-Animation Types:**
+- `null` (default) - Simple slide up with no extra effects
+- `fade` - Cards fade in (opacity 0 → 1) as they slide up
+- `scale` - Cards scale up (0.8 → 1.0) as they appear
+- `rotate` - Cards rotate (±15°) as they slide up (alternating direction)
+
+**Out-Animation Types:**
+- `null` (default) - Cards stay in final position
+- `perspective` - Cards tilt back (-10° rotationX) and scale down when next card appears
+- `scale` - Cards scale down (→ 0.85) when next card appears
+- `blur` - Cards blur (→ 4px) when next card appears
+
+**Examples:**
+
+```html
+<!-- Simple stack (no in/out animations) -->
+<div aa-animate="pin-stack" aa-scroll-start="top 5%" aa-scroll-end="+=1000">
+  <div class="card">Card 1</div>
+  <div class="card">Card 2</div>
+  <div class="card">Card 3</div>
+</div>
+
+<!-- Combined: Fade in + Perspective out -->
+<div aa-animate="pin-stack" aa-pin-in="fade" aa-pin-out="perspective" aa-scroll-start="top 5%" aa-scroll-end="+=1000">
+  <div class="card">Card 1</div>
+  <div class="card">Card 2</div>
+  <div class="card">Card 3</div>
+</div>
+
+```
+
+**Styling Tips:**
+```css
+/* Parent wrapper - use grid with gap for initial spacing */
+.pin-stack-wrapper {
+  display: grid;
+  gap: 2rem; /* Gap is preserved in animation */
+}
+
+/* Cards */
+.card {
+  height: 90vh; /* Or any height you want */
+  border-radius: 1rem;
+  padding: 2rem;
+}
+```
+
+**Important Notes:**
+- Parent is automatically converted to `display: grid` during animation
+- Children are positioned using `grid-area: 1 / 1 / 2 / 2` to overlap
+- Initial `row-gap` from CSS is respected in animation calculations
+- Use `aa-scroll-end` with sufficient distance (e.g., `+=1000` or `+=100%`) for smooth reveals
+- Out-animations are NOT applied to the last card (it has no card appearing after it)
+- You can mix and match any in-animation with any out-animation
 
 ---
 

@@ -202,11 +202,11 @@ function initializeParallax(element, gsap, ScrollTrigger, scrub, animationType) 
 
   // Get the start position in %
   const startAttr = element.getAttribute('aa-parallax-start');
-  const startVal = startAttr !== null ? parseFloat(startAttr) : 20;
+  const startVal = startAttr !== null ? parseFloat(startAttr) : 10;
 
   // Get the end position in %
   const endAttr = element.getAttribute('aa-parallax-end');
-  const endVal = endAttr !== null ? parseFloat(endAttr) : -20;
+  const endVal = endAttr !== null ? parseFloat(endAttr) : -10;
 
   // Get the start/end value of the ScrollTrigger
   const scrollStartRaw = element.getAttribute('aa-scroll-start') || 'top bottom';
@@ -358,6 +358,177 @@ function initializeStack(element, scrub, distance) {
   });
 }
 
+function initializePin(element, scrollStart, scrollEnd, debug = false) {
+  // Simple pin - just pin the element with specified scroll positions
+  ScrollTrigger.create({
+    trigger: element,
+    pin: true,
+    start: scrollStart,
+    end: scrollEnd,
+    pinSpacing: false,
+    markers: debug,
+    invalidateOnRefresh: true
+  });
+}
+
+function initializePinStack(element, scrollStart, scrollEnd, debug = false, inAnimation = null, outAnimation = null) {
+  const children = Array.from(element.children);
+  
+  if (children.length === 0) {
+    console.warn('aa-animate="pin-stack": No children found to stack');
+    return;
+  }
+  
+  // Get gap from CSS (works for both flex and grid)
+  const gap = parseFloat(getComputedStyle(element).rowGap) || 0;
+  
+  // Set all children to overlap using grid positioning
+  gsap.set(element, {
+    display: 'grid',
+    perspective: '1000px' // Set perspective on parent for 3D transforms on children
+  });
+  
+  // Position all children in the same grid cell
+  children.forEach(child => {
+    gsap.set(child, {
+      gridArea: '1 / 1 / 2 / 2'
+    });
+  });
+  
+  // Calculate card heights AFTER grid is applied
+  const cardHeights = children.map(child => child.offsetHeight);
+  
+  // Create timeline with scrub AFTER layout is settled
+  const tl = gsap.timeline({
+    defaults: {
+      ease: "none"
+    },
+    scrollTrigger: {
+      trigger: element,
+      start: scrollStart,
+      end: scrollEnd,
+      scrub: true,
+      pin: true,
+      pinSpacing: true, // Keep spacing to maintain document flow
+      markers: debug,
+      invalidateOnRefresh: true
+    }
+  });
+  
+  // Apply in-animations (how cards appear from below)
+  applyInAnimation(children, cardHeights, gap, tl, inAnimation);
+  
+  // Apply out-animations (how cards react when next card appears)
+  if (outAnimation) {
+    applyOutAnimation(children, cardHeights, gap, tl, outAnimation);
+  }
+  
+  return tl;
+}
+
+// Apply in-animation based on type
+function applyInAnimation(children, cardHeights, gap, tl, inAnimation) {
+  children.forEach((child, index) => {
+    const childHeight = cardHeights[index];
+    
+    // Base Y position (stacked below)
+    let baseY = (childHeight + gap) * index;
+    
+    // Add extra offset for certain animation types
+    let extraOffset = 0;
+    
+    const fromProps = {
+      duration: index * 1,
+      ease: "none"
+    };
+    
+    // Add animation-specific properties
+    switch(inAnimation) {
+      case 'fade':
+        fromProps.opacity = 0;
+        break;
+      
+      case 'scale':
+        gsap.set(child, { transformOrigin: "center center" });
+        fromProps.scale = 0.8;
+        break;
+      
+      case 'rotate':
+        gsap.set(child, { transformOrigin: "center center" });
+        fromProps.rotation = 15 * (index % 2 === 0 ? 1 : -1);
+        extraOffset = childHeight * 0.5; // Add 50% of card height as extra offset
+        break;
+      
+      // 'simple' or null - just slide up with no extra effects
+      default:
+        break;
+    }
+    
+    // Set final Y position with any extra offset
+    fromProps.y = baseY + extraOffset;
+    
+    tl.from(child, fromProps, 0);
+  });
+}
+
+// Apply out-animation based on type
+function applyOutAnimation(children, cardHeights, gap, tl, outAnimation) {
+  children.forEach((child, index) => {
+    // Skip the last card - it has no card appearing after it
+    if (index === children.length - 1) return;
+    
+    const childHeight = cardHeights[index];
+    
+    // Set transform origin for perspective effects
+    if (outAnimation === 'perspective') {
+      gsap.set(child, {
+        transformOrigin: "top center",
+        transformStyle: "preserve-3d"
+      });
+    }
+    
+    // Out-animation should start when THIS card reaches its final position
+    // and continue as the next cards appear
+    const startTime = index; // Card reaches final position at its index
+    
+    // Duration should cover from when this card is in position until the end
+    // This allows the effect to continue as subsequent cards appear
+    const remainingCards = children.length - index - 1; // How many cards appear after this one
+    const duration = remainingCards; // Animation continues for all remaining cards
+    
+    const toProps = {
+      ease: "none",
+      duration: duration
+    };
+    
+    switch(outAnimation) {
+      case 'perspective':
+        // Card tilts back and scales down as subsequent cards appear
+        toProps.scale = 0.9 + 0.025 * index;
+        toProps.rotationX = -15;
+        toProps.y = "-2rem"; // Slight upward movement
+        break;
+      
+      case 'scale':
+        // Card scales down as subsequent cards appear
+        toProps.scale = 0.85;
+        break;
+      
+      case 'blur':
+        // Card blurs as subsequent cards appear
+        toProps.filter = "blur(8px)";
+        toProps.scale = 0.9;
+        toProps.y = "-4rem";
+        break;
+      
+      default:
+        return; // No out animation
+    }
+    
+    tl.to(child, toProps, startTime);
+  });
+}
+
 function createSectionAnimations(gsap, ScrollTrigger) {
   
   return {
@@ -372,8 +543,17 @@ function createSectionAnimations(gsap, ScrollTrigger) {
     clip: (element) => {
       return initializeClip(element);
     },
+    
     stack: (element, scrub, distance) => {
       return initializeStack(element, scrub, distance);
+    },
+    
+    pin: (element, scrollStart, scrollEnd, debug) => {
+      initializePin(element, scrollStart, scrollEnd, debug);
+    },
+    
+    pinStack: (element, scrollStart, scrollEnd, debug, inAnimation, outAnimation) => {
+      return initializePinStack(element, scrollStart, scrollEnd, debug, inAnimation, outAnimation);
     }
   };
 }

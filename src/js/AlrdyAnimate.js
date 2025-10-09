@@ -524,10 +524,10 @@ function setupGSAPAnimations(element, elementSettings, initOptions, isMobile, mo
   
   // 1. Variables setup
   const baseType = animationType.includes('-') ? animationType.split('-')[0] : animationType;
-  const gsapAnimations = ['appear', 'reveal', 'counter', 'grow', 'text', 'background', 'parallax', 'clip', 'stack'];
+  const gsapAnimations = ['appear', 'reveal', 'counter', 'grow', 'text', 'background', 'parallax', 'clip', 'stack', 'pin'];
   
   // 2. Determine if this animation type creates its own ScrollTriggers
-  const ownScrollTriggerAnimations = ['clip', 'stack', 'background', 'parallax'];
+  const ownScrollTriggerAnimations = ['clip', 'stack', 'background', 'parallax', 'pin'];
   const hasOwnScrollTrigger = ownScrollTriggerAnimations.includes(baseType);
 
   // Clear existing animations
@@ -634,42 +634,53 @@ function setupGSAPAnimations(element, elementSettings, initOptions, isMobile, mo
   }
 
   // 5. Handle GSAP animations
-  requestAnimationFrame(() => {
-    switch(baseType) {
-      case 'clip':
-        modules.animations.clip(element);
-        return;
+  // Note: No requestAnimationFrame - ScrollTriggers are created synchronously in DOM order
+  // This is critical for pin-stacks to work correctly with elements below them
+  switch(baseType) {
+    case 'clip':
+      modules.animations.clip(element);
+      return;
 
-      case 'stack':
-        modules.animations.stack(element, scrub, distance);
-        return;
-        
+    case 'stack':
+      modules.animations.stack(element, scrub, distance);
+      return;
 
-      case 'background':
-        modules.animations.backgroundColor(element, duration, ease, scrollStart, scrollEnd, initOptions.debug, scrub);
-        break;
+    case 'pin':
+      if (animationType === 'pin-stack') {
+        // Get in and out animation types from attributes
+        const inAnimation = element.getAttribute('aa-pin-in') || null;
+        const outAnimation = element.getAttribute('aa-pin-out') || null;
+        modules.animations.pinStack(element, scrollStart, scrollEnd, initOptions.debug, inAnimation, outAnimation);
+      } else {
+        modules.animations.pin(element, scrollStart, scrollEnd, initOptions.debug);
+      }
+      return;
 
-      case 'parallax':
-        modules.animations.parallax(element, scrub, animationType);
-        break;
+    case 'background':
+      modules.animations.backgroundColor(element, duration, ease, scrollStart, scrollEnd, initOptions.debug, scrub);
+      break;
 
-      case 'appear':
-        tl.add(modules.animations.appear(element, duration, ease, delay, distance, animationType, opacity));
-        break;
+    case 'parallax':
+      modules.animations.parallax(element, scrub, animationType);
+      break;
 
-      case 'reveal':
-        tl.add(modules.animations.reveal(element, duration, ease, delay, animationType, opacity));
-        break;
+    case 'appear':
+      tl.add(modules.animations.appear(element, duration, ease, delay, distance, animationType, opacity));
+      break;
 
-      case 'counter':
-        tl.add(modules.animations.counter(element, duration, ease, delay, animationType));
-        break;
+    case 'reveal':
+      tl.add(modules.animations.reveal(element, duration, ease, delay, animationType, opacity));
+      break;
 
-      case 'grow':
-        tl.add(modules.animations.grow(element, duration, ease, delay, animationType));
-        break;
+    case 'counter':
+      tl.add(modules.animations.counter(element, duration, ease, delay, animationType));
+      break;
 
-      case 'text':
+    case 'grow':
+      tl.add(modules.animations.grow(element, duration, ease, delay, animationType));
+      break;
+
+    case 'text':
         const { splitInstance } = modules.splitText(
           element, 
           split,
@@ -698,11 +709,10 @@ function setupGSAPAnimations(element, elementSettings, initOptions, isMobile, mo
         element.splitInstance = splitInstance;
         break;
 
-      default:
-        console.warn(`Unknown animation type: ${baseType}`);
-        break;
-    }
-  });
+    default:
+      console.warn(`Unknown animation type: ${baseType}`);
+      break;
+  }
 }
 
 function setupIntersectionObserver(element, elementSettings, initOptions) {
