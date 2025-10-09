@@ -373,6 +373,7 @@ function initializePin(element, scrollStart, scrollEnd, debug = false) {
 
 function initializePinStack(element, scrollStart, scrollEnd, debug = false, inAnimation = null, outAnimation = null) {
   const children = Array.from(element.children);
+  const distance = element.settings.distance;
   
   if (children.length === 0) {
     console.warn('aa-animate="pin-stack": No children found to stack');
@@ -416,18 +417,18 @@ function initializePinStack(element, scrollStart, scrollEnd, debug = false, inAn
   });
   
   // Apply in-animations (how cards appear from below)
-  applyInAnimation(children, cardHeights, gap, tl, inAnimation);
+  applyInAnimation(children, cardHeights, gap, tl, inAnimation, distance);
   
   // Apply out-animations (how cards react when next card appears)
   if (outAnimation) {
-    applyOutAnimation(children, cardHeights, gap, tl, outAnimation);
+    applyOutAnimation(children, cardHeights, gap, tl, outAnimation, distance);
   }
   
   return tl;
 }
 
 // Apply in-animation based on type
-function applyInAnimation(children, cardHeights, gap, tl, inAnimation) {
+function applyInAnimation(children, cardHeights, gap, tl, inAnimation, distance) {
   children.forEach((child, index) => {
     const childHeight = cardHeights[index];
     
@@ -450,13 +451,13 @@ function applyInAnimation(children, cardHeights, gap, tl, inAnimation) {
       
       case 'scale':
         gsap.set(child, { transformOrigin: "center center" });
-        fromProps.scale = 0.8;
+        fromProps.scale = 0.8 * distance;
         break;
       
       case 'rotate':
         gsap.set(child, { transformOrigin: "center center" });
         fromProps.rotation = 15 * (index % 2 === 0 ? 1 : -1);
-        extraOffset = childHeight * 0.5; // Add 50% of card height as extra offset
+        extraOffset = childHeight * 0.5 * distance; // Add 50% of card height as extra offset
         break;
       
       // 'simple' or null - just slide up with no extra effects
@@ -472,7 +473,7 @@ function applyInAnimation(children, cardHeights, gap, tl, inAnimation) {
 }
 
 // Apply out-animation based on type
-function applyOutAnimation(children, cardHeights, gap, tl, outAnimation) {
+function applyOutAnimation(children, cardHeights, gap, tl, outAnimation, distance) {
   children.forEach((child, index) => {
     // Skip the last card - it has no card appearing after it
     if (index === children.length - 1) return;
@@ -498,7 +499,6 @@ function applyOutAnimation(children, cardHeights, gap, tl, outAnimation) {
     
     const toProps = {
       ease: "none",
-      duration: duration
     };
     
     switch(outAnimation) {
@@ -506,19 +506,38 @@ function applyOutAnimation(children, cardHeights, gap, tl, outAnimation) {
         // Card tilts back and scales down as subsequent cards appear
         toProps.scale = 0.9 + 0.025 * index;
         toProps.rotationX = -15;
-        toProps.y = "-2rem"; // Slight upward movement
+        toProps.y = `${-2 * distance}rem`; // Slight upward movement
+        toProps.duration = duration;
+        break;
+
+      case 'right':
+        toProps.x = `${4 * distance}rem`; // Slight upward movement
+        toProps.duration = duration;
+        break;
+
+      case 'left':
+        toProps.x = `${-4 * distance}rem`; // Slight upward movement
+        toProps.duration = duration;
         break;
       
       case 'scale':
         // Card scales down as subsequent cards appear
-        toProps.scale = 0.85;
+        toProps.scale = 0.85 * distance;
+        toProps.duration = 1;
         break;
       
       case 'blur':
         // Card blurs as subsequent cards appear
         toProps.filter = "blur(8px)";
         toProps.scale = 0.9;
-        toProps.y = "-4rem";
+        toProps.y = `${-4 * distance}rem`;
+        toProps.duration = 1;
+        break;
+
+      case 'fade':
+        // Card blurs as subsequent cards appear
+        toProps.opacity = 0;
+        toProps.duration = 1;
         break;
       
       default:
