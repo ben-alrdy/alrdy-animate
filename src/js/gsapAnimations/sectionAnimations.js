@@ -571,7 +571,7 @@ function resetNestedAnimation(element) {
   }
   element.classList.remove('in-view');
   if (element.timeline) {
-    element.timeline.progress(0).pause();
+    element.timeline.reverse();
   }
 }
 
