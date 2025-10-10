@@ -551,11 +551,9 @@ function setupGSAPAnimations(element, elementSettings, initOptions, isMobile, mo
     const useProgrammaticTrigger = element.hasAttribute('aa-pin-programmatic');
     
     if (useProgrammaticTrigger) {
-      // Cards 2-4 in pin-stack: Skip ScrollTrigger creation, will be triggered programmatically
+      // Cards in pin-stack: Skip ScrollTrigger creation, will be triggered programmatically
       tl.pause();
       element.scrollTriggers = [];
-      // Timeline and in-view class will be triggered by the pin-stack's triggerNestedAnimations function
-      // Note: Continue to GSAP animation setup below (no return here)
     } else {
       // Get pinnedContainer reference if element is marked (card 1 in pin-stack)
       const pinnedContainerId = element.getAttribute('aa-pinned-container');
