@@ -338,9 +338,7 @@ async function init(options = {}) {
           loadedModules = await gsapModulesPromise;
 
           if (loadedModules) {
-            // Setup animations
-            setupAnimations(allAnimatedElements, initOptions, isMobile, loadedModules);
-            setupResizeHandler(loadedModules, initOptions, isMobile, setupGSAPAnimations);
+            
 
             // Setup nav animations if feature is enabled
             if (initOptions.gsapFeatures.includes('nav')) {
@@ -363,6 +361,9 @@ async function init(options = {}) {
               loadedModules.animations.accordion();
             }
 
+            // Setup animations
+            setupAnimations(allAnimatedElements, initOptions, isMobile, loadedModules);
+            setupResizeHandler(loadedModules, initOptions, isMobile, setupGSAPAnimations);
 
             // Only initialize lazy load handler if enabled
             if (initOptions.lazyLoadHandler) {
