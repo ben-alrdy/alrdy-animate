@@ -546,10 +546,25 @@ function setupGSAPAnimations(element, elementSettings, initOptions, isMobile, mo
       paused: !scrub
     });
     element.timeline = tl;
-
-    // Create and store new ScrollTriggers
-    const mainTrigger = modules.ScrollTrigger.create({
+    
+    // Check if element is marked for programmatic triggering (by pin-stack)
+    const useProgrammaticTrigger = element.hasAttribute('aa-pin-programmatic');
+    
+    if (useProgrammaticTrigger) {
+      // Cards 2-4 in pin-stack: Skip ScrollTrigger creation, will be triggered programmatically
+      tl.pause();
+      element.scrollTriggers = [];
+      // Timeline and in-view class will be triggered by the pin-stack's triggerNestedAnimations function
+      // Note: Continue to GSAP animation setup below (no return here)
+    } else {
+      // Get pinnedContainer reference if element is marked (card 1 in pin-stack)
+      const pinnedContainerId = element.getAttribute('aa-pinned-container');
+      const pinnedContainer = pinnedContainerId ? document.getElementById(pinnedContainerId) : null;
+      
+      // Normal elements or card 1: Create ScrollTriggers
+      const mainTrigger = modules.ScrollTrigger.create({
       trigger: anchorElement,
+      ...(pinnedContainer ? { pinnedContainer: pinnedContainer } : {}),
       ...(scrub ? {
         start: scrollStart,
         end: scrollEnd,
@@ -611,22 +626,24 @@ function setupGSAPAnimations(element, elementSettings, initOptions, isMobile, mo
           }
         }
       },
-      markers: initOptions.debug
-    });
+        markers: initOptions.debug
+      });
 
-    const resetTrigger = modules.ScrollTrigger.create({
-      trigger: anchorElement,
-      start: 'top 100%',
-      onLeaveBack: () => {
-        if (initOptions.again || anchorSelector) {
-          element.classList.remove("in-view");
-          tl.progress(0).pause();
+      const resetTrigger = modules.ScrollTrigger.create({
+        trigger: anchorElement,
+        ...(pinnedContainer ? { pinnedContainer: pinnedContainer } : {}),
+        start: 'top 100%',
+        onLeaveBack: () => {
+          if (initOptions.again || anchorSelector) {
+            element.classList.remove("in-view");
+            tl.progress(0).pause();
+          }
         }
-      }
-    });
+      });
 
-    element.scrollTriggers = [mainTrigger, resetTrigger];
-  }
+      element.scrollTriggers = [mainTrigger, resetTrigger];
+    }
+  } // End of !hasOwnScrollTrigger
 
   // 4. Return early if not a GSAP animation
   if (!gsapAnimations.includes(baseType)) {

@@ -380,6 +380,11 @@ function initializePinStack(element, scrollStart, scrollEnd, debug = false, inAn
     return;
   }
   
+  // Get trigger offset for nested animations (how early to trigger before card reaches position)
+  const triggerOffset = element.hasAttribute('aa-pin-trigger-animations') 
+    ? parseFloat(element.getAttribute('aa-pin-trigger-animations'))
+    : 0.7;
+  
   // Get gap from CSS (works for both flex and grid)
   const gap = parseFloat(getComputedStyle(element).rowGap) || 0;
   
@@ -416,6 +421,30 @@ function initializePinStack(element, scrollStart, scrollEnd, debug = false, inAn
     }
   });
   
+  // Mark children and their nested aa-animate elements
+  children.forEach((child, index) => {
+    child.setAttribute('data-pin-stack-card', index);
+    
+    // Find nested aa-animate elements
+    const nestedAnimations = Array.from(child.querySelectorAll('[aa-animate]'));
+    
+    if (index === 0) {
+      // First child: mark nested elements to use pinnedContainer
+      nestedAnimations.forEach(nestedEl => {
+        nestedEl.setAttribute('aa-pinned-container', element.id || `pin-stack-${Date.now()}`);
+      });
+      // Ensure pin-stack has an ID for reference
+      if (!element.id) {
+        element.id = `pin-stack-${Date.now()}`;
+      }
+    } else {
+      // Remaining children: mark nested elements for programmatic triggering
+      nestedAnimations.forEach(nestedEl => {
+        nestedEl.setAttribute('aa-pin-programmatic', 'true');
+      });
+    }
+  });
+  
   // Apply in-animations (how cards appear from below)
   applyInAnimation(children, cardHeights, gap, tl, inAnimation, distance);
   
@@ -424,7 +453,135 @@ function initializePinStack(element, scrollStart, scrollEnd, debug = false, inAn
     applyOutAnimation(children, cardHeights, gap, tl, outAnimation, distance);
   }
   
+  // Store timeline and config on element for resize handling
+  element.pinStackTimeline = tl;
+  element.pinStackConfig = { children, gap, inAnimation, outAnimation, distance, debug, triggerOffset };
+  
+  // Trigger nested animations when each card becomes active
+  // Note: Must be called AFTER storing config since it accesses element.pinStackTimeline
+  triggerNestedAnimations(children, tl, triggerOffset, debug);
+  
   return tl;
+}
+
+// Helper: Restore nested animation state after resize
+function restoreNestedAnimationStates(children, currentTime, triggerOffset) {
+  children.forEach((child, index) => {
+    if (index === 0) return; // First child uses ScrollTriggers
+    
+    const nestedElements = Array.from(child.querySelectorAll('[aa-animate]'));
+    const shouldBeActive = currentTime >= (index - triggerOffset);
+    
+    nestedElements.forEach(nestedEl => {
+      if (shouldBeActive) {
+        // Set to completed state (already scrolled past)
+        if (nestedEl._delayedCall) nestedEl._delayedCall.kill();
+        nestedEl.classList.add('in-view');
+        nestedEl.style.visibility = 'visible';
+        if (nestedEl.timeline) nestedEl.timeline.progress(1);
+      } else {
+        // Set to reset state (not yet reached)
+        resetNestedAnimation(nestedEl);
+      }
+    });
+  });
+}
+
+// Recalculate and update pin-stack on resize
+function updatePinStackOnResize(element) {
+  if (!element.pinStackTimeline || !element.pinStackConfig) return;
+  
+  const { children, inAnimation, outAnimation, distance, debug, triggerOffset } = element.pinStackConfig;
+  const tl = element.pinStackTimeline;
+  const currentTime = tl.time();
+  
+  // Recalculate dimensions
+  const gap = parseFloat(getComputedStyle(element).rowGap) || 0;
+  const cardHeights = children.map(child => child.offsetHeight);
+  
+  
+  // Clear and rebuild timeline
+  tl.clear();
+  delete tl._directionTrackingSetup;
+  
+  children.forEach(child => {
+    gsap.set(child, { gridArea: '1 / 1 / 2 / 2', clearProps: 'y,x,opacity,scale,rotation,rotationX,filter' });
+  });
+  
+  applyInAnimation(children, cardHeights, gap, tl, inAnimation, distance);
+  if (outAnimation) applyOutAnimation(children, cardHeights, gap, tl, outAnimation, distance);
+  triggerNestedAnimations(children, tl, triggerOffset, debug);
+  
+  // Restore state
+  tl.time(currentTime);
+  tl._previousProgress = tl.progress();
+  restoreNestedAnimationStates(children, currentTime, triggerOffset);
+  
+  element.pinStackConfig.gap = gap;
+}
+
+// Helper: Setup direction tracking on timeline (only once)
+function setupDirectionTracking(timeline) {
+  if (timeline._directionTrackingSetup) return;
+  
+  timeline._previousProgress = timeline._previousProgress ?? timeline.progress();
+  
+  timeline.eventCallback('onUpdate', () => {
+    const curr = timeline.progress();
+    timeline._isReversing = curr < timeline._previousProgress;
+    timeline._previousProgress = curr;
+  });
+  
+  timeline._directionTrackingSetup = true;
+}
+
+// Helper: Activate nested animation
+function activateNestedAnimation(element, delay) {
+  element.classList.add('in-view');
+  element.style.visibility = 'visible';
+  
+  if (!element.timeline) return;
+  
+  if (delay > 0) {
+    element._delayedCall = gsap.delayedCall(delay, () => element.timeline.play());
+  } else {
+    element.timeline.play();
+  }
+}
+
+// Helper: Reset nested animation
+function resetNestedAnimation(element) {
+  if (element._delayedCall) {
+    element._delayedCall.kill();
+    element._delayedCall = null;
+  }
+  element.classList.remove('in-view');
+  if (element.timeline) {
+    element.timeline.progress(0).pause();
+  }
+}
+
+// Trigger nested animations when cards become active and reset when scrolling back
+function triggerNestedAnimations(children, parentTimeline, triggerOffset, debug) {
+  setupDirectionTracking(parentTimeline);
+  
+  children.forEach((child, index) => {
+    if (index === 0) return; // First child uses ScrollTriggers
+    
+    const nestedElements = Array.from(child.querySelectorAll('[aa-animate]'));
+    if (nestedElements.length === 0) return;
+    
+    // Single callback at trigger point, handles both directions
+    parentTimeline.call(() => {
+      nestedElements.forEach(nestedEl => {
+        if (parentTimeline._isReversing) {
+          resetNestedAnimation(nestedEl);
+        } else {
+          activateNestedAnimation(nestedEl, nestedEl.settings?.delay || 0);
+        }
+      });
+    }, null, index - triggerOffset);
+  });
 }
 
 // Apply in-animation based on type
@@ -477,8 +634,6 @@ function applyOutAnimation(children, cardHeights, gap, tl, outAnimation, distanc
   children.forEach((child, index) => {
     // Skip the last card - it has no card appearing after it
     if (index === children.length - 1) return;
-    
-    const childHeight = cardHeights[index];
     
     // Set transform origin for perspective effects
     if (outAnimation === 'perspective') {
@@ -573,6 +728,10 @@ function createSectionAnimations(gsap, ScrollTrigger) {
     
     pinStack: (element, scrollStart, scrollEnd, debug, inAnimation, outAnimation) => {
       return initializePinStack(element, scrollStart, scrollEnd, debug, inAnimation, outAnimation);
+    },
+    
+    updatePinStackOnResize: (element) => {
+      updatePinStackOnResize(element);
     }
   };
 }

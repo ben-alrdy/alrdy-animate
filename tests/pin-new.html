@@ -157,30 +157,44 @@
     <div class="pin-stack-wrapper" 
          aa-animate="pin-stack" 
          aa-scroll-start="top 5%" 
-         aa-scroll-end="+=200%"
-         aa-pin-out="right"
-         aa-distance="20">
-      <div class="card">
-        <div class="card-content">
-          <h2>Card 1</h2>
+         aa-scroll-end="+=200%">
+      <div class="card" id="card-0">
+        <div class="card-content" aa-children="fade-up" aa-stagger="0.1" aa-anchor="#card-0">
+          <h2 aa-animate="fade-up" aa-anchor="#card-0">Card 1</h2>
+          <h2 aa-animate="fade-up" aa-delay="0.2" aa-anchor="#card-0">Card 1</h2>
+          <h2 aa-animate="fade-up" aa-delay="0.4" aa-anchor="#card-0">Card 1</h2>
+          <h2 aa-animate="fade-up" aa-delay="0.6" aa-anchor="#card-0">Card 1</h2>
+          <h2 aa-animate="fade-up" aa-delay="0.8" aa-anchor="#card-0">Card 1</h2>
           <p>Simple slide up animation</p>
         </div>
       </div>
-      <div class="card">
+      <div class="card" id="card-1">
         <div class="card-content">
-          <h2>Card 2</h2>
+          <h2 aa-animate="fade-up" aa-anchor="#card-1">Card 2</h2>
+          <h2 aa-animate="fade-up" aa-delay="0.2" aa-anchor="#card-1">Card 2</h2>
+          <h2 aa-animate="fade-up" aa-delay="0.3" aa-anchor="#card-1">Card 2</h2>
+          <h2 aa-animate="fade-up" aa-delay="0.4" aa-anchor="#card-1">Card 2</h2>
+          <h2 aa-animate="fade-up" aa-delay="0.6" aa-anchor="#card-1">Card 2</h2>
           <p>Cards stack on top</p>
         </div>
       </div>
       <div class="card">
         <div class="card-content">
-          <h2>Card 3</h2>
+          <h2 aa-animate="fade-up">Card 3</h2>
+          <h2 aa-animate="fade-up">Card 3</h2>
+          <h2 aa-animate="fade-up">Card 3</h2>
+          <h2 aa-animate="fade-up">Card 3</h2>
+          <h2 aa-animate="fade-up">Card 3</h2>
           <p>Clean and smooth</p>
         </div>
       </div>
       <div class="card">
         <div class="card-content">
-          <h2>Card 4</h2>
+          <h2 aa-animate="fade-up">Card 4</h2>
+          <h2 aa-animate="fade-up">Card 4</h2>
+          <h2 aa-animate="fade-up">Card 4</h2>
+          <h2 aa-animate="fade-up">Card 4</h2>
+          <h2 aa-animate="fade-up">Card 4</h2>
           <p>Final card!</p>
         </div>
       </div>

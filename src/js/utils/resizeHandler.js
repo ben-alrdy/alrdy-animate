@@ -5,12 +5,41 @@ import { processTemplates } from './templateHandler';
 
 export function setupResizeHandler(modules, initOptions, isMobile, setupGSAPAnimations) {
   let prevWidth = window.innerWidth;
+  let prevHeight = window.innerHeight;
 
   const debouncedResize = debounce(() => {
     const currentWidth = window.innerWidth;
+    const currentHeight = window.innerHeight;
+    const widthChanged = currentWidth !== prevWidth;
+    const heightChanged = currentHeight !== prevHeight;
+    const isMobileDevice = currentWidth < 768;
     
-    if (currentWidth !== prevWidth) {
-      isMobile = currentWidth < 768;
+    // On mobile, ignore height changes (address bar causes false positives)
+    if (isMobileDevice && !widthChanged) {
+      prevHeight = currentHeight;
+      return;
+    }
+    
+    // Desktop vertical resize only - update pin animations (don't rebuild from scratch)
+    if (!widthChanged && heightChanged && initOptions.gsapFeatures.includes('section')) {
+      document.querySelectorAll('[aa-animate="pin-stack"]').forEach(element => {
+        if (modules.animations?.updatePinStackOnResize) {
+          modules.animations.updatePinStackOnResize(element);
+        }
+      });
+      
+      // Refresh ScrollTrigger after updating
+      if (modules.ScrollTrigger) {
+        modules.ScrollTrigger.refresh(true);
+      }
+      
+      prevHeight = currentHeight;
+      return;
+    }
+    
+    // Horizontal resize - full rebuild
+    if (widthChanged) {
+      isMobile = isMobileDevice;
 
       // Cleanup existing animations
       if (modules.animations?.slider) {
@@ -79,6 +108,7 @@ export function setupResizeHandler(modules, initOptions, isMobile, setupGSAPAnim
       }
       
       prevWidth = currentWidth;
+      prevHeight = currentHeight;
     }
   }, 250);
 

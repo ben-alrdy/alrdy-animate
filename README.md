@@ -593,6 +593,7 @@ Create stunning card reveal effects where cards slide up and stack on top of eac
 | `aa-animate` | `pin-stack` | - | Enables pin-stack animation |
 | `aa-pin-in` | `fade`, `scale`, `rotate`, or `null` | `null` (simple slide) | How cards appear from below |
 | `aa-pin-out` | `perspective`, `scale`, `fade`, `blur`, or `null` | `null` (no effect) | How cards react when next card appears |
+| `aa-pin-trigger-animation` | `0.5` | `0.7` | Percentage of viewport when aa-animate animations inside a pinned child are triggered |
 | `aa-scroll-start` | ScrollTrigger position | `top 80%` | When animation starts |
 | `aa-scroll-end` | ScrollTrigger position | `bottom 70%` | When animation ends |
 
@@ -652,6 +653,8 @@ Create stunning card reveal effects where cards slide up and stack on top of eac
 - Use `aa-scroll-end` with sufficient distance (e.g., `+=1000` or `+=100%`) for smooth reveals
 - Out-animations are NOT applied to the last card (it has no card appearing after it)
 - You can mix and match any in-animation with any out-animation
+- Animations inside a child via `aa-animate` work best with with `aa-anchor` attribute and defined `aa-delay` per element
+- Important: `aa-children` animations inside a child won't work
 
 ---
 
