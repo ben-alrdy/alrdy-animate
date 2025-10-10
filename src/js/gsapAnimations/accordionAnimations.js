@@ -742,14 +742,11 @@ function initializeAutoplayAccordion(accordion, toggles, timelines, animations, 
     const toggleId = toggle.getAttribute('aa-accordion-toggle');
     const content = accordion.querySelector(`[aa-accordion-content="${toggleId}"]`);
     
-    // Close all active toggles except the target one
-    toggles.forEach(otherToggle => {
-      if (otherToggle !== toggle && otherToggle.getAttribute('aa-accordion-status') === 'active') {
-        const otherId = otherToggle.getAttribute('aa-accordion-toggle');
-        const otherContent = accordion.querySelector(`[aa-accordion-content="${otherId}"]`);
-        closeAccordion(otherToggle, otherContent, accordion, timelines);
-      }
-    });
+    if (currentlyOpenAccordion && currentlyOpenAccordion !== toggle) {
+      const openToggleId = currentlyOpenAccordion.getAttribute('aa-accordion-toggle');
+      const openContent = accordion.querySelector(`[aa-accordion-content="${openToggleId}"]`);
+      closeAccordion(currentlyOpenAccordion, openContent, accordion, timelines);
+    }
     
     const isActive = toggle.getAttribute('aa-accordion-status') === 'active';
     if (!isActive) {
