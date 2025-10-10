@@ -338,6 +338,10 @@ async function init(options = {}) {
           loadedModules = await gsapModulesPromise;
 
           if (loadedModules) {
+            // Setup animations
+            setupAnimations(allAnimatedElements, initOptions, isMobile, loadedModules);
+            setupResizeHandler(loadedModules, initOptions, isMobile, setupGSAPAnimations);
+
             // Setup nav animations if feature is enabled
             if (initOptions.gsapFeatures.includes('nav')) {
               loadedModules.animations.nav(loadedModules.ScrollTrigger);
@@ -359,9 +363,6 @@ async function init(options = {}) {
               loadedModules.animations.accordion();
             }
 
-            // Setup animations
-            setupAnimations(allAnimatedElements, initOptions, isMobile, loadedModules);
-            setupResizeHandler(loadedModules, initOptions, isMobile, setupGSAPAnimations);
 
             // Only initialize lazy load handler if enabled
             if (initOptions.lazyLoadHandler) {
@@ -649,53 +650,61 @@ function setupGSAPAnimations(element, elementSettings, initOptions, isMobile, mo
   }
 
   // 5. Handle GSAP animations
-  // Note: No requestAnimationFrame - ScrollTriggers are created synchronously in DOM order
-  // This is critical for pin-stacks to work correctly with elements below them
-  switch(baseType) {
-    case 'clip':
-      modules.animations.clip(element);
-      return;
+  // Animations with own ScrollTriggers (pin, clip, stack, background, parallax) must be synchronous
+  // to maintain DOM order. Other animations use RAF for smooth scrubbing.
+  
+  // Handle animations that create their own ScrollTriggers (must be synchronous)
+  if (hasOwnScrollTrigger) {
+    switch(baseType) {
+      case 'clip':
+        modules.animations.clip(element);
+        return;
 
-    case 'stack':
-      modules.animations.stack(element, scrub, distance);
-      return;
+      case 'stack':
+        modules.animations.stack(element, scrub, distance);
+        return;
 
-    case 'pin':
-      if (animationType === 'pin-stack') {
-        // Get in and out animation types from attributes
-        const inAnimation = element.getAttribute('aa-pin-in') || null;
-        const outAnimation = element.getAttribute('aa-pin-out') || null;
-        modules.animations.pinStack(element, scrollStart, scrollEnd, initOptions.debug, inAnimation, outAnimation);
-      } else {
-        modules.animations.pin(element, scrollStart, scrollEnd, initOptions.debug);
-      }
-      return;
+      case 'pin':
+        if (animationType === 'pin-stack') {
+          // Get in and out animation types from attributes
+          const inAnimation = element.getAttribute('aa-pin-in') || null;
+          const outAnimation = element.getAttribute('aa-pin-out') || null;
+          modules.animations.pinStack(element, scrollStart, scrollEnd, initOptions.debug, inAnimation, outAnimation);
+        } else {
+          modules.animations.pin(element, scrollStart, scrollEnd, initOptions.debug);
+        }
+        return;
 
-    case 'background':
-      modules.animations.backgroundColor(element, duration, ease, scrollStart, scrollEnd, initOptions.debug, scrub);
-      break;
+      case 'background':
+        modules.animations.backgroundColor(element, duration, ease, scrollStart, scrollEnd, initOptions.debug, scrub);
+        return;
 
-    case 'parallax':
-      modules.animations.parallax(element, scrub, animationType);
-      break;
+      case 'parallax':
+        modules.animations.parallax(element, scrub, animationType);
+        return;
+    }
+  }
+  
+  // Handle animations that use the shared timeline (use RAF for smooth scrubbing)
+  requestAnimationFrame(() => {
+    switch(baseType) {
+      case 'appear':
+        tl.add(modules.animations.appear(element, duration, ease, delay, distance, animationType, opacity));
+        break;
 
-    case 'appear':
-      tl.add(modules.animations.appear(element, duration, ease, delay, distance, animationType, opacity));
-      break;
+      case 'reveal':
+        tl.add(modules.animations.reveal(element, duration, ease, delay, animationType, opacity));
+        break;
 
-    case 'reveal':
-      tl.add(modules.animations.reveal(element, duration, ease, delay, animationType, opacity));
-      break;
+      case 'counter':
+        tl.add(modules.animations.counter(element, duration, ease, delay, animationType));
+        break;
 
-    case 'counter':
-      tl.add(modules.animations.counter(element, duration, ease, delay, animationType));
-      break;
+      case 'grow':
+        tl.add(modules.animations.grow(element, duration, ease, delay, animationType));
+        break;
 
-    case 'grow':
-      tl.add(modules.animations.grow(element, duration, ease, delay, animationType));
-      break;
-
-    case 'text':
+      case 'text':
         const { splitInstance } = modules.splitText(
           element, 
           split,
@@ -703,13 +712,7 @@ function setupGSAPAnimations(element, elementSettings, initOptions, isMobile, mo
           (self) => {
             // Strip suffixes to get baseType
             const baseTextAnim = animationType.replace(/-clip|-lines|-words|-chars$/, '');
-            
-            // Try to get animation, fallback to text-fade for text-fade-[number] pattern
-            let animation = modules.animations.text[baseTextAnim];
-            if (!animation && baseTextAnim.startsWith('text-fade-')) {
-              animation = modules.animations.text['text-fade'];
-            }
-            
+            const animation = modules.animations.text[baseTextAnim];
             if (animation) {
               const timeline = animation(element, split, duration, stagger, delay, ease).onSplit(self);
               if (timeline) {
@@ -724,10 +727,11 @@ function setupGSAPAnimations(element, elementSettings, initOptions, isMobile, mo
         element.splitInstance = splitInstance;
         break;
 
-    default:
-      console.warn(`Unknown animation type: ${baseType}`);
-      break;
-  }
+      default:
+        console.warn(`Unknown animation type: ${baseType}`);
+        break;
+    }
+  });
 }
 
 function setupIntersectionObserver(element, elementSettings, initOptions) {

@@ -258,22 +258,19 @@ export function createTextAnimations(gsap) {
       defaults.slide
     ),
   
-    'text-fade': (element, split, duration, stagger, delay, ease) => {
-      // Extract opacity value from animation type (e.g., text-fade-30 → 0.3)
-      const parts = element.settings.animationType.split('-');
-      const opacityPercent = parseInt(parts[2]); // Get the number after 'text-fade-'
-      const opacity = isNaN(opacityPercent) ? 0 : opacityPercent / 100; // Default to 0 if no number
-      
-      return createBaseAnimation(
-        element,
-        split,
-        duration ?? defaults.fade.duration,
-        stagger ?? defaults.fade.stagger,
-        delay,
-        ease ?? defaults.fade.ease,
-        { opacity }
-      );
-    },
+    'text-fade-30': createAnimation(
+      { opacity: 0.3 },
+      defaults.fade
+    ),
+    'text-fade-10': createAnimation(
+      { opacity: 0.1 },
+      defaults.fade
+    ),
+    'text-fade': createAnimation(
+      { opacity: 0 },
+      defaults.fade
+    ),
+    
     
     'text-blur': createAnimation(
       { 

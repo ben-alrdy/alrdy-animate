@@ -359,8 +359,7 @@ Advanced text splitting and animation effects.
 **Available Animations:**
 - **Slide**: `text-slide-[direction]` where `[direction]` = `up`, `down`, `left`, `right`
 - **Tilt**: `text-tilt-[direction]` where `[direction]` = `up`, `down`
-- **Fade**: `text-fade`, `text-fade-[number]` (opacity-only animations)
-  - Use any number 0-100 for starting opacity (e.g., `text-fade-5`, `text-fade-50`, `text-fade-99`)
+- **Fade**: `text-fade`, `text-fade-10`, `text-fade-30`  (opacity-only animations)
 - **Scale**: `text-scale-up`
 - **Blur**: `text-blur`, `text-blur-[direction]` where `[direction]` = `up`, `down`, `left`, `right`
 - **Rotate**: `text-rotate-soft` (3D rotation around X-axis)
