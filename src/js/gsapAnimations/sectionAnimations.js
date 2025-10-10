@@ -360,7 +360,8 @@ function initializeStack(element, scrub, distance) {
 
 function initializePin(element, scrollStart, scrollEnd, debug = false) {
   // Simple pin - just pin the element with specified scroll positions
-  ScrollTrigger.create({
+  const pinType = element.getAttribute('aa-pin-type');
+  const config = {
     trigger: element,
     pin: true,
     start: scrollStart,
@@ -368,7 +369,13 @@ function initializePin(element, scrollStart, scrollEnd, debug = false) {
     pinSpacing: false,
     markers: debug,
     invalidateOnRefresh: true
-  });
+  };
+  
+  if (pinType) {
+    config.pinType = pinType;
+  }
+  
+  ScrollTrigger.create(config);
 }
 
 function initializePinStack(element, scrollStart, scrollEnd, debug = false, inAnimation = null, outAnimation = null) {
@@ -405,20 +412,27 @@ function initializePinStack(element, scrollStart, scrollEnd, debug = false, inAn
   const cardHeights = children.map(child => child.offsetHeight);
   
   // Create timeline with scrub AFTER layout is settled
+  const pinType = element.getAttribute('aa-pin-type');
+  const scrollTriggerConfig = {
+    trigger: element,
+    start: scrollStart,
+    end: scrollEnd,
+    scrub: true,
+    pin: true,
+    pinSpacing: true, // Keep spacing to maintain document flow
+    markers: debug,
+    invalidateOnRefresh: true
+  };
+  
+  if (pinType) {
+    scrollTriggerConfig.pinType = pinType;
+  }
+  
   const tl = gsap.timeline({
     defaults: {
       ease: "none"
     },
-    scrollTrigger: {
-      trigger: element,
-      start: scrollStart,
-      end: scrollEnd,
-      scrub: true,
-      pin: true,
-      pinSpacing: true, // Keep spacing to maintain document flow
-      markers: debug,
-      invalidateOnRefresh: true
-    }
+    scrollTrigger: scrollTriggerConfig
   });
   
   // Mark children and their nested aa-animate elements
@@ -571,16 +585,23 @@ function triggerNestedAnimations(children, parentTimeline, triggerOffset, debug)
     const nestedElements = Array.from(child.querySelectorAll('[aa-animate]'));
     if (nestedElements.length === 0) return;
     
-    // Single callback at trigger point, handles both directions
+    // Forward playback callback
     parentTimeline.call(() => {
-      nestedElements.forEach(nestedEl => {
-        if (parentTimeline._isReversing) {
-          resetNestedAnimation(nestedEl);
-        } else {
+      if (!parentTimeline._isReversing) {
+        nestedElements.forEach(nestedEl => {
           activateNestedAnimation(nestedEl, nestedEl.settings?.delay || 0);
-        }
-      });
+        });
+      }
     }, null, index - triggerOffset);
+    
+    // Reverse playback callback
+    parentTimeline.call(() => {
+      if (parentTimeline._isReversing) {
+        nestedElements.forEach(nestedEl => {
+          resetNestedAnimation(nestedEl);
+        });
+      }
+    }, null, index - 1);
   });
 }
 
