@@ -128,6 +128,18 @@ async function init(options = {}) {
       const templateElements = document.querySelectorAll(templateSelectors);
       elements = [...elements, ...templateElements];
     }
+    
+    // Store element types on each element to avoid repeated attribute lookups
+    elements.forEach(element => {
+      element._aaAttributeType = {
+        isAnimate: element.hasAttribute('aa-animate'),
+        isChildren: element.hasAttribute('aa-children'),
+        isHover: element.hasAttribute('aa-hover'),
+        isSlider: element.hasAttribute('aa-slider'),
+        isAccordion: element.hasAttribute('aa-accordion'),
+        isMarquee: element.hasAttribute('aa-marquee')
+      };
+    });
       
     allAnimatedElements = elements;
     isMobile = window.innerWidth < 768;
@@ -278,9 +290,9 @@ async function init(options = {}) {
               );
 
               // Store the accordion animation function (like all other gsap animations)
-              modules.animations.accordion = () => {
+              modules.animations.accordion = (element) => {
                 if (accordionAnimations?.accordion && typeof accordionAnimations.accordion === 'function') {
-                  return accordionAnimations.accordion();
+                  return accordionAnimations.accordion(element);
                 }
               };
             } catch (accordionError) {
@@ -356,12 +368,7 @@ async function init(options = {}) {
               }
             }
 
-            // Setup accordion animations if feature is enabled
-            if (initOptions.gsapFeatures.includes('accordion')) {
-              loadedModules.animations.accordion();
-            }
-
-            // Setup animations
+            // Setup animations (accordions are now initialized inline during this traversal to maintain DOM order)
             setupAnimations(allAnimatedElements, initOptions, isMobile, loadedModules);
             setupResizeHandler(loadedModules, initOptions, isMobile, setupGSAPAnimations);
 
@@ -412,8 +419,18 @@ async function init(options = {}) {
 
 function setupAnimations(elements, initOptions, isMobile, modules) {
   elements.forEach((element) => {
+    // Get cached types (or check directly for dynamically added elements)
+    const aaAttributeType = element._aaAttributeType || {
+      isAnimate: element.hasAttribute('aa-animate'),
+      isChildren: element.hasAttribute('aa-children'),
+      isHover: element.hasAttribute('aa-hover'),
+      isSlider: element.hasAttribute('aa-slider'),
+      isAccordion: element.hasAttribute('aa-accordion'),
+      isMarquee: element.hasAttribute('aa-marquee')
+    };
+    
     // Process children elements
-    if (element.hasAttribute("aa-children")) {
+    if (aaAttributeType.isChildren) {
       const children = processChildren(element);
       setupAnimations(children, initOptions, isMobile, modules);
       return;
@@ -433,7 +450,7 @@ function setupAnimations(elements, initOptions, isMobile, modules) {
     applyElementStyles(element, settings, isMobile, initOptions.loadGracePeriod);
 
     // Setup hover animations 
-    if (element.hasAttribute('aa-hover')) {
+    if (aaAttributeType.isHover) {
       // Check if device supports hover
       const hasHoverSupport = window.matchMedia('(hover: hover)').matches;
       if (hasHoverSupport && enableGSAP && initOptions.gsapFeatures.includes('hover')) {
@@ -442,14 +459,14 @@ function setupAnimations(elements, initOptions, isMobile, modules) {
     }
 
     // Setup interactive components (sliders, accordions, marquees)
-    if (element.hasAttribute('aa-slider') || element.hasAttribute('aa-accordion') || element.hasAttribute('aa-marquee')) {
+    if (aaAttributeType.isSlider || aaAttributeType.isAccordion || aaAttributeType.isMarquee) {
       if (enableGSAP) {
-        setupInteractiveComponent(element, settings, modules, initOptions);
+        setupInteractiveComponent(element, settings, modules, initOptions, aaAttributeType);
       }
     }
 
     // Setup regular animations
-    if (element.hasAttribute('aa-animate') || templateSettings) {
+    if (aaAttributeType.isAnimate || templateSettings) {
       if (enableGSAP) {
         setupGSAPAnimations(element, settings, initOptions, isMobile, modules);
       } else {
@@ -460,48 +477,44 @@ function setupAnimations(elements, initOptions, isMobile, modules) {
   });
 }
 
-function setupInteractiveComponent(element, elementSettings, modules, initOptions) {
+function setupInteractiveComponent(element, elementSettings, modules, initOptions, aaAttributeType) {
+  const { sliderType, accordionType, marqueeType } = elementSettings;
+  
   // Handle slider components
-  if (element.hasAttribute('aa-slider')) {
-    const { sliderType, duration, ease, delay } = elementSettings;
-    
+  if (aaAttributeType.isSlider) {
     // Skip if slider type is 'none' (useful for mobile variants like 'draggable|none')
     if (sliderType === 'none') {
       return;
     }
     
     if (initOptions.gsapFeatures.includes('slider')) {
+      const { duration, ease, delay } = elementSettings;
       // Pass the slider type directly - the slider system uses feature detection with .includes()
       modules.animations.slider(element, sliderType, duration, ease, delay);
     }
   }
   
   // Handle accordion components
-  if (element.hasAttribute('aa-accordion')) {
-    const { accordionType } = elementSettings;
-    
+  if (aaAttributeType.isAccordion) {
     // Skip if accordion type is 'none' (useful for mobile variants)
-    if (!accordionType || accordionType === 'none') {
+    if (accordionType === 'none') {
       return;
     }
     
     if (initOptions.gsapFeatures.includes('accordion')) {
-      // Accordion initialization is handled globally, not per element
-      // The accordion system will find all aa-accordion elements
-      return;
+      modules.animations.accordion(element);
     }
   }
   
   // Handle marquee components
-  if (element.hasAttribute('aa-marquee')) {
-    const { marqueeType, duration, scrub } = elementSettings;
-    
+  if (aaAttributeType.isMarquee) {
     // Skip if marquee type is 'none' (useful for mobile variants)
-    if (!marqueeType || marqueeType === 'none') {
+    if (marqueeType === 'none') {
       return;
     }
     
     if (initOptions.gsapFeatures.includes('marquee')) {
+      const { duration, scrub } = elementSettings;
       // Pass the marquee type directly - the marquee system uses feature detection
       modules.animations.marquee(element, duration, scrub, marqueeType);
     }

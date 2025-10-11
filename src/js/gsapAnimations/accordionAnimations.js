@@ -575,6 +575,13 @@ function initializeAutoplayAccordion(accordion, toggles, timelines, animations, 
   let currentlyOpenAccordion = null;
   let scrollInstance = null;
   
+  // Check for initial toggle and set currentlyOpenAccordion
+  const initialToggle = accordion.querySelector('[aa-accordion-initial]');
+  if (initialToggle) {
+    currentlyOpenAccordion = initialToggle;
+    currentAutoplayIndex = Array.from(toggles).indexOf(initialToggle);
+  }
+  
   // Set up toggles
   toggles.forEach((toggle) => {
     const toggleId = toggle.getAttribute('aa-accordion-toggle');
@@ -640,9 +647,6 @@ function initializeAutoplayAccordion(accordion, toggles, timelines, animations, 
   });
   
   // Initialize ScrollTrigger for autoplay
-  const initialToggle = accordion.querySelector('[aa-accordion-initial]');
-  currentAutoplayIndex = initialToggle ? Array.from(toggles).indexOf(initialToggle) : 0;
-  
   if (window.ScrollTrigger) {
     scrollInstance = ScrollTrigger.create({
       trigger: accordion,
@@ -884,49 +888,37 @@ function initializeScrollAccordion(accordion, toggles, timelines) {
 // Main initialization function
 // 
 
-function initializeAccordions(animations = null, splitText = null) {
-  const accordions = document.querySelectorAll('[aa-accordion]');
+function initializeAccordion(accordion, animations = null, splitText = null) {
+  
+  const accordionType = accordion.getAttribute('aa-accordion');
+  const isMulti = accordionType === 'multi';
+  const isAutoplay = accordionType === 'autoplay';
+  const isScroll = accordionType === 'scroll';
+  const toggles = accordion.querySelectorAll('[aa-accordion-toggle]');
+  const contents = accordion.querySelectorAll('[aa-accordion-content]');
+  
+  // Each accordion gets its own timelines Map (captured in closures by event handlers)
   const timelines = new Map();
-
-  accordions.forEach((accordion) => {
-    const accordionType = accordion.getAttribute('aa-accordion');
-    const isMulti = accordionType === 'multi';
-    const isAutoplay = accordionType === 'autoplay';
-    const isScroll = accordionType === 'scroll';
-    const toggles = accordion.querySelectorAll('[aa-accordion-toggle]');
-    const contents = accordion.querySelectorAll('[aa-accordion-content]');
-    
-    // Auto-assign IDs if not provided
-    autoAssignIds(accordion);
-    
-    // Initialize accordion elements: states, timelines, and animations
-    initializeAccordionElements(accordion, toggles, contents, timelines, animations, splitText);
-    
-     // Initialize based on accordion type
-     if (isScroll) {
-       initializeScrollAccordion(accordion, toggles, timelines);
-     } else if (isAutoplay) {
-       initializeAutoplayAccordion(accordion, toggles, timelines, animations, splitText);
-     } else {
-       initializeBasicAccordion(accordion, toggles, timelines, isMulti, animations, splitText);
-     }
-  });
-
-  // Refresh ScrollTrigger after all accordions have been initialized
-  if (window.ScrollTrigger) {
-    window.ScrollTrigger.refresh();
-  }
-
-  return {
-    open: (toggle, content, accordion) => openAccordion(toggle, content, accordion, timelines),
-    close: (toggle, content, accordion) => closeAccordion(toggle, content, accordion, timelines),
-    timelines
-  };
+  
+  // Auto-assign IDs if not provided
+  autoAssignIds(accordion);
+  
+  // Initialize accordion elements: states, timelines, and animations
+  initializeAccordionElements(accordion, toggles, contents, timelines, animations, splitText);
+  
+   // Initialize based on accordion type
+   if (isScroll) {
+     initializeScrollAccordion(accordion, toggles, timelines);
+   } else if (isAutoplay) {
+     initializeAutoplayAccordion(accordion, toggles, timelines, animations, splitText);
+   } else {
+     initializeBasicAccordion(accordion, toggles, timelines, isMulti, animations, splitText);
+   }
 }
 
 function createAccordionAnimations(gsap, animations, splitText) {
   return {
-    accordion: () => initializeAccordions(animations, splitText)
+    accordion: (accordion) => initializeAccordion(accordion, animations, splitText)
   };
 }
 
