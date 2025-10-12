@@ -38,8 +38,8 @@ function createMarqueeTimeline(element, gsap, duration, scrub, marqueeType) {
       repeat: -1,
       duration: baseSpeed,
       ease: 'linear',
-      force3D: true, // Enable hardware acceleration
-      willChange: 'transform' // Hint to browser about animation
+      force3D: true,
+      willChange: 'transform'
     }).totalProgress(0.5);
 
     // Set initial position based on direction
@@ -49,11 +49,28 @@ function createMarqueeTimeline(element, gsap, duration, scrub, marqueeType) {
       willChange: 'transform'
     });
 
-    // Set the direction using timeScale
+    // IMPORTANT: Must call play() BEFORE timeScale() for direction to work correctly
     animation.play();
     animation.timeScale(currentDirection);
-
+    
     element.classList.add('marquee-normal');
+
+    // Create ScrollTrigger for visibility-based play/pause control
+    ScrollTrigger.create({
+      trigger: element,
+      start: "top bottom",
+      end: "bottom top",
+      onEnter: () => {
+        animation.play();
+        animation.timeScale(currentDirection); // Re-apply timeScale on play
+      },
+      onLeave: () => animation.pause(),
+      onEnterBack: () => {
+        animation.play();
+        animation.timeScale(currentDirection); // Re-apply timeScale on play
+      },
+      onLeaveBack: () => animation.pause()
+    });
 
     // Only set up direction switching if needed
     if (hasSwitch) {
