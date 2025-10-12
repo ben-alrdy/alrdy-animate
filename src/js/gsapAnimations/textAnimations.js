@@ -29,13 +29,20 @@ export function createTextAnimations(gsap) {
 
   // Helper function to create base animation configuration
   function createBaseAnimation(element, split, duration, stagger, delay, ease, props) {
+    // For scrubbed animations, set visibility before creating the animation
+    // This ensures the element is visible and GSAP controls it via the timeline
+    const isScrubbed = element.hasAttribute('aa-scrub');
+    if (isScrubbed) {
+      gsap.set(element, { visibility: 'visible' });
+    }
+    
     const baseProps = {
       duration,
       ease,
       delay,
       onStart: () => {
-        // Only set visibility in onStart for non-scrubbed animations
-        if (!element.hasAttribute('aa-scrub')) {
+        // For non-scrubbed animations, set visibility when animation starts
+        if (!isScrubbed) {
           gsap.set(element, { visibility: 'visible' });
         }
       }
@@ -173,6 +180,12 @@ export function createTextAnimations(gsap) {
         const parsedColors = element.hasAttribute('aa-color') ? parseColorAttribute(element.getAttribute('aa-color')) : {};
         const blockColor = parsedColors.backgroundColor || '#000000'; // Default if not specified
         const textColor = parsedColors.color; // Optional text color
+        
+        // For scrubbed animations, set visibility before creating the animation
+        const isScrubbed = element.hasAttribute('aa-scrub');
+        if (isScrubbed) {
+          gsap.set(element, { visibility: 'visible' });
+        }
         
         const { initialClip, revealClip, hideClip, textInit, textFinal } = config[direction];
 
@@ -330,6 +343,12 @@ export function createTextAnimations(gsap) {
 
           // Parse aa-color
           const colorProps = element.hasAttribute('aa-color') ? parseColorAttribute(element.getAttribute('aa-color')) : {};
+          
+          // For scrubbed animations, set visibility before creating the animation
+          const isScrubbed = element.hasAttribute('aa-scrub');
+          if (isScrubbed) {
+            gsap.set(element, { visibility: 'visible' });
+          }
 
           // Calculate perspective
           const fontSize = parseFloat(window.getComputedStyle(element).fontSize);
@@ -362,7 +381,8 @@ export function createTextAnimations(gsap) {
             ease: ease ?? defaults.rotateSoft.ease,
             delay,
             onStart: () => {
-              if (!element.hasAttribute('aa-scrub')) {
+              // For non-scrubbed animations, set visibility when animation starts
+              if (!isScrubbed) {
                 gsap.set(element, { visibility: 'visible' });
               }
             }
