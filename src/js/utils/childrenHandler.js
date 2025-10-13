@@ -14,7 +14,7 @@ export function processChildren(element) {
     // Copy attributes into child
     Array.from(element.attributes)
       .filter(attr => attr.name.startsWith('aa-') && 
-                     !['aa-children', 'aa-stagger', 'aa-delay'].includes(attr.name))
+                     !['aa-children', 'aa-stagger', 'aa-delay', 'aa-accordion', 'aa-modal', 'aa-hover', 'aa-slider', 'aa-marquee', 'aa-nav'].includes(attr.name))
       .forEach(attr => {
         child.setAttribute(attr.name, attr.value);
       });
