@@ -45,7 +45,7 @@ const defaultOptions = {
 // Function to apply reduced motion by replacing animation attributes
 function applyReducedMotionAttributes(duration, ease) {
   // Find all elements with aa-animate or aa-children attributes
-  const animatedElements = document.querySelectorAll('[aa-animate], [aa-children]');
+  const animatedElements = document.querySelectorAll('[aa-animate], [aa-children], [aa-hover]');
   
   animatedElements.forEach((element) => {
     // Skip accordion-related elements
@@ -59,6 +59,10 @@ function applyReducedMotionAttributes(duration, ease) {
     if (currentAnimate && ['background', 'clip', 'stack'].includes(currentAnimate)) {
       return; // Skip this element
     }
+
+    if (element.hasAttribute('aa-load') && element.hasAttribute('aa-animate')) {
+      element.removeAttribute('aa-animate');
+    }
     
     // Replace aa-animate with fade
     if (element.hasAttribute('aa-animate')) {
@@ -68,6 +72,10 @@ function applyReducedMotionAttributes(duration, ease) {
     // Replace aa-children with fade
     if (element.hasAttribute('aa-children')) {
       element.setAttribute('aa-children', 'fade');
+    }
+
+    if (element.hasAttribute('aa-hover')) {
+      element.setAttribute('aa-hover', 'none');
     }
     
     // Set reduced motion duration and easing from options
