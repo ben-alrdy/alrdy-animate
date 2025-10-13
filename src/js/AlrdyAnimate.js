@@ -438,7 +438,10 @@ function setupAnimations(elements, initOptions, isMobile, modules) {
     if (aaAttributeType.isChildren) {
       const children = processChildren(element);
       setupAnimations(children, initOptions, isMobile, modules);
-      return;
+      // Don't return early if this is also an interactive component
+      if (!aaAttributeType.isSlider && !aaAttributeType.isAccordion && !aaAttributeType.isMarquee) {
+        return;
+      }
     }
 
     // Get settings from attributes or templates

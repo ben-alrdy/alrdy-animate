@@ -199,22 +199,19 @@ function autoAssignIds(accordion) {
   const visuals = accordion.querySelectorAll('[aa-accordion-visual]');
   
   toggles.forEach((toggle, index) => {
-    const toggleId = toggle.getAttribute('aa-accordion-toggle');
-    if (!toggleId || toggleId.trim() === '') {
+    if (!toggle.getAttribute('aa-accordion-toggle')) {
       toggle.setAttribute('aa-accordion-toggle', `accordion-${index}`);
     }
   });
   
   contents.forEach((content, index) => {
-    const contentId = content.getAttribute('aa-accordion-content');
-    if (!contentId || contentId.trim() === '') {
+    if (!content.getAttribute('aa-accordion-content')) {
       content.setAttribute('aa-accordion-content', `accordion-${index}`);
     }
   });
   
   visuals.forEach((visual, index) => {
-    const visualId = visual.getAttribute('aa-accordion-visual');
-    if (!visualId || visualId.trim() === '') {
+    if (!visual.getAttribute('aa-accordion-visual')) {
       visual.setAttribute('aa-accordion-visual', `accordion-${index}`);
     }
   });

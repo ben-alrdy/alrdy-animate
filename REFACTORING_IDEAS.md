@@ -1,5 +1,8 @@
 # AlrdyAnimate Refactoring Ideas & Inconsistencies
 
+1. event driven animation triggers (call it: "aa-event-trigger" to mark aa-animate to be triggered by event)
+2. check accordion.js for querySelector reduncy
+
 ## Attribute Naming Inconsistencies
 
 ### 1. Animation Type Attributes
