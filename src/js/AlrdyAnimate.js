@@ -372,6 +372,11 @@ async function init(options = {}) {
             setupAnimations(allAnimatedElements, initOptions, isMobile, loadedModules);
             setupResizeHandler(loadedModules, initOptions, isMobile, setupGSAPAnimations);
 
+            // Refresh ScrollTrigger after setup animations
+            if (loadedModules.ScrollTrigger) {
+              loadedModules.ScrollTrigger.refresh(true);
+            }
+
             // Only initialize lazy load handler if enabled
             if (initOptions.lazyLoadHandler) {
               handleLazyLoadedImages(loadedModules.ScrollTrigger);
@@ -585,58 +590,17 @@ function setupGSAPAnimations(element, elementSettings, initOptions, isMobile, mo
         scrub: scrub ? 
           (parseFloat(scrub) || true)
         : false,
-        invalidateOnRefresh: true
+        invalidateOnRefresh: scrub ? false : true,
       } : {
         start: scrollStart
       }),
       animation: tl,
       onEnter: () => {
         element.classList.add("in-view");
-        modules.gsap.set(element, { visibility: 'visible' });
-        if (!scrub) tl.play();
-      },
-      onRefresh: function() {
-        // For scrub animations, check if element should be visible on page load
-        if (scrub) {
-
-          if (document.body.getAttribute('data-scroll-started') !== 'true') {
-            return;
-          }
-          
-          const elementRect = anchorElement.getBoundingClientRect();
-          const viewportHeight = window.innerHeight;
-          // Parse scrollStart to get trigger position for legacy compatibility
-          const scrollStartMatch = scrollStart.match(/top\s+(\d+)%/);
-          const triggerStart = scrollStartMatch ? viewportHeight * (parseFloat(scrollStartMatch[1]) / 100) : viewportHeight * 0.8;
-          
-          // If element is above the trigger start point, make it visible and set to end state
-          if (elementRect.bottom < triggerStart) {
-            element.classList.add("in-view");
-            gsap.set(element, { visibility: 'visible' });
-            
-            if (baseType === 'text') {
-              // We need to wait for the splitInstance to be available before setting the timeline to end state
-              const waitForSplitInstance = () => {
-                if (element.splitInstance) {
-                  tl.progress(1); // Set timeline to end state
-                } else {
-                  requestAnimationFrame(waitForSplitInstance);  // Keep checking until splitInstance is available
-                }
-              };
-              requestAnimationFrame(waitForSplitInstance);
-            
-            } else {
-              const waitForTimeline = () => {
-                if (tl.duration() > 0) {
-                  tl.progress(1);
-                  gsap.set(element, { autoAlpha: 1 });
-                } else {
-                  requestAnimationFrame(waitForTimeline);
-                }
-              };
-              requestAnimationFrame(waitForTimeline);
-            }
-          }
+        // For scrubbed animations, visibility is controlled by the animation itself
+        if (!scrub) {
+          modules.gsap.set(element, { visibility: 'visible' });
+          tl.play();
         }
       },
         markers: initOptions.debug
@@ -665,7 +629,7 @@ function setupGSAPAnimations(element, elementSettings, initOptions, isMobile, mo
 
   // 5. Handle GSAP animations
   // Animations with own ScrollTriggers (pin, clip, stack, background, parallax) must be synchronous
-  // to maintain DOM order. Other animations use RAF for smooth scrubbing.
+  // to maintain DOM order. Other animations use RAF unless they are scrubbed.
   
   // Handle animations that create their own ScrollTriggers (must be synchronous)
   if (hasOwnScrollTrigger) {
@@ -699,8 +663,8 @@ function setupGSAPAnimations(element, elementSettings, initOptions, isMobile, mo
     }
   }
   
-  // Handle animations that use the shared timeline (use RAF for smooth scrubbing)
-  requestAnimationFrame(() => {
+  // Handle animations that use the shared timeline
+  const setupMainTimelineAnimation = () => {
     switch(baseType) {
       case 'appear':
         tl.add(modules.animations.appear(element, duration, ease, delay, distance, animationType, opacity));
@@ -745,7 +709,15 @@ function setupGSAPAnimations(element, elementSettings, initOptions, isMobile, mo
         console.warn(`Unknown animation type: ${baseType}`);
         break;
     }
-  });
+  };
+  
+  // Scrubbed animations must be synchronous to ensure timeline content exists before ScrollTrigger binds
+  // Other animations can use RAF for better performance
+  if (scrub) {
+    setupMainTimelineAnimation();
+  } else {
+    requestAnimationFrame(setupMainTimelineAnimation);
+  }
 }
 
 function setupIntersectionObserver(element, elementSettings, initOptions) {
