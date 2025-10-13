@@ -234,6 +234,7 @@ body[aa-js-ready] [aa-load][aa-animate] {
   /* Reduce animation duration for better accessibility */
   [aa-load], [aa-load][aa-stagger]:not([aa-animate]) > * {
     animation-duration: 0.3s !important;
+    animation-delay: 0s !important;
   }
   
   /* Disable any transform animations that might cause motion */

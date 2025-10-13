@@ -37,7 +37,7 @@ const defaultOptions = {
   debug: false, // Set to true to see GSAP debug info
   templates: null, // Template configuration for class-based animations
   initTimeout: 3, // 3 seconds timeout for initialization
-  reducedMotionDuration: 0.3, // Duration for reduced motion animations
+  reducedMotionDuration: 0.5, // Duration for reduced motion animations
   reducedMotionEase: "ease", // Easing for reduced motion animations
   loadGracePeriod: 0.35 // Grace period in seconds for hybrid aa-load + aa-animate elements (should be slightly shorter than --load-base-delay)
 };
@@ -48,6 +48,11 @@ function applyReducedMotionAttributes(duration, ease) {
   const animatedElements = document.querySelectorAll('[aa-animate], [aa-children]');
   
   animatedElements.forEach((element) => {
+    // Skip accordion-related elements
+    if (element.hasAttribute('aa-accordion-content') || element.hasAttribute('aa-accordion')) {
+      return; // Skip this element
+    }
+    
     const currentAnimate = element.getAttribute('aa-animate');
     
     // Skip complex GSAP animations that should be preserved
