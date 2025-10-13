@@ -1,6 +1,6 @@
 {
   "name": "alrdy-animate",
-  "version": "6.15.11",
+  "version": "6.15.12",
   "description": "A library to handle animations on scroll with GSAP integration.",
   "main": "dist/AlrdyAnimate.js",
   "files": [
