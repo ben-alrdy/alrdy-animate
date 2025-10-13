@@ -30,7 +30,7 @@ function parseHoverDirection(hoverType) {
   return null;
 }
 
-export function getElementSettings(element, settings, isMobile) {
+export function getElementSettings(element, settings, isMobile, loadGracePeriod = 0) {
   // Parse attributes with mobile/desktop variants (desktop|mobile)
   function parseResponsiveAttribute(attribute, defaultValue) {
     if (!attribute) return defaultValue;
@@ -81,7 +81,7 @@ export function getElementSettings(element, settings, isMobile) {
   const color = animationType?.includes('#') ? '#' + animationType.split('#')[1] : undefined;
 
   // Get scroll start/end values
-  const scrollStart = parseResponsiveAttribute(element.getAttribute('aa-scroll-start'),settings.scrollStart || 'top 80%');
+  const scrollStart = parseResponsiveAttribute(element.getAttribute('aa-scroll-start'), settings.scrollStart || 'top 80%');
   
   const scrollEnd = parseResponsiveAttribute(element.getAttribute('aa-scroll-end'), settings.scrollEnd || 'bottom 70%');
 
@@ -122,7 +122,11 @@ export function getElementSettings(element, settings, isMobile) {
 
     // Animation timing
     duration: element.hasAttribute('aa-duration') ? parseFloat(element.getAttribute('aa-duration')) : settings.duration,
-    delay: element.hasAttribute('aa-delay') ? parseFloat(element.getAttribute('aa-delay')) : settings.delay,
+    delay: (() => {
+      const baseDelay = element.hasAttribute('aa-delay') ? parseFloat(element.getAttribute('aa-delay')) : settings.delay;
+      const isHybrid = element.hasAttribute('aa-load') && element.hasAttribute('aa-animate');
+      return isHybrid && loadGracePeriod > 0 ? baseDelay + loadGracePeriod : baseDelay;
+    })(),
     delayMobile: element.hasAttribute('aa-delay-mobile') ? parseFloat(element.getAttribute('aa-delay-mobile')) : undefined,
     stagger: element.hasAttribute('aa-stagger') ? parseFloat(element.getAttribute('aa-stagger')) : undefined,
     opacity: element.hasAttribute('aa-opacity') ? parseFloat(element.getAttribute('aa-opacity')) : 1,
@@ -144,7 +148,7 @@ export function getElementSettings(element, settings, isMobile) {
   };
 }
 
-export function applyElementStyles(element, elementSettings, isMobile, loadGracePeriod) {
+export function applyElementStyles(element, elementSettings, isMobile) {
   const { duration, delay, distance, delayMobile, color, opacity } = elementSettings;
 
   // Set duration if specified on element
@@ -153,17 +157,8 @@ export function applyElementStyles(element, elementSettings, isMobile, loadGrace
   }
 
   // Set delay if specified on element, and handle mobile delay if defined
-  // For hybrid elements (aa-load + aa-animate), add grace period to give JS time to initialize
-  const isHybrid = element.hasAttribute('aa-load') && element.hasAttribute('aa-animate');
-  
-  if (element.hasAttribute('aa-delay') || isHybrid) {
-    const baseDelay = isMobile && delayMobile !== undefined ? delayMobile : delay;
-    
-    // For hybrid elements, add grace period to the delay
-    const finalDelay = isHybrid && loadGracePeriod > 0 
-      ? baseDelay + (loadGracePeriod / 1000) 
-      : baseDelay;
-    
+  if (element.hasAttribute('aa-delay') || (element.hasAttribute('aa-load') && element.hasAttribute('aa-animate'))) {
+    const finalDelay = isMobile && delayMobile !== undefined ? delayMobile : delay;
     element.style.setProperty("--aa-delay", `${finalDelay}s`);
   }
 

@@ -36,10 +36,10 @@ const defaultOptions = {
   lazyLoadHandler: false, // default to false for backward compatibility
   debug: false, // Set to true to see GSAP debug info
   templates: null, // Template configuration for class-based animations
-  initTimeout: 3000, // 3 seconds timeout for initialization
+  initTimeout: 3, // 3 seconds timeout for initialization
   reducedMotionDuration: 0.3, // Duration for reduced motion animations
   reducedMotionEase: "ease", // Easing for reduced motion animations
-  loadGracePeriod: 350 // Grace period in ms for hybrid aa-load + aa-animate elements (should be slightly shorter than --load-base-delay)
+  loadGracePeriod: 0.35 // Grace period in seconds for hybrid aa-load + aa-animate elements (should be slightly shorter than --load-base-delay)
 };
 
 // Function to apply reduced motion by replacing animation attributes
@@ -95,9 +95,9 @@ async function init(options = {}) {
     if (!document.body.hasAttribute('aa-js-ready')) {
       // JS hasn't finished loading yet, grace period has expired
       document.body.setAttribute('aa-load-grace-expired', 'true');
-      console.warn(`AlrdyAnimate: Loading grace period expired (${initOptions.loadGracePeriod}ms) - hybrid loading elements will use CSS animations`);
+      console.warn(`AlrdyAnimate: Loading grace period expired (${initOptions.loadGracePeriod}s) - hybrid loading elements will use CSS animations`);
     }
-  }, initOptions.loadGracePeriod);
+  }, initOptions.loadGracePeriod * 1000);
 
   // Set timeout for initialization
   initTimeoutId = setTimeout(() => {
@@ -105,7 +105,7 @@ async function init(options = {}) {
       console.warn('AlrdyAnimate initialization taking longer than expected - showing elements temporarily');
       handleInitError(null, allAnimatedElements);
     }
-  }, initOptions.initTimeout);
+  }, initOptions.initTimeout * 1000);
 
   try {
     // Initialize core features
@@ -446,7 +446,7 @@ function setupAnimations(elements, initOptions, isMobile, modules) {
 
     // Get settings from attributes or templates
     const templateSettings = getFinalSettings(element, initOptions, isMobile);
-    const settings = templateSettings || getElementSettings(element, initOptions, isMobile);
+    const settings = templateSettings || getElementSettings(element, initOptions, isMobile, initOptions.loadGracePeriod);
     
     // Skip if no settings found
     if (!settings) return;
@@ -455,7 +455,7 @@ function setupAnimations(elements, initOptions, isMobile, modules) {
     element.settings = settings;
 
     // Apply styles (duration, delay, colors)
-    applyElementStyles(element, settings, isMobile, initOptions.loadGracePeriod);
+    applyElementStyles(element, settings, isMobile);
 
     // Setup hover animations 
     if (aaAttributeType.isHover) {

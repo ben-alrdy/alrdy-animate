@@ -1502,24 +1502,23 @@ Combine `aa-load` (CSS) with `aa-animate` (GSAP) for above the fold loading anim
 
 **How It Works:**
   - Hybrid element hidden initially (prevents FOUC)
-  - If JS loads within grace period (< 500ms): GSAP animation plays
-  - If JS is slow (> 400ms): CSS animation plays as fallback
+  - If JS loads within grace period (< 0.35s): GSAP animation plays
+  - Otherwise CSS animation plays as fallback after CSS load delay variable
   - **Prevents double animation** - only one system animates per element
 
 **Configuration:**
 
-The grace period must match in both CSS and JavaScript (default: 200ms):
 
 ```css
 /* In your custom CSS or Webflow's custom code */
 :root {
-  --load-base-delay: 0.4s; /* 200ms - adjust based on your JS load time */
+  --load-base-delay: 0.4s; /* adjust based on your JS load time */
 }
 ```
 
 ```javascript
 AlrdyAnimate.init({
-  loadGracePeriod: 350, // Should be slightly earlier than the --load-base-delay
+  loadGracePeriod: 0.35, // Should be slightly earlier than the --load-base-delay
   gsapFeatures: ['appear', 'text'],
   // ... other options
 });
@@ -1533,7 +1532,7 @@ AlrdyAnimate.init({
 
 **Performance Notes:**
 - **Pure `aa-load`**: 0ms to animate - no hiding, no waiting for JS
-- **Hybrid elements**: Hidden until JS ready or grace period expires (200ms)
+- **Hybrid elements**: Hidden until JS ready or grace period expires
 - **Body attributes**: `aa-js-ready` (JS loaded), `aa-load-grace-expired` (CSS owns hybrid elements)
 
 ### Template System
@@ -1941,8 +1940,8 @@ AlrdyAnimate.init({
   
   // Advanced options
   includeGSAP: false,       // Include GSAP in bundle vs use Webflow's
-  initTimeout: 3000,        // Initialization timeout (ms), shows all elements after this time
-  loadGracePeriod: 350,     // Grace period for hybrid aa-load + aa-animate (ms)
+  initTimeout: 3,            // Initialization timeout (seconds), shows all elements after this time
+  loadGracePeriod: 0.35,     // Grace period for hybrid aa-load + aa-animate (seconds)
   
   // Smooth scrolling
   smoothScroll: {

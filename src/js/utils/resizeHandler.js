@@ -54,7 +54,7 @@ export function setupResizeHandler(modules, initOptions, isMobile, setupGSAPAnim
         // Rebuild if has mobile/desktop variants (contains |)
         if ((animType && animType.includes('|')) || animTypeOriginal) {
           // Get new settings with updated animation type
-          const settings = getElementSettings(element, initOptions, isMobile);
+          const settings = getElementSettings(element, initOptions, isMobile, initOptions.loadGracePeriod);
           element.settings = settings;
           setupGSAPAnimations(element, settings, initOptions, isMobile, modules);
         }
@@ -66,7 +66,7 @@ export function setupResizeHandler(modules, initOptions, isMobile, setupGSAPAnim
         
         if (sliderType) {
           // Get new settings with updated slider type
-          const settings = getElementSettings(element, initOptions, isMobile);
+          const settings = getElementSettings(element, initOptions, isMobile, initOptions.loadGracePeriod);
           element.settings = settings;
           
           // Use the slider component setup function
