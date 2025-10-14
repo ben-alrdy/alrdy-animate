@@ -659,13 +659,17 @@ function setupGSAPAnimations(element, elementSettings, initOptions, isMobile, mo
         return;
 
       case 'pin':
+        // Parse pin-specific attributes locally (no responsive parsing needed since pin is disabled on mobile)
+        const pinStart = element.getAttribute('aa-pin-start') || 'top 10%';
+        const pinEnd = element.getAttribute('aa-pin-end') || '+=100%';
+        
         if (animationType === 'pin-stack') {
           // Get in and out animation types from attributes
           const inAnimation = element.getAttribute('aa-pin-in') || null;
           const outAnimation = element.getAttribute('aa-pin-out') || null;
-          modules.animations.pinStack(element, scrollStart, scrollEnd, initOptions.debug, inAnimation, outAnimation);
+          modules.animations.pinStack(element, pinStart, pinEnd, initOptions.debug, inAnimation, outAnimation);
         } else {
-          modules.animations.pin(element, scrollStart, scrollEnd, initOptions.debug);
+          modules.animations.pin(element, pinStart, pinEnd, initOptions.debug);
         }
         return;
 

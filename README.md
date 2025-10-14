@@ -552,6 +552,8 @@ Pin elements during scroll using GSAP's ScrollTrigger. This is **superior to CSS
 
 **Setup:** `gsapFeatures: ['section']`
 
+**Touch Device Support:** Pin and pin-stack animations are automatically disabled on touch devices for better user experience. This prevents disruption of native scrolling gestures and maintains smooth touch interactions.
+
 #### Simple Pin
 
 Pin a single element during scroll.
@@ -560,18 +562,18 @@ Pin a single element during scroll.
 | Attribute | Values | Default | Description |
 |-----------|--------|---------|-------------|
 | `aa-animate` | `pin` | - | Pins element during scroll |
-| `aa-scroll-start` | ScrollTrigger position | `top 80%` | When pinning starts |
-| `aa-scroll-end` | ScrollTrigger position | `bottom 70%` | When pinning ends |
+| `aa-pin-start` | ScrollTrigger position | `top 10%` | When pinning starts |
+| `aa-pin-end` | ScrollTrigger position | `+=100%` | When pinning ends |
 
 **Examples:**
 ```html
 <!-- Pin at top of viewport -->
-<section aa-animate="pin" aa-scroll-start="top 5%" aa-scroll-end="+=100%">
+<section aa-animate="pin" aa-pin-start="top 5%" aa-pin-end="+=100%">
   <h2 aa-animate="fade-up">I stay pinned!</h2>
 </section>
 
 <!-- Pin for specific scroll distance -->
-<div aa-animate="pin" aa-scroll-start="top 10%" aa-scroll-end="+=2000">
+<div aa-animate="pin" aa-pin-start="top 10%" aa-pin-end="+=2000">
   <h3>Pinned for 2000px of scroll</h3>
 </div>
 ```
@@ -593,8 +595,8 @@ Create stunning card reveal effects where cards slide up and stack on top of eac
 | `aa-pin-in` | `fade`, `scale`, `rotate`, or `null` | `null` (simple slide) | How cards appear from below |
 | `aa-pin-out` | `perspective`, `scale`, `fade`, `blur`, or `null` | `null` (no effect) | How cards react when next card appears |
 | `aa-pin-trigger-animation` | `0.5` | `0.7` | Percentage of viewport when aa-animate animations inside a pinned child are triggered |
-| `aa-scroll-start` | ScrollTrigger position | `top 80%` | When animation starts |
-| `aa-scroll-end` | ScrollTrigger position | `bottom 70%` | When animation ends |
+| `aa-pin-start` | ScrollTrigger position | `top 10%` | When animation starts |
+| `aa-pin-end` | ScrollTrigger position | `+=100%` | When animation ends |
 
 **In-Animation Types:**
 - `null` (default) - Simple slide up with no extra effects
@@ -614,14 +616,14 @@ Create stunning card reveal effects where cards slide up and stack on top of eac
 
 ```html
 <!-- Simple stack (no in/out animations) -->
-<div aa-animate="pin-stack" aa-scroll-start="top 5%" aa-scroll-end="+=1000">
+<div aa-animate="pin-stack" aa-pin-start="top 5%" aa-pin-end="+=1000">
   <div class="card">Card 1</div>
   <div class="card">Card 2</div>
   <div class="card">Card 3</div>
 </div>
 
 <!-- Combined: Fade in + Perspective out -->
-<div aa-animate="pin-stack" aa-pin-in="fade" aa-pin-out="perspective" aa-scroll-start="top 5%" aa-scroll-end="+=1000">
+<div aa-animate="pin-stack" aa-pin-in="fade" aa-pin-out="perspective" aa-pin-start="top 5%" aa-pin-end="+=1000">
   <div class="card">Card 1</div>
   <div class="card">Card 2</div>
   <div class="card">Card 3</div>

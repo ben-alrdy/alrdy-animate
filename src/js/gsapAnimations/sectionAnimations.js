@@ -359,6 +359,14 @@ function initializeStack(element, scrub, distance) {
 }
 
 function initializePin(element, scrollStart, scrollEnd, debug = false) {
+  // Check if device is touch-enabled - disable pin on touch devices for better UX
+  if (ScrollTrigger.isTouch) {
+    if (debug) {
+      console.log('Pin animation disabled on touch device for better user experience');
+    }
+    return;
+  }
+
   // Simple pin - just pin the element with specified scroll positions
   const pinType = element.getAttribute('aa-pin-type');
   const config = {
@@ -379,6 +387,14 @@ function initializePin(element, scrollStart, scrollEnd, debug = false) {
 }
 
 function initializePinStack(element, scrollStart, scrollEnd, debug = false, inAnimation = null, outAnimation = null) {
+  // Check if device is touch-enabled - disable pin-stack on touch devices for better UX
+  if (ScrollTrigger.isTouch) {
+    if (debug) {
+      console.log('Pin-stack animation disabled on touch device for better user experience');
+    }
+    return;
+  }
+
   const children = Array.from(element.children);
   const distance = element.settings.distance;
   
