@@ -5,6 +5,7 @@ import { processChildren } from './utils/childrenHandler';
 import { getElementSettings, applyElementStyles } from './utils/elementAttributes';
 import { processTemplates, getFinalSettings, clearProcessedTemplates } from './utils/templateHandler';
 import { initializeScrollState, initializePlayStateObserver, initializeFormSubmitButton } from './utils/defaultFeatures';
+import { initAnimationEventTrigger } from './utils/animationEventTrigger';
 
 // Define these variables in the module scope
 let allAnimatedElements = null;
@@ -125,6 +126,12 @@ async function init(options = {}) {
     initializeScrollState();
     initializePlayStateObserver();
     initializeFormSubmitButton();
+    
+    // Initialize animation event trigger with defaults
+    initAnimationEventTrigger({
+      duration: initOptions.duration,
+      delay: initOptions.delay
+    });
 
     // Process templates if specified
     const templates = processTemplates(initOptions);
@@ -277,7 +284,8 @@ async function init(options = {}) {
                 modules.gsap,
                 lenis,
                 modules.animations,
-                modules.splitText
+                modules.splitText,
+                initOptions.duration
               );
 
               // Store the modal animation function (like all other gsap animations)
@@ -350,7 +358,7 @@ async function init(options = {}) {
       try {
         const { coreBundles } = await import('./utils/moduleBundle');
         const { initializeModals } = await coreBundles.modals.setup();
-        initializeModals(lenis); 
+        initializeModals(lenis, initOptions.duration); 
       } catch (error) {
         console.warn('Failed to initialize modals:', error);
       }
@@ -562,7 +570,10 @@ function setupGSAPAnimations(element, elementSettings, initOptions, isMobile, mo
   const baseType = animationType.includes('-') ? animationType.split('-')[0] : animationType;
   const gsapAnimations = ['appear', 'reveal', 'counter', 'grow', 'text', 'background', 'parallax', 'clip', 'stack', 'pin'];
   
-  // 2. Determine if this animation type creates its own ScrollTriggers
+  // 2. Check if this is a GSAP animation BEFORE creating timeline
+  const isGSAPAnimation = gsapAnimations.includes(baseType);
+  
+  // 3. Determine if this animation type creates its own ScrollTriggers
   const ownScrollTriggerAnimations = ['clip', 'stack', 'background', 'parallax', 'pin'];
   const hasOwnScrollTrigger = ownScrollTriggerAnimations.includes(baseType);
 
@@ -575,50 +586,74 @@ function setupGSAPAnimations(element, elementSettings, initOptions, isMobile, mo
     element.scrollTriggers = [];
   }
 
-  // 3. Create timeline and ScrollTrigger setup (only for animations that don't have their own ScrollTriggers)
+  // 4. Create timeline and ScrollTrigger setup
   let tl = null;
-  if (!hasOwnScrollTrigger) {
+  
+  // Create timeline only for GSAP animations
+  if (isGSAPAnimation && !hasOwnScrollTrigger) {
     tl = modules.gsap.timeline({
       paused: !scrub
     });
     element.timeline = tl;
+  }
+  
+  // Create ScrollTriggers for both GSAP and CSS animations (but only if not event-triggered)
+  if (!hasOwnScrollTrigger) {
+    const useEventTrigger = element.hasAttribute('aa-event-trigger');
     
-    // Check if element is marked for programmatic triggering (by pin-stack)
-    const useProgrammaticTrigger = element.hasAttribute('aa-pin-programmatic');
-    
-    if (useProgrammaticTrigger) {
-      // Cards in pin-stack: Skip ScrollTrigger creation, will be triggered programmatically
-      tl.pause();
+    if (useEventTrigger) {
+      // Event-triggered elements: Skip ScrollTrigger creation, will be triggered by events
+      if (element.timeline) {
+        element.timeline.pause();
+      }
       element.scrollTriggers = [];
+      
+      // Set up event listener for aa-event-trigger events
+      element.addEventListener('aa-event-trigger', (e) => {
+        const { action } = e.detail;
+        
+        if (action === 'play') {
+          element.classList.add('in-view');
+          element.style.visibility = 'visible';
+          if (element.timeline) {
+            element.timeline.timeScale(1).play();
+          }
+        } else if (action === 'reverse') {
+          element.classList.remove('in-view');
+          if (element.timeline) {
+            element.timeline.timeScale(2).reverse();
+          }
+        }
+      });
     } else {
       // Get pinnedContainer reference if element is marked (card 1 in pin-stack)
       const pinnedContainerId = element.getAttribute('aa-pinned-container');
       const pinnedContainer = pinnedContainerId ? document.getElementById(pinnedContainerId) : null;
       
-      // Normal elements or card 1: Create ScrollTriggers
+      // Create ScrollTriggers for both GSAP and CSS animations
       const mainTrigger = modules.ScrollTrigger.create({
-      trigger: anchorElement,
-      ...(pinnedContainer ? { pinnedContainer: pinnedContainer } : {}),
-      ...(scrub ? {
-        start: scrollStart,
-        end: scrollEnd,
-        stagger,
-        scrub: scrub ? 
-          (parseFloat(scrub) || true)
-        : false,
-        invalidateOnRefresh: scrub ? false : true,
-      } : {
-        start: scrollStart
-      }),
-      animation: tl,
-      onEnter: () => {
-        element.classList.add("in-view");
-        // For scrubbed animations, visibility is controlled by the animation itself
-        if (!scrub) {
-          modules.gsap.set(element, { visibility: 'visible' });
-          tl.play();
-        }
-      },
+        trigger: anchorElement,
+        ...(pinnedContainer ? { pinnedContainer: pinnedContainer } : {}),
+        ...(scrub ? {
+          start: scrollStart,
+          end: scrollEnd,
+          stagger,
+          scrub: scrub ? 
+            (parseFloat(scrub) || true)
+          : false,
+          invalidateOnRefresh: scrub ? false : true,
+        } : {
+          start: scrollStart
+        }),
+        ...(tl ? { animation: tl } : {}), // Only add animation if timeline exists
+        onEnter: () => {
+          element.classList.add("in-view");
+          // For scrubbed animations, visibility is controlled by the animation itself
+          if (!scrub) {
+            modules.gsap.set(element, { visibility: 'visible' });
+            if (tl) tl.play(); // Only play if timeline exists
+          }
+        },
         markers: initOptions.debug
       });
 
@@ -629,7 +664,7 @@ function setupGSAPAnimations(element, elementSettings, initOptions, isMobile, mo
         onLeaveBack: () => {
           if (initOptions.again || anchorSelector) {
             element.classList.remove("in-view");
-            tl.progress(0).pause();
+            if (tl) tl.progress(0).pause(); // Only reset if timeline exists
           }
         }
       });
@@ -638,8 +673,8 @@ function setupGSAPAnimations(element, elementSettings, initOptions, isMobile, mo
     }
   } // End of !hasOwnScrollTrigger
 
-  // 4. Return early if not a GSAP animation
-  if (!gsapAnimations.includes(baseType)) {
+  // 5. Return early if not a GSAP animation (now after timeline check)
+  if (!isGSAPAnimation) {
     return;
   }
 
@@ -739,6 +774,7 @@ function setupGSAPAnimations(element, elementSettings, initOptions, isMobile, mo
     requestAnimationFrame(setupMainTimelineAnimation);
   }
 }
+
 
 function setupIntersectionObserver(element, elementSettings, initOptions) {
   const { anchorElement, anchorSelector, scrollStart } = elementSettings;

@@ -468,9 +468,9 @@ function initializePinStack(element, scrollStart, scrollEnd, debug = false, inAn
         element.id = `pin-stack-${Date.now()}`;
       }
     } else {
-      // Remaining children: mark nested elements for programmatic triggering
+      // Remaining children: mark nested elements for event-based triggering
       nestedAnimations.forEach(nestedEl => {
-        nestedEl.setAttribute('aa-pin-programmatic', 'true');
+        nestedEl.setAttribute('aa-event-trigger', '');
       });
     }
   });
@@ -565,30 +565,25 @@ function setupDirectionTracking(timeline) {
   timeline._directionTrackingSetup = true;
 }
 
-// Helper: Activate nested animation
+// Helper: Activate nested animation via event
 function activateNestedAnimation(element, delay) {
-  element.classList.add('in-view');
-  element.style.visibility = 'visible';
-  
-  if (!element.timeline) return;
-  
-  if (delay > 0) {
-    element._delayedCall = gsap.delayedCall(delay, () => element.timeline.play());
-  } else {
-    element.timeline.play();
-  }
+  element.dispatchEvent(new CustomEvent('aa-event-trigger', {
+    detail: { 
+      action: 'play', 
+      timeScale: 1, 
+      delay: delay || 0 
+    }
+  }));
 }
 
-// Helper: Reset nested animation
+// Helper: Reset nested animation via event
 function resetNestedAnimation(element) {
-  if (element._delayedCall) {
-    element._delayedCall.kill();
-    element._delayedCall = null;
-  }
-  element.classList.remove('in-view');
-  if (element.timeline) {
-    element.timeline.reverse();
-  }
+  element.dispatchEvent(new CustomEvent('aa-event-trigger', {
+    detail: { 
+      action: 'reverse', 
+      timeScale: 1 
+    }
+  }));
 }
 
 // Trigger nested animations when cards become active and reset when scrolling back

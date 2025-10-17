@@ -72,7 +72,7 @@
 
     [aa-animate='zoom-in'],
     .aa-zoom-in {
-      transform: scale(0.6);
+      transform: scale(calc(0.6 * var(--aa-distance)));
     }
 
     [aa-animate='zoom-in-up'],
@@ -87,7 +87,7 @@
 
     [aa-animate='zoom-out'],
     .aa-zoom-out {
-      transform: scale(1.5);
+      transform: scale(calc(1.5 * var(--aa-distance)));
     }
 
     [aa-animate='zoom-out-up'],
