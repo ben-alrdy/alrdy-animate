@@ -1,23 +1,369 @@
 import { triggerAnimations } from '../utils/animationEventTrigger';
 
 //
+// AccordionState Class for Element Caching
+//
+class AccordionState {
+  constructor(accordion, defaultDuration = 1) {
+    this.accordion = accordion;
+    this.defaultDuration = defaultDuration;
+    this.toggles = [];
+    this.contents = [];
+    this.visuals = [];
+    this.elementMap = new Map(); // toggleId -> { toggle, content, visual, progressElement }
+    this.cleanupFunctions = [];
+    
+    this.initializeElements();
+  }
+  
+  initializeElements() {
+    // Get all elements once
+    this.toggles = Array.from(this.accordion.querySelectorAll('[aa-accordion-toggle]'));
+    this.contents = Array.from(this.accordion.querySelectorAll('[aa-accordion-content]'));
+    this.visuals = Array.from(this.accordion.querySelectorAll('[aa-accordion-visual]'));
+    
+    // Build element map for O(1) lookups
+    this.toggles.forEach(toggle => {
+      const toggleId = toggle.getAttribute('aa-accordion-toggle');
+      const content = this.accordion.querySelector(`[aa-accordion-content="${toggleId}"]`);
+      const visual = this.accordion.querySelector(`[aa-accordion-visual="${toggleId}"]`);
+      const progressElement = toggle.querySelector('[aa-accordion-progress]');
+      
+      // Parse attributes once
+      const duration = parseFloat(toggle.getAttribute('aa-duration')) || this.defaultDuration;
+      const delay = parseFloat(toggle.getAttribute('aa-delay')) || 0;
+      const contentDuration = content ? (parseFloat(content.getAttribute('aa-duration')) || this.defaultDuration / 2) : this.defaultDuration / 2;
+      
+      // Parse visual element attributes once
+      const visualDuration = visual ? (parseFloat(visual.getAttribute('aa-duration')) || this.defaultDuration) : this.defaultDuration;
+      const visualDelay = visual ? (parseFloat(visual.getAttribute('aa-delay')) || 0) : 0;
+      const visualReverseDuration = (visualDuration + visualDelay) / 2;
+      
+      this.elementMap.set(toggleId, {
+        toggle,
+        content,
+        visual,
+        progressElement,
+        duration,
+        delay,
+        contentDuration,
+        reverseDuration: (duration + delay) / 2,
+        visualDuration,
+        visualDelay,
+        visualReverseDuration
+      });
+    });
+    
+    // Setup event-based triggering for all elements
+    this.setupEventTriggering();
+  }
+  
+  setupEventTriggering() {
+    // Setup event triggering for all toggles and their associated elements
+    this.toggles.forEach(toggle => {
+      const toggleId = toggle.getAttribute('aa-accordion-toggle');
+      const elementData = this.elementMap.get(toggleId);
+      if (!elementData) return;
+      
+      // Setup content event triggering
+      if (elementData.content) {
+        this.markElementsForEventTriggering(elementData.content);
+      }
+      
+      // Setup visual event triggering
+      if (elementData.visual) {
+        this.markElementsForEventTriggering(elementData.visual);
+      }
+    });
+  }
+  
+  markElementsForEventTriggering(container) {
+    const animatedElements = [
+      ...(container.hasAttribute('aa-animate') ? [container] : []),
+      ...container.querySelectorAll('[aa-animate]')
+    ];
+    animatedElements.forEach(el => {
+      el.setAttribute('aa-event-trigger', '');
+    });
+  }
+  
+  getElementData(toggleId) {
+    return this.elementMap.get(toggleId);
+  }
+  
+  getAllToggles() {
+    return this.toggles;
+  }
+  
+  getActiveToggle() {
+    return this.accordion.querySelector('[aa-accordion-toggle][aa-accordion-status="active"]');
+  }
+  
+  getActiveVisual() {
+    return this.accordion.querySelector('[aa-accordion-visual][aa-accordion-status="active"]');
+  }
+  
+  getActiveVisualData() {
+    const activeVisual = this.getActiveVisual();
+    if (!activeVisual) return null;
+    
+    // Find the toggle that corresponds to this visual
+    const visualId = activeVisual.getAttribute('aa-accordion-visual');
+    return this.getElementData(visualId);
+  }
+  
+  addCleanupFunction(fn) {
+    this.cleanupFunctions.push(fn);
+  }
+  
+  cleanup() {
+    this.cleanupFunctions.forEach(fn => fn());
+    this.cleanupFunctions = [];
+    this.elementMap.clear();
+  }
+}
+
+//
+// AccordionController Base Class
+//
+class AccordionController {
+  constructor(accordion, state, defaultDuration = 1) {
+    this.accordion = accordion;
+    this.state = state;
+    this.defaultDuration = defaultDuration;
+    this.accordionType = accordion.getAttribute('aa-accordion');
+    this.isMulti = this.accordionType === 'multi';
+    this.isAutoplay = this.accordionType === 'autoplay';
+    this.isScroll = this.accordionType === 'scroll';
+    
+    this.setupEventDelegation();
+  }
+  
+  setupEventDelegation() {
+    // Single delegated click handler
+    this.accordion.addEventListener('click', (e) => {
+      const toggle = e.target.closest('[aa-accordion-toggle]');
+      if (!toggle) return;
+      
+      this.handleToggle(toggle);
+    });
+    
+    // Single delegated keyboard handler
+    this.accordion.addEventListener('keydown', (e) => {
+      const toggle = e.target.closest('[aa-accordion-toggle]');
+      if (!toggle) return;
+      
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        this.handleToggle(toggle);
+      }
+    });
+  }
+  
+  handleToggle(toggle) {
+    const toggleId = toggle.getAttribute('aa-accordion-toggle');
+    const elementData = this.state.getElementData(toggleId);
+    if (!elementData) return;
+    
+    const isActive = toggle.getAttribute('aa-accordion-status') === 'active';
+    
+    if (isActive) {
+      this.closeAccordion(toggle, elementData);
+    } else {
+      this.openAccordion(toggle, elementData);
+    }
+  }
+  
+  openAccordion(toggle, elementData) {
+    const { toggleId, content, visual } = elementData;
+    
+    // Close other accordions if not multi
+    if (!this.isMulti) {
+      const activeToggle = this.state.getActiveToggle();
+      if (activeToggle && activeToggle !== toggle) {
+        const activeToggleId = activeToggle.getAttribute('aa-accordion-toggle');
+        const activeElementData = this.state.getElementData(activeToggleId);
+        if (activeElementData) {
+          this.closeAccordion(activeToggle, activeElementData);
+        }
+      }
+    }
+    
+    // Set current accordion to active
+    toggle.setAttribute('aa-accordion-status', 'active');
+    
+    // Set appropriate ARIA state based on content presence
+    if (content) {
+      toggle.setAttribute('aria-expanded', 'true');
+    } else {
+      toggle.setAttribute('aria-selected', 'true');
+    }
+    
+    // Update visual ARIA state
+    if (visual) {
+      if (content) {
+        // Visual is secondary to content
+        visual.setAttribute('aria-hidden', 'false');
+      } else {
+        // Visual is primary content
+        visual.setAttribute('aria-hidden', 'false');
+      }
+    }
+    
+    if (content) {
+      gsap.set(content, { gridTemplateRows: '1fr' });
+      content.setAttribute('aa-accordion-status', 'active');
+      triggerAccordionAnimations(content, 'play');
+    }
+    
+    // Handle visual animations
+    if (visual) {
+      this.handleVisualOpening(visual, elementData);
+    }
+    
+    // Refresh ScrollTrigger after animation
+    gsap.delayedCall(elementData.contentDuration, () => {
+      if (window.ScrollTrigger) {
+        window.ScrollTrigger.refresh();
+      }
+    });
+  }
+  
+  closeAccordion(toggle, elementData) {
+    const { content, visual, contentDuration, reverseDuration } = elementData;
+    
+    toggle.setAttribute('aa-accordion-status', 'inactive');
+    
+    // Set appropriate ARIA state based on content presence
+    if (content) {
+      toggle.setAttribute('aria-expanded', 'false');
+    } else {
+      toggle.setAttribute('aria-selected', 'false');
+    }
+    
+    // Update visual ARIA state
+    if (visual) {
+      visual.setAttribute('aria-hidden', 'true');
+    }
+    
+    if (content) {
+      content.setAttribute('aa-accordion-status', 'inactive');
+      gsap.set(content, { gridTemplateRows: '0fr' });
+      triggerAccordionAnimations(content, 'reverse');
+    }
+    
+    // Handle visual closing
+    if (visual) {
+      triggerAccordionAnimations(visual, 'reverse');
+      
+      // Use cached visual reverse duration
+      gsap.delayedCall(elementData.visualReverseDuration, () => {
+        gsap.set(visual, { visibility: 'hidden' });
+        visual.setAttribute('aa-accordion-status', 'inactive');
+      });
+    }
+    
+    // Reset progress bar
+    this.resetProgressBar(elementData);
+    
+    // Refresh ScrollTrigger after animation
+    gsap.delayedCall(contentDuration, () => {
+      if (window.ScrollTrigger) {
+        window.ScrollTrigger.refresh();
+      }
+    });
+  }
+  
+  handleVisualOpening(visual, elementData) {
+    const previouslyActiveVisualData = this.state.getActiveVisualData();
+    
+    if (previouslyActiveVisualData && previouslyActiveVisualData.visual !== visual) {
+      // Use cached previous visual's reverse duration
+      gsap.delayedCall(previouslyActiveVisualData.visualReverseDuration, () => {
+        this.startVisualAnimation(visual);
+      });
+    } else {
+      this.startVisualAnimation(visual);
+    }
+  }
+  
+  startVisualAnimation(visual) {
+    visual.setAttribute('aa-accordion-status', 'active');
+    gsap.set(visual, { visibility: 'visible' });
+    triggerAccordionAnimations(visual, 'play');
+  }
+  
+  resetProgressBar(elementData) {
+    const { progressElement, toggle } = elementData;
+    if (!progressElement) return;
+    
+    const circle = toggle.querySelector('circle[aa-accordion-progress="circle"]');
+    if (circle) {
+      // Use direct DOM manipulation for SVG stroke properties
+      circle.style.strokeDasharray = '10000';
+      circle.style.strokeDashoffset = '10000';
+    } else {
+      const progressType = progressElement.getAttribute('aa-accordion-progress') || 'width';
+      gsap.set(progressElement, { [progressType]: 0 });
+    }
+  }
+  
+  triggerAccordionAnimations(container, action) {
+    triggerAccordionAnimations(container, action);
+  }
+  
+  cleanup() {
+    this.state.cleanup();
+  }
+}
+
+//
 // Helper Functions
 //
-function getElementParams(element, defaultDuration = 1) {
-  return {
-    toggleId: element.getAttribute('aa-accordion-toggle'),
-    contentId: element.getAttribute('aa-accordion-content'),
-    duration: parseFloat(element.getAttribute('aa-duration')) || defaultDuration / 2
-  };
+function setupAriaAttributes(toggle, content, visual, toggleId) {
+  const ariaToggleId = `accordion-toggle-${toggleId}`;
+  const ariaContentId = `accordion-content-${toggleId}`;
+  const ariaVisualId = `accordion-visual-${toggleId}`;
+  
+  // Always set up toggle
+  toggle.setAttribute('id', ariaToggleId);
+  toggle.setAttribute('tabindex', '0');
+  
+  if (content && visual) {
+    // Accordion with content + visual (content takes precedence)
+    toggle.setAttribute('role', 'button');
+    toggle.setAttribute('aria-expanded', 'false');
+    toggle.setAttribute('aria-controls', ariaContentId);
+    
+    content.setAttribute('id', ariaContentId);
+    content.setAttribute('aria-labelledby', ariaToggleId);
+    content.setAttribute('role', 'region');
+    
+    // Visual gets basic attributes but is secondary
+    visual.setAttribute('id', ariaVisualId);
+    visual.setAttribute('aria-hidden', 'true');
+    
+  } else if (content) {
+    // Accordion with content only
+    toggle.setAttribute('role', 'button');
+    toggle.setAttribute('aria-expanded', 'false');
+    toggle.setAttribute('aria-controls', ariaContentId);
+    
+    content.setAttribute('id', ariaContentId);
+    content.setAttribute('aria-labelledby', ariaToggleId);
+    content.setAttribute('role', 'region');
+    
+  } else if (visual) {
+    // Tab with visual only
+    toggle.setAttribute('role', 'tab');
+    toggle.setAttribute('aria-selected', 'false');
+    toggle.setAttribute('aria-controls', ariaVisualId);
+    
+    visual.setAttribute('id', ariaVisualId);
+    visual.setAttribute('aria-labelledby', ariaToggleId);
+    visual.setAttribute('role', 'tabpanel');
+  }
 }
-
-function getReverseDuration(element, defaultDuration) {
-  const duration = parseFloat(element.getAttribute('aa-duration')) || defaultDuration;
-  const delay = parseFloat(element.getAttribute('aa-delay')) || 0;
-  return (duration + delay) / 2;
-}
-
-
 
 function triggerAccordionAnimations(container, action) {
   const animatedElements = [
@@ -26,31 +372,6 @@ function triggerAccordionAnimations(container, action) {
   ];
   
   triggerAnimations(animatedElements, action);
-}
-
-function setupAriaAttributes(toggle, content, toggleId) {
-  const ariaToggleId = `accordion-toggle-${toggleId}`;
-  const ariaContentId = `accordion-content-${toggleId}`;
-  
-  toggle.setAttribute('id', ariaToggleId);
-  content.setAttribute('id', ariaContentId);
-  
-  toggle.setAttribute('aria-expanded', 'false');
-  toggle.setAttribute('aria-controls', ariaContentId);
-  toggle.setAttribute('tabindex', '0');
-  toggle.setAttribute('role', 'button');
-  content.setAttribute('aria-labelledby', ariaToggleId);
-  content.setAttribute('role', 'region');
-}
-
-function setupElementEventListeners(toggle, handleToggle) {
-  toggle.addEventListener('click', handleToggle);
-  toggle.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      handleToggle();
-    }
-  });
 }
 
 function autoAssignIds(accordion) {
@@ -77,69 +398,73 @@ function autoAssignIds(accordion) {
   });
 }
 
-function initializeAccordionElements(accordion, toggles, contents, animations, splitText, defaultDuration = 1) {
+function initializeAccordionElements(accordion, state, animations, splitText, defaultDuration = 1) {
   const initialToggle = accordion.querySelector('[aa-accordion-initial]');
   
-  // Set all toggles to inactive initially
-  toggles.forEach((toggle) => {
+  // Set all toggles to inactive initially using cached elements
+  state.toggles.forEach((toggle) => {
     const toggleId = toggle.getAttribute('aa-accordion-toggle');
-    const content = accordion.querySelector(`[aa-accordion-content="${toggleId}"]`);
-    const visual = accordion.querySelector(`[aa-accordion-visual="${toggleId}"]`);
+    const elementData = state.getElementData(toggleId);
     
     // Set initial states
     toggle.setAttribute('aa-accordion-status', 'inactive');
-    toggle.setAttribute('aria-expanded', 'false');
     
-    if (content) {
-      content.setAttribute('aa-accordion-status', 'inactive');
+    if (elementData.content) {
+      elementData.content.setAttribute('aa-accordion-status', 'inactive');
     }
     
-    if (visual) {
-      visual.setAttribute('aa-accordion-status', 'inactive');
-      gsap.set(visual, { visibility: 'hidden' });
+    // Setup ARIA attributes for all scenarios
+    setupAriaAttributes(toggle, elementData.content, elementData.visual, toggleId);
+    
+    if (elementData.visual) {
+      elementData.visual.setAttribute('aa-accordion-status', 'inactive');
+      gsap.set(elementData.visual, { visibility: 'hidden' });
     }
   });
   
-  // Mark content elements for event-based triggering
-  contents.forEach((content) => {
-    const contentId = content.getAttribute('aa-accordion-content');
-    
-    // Set CSS variable for aa-duration on content element
+  // Set CSS variables for content elements
+  state.contents.forEach((content) => {
     const contentDuration = parseFloat(content.getAttribute('aa-duration')) || defaultDuration / 2;
     content.style.setProperty('--aa-duration', `${contentDuration}s`);
-    
-    // Mark content elements for event-based triggering
-    const contentAnimatedElements = [
-      ...(content.hasAttribute('aa-animate') ? [content] : []),
-      ...content.querySelectorAll('[aa-animate]')
-    ];
-    contentAnimatedElements.forEach(el => {
-      el.setAttribute('aa-event-trigger', '');
-    });
-    
-    // Setup connected visual elements
-    const connectedVisual = accordion.querySelector(`[aa-accordion-visual="${contentId}"]`);
-    if (connectedVisual) {
-      // Mark visual elements for event-based triggering
-      const visualAnimatedElements = [
-        ...(connectedVisual.hasAttribute('aa-animate') ? [connectedVisual] : []),
-        ...connectedVisual.querySelectorAll('[aa-animate]')
-      ];
-      visualAnimatedElements.forEach(el => {
-        el.setAttribute('aa-event-trigger', '');
-      });
-    }
   });
   
   // Open initial accordion if specified
   if (initialToggle) {
     const initialToggleId = initialToggle.getAttribute('aa-accordion-toggle');
-    const initialContent = accordion.querySelector(`[aa-accordion-content="${initialToggleId}"]`);
+    const elementData = state.getElementData(initialToggleId);
     
-    // Add a small delay to ensure all animations are properly set up before opening
-    gsap.delayedCall(0.1, () => {
-      openAccordion(initialToggle, initialContent, accordion, defaultDuration);
-    });
+    if (elementData) {
+      // Add a small delay to ensure all animations are properly set up before opening
+      gsap.delayedCall(0.1, () => {
+        // Set current accordion to active
+        initialToggle.setAttribute('aa-accordion-status', 'active');
+        
+        // Set appropriate ARIA state based on content presence
+        if (elementData.content) {
+          initialToggle.setAttribute('aria-expanded', 'true');
+        } else {
+          initialToggle.setAttribute('aria-selected', 'true');
+        }
+        
+        // Update visual ARIA state
+        if (elementData.visual) {
+          elementData.visual.setAttribute('aria-hidden', 'false');
+        }
+        
+        if (elementData.content) {
+          gsap.set(elementData.content, { gridTemplateRows: '1fr' });
+          elementData.content.setAttribute('aa-accordion-status', 'active');
+          triggerAccordionAnimations(elementData.content, 'play');
+        }
+        
+        // Handle visual animations
+        if (elementData.visual) {
+          elementData.visual.setAttribute('aa-accordion-status', 'active');
+          gsap.set(elementData.visual, { visibility: 'visible' });
+          triggerAccordionAnimations(elementData.visual, 'play');
+        }
+      });
+    }
   }
 }
 // Helper function to update progress bars for type "scroll"
@@ -156,7 +481,7 @@ function updateProgressBars(toggles, activeIndex, progress, accordionCount) {
       const clampedProgress = Math.max(0, Math.min(1, accordionProgress));
       
       if (progressType === 'circle') {
-        const circle = progressElement.querySelector('circle[aa-accordion-progress="circle"]');
+        const circle = toggle.querySelector('circle[aa-accordion-progress="circle"]');
         if (circle) {
           const radius = parseFloat(circle.getAttribute('r')) || 25;
           const circumference = 2 * Math.PI * radius;
@@ -164,19 +489,19 @@ function updateProgressBars(toggles, activeIndex, progress, accordionCount) {
           circle.style.strokeDashoffset = offset;
         }
       } else {
-        progressElement.style[progressType] = `${clampedProgress * 100}%`;
+        gsap.set(progressElement, { [progressType]: `${clampedProgress * 100}%` });
       }
     } else {
       // Reset progress for inactive accordions
       if (progressType === 'circle') {
-        const circle = progressElement.querySelector('circle[aa-accordion-progress="circle"]');
+        const circle = toggle.querySelector('circle[aa-accordion-progress="circle"]');
         if (circle) {
           const radius = parseFloat(circle.getAttribute('r')) || 25;
           const circumference = 2 * Math.PI * radius;
           circle.style.strokeDashoffset = circumference;
         }
       } else {
-        progressElement.style[progressType] = '0%';
+        gsap.set(progressElement, { [progressType]: '0%' });
       }
     }
   });
@@ -196,173 +521,19 @@ function parseResponsiveAttribute(attribute, defaultValue) {
 
 
 // 
-// Core accordion functions (used by all types)
-// 
-function openAccordion(toggle, content, accordion, defaultDuration = 1) {
-  const { toggleId } = getElementParams(toggle);
-  const connectedVisual = accordion.querySelector(`[aa-accordion-visual="${toggleId}"]`);
-  
-  // 1. Check if any other accordions are open and close them (unless multi)
-  const accordionType = accordion.getAttribute('aa-accordion');
-  const isMulti = accordionType === 'multi';
-  
-  if (!isMulti) {
-    const allToggles = accordion.querySelectorAll('[aa-accordion-toggle]');
-    allToggles.forEach(otherToggle => {
-      if (otherToggle !== toggle && otherToggle.getAttribute('aa-accordion-status') === 'active') {
-        const otherToggleId = otherToggle.getAttribute('aa-accordion-toggle');
-        const otherContent = accordion.querySelector(`[aa-accordion-content="${otherToggleId}"]`);
-        closeAccordion(otherToggle, otherContent, accordion, defaultDuration);
-      }
-    });
-  }
-  
-  // 2. Set current accordion to active
-  toggle.setAttribute('aa-accordion-status', 'active');
-  toggle.setAttribute('aria-expanded', 'true');
-  
-  if (content) {
-    gsap.set(content, { gridTemplateRows: '1fr' });
-    content.setAttribute('aa-accordion-status', 'active');
-    triggerAccordionAnimations(content, 'play');
-  }
-  
-  // 3. Handle opening visuals - wait for any previous visual to finish closing
-  if (connectedVisual) {
-    // Check if there's a currently active visual that needs to close first
-    const previouslyActiveVisual = accordion.querySelector('[aa-accordion-visual][aa-accordion-status="active"]');
-    
-    if (previouslyActiveVisual && previouslyActiveVisual !== connectedVisual) {
-      // Previous visual is being closed by closeAccordion call above
-      // Wait for it to complete before starting new one
-      const reverseDuration = getReverseDuration(previouslyActiveVisual, defaultDuration);
-      
-      gsap.delayedCall(reverseDuration, () => {
-        connectedVisual.setAttribute('aa-accordion-status', 'active');
-        gsap.set(connectedVisual, { visibility: 'visible' });
-        triggerAccordionAnimations(connectedVisual, 'play');
-      });
-    } else {
-      // No previous visual, start immediately
-      connectedVisual.setAttribute('aa-accordion-status', 'active');
-      gsap.set(connectedVisual, { visibility: 'visible' });
-      triggerAccordionAnimations(connectedVisual, 'play');
-    }
-  }
-  
-  const { duration } = content ? getElementParams(content, defaultDuration) : defaultDuration / 2;
-  gsap.delayedCall(duration, () => {
-    if (window.ScrollTrigger) {
-      window.ScrollTrigger.refresh();
-    }
-  });
-}
-
-function closeAccordion(toggle, content, accordion, defaultDuration = 1) {
-  toggle.setAttribute('aa-accordion-status', 'inactive');
-  if (content) {
-    content.setAttribute('aa-accordion-status', 'inactive');
-  }
-  toggle.setAttribute('aria-expanded', 'false');
-
-  const { duration } = content ? getElementParams(content, defaultDuration) : defaultDuration / 2;
-  const { toggleId } = getElementParams(toggle);
-  const connectedVisual = accordion.querySelector(`[aa-accordion-visual="${toggleId}"]`);
-  const progressElement = toggle.querySelector('[aa-accordion-progress]');
-
-  // Reverse content animations 
-  if (content) {
-    gsap.set(content, { gridTemplateRows: '0fr' });
-    triggerAccordionAnimations(content, 'reverse');
-  }
-
-  // Hide connected visual
-  if (connectedVisual) {
-    triggerAccordionAnimations(connectedVisual, 'reverse');
-    
-    // Calculate reverse animation duration (2x faster)
-    const reverseDuration = getReverseDuration(connectedVisual, defaultDuration);
-    
-    // Hide after reverse completes
-    gsap.delayedCall(reverseDuration, () => {
-      gsap.set(connectedVisual, { visibility: 'hidden' });
-      connectedVisual.setAttribute('aa-accordion-status', 'inactive');
-    });
-  }
-
-  // Reset progress bar
-  if (progressElement) {
-    const circle = toggle.querySelector('circle[aa-accordion-progress="circle"]');
-    if (circle) {
-      // Reset circular progress to empty using large values
-      gsap.set(circle, { 
-        strokeDasharray: 10000,
-        strokeDashoffset: 10000 
-      });
-    } else {
-      const progressType = progressElement.getAttribute('aa-accordion-progress') || 'width';
-      gsap.set(progressElement, { [progressType]: 0 });
-    }
-  }
-  
-  
-  gsap.delayedCall(duration, () => {
-    if (window.ScrollTrigger) {
-      window.ScrollTrigger.refresh();
-    }
-  });
-}
+// Core accordion functions (used by all types) - Now handled by AccordionController
+//
 
 
 // 
 // Main accordion types
 // 
 
-// Initialize basic/multi accordion
-function initializeBasicAccordion(accordion, toggles, isMulti, animations, splitText, defaultDuration = 1) {
-  toggles.forEach((toggle) => {
-    const toggleId = toggle.getAttribute('aa-accordion-toggle');
-    
-    toggle.setAttribute('aa-accordion-status', 'inactive');
-    const connectedContent = accordion.querySelector(`[aa-accordion-content="${toggleId}"]`);
-    
-    if (connectedContent) {
-      setupAriaAttributes(toggle, connectedContent, toggleId);
-    }
-    
-    // Setup connected visual even if there's no content
-    const connectedVisual = accordion.querySelector(`[aa-accordion-visual="${toggleId}"]`);
-    if (connectedVisual && !connectedContent) {
-      connectedVisual.setAttribute('aa-accordion-status', 'inactive');
-      gsap.set(connectedVisual, { visibility: 'hidden' });
-      
-      // Mark visual elements for event-based triggering
-      const visualAnimatedElements = [
-        ...(connectedVisual.hasAttribute('aa-animate') ? [connectedVisual] : []),
-        ...connectedVisual.querySelectorAll('[aa-animate]')
-      ];
-      visualAnimatedElements.forEach(el => {
-        el.setAttribute('aa-event-trigger', '');
-      });
-    }
-    
-    const handleToggle = () => {
-      const content = connectedContent;
-      const isActive = toggle.getAttribute('aa-accordion-status') === 'active';
-      
-      if (isActive) {
-        closeAccordion(toggle, content, accordion, defaultDuration);
-      } else {
-        openAccordion(toggle, content, accordion, defaultDuration);
-      }
-    };
-
-    setupElementEventListeners(toggle, handleToggle);
-  });
-}
+// Initialize basic/multi accordion - Now handled by AccordionController base class
+// No additional setup needed as event delegation handles everything
 
 // Initialize autoplay accordion
-function initializeAutoplayAccordion(accordion, toggles, animations, splitText, defaultDuration = 1) {
+function initializeAutoplayAccordion(accordion, state, controller, animations, splitText, defaultDuration = 1) {
   let progressTween = null;
   let currentAutoplayIndex = 0;
   let currentlyOpenAccordion = null;
@@ -372,72 +543,86 @@ function initializeAutoplayAccordion(accordion, toggles, animations, splitText, 
   const initialToggle = accordion.querySelector('[aa-accordion-initial]');
   if (initialToggle) {
     currentlyOpenAccordion = initialToggle;
-    currentAutoplayIndex = Array.from(toggles).indexOf(initialToggle);
+    currentAutoplayIndex = state.toggles.indexOf(initialToggle);
+    
+    // Ensure initial accordion is properly opened with animations
+    const initialToggleId = initialToggle.getAttribute('aa-accordion-toggle');
+    const elementData = state.getElementData(initialToggleId);
+    if (elementData) {
+      // Set initial accordion to active
+      initialToggle.setAttribute('aa-accordion-status', 'active');
+      
+      // Set appropriate ARIA state based on content presence
+      if (elementData.content) {
+        initialToggle.setAttribute('aria-expanded', 'true');
+      } else {
+        initialToggle.setAttribute('aria-selected', 'true');
+      }
+      
+      // Update visual ARIA state
+      if (elementData.visual) {
+        elementData.visual.setAttribute('aria-hidden', 'false');
+      }
+      
+      if (elementData.content) {
+        gsap.set(elementData.content, { gridTemplateRows: '1fr' });
+        elementData.content.setAttribute('aa-accordion-status', 'active');
+        triggerAccordionAnimations(elementData.content, 'play');
+      }
+      
+      // Handle visual animations
+      if (elementData.visual) {
+        elementData.visual.setAttribute('aa-accordion-status', 'active');
+        gsap.set(elementData.visual, { visibility: 'visible' });
+        triggerAccordionAnimations(elementData.visual, 'play');
+      }
+    }
   }
   
-  // Set up toggles
-  toggles.forEach((toggle) => {
+  // Override controller's handleToggle for autoplay-specific logic
+  const originalHandleToggle = controller.handleToggle.bind(controller);
+  controller.handleToggle = (toggle) => {
     const toggleId = toggle.getAttribute('aa-accordion-toggle');
-    const connectedContent = accordion.querySelector(`[aa-accordion-content="${toggleId}"]`);
+    const elementData = state.getElementData(toggleId);
+    if (!elementData) return;
     
-    if (connectedContent) {
-      setupAriaAttributes(toggle, connectedContent, toggleId);
+    const isActive = toggle.getAttribute('aa-accordion-status') === 'active';
+    const hasInitialToggle = accordion.querySelector('[aa-accordion-initial]');
+    
+    if (progressTween?.isActive()) {
+      const currentToggleIndex = state.toggles.indexOf(toggle);
+      if (currentToggleIndex === currentAutoplayIndex) return;
     }
     
-    // Setup connected visual even if there's no content
-    const connectedVisual = accordion.querySelector(`[aa-accordion-visual="${toggleId}"]`);
-    if (connectedVisual && !connectedContent) {
-      // Mark visual elements for event-based triggering
-      const visualAnimatedElements = [
-        ...(connectedVisual.hasAttribute('aa-animate') ? [connectedVisual] : []),
-        ...connectedVisual.querySelectorAll('[aa-animate]')
-      ];
-      visualAnimatedElements.forEach(el => {
-        el.setAttribute('aa-event-trigger', '');
-      });
+    stopAutoplay();
+    
+    // Prevent closing active accordion if it has initial toggle
+    if (isActive && hasInitialToggle) {
+      return;
     }
     
-    const handleToggle = () => {
-      const content = connectedContent;
-      const isActive = toggle.getAttribute('aa-accordion-status') === 'active';
-      const hasInitialToggle = accordion.querySelector('[aa-accordion-initial]');
-      
-      if (progressTween?.isActive()) {
-        const currentToggleIndex = Array.from(toggles).indexOf(toggle);
-        if (currentToggleIndex === currentAutoplayIndex) return;
-      }
-      
-      stopAutoplay();
-      
-      // Prevent closing active accordion if it has initial toggle
-      if (isActive && hasInitialToggle) {
-        return;
-      }
-      
-      if (isActive) {
-        closeAccordion(toggle, content, accordion, defaultDuration);
-      } else {
-        toggles.forEach(otherToggle => {
-          if (otherToggle !== toggle) {
-            const otherId = otherToggle.getAttribute('aa-accordion-toggle');
-            const otherContent = accordion.querySelector(`[aa-accordion-content="${otherId}"]`);
-            if (otherToggle.getAttribute('aa-accordion-status') === 'active') {
-              closeAccordion(otherToggle, otherContent, accordion, defaultDuration);
-            }
+    if (isActive) {
+      controller.closeAccordion(toggle, elementData);
+    } else {
+      // Close other accordions
+      state.toggles.forEach(otherToggle => {
+        if (otherToggle !== toggle) {
+          const otherId = otherToggle.getAttribute('aa-accordion-toggle');
+          const otherElementData = state.getElementData(otherId);
+          if (otherToggle.getAttribute('aa-accordion-status') === 'active' && otherElementData) {
+            controller.closeAccordion(otherToggle, otherElementData);
           }
-        });
-        openAccordion(toggle, content, accordion, defaultDuration);
-        currentlyOpenAccordion = toggle;
-      }
-      
-      if (scrollInstance?.isActive) {
-        const clickedIndex = Array.from(toggles).indexOf(toggle);
-        if (clickedIndex !== -1) switchToAccordion(clickedIndex);
-      }
-    };
-
-    setupElementEventListeners(toggle, handleToggle);
-  });
+        }
+      });
+      controller.openAccordion(toggle, elementData);
+      currentlyOpenAccordion = toggle;
+    }
+    
+    if (scrollInstance?.isActive) {
+      const clickedIndex = state.toggles.indexOf(toggle);
+      if (clickedIndex !== -1) switchToAccordion(clickedIndex);
+    }
+  };
   
   // Initialize ScrollTrigger for autoplay
   if (window.ScrollTrigger) {
@@ -467,6 +652,13 @@ function initializeAutoplayAccordion(accordion, toggles, animations, splitText, 
         switchToAccordion(currentAutoplayIndex);
       });
     }
+    
+    // Add cleanup for ScrollTrigger
+    state.addCleanupFunction(() => {
+      if (scrollInstance) {
+        scrollInstance.kill();
+      }
+    });
   }
   
   // Autoplay functions
@@ -480,9 +672,11 @@ function initializeAutoplayAccordion(accordion, toggles, animations, splitText, 
   function startProgress(index, duration) {
     if (progressTween) progressTween.kill();
     
-    const toggle = toggles[index];
+    const toggle = state.toggles[index];
+    const elementData = state.getElementData(toggle.getAttribute('aa-accordion-toggle'));
+    if (!elementData) return;
     
-    // Check for circular progress first
+    // Check for circular progress first - look directly on toggle like old implementation
     const circle = toggle.querySelector('circle[aa-accordion-progress="circle"]');
     if (circle) {
       const progressEase = circle.getAttribute('aa-ease') || 'power1.inOut';
@@ -492,10 +686,8 @@ function initializeAutoplayAccordion(accordion, toggles, animations, splitText, 
       const circumference = 2 * Math.PI * radius;
       
       // Set initial state (empty circle)
-      gsap.set(circle, { 
-        strokeDasharray: circumference,
-        strokeDashoffset: circumference 
-      });
+      circle.style.strokeDasharray = circumference;
+      circle.style.strokeDashoffset = circumference;
       
       progressTween = gsap.to(circle, {
         strokeDashoffset: 0,
@@ -503,43 +695,50 @@ function initializeAutoplayAccordion(accordion, toggles, animations, splitText, 
         ease: progressEase,
         onComplete: () => {
           if (scrollInstance?.isActive) {
-            const nextIndex = (index + 1) % toggles.length;
+            const nextIndex = (index + 1) % state.toggles.length;
             switchToAccordion(nextIndex);
           }
         },
         paused: !scrollInstance?.isActive
       });
-    } else {
-      // Handle linear progress (width/height) or no progress bar
-      const progressElement = toggle.querySelector('[aa-accordion-progress]');
+    } else if (elementData.progressElement) {
+      // Handle linear progress (width/height) - but not circle
+      const progressType = elementData.progressElement.getAttribute('aa-accordion-progress') || 'width';
+      const progressEase = elementData.progressElement.getAttribute('aa-ease') || 'power1.inOut';
       
-      if (progressElement) {
-        const progressType = progressElement.getAttribute('aa-accordion-progress') || 'width';
-        const progressEase = progressElement.getAttribute('aa-ease') || 'power1.inOut';
+      // Skip if it's a circle type (should have been handled above)
+      if (progressType === 'circle') {
+        // No progress bar - just use a simple timer
+        progressTween = gsap.delayedCall(duration, () => {
+          if (scrollInstance?.isActive) {
+            const nextIndex = (index + 1) % state.toggles.length;
+            switchToAccordion(nextIndex);
+          }
+        });
+      } else {
+        gsap.set(elementData.progressElement, { [progressType]: 0 });
         
-        gsap.set(progressElement, { [progressType]: 0 });
-        
-        progressTween = gsap.to(progressElement, {
+        progressTween = gsap.to(elementData.progressElement, {
           [progressType]: '100%',
           duration,
           ease: progressEase,
           onComplete: () => {
             if (scrollInstance?.isActive) {
-              const nextIndex = (index + 1) % toggles.length;
+              const nextIndex = (index + 1) % state.toggles.length;
               switchToAccordion(nextIndex);
             }
           },
           paused: !scrollInstance?.isActive
         });
-      } else {
-        // No progress bar - just use a simple timer
-        progressTween = gsap.delayedCall(duration, () => {
-          if (scrollInstance?.isActive) {
-            const nextIndex = (index + 1) % toggles.length;
-            switchToAccordion(nextIndex);
-          }
-        });
       }
+    } else {
+      // No progress bar - just use a simple timer
+      progressTween = gsap.delayedCall(duration, () => {
+        if (scrollInstance?.isActive) {
+          const nextIndex = (index + 1) % state.toggles.length;
+          switchToAccordion(nextIndex);
+        }
+      });
     }
     
     if (scrollInstance?.isActive) {
@@ -548,21 +747,24 @@ function initializeAutoplayAccordion(accordion, toggles, animations, splitText, 
   }
   
   function switchToAccordion(index) {
-    if (index >= toggles.length) return;
+    if (index >= state.toggles.length) return;
     
-    const toggle = toggles[index];
+    const toggle = state.toggles[index];
     const toggleId = toggle.getAttribute('aa-accordion-toggle');
-    const content = accordion.querySelector(`[aa-accordion-content="${toggleId}"]`);
+    const elementData = state.getElementData(toggleId);
+    if (!elementData) return;
     
     if (currentlyOpenAccordion && currentlyOpenAccordion !== toggle) {
       const openToggleId = currentlyOpenAccordion.getAttribute('aa-accordion-toggle');
-      const openContent = accordion.querySelector(`[aa-accordion-content="${openToggleId}"]`);
-      closeAccordion(currentlyOpenAccordion, openContent, accordion, defaultDuration);
+      const openElementData = state.getElementData(openToggleId);
+      if (openElementData) {
+        controller.closeAccordion(currentlyOpenAccordion, openElementData);
+      }
     }
     
     const isActive = toggle.getAttribute('aa-accordion-status') === 'active';
     if (!isActive) {
-      openAccordion(toggle, content, accordion, defaultDuration);
+      controller.openAccordion(toggle, elementData);
       currentlyOpenAccordion = toggle;
     }
     
@@ -573,7 +775,7 @@ function initializeAutoplayAccordion(accordion, toggles, animations, splitText, 
 }
 
 // Initialize scroll accordion with optimized approach
-function initializeScrollAccordion(accordion, toggles, defaultDuration = 1) {
+function initializeScrollAccordion(accordion, state, controller, defaultDuration = 1) {
   if (!window.ScrollTrigger) return;
   
   // Get configuration with mobile support
@@ -581,20 +783,20 @@ function initializeScrollAccordion(accordion, toggles, defaultDuration = 1) {
   const scrollStart = parseResponsiveAttribute(scrollStartAttr, 'top 20%');
   const distanceAttr = accordion.getAttribute('aa-distance') || '100';
   const scrubValue = accordion.getAttribute('aa-scrub') || 'true';
-  const accordionCount = toggles.length;
+  const accordionCount = state.toggles.length;
   
   // Calculate scroll distance (convert vh to pixels for ScrollTrigger)
   const totalScrollDistance = accordionCount * parseFloat(distanceAttr) * window.innerHeight / 100;
   
   // Check for initial accordion
   const initialAccordion = accordion.querySelector('[aa-accordion-initial]');
-  const hasInitialAccordion = initialAccordion && toggles[0] === initialAccordion;
+  const hasInitialAccordion = initialAccordion && state.toggles[0] === initialAccordion;
   
   // Track current active accordion
   let currentActiveIndex = hasInitialAccordion ? 0 : -1;
   
   // Disable click functionality for scroll-driven accordions
-  toggles.forEach((toggle) => {
+  state.toggles.forEach((toggle) => {
     toggle.style.pointerEvents = 'none';
     toggle.style.cursor = 'default';
   });
@@ -622,25 +824,29 @@ function initializeScrollAccordion(accordion, toggles, defaultDuration = 1) {
       if (currentActiveIndex !== newActiveIndex) {
         // Close previous accordion
         if (currentActiveIndex >= 0) {
-          const prevToggle = toggles[currentActiveIndex];
+          const prevToggle = state.toggles[currentActiveIndex];
           const prevToggleId = prevToggle.getAttribute('aa-accordion-toggle');
-          const prevContent = accordion.querySelector(`[aa-accordion-content="${prevToggleId}"]`);
-          closeAccordion(prevToggle, prevContent, accordion, defaultDuration);
+          const prevElementData = state.getElementData(prevToggleId);
+          if (prevElementData) {
+            controller.closeAccordion(prevToggle, prevElementData);
+          }
         }
         
         // Open new accordion
         if (newActiveIndex >= 0) {
-          const newToggle = toggles[newActiveIndex];
+          const newToggle = state.toggles[newActiveIndex];
           const newToggleId = newToggle.getAttribute('aa-accordion-toggle');
-          const newContent = accordion.querySelector(`[aa-accordion-content="${newToggleId}"]`);
-          openAccordion(newToggle, newContent, accordion, defaultDuration);
+          const newElementData = state.getElementData(newToggleId);
+          if (newElementData) {
+            controller.openAccordion(newToggle, newElementData);
+          }
         }
         
         currentActiveIndex = newActiveIndex;
       }
       
       // Update progress bars efficiently
-      updateProgressBars(toggles, newActiveIndex, progress, accordionCount);
+      updateProgressBars(state.toggles, newActiveIndex, progress, accordionCount);
     }
   });
   
@@ -653,6 +859,13 @@ function initializeScrollAccordion(accordion, toggles, defaultDuration = 1) {
     pinSpacing: true,
     scrub: scrubValue ? (parseFloat(scrubValue) || true) : true,
     animation: progressTween
+  });
+  
+  // Add cleanup for ScrollTrigger
+  state.addCleanupFunction(() => {
+    if (scrollTrigger) {
+      scrollTrigger.kill();
+    }
   });
   
   // Handle responsive updates for aa-scroll-start
@@ -689,6 +902,15 @@ function initializeScrollAccordion(accordion, toggles, defaultDuration = 1) {
         setTimeout(debouncedResize, 100);
       });
     }
+    
+    // Add cleanup for resize handlers
+    state.addCleanupFunction(() => {
+      window.removeEventListener('resize', debouncedResize);
+      if (window.matchMedia('(hover: none)').matches) {
+        window.removeEventListener('orientationchange', debouncedResize);
+      }
+      clearTimeout(resizeTimeout);
+    });
   }
 }
 
@@ -697,33 +919,40 @@ function initializeScrollAccordion(accordion, toggles, defaultDuration = 1) {
 // 
 
 function initializeAccordion(accordion, animations = null, splitText = null, defaultDuration = 1) {
-  
-  const accordionType = accordion.getAttribute('aa-accordion');
-  const isMulti = accordionType === 'multi';
-  const isAutoplay = accordionType === 'autoplay';
-  const isScroll = accordionType === 'scroll';
-  const toggles = accordion.querySelectorAll('[aa-accordion-toggle]');
-  const contents = accordion.querySelectorAll('[aa-accordion-content]');
-  
   // Auto-assign IDs if not provided
   autoAssignIds(accordion);
   
-  // Initialize accordion elements: states and animations
-  initializeAccordionElements(accordion, toggles, contents, animations, splitText, defaultDuration);
+  // Create state and controller
+  const state = new AccordionState(accordion, defaultDuration);
+  const controller = new AccordionController(accordion, state, defaultDuration);
   
-   // Initialize based on accordion type
-   if (isScroll) {
-     initializeScrollAccordion(accordion, toggles, defaultDuration);
-   } else if (isAutoplay) {
-     initializeAutoplayAccordion(accordion, toggles, animations, splitText, defaultDuration);
-   } else {
-     initializeBasicAccordion(accordion, toggles, isMulti, animations, splitText, defaultDuration);
-   }
+  // Initialize accordion elements: states and animations
+  initializeAccordionElements(accordion, state, animations, splitText, defaultDuration);
+  
+  // Initialize based on accordion type
+  const accordionType = accordion.getAttribute('aa-accordion');
+  if (accordionType === 'scroll') {
+    initializeScrollAccordion(accordion, state, controller, defaultDuration);
+  } else if (accordionType === 'autoplay') {
+    initializeAutoplayAccordion(accordion, state, controller, animations, splitText, defaultDuration);
+  }
+  // Basic and multi accordions are handled by the base controller
+  
+  // Return cleanup function
+  return () => controller.cleanup();
 }
 
 function createAccordionAnimations(gsap, animations, splitText, defaultDuration = 1) {
   return {
-    accordion: (accordion) => initializeAccordion(accordion, animations, splitText, defaultDuration)
+    accordion: (accordion) => {
+      // Initialize accordion and return cleanup function
+      const cleanup = initializeAccordion(accordion, animations, splitText, defaultDuration);
+      
+      // Store cleanup function on the accordion element for potential manual cleanup
+      accordion._accordionCleanup = cleanup;
+      
+      return cleanup;
+    }
   };
 }
 
