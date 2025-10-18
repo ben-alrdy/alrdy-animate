@@ -1328,7 +1328,7 @@ Scrolling text and content animations.
 
 Accessible, attribute-driven modals that work seamlessly with or without smooth scrolling (Lenis).
 
-**Setup:** `gsapFeatures: ['modal']` and `modals: true`
+**Setup:** `gsapFeatures: ['modal']` 
 
 #### Basic Structure
 

@@ -76,8 +76,5 @@ export const coreBundles = {
     smoothScroll: {
         plugins: () => import(/* webpackChunkName: "lenis" */ 'lenis'),
         setup: () => import(/* webpackChunkName: "lenis" */ '../smoothScroll/setup')
-    },
-    modals: {
-        setup: () => import(/* webpackChunkName: "modals" */ '../modals/setup')
     }
 }; 

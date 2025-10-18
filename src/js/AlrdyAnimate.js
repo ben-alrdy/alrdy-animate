@@ -33,7 +33,6 @@ const defaultOptions = {
     enabled: true,
     options: {} // Defined in smoothScroll/setup.js
   },
-  modals: false,
   lazyLoadHandler: false, // default to false for backward compatibility
   debug: false, // Set to true to see GSAP debug info
   templates: null, // Template configuration for class-based animations
@@ -353,17 +352,6 @@ async function init(options = {}) {
       }
     }
 
-    // Initialize modals if enabled
-    if (initOptions.modals) {
-     
-      try {
-        const { coreBundles } = await import('./utils/moduleBundle');
-        const { initializeModals } = await coreBundles.modals.setup();
-        initializeModals(lenis, initOptions.duration); 
-      } catch (error) {
-        console.warn('Failed to initialize modals:', error);
-      }
-    }
 
     return new Promise((resolve) => {
       // Wait for window load to setup actual animations
