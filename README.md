@@ -617,9 +617,18 @@ Create stunning card reveal effects where cards slide up and stack on top of eac
 ```html
 <!-- Simple stack (no in/out animations) -->
 <div aa-animate="pin-stack" aa-pin-start="top 5%" aa-pin-end="+=1000">
-  <div class="card">Card 1</div>
-  <div class="card">Card 2</div>
-  <div class="card">Card 3</div>
+  <div class="card">
+    <h2 aa-animate="fade-up" aa-delay="0.1">Card 1 Title</h2>
+    <p aa-animate="fade" aa-delay="0.2">Card 1 content</p>
+  </div>
+  <div class="card">
+    <h2 aa-animate="fade-up" aa-delay="0.1">Card 2 Title</h2>
+    <p aa-animate="fade" aa-delay="0.2">Card 2 content</p>
+  </div>
+  <div class="card">
+    <h2 aa-animate="fade-up" aa-delay="0.1">Card 3 Title</h2>
+    <p aa-animate="fade" aa-delay="0.2">Card 3 content</p>
+  </div>
 </div>
 
 <!-- Combined: Fade in + Perspective out -->
@@ -654,7 +663,7 @@ Create stunning card reveal effects where cards slide up and stack on top of eac
 - Use `aa-scroll-end` with sufficient distance (e.g., `+=1000` or `+=100%`) for smooth reveals
 - Out-animations are NOT applied to the last card (it has no card appearing after it)
 - You can mix and match any in-animation with any out-animation
-- Animations inside a child via `aa-animate` work best with with `aa-anchor` attribute and defined `aa-delay` per element
+- Inner animations are automatically triggered when cards become active
 - Important: `aa-children` animations inside a child won't work
 
 ---
@@ -1040,7 +1049,7 @@ Accessible accordion functionality with GSAP animations. Create expandable/colla
 
 **Setup:** `gsapFeatures: ['accordion']`
 
-**Note:** Opening/closing is animated via CSS transition of the grid `fr` unit, while inner content animations are handled by GSAP. This is why `aa-accordion-content` needs the `aa-animate` attribute to set `aa-duration` and `aa-ease`.
+**Note:** Opening/closing is animated via CSS transition of the grid `fr` unit, while inner content animations are handled by GSAP using event-based triggering.
 
 #### Component Structure
 
@@ -1075,39 +1084,18 @@ When no IDs are provided, the accordion system automatically assigns sequential 
 
 Manual IDs take precedence over auto-generated ones.
 
+#### Inner Animations
 
+**Simplified Approach:** All inner animations now use the standard `aa-animate` attribute with event-based triggering. The system automatically detects and triggers animations when accordions open/close.
 
-#### Accordion Opening Animation
-- Add `aa-duration` and `aa-ease` to `aa-accordion-content` to define it's opening animation; it requires `aa-animate` to be present as well because the opening animation is done via css when changing the grid column.
-- Add `aa-delay` to define when inner animations should play out (see below)
-
-
-#### Available Inner Animations
-
-**Simple Animations:**
-- **Fade**: `fade`, `fade-up`, `fade-down`, `fade-left`, `fade-right`
-- **Slide**: `slide-up`, `slide-down`, `slide-left`, `slide-right`
-- **Scale**: `scale`
-
-**Complex Animations (requires GSAP plugins):**
-- Appear, Reveal, Grow and Counter [Appear animations](#14-appear-animations) available
-
-**Text Animations (requires splitText plugin):**
-- **Text Animations**: All [Text animations](#13-text-animations) available
-
-**Custom Animations:**
-Use `custom-*` to animate from CSS-defined positions to zero:
-```css
-[aa-accordion-animate="custom-slide"] {
-  transform: translateX(500px);
-}
-```
+**Available Animations:**
+- **All Scroll Animations**: Fade, slide, scale, appear, reveal, grow, counter, text animations
 
 **Attributes & Defaults:**
 | Attribute | Values | Default | Description |
 |-----------|--------|---------|-------------|
 | `aa-accordion` | Accordion type | - | Accordion behavior |
-| `aa-duration` | Number (seconds) | `5` (autoplay), `0.2` (inner) | Duration for autoplay and inner animations |
+| `aa-duration` | Number (seconds) | `5` (autoplay) | Duration for autoplay |
 | `aa-distance` | Number (vh units) | `100` (scroll) | Scroll distance per accordion (scroll accordion only) |
 | `aa-ease` | Easing function | `power4.out` | Animation easing |
 | `aa-delay` | Number (seconds) | `0.3` | Delay before inner animations |
@@ -1117,12 +1105,7 @@ Use `custom-*` to animate from CSS-defined positions to zero:
 | `aa-accordion-content` | ID | - | Content element |
 | `aa-accordion-visual` | ID | - | Connected visual |
 | `aa-accordion-initial` | - | - | Initially open |
-| `aa-accordion-animate` | Animation type | - | Inner animation |
-| `aa-accordion-order` | Number or `number-percent` | `0` | Animation sequence |
 | `aa-accordion-progress` | `width`, `height`, `circle` | - | Progress type |
-| `aa-split` | `words`, `chars`, `lines` | - | Text splitting method |
-| `aa-stagger` | Number (seconds) | `0.01` | Text stagger delay |
-| `aa-distance` | Number | `1` | Distance for complex animations |
 
 **Examples:**
 
@@ -1132,13 +1115,13 @@ Use `custom-*` to animate from CSS-defined positions to zero:
   <div aa-accordion-toggle="item-1" aa-accordion-initial>
     <h3>Accordion Item 1</h3>
   </div>
-  <div aa-accordion-content="item-1" aa-animate>
+  <div aa-accordion-content="item-1" aa-animate aa-duration="0.5" aa-ease="power2.inOut">
     <div class="content-inner">
       <div class="content-wrapper">
-        <div aa-accordion-animate="fade" aa-accordion-order="0">
+        <div aa-animate="fade-up" aa-delay="0.1">
           <p>Content for item 1</p>
         </div>
-        <div aa-accordion-animate="text-slide-up" aa-accordion-order="1" aa-split="words">
+        <div aa-animate="text-slide-up" aa-split="words" aa-stagger="0.05" aa-delay="0.2">
           <p>More content with text animation</p>
         </div>
       </div>
@@ -1148,10 +1131,10 @@ Use `custom-*` to animate from CSS-defined positions to zero:
   <div aa-accordion-toggle="item-2">
     <h3>Accordion Item 2</h3>
   </div>
-  <div aa-accordion-content="item-2" aa-animate>
+  <div aa-accordion-content="item-2" aa-animate aa-duration="0.5" aa-ease="power2.inOut">
     <div class="content-inner">
       <div class="content-wrapper">
-        <div aa-accordion-animate="appear-up" aa-accordion-order="0">
+        <div aa-animate="appear-up" aa-delay="0.1">
           <p>Content for item 2</p>
         </div>
       </div>
@@ -1170,7 +1153,7 @@ Use `custom-*` to animate from CSS-defined positions to zero:
   <div aa-accordion-content="autoplay-1" aa-animate aa-duration="0.5" aa-ease="power2.inOut">
     <div class="content-inner">
       <div class="content-wrapper">
-        <div aa-accordion-animate="fade" aa-accordion-order="0">
+        <div aa-animate="fade-up" aa-delay="0.1">
           <p>Content for autoplay item 1</p>
         </div>
       </div>
@@ -1185,10 +1168,10 @@ Use `custom-*` to animate from CSS-defined positions to zero:
   <div aa-accordion-toggle="visual-1" aa-accordion-initial>
     <h3>Visual Item 1</h3>
   </div>
-  <div aa-accordion-content="visual-1" aa-delay="0.3">
+  <div aa-accordion-content="visual-1" aa-animate aa-duration="0.5" aa-ease="power2.inOut">
     <div class="content-inner">
       <div class="content-wrapper">
-        <div aa-accordion-animate="fade" aa-accordion-order="0">
+        <div aa-animate="fade-up" aa-delay="0.1">
           <p>This controls the visual on the right</p>
         </div>
       </div>
@@ -1197,7 +1180,7 @@ Use `custom-*` to animate from CSS-defined positions to zero:
   
   <!-- Connected visual elements -->
   <div class="visual-container">
-    <div aa-accordion-visual="visual-1" aa-accordion-animate="fade-left" aa-duration="0.4" aa-delay="0.2">
+    <div aa-accordion-visual="visual-1" aa-animate="fade-left" aa-duration="0.4" aa-delay="0.2">
       <span>Visual 1</span>
     </div>
   </div>
@@ -1219,10 +1202,10 @@ Use `custom-*` to animate from CSS-defined positions to zero:
       </div>
     </div>
   </div>
-  <div aa-accordion-content="circle-1">
+  <div aa-accordion-content="circle-1" aa-animate aa-duration="0.5" aa-ease="power2.inOut">
     <div class="content-inner">
       <div class="content-wrapper">
-        <div aa-accordion-animate="text-slide-up" aa-accordion-order="0" aa-split="words">
+        <div aa-animate="text-slide-up" aa-split="words" aa-stagger="0.05" aa-delay="0.1">
           <p>This uses a circular progress indicator.</p>
         </div>
       </div>
@@ -1355,26 +1338,13 @@ Accessible, attribute-driven modals that work seamlessly with or without smooth 
 - **Close Elements**: Any element with `aa-modal-close` will close the modal when clicked (buttons, backdrop, etc.)
 - **Scrollable Content**: Apply `data-lenis-prevent` to content areas that need independent scrolling
 
-#### Available Animations
+#### Inner Animations
 
-**Simple Animations:**
-- **Fade**: `fade`, `fade-up`, `fade-down`, `fade-left`, `fade-right`
-- **Slide**: `slide-up`, `slide-down`, `slide-left`, `slide-right`
-- **Scale**: `scale`
+**Simplified Approach:** All inner animations now use the standard `aa-animate` attribute with event-based triggering. The system automatically detects and triggers animations when modals open/close.
 
-**Complex Animations (requires GSAP plugins):**
-- Appear, Reveal, Grow and Counter [Appear animations](#14-appear-animations) available
+**Available Animations:**
+- **All Scroll Animations**: Fade, slide, scale, appear, reveal, grow, counter, text animations
 
-**Text Animations (requires splitText plugin):**
-- **Text Animations**: All [Text animations](#13-text-animations) available
-
-**Custom Animations:**
-Use `custom-*` to animate from CSS-defined positions to zero:
-```css
-[aa-modal-animate="custom-slide"] {
-  transform: translateX(500px);
-}
-```
 
 **Attributes & Defaults:**
 | Attribute | Values | Default | Description |
@@ -1383,15 +1353,8 @@ Use `custom-*` to animate from CSS-defined positions to zero:
 | `aa-modal-target` | Modal name | - | Opens specified modal |
 | `aa-modal-name` | Unique name | - | Modal identifier |
 | `aa-modal-close` | - | - | Closes modal when clicked |
-| `aa-modal-animate` | Animation type | - | Element animation |
-| `aa-modal-order` | Number or `number-percent` | `0` | Animation sequence |
 | `aa-duration` | Number (seconds) | `0.5` | Animation duration |
 | `aa-ease` | Easing function | `power2.out` | Animation easing |
-
-#### Animation Sequencing
-
-- **Basic order**: `aa-modal-order="1"` (elements animate in numeric order)
-- **Overlapping**: `aa-modal-order="1-30"` (starts at 30% of previous animation)
 
 **Examples:**
 ```html
@@ -1400,7 +1363,7 @@ Use `custom-*` to animate from CSS-defined positions to zero:
 
 <!-- Modal system -->
 <div aa-modal-group>
-  <div aa-modal-name="example-modal" class="modal">
+  <div aa-modal-name="example-modal" class="modal" aa-animate aa-duration="0.6" aa-ease="power2.out">
     <!-- Backdrop closes modal -->
     <div class="modal-backdrop" aa-modal-close></div>
     
@@ -1409,14 +1372,14 @@ Use `custom-*` to animate from CSS-defined positions to zero:
       <button aa-modal-close class="close-btn">×</button>
       
       <!-- Animated content -->
-      <h2 aa-modal-animate="fade-up" aa-modal-order="0">Modal Title</h2>
-      <p aa-modal-animate="fade" aa-modal-order="1">Modal content with animations</p>
-      <div aa-modal-animate="scale" aa-modal-order="2">
+      <h2 aa-animate="fade-up" aa-delay="0.1">Modal Title</h2>
+      <p aa-animate="fade" aa-delay="0.2">Modal content with animations</p>
+      <div aa-animate="zoom-in" aa-delay="0.3">
         <img src="image.jpg" alt="Modal image">
       </div>
       
       <!-- Text animation -->
-      <p aa-modal-animate="text-slide-up" aa-modal-order="1-50" aa-split="words">
+      <p aa-animate="text-slide-up" aa-split="words" aa-stagger="0.05" aa-delay="0.4">
         Text with word-by-word animation
       </p>
     </div>
@@ -1425,7 +1388,7 @@ Use `custom-*` to animate from CSS-defined positions to zero:
 
 <!-- Multiple modal groups -->
 <div aa-modal-group="gallery">
-  <div aa-modal-name="image-1" class="modal">
+  <div aa-modal-name="image-1" class="modal" aa-animate aa-duration="0.6" aa-ease="power2.out">
     <div class="modal-content" data-lenis-prevent>
       <!-- Gallery modal content -->
     </div>
