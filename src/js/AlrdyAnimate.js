@@ -307,7 +307,8 @@ async function init(options = {}) {
               const accordionAnimations = accordionModule.createAccordionAnimations(
                 modules.gsap,
                 modules.animations,
-                modules.splitText
+                modules.splitText,
+                initOptions.duration
               );
 
               // Store the accordion animation function (like all other gsap animations)

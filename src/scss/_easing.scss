@@ -43,21 +43,13 @@ $aa-ease: (
 // Note: elastic and bounce easings are not included as they can't be accurately represented with cubic-bezier
 
 // Easings implementations
-[aa-animate] {
+[aa-animate], [aa-accordion-content], [aa-hover] {
   @each $key, $val in $aa-ease {
     body[aa-ease="#{$key}"] &,
-    &[aa-animate][aa-ease="#{$key}"] {
+    &[aa-ease][aa-ease="#{$key}"] {
       animation-timing-function: $val;
       transition-timing-function: $val;
     }
   }
 }
 
-[aa-hover] {
-  @each $key, $val in $aa-ease {
-    body[aa-ease="#{$key}"] &,
-    &[aa-hover][aa-ease="#{$key}"] {
-      animation-timing-function: $val;
-    }
-  }
-}

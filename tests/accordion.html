@@ -268,7 +268,7 @@
                 grid-template-columns: 1fr;
             }
         }
-        [aa-accordion-animate="custom-slide"]{
+        [aa-animate="custom-slide"]{
             transform: translateY(100%);
             opacity: 0;
             transition: transform 0.6s ease, opacity 0.6s ease;
@@ -283,18 +283,18 @@
         <!-- Basic Accordion Section -->
         <div class="section">
             <h2>Basic Accordion</h2>
-            <div class="accordion-basic" aa-accordion>
+            <div class="accordion-basic" aa-accordion="" aa-duration="5" >
                 <div class="accordion-toggle" aa-accordion-toggle="basic-1">
                     <span>Basic Accordion Item 1</span>
                     <span>▼</span>
                 </div>
-                <div class="accordion-content" aa-accordion-content="basic-1" aa-animate aa-duration="0.6" aa-ease="power4.inOut">
+                <div class="accordion-content" aa-accordion-content="basic-1" aa-ease="circ.in">
                     <div class="content-inner">
                         <div class="content-wrapper">
-                            <div aa-accordion-animate="text-slide-up-lines" aa-split="words" aa-accordion-order="0">
+                            <div aa-animate="text-slide-up-lines" aa-split="words" aa-duration="0.8" aa-stagger="0.03">
                                 <p>This is a basic accordion item with fade animation.</p>
                             </div>
-                            <div aa-accordion-animate="text-slide-up-lines" aa-accordion-order="1" aa-split="words">
+                            <div aa-animate="text-slide-up-lines" aa-delay="1.2" aa-split="words">
                                 <p>This text will animate with a slide-up effect.</p>
                             </div>
                         </div>
@@ -308,7 +308,7 @@
                 <div class="accordion-content" aa-accordion-content="basic-2">
                     <div class="content-inner">
                         <div class="content-wrapper">
-                            <div aa-accordion-animate="custom-slide" aa-accordion-order="0">
+                            <div aa-animate="slide-up" >
                                 <p>This item uses appear-up animation.</p>
                             </div>
                         </div>
@@ -328,7 +328,7 @@
                 <div class="accordion-content" aa-accordion-content="multi-1" aa-duration="0.6" aa-ease="power2.out">
                     <div class="content-inner">
                         <div class="content-wrapper">
-                            <div aa-accordion-animate="scale" aa-accordion-order="0">
+                            <div aa-animate="scale" aa-delay="0">
                                 <p>Multiple accordions can be open at once.</p>
                             </div>
                         </div>
@@ -342,7 +342,7 @@
                 <div class="accordion-content" aa-accordion-content="multi-2" aa-duration="0.6" aa-ease="power2.out">
                     <div class="content-inner">
                         <div class="content-wrapper">
-                            <div aa-accordion-animate="reveal-up" aa-accordion-order="0">
+                            <div aa-animate="reveal-up" aa-delay="0">
                                 <p>This one uses reveal-up animation.</p>
                             </div>
                         </div>
@@ -370,7 +370,7 @@
                 <div class="autoplay-content" aa-accordion-content="circle-1">
                     <div class="autoplay-content-inner">
                         <div class="autoplay-content-wrapper">
-                            <div aa-accordion-animate="text-slide-up-lines" aa-accordion-order="0" aa-split="words">
+                            <div aa-animate="text-slide-up-lines" aa-delay="0" aa-split="words">
                                 <p>This uses a circular progress indicator instead of a bar.</p>
                             </div>
                         </div>
@@ -391,7 +391,7 @@
                 <div class="autoplay-content" aa-accordion-content="circle-2">
                     <div class="autoplay-content-inner">
                         <div class="autoplay-content-wrapper">
-                            <div aa-accordion-animate="text-slide-up-lines" aa-accordion-order="0" aa-split="words">
+                            <div aa-animate="text-slide-up-lines" aa-delay="0" aa-split="words">
                                 <p>This uses a circular progress indicator instead of a bar.</p>
                             </div>
                         </div>
@@ -416,7 +416,7 @@
                 <div class="autoplay-content" aa-accordion-content="autoplay-1" >
                     <div class="autoplay-content-inner">
                         <div class="autoplay-content-wrapper">
-                            <div aa-accordion-animate="text-slide-up-lines" aa-split="lines" aa-accordion-order="0">
+                            <div aa-animate="text-slide-up-lines" aa-split="lines" aa-delay="0">
                                 <p>This accordion automatically cycles through items every 3 seconds.</p>
                             </div>
                         </div>
@@ -435,7 +435,7 @@
                 <div class="autoplay-content" aa-accordion-content="autoplay-2">
                     <div class="autoplay-content-inner">
                         <div class="autoplay-content-wrapper">
-                            <div aa-accordion-animate="text-fade" aa-accordion-order="0" aa-split="words">
+                            <div aa-animate="text-fade" aa-delay="0" aa-split="words">
                                 <p>Click any item to stop the autoplay and take control.</p>
                             </div>
                         </div>
@@ -454,7 +454,7 @@
                 <div class="autoplay-content" aa-accordion-content="autoplay-3">
                     <div class="autoplay-content-inner">
                         <div class="autoplay-content-wrapper">
-                            <div aa-accordion-animate="appear" aa-accordion-order="0">
+                            <div aa-animate="appear" aa-delay="0">
                                 <p>Progress bars show the timing for each item.</p>
                             </div>
                         </div>
@@ -525,10 +525,10 @@
                         <span>Visual Item 1</span>
                         <span>▼</span>
                     </div>
-                    <div class="accordion-content" aa-accordion-content="visual-1" aa-duration="0.6" aa-ease="power2.out">
+                    <div class="accordion-content" aa-accordion-content="visual-1" aa-duration="0.2" aa-ease="power2.out">
                         <div class="content-inner">
                             <div class="content-wrapper">
-                                <div aa-accordion-animate="text-tilt-up-lines" aa-split="lines" aa-accordion-order="0" aa-delay="0.5">
+                                <div aa-animate="text-tilt-up-lines" aa-split="lines" aa-ease="linear">
                                     <p>This accordion controls the visual items on the right.</p>
                                 </div>
                             </div>
@@ -542,7 +542,7 @@
                     <div class="accordion-content" aa-accordion-content="visual-2" aa-duration="0.6" aa-ease="power2.out">
                         <div class="content-inner">
                             <div class="content-wrapper">
-                                <div aa-accordion-animate="text-slide-up" aa-accordion-order="0" aa-split="words">
+                                <div aa-animate="text-slide-up" aa-delay="0" aa-split="words">
                                     <p>Each accordion item is connected to a visual element.</p>
                                 </div>
                             </div>
@@ -556,7 +556,7 @@
                     <div class="accordion-content" aa-accordion-content="visual-3" aa-duration="0.6" aa-ease="power2.out">
                         <div class="content-inner">
                             <div class="content-wrapper">
-                                <div aa-accordion-animate="appear-up" aa-accordion-order="0">
+                                <div aa-animate="appear-up" aa-delay="0">
                                     <p>Visual items animate in when their accordion opens.</p>
                                 </div>
                             </div>
@@ -566,23 +566,23 @@
                     
                 </div>
                 <div class="visual-items">
-                        <div class="visual-item" aa-accordion-visual="visual-1" aa-accordion-animate="fade-left" aa-duration="0.1">
+                        <div class="visual-item" aa-accordion-visual="visual-1" aa-animate="fade-left" aa-duration="0.3" aa-distance="0.25">
                             <span>Visual 1</span>
                         </div>
-                        <div class="visual-item" aa-accordion-visual="visual-2" aa-accordion-animate="fade-left" aa-duration="0.1">
+                        <div class="visual-item" aa-accordion-visual="visual-2" aa-animate="fade-left" aa-duration="0.3" aa-distance="0.25">
                             <span>Visual 2</span>
                         </div>
-                        <div class="visual-item" aa-accordion-visual="visual-3" aa-accordion-animate="fade-left" aa-duration="0.1">
+                        <div class="visual-item" aa-accordion-visual="visual-3" aa-animate="fade-left" aa-duration="0.3" aa-distance="0.25">
                             <span>Visual 3</span>
                         </div>
-                    </div>
+                </div>
             </div>
         </div>
         
         <!-- Complex Example Section -->
         <div class="section">
             <h2>Complex Example: Autoplay with Visual Items</h2>
-            <div class="visual-container" aa-accordion="autoplay" aa-duration="1" >
+            <div class="visual-container" aa-accordion="autoplay" aa-duration="4" >
                 <div class="autoplay-accordion">
                     <div class="autoplay-toggle" aa-accordion-toggle="complex-1" >
                         <div>
@@ -596,10 +596,10 @@
                     <div class="autoplay-content" aa-accordion-content="complex-1">
                         <div class="autoplay-content-inner">
                             <div class="autoplay-content-wrapper">
-                                <div aa-accordion-animate="text-slide-up-lines" aa-accordion-order="0" aa-split="words">
+                                <div aa-animate="text-slide-up-lines" aa-delay="0" aa-split="words">
                                     <p>Advanced text animations with word splitting.</p>
                                 </div>
-                                <div aa-accordion-animate="text-slide-up-lines" aa-accordion-order="1-70">
+                                <div aa-animate="fade" aa-delay="0.1">
                                     <p>Multiple elements animate in sequence.</p>
                                 </div>
                             </div>
@@ -618,7 +618,7 @@
                     <div class="autoplay-content" aa-accordion-content="complex-2">
                         <div class="autoplay-content-inner">
                             <div class="autoplay-content-wrapper">
-                                <div aa-accordion-animate="appear-up" aa-accordion-order="0">
+                                <div aa-animate="appear-up" aa-delay="0">
                                     <p>Smooth appear animations with custom timing.</p>
                                 </div>
                             </div>
@@ -637,7 +637,7 @@
                     <div class="autoplay-content" aa-accordion-content="complex-3">
                         <div class="autoplay-content-inner">
                             <div class="autoplay-content-wrapper">
-                                <div aa-accordion-animate="reveal-up" aa-accordion-order="0">
+                                <div aa-animate="reveal-up" aa-delay="0">
                                     <p>Clip-path reveal animations for dramatic effects.</p>
                                 </div>
                             </div>
@@ -647,25 +647,25 @@
                     
                 </div>
                 <div class="visual-items">
-                        <div class="visual-item" aa-accordion-visual="complex-1" aa-duration="0.3" aa-accordion-animate="fade-left" style="display: flex; flex-direction: column; gap: 10px;">
-                            <div aa-accordion-animate="text-slide-up-words" aa-accordion-order="0" aa-split="words" aa-stagger="0.05">
+                        <div class="visual-item" aa-accordion-visual="complex-1" aa-duration="1.3" aa-animate="fade-left" style="display: flex; flex-direction: column; gap: 10px;">
+                            <div aa-animate="text-slide-up-words" aa-delay="0" aa-split="words" aa-stagger="0.05">
                                 Text Animation
                             </div>
-                            <div aa-accordion-animate="text-slide-up-words" aa-accordion-order="1-50" aa-split="words" aa-stagger="0.05">
+                            <div aa-animate="text-slide-up-words" aa-delay="0.1" aa-split="words" aa-stagger="0.05">
                                 Text Animation
                             </div>
-                            <div aa-accordion-animate="text-slide-up-words" aa-accordion-order="2-10" aa-split="words" aa-stagger="0.05">
+                            <div aa-animate="text-slide-up-words" aa-delay="0.2" aa-split="words" aa-stagger="0.05">
                                 Text Animation
                             </div>
                             
                         </div>
-                        <div class="visual-item" aa-accordion-visual="complex-2" aa-duration="0.3" aa-accordion-animate="fade-left">
-                            <div aa-accordion-animate="appear">
+                        <div class="visual-item" aa-accordion-visual="complex-2" aa-duration="0.3" aa-animate="fade-left">
+                            <div aa-animate="appear">
                                 <span>Visual Effects</span>
                             </div>
                         </div>
-                        <div class="visual-item" aa-accordion-visual="complex-3" aa-duration="0.3" aa-accordion-animate="fade-left">
-                            <div aa-accordion-animate="reveal-left">
+                        <div class="visual-item" aa-accordion-visual="complex-3" aa-duration="0.3" aa-animate="fade-left">
+                            <div aa-animate="reveal-left">
                                 <span>Reveal Effects</span>
                             </div>
                         </div>
@@ -690,10 +690,10 @@
                 <div class="accordion-content" aa-accordion-content="scroll-1" aa-animate aa-duration="0.6" aa-ease="power4.inOut">
                     <div class="content-inner">
                         <div class="content-wrapper">
-                            <div aa-accordion-animate="text-slide-up-lines" aa-accordion-order="0" aa-split="words">
+                            <div aa-animate="text-slide-up-lines" aa-delay="0" aa-split="words">
                                 <p>This accordion opens as you scroll through the first section.</p>
                             </div>
-                            <div aa-accordion-animate="text-slide-up-lines" aa-accordion-order="1" aa-split="words">
+                            <div aa-animate="text-slide-up-lines" aa-delay="0.2" aa-split="words">
                                 <p>The progress bar fills based on your scroll position.</p>
                             </div>
                         </div>
@@ -712,10 +712,10 @@
                 <div class="accordion-content" aa-accordion-content="scroll-2" aa-animate aa-duration="0.6" aa-ease="power4.inOut">
                     <div class="content-inner">
                         <div class="content-wrapper">
-                            <div aa-accordion-animate="appear-up" aa-accordion-order="0">
+                            <div aa-animate="appear-up" aa-delay="0">
                                 <p>This accordion opens when you reach the second scroll section.</p>
                             </div>
-                            <div aa-accordion-animate="text-fade" aa-accordion-order="1" aa-split="words">
+                            <div aa-animate="text-fade" aa-delay="0.2" aa-split="words">
                                 <p>Content animations play normally while scrolling controls the opening.</p>
                             </div>
                         </div>
@@ -734,10 +734,10 @@
                 <div class="accordion-content" aa-accordion-content="scroll-3" aa-animate aa-duration="0.6" aa-ease="power4.inOut">
                     <div class="content-inner">
                         <div class="content-wrapper">
-                            <div aa-accordion-animate="reveal-up" aa-accordion-order="0">
+                            <div aa-animate="reveal-up" aa-delay="0">
                                 <p>This is the final accordion in the scroll sequence.</p>
                             </div>
-                            <div aa-accordion-animate="text-slide-up" aa-accordion-order="1" aa-split="words">
+                            <div aa-animate="text-slide-up" aa-delay="0.2" aa-split="words">
                                 <p>When all progress bars are filled, the pinning is released.</p>
                             </div>
                         </div>
@@ -757,10 +757,10 @@
                     <div class="accordion-content" aa-accordion-content aa-animate aa-duration="0.6" aa-ease="power4.inOut">
                         <div class="content-inner">
                             <div class="content-wrapper">
-                                <div aa-accordion-animate="fade-up" aa-accordion-order="0">
+                                <div aa-animate="fade-up" aa-delay="0">
                                     <p>This content has auto-generated ID "auto-0".</p>
                                 </div>
-                                <div aa-accordion-animate="slide-up" aa-accordion-order="1">
+                                <div aa-animate="slide-up" aa-delay="0.2">
                                     <p>No manual IDs needed - they're automatically assigned!</p>
                                 </div>
                             </div>
@@ -775,10 +775,10 @@
                     <div class="accordion-content" aa-accordion-content aa-animate aa-duration="0.6" aa-ease="power4.inOut">
                         <div class="content-inner">
                             <div class="content-wrapper">
-                                <div aa-accordion-animate="text-slide-up" aa-accordion-order="0" aa-split="words">
+                                <div aa-animate="text-slide-up" aa-delay="0" aa-split="words">
                                     <p>This content has auto-generated ID "auto-1".</p>
                                 </div>
-                                <div aa-accordion-animate="scale" aa-accordion-order="1">
+                                <div aa-animate="scale" aa-delay="0.2">
                                     <p>Works with all animation types!</p>
                                 </div>
                             </div>
@@ -793,10 +793,10 @@
                     <div class="accordion-content" aa-accordion-content aa-animate aa-duration="0.6" aa-ease="power4.inOut">
                         <div class="content-inner">
                             <div class="content-wrapper">
-                                <div aa-accordion-animate="appear-up" aa-accordion-order="0">
+                                <div aa-animate="appear-up" aa-delay="0">
                                     <p>This content has auto-generated ID "auto-2" and is initially open.</p>
                                 </div>
-                                <div aa-accordion-animate="text-fade" aa-accordion-order="1" aa-split="chars">
+                                <div aa-animate="text-fade" aa-delay="0.2" aa-split="chars">
                                     <p>Even complex animations work with auto-generated IDs!</p>
                                 </div>
                             </div>
@@ -819,7 +819,7 @@
                 <div class="accordion-content" aa-accordion-content="manual-1" aa-animate aa-duration="0.6" aa-ease="power4.inOut">
                     <div class="content-inner">
                         <div class="content-wrapper">
-                            <div aa-accordion-animate="fade" aa-accordion-order="0">
+                            <div aa-animate="fade" aa-delay="0">
                                 <p>This uses the manual ID "manual-1".</p>
                             </div>
                         </div>
@@ -833,7 +833,7 @@
                 <div class="accordion-content" aa-accordion-content aa-animate aa-duration="0.6" aa-ease="power4.inOut">
                     <div class="content-inner">
                         <div class="content-wrapper">
-                            <div aa-accordion-animate="slide-up" aa-accordion-order="0">
+                            <div aa-animate="slide-up" aa-delay="0">
                                 <p>This gets auto-generated ID "auto-1" (since manual-1 is already taken).</p>
                             </div>
                         </div>
@@ -860,7 +860,7 @@
                         <div class="accordion-content" aa-accordion-content aa-animate aa-duration="0.6" aa-ease="power4.inOut">
                             <div class="content-inner">
                                 <div class="content-wrapper">
-                                    <div aa-accordion-animate="fade" aa-accordion-order="0">
+                                    <div aa-animate="fade" aa-delay="0">
                                         <p>Content for Accordion 1, Item 1 (auto-0)</p>
                                     </div>
                                 </div>
@@ -874,7 +874,7 @@
                         <div class="accordion-content" aa-accordion-content aa-animate aa-duration="0.6" aa-ease="power4.inOut">
                             <div class="content-inner">
                                 <div class="content-wrapper">
-                                    <div aa-accordion-animate="slide-up" aa-accordion-order="0">
+                                    <div aa-animate="slide-up" aa-delay="0">
                                         <p>Content for Accordion 1, Item 2 (auto-1)</p>
                                     </div>
                                 </div>
@@ -893,7 +893,7 @@
                         <div class="accordion-content" aa-accordion-content aa-animate aa-duration="0.6" aa-ease="power4.inOut">
                             <div class="content-inner">
                                 <div class="content-wrapper">
-                                    <div aa-accordion-animate="scale" aa-accordion-order="0">
+                                    <div aa-animate="scale" aa-delay="0">
                                         <p>Content for Accordion 2, Item 1 (auto-0)</p>
                                     </div>
                                 </div>
@@ -907,7 +907,7 @@
                         <div class="accordion-content" aa-accordion-content aa-animate aa-duration="0.6" aa-ease="power4.inOut">
                             <div class="content-inner">
                                 <div class="content-wrapper">
-                                    <div aa-accordion-animate="text-slide-up" aa-accordion-order="0" aa-split="words">
+                                    <div aa-animate="text-slide-up" aa-delay="0" aa-split="words">
                                         <p>Content for Accordion 2, Item 2 (auto-1)</p>
                                     </div>
                                 </div>
@@ -921,7 +921,7 @@
                         <div class="accordion-content" aa-accordion-content aa-animate aa-duration="0.6" aa-ease="power4.inOut">
                             <div class="content-inner">
                                 <div class="content-wrapper">
-                                    <div aa-accordion-animate="appear-up" aa-accordion-order="0">
+                                    <div aa-animate="appear-up" aa-delay="0">
                                         <p>Content for Accordion 2, Item 3 (auto-2)</p>
                                     </div>
                                 </div>
@@ -941,7 +941,7 @@
                     <div class="accordion-content" aa-accordion-content aa-animate aa-duration="0.6" aa-ease="power4.inOut">
                         <div class="content-inner">
                             <div class="content-wrapper">
-                                <div aa-accordion-animate="fade-up" aa-accordion-order="0">
+                                <div aa-animate="fade-up" aa-delay="0">
                                     <p>Multi-accordion allows multiple items to be open simultaneously.</p>
                                 </div>
                             </div>
@@ -955,7 +955,7 @@
                     <div class="accordion-content" aa-accordion-content aa-animate aa-duration="0.6" aa-ease="power4.inOut">
                         <div class="content-inner">
                             <div class="content-wrapper">
-                                <div aa-accordion-animate="slide-left" aa-accordion-order="0">
+                                <div aa-animate="slide-left" aa-delay="0">
                                     <p>Each accordion maintains its own auto-generated ID sequence.</p>
                                 </div>
                             </div>
