@@ -11,7 +11,6 @@ class AccordionState {
     this.contents = [];
     this.visuals = [];
     this.elementMap = new Map(); // toggleId -> { toggle, content, visual, progressElement }
-    this.cleanupFunctions = [];
     
     this.initializeElements();
   }
@@ -112,15 +111,6 @@ class AccordionState {
     return this.getElementData(visualId);
   }
   
-  addCleanupFunction(fn) {
-    this.cleanupFunctions.push(fn);
-  }
-  
-  cleanup() {
-    this.cleanupFunctions.forEach(fn => fn());
-    this.cleanupFunctions = [];
-    this.elementMap.clear();
-  }
 }
 
 //
@@ -310,10 +300,6 @@ class AccordionController {
   
   triggerAccordionAnimations(container, action) {
     triggerAccordionAnimations(container, action);
-  }
-  
-  cleanup() {
-    this.state.cleanup();
   }
 }
 
@@ -653,12 +639,6 @@ function initializeAutoplayAccordion(accordion, state, controller, animations, s
       });
     }
     
-    // Add cleanup for ScrollTrigger
-    state.addCleanupFunction(() => {
-      if (scrollInstance) {
-        scrollInstance.kill();
-      }
-    });
   }
   
   // Autoplay functions
@@ -861,12 +841,6 @@ function initializeScrollAccordion(accordion, state, controller, defaultDuration
     animation: progressTween
   });
   
-  // Add cleanup for ScrollTrigger
-  state.addCleanupFunction(() => {
-    if (scrollTrigger) {
-      scrollTrigger.kill();
-    }
-  });
   
   // Handle responsive updates for aa-scroll-start
   if (scrollStartAttr.includes('|')) {
@@ -903,14 +877,6 @@ function initializeScrollAccordion(accordion, state, controller, defaultDuration
       });
     }
     
-    // Add cleanup for resize handlers
-    state.addCleanupFunction(() => {
-      window.removeEventListener('resize', debouncedResize);
-      if (window.matchMedia('(hover: none)').matches) {
-        window.removeEventListener('orientationchange', debouncedResize);
-      }
-      clearTimeout(resizeTimeout);
-    });
   }
 }
 
@@ -937,21 +903,13 @@ function initializeAccordion(accordion, animations = null, splitText = null, def
     initializeAutoplayAccordion(accordion, state, controller, animations, splitText, defaultDuration);
   }
   // Basic and multi accordions are handled by the base controller
-  
-  // Return cleanup function
-  return () => controller.cleanup();
 }
 
 function createAccordionAnimations(gsap, animations, splitText, defaultDuration = 1) {
   return {
     accordion: (accordion) => {
-      // Initialize accordion and return cleanup function
-      const cleanup = initializeAccordion(accordion, animations, splitText, defaultDuration);
-      
-      // Store cleanup function on the accordion element for potential manual cleanup
-      accordion._accordionCleanup = cleanup;
-      
-      return cleanup;
+      // Initialize accordion
+      initializeAccordion(accordion, animations, splitText, defaultDuration);
     }
   };
 }
