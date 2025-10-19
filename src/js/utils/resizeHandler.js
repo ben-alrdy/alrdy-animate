@@ -1,6 +1,6 @@
 import { debounce } from './shared';
-import { getElementSettings } from './elementAttributes';
-import { getElementTemplateSettings } from './templateHandler';
+import { getElementSettings, updateElementSettingsOnResize } from './elementAttributes';
+import { getElementTemplateSettings, updateTemplateSettingsOnResize } from './templateHandler';
 import { processTemplates } from './templateHandler';
 
 export function setupResizeHandler(modules, initOptions, isMobile, setupGSAPAnimations) {
@@ -55,7 +55,7 @@ export function setupResizeHandler(modules, initOptions, isMobile, setupGSAPAnim
         if ((animType && animType.includes('|')) || animTypeOriginal) {
           // Get new settings with updated animation type
           const aaAttributeType = element._aaAttributeType;
-          const settings = getElementSettings(element, initOptions, isMobile, initOptions.loadGracePeriod, aaAttributeType);
+          const settings = updateElementSettingsOnResize(element, element.settings, initOptions, isMobile, aaAttributeType);
           element.settings = settings;
           setupGSAPAnimations(element, settings, initOptions, isMobile, modules);
         }
@@ -63,19 +63,17 @@ export function setupResizeHandler(modules, initOptions, isMobile, setupGSAPAnim
 
       // Rebuild ALL slider components (since they all get cleaned up)
       document.querySelectorAll("[aa-slider]").forEach(element => {
-        const sliderType = element.getAttribute('aa-slider');
+
+        // Get new settings with updated slider type
+        const aaAttributeType = element._aaAttributeType;
+        const settings = updateElementSettingsOnResize(element, element.settings, initOptions, isMobile, aaAttributeType);
+        element.settings = settings;
         
-        if (sliderType) {
-          // Get new settings with updated slider type
-          const aaAttributeType = element._aaAttributeType;
-          const settings = getElementSettings(element, initOptions, isMobile, initOptions.loadGracePeriod, aaAttributeType);
-          element.settings = settings;
-          
-          // Use the slider component setup function
-          if (modules.animations?.slider && settings.sliderType && settings.sliderType !== 'none') {
-            modules.animations.slider(element, settings.sliderType, settings.duration, settings.ease, settings.delay);
-          }
+        // Use the slider component setup function
+        if (modules.animations?.slider && settings.sliderType && settings.sliderType !== 'none') {
+          modules.animations.slider(element, settings.sliderType, settings.duration, settings.ease, settings.delay);
         }
+        
       });
 
       // Rebuild template-based animations
@@ -90,23 +88,27 @@ export function setupResizeHandler(modules, initOptions, isMobile, setupGSAPAnim
           
           // Get all template elements in a single query
           document.querySelectorAll(templateSelectors).forEach(element => {
-            const templateSettings = getElementTemplateSettings(element, isMobile);
-            if (templateSettings?.animationType) {
-              // Skip text animations unless they have mobile/desktop variants
-              const isTextAnimation = templateSettings.animationType.startsWith('text-');
-              const hasMobileVariant = templateSettings.animationType.includes('|');
-              
-              if (!isTextAnimation || hasMobileVariant) {
-                // Update settings with new animation type
-                element.settings = {
-                  ...element.settings,
-                  ...templateSettings
-                };
-                setupGSAPAnimations(element, element.settings, initOptions, isMobile, modules);
+            if (element.settings) {
+              const updatedSettings = updateTemplateSettingsOnResize(element, element.settings, isMobile);
+              if (updatedSettings) {
+                // Always rebuild text animations on resize (they need split text recalculation)
+                // For other animations, only rebuild if they have mobile/desktop variants
+                const isTextAnimation = updatedSettings.animationType?.startsWith('text-');
+                const hasMobileVariant = updatedSettings.animationType?.includes('|');
+                
+                if (isTextAnimation || hasMobileVariant) {
+                  element.settings = updatedSettings;
+                  setupGSAPAnimations(element, element.settings, initOptions, isMobile, modules);
+                }
               }
             }
           });
         }
+      }
+      
+      // Refresh ScrollTrigger after rebuilding animations
+      if (modules.ScrollTrigger) {
+        modules.ScrollTrigger.refresh(true);
       }
       
       prevWidth = currentWidth;

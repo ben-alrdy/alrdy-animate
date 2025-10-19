@@ -52,18 +52,19 @@ function parseColorAttribute(attribute) {
   }, {});
 }
 
-export function getElementSettings(element, settings, isMobile, loadGracePeriod = 0, aaAttributeType = null) {
-  // Parse attributes with mobile/desktop variants (desktop|mobile)
-  function parseResponsiveAttribute(attribute, defaultValue) {
-    if (!attribute) return defaultValue;
-    
-    if (attribute.includes('|')) {
-      const [desktop, mobile] = attribute.split('|');
-      return isMobile ? mobile.trim() : desktop.trim();
-    }
-    
-    return attribute.trim();
+// Parse attributes with mobile/desktop variants (desktop|mobile)
+export function parseResponsiveAttribute(attribute, defaultValue, isMobile) {
+  if (!attribute) return defaultValue;
+  
+  if (attribute.includes('|')) {
+    const [desktop, mobile] = attribute.split('|');
+    return isMobile ? mobile.trim() : desktop.trim();
   }
+  
+  return attribute.trim();
+}
+
+export function getElementSettings(element, settings, isMobile, loadGracePeriod = 0, aaAttributeType = null) {
 
   // Handle mobile animations
   const originalAnimationType = element.getAttribute('aa-animate-original') || element.getAttribute('aa-animate');
@@ -76,7 +77,7 @@ export function getElementSettings(element, settings, isMobile, loadGracePeriod 
     }
     
     // Use the responsive parsing function
-    animationType = parseResponsiveAttribute(originalAnimationType, null);
+    animationType = parseResponsiveAttribute(originalAnimationType, null, isMobile);
     // Update the actual attribute for CSS animations
     element.setAttribute('aa-animate', animationType);
   }
@@ -85,17 +86,17 @@ export function getElementSettings(element, settings, isMobile, loadGracePeriod 
   
   // Handle slider type
   const sliderType = aaAttributeType?.isSlider
-    ? parseResponsiveAttribute(element.getAttribute('aa-slider'), 'basic') // Default to basic slider if no type is specified
+    ? parseResponsiveAttribute(element.getAttribute('aa-slider'), 'basic', isMobile) // Default to basic slider if no type is specified
     : null;
   
   // Handle accordion type
   const accordionType = aaAttributeType?.isAccordion
-    ? parseResponsiveAttribute(element.getAttribute('aa-accordion'), 'basic') 
+    ? parseResponsiveAttribute(element.getAttribute('aa-accordion'), 'basic', isMobile) 
     : null;
   
   // Handle marquee type
   const marqueeType = aaAttributeType?.isMarquee
-    ? parseResponsiveAttribute(element.getAttribute('aa-marquee'), null) 
+    ? parseResponsiveAttribute(element.getAttribute('aa-marquee'), null, isMobile) 
     : null;
   
   const anchorSelector = element.getAttribute("aa-anchor");
@@ -109,9 +110,9 @@ export function getElementSettings(element, settings, isMobile, loadGracePeriod 
   const pseudoColor = parsedColors.backgroundColor;
 
   // Get scroll start/end values
-  const scrollStart = parseResponsiveAttribute(element.getAttribute('aa-scroll-start'), settings.scrollStart || 'top 80%');
+  const scrollStart = parseResponsiveAttribute(element.getAttribute('aa-scroll-start'), settings.scrollStart || 'top 80%', isMobile);
   
-  const scrollEnd = parseResponsiveAttribute(element.getAttribute('aa-scroll-end'), settings.scrollEnd || 'bottom 70%');
+  const scrollEnd = parseResponsiveAttribute(element.getAttribute('aa-scroll-end'), settings.scrollEnd || 'bottom 70%', isMobile);
 
   // Backward compatibility: convert aa-viewport to aa-scroll-start format
   let finalScrollStart = scrollStart;
@@ -177,6 +178,61 @@ export function getElementSettings(element, settings, isMobile, loadGracePeriod 
     isParent: aaAttributeType?.isChildren || element.hasAttribute("aa-children"),
     childrenAnimation: element.getAttribute("aa-children")
   };
+}
+
+/**
+ * Update only responsive properties in element settings on resize
+ * @param {HTMLElement} element - The element to update
+ * @param {Object} existingSettings - Current element settings
+ * @param {Object} defaultSettings - Default settings for fallbacks
+ * @param {boolean} isMobile - Whether current device is mobile
+ * @param {Object} aaAttributeType - Element attribute type info
+ * @returns {Object} Updated settings with only responsive properties changed
+ */
+export function updateElementSettingsOnResize(element, existingSettings, defaultSettings, isMobile, aaAttributeType) {
+  const updates = {};
+  
+  // Handle animation type updates
+  const originalAnimationType = element.getAttribute('aa-animate-original') || element.getAttribute('aa-animate');
+  if (originalAnimationType && originalAnimationType.includes('|')) {
+    // Store original value if not already stored
+    if (!element.hasAttribute('aa-animate-original')) {
+      element.setAttribute('aa-animate-original', originalAnimationType);
+    }
+    
+    // Parse responsive animation type
+    updates.animationType = parseResponsiveAttribute(originalAnimationType, null, isMobile);
+    // Update the actual attribute for CSS animations
+    element.setAttribute('aa-animate', updates.animationType);
+  }
+  
+  // Handle slider type updates
+  if (aaAttributeType?.isSlider) {
+    updates.sliderType = parseResponsiveAttribute(element.getAttribute('aa-slider'), 'basic', isMobile);
+  }
+  
+  // Handle accordion type updates
+  if (aaAttributeType?.isAccordion) {
+    updates.accordionType = parseResponsiveAttribute(element.getAttribute('aa-accordion'), 'basic', isMobile);
+  }
+  
+  // Handle marquee type updates
+  if (aaAttributeType?.isMarquee) {
+    updates.marqueeType = parseResponsiveAttribute(element.getAttribute('aa-marquee'), null, isMobile);
+  }
+  
+  // Handle scroll positioning updates
+  updates.scrollStart = parseResponsiveAttribute(element.getAttribute('aa-scroll-start'), defaultSettings.scrollStart || 'top 80%', isMobile);
+  updates.scrollEnd = parseResponsiveAttribute(element.getAttribute('aa-scroll-end'), defaultSettings.scrollEnd || 'bottom 70%', isMobile);
+  
+  // Backward compatibility: convert aa-viewport to aa-scroll-start format
+  if (element.hasAttribute('aa-viewport') && !element.hasAttribute('aa-scroll-start')) {
+    const viewport = parseFloat(element.getAttribute('aa-viewport'));
+    updates.scrollStart = `top ${viewport * 100}%`;
+  }
+  
+  // Return merged settings (existing + updates)
+  return { ...existingSettings, ...updates };
 }
 
 export function applyElementStyles(element, elementSettings, isMobile) {

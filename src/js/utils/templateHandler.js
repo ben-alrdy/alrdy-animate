@@ -1,4 +1,5 @@
 import { getTheme } from './themeRegistry';
+import { parseResponsiveAttribute } from './elementAttributes';
 
 // Store for processed templates
 let processedTemplates = null;
@@ -106,6 +107,38 @@ export function getFinalSettings(element, defaultSettings, isMobile) {
     anchorElement: element,
     anchorSelector: null // Don't use selectors for template elements
   };
+}
+
+/**
+ * Update only responsive properties in template settings on resize
+ * @param {HTMLElement} element - The element to update
+ * @param {Object} existingSettings - Current element settings
+ * @param {boolean} isMobile - Whether current device is mobile
+ * @returns {Object|null} Updated settings with only responsive properties changed, or null if no template match
+ */
+export function updateTemplateSettingsOnResize(element, existingSettings, isMobile) {
+  if (!processedTemplates) return null;
+
+  const className = element.className;
+  const template = processedTemplates[className];
+  
+  if (!template) return null;
+  
+  const updates = {};
+  
+  // Handle mobile/desktop animation split
+  if (template.animationType && template.animationType.includes('|')) {
+    updates.animationType = parseResponsiveAttribute(template.animationType, null, isMobile);
+  }
+  
+  // For text animations, always return updated settings (they need rebuild for split text recalculation)
+  // For other animations, only return updates if there are actual changes
+  const isTextAnimation = template.animationType?.startsWith('text-');
+  if (isTextAnimation || Object.keys(updates).length > 0) {
+    return { ...existingSettings, ...updates };
+  }
+  
+  return existingSettings;
 }
 
 /**
