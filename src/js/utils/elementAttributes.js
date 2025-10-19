@@ -30,7 +30,7 @@ function parseHoverDirection(hoverType) {
   return null;
 }
 
-export function getElementSettings(element, settings, isMobile, loadGracePeriod = 0) {
+export function getElementSettings(element, settings, isMobile, loadGracePeriod = 0, aaAttributeType = null) {
   // Parse attributes with mobile/desktop variants (desktop|mobile)
   function parseResponsiveAttribute(attribute, defaultValue) {
     if (!attribute) return defaultValue;
@@ -62,17 +62,17 @@ export function getElementSettings(element, settings, isMobile, loadGracePeriod 
   const hoverType = element.getAttribute('aa-hover');
   
   // Handle slider type
-  const sliderType = element.hasAttribute('aa-slider') 
+  const sliderType = aaAttributeType?.isSlider
     ? parseResponsiveAttribute(element.getAttribute('aa-slider'), 'basic') // Default to basic slider if no type is specified
     : null;
   
   // Handle accordion type
-  const accordionType = element.hasAttribute('aa-accordion') 
+  const accordionType = aaAttributeType?.isAccordion
     ? parseResponsiveAttribute(element.getAttribute('aa-accordion'), null) 
     : null;
   
   // Handle marquee type
-  const marqueeType = element.hasAttribute('aa-marquee') 
+  const marqueeType = aaAttributeType?.isMarquee
     ? parseResponsiveAttribute(element.getAttribute('aa-marquee'), null) 
     : null;
   
@@ -100,16 +100,18 @@ export function getElementSettings(element, settings, isMobile, loadGracePeriod 
     scrub: element.getAttribute('aa-scrub'),
     distance: element.hasAttribute('aa-distance') ? parseFloat(element.getAttribute('aa-distance')) : settings.distance,
 
-    // Hover properties
-    hoverType,
-    hoverDirection: hoverType ? (parseHoverDirection(hoverType) || element.getAttribute('aa-hover-direction') || 'all') : 'all',
-    isReverse: hoverType ? hoverType.includes('reverse') : false,
-    hoverDuration: element.hasAttribute('aa-duration') ? parseFloat(element.getAttribute('aa-duration')) : settings.hoverDuration,
-    hoverDelay: element.hasAttribute('aa-delay') ? parseFloat(element.getAttribute('aa-delay')) : settings.hoverDelay,
-    hoverEase: element.hasAttribute('aa-ease') ? element.getAttribute('aa-ease') : settings.hoverEase,
-    hoverDistance: element.hasAttribute('aa-distance') ? parseFloat(element.getAttribute('aa-distance')) : settings.hoverDistance,
-    hoverStagger: element.hasAttribute('aa-stagger') ? parseFloat(element.getAttribute('aa-stagger')) : 0.03,
-    bg: element.querySelector('[aa-hover-bg]'),
+    // Only parse hover properties if this is a hover element
+    ...(aaAttributeType?.isHover ? {
+      hoverType,
+      hoverDirection: hoverType ? (parseHoverDirection(hoverType) || element.getAttribute('aa-hover-direction') || 'all') : 'all',
+      isReverse: hoverType ? hoverType.includes('reverse') : false,
+      hoverDuration: element.hasAttribute('aa-duration') ? parseFloat(element.getAttribute('aa-duration')) : settings.hoverDuration,
+      hoverDelay: element.hasAttribute('aa-delay') ? parseFloat(element.getAttribute('aa-delay')) : settings.hoverDelay,
+      hoverEase: element.hasAttribute('aa-ease') ? element.getAttribute('aa-ease') : settings.hoverEase,
+      hoverDistance: element.hasAttribute('aa-distance') ? parseFloat(element.getAttribute('aa-distance')) : settings.hoverDistance,
+      hoverStagger: element.hasAttribute('aa-stagger') ? parseFloat(element.getAttribute('aa-stagger')) : 0.03,
+      bg: element.querySelector('[aa-hover-bg]')
+    } : {}),
 
     // Slider properties
     sliderType,
@@ -143,7 +145,7 @@ export function getElementSettings(element, settings, isMobile, loadGracePeriod 
     anchorElement,
     
     // Parent-specific attributes
-    isParent: element.hasAttribute("aa-children"),
+    isParent: aaAttributeType?.isChildren || element.hasAttribute("aa-children"),
     childrenAnimation: element.getAttribute("aa-children")
   };
 }

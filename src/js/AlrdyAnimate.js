@@ -456,7 +456,7 @@ function setupAnimations(elements, initOptions, isMobile, modules) {
 
     // Get settings from attributes or templates
     const templateSettings = getFinalSettings(element, initOptions, isMobile);
-    const settings = templateSettings || getElementSettings(element, initOptions, isMobile, initOptions.loadGracePeriod);
+    const settings = templateSettings || getElementSettings(element, initOptions, isMobile, initOptions.loadGracePeriod, aaAttributeType);
     
     // Skip if no settings found
     if (!settings) return;
