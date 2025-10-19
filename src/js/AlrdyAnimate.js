@@ -259,6 +259,9 @@ async function init(options = {}) {
                       case 'nav':
                         moduleAnimations = animationModule.createNavAnimations(modules.gsap);
                         break;
+                      case 'accordion':
+                        moduleAnimations = animationModule.createAccordionAnimations(modules.gsap, initOptions.duration);
+                        break;
                     }
 
                     Object.assign(animations, moduleAnimations);
@@ -274,6 +277,29 @@ async function init(options = {}) {
 
           modules.animations = animations;
 
+          // Initialize Lenis if enabled (now that GSAP is available)
+          if (initOptions.smoothScroll?.enabled) {
+            try {
+              const { coreBundles } = await import('./utils/moduleBundle');
+              const smoothScrollModule = coreBundles.smoothScroll;
+              
+              const [{ default: Lenis }, { initializeSmoothScroll }] = await Promise.all([
+                smoothScrollModule.plugins(),
+                smoothScrollModule.setup()
+              ]);
+
+              lenis = initializeSmoothScroll(
+                Lenis, 
+                modules.gsap,  // Use the GSAP instance from modules
+                modules.ScrollTrigger,  // Use the ScrollTrigger instance from modules
+                initOptions.smoothScroll.options
+              );
+              window.lenis = lenis;
+            } catch (error) {
+              console.warn('Failed to initialize smooth scroll:', error);
+            }
+          }
+
           // Initialize modal animations after all other animations are set up
           if (initOptions.gsapFeatures.includes('modal')) {
             try {
@@ -282,8 +308,6 @@ async function init(options = {}) {
               const modalAnimations = modalModule.createModalAnimations(
                 modules.gsap,
                 lenis,
-                modules.animations,
-                modules.splitText,
                 initOptions.duration
               );
 
@@ -298,28 +322,6 @@ async function init(options = {}) {
             }
           }
 
-          // Initialize accordion animations after all other animations are set up
-          if (initOptions.gsapFeatures.includes('accordion')) {
-            try {
-              const accordionModule = await gsapBundles.accordion.animations();
-              
-              const accordionAnimations = accordionModule.createAccordionAnimations(
-                modules.gsap,
-                modules.animations,
-                modules.splitText,
-                initOptions.duration
-              );
-
-              // Store the accordion animation function (like all other gsap animations)
-              modules.animations.accordion = (element, accordionType) => {
-                if (accordionAnimations?.accordion && typeof accordionAnimations.accordion === 'function') {
-                  return accordionAnimations.accordion(element, accordionType);
-                }
-              };
-            } catch (accordionError) {
-              console.warn('Failed to initialize accordion animations:', accordionError);
-            }
-          }
 
           return modules;
         } catch (error) {
@@ -329,28 +331,6 @@ async function init(options = {}) {
       })();
     }
 
-    // Initialize Lenis if enabled (regardless of GSAP)
-    if (initOptions.smoothScroll?.enabled) {
-      try {
-        const { coreBundles } = await import('./utils/moduleBundle');
-        const smoothScrollModule = coreBundles.smoothScroll;
-        
-        const [{ default: Lenis }, { initializeSmoothScroll }] = await Promise.all([
-          smoothScrollModule.plugins(),
-          smoothScrollModule.setup()
-        ]);
-
-        lenis = initializeSmoothScroll(
-          Lenis, 
-          window.gsap || null,  // Use window.gsap if available, otherwise null
-          window.ScrollTrigger || null,  // Use window.ScrollTrigger if available, otherwise null
-          initOptions.smoothScroll.options
-        );
-        window.lenis = lenis;
-      } catch (error) {
-        console.warn('Failed to initialize smooth scroll:', error);
-      }
-    }
 
 
     return new Promise((resolve) => {
