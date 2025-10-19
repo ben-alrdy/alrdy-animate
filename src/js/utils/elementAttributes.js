@@ -30,6 +30,28 @@ function parseHoverDirection(hoverType) {
   return null;
 }
 
+// Helper to parse aa-color attribute
+// Format: "bg:#hex text:#hex border:#hex"
+// Returns: { backgroundColor: '#hex', color: '#hex', borderColor: '#hex' }
+function parseColorAttribute(attribute) {
+  if (!attribute) return {};
+  
+  return attribute.split(' ').reduce((colors, current) => {
+    const [type, value] = current.split(':').map(s => s.trim());
+    if (type && value) {
+      const colorMap = {
+        'bg': 'backgroundColor',
+        'text': 'color',
+        'border': 'borderColor'
+      };
+      if (colorMap[type]) {
+        colors[colorMap[type]] = value;
+      }
+    }
+    return colors;
+  }, {});
+}
+
 export function getElementSettings(element, settings, isMobile, loadGracePeriod = 0, aaAttributeType = null) {
   // Parse attributes with mobile/desktop variants (desktop|mobile)
   function parseResponsiveAttribute(attribute, defaultValue) {
@@ -78,7 +100,13 @@ export function getElementSettings(element, settings, isMobile, loadGracePeriod 
   
   const anchorSelector = element.getAttribute("aa-anchor");
   const anchorElement = anchorSelector ? document.querySelector(anchorSelector) : element;
-  const color = animationType?.includes('#') ? '#' + animationType.split('#')[1] : undefined;
+  
+  // Parse aa-color attribute once
+  const aaColorAttr = element.getAttribute('aa-color');
+  const parsedColors = parseColorAttribute(aaColorAttr);
+
+  // Extract background color for CSS pseudo-element animations
+  const pseudoColor = parsedColors.backgroundColor;
 
   // Get scroll start/end values
   const scrollStart = parseResponsiveAttribute(element.getAttribute('aa-scroll-start'), settings.scrollStart || 'top 80%');
@@ -133,8 +161,9 @@ export function getElementSettings(element, settings, isMobile, loadGracePeriod 
     stagger: element.hasAttribute('aa-stagger') ? parseFloat(element.getAttribute('aa-stagger')) : undefined,
     opacity: element.hasAttribute('aa-opacity') ? parseFloat(element.getAttribute('aa-opacity')) : 1,
     
-    // Colors
-    color,
+    // Colors (parsed once)
+    colors: parsedColors,  // { backgroundColor, color, borderColor }
+    pseudoColor,           // For CSS pseudo-element animations
     
     // Scroll positioning (new system)
     scrollStart: finalScrollStart,
@@ -151,7 +180,7 @@ export function getElementSettings(element, settings, isMobile, loadGracePeriod 
 }
 
 export function applyElementStyles(element, elementSettings, isMobile) {
-  const { duration, delay, distance, delayMobile, color, opacity } = elementSettings;
+  const { duration, delay, distance, delayMobile, color, opacity, pseudoColor } = elementSettings;
 
   // Set duration if specified on element
   if (element.hasAttribute('aa-duration')) {
@@ -174,7 +203,7 @@ export function applyElementStyles(element, elementSettings, isMobile) {
     element.style.setProperty("--aa-opacity", `${opacity}`);
   }
 
-  if (element.getAttribute('aa-animate')?.includes('#')) {
-    element.style.setProperty("--aa-pseudo-color", color);
+  if (pseudoColor) {
+    element.style.setProperty("--aa-pseudo-color", pseudoColor);
   }
 } 

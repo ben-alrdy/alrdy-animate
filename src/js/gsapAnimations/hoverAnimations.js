@@ -89,8 +89,8 @@ function getAdjustedDirection(mouseDirection, hoverDirection, isEnter) {
     return direction;
 }
 
-// Helper to parse aa-color attribute
-function parseColorAttribute(attribute) {
+// Helper to parse aa-color for child elements
+function parseChildColors(attribute) {
     if (!attribute) return {};
     
     return attribute.split(' ').reduce((colors, current) => {
@@ -115,7 +115,9 @@ function storeOriginalColors(element) {
     // Store original colors for each element with aa-color
     const originalColors = Array.from(colorElements).map(el => {
         const aaColorAttr = el.getAttribute('aa-color');
-        const targetColors = parseColorAttribute(aaColorAttr);
+        const targetColors = el === element && element.settings?.colors 
+            ? element.settings.colors 
+            : parseChildColors(aaColorAttr);
         const computedStyle = window.getComputedStyle(el);
         
         // Only store original values for properties that are defined in aa-color

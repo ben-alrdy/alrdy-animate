@@ -74,32 +74,12 @@ function createRevealTimeline(element, gsap, duration, ease, delay, animationTyp
   );
 }
 
-// Helper to parse aa-color attribute
-function parseColorAttribute(attribute) {
-  if (!attribute) return {};
-  
-  return attribute.split(' ').reduce((colors, current) => {
-    const [type, value] = current.split(':').map(s => s.trim());
-    if (type && value) {
-      const colorMap = {
-        'bg': 'backgroundColor',
-        'text': 'color',
-        'border': 'borderColor'
-      };
-      if (colorMap[type]) {
-        colors[colorMap[type]] = value;
-      }
-    }
-    return colors;
-  }, {});
-}
 
 function createGrowTimeline(element, gsap, duration, ease, delay, animationType) {
   const [_, direction] = animationType.split('-');
   
   // Parse aa-color attribute
-  const colorAttr = element.getAttribute('aa-color');
-  const targetColors = parseColorAttribute(colorAttr);
+  const targetColors = element.settings?.colors || {};
   
   // Store original colors
   const computedStyle = window.getComputedStyle(element);

@@ -7,25 +7,6 @@ export function createTextAnimations(gsap) {
     blur:         { duration: 0.4, stagger: 0.02, ease: 'ease-out' },
   };
 
-  // Helper to parse aa-color attribute
-  function parseColorAttribute(attribute) {
-    if (!attribute) return {};
-    
-    return attribute.split(' ').reduce((colors, current) => {
-      const [type, value] = current.split(':').map(s => s.trim());
-      if (type && value) {
-        const colorMap = {
-          'bg': 'backgroundColor',
-          'text': 'color',
-          'border': 'borderColor'
-        };
-        if (colorMap[type]) {
-          colors[colorMap[type]] = value;
-        }
-      }
-      return colors;
-    }, {});
-  }
 
   // Helper function to create base animation configuration
   function createBaseAnimation(element, split, duration, stagger, delay, ease, props) {
@@ -49,7 +30,7 @@ export function createTextAnimations(gsap) {
     };
 
     // Parse aa-color and add to animation from props
-    const colorProps = element.hasAttribute('aa-color') ? parseColorAttribute(element.getAttribute('aa-color')) : {};
+    const colorProps = element.settings?.colors || {};
 
     // Handle lines&words split type
     if (split === 'lines&words') {
@@ -177,7 +158,7 @@ export function createTextAnimations(gsap) {
         const tl = gsap.timeline({ delay });
         
         // Parse aa-color - must be in format "bg:#hex" or "bg:#hex text:#hex"
-        const parsedColors = element.hasAttribute('aa-color') ? parseColorAttribute(element.getAttribute('aa-color')) : {};
+        const parsedColors = element.settings?.colors || {};
         const blockColor = parsedColors.backgroundColor || '#000000'; // Default if not specified
         const textColor = parsedColors.color; // Optional text color
         
@@ -342,7 +323,7 @@ export function createTextAnimations(gsap) {
           if (!self.lines || self.lines.length === 0) return tl;
 
           // Parse aa-color
-          const colorProps = element.hasAttribute('aa-color') ? parseColorAttribute(element.getAttribute('aa-color')) : {};
+          const colorProps = element.settings?.colors || {};
           
           // For scrubbed animations, set visibility before creating the animation
           const isScrubbed = element.hasAttribute('aa-scrub');
