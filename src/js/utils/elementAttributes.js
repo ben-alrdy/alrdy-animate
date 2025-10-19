@@ -90,7 +90,7 @@ export function getElementSettings(element, settings, isMobile, loadGracePeriod 
   
   // Handle accordion type
   const accordionType = aaAttributeType?.isAccordion
-    ? parseResponsiveAttribute(element.getAttribute('aa-accordion'), null) 
+    ? parseResponsiveAttribute(element.getAttribute('aa-accordion'), 'basic') 
     : null;
   
   // Handle marquee type

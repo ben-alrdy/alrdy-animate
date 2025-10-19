@@ -311,9 +311,9 @@ async function init(options = {}) {
               );
 
               // Store the accordion animation function (like all other gsap animations)
-              modules.animations.accordion = (element) => {
+              modules.animations.accordion = (element, accordionType) => {
                 if (accordionAnimations?.accordion && typeof accordionAnimations.accordion === 'function') {
-                  return accordionAnimations.accordion(element);
+                  return accordionAnimations.accordion(element, accordionType);
                 }
               };
             } catch (accordionError) {
@@ -520,7 +520,7 @@ function setupInteractiveComponent(element, elementSettings, modules, initOption
     }
     
     if (initOptions.gsapFeatures.includes('accordion')) {
-      modules.animations.accordion(element);
+      modules.animations.accordion(element, accordionType);
     }
   }
   
