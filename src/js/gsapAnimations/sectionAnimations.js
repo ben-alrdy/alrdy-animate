@@ -487,6 +487,67 @@ function initializePinStack(element, scrollStart, scrollEnd, debug = false, inAn
   element.pinStackTimeline = tl;
   element.pinStackConfig = { children, gap, inAnimation, outAnimation, distance, debug, triggerOffset };
   
+  // Check initial scroll position and trigger appropriate nested animations
+  const checkInitialPinStackPosition = () => {
+    const scrollY = window.scrollY;
+    const viewportHeight = window.innerHeight;
+    const triggerPoint = scrollY + viewportHeight * 0.5;
+    
+    // Get the pin-stack element's position
+    const elementRect = element.getBoundingClientRect();
+    const elementTop = elementRect.top + scrollY;
+    const elementBottom = elementRect.bottom + scrollY;
+    
+    // Check if the pin-stack has been scrolled past entirely
+    const isScrolledPast = elementBottom < triggerPoint;
+    
+    // Check if the pin-stack is currently in view or has been scrolled past
+    if (elementTop <= triggerPoint && elementBottom >= triggerPoint) {
+      // Pin-stack is currently in view, check which cards should be active
+      const currentTime = tl.time();
+      
+      // Trigger nested animations for cards that should already be active
+      children.forEach((child, index) => {
+        if (index === 0) return; // First child uses ScrollTriggers
+        
+        const nestedElements = Array.from(child.querySelectorAll('[aa-animate]'));
+        if (nestedElements.length === 0) return;
+        
+        // Check if this card should be active based on current timeline position
+        const shouldBeActive = currentTime >= (index - triggerOffset);
+        
+        if (shouldBeActive) {
+          // Set to completed state (already scrolled past)
+          nestedElements.forEach(nestedEl => {
+            if (nestedEl._delayedCall) nestedEl._delayedCall.kill();
+            nestedEl.classList.add('in-view');
+            nestedEl.style.visibility = 'visible';
+            if (nestedEl.timeline) nestedEl.timeline.progress(1);
+          });
+        }
+      });
+    } else if (isScrolledPast) {
+      // Pin-stack has been completely scrolled past, all cards should be active
+      children.forEach((child, index) => {
+        if (index === 0) return; // First child uses ScrollTriggers
+        
+        const nestedElements = Array.from(child.querySelectorAll('[aa-animate]'));
+        if (nestedElements.length === 0) return;
+        
+        // Set all nested animations to completed state
+        nestedElements.forEach(nestedEl => {
+          if (nestedEl._delayedCall) nestedEl._delayedCall.kill();
+          nestedEl.classList.add('in-view');
+          nestedEl.style.visibility = 'visible';
+          if (nestedEl.timeline) nestedEl.timeline.progress(1);
+        });
+      });
+    }
+  };
+  
+  // Check initial position after a short delay to ensure DOM and timeline are ready
+  setTimeout(checkInitialPinStackPosition, 100);
+  
   // Trigger nested animations when each card becomes active
   // Note: Must be called AFTER storing config since it accesses element.pinStackTimeline
   triggerNestedAnimations(children, tl, triggerOffset, debug);
