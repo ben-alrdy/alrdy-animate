@@ -783,8 +783,15 @@ function applyOutAnimation(children, cardHeights, gap, tl, outAnimation, distanc
         break;
 
       case 'fade':
-        // Card blurs as subsequent cards appear
+        // Card fades as subsequent cards appear
         toProps.opacity = 0;
+        toProps.duration = 1;
+        break;
+
+      case 'fade-scale':
+        // Card scales down and fades as subsequent cards appear
+        toProps.opacity = 0;
+        toProps.scale = 0.85 * distance;
         toProps.duration = 1;
         break;
       

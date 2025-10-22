@@ -608,8 +608,9 @@ Create stunning card reveal effects where cards slide up and stack on top of eac
 - `null` (default) - Cards stay in final position
 - `perspective` - Cards tilt back and scale down when next card appears
 - `scale` - Cards scale down when next card appears
-- `blur` - Cards blur when next card appears
 - `fade` - Cards fades out when next card appears
+- `fade-scale` - Cards fades out and scales down when next card appears
+- `blur` - Cards blur when next card appears
 - `right` or `right` - Cards move out left/right
 
 **Examples:**
