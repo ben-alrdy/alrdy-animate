@@ -125,6 +125,7 @@ class AccordionController {
     this.isMulti = this.accordionType === 'multi';
     this.isAutoplay = this.accordionType === 'autoplay';
     this.isScroll = this.accordionType === 'scroll';
+    this.isSingle = this.accordionType === 'single';
     
     this.setupEventDelegation();
   }
@@ -156,6 +157,11 @@ class AccordionController {
     if (!elementData) return;
     
     const isActive = toggle.getAttribute('aa-accordion-status') === 'active';
+    
+    // For single type, prevent closing the active accordion
+    if (isActive && this.isSingle) {
+      return;
+    }
     
     if (isActive) {
       this.closeAccordion(toggle, elementData);
@@ -386,6 +392,8 @@ function autoAssignIds(accordion) {
 
 function initializeAccordionElements(accordion, state, animations, splitText, defaultDuration = 1) {
   const initialToggle = accordion.querySelector('[aa-accordion-initial]');
+  const accordionType = accordion.getAttribute('aa-accordion') || 'basic';
+  const isSingle = accordionType === 'single';
   
   // Set all toggles to inactive initially using cached elements
   state.toggles.forEach((toggle) => {
@@ -414,22 +422,30 @@ function initializeAccordionElements(accordion, state, animations, splitText, de
     content.style.setProperty('--aa-duration', `${contentDuration}s`);
   });
   
-  // Open initial accordion if specified
-  if (initialToggle) {
-    const initialToggleId = initialToggle.getAttribute('aa-accordion-toggle');
-    const elementData = state.getElementData(initialToggleId);
+  // Determine which accordion to open initially
+  let toggleToOpen = initialToggle;
+  
+  // For single type, ensure at least one accordion is open
+  if (isSingle && !toggleToOpen && state.toggles.length > 0) {
+    toggleToOpen = state.toggles[0];
+  }
+  
+  // Open initial accordion if specified or required
+  if (toggleToOpen) {
+    const toggleToOpenId = toggleToOpen.getAttribute('aa-accordion-toggle');
+    const elementData = state.getElementData(toggleToOpenId);
     
     if (elementData) {
       // Add a small delay to ensure all animations are properly set up before opening
       gsap.delayedCall(0.1, () => {
         // Set current accordion to active
-        initialToggle.setAttribute('aa-accordion-status', 'active');
+        toggleToOpen.setAttribute('aa-accordion-status', 'active');
         
         // Set appropriate ARIA state based on content presence
         if (elementData.content) {
-          initialToggle.setAttribute('aria-expanded', 'true');
+          toggleToOpen.setAttribute('aria-expanded', 'true');
         } else {
-          initialToggle.setAttribute('aria-selected', 'true');
+          toggleToOpen.setAttribute('aria-selected', 'true');
         }
         
         // Update visual ARIA state

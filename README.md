@@ -1055,7 +1055,8 @@ Accessible accordion functionality with GSAP animations. Create expandable/colla
 #### Component Structure
 
 **Main Component Attributes:**
-- `aa-accordion` - Single accordion (only one open at a time)
+- `aa-accordion` - Basic accordion (only one open at a time)
+- `aa-accordion="single"` - Basic accordion (only one open at a time + open one cannot be closed)
 - `aa-accordion="multi"` - Multi accordion (multiple can be open)
 - `aa-accordion="autoplay"` - Autoplay accordion with progress indicators
   - Add `aa-duration` to define how long one autoplay cycle takes
