@@ -765,7 +765,7 @@ function initializeScrollAccordion(accordion, state, controller, defaultDuration
   
   // Get configuration
   const scrollStart = accordion.getAttribute('aa-scroll-start') || 'top 20%';
-  const distanceAttr = accordion.getAttribute('aa-distance') || '100';
+  const distanceAttr = accordion.getAttribute('aa-distance') || '30';
   const scrubValue = accordion.getAttribute('aa-scrub') || 'true';
   const accordionCount = state.toggles.length;
   
@@ -779,11 +779,6 @@ function initializeScrollAccordion(accordion, state, controller, defaultDuration
   // Track current active accordion
   let currentActiveIndex = hasInitialAccordion ? 0 : -1;
   
-  // Disable click functionality for scroll-driven accordions
-  state.toggles.forEach((toggle) => {
-    toggle.style.pointerEvents = 'none';
-    toggle.style.cursor = 'default';
-  });
   
   // Create a dummy animation object for scrub to work with
   const dummyProgress = { value: 0 };
@@ -844,6 +839,51 @@ function initializeScrollAccordion(accordion, state, controller, defaultDuration
     scrub: scrubValue ? (parseFloat(scrubValue) || true) : true,
     animation: progressTween
   });
+  
+  // Override the base controller's handleToggle method for scroll-type accordions
+  // Store the original method and replace it with our scroll-to logic
+  const originalHandleToggle = controller.handleToggle.bind(controller);
+  
+  controller.handleToggle = (toggle) => {
+    const toggleIndex = state.toggles.indexOf(toggle);
+    
+    if (toggleIndex === -1) {
+      return originalHandleToggle(toggle);
+    }
+    
+    // Calculate target scroll position
+    const scrollTriggerInstance = scrollTrigger;
+    if (!scrollTriggerInstance) return;
+    
+    const distancePerAccordion = totalScrollDistance / accordionCount;
+    // Add a small offset to ensure the accordion actually opens
+    // We need to scroll slightly into the accordion's section, not just to its start
+    const accordionOffset = distancePerAccordion * 0.05; // 5% into the accordion section
+    const targetScrollY = scrollTriggerInstance.start + (toggleIndex * distancePerAccordion) + accordionOffset;
+    
+    // Use Lenis if available, otherwise fall back to GSAP
+    if (window.lenis) {
+      // Use Lenis for smooth scrolling with quartic easing
+      window.lenis.scrollTo(targetScrollY, {
+        duration: 0.6,
+        offset: 0
+      });
+    } else if (gsap.ScrollToPlugin) {
+      // Fallback to GSAP ScrollToPlugin
+      gsap.to(window, {
+        duration: 0.6,
+        scrollTo: { y: targetScrollY, autoKill: false },
+        ease: "power2.inOut"
+      });
+    } else {
+      // Last resort: direct scroll
+      window.scrollTo({
+        top: targetScrollY,
+        behavior: 'smooth'
+      });
+    }
+  };
+  
   
 }
 
