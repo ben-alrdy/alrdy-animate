@@ -865,13 +865,14 @@ function initializeScrollAccordion(accordion, state, controller, defaultDuration
     if (window.lenis) {
       // Use Lenis for smooth scrolling with quartic easing
       window.lenis.scrollTo(targetScrollY, {
-        duration: 0.6,
-        offset: 0
+        duration: 1.2,
+        offset: 0,
+        easing: (x) => (x < 0.5 ? 8 * x * x * x * x : 1 - Math.pow(-2 * x + 2, 4) / 2)
       });
     } else if (gsap.ScrollToPlugin) {
       // Fallback to GSAP ScrollToPlugin
       gsap.to(window, {
-        duration: 0.6,
+        duration: 1.2,
         scrollTo: { y: targetScrollY, autoKill: false },
         ease: "power2.inOut"
       });
