@@ -1098,7 +1098,7 @@ Manual IDs take precedence over auto-generated ones.
 |-----------|--------|---------|-------------|
 | `aa-accordion` | Accordion type | - | Accordion behavior |
 | `aa-duration` | Number (seconds) | `5` (autoplay) | Duration for autoplay |
-| `aa-distance` | Number (vh units) | `30` (scroll) | Scroll distance per accordion (scroll accordion only) |
+| `aa-distance` | Number (vh units) | `50` (scroll) | Scroll distance per accordion (scroll accordion only) |
 | `aa-ease` | Easing function | `power4.out` | Animation easing |
 | `aa-delay` | Number (seconds) | `0.3` | Delay before inner animations |
 | `aa-scroll-start` | Position | `top 20%` (scroll) | When pinning starts (scroll accordion) |

@@ -765,7 +765,7 @@ function initializeScrollAccordion(accordion, state, controller, defaultDuration
   
   // Get configuration
   const scrollStart = accordion.getAttribute('aa-scroll-start') || 'top 20%';
-  const distanceAttr = accordion.getAttribute('aa-distance') || '30';
+  const distanceAttr = accordion.getAttribute('aa-distance') || '50';
   const scrubValue = accordion.getAttribute('aa-scrub') || 'true';
   const accordionCount = state.toggles.length;
   
