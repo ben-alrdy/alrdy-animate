@@ -377,7 +377,7 @@ All text animations support the `aa-color` attribute for smooth color transition
 | `aa-split` | `words`, `chars`, `lines`, `lines&words` | `words` | How to split text |
 | `aa-stagger` | Number (seconds) | `0.05` | Delay between split elements |
 | `aa-duration` | Number (seconds) | `0.8` | Animation duration |
-| `aa-scrub` | `true`, number | - | Scroll-driven animation. `true` = direct mapping, number = lag (higher = more lag) |
+| `aa-scrub` | empty or number | `true` | Scroll-driven animation. `true` = direct mapping, number = lag (higher = more lag) |
 | `aa-color` | `text:#hex bg:#hex border:#hex` | - | Color transitions (animates from these colors to original) |
 
 **Examples:**
@@ -424,7 +424,7 @@ Smooth transitions and reveals with GSAP.
 | `aa-duration` | Number (seconds) | `0.8` | Animation duration |
 | `aa-delay` | Number (seconds) | `0` | Animation delay |
 | `aa-distance` | Number | `1` | Distance multiplier |
-| `aa-scrub` | `true`, number | - | Scroll-driven animation. `true` = direct mapping, number = lag (higher = more lag) |
+| `aa-scrub` | empty or number | `true` | Scroll-driven animation. `true` = direct mapping, number = lag (higher = more lag) |
 | `aa-color` | `bg:#hex text:#hex border:#hex` | - | Color transitions for grow animation |
 
 **Examples:**
@@ -459,7 +459,7 @@ Scroll-driven movement effects.
 | `aa-parallax-end` | Number (%) | `-10` | End position |
 | `aa-scroll-start` | Position | `top bottom` | When to start |
 | `aa-scroll-end` | Position | `bottom top` | When to end |
-| `aa-scrub` | `true`, number | `true` | Scroll-driven animation. `true` = direct mapping, number = lag (higher = more lag) |
+| `aa-scrub` | empty or number | `true` | Scroll-driven animation. `true` = direct mapping, number = lag (higher = more lag) |
 
 **Examples:**
 ```html
@@ -489,7 +489,7 @@ Animated background transitions between sections.
 | `aa-animate` | `background` | - | Background transition |
 | `aa-duration` | Number (seconds) | `0.8` | Transition duration |
 | `aa-ease` | Easing function | `power2.inOut` | Transition easing |
-| `aa-scrub` | `true`, number | - | Scroll-driven animation. `true` = direct mapping, number = lag (higher = more lag) |
+| `aa-scrub` | empty or number | `true` | Scroll-driven animation. `true` = direct mapping, number = lag (higher = more lag) |
 | `aa-wrapper-colors` | `bg:color;text:color` | - | Wrapper colors |
 | `aa-item-colors` | `bg:color;text:color` | - | Item colors |
 
@@ -534,7 +534,7 @@ Stacking scroll effects.
 |-----------|--------|---------|-------------|
 | `aa-animate` | `stack` | - | Stack animation |
 | `aa-distance` | Number | `1` | Stack distance |
-| `aa-scrub` | `true`, number | `true` | Scroll-driven |
+| `aa-scrub` | empty or number | `true` | Scroll-driven |
 
 **Examples:**
 ```html
@@ -1068,7 +1068,7 @@ Accessible accordion functionality with GSAP animations. Create expandable/colla
   - Toggle elements are not clickable (controlled by scroll only)
   - Use `aa-distance` to define scroll distance per accordion in viewport height units (default: 100, meaning 100vh)
   - Use `aa-scroll-start` to control when pinning starts (default: "top 20%")
-  - Use `aa-scrub` to control scroll scrubbing behavior (default: true, accepts true/false or number)
+  - Use `aa-scrub` to control scroll scrubbing behavior (default: true; add number to set scrubbing delay)
   - Use `aa-accordion-initial` on the first accordion to have it open before reaching the trigger
 
 **Element Attributes:**
@@ -1283,7 +1283,7 @@ Scrolling text and content animations.
 | `aa-duration` | Number (seconds) | `15` | Animation duration |
 | `aa-marquee-scroller` | Number | `0` | Scroll speed multiplier |
 | `aa-marquee-items` | Number | `2` | Number of duplicates |
-| `aa-scrub` | `true`, number | - | Scroll-driven (for paused) |
+| `aa-scrub` | empty or number | - | Scroll-driven (for paused) |
 
 **CSS Requirements:**
 - Container with `aa-marquee-items` needs `display: flex`
@@ -1941,7 +1941,7 @@ AlrdyAnimate.init({
 | `aa-distance` | Number | Distance multiplier |
 | `aa-scroll-start` | ScrollTrigger position | When animation starts |
 | `aa-scroll-end` | ScrollTrigger position | When animation ends (for scrub) |
-| `aa-scrub` | `true` or Number | Scroll-driven animation |
+| `aa-scrub` | `empty or Number | Scroll-driven animation |
 | `aa-children` | Animation name | Apply animation to all children |
 | `aa-stagger` | Number (seconds) | Stagger delay between children |
 | `aa-anchor` | CSS selector | Element that triggers this animation |

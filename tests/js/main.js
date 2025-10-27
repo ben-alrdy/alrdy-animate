@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('Initializing AlrdyAnimate...');
     
     AlrdyAnimate.init({
-        ease: 'power2.inOut',
+        ease: 'snappy.inOut',
         duration: 1,
         again: true,
         gsapFeatures: ['section', 'appear', 'marquee', 'text', 'slider', 'hover', 'nav', 'modal', 'accordion'],
