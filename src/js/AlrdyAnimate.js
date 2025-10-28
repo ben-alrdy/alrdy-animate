@@ -519,6 +519,9 @@ function setupInteractiveComponent(element, elementSettings, modules, initOption
   }
 }
 
+// Cache for feature availability checks - checked once per animation type, not per element
+const featureAvailabilityCache = new Map();
+
 function setupGSAPAnimations(element, elementSettings, initOptions, isMobile, modules) {
   const { animationType, split, scrub, duration, stagger, delay, ease, opacity, distance, anchorElement, anchorSelector, scrollStart, scrollEnd } = elementSettings;
   
@@ -542,7 +545,43 @@ function setupGSAPAnimations(element, elementSettings, initOptions, isMobile, mo
   // 2. Check if this is a GSAP animation BEFORE creating timeline
   const isGSAPAnimation = gsapAnimations.includes(baseType);
   
-  // 3. Determine if this animation type creates its own ScrollTriggers
+  // 3. Early check: verify required animation function exists (cached for performance)
+  if (isGSAPAnimation) {
+    // Check cache first
+    if (!featureAvailabilityCache.has(baseType)) {
+      // Feature map for first-time checks
+      const animationFeatureMap = {
+        'appear': { feature: 'appear', check: () => modules.animations.appear },
+        'reveal': { feature: 'appear', check: () => modules.animations.reveal },
+        'counter': { feature: 'appear', check: () => modules.animations.counter },
+        'grow': { feature: 'appear', check: () => modules.animations.grow },
+        'text': { feature: 'text', check: () => modules.splitText && modules.animations.text },
+        'clip': { feature: 'section', check: () => modules.animations.clip },
+        'stack': { feature: 'section', check: () => modules.animations.stack },
+        'pin': { feature: 'section', check: () => modules.animations.pin || modules.animations.pinStack },
+        'background': { feature: 'section', check: () => modules.animations.backgroundColor },
+        'parallax': { feature: 'section', check: () => modules.animations.parallax }
+      };
+      
+      if (animationFeatureMap[baseType]) {
+        const { feature, check } = animationFeatureMap[baseType];
+        const isAvailable = check();
+        featureAvailabilityCache.set(baseType, { available: isAvailable, feature });
+        
+        if (!isAvailable) {
+          console.warn(`AlrdyAnimate: '${baseType}' animation requires '${feature}' feature in gsapFeatures. Skipping animation for element:`, element);
+        }
+      }
+    }
+    
+    // Use cached result
+    const cachedResult = featureAvailabilityCache.get(baseType);
+    if (cachedResult && !cachedResult.available) {
+      return; // Skip this element
+    }
+  }
+  
+  // 4. Determine if this animation type creates its own ScrollTriggers
   const ownScrollTriggerAnimations = ['clip', 'stack', 'background', 'parallax', 'pin'];
   const hasOwnScrollTrigger = ownScrollTriggerAnimations.includes(baseType);
 
@@ -555,7 +594,7 @@ function setupGSAPAnimations(element, elementSettings, initOptions, isMobile, mo
     element.scrollTriggers = [];
   }
 
-  // 4. Create timeline and ScrollTrigger setup
+  // 5. Create timeline and ScrollTrigger setup
   let tl = null;
   
   // Create timeline only for GSAP animations
@@ -642,7 +681,7 @@ function setupGSAPAnimations(element, elementSettings, initOptions, isMobile, mo
     }
   } // End of !hasOwnScrollTrigger
 
-  // 5. Return early if not a GSAP animation (now after timeline check)
+  // 6. Return early if not a GSAP animation (now after timeline check)
   if (!isGSAPAnimation) {
     return;
   }
