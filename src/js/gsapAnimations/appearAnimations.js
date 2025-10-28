@@ -98,21 +98,15 @@ function createGrowTimeline(element, gsap, duration, ease, delay, animationType)
   const isHorizontal = direction === 'horizontal';
   const property = isHorizontal ? 'width' : 'height';
   
-  // Get the natural size (auto)
-  const originalSize = element.style[property];
-  element.style[property] = 'auto';
-  const autoSize = isHorizontal ? element.offsetWidth : element.offsetHeight;
-  element.style[property] = originalSize;
-  
   // Create initial state
   const fromState = {
     [property]: 0,
     ...targetColors // Start with aa-color values
   };
   
-  // Create end state
+  // Create end state - GSAP handles 'auto' value properly without forced reflow
   const toState = {
-    [property]: autoSize,
+    [property]: 'auto',
     ...originalColors, // End with original colors
     duration,
     ease,

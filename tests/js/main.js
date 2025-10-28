@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', function() {
         ease: 'snappy.inOut',
         duration: 1,
         again: true,
-        gsapFeatures: ['section',  'marquee', 'text', 'slider', 'hover', 'nav', 'modal', 'accordion'],
+        gsapFeatures: ['section', 'appear', 'marquee', 'text', 'slider', 'hover', 'nav', 'modal', 'accordion'],
         debug: false,
         modals: false,
         enforceReducedMotion: false,

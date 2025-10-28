@@ -127,7 +127,23 @@ class AccordionController {
     this.isScroll = this.accordionType === 'scroll';
     this.isSingle = this.accordionType === 'single';
     
+    // Debounced ScrollTrigger refresh to prevent forced reflows
+    this.refreshTimer = null;
+    this.debouncedRefresh = this.debouncedRefresh.bind(this);
+    
     this.setupEventDelegation();
+  }
+  
+  debouncedRefresh() {
+    if (this.refreshTimer) {
+      this.refreshTimer.kill();
+    }
+    this.refreshTimer = gsap.delayedCall(0.1, () => {
+      if (window.ScrollTrigger) {
+        window.ScrollTrigger.refresh();
+      }
+      this.refreshTimer = null;
+    });
   }
   
   setupEventDelegation() {
@@ -217,11 +233,9 @@ class AccordionController {
       this.handleVisualOpening(visual, elementData);
     }
     
-    // Refresh ScrollTrigger after animation
+    // Debounced refresh to prevent forced reflows
     gsap.delayedCall(elementData.contentDuration, () => {
-      if (window.ScrollTrigger) {
-        window.ScrollTrigger.refresh();
-      }
+      this.debouncedRefresh();
     });
   }
   
@@ -262,11 +276,9 @@ class AccordionController {
     // Reset progress bar
     this.resetProgressBar(elementData);
     
-    // Refresh ScrollTrigger after animation
+    // Debounced refresh to prevent forced reflows
     gsap.delayedCall(contentDuration, () => {
-      if (window.ScrollTrigger) {
-        window.ScrollTrigger.refresh();
-      }
+      this.debouncedRefresh();
     });
   }
   
