@@ -765,7 +765,7 @@ function initializeScrollAccordion(accordion, state, controller, defaultDuration
   
   // Get configuration
   const scrollStart = accordion.getAttribute('aa-scroll-start') || 'top 20%';
-  const distanceAttr = accordion.getAttribute('aa-distance') || '50';
+  const distanceAttr = accordion.getAttribute('aa-distance') || '30';
   const scrubValue = accordion.getAttribute('aa-scrub') || 'true';
   const accordionCount = state.toggles.length;
   
@@ -895,6 +895,12 @@ function initializeScrollAccordion(accordion, state, controller, defaultDuration
 function initializeAccordion(accordion, animations = null, splitText = null, defaultDuration = 1, accordionType = null) {
   // Auto-assign IDs if not provided
   autoAssignIds(accordion);
+  
+  // Check if device is touch-enabled and convert scroll accordion to single type for better UX
+  if (accordionType === 'scroll' && window.ScrollTrigger && ScrollTrigger.isTouch) {
+    accordion.setAttribute('aa-accordion', 'single');
+    accordionType = 'single';
+  }
   
   // Create state and controller
   const state = new AccordionState(accordion, defaultDuration);
