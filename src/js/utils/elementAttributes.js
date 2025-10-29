@@ -172,11 +172,7 @@ export function getElementSettings(element, settings, isMobile, loadGracePeriod 
     
     // Anchoring
     anchorSelector,
-    anchorElement,
-    
-    // Parent-specific attributes
-    isParent: aaAttributeType?.isChildren || element.hasAttribute("aa-children"),
-    childrenAnimation: element.getAttribute("aa-children")
+    anchorElement
   };
 }
 

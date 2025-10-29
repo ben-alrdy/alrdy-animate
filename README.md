@@ -1854,6 +1854,64 @@ Use the `|` separator to define different values for desktop and mobile, availab
 </div>
 ```
 
+### Image Lazy Loading Without JavaScript
+
+For optimal performance and to prevent layout shifts with lazy-loaded images, use this CSS-only approach instead of relying on JavaScript handlers.
+
+**The Problem:**
+Lazy-loaded images can cause ScrollTrigger calculations to be incorrect because images load after ScrollTrigger initializes, changing layout heights.
+
+**The Solution:**
+Reserve space for images using `aspect-ratio` on the image element itself, combined with proper sizing constraints.
+
+**HTML Structure:**
+```html
+<div class="grid-container">
+  <div class="grid-column-text">
+    <h2>Your heading</h2>
+    <p>Your text content</p>
+  </div>
+  <div class="grid-column-image">
+    <div class="image-wrapper">
+      <img src="image.jpg" loading="lazy" alt="Description">
+    </div>
+  </div>
+</div>
+```
+
+**CSS Setup:**
+```css
+/* Grid Container */
+.grid-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  align-items: start; /* Important: prevents stretching */
+}
+
+/* Image Wrapper */
+.image-wrapper {
+  width: 100%;
+  /* No aspect-ratio here */
+}
+
+/* Image - THIS IS THE KEY */
+.image-wrapper img {
+  width: 100%;
+  max-width: 20rem; /* Use rem units - set to your image's actual width */
+  aspect-ratio: 16 / 9; /* Set to your image's actual ratio */
+  display: block;
+  object-fit: contain; /* Maintains aspect ratio without cropping */
+}
+```
+
+**Why This Works:**
+1. **aspect-ratio on img**: Reserves space before the image loads, preventing layout shift
+2. **max-width in rem**: Prevents over-scaling beyond native resolution (respects your rem scaling)
+3. **object-fit: contain**: Ensures the entire image is visible without cropping
+4. **No JavaScript needed**: Pure CSS solution that works instantly
+
+
 ### Performance Features
 
 #### Lazy Loading Handler
@@ -1862,6 +1920,8 @@ AlrdyAnimate.init({
   lazyLoadHandler: true // Optimizes images and ScrollTrigger
 });
 ```
+
+**Note:** If you follow the CSS-only image lazy loading approach above, you can set this to `false` for better performance.
 
 #### Resize Optimization
 Automatic handling of window resize events for optimal performance.

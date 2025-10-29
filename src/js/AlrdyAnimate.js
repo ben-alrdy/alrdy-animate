@@ -135,8 +135,14 @@ async function init(options = {}) {
     // Process templates if specified
     const templates = processTemplates(initOptions);
 
+    // Process children FIRST - this copies attributes to child elements before we query for animated elements
+    const parentElements = document.querySelectorAll('[aa-children]');
+    parentElements.forEach(parent => {
+      processChildren(parent);
+    });
+
     // First get all elements with animation attributes
-    let elements = [...document.querySelectorAll("[aa-animate], [aa-children], [aa-hover], [aa-slider], [aa-accordion], [aa-marquee]")];
+    let elements = [...document.querySelectorAll("[aa-animate], [aa-hover], [aa-slider], [aa-accordion], [aa-marquee]")];
     
     // If templates are enabled, add elements with matching classes
     if (templates) {
@@ -152,7 +158,6 @@ async function init(options = {}) {
     elements.forEach(element => {
       element._aaAttributeType = {
         isAnimate: element.hasAttribute('aa-animate'),
-        isChildren: element.hasAttribute('aa-children'),
         isHover: element.hasAttribute('aa-hover'),
         isSlider: element.hasAttribute('aa-slider'),
         isAccordion: element.hasAttribute('aa-accordion'),
@@ -426,12 +431,6 @@ function batchProcessTextElements(textElements, initOptions, isMobile, modules, 
       // Apply styles (duration, delay, colors)
       applyElementStyles(element, settings, isMobile);
       
-      // Process children if needed
-      if (aaAttributeType.isChildren) {
-        const children = processChildren(element);
-        setupAnimations(children, initOptions, isMobile, modules);
-      }
-      
       // Setup the text animation (includes SplitText creation)
       if (enableGSAP) {
         setupGSAPAnimations(element, settings, initOptions, isMobile, modules);
@@ -474,22 +473,11 @@ function setupAnimations(elements, initOptions, isMobile, modules) {
     // Get cached types (or check directly for dynamically added elements)
     const aaAttributeType = element._aaAttributeType || {
       isAnimate: element.hasAttribute('aa-animate'),
-      isChildren: element.hasAttribute('aa-children'),
       isHover: element.hasAttribute('aa-hover'),
       isSlider: element.hasAttribute('aa-slider'),
       isAccordion: element.hasAttribute('aa-accordion'),
       isMarquee: element.hasAttribute('aa-marquee')
     };
-    
-    // Process children elements
-    if (aaAttributeType.isChildren) {
-      const children = processChildren(element);
-      setupAnimations(children, initOptions, isMobile, modules);
-      // Don't return early if this is also an interactive component
-      if (!aaAttributeType.isSlider && !aaAttributeType.isAccordion && !aaAttributeType.isMarquee) {
-        return;
-      }
-    }
 
     // Get settings from attributes or templates
     const templateSettings = getFinalSettings(element, initOptions, isMobile);
