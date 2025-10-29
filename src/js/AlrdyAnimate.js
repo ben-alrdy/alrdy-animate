@@ -412,7 +412,51 @@ async function init(options = {}) {
   }
 }
 
+function batchProcessTextElements(textElements, initOptions, isMobile, modules) {
+  const BATCH_SIZE = 10; // Process 10 text elements per frame
+  let currentIndex = 0;
+  
+  function processBatch() {
+    const batch = textElements.slice(currentIndex, currentIndex + BATCH_SIZE);
+    
+    batch.forEach(({ element, settings, aaAttributeType }) => {
+      // Apply styles (duration, delay, colors)
+      applyElementStyles(element, settings, isMobile);
+      
+      // Process children if needed
+      if (aaAttributeType.isChildren) {
+        const children = processChildren(element);
+        setupAnimations(children, initOptions, isMobile, modules);
+      }
+      
+      // Setup the text animation (includes SplitText creation)
+      if (enableGSAP) {
+        setupGSAPAnimations(element, settings, initOptions, isMobile, modules);
+      } else {
+        element.style.visibility = 'visible';
+        setupIntersectionObserver(element, settings, initOptions);
+      }
+    });
+    
+    currentIndex += BATCH_SIZE;
+    
+    // Schedule next batch if more elements remain
+    if (currentIndex < textElements.length) {
+      requestAnimationFrame(processBatch);
+    }
+  }
+  
+  // Start processing
+  if (textElements.length > 0) {
+    requestAnimationFrame(processBatch);
+  }
+}
+
 function setupAnimations(elements, initOptions, isMobile, modules) {
+  const textElements = [];
+  const nonTextElements = [];
+  
+  // First pass: categorize elements into text and non-text
   elements.forEach((element) => {
     // Get cached types (or check directly for dynamically added elements)
     const aaAttributeType = element._aaAttributeType || {
@@ -443,7 +487,24 @@ function setupAnimations(elements, initOptions, isMobile, modules) {
     
     // Store settings on the element for resize handling
     element.settings = settings;
-
+    
+    // Check if this is a text animation
+    const baseType = settings.animationType?.includes('-') 
+      ? settings.animationType.split('-')[0] 
+      : settings.animationType;
+    const isTextAnimation = baseType === 'text' && (aaAttributeType.isAnimate || templateSettings);
+    
+    if (isTextAnimation) {
+      // Add to text elements for batched processing
+      textElements.push({ element, settings, aaAttributeType });
+    } else {
+      // Process non-text elements immediately
+      nonTextElements.push({ element, settings, aaAttributeType });
+    }
+  });
+  
+  // Process non-text elements immediately
+  nonTextElements.forEach(({ element, settings, aaAttributeType }) => {
     // Apply styles (duration, delay, colors)
     applyElementStyles(element, settings, isMobile);
 
@@ -463,8 +524,8 @@ function setupAnimations(elements, initOptions, isMobile, modules) {
       }
     }
 
-    // Setup regular animations
-    if (aaAttributeType.isAnimate || templateSettings) {
+    // Setup regular animations (non-text)
+    if (aaAttributeType.isAnimate) {
       if (enableGSAP) {
         setupGSAPAnimations(element, settings, initOptions, isMobile, modules);
       } else {
@@ -473,6 +534,9 @@ function setupAnimations(elements, initOptions, isMobile, modules) {
       }
     }
   });
+  
+  // Batch process text elements with RAF to prevent forced reflows
+  batchProcessTextElements(textElements, initOptions, isMobile, modules);
 }
 
 function setupInteractiveComponent(element, elementSettings, modules, initOptions, aaAttributeType) {
