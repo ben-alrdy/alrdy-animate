@@ -2,6 +2,7 @@ export function handleLazyLoadedImages(ScrollTrigger, config = {}) {
   const {
     lazy = true,
     timeout = 0.5,
+    maxWait = 2.0,
     forceEagerAboveViewport = true,
     excludeNavTriggers = true
   } = config;
@@ -37,13 +38,34 @@ export function handleLazyLoadedImages(ScrollTrigger, config = {}) {
   }
 
   // Set up throttled refresh using GSAP's delayedCall
-  const refreshTimeout = gsap.delayedCall(timeout, refreshScrollTriggers).pause();
   let imgLoaded = lazyImages.length;
+  let firstLoadTime = null;
+  
+  const refreshTimeout = gsap.delayedCall(timeout, () => {
+    refreshScrollTriggers();
+    firstLoadTime = null; // Reset timer after successful debounced refresh
+  }).pause();
 
   const onImgLoad = () => {
     if (lazy) {
-      // Restart the timeout - this throttles multiple rapid loads
-      refreshTimeout.restart(true);
+      const now = Date.now();
+      
+      // Track when the first image started loading
+      if (!firstLoadTime) {
+        firstLoadTime = now;
+      }
+      
+      // Check if we've exceeded maxWait time
+      const elapsedTime = (now - firstLoadTime) / 1000;
+      
+      if (elapsedTime >= maxWait) {
+        // Force refresh and reset timer
+        refreshScrollTriggers();
+        firstLoadTime = null;
+      } else {
+        // Normal debounce behavior - restart the timeout
+        refreshTimeout.restart(true);
+      }
     } else {
       // Immediate refresh when all images loaded
       --imgLoaded || refreshScrollTriggers();
