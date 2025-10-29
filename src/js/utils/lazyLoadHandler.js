@@ -74,15 +74,23 @@ export function handleLazyLoadedImages(ScrollTrigger, config = {}) {
     }
   };
 
-  // Process each image
-  lazyImages.forEach(img => {
-    // Convert to eager loading if lazy is false
-    if (!lazy) {
+  // Process each image - batch DOM operations to prevent forced reflows
+  // 1. Read phase: Check which images are already loaded
+  const imageStates = lazyImages.map(img => ({
+    img,
+    isLoaded: img.naturalWidth > 0
+  }));
+  
+  // 2. Write phase: Update loading attribute if needed
+  if (!lazy) {
+    imageStates.forEach(({ img }) => {
       img.loading = "eager";
-    }
-    
-    // Check if already loaded or add load listener
-    img.naturalWidth ? onImgLoad() : img.addEventListener("load", onImgLoad, { once: true });
+    });
+  }
+  
+  // 3. Setup listeners based on cached read results
+  imageStates.forEach(({ img, isLoaded }) => {
+    isLoaded ? onImgLoad() : img.addEventListener("load", onImgLoad, { once: true });
   });
 
   // Force all remaining lazy images to eager after delay
@@ -105,12 +113,21 @@ export function handleLazyLoadedImages(ScrollTrigger, config = {}) {
           }
         };
         
-        remainingLazyImages.forEach(img => {
-          // Convert to eager
+        // Batch DOM operations to prevent forced reflows
+        // 1. Read phase: Check which images are already loaded
+        const imageStates = remainingLazyImages.map(img => ({
+          img,
+          isLoaded: img.naturalWidth > 0
+        }));
+        
+        // 2. Write phase: Update loading attribute
+        imageStates.forEach(({ img }) => {
           img.loading = "eager";
-          
-          // Check if already loaded or add load listener
-          img.naturalWidth ? onDelayedImgLoad() : img.addEventListener("load", onDelayedImgLoad, { once: true });
+        });
+        
+        // 3. Setup event listeners based on read phase results
+        imageStates.forEach(({ img, isLoaded }) => {
+          isLoaded ? onDelayedImgLoad() : img.addEventListener("load", onDelayedImgLoad, { once: true });
         });
       }
     });
