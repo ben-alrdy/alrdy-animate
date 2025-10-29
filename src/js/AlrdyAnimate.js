@@ -33,7 +33,7 @@ const defaultOptions = {
     enabled: true,
     options: {} // Defined in smoothScroll/setup.js
   },
-  lazyLoadHandler: true, // optionally pass config object: { lazy: true, timeout: 0.5, maxWait: 2.0, forceEagerAboveViewport: true, excludeNavTriggers: true }
+  lazyLoadHandler: true, // optionally pass config object: { lazy: true, timeout: 0.5, maxWait: 2.0, forceEagerAboveViewport: true, forceEagerAfterDelay: 3, excludeNavTriggers: true }
   debug: false, // Set to true to see GSAP debug info
   templates: null, // Template configuration for class-based animations
   initTimeout: 3, // 3 seconds timeout for initialization
@@ -371,7 +371,8 @@ async function init(options = {}) {
             if (initOptions.lazyLoadHandler) {
               // If lazyLoadHandler is an object, use it as config; otherwise use empty object for defaults
               const lazyConfig = typeof initOptions.lazyLoadHandler === 'object' ? initOptions.lazyLoadHandler : {};
-              handleLazyLoadedImages(loadedModules.ScrollTrigger, lazyConfig);
+              // Pass debug flag to the handler
+              handleLazyLoadedImages(loadedModules.ScrollTrigger, { ...lazyConfig, debug: initOptions.debug });
             }
           } else {
             // Fallback if GSAP loading failed

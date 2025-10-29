@@ -4,7 +4,9 @@ export function handleLazyLoadedImages(ScrollTrigger, config = {}) {
     timeout = 0.5,
     maxWait = 2.0,
     forceEagerAboveViewport = true,
-    excludeNavTriggers = true
+    forceEagerAfterDelay = 3, // Set to number (e.g., 3) to force all images to eager after X seconds
+    excludeNavTriggers = true,
+    debug = false
   } = config;
 
   // Selective refresh function that excludes nav triggers
@@ -82,4 +84,35 @@ export function handleLazyLoadedImages(ScrollTrigger, config = {}) {
     // Check if already loaded or add load listener
     img.naturalWidth ? onImgLoad() : img.addEventListener("load", onImgLoad, { once: true });
   });
+
+  // Force all remaining lazy images to eager after delay
+  if (forceEagerAfterDelay && forceEagerAfterDelay > 0) {
+    gsap.delayedCall(forceEagerAfterDelay, () => {
+      // Find all lazy images again (some may have loaded already)
+      const remainingLazyImages = gsap.utils.toArray("img[loading='lazy']");
+      
+      if (remainingLazyImages.length > 0) {
+        if (debug) {
+          console.log(`AlrdyAnimate: Converting ${remainingLazyImages.length} remaining lazy images to eager after ${forceEagerAfterDelay}s`);
+        }
+        
+        let remainingCount = remainingLazyImages.length;
+        
+        const onDelayedImgLoad = () => {
+          if (--remainingCount === 0) {
+            // All delayed images loaded, refresh ScrollTrigger
+            refreshScrollTriggers();
+          }
+        };
+        
+        remainingLazyImages.forEach(img => {
+          // Convert to eager
+          img.loading = "eager";
+          
+          // Check if already loaded or add load listener
+          img.naturalWidth ? onDelayedImgLoad() : img.addEventListener("load", onDelayedImgLoad, { once: true });
+        });
+      }
+    });
+  }
 } 
