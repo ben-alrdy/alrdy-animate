@@ -33,7 +33,7 @@ const defaultOptions = {
     enabled: true,
     options: {} // Defined in smoothScroll/setup.js
   },
-  lazyLoadHandler: true, // optionally pass config object: { lazy: true, timeout: 0.5, maxWait: 2.0, forceEagerAboveViewport: true, forceEagerAfterDelay: 3, excludeNavTriggers: true }
+  lazyLoadHandler: false, // optionally pass config object: { lazy: true, timeout: 0.5, maxWait: 2.0, forceEagerAboveViewport: true, forceEagerAfterDelay: 3, excludeNavTriggers: true }
   debug: false, // Set to true to see GSAP debug info
   templates: null, // Template configuration for class-based animations
   initTimeout: 3, // 3 seconds timeout for initialization
@@ -415,8 +415,8 @@ async function init(options = {}) {
   }
 }
 
-function batchProcessTextElements(textElements, initOptions, isMobile, modules) {
-  const BATCH_SIZE = 10; // Process 10 text elements per frame
+function batchProcessTextElements(textElements, initOptions, isMobile, modules, onComplete) {
+  const BATCH_SIZE = 5; // Process 5 text elements per frame (reduced for chars splitting)
   let currentIndex = 0;
   
   function processBatch() {
@@ -446,12 +446,22 @@ function batchProcessTextElements(textElements, initOptions, isMobile, modules) 
     // Schedule next batch if more elements remain
     if (currentIndex < textElements.length) {
       requestAnimationFrame(processBatch);
+    } else {
+      // All text elements processed - call completion callback
+      if (onComplete) {
+        onComplete();
+      }
     }
   }
   
   // Start processing
   if (textElements.length > 0) {
     requestAnimationFrame(processBatch);
+  } else {
+    // No text elements - call completion callback immediately
+    if (onComplete) {
+      onComplete();
+    }
   }
 }
 
@@ -539,7 +549,11 @@ function setupAnimations(elements, initOptions, isMobile, modules) {
   });
   
   // Batch process text elements with RAF to prevent forced reflows
-  batchProcessTextElements(textElements, initOptions, isMobile, modules);
+  // Pass a callback to trigger accordion initialization when text splitting is complete
+  batchProcessTextElements(textElements, initOptions, isMobile, modules, () => {
+    // Text splitting complete - trigger any pending accordion initializations
+    document.dispatchEvent(new CustomEvent('aa-text-splitting-complete'));
+  });
 }
 
 function setupInteractiveComponent(element, elementSettings, modules, initOptions, aaAttributeType) {

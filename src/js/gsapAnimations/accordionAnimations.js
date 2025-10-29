@@ -442,14 +442,14 @@ function initializeAccordionElements(accordion, state, animations, splitText, de
     toggleToOpen = state.toggles[0];
   }
   
-  // Open initial accordion if specified or required
+  // Set up initial accordion opening (delayed until text splitting is complete)
   if (toggleToOpen) {
     const toggleToOpenId = toggleToOpen.getAttribute('aa-accordion-toggle');
     const elementData = state.getElementData(toggleToOpenId);
     
     if (elementData) {
-      // Add a small delay to ensure all animations are properly set up before opening
-      gsap.delayedCall(0.1, () => {
+      // Store the opening function for this accordion
+      const openInitialAccordion = () => {
         // Set current accordion to active
         toggleToOpen.setAttribute('aa-accordion-status', 'active');
         
@@ -476,6 +476,17 @@ function initializeAccordionElements(accordion, state, animations, splitText, de
           elementData.visual.setAttribute('aa-accordion-status', 'active');
           gsap.set(elementData.visual, { visibility: 'visible' });
           triggerAccordionAnimations(elementData.visual, 'play');
+        }
+      };
+      
+      // Listen for text splitting completion (global event)
+      document.addEventListener('aa-text-splitting-complete', openInitialAccordion, { once: true });
+      
+      // Fallback: if no text elements exist, open immediately
+      // This handles cases where there are no text animations on the page
+      gsap.delayedCall(0.1, () => {
+        if (toggleToOpen.getAttribute('aa-accordion-status') !== 'active') {
+          openInitialAccordion();
         }
       });
     }

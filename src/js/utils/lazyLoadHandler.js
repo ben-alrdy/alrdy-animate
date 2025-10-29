@@ -10,17 +10,22 @@ export function handleLazyLoadedImages(ScrollTrigger, config = {}) {
   } = config;
 
   // Selective refresh function that excludes nav triggers
+  // Wrap in RAF to batch layout recalculations and prevent forced reflows
   const refreshScrollTriggers = () => {
-    if (excludeNavTriggers) {
-      ScrollTrigger.getAll().forEach(st => {
-        const trigger = st.vars.trigger;
-        if (!trigger || typeof trigger.hasAttribute !== "function" || !trigger.hasAttribute('aa-nav')) {
-          st.refresh();
-        }
-      });
-    } else {
-      ScrollTrigger.refresh();
-    }
+    requestAnimationFrame(() => {
+      if (excludeNavTriggers) {
+        // Filter and refresh individual triggers
+        ScrollTrigger.getAll().forEach(st => {
+          const trigger = st.vars.trigger;
+          if (!trigger || typeof trigger.hasAttribute !== "function" || !trigger.hasAttribute('aa-nav')) {
+            st.refresh();
+          }
+        });
+      } else {
+        // Use batch refresh for all triggers
+        ScrollTrigger.refresh(true);
+      }
+    });
   };
 
   // Get all lazy images using GSAP's utility
