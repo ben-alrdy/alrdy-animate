@@ -535,19 +535,39 @@ function setupAnimations(elements, initOptions, isMobile, modules) {
   // Debug logging
   if (initOptions.debug) {
     console.group('AlrdyAnimate: Initialization Strategy');
-    console.log(`deferInit: ${initOptions.deferInit || 'false (disabled)'}`);
-    console.log(`Immediate elements: ${immediateElements.length}`);
-    console.log(`Deferred elements: ${deferredElements.length}`);
-    console.log(`Text elements (batched immediately): ${textElements.length}`);
+    console.log(`deferInit setting: ${initOptions.deferInit || 'false (disabled)'}`);
+    console.log(`Total elements found: ${elements.length}`);
+    console.log(`├─ Immediate elements: ${immediateElements.length}`);
+    console.log(`├─ Deferred elements: ${deferredElements.length}`);
+    console.log(`└─ Text elements (batched immediately): ${textElements.length}`);
     
+    // Log immediate breakdown
+    if (immediateElements.length > 0) {
+      const immediateByType = immediateElements.reduce((acc, { aaAttributeType, settings }) => {
+        let type = 'animation';
+        if (aaAttributeType.isSlider) type = 'slider';
+        else if (aaAttributeType.isAccordion) type = 'accordion';
+        else if (aaAttributeType.isMarquee) type = 'marquee';
+        else if (aaAttributeType.isHover) type = 'hover';
+        else if (settings.animationType) type = settings.animationType.split('-')[0];
+        
+        acc[type] = (acc[type] || 0) + 1;
+        return acc;
+      }, {});
+      
+      console.log('Immediate breakdown:', immediateByType);
+    }
+    
+    // Log deferred breakdown
     if (deferredElements.length > 0) {
-      const deferredByType = deferredElements.reduce((acc, { aaAttributeType, element, settings }) => {
+      const deferredByType = deferredElements.reduce((acc, { aaAttributeType, settings }) => {
         let type = 'animation';
         if (aaAttributeType.isSlider) type = 'slider';
         else if (aaAttributeType.isAccordion) type = 'accordion';
         else if (aaAttributeType.isMarquee) type = 'marquee';
         else if (aaAttributeType.isHover) type = 'hover';
         else if (settings.animationType?.includes('text-')) type = 'text';
+        else if (settings.animationType) type = settings.animationType.split('-')[0];
         
         acc[type] = (acc[type] || 0) + 1;
         return acc;
@@ -555,6 +575,13 @@ function setupAnimations(elements, initOptions, isMobile, modules) {
       
       console.log('Deferred breakdown:', deferredByType);
     }
+    
+    // Log elements with aa-load that prevented deferring
+    const elementsWithLoad = elements.filter(el => el.element.hasAttribute('aa-load'));
+    if (elementsWithLoad.length > 0) {
+      console.log(`Elements with aa-load (never deferred): ${elementsWithLoad.length}`);
+    }
+    
     console.groupEnd();
   }
   
@@ -610,8 +637,10 @@ function processElement(element, settings, aaAttributeType, isMobile, modules, i
 // Defer element initialization until browser is idle
 function deferElementInitialization(elements, initOptions, isMobile, modules) {
   const initDeferred = () => {
+    const startTime = performance.now();
+    
     if (initOptions.debug) {
-      console.log(`AlrdyAnimate: Initializing ${elements.length} deferred elements`);
+      console.log(`AlrdyAnimate: Starting deferred initialization of ${elements.length} elements`);
     }
     
     // Separate text elements from non-text elements for batched processing
@@ -648,7 +677,8 @@ function deferElementInitialization(elements, initOptions, isMobile, modules) {
         document.dispatchEvent(new CustomEvent('aa-deferred-init-complete'));
         
         if (initOptions.debug) {
-          console.log('AlrdyAnimate: Deferred initialization complete');
+          const endTime = performance.now();
+          console.log(`AlrdyAnimate: Deferred initialization complete (took ${(endTime - startTime).toFixed(2)}ms)`);
         }
       });
     } else {
@@ -660,7 +690,8 @@ function deferElementInitialization(elements, initOptions, isMobile, modules) {
       document.dispatchEvent(new CustomEvent('aa-deferred-init-complete'));
       
       if (initOptions.debug) {
-        console.log('AlrdyAnimate: Deferred initialization complete');
+        const endTime = performance.now();
+        console.log(`AlrdyAnimate: Deferred initialization complete (took ${(endTime - startTime).toFixed(2)}ms)`);
       }
     }
   };
@@ -668,8 +699,14 @@ function deferElementInitialization(elements, initOptions, isMobile, modules) {
   // Use requestIdleCallback if available (runs during browser idle time)
   // Fallback to setTimeout for older browsers
   if ('requestIdleCallback' in window) {
+    if (initOptions.debug) {
+      console.log('AlrdyAnimate: Scheduling deferred elements with requestIdleCallback');
+    }
     requestIdleCallback(initDeferred, { timeout: 2000 });
   } else {
+    if (initOptions.debug) {
+      console.log('AlrdyAnimate: Scheduling deferred elements with setTimeout (100ms)');
+    }
     setTimeout(initDeferred, 100);
   }
 }
