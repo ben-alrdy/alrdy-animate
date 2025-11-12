@@ -39,8 +39,7 @@ const defaultOptions = {
   initTimeout: 3, // 3 seconds timeout for initialization
   reducedMotionDuration: 0.5, // Duration for reduced motion animations
   reducedMotionEase: "ease", // Easing for reduced motion animations
-  loadGracePeriod: 0.35, // Grace period in seconds for hybrid aa-load + aa-animate elements (should be slightly shorter than --load-base-delay)
-  deferInit: false // Options: 'all' (defer all animations including text, except aa-load), 'interactive' (defer only sliders/accordions/marquees, except aa-load), false (no deferring)
+  loadGracePeriod: 0.35 // Grace period in seconds for hybrid aa-load + aa-animate elements (should be slightly shorter than --load-base-delay)
 };
 
 // Function to apply reduced motion by replacing animation attributes
@@ -162,7 +161,8 @@ async function init(options = {}) {
         isHover: element.hasAttribute('aa-hover'),
         isSlider: element.hasAttribute('aa-slider'),
         isAccordion: element.hasAttribute('aa-accordion'),
-        isMarquee: element.hasAttribute('aa-marquee')
+        isMarquee: element.hasAttribute('aa-marquee'),
+        isHybrid: element.hasAttribute('aa-load') && element.hasAttribute('aa-animate')
       };
     });
       
@@ -467,19 +467,12 @@ function batchProcessTextElements(textElements, initOptions, isMobile, modules, 
 
 function setupAnimations(elements, initOptions, isMobile, modules) {
   const textElements = [];
-  const immediateElements = [];
-  const deferredElements = [];
+  const nonTextElements = [];
   
-  // First pass: categorize elements into text, immediate, and deferred
+  // First pass: categorize elements into text and non-text
   elements.forEach((element) => {
-    // Get cached types (or check directly for dynamically added elements)
-    const aaAttributeType = element._aaAttributeType || {
-      isAnimate: element.hasAttribute('aa-animate'),
-      isHover: element.hasAttribute('aa-hover'),
-      isSlider: element.hasAttribute('aa-slider'),
-      isAccordion: element.hasAttribute('aa-accordion'),
-      isMarquee: element.hasAttribute('aa-marquee')
-    };
+    // Use cached types (already set in init)
+    const aaAttributeType = element._aaAttributeType;
 
     // Get settings from attributes or templates
     const templateSettings = getFinalSettings(element, initOptions, isMobile);
@@ -497,218 +490,53 @@ function setupAnimations(elements, initOptions, isMobile, modules) {
       : settings.animationType;
     const isTextAnimation = baseType === 'text' && (aaAttributeType.isAnimate || templateSettings);
     
-    // Check if element has aa-load (opt-out of deferring)
-    const hasLoadAttribute = element.hasAttribute('aa-load');
-    
-    // Check if this is an interactive component
-    const isInteractive = aaAttributeType.isSlider || aaAttributeType.isAccordion || aaAttributeType.isMarquee;
-    
-    // Determine if element should be deferred based on deferInit setting
-    let shouldDefer = false;
-    if (initOptions.deferInit && !hasLoadAttribute) {
-      if (initOptions.deferInit === 'all') {
-        // Defer all animations including text
-        shouldDefer = true;
-      } else if (initOptions.deferInit === 'interactive') {
-        // Defer only interactive components (text is batched immediately)
-        shouldDefer = isInteractive;
-      }
-    }
-    
-    if (isTextAnimation) {
-      // If deferInit is 'all', defer text animations too (for maximum Lighthouse optimization)
-      // Otherwise, batch them immediately (spreads work across frames but starts right away)
-      if (shouldDefer && initOptions.deferInit === 'all') {
-        deferredElements.push({ element, settings, aaAttributeType });
-      } else {
-        textElements.push({ element, settings, aaAttributeType });
-      }
-    } else if (shouldDefer) {
-      // Add to deferred elements
-      deferredElements.push({ element, settings, aaAttributeType });
+    // Hybrid text elements must be processed immediately (not batched) to prevent FOUC
+    // Regular text elements can be batched for better performance
+    if (isTextAnimation && !aaAttributeType.isHybrid) {
+      textElements.push({ element, settings, aaAttributeType });
     } else {
-      // Process immediately
-      immediateElements.push({ element, settings, aaAttributeType });
+      nonTextElements.push({ element, settings, aaAttributeType });
     }
   });
   
-  // Debug logging
-  if (initOptions.debug) {
-    console.group('AlrdyAnimate: Initialization Strategy');
-    console.log(`deferInit setting: ${initOptions.deferInit || 'false (disabled)'}`);
-    console.log(`Total elements found: ${elements.length}`);
-    console.log(`├─ Immediate elements: ${immediateElements.length}`);
-    console.log(`├─ Deferred elements: ${deferredElements.length}`);
-    console.log(`└─ Text elements (batched immediately): ${textElements.length}`);
-    
-    // Log immediate breakdown
-    if (immediateElements.length > 0) {
-      const immediateByType = immediateElements.reduce((acc, { aaAttributeType, settings }) => {
-        let type = 'animation';
-        if (aaAttributeType.isSlider) type = 'slider';
-        else if (aaAttributeType.isAccordion) type = 'accordion';
-        else if (aaAttributeType.isMarquee) type = 'marquee';
-        else if (aaAttributeType.isHover) type = 'hover';
-        else if (settings.animationType) type = settings.animationType.split('-')[0];
-        
-        acc[type] = (acc[type] || 0) + 1;
-        return acc;
-      }, {});
-      
-      console.log('Immediate breakdown:', immediateByType);
+  // Process non-text elements immediately
+  nonTextElements.forEach(({ element, settings, aaAttributeType }) => {
+    // Apply styles (duration, delay, colors)
+    applyElementStyles(element, settings, isMobile);
+
+    // Setup hover animations 
+    if (aaAttributeType.isHover) {
+      // Check if device supports hover
+      const hasHoverSupport = window.matchMedia('(hover: hover)').matches;
+      if (hasHoverSupport && enableGSAP && initOptions.gsapFeatures.includes('hover')) {
+        setupGSAPHoverAnimations(element, settings, modules);
+      } 
     }
-    
-    // Log deferred breakdown
-    if (deferredElements.length > 0) {
-      const deferredByType = deferredElements.reduce((acc, { aaAttributeType, settings }) => {
-        let type = 'animation';
-        if (aaAttributeType.isSlider) type = 'slider';
-        else if (aaAttributeType.isAccordion) type = 'accordion';
-        else if (aaAttributeType.isMarquee) type = 'marquee';
-        else if (aaAttributeType.isHover) type = 'hover';
-        else if (settings.animationType?.includes('text-')) type = 'text';
-        else if (settings.animationType) type = settings.animationType.split('-')[0];
-        
-        acc[type] = (acc[type] || 0) + 1;
-        return acc;
-      }, {});
-      
-      console.log('Deferred breakdown:', deferredByType);
+
+    // Setup interactive components (sliders, accordions, marquees)
+    if (aaAttributeType.isSlider || aaAttributeType.isAccordion || aaAttributeType.isMarquee) {
+      if (enableGSAP) {
+        setupInteractiveComponent(element, settings, modules, initOptions, aaAttributeType);
+      }
     }
-    
-    // Log elements with aa-load that prevented deferring
-    const elementsWithLoad = elements.filter(el => el.hasAttribute && el.hasAttribute('aa-load'));
-    if (elementsWithLoad.length > 0) {
-      console.log(`Elements with aa-load (never deferred): ${elementsWithLoad.length}`);
+
+    // Setup regular animations (non-text)
+    if (aaAttributeType.isAnimate) {
+      if (enableGSAP) {
+        setupGSAPAnimations(element, settings, initOptions, isMobile, modules);
+      } else {
+        element.style.visibility = 'visible';
+        setupIntersectionObserver(element, settings, initOptions);
+      }
     }
-    
-    console.groupEnd();
-  }
-  
-  // Process immediate elements
-  immediateElements.forEach(({ element, settings, aaAttributeType }) => {
-    processElement(element, settings, aaAttributeType, isMobile, modules, initOptions);
   });
   
   // Batch process text elements with RAF to prevent forced reflows
+  // Pass a callback to trigger accordion initialization when text splitting is complete
   batchProcessTextElements(textElements, initOptions, isMobile, modules, () => {
     // Text splitting complete - trigger any pending accordion initializations
     document.dispatchEvent(new CustomEvent('aa-text-splitting-complete'));
   });
-  
-  // Defer elements if there are any
-  if (deferredElements.length > 0) {
-    deferElementInitialization(deferredElements, initOptions, isMobile, modules);
-  }
-}
-
-// Helper function to process a single element
-function processElement(element, settings, aaAttributeType, isMobile, modules, initOptions) {
-  // Apply styles (duration, delay, colors)
-  applyElementStyles(element, settings, isMobile);
-
-  // Setup hover animations 
-  if (aaAttributeType.isHover) {
-    // Check if device supports hover
-    const hasHoverSupport = window.matchMedia('(hover: hover)').matches;
-    if (hasHoverSupport && enableGSAP && initOptions.gsapFeatures.includes('hover')) {
-      setupGSAPHoverAnimations(element, settings, modules);
-    } 
-  }
-
-  // Setup interactive components (sliders, accordions, marquees)
-  if (aaAttributeType.isSlider || aaAttributeType.isAccordion || aaAttributeType.isMarquee) {
-    if (enableGSAP) {
-      setupInteractiveComponent(element, settings, modules, initOptions, aaAttributeType);
-    }
-  }
-
-  // Setup regular animations (non-text)
-  if (aaAttributeType.isAnimate) {
-    if (enableGSAP) {
-      setupGSAPAnimations(element, settings, initOptions, isMobile, modules);
-    } else {
-      element.style.visibility = 'visible';
-      setupIntersectionObserver(element, settings, initOptions);
-    }
-  }
-}
-
-// Defer element initialization until browser is idle
-function deferElementInitialization(elements, initOptions, isMobile, modules) {
-  const initDeferred = () => {
-    const startTime = performance.now();
-    
-    if (initOptions.debug) {
-      console.log(`AlrdyAnimate: Starting deferred initialization of ${elements.length} elements`);
-    }
-    
-    // Separate text elements from non-text elements for batched processing
-    const textElements = [];
-    const nonTextElements = [];
-    
-    elements.forEach(({ element, settings, aaAttributeType }) => {
-      const baseType = settings.animationType?.includes('-') 
-        ? settings.animationType.split('-')[0] 
-        : settings.animationType;
-      const isTextAnimation = baseType === 'text';
-      
-      if (isTextAnimation) {
-        textElements.push({ element, settings, aaAttributeType });
-      } else {
-        nonTextElements.push({ element, settings, aaAttributeType });
-      }
-    });
-    
-    // Process non-text elements immediately
-    nonTextElements.forEach(({ element, settings, aaAttributeType }) => {
-      processElement(element, settings, aaAttributeType, isMobile, modules, initOptions);
-    });
-    
-    // Batch process text elements to prevent forced reflows
-    if (textElements.length > 0) {
-      batchProcessTextElements(textElements, initOptions, isMobile, modules, () => {
-        // Text splitting complete
-        if (modules.ScrollTrigger) {
-          modules.ScrollTrigger.refresh(true);
-        }
-        
-        // Dispatch event for any custom logic that needs to know when deferred elements are ready
-        document.dispatchEvent(new CustomEvent('aa-deferred-init-complete'));
-        
-        if (initOptions.debug) {
-          const endTime = performance.now();
-          console.log(`AlrdyAnimate: Deferred initialization complete (took ${(endTime - startTime).toFixed(2)}ms)`);
-        }
-      });
-    } else {
-      // No text elements - refresh and dispatch immediately
-      if (modules.ScrollTrigger) {
-        modules.ScrollTrigger.refresh(true);
-      }
-      
-      document.dispatchEvent(new CustomEvent('aa-deferred-init-complete'));
-      
-      if (initOptions.debug) {
-        const endTime = performance.now();
-        console.log(`AlrdyAnimate: Deferred initialization complete (took ${(endTime - startTime).toFixed(2)}ms)`);
-      }
-    }
-  };
-  
-  // Use requestIdleCallback if available (runs during browser idle time)
-  // Fallback to setTimeout for older browsers
-  if ('requestIdleCallback' in window) {
-    if (initOptions.debug) {
-      console.log('AlrdyAnimate: Scheduling deferred elements with requestIdleCallback');
-    }
-    requestIdleCallback(initDeferred, { timeout: 2000 });
-  } else {
-    if (initOptions.debug) {
-      console.log('AlrdyAnimate: Scheduling deferred elements with setTimeout (100ms)');
-    }
-    setTimeout(initDeferred, 100);
-  }
 }
 
 function setupInteractiveComponent(element, elementSettings, modules, initOptions, aaAttributeType) {
@@ -761,12 +589,12 @@ const featureAvailabilityCache = new Map();
 function setupGSAPAnimations(element, elementSettings, initOptions, isMobile, modules) {
   const { animationType, split, scrub, duration, stagger, delay, ease, opacity, distance, anchorElement, anchorSelector, scrollStart, scrollEnd } = elementSettings;
   
-  // 0. Check if this is a hybrid element (has both aa-load and aa-animate)
-  const isHybridElement = element.hasAttribute('aa-load') && element.hasAttribute('aa-animate');
+  // 0. Check if grace period expired for hybrid elements (has both aa-load and aa-animate)
+  const isHybrid = element._aaAttributeType?.isHybrid || false;
   const gracePeriodExpired = document.body.hasAttribute('aa-load-grace-expired');
   
   // If hybrid element and grace period expired, CSS animations have taken over - skip GSAP
-  if (isHybridElement && gracePeriodExpired) {
+  if (isHybrid && gracePeriodExpired) {
     if (initOptions.debug) {
       console.log('AlrdyAnimate: Loading grace period expired, CSS load animations run instead of GSAP');
     }
