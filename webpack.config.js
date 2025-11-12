@@ -33,7 +33,16 @@ module.exports = {
         use: {
           loader: 'babel-loader',
           options: {
-            presets: ['@babel/preset-env'],
+            presets: [
+              [
+                '@babel/preset-env',
+                {
+                  bugfixes: true,
+                  modules: false,
+                  targets: 'defaults and supports es6-module'
+                }
+              ]
+            ],
             plugins: ['@babel/plugin-syntax-dynamic-import']
           }
         }

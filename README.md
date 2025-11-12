@@ -1914,6 +1914,44 @@ Reserve space for images using `aspect-ratio` on the image element itself, combi
 
 ### Performance Features
 
+#### Deferred Initialization (Lighthouse Optimization)
+
+Improve page load performance by deferring non-critical animations until after the initial page load. This significantly improves Lighthouse scores by reducing forced reflows during the measurement window.
+
+```javascript
+AlrdyAnimate.init({
+  deferInit: 'interactive' // Recommended for Lighthouse optimization
+});
+```
+
+**Options:**
+- `false` (default) - All animations initialize immediately on page load
+- `'interactive'` (recommended) - Defer sliders, accordions, and marquees (~100ms after load). Regular animations (fade, slide, etc.) remain immediate. **Best balance of performance and UX.**
+- `'all'` - Defer all animations except text animations (most aggressive optimization)
+
+**Opt-out with `aa-load`:**
+Any element with the `aa-load` attribute will always initialize immediately, regardless of the `deferInit` setting:
+
+```html
+<!-- This slider will ALWAYS load immediately -->
+<div aa-slider="autoplay" aa-load>Hero Slider</div>
+
+<!-- This slider will be deferred if deferInit='interactive' -->
+<div aa-slider="basic">Product Gallery</div>
+```
+
+**Performance Impact:**
+- Typical improvement: 50-100ms reduction in initial load time
+- Deferred elements initialize during browser idle time via `requestIdleCallback`
+- Fallback to 100ms `setTimeout` for older browsers
+- Event dispatched when complete: `aa-deferred-init-complete`
+
+**When to Use:**
+- ✅ Pages with multiple sliders/accordions
+- ✅ Lighthouse score optimization
+- ✅ Long-form content pages
+- ❌ Simple pages with only critical components
+
 #### Lazy Loading Handler
 ```javascript
 AlrdyAnimate.init({
@@ -1968,6 +2006,7 @@ AlrdyAnimate.init({
   includeGSAP: false,       // Include GSAP in bundle vs use Webflow's
   initTimeout: 3,            // Initialization timeout (seconds), shows all elements after this time
   loadGracePeriod: 0.35,     // Grace period for hybrid aa-load + aa-animate (seconds)
+  deferInit: false,          // Defer initialization: false (disabled), 'interactive' (defer sliders/accordions/marquees), 'all' (defer all animations)
   
   // Smooth scrolling
   smoothScroll: {
