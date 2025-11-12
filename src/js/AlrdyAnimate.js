@@ -577,7 +577,7 @@ function setupAnimations(elements, initOptions, isMobile, modules) {
     }
     
     // Log elements with aa-load that prevented deferring
-    const elementsWithLoad = elements.filter(el => el.element.hasAttribute('aa-load'));
+    const elementsWithLoad = elements.filter(el => el.hasAttribute && el.hasAttribute('aa-load'));
     if (elementsWithLoad.length > 0) {
       console.log(`Elements with aa-load (never deferred): ${elementsWithLoad.length}`);
     }
