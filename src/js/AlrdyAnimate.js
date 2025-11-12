@@ -40,7 +40,7 @@ const defaultOptions = {
   reducedMotionDuration: 0.5, // Duration for reduced motion animations
   reducedMotionEase: "ease", // Easing for reduced motion animations
   loadGracePeriod: 0.35, // Grace period in seconds for hybrid aa-load + aa-animate elements (should be slightly shorter than --load-base-delay)
-  deferInit: false // Options: 'all' (defer all animations except aa-load), 'interactive' (defer sliders/accordions/marquees except aa-load), false (no deferring)
+  deferInit: false // Options: 'all' (defer all animations including text, except aa-load), 'interactive' (defer only sliders/accordions/marquees, except aa-load), false (no deferring)
 };
 
 // Function to apply reduced motion by replacing animation attributes
@@ -516,8 +516,13 @@ function setupAnimations(elements, initOptions, isMobile, modules) {
     }
     
     if (isTextAnimation) {
-      // Add to text elements for batched processing
-      textElements.push({ element, settings, aaAttributeType });
+      // If deferInit is 'all', defer text animations too (for maximum Lighthouse optimization)
+      // Otherwise, batch them immediately (spreads work across frames but starts right away)
+      if (shouldDefer && initOptions.deferInit === 'all') {
+        deferredElements.push({ element, settings, aaAttributeType });
+      } else {
+        textElements.push({ element, settings, aaAttributeType });
+      }
     } else if (shouldDefer) {
       // Add to deferred elements
       deferredElements.push({ element, settings, aaAttributeType });
@@ -533,15 +538,16 @@ function setupAnimations(elements, initOptions, isMobile, modules) {
     console.log(`deferInit: ${initOptions.deferInit || 'false (disabled)'}`);
     console.log(`Immediate elements: ${immediateElements.length}`);
     console.log(`Deferred elements: ${deferredElements.length}`);
-    console.log(`Text elements (batched): ${textElements.length}`);
+    console.log(`Text elements (batched immediately): ${textElements.length}`);
     
     if (deferredElements.length > 0) {
-      const deferredByType = deferredElements.reduce((acc, { aaAttributeType, element }) => {
+      const deferredByType = deferredElements.reduce((acc, { aaAttributeType, element, settings }) => {
         let type = 'animation';
         if (aaAttributeType.isSlider) type = 'slider';
         else if (aaAttributeType.isAccordion) type = 'accordion';
         else if (aaAttributeType.isMarquee) type = 'marquee';
         else if (aaAttributeType.isHover) type = 'hover';
+        else if (settings.animationType?.includes('text-')) type = 'text';
         
         acc[type] = (acc[type] || 0) + 1;
         return acc;
@@ -608,20 +614,54 @@ function deferElementInitialization(elements, initOptions, isMobile, modules) {
       console.log(`AlrdyAnimate: Initializing ${elements.length} deferred elements`);
     }
     
+    // Separate text elements from non-text elements for batched processing
+    const textElements = [];
+    const nonTextElements = [];
+    
     elements.forEach(({ element, settings, aaAttributeType }) => {
+      const baseType = settings.animationType?.includes('-') 
+        ? settings.animationType.split('-')[0] 
+        : settings.animationType;
+      const isTextAnimation = baseType === 'text';
+      
+      if (isTextAnimation) {
+        textElements.push({ element, settings, aaAttributeType });
+      } else {
+        nonTextElements.push({ element, settings, aaAttributeType });
+      }
+    });
+    
+    // Process non-text elements immediately
+    nonTextElements.forEach(({ element, settings, aaAttributeType }) => {
       processElement(element, settings, aaAttributeType, isMobile, modules, initOptions);
     });
     
-    // Refresh ScrollTrigger after all deferred elements are initialized
-    if (modules.ScrollTrigger) {
-      modules.ScrollTrigger.refresh(true);
-    }
-    
-    // Dispatch event for any custom logic that needs to know when deferred elements are ready
-    document.dispatchEvent(new CustomEvent('aa-deferred-init-complete'));
-    
-    if (initOptions.debug) {
-      console.log('AlrdyAnimate: Deferred initialization complete');
+    // Batch process text elements to prevent forced reflows
+    if (textElements.length > 0) {
+      batchProcessTextElements(textElements, initOptions, isMobile, modules, () => {
+        // Text splitting complete
+        if (modules.ScrollTrigger) {
+          modules.ScrollTrigger.refresh(true);
+        }
+        
+        // Dispatch event for any custom logic that needs to know when deferred elements are ready
+        document.dispatchEvent(new CustomEvent('aa-deferred-init-complete'));
+        
+        if (initOptions.debug) {
+          console.log('AlrdyAnimate: Deferred initialization complete');
+        }
+      });
+    } else {
+      // No text elements - refresh and dispatch immediately
+      if (modules.ScrollTrigger) {
+        modules.ScrollTrigger.refresh(true);
+      }
+      
+      document.dispatchEvent(new CustomEvent('aa-deferred-init-complete'));
+      
+      if (initOptions.debug) {
+        console.log('AlrdyAnimate: Deferred initialization complete');
+      }
     }
   };
   

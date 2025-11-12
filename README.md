@@ -1926,8 +1926,8 @@ AlrdyAnimate.init({
 
 **Options:**
 - `false` (default) - All animations initialize immediately on page load
-- `'interactive'` (recommended) - Defer sliders, accordions, and marquees (~100ms after load). Regular animations (fade, slide, etc.) remain immediate. **Best balance of performance and UX.**
-- `'all'` - Defer all animations except text animations (most aggressive optimization)
+- `'interactive'` (recommended) - Defer sliders, accordions, and marquees (~100ms after load). Regular animations (fade, slide, etc.) and text animations remain immediate. **Best balance of performance and UX.**
+- `'all'` - Defer all animations including text animations (most aggressive optimization). Only elements with `aa-load` initialize immediately.
 
 **Opt-out with `aa-load`:**
 Any element with the `aa-load` attribute will always initialize immediately, regardless of the `deferInit` setting:
@@ -2006,7 +2006,7 @@ AlrdyAnimate.init({
   includeGSAP: false,       // Include GSAP in bundle vs use Webflow's
   initTimeout: 3,            // Initialization timeout (seconds), shows all elements after this time
   loadGracePeriod: 0.35,     // Grace period for hybrid aa-load + aa-animate (seconds)
-  deferInit: false,          // Defer initialization: false (disabled), 'interactive' (defer sliders/accordions/marquees), 'all' (defer all animations)
+  deferInit: false,          // Defer initialization: false (disabled), 'interactive' (defer sliders/accordions/marquees), 'all' (defer all including text animations)
   
   // Smooth scrolling
   smoothScroll: {
