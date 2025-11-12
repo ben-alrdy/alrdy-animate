@@ -507,10 +507,10 @@ function setupAnimations(elements, initOptions, isMobile, modules) {
     let shouldDefer = false;
     if (initOptions.deferInit && !hasLoadAttribute) {
       if (initOptions.deferInit === 'all') {
-        // Defer all animations (except text which is already batched)
-        shouldDefer = !isTextAnimation;
+        // Defer all animations including text
+        shouldDefer = true;
       } else if (initOptions.deferInit === 'interactive') {
-        // Defer only interactive components
+        // Defer only interactive components (text is batched immediately)
         shouldDefer = isInteractive;
       }
     }
