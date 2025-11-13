@@ -42,7 +42,11 @@ function generatePreloadHints() {
     return `<link rel="modulepreload" href="/dist/chunks/${file}">`;
   }).join('\n');
 
-  const cdnHints = criticalChunkFiles.map(file => {
+  const unpkgHints = criticalChunkFiles.map(file => {
+    return `<link rel="modulepreload" href="https://unpkg.com/alrdy-animate@${version}/dist/chunks/${file}">`;
+  }).join('\n');
+
+  const jsdelivrHints = criticalChunkFiles.map(file => {
     return `<link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/alrdy-animate@${version}/dist/chunks/${file}">`;
   }).join('\n');
 
@@ -53,8 +57,11 @@ function generatePreloadHints() {
 <!-- Option 1: Local paths (if self-hosting) -->
 ${localHints}
 
-<!-- Option 2: CDN paths (JSDelivr) -->
-${cdnHints}
+<!-- Option 2: UNPKG (npm CDN - Recommended) -->
+${unpkgHints}
+
+<!-- Option 3: JSDelivr (npm CDN - Alternative) -->
+${jsdelivrHints}
 
 <!--
 Usage Instructions:

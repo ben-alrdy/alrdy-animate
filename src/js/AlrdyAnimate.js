@@ -39,7 +39,22 @@ const defaultOptions = {
   initTimeout: 3, // 3 seconds timeout for initialization
   reducedMotionDuration: 0.5, // Duration for reduced motion animations
   reducedMotionEase: "ease", // Easing for reduced motion animations
-  loadGracePeriod: 0.35 // Grace period in seconds for hybrid aa-load + aa-animate elements (should be slightly shorter than --load-base-delay)
+  loadGracePeriod: 0.35, // Grace period in seconds for hybrid aa-load + aa-animate elements (should be slightly shorter than --load-base-delay)
+  optimizePageSpeed: false // true or object (see defaultSpeedOptimizations) to replace expensive GSAP animations with CSS animations on mobile for better performance
+};
+
+// Default mappings for page speed optimization on mobile
+const defaultSpeedOptimizations = {
+  text: 'fade',           // All text-* animations → fade (avoids expensive SplitText)
+  parallax: 'zoom-out',   // parallax → zoom-out (avoids ScrollTrigger parallax)
+  clip: 'fade',           // clip → fade (avoids GSAP clip animation)
+  stack: 'fade-up',       // stack → fade-up (avoids GSAP stack animation)
+  appear: 'fade',         // appear-* → fade
+  reveal: 'fade',         // reveal-* → fade
+  grow: 'zoom-in',        // grow → zoom-in
+  background: 'fade',     // background → fade (avoids GSAP background color animation)
+  pin: 'fade',            // pin → fade (avoids ScrollTrigger pinning)
+  counter: 'fade'         // counter → fade (avoids GSAP counter animation)
 };
 
 // Function to apply reduced motion by replacing animation attributes
@@ -84,6 +99,59 @@ function applyReducedMotionAttributes(duration, ease) {
   });
 }
 
+// Function to apply page speed optimizations by replacing expensive animations on mobile
+function applyPageSpeedOptimizations(mappings) {
+  // Find all elements with aa-animate, aa-children, or aa-hover attributes
+  const animatedElements = document.querySelectorAll('[aa-animate], [aa-children], [aa-hover]');
+  
+  animatedElements.forEach((element) => {
+    // Skip interactive components that should be preserved
+    if (element.hasAttribute('aa-slider') || 
+        element.hasAttribute('aa-accordion') || 
+        element.hasAttribute('aa-marquee')) {
+      return;
+    }
+    
+    // Handle hybrid elements (aa-load + aa-animate): remove aa-animate to use CSS-only
+    if (element.hasAttribute('aa-load') && element.hasAttribute('aa-animate')) {
+      element.removeAttribute('aa-animate');
+      return; // Skip further processing for this element
+    }
+    
+    // Disable hover animations on mobile (hover doesn't work well on touch devices)
+    if (element.hasAttribute('aa-hover')) {
+      element.setAttribute('aa-hover', 'none');
+    }
+    
+    // Process aa-animate attribute
+    if (element.hasAttribute('aa-animate')) {
+      const currentAnimate = element.getAttribute('aa-animate');
+      
+      // Check each mapping for prefix match
+      for (const [key, replacement] of Object.entries(mappings)) {
+        // Check if animation starts with key (handles text-*, appear-*, etc)
+        if (currentAnimate.startsWith(key)) {
+          element.setAttribute('aa-animate', replacement);
+          break; // Only replace once
+        }
+      }
+    }
+    
+    // Process aa-children attribute (same logic as aa-animate)
+    if (element.hasAttribute('aa-children')) {
+      const currentChildren = element.getAttribute('aa-children');
+      
+      // Check each mapping for prefix match
+      for (const [key, replacement] of Object.entries(mappings)) {
+        if (currentChildren.startsWith(key)) {
+          element.setAttribute('aa-children', replacement);
+          break; // Only replace once
+        }
+      }
+    }
+  });
+}
+
 async function init(options = {}) {
   const initOptions = { ...defaultOptions, ...options };
   let lenis = null;
@@ -97,6 +165,16 @@ async function init(options = {}) {
     applyReducedMotionAttributes(initOptions.reducedMotionDuration, initOptions.reducedMotionEase);
     // Disable template system for reduced motion
     initOptions.templates = null;
+  }
+
+  // Check if mobile and apply page speed optimizations if enabled
+  isMobile = window.innerWidth < 768;
+  if (initOptions.optimizePageSpeed && isMobile) {
+    const optimizations = typeof initOptions.optimizePageSpeed === 'object' 
+      ? initOptions.optimizePageSpeed 
+      : defaultSpeedOptimizations;
+    console.log('AlrdyAnimate: Page speed optimization enabled, replacing expensive animations on mobile');
+    applyPageSpeedOptimizations(optimizations);
   }
 
   // Set initialization state
@@ -167,7 +245,6 @@ async function init(options = {}) {
     });
       
     allAnimatedElements = elements;
-    isMobile = window.innerWidth < 768;
     enableGSAP = initOptions.gsapFeatures.length > 0;
 
     // Fallback for browsers that do not support IntersectionObserver

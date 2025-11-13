@@ -39,7 +39,15 @@ A powerful, lightweight JavaScript library for creating scroll-triggered and int
 #### UNPKG (Recommended)
 ```html
 <!-- Latest version -->
-<link rel="stylesheet" href="https://unpkg.com/alrdy-animate@latest/dist/AlrdyAnimate.css">
+<!-- AlrdyAnimate CSS (preloaded for non-blocking load) -->
+<link rel="preload" 
+      href="https://unpkg.com/alrdy-animate@7.0.12/dist/AlrdyAnimate.css" 
+      as="style" 
+      onload="this.onload=null;this.rel='stylesheet'">
+<noscript>
+  <link rel="stylesheet" href="https://unpkg.com/alrdy-animate@7.0.12/dist/AlrdyAnimate.css">
+</noscript>
+
 <script src="https://unpkg.com/alrdy-animate@latest/dist/AlrdyAnimate.js"></script>
 
 <!-- Specific version (recommended for production) -->
@@ -66,7 +74,14 @@ Perfect for simple animations and getting started quickly:
 
 ```html
 <!-- In site-wide custom code (head) -->
-<link rel="stylesheet" href="https://unpkg.com/alrdy-animate@6.12.1/dist/AlrdyAnimate.css">
+<!-- AlrdyAnimate CSS (preloaded for non-blocking load) -->
+<link rel="preload" 
+      href="https://unpkg.com/alrdy-animate@7.0.12/dist/AlrdyAnimate.css" 
+      as="style" 
+      onload="this.onload=null;this.rel='stylesheet'">
+<noscript>
+  <link rel="stylesheet" href="https://unpkg.com/alrdy-animate@7.0.12/dist/AlrdyAnimate.css">
+</noscript>
 
 <!-- In site-wide custom code (before </body>) -->
 <script src="https://unpkg.com/alrdy-animate@6.12.1/dist/AlrdyAnimate.js"></script>

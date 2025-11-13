@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', function() {
         modals: false,
         enforceReducedMotion: false,
         includeGSAP: true,
+        optimizePageSpeed: true,
         templates: {
             theme: 'tilt',
             custom: {
