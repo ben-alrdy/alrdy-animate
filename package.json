@@ -12,6 +12,7 @@
   "scripts": {
     "clean": "rimraf dist",
     "build": "npm run clean && webpack",
+    "build:hints": "npm run build && node scripts/generate-preload-hints.js",
     "prepare": "npm run build",
     "dev": "webpack --mode=development --watch",
     "build:cdn": "npm run build && node scripts/deploy-cdn.js",

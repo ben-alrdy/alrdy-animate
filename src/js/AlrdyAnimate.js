@@ -205,78 +205,103 @@ async function init(options = {}) {
           window.ScrollTrigger = ScrollTrigger;
 
           try {
-            // Load all features in parallel with individual error handling
-            await Promise.all(
-              initOptions.gsapFeatures.map(async (feature) => {
-                try {
-                  const moduleConfig = gsapBundles[feature];
-                  if (!moduleConfig) return;
+            // Step 1: Collect all import promises for ALL features upfront (parallel loading)
+            const featureImportPromises = initOptions.gsapFeatures.map(async (feature) => {
+              try {
+                const moduleConfig = gsapBundles[feature];
+                if (!moduleConfig) return { feature, success: false };
 
-                  if (moduleConfig.plugins) {
-                    const plugins = await moduleConfig.plugins(initOptions.includeGSAP);
-                    plugins.forEach(plugin => {
-                      try {
-                        Object.entries(plugin).forEach(([key, value]) => {
-                          if (value) {  // Only register if the plugin exists
-                            gsap.registerPlugin(value);
-                            window[key] = value;
-                          } else {
-                            console.warn(`Plugin ${key} not available from ${initOptions.includeGSAP ? 'bundle' : 'Webflow'}`);
-                          }
-                        });
-                        Object.assign(modules, plugin);
-                      } catch (pluginError) {
-                        console.warn(`Failed to register plugin for feature ${feature}:`, pluginError);
+                // Load plugins, dependencies, and animations in parallel for this feature
+                const [plugins, deps, animModule] = await Promise.all([
+                  moduleConfig.plugins ? moduleConfig.plugins(initOptions.includeGSAP).catch(e => {
+                    console.warn(`Failed to load plugins for ${feature}:`, e);
+                    return null;
+                  }) : Promise.resolve(null),
+                  moduleConfig.dependencies ? moduleConfig.dependencies().catch(e => {
+                    console.warn(`Failed to load dependencies for ${feature}:`, e);
+                    return null;
+                  }) : Promise.resolve(null),
+                  moduleConfig.animations ? moduleConfig.animations().catch(e => {
+                    console.warn(`Failed to load animations for ${feature}:`, e);
+                    return null;
+                  }) : Promise.resolve(null)
+                ]);
+
+                return { feature, plugins, deps, animModule, success: true };
+              } catch (featureError) {
+                console.warn(`Failed to load feature ${feature}:`, featureError);
+                return { feature, success: false };
+              }
+            });
+
+            // Step 2: Wait for ALL imports to complete in parallel
+            const loadedFeatures = await Promise.all(featureImportPromises);
+
+            // Step 3: Process loaded features sequentially (registration must be sequential)
+            loadedFeatures.forEach(({ feature, plugins, deps, animModule, success }) => {
+              if (!success) return;
+
+              // Register plugins
+              if (plugins) {
+                plugins.forEach(plugin => {
+                  try {
+                    Object.entries(plugin).forEach(([key, value]) => {
+                      if (value) {
+                        gsap.registerPlugin(value);
+                        window[key] = value;
+                      } else {
+                        console.warn(`Plugin ${key} not available from ${initOptions.includeGSAP ? 'bundle' : 'Webflow'}`);
                       }
                     });
+                    Object.assign(modules, plugin);
+                  } catch (pluginError) {
+                    console.warn(`Failed to register plugin for feature ${feature}:`, pluginError);
                   }
+                });
+              }
 
-                  if (moduleConfig.dependencies) {
-                    const deps = await moduleConfig.dependencies();
-                    Object.assign(modules, deps);
-                    if (deps.splitText) {
-                      window.splitText = deps.splitText;
-                    }
-                  }
-
-                  if (moduleConfig.animations) {
-                    const animationModule = await moduleConfig.animations();
-                    let moduleAnimations = {};
-
-                    switch (feature) {
-                      case 'text':
-                        moduleAnimations = animationModule.createTextAnimations(modules.gsap);
-                        break;
-                      case 'section':
-                        moduleAnimations = animationModule.createSectionAnimations(modules.gsap, modules.ScrollTrigger);
-                        break;
-                      case 'appear':
-                        moduleAnimations = animationModule.createAppearAnimations(modules.gsap, modules.ScrollTrigger);
-                        break;
-                      case 'marquee':
-                        moduleAnimations = animationModule.createMarqueeAnimations(modules.gsap, modules.ScrollTrigger);
-                        break;
-                      case 'slider':
-                        moduleAnimations = animationModule.createSliderAnimations(modules.gsap, modules.Draggable);
-                        break;
-                      case 'hover':
-                        moduleAnimations = animationModule.createHoverAnimations(modules.gsap, modules.splitText);
-                        break;
-                      case 'nav':
-                        moduleAnimations = animationModule.createNavAnimations(modules.gsap);
-                        break;
-                      case 'accordion':
-                        moduleAnimations = animationModule.createAccordionAnimations(modules.gsap, initOptions.duration);
-                        break;
-                    }
-
-                    Object.assign(animations, moduleAnimations);
-                  }
-                } catch (featureError) {
-                  console.warn(`Failed to load feature ${feature}:`, featureError);
+              // Add dependencies
+              if (deps) {
+                Object.assign(modules, deps);
+                if (deps.splitText) {
+                  window.splitText = deps.splitText;
                 }
-              })
-            );
+              }
+
+              // Create animations
+              if (animModule) {
+                let moduleAnimations = {};
+
+                switch (feature) {
+                  case 'text':
+                    moduleAnimations = animModule.createTextAnimations(modules.gsap);
+                    break;
+                  case 'section':
+                    moduleAnimations = animModule.createSectionAnimations(modules.gsap, modules.ScrollTrigger);
+                    break;
+                  case 'appear':
+                    moduleAnimations = animModule.createAppearAnimations(modules.gsap, modules.ScrollTrigger);
+                    break;
+                  case 'marquee':
+                    moduleAnimations = animModule.createMarqueeAnimations(modules.gsap, modules.ScrollTrigger);
+                    break;
+                  case 'slider':
+                    moduleAnimations = animModule.createSliderAnimations(modules.gsap, modules.Draggable);
+                    break;
+                  case 'hover':
+                    moduleAnimations = animModule.createHoverAnimations(modules.gsap, modules.splitText);
+                    break;
+                  case 'nav':
+                    moduleAnimations = animModule.createNavAnimations(modules.gsap);
+                    break;
+                  case 'accordion':
+                    moduleAnimations = animModule.createAccordionAnimations(modules.gsap, initOptions.duration);
+                    break;
+                }
+
+                Object.assign(animations, moduleAnimations);
+              }
+            });
           } catch (featuresError) {
             console.warn('Failed to load some GSAP features:', featuresError);
           }

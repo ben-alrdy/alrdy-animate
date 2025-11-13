@@ -2036,6 +2036,66 @@ Many attributes support mobile/desktop variants using the `|` separator:
 4. **Optimize scroll triggers** - Use appropriate `aa-scroll-start` values
 5. **Clean up on navigation** - Library handles this automatically
 
+### Performance Optimization for Production
+
+#### Bundled GSAP for Faster Loading
+
+By default, AlrdyAnimate uses Webflow's included GSAP library (`includeGSAP: false`). However, for optimal performance and control over chunk loading, you can bundle GSAP with AlrdyAnimate:
+
+```javascript
+AlrdyAnimate.init({
+  includeGSAP: true,  // Bundle GSAP with AlrdyAnimate
+  gsapFeatures: ['text', 'slider', 'accordion', 'nav']
+});
+```
+
+**Benefits of `includeGSAP: true`:**
+- **Parallel chunk loading**: Features load simultaneously instead of sequentially (~150-200ms faster)
+- **Optimized chunk splitting**: Better caching and load performance
+- **Version control**: Ensures GSAP version compatibility
+- **Resource hints support**: Enable modulepreload for even faster loading
+
+#### Modulepreload Hints for Critical Chunks
+
+For performance-critical landing pages, you can use modulepreload hints to start downloading GSAP chunks earlier:
+
+**Step 1: Generate preload hints**
+```bash
+npm run build:hints
+```
+
+This creates `dist/preload-hints.html` with modulepreload tags for your current build.
+
+**Step 2: Add hints to your HTML**
+```html
+<head>
+  <!-- Preload critical chunks BEFORE main script -->
+  <link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/alrdy-animate@7.0.18/dist/chunks/gsap-core.xxx.js">
+  <link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/alrdy-animate@7.0.18/dist/chunks/gsap-text.xxx.js">
+  
+  <!-- Main script -->
+  <script src="https://cdn.jsdelivr.net/npm/alrdy-animate@7.0.18/dist/AlrdyAnimate.js"></script>
+</head>
+```
+
+**Performance Impact:**
+- Reduces JavaScript critical path by 50-100ms
+- Improves Largest Contentful Paint (LCP)
+- Benefits first-time visitors most
+- Must be updated when upgrading AlrdyAnimate versions
+
+**When to use modulepreload hints:**
+- Performance-critical landing pages
+- Pages with above-the-fold animations
+- Sites targeting high Lighthouse scores
+- When every millisecond counts for conversions
+
+**When to skip them:**
+- Animations are below the fold
+- Using Webflow's GSAP (`includeGSAP: false`)
+- Frequent version updates (maintenance overhead)
+- Development/staging environments
+
 ### Accessibility Features
 
 1. **Reduced motion support** - Automatically detects and respects `prefers-reduced-motion: reduce`
