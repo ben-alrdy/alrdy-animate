@@ -38,7 +38,7 @@ const defaultOptions = {
   templates: null, // Template configuration for class-based animations
   initTimeout: 3, // 3 seconds timeout for initialization
   reducedMotionDuration: 0.5, // Duration for reduced motion animations
-  reducedMotionEase: "ease", // Easing for reduced motion animations
+  reducedMotionEase: "ease", // Easing for reduced motion animations  
   loadGracePeriod: 0.35, // Grace period in seconds for hybrid aa-load + aa-animate elements (should be slightly shorter than --load-base-delay)
   optimizePageSpeed: false // true or object (see defaultSpeedOptimizations) to replace expensive GSAP animations with CSS animations on mobile for better performance
 };
@@ -48,7 +48,7 @@ const defaultSpeedOptimizations = {
   text: 'fade',           // All text-* animations → fade (avoids expensive SplitText)
   parallax: 'zoom-out',   // parallax → zoom-out (avoids ScrollTrigger parallax)
   clip: 'fade',           // clip → fade (avoids GSAP clip animation)
-  stack: 'fade-up',       // stack → fade-up (avoids GSAP stack animation)
+  stack: 'fade',          // stack → fade-up (avoids GSAP stack animation)
   appear: 'fade',         // appear-* → fade
   reveal: 'fade',         // reveal-* → fade
   grow: 'zoom-in',        // grow → zoom-in
@@ -175,6 +175,15 @@ async function init(options = {}) {
       : defaultSpeedOptimizations;
     console.log('AlrdyAnimate: Page speed optimization enabled, replacing expensive animations on mobile');
     applyPageSpeedOptimizations(optimizations);
+    
+    // If using default optimizations (boolean true), remove expensive GSAP features
+    if (initOptions.optimizePageSpeed === true) {
+      const expensiveFeatures = ['text', 'section', 'appear', 'hover'];
+      initOptions.gsapFeatures = initOptions.gsapFeatures.filter(
+        feature => !expensiveFeatures.includes(feature)
+      );
+      console.log('AlrdyAnimate: Removed expensive GSAP features on mobile:', expensiveFeatures.join(', '));
+    }
   }
 
   // Set initialization state
