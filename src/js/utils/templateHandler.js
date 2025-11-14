@@ -4,6 +4,36 @@ import { parseResponsiveAttribute } from './elementAttributes';
 // Store for processed templates
 let processedTemplates = null;
 
+// CSS animations that should be applied via aa-animate attribute
+const CSS_ANIMATIONS = [
+  // Transition-based (_transitions.scss)
+  'fade', 'fade-up', 'fade-down', 'fade-left', 'fade-right',
+  'zoom-in', 'zoom-in-up', 'zoom-in-down', 
+  'zoom-out', 'zoom-out-up', 'zoom-out-down',
+  'slide-up', 'slide-down', 'slide-left', 'slide-right',
+  'blur-in',
+  'flip-left', 'flip-right', 'flip-up', 'flip-down',
+  'pseudo-reveal-up', 'pseudo-reveal-down', 'pseudo-reveal-left', 'pseudo-reveal-right',
+  
+  // Keyframe-based (_animations.scss)
+  'float-up', 'float-down', 'float-left', 'float-right',
+  'swing-fwd', 'swing-bwd',
+  'turn-3d-soft', 'turn-3d-soft-3em', 'turn-3d-elliptic',
+  'rotate-br-cw', 'rotate-br-ccw', 'rotate-bl-cw', 'rotate-bl-ccw',
+  'rotate-tr-cw', 'rotate-tr-ccw', 'rotate-tl-cw', 'rotate-tl-ccw',
+  'rotate-c-cw', 'rotate-c-ccw'
+];
+
+/**
+ * Check if an animation type is a CSS-based animation
+ * @param {string} animationType - The animation type to check
+ * @returns {boolean} True if it's a CSS animation
+ */
+function isCSSAnimation(animationType) {
+  if (!animationType) return false;
+  return CSS_ANIMATIONS.includes(animationType);
+}
+
 /**
  * Process templates from init options
  * @param {Object} options - Init options containing template configuration
@@ -58,10 +88,15 @@ export function getElementTemplateSettings(element, isMobile) {
     settings.animationType = isMobile ? mobileAnim : desktopAnim;
   }
   
-  // Check if it's a CSS animation (starts with aa-)
-  if (settings.animationType?.startsWith('aa-')) {
-    // Add the class directly (no need to modify the name)
-    element.classList.add(settings.animationType);
+  // Check if it's a CSS animation and set aa-animate attribute
+  if (settings.animationType && isCSSAnimation(settings.animationType)) {
+    // Set aa-animate attribute directly
+    element.setAttribute('aa-animate', settings.animationType);
+    
+    // Update the element's attribute type cache so it gets processed as an animate element
+    if (element._aaAttributeType) {
+      element._aaAttributeType.isAnimate = true;
+    }
     
     // Set CSS custom properties only if they are defined
     if (settings.duration) {
@@ -76,7 +111,6 @@ export function getElementTemplateSettings(element, isMobile) {
     if (settings.opacity !== undefined) {
       element.style.setProperty('--aa-opacity', settings.opacity);
     }
-    
   }
   
   // Add element-specific properties

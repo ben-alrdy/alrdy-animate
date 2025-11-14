@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', function() {
             theme: 'tilt',
             custom: {
                 'heading-style-h2': {
-                animationType: 'text-tilt-up-lines|text-slide-down',
+                animationType: 'text-tilt-up-lines|slide-left',
                 split: 'lines',
                 ease: 'power4.out',
                 duration: 0.9,
