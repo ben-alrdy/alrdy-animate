@@ -52,6 +52,12 @@ export function getElementTemplateSettings(element, isMobile) {
   // Create a new settings object
   const settings = { ...template };
   
+  // Handle mobile/desktop animation split
+  if (settings.animationType && settings.animationType.includes('|')) {
+    const [desktopAnim, mobileAnim] = settings.animationType.split('|');
+    settings.animationType = isMobile ? mobileAnim : desktopAnim;
+  }
+  
   // Check if it's a CSS animation (starts with aa-)
   if (settings.animationType?.startsWith('aa-')) {
     // Add the class directly (no need to modify the name)
@@ -71,12 +77,6 @@ export function getElementTemplateSettings(element, isMobile) {
       element.style.setProperty('--aa-opacity', settings.opacity);
     }
     
-  }
-  
-  // Handle mobile/desktop animation split
-  if (settings.animationType && settings.animationType.includes('|')) {
-    const [desktopAnim, mobileAnim] = settings.animationType.split('|');
-    settings.animationType = isMobile ? mobileAnim : desktopAnim;
   }
   
   // Add element-specific properties

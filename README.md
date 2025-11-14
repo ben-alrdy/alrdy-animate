@@ -106,7 +106,7 @@ Perfect for simple animations and getting started quickly:
               stagger: 0.05
             },
             'heading-style-h3': {
-              animationType: 'fade-up'
+              animationType: 'aa-fade-up'
             }
           }
         }
@@ -166,7 +166,7 @@ Full-featured setup with GSAP animations, smooth scrolling, and modals:
               stagger: 0.05
             },
             'heading-style-h3': {
-              animationType: 'fade-up'
+              animationType: 'aa-fade-up'
             }
           }
         }
@@ -1532,7 +1532,7 @@ AlrdyAnimate.init({
         ease: 'back.out'
       },
       'card-item': {
-        animationType: 'fade-up',
+        animationType: 'aa-fade-up',
         duration: 0.6,
         delay: 0.2
       }
