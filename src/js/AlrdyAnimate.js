@@ -365,6 +365,9 @@ async function init(options = {}) {
                   case 'section':
                     moduleAnimations = animModule.createSectionAnimations(modules.gsap, modules.ScrollTrigger);
                     break;
+                  case 'parallax':
+                    moduleAnimations = animModule.createParallaxAnimations(modules.gsap, modules.ScrollTrigger);
+                    break;
                   case 'appear':
                     moduleAnimations = animModule.createAppearAnimations(modules.gsap, modules.ScrollTrigger);
                     break;
@@ -715,7 +718,7 @@ function setupGSAPAnimations(element, elementSettings, initOptions, isMobile, mo
   
   // 1. Variables setup
   const baseType = animationType.includes('-') ? animationType.split('-')[0] : animationType;
-  const gsapAnimations = ['appear', 'reveal', 'counter', 'grow', 'text', 'background', 'parallax', 'clip', 'stack', 'pin'];
+  const gsapAnimations = ['appear', 'reveal', 'counter', 'grow', 'text', 'background', 'parallax', 'glide', 'clip', 'stack', 'pin'];
   
   // 2. Check if this is a GSAP animation BEFORE creating timeline
   const isGSAPAnimation = gsapAnimations.includes(baseType);
@@ -735,7 +738,8 @@ function setupGSAPAnimations(element, elementSettings, initOptions, isMobile, mo
         'stack': { feature: 'section', check: () => modules.animations.stack },
         'pin': { feature: 'section', check: () => modules.animations.pin || modules.animations.pinStack },
         'background': { feature: 'section', check: () => modules.animations.backgroundColor },
-        'parallax': { feature: 'section', check: () => modules.animations.parallax }
+        'parallax': { feature: 'parallax', check: () => modules.animations.parallax },
+        'glide': { feature: 'parallax', check: () => modules.animations.glide }
       };
       
       if (animationFeatureMap[baseType]) {
@@ -757,7 +761,7 @@ function setupGSAPAnimations(element, elementSettings, initOptions, isMobile, mo
   }
   
   // 4. Determine if this animation type creates its own ScrollTriggers
-  const ownScrollTriggerAnimations = ['clip', 'stack', 'background', 'parallax', 'pin'];
+  const ownScrollTriggerAnimations = ['clip', 'stack', 'background', 'parallax', 'glide', 'pin'];
   const hasOwnScrollTrigger = ownScrollTriggerAnimations.includes(baseType);
 
   // Clear existing animations
@@ -897,6 +901,10 @@ function setupGSAPAnimations(element, elementSettings, initOptions, isMobile, mo
 
       case 'parallax':
         modules.animations.parallax(element, scrub, animationType);
+        return;
+
+      case 'glide':
+        modules.animations.glide(element, delay, distance, initOptions.debug);
         return;
     }
   }

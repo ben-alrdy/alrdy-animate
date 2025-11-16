@@ -189,49 +189,6 @@ function initializeBackgroundColor(element, gsap, ScrollTrigger, duration, ease,
   });
 }
 
-function initializeParallax(element, gsap, ScrollTrigger, scrub, animationType) {
-  // Determine target for animation
-  const target = element.querySelector('[aa-parallax-target]') || element;
-
-  // Determine animation direction and property
-  const isHorizontal = animationType && animationType.includes('horizontal');
-  const prop = isHorizontal ? 'xPercent' : 'yPercent';
-
-  // Get scrub value
-  const scrubValue = scrub ? parseFloat(scrub) : true;
-
-  // Get the start position in %
-  const startAttr = element.getAttribute('aa-parallax-start');
-  const startVal = startAttr !== null ? parseFloat(startAttr) : 10;
-
-  // Get the end position in %
-  const endAttr = element.getAttribute('aa-parallax-end');
-  const endVal = endAttr !== null ? parseFloat(endAttr) : -10;
-
-  // Get the start/end value of the ScrollTrigger
-  const scrollStartRaw = element.getAttribute('aa-scroll-start') || 'top bottom';
-  const scrollStart = `clamp(${scrollStartRaw})`;
-  
-  const scrollEndRaw = element.getAttribute('aa-scroll-end') || 'bottom top';
-  const scrollEnd = `clamp(${scrollEndRaw})`;
-
-  // Create GSAP animation with ScrollTrigger
-  gsap.fromTo(
-    target,
-    { [prop]: startVal },
-    {
-      [prop]: endVal,
-      ease: 'none',
-      scrollTrigger: {
-        trigger: element,
-        start: scrollStart,
-        end: scrollEnd,
-        scrub: scrubValue,
-      },
-    }
-  );
-}
-
 function initializeClip(element) {
   const triggers = Array.from(element.querySelectorAll('[aa-clip-trigger]'));
   const contents = Array.from(element.querySelectorAll('[aa-clip-content]'));
@@ -808,10 +765,6 @@ function createSectionAnimations(gsap, ScrollTrigger) {
   return {
     backgroundColor: (element, duration, ease, scrollStart, scrollEnd, debug, scrub) => {
       initializeBackgroundColor(element, gsap, ScrollTrigger, duration, ease, scrollStart, scrollEnd, debug, scrub);
-    },
-    
-    parallax: (element, scrub, animationType) => {
-      initializeParallax(element, gsap, ScrollTrigger, scrub, animationType);
     },
     
     clip: (element) => {

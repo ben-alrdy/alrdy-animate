@@ -32,6 +32,9 @@ export const gsapBundles = {
     section: {
         animations: () => import(/* webpackChunkName: "gsap-section" */ '../gsapAnimations/sectionAnimations')
     },
+    parallax: {
+        animations: () => import(/* webpackChunkName: "gsap-parallax" */ '../gsapAnimations/parallaxAnimations')
+    },
     appear: {
         animations: () => import(/* webpackChunkName: "gsap-appear" */ '../gsapAnimations/appearAnimations')
     },

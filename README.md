@@ -13,10 +13,11 @@ A powerful, lightweight JavaScript library for creating scroll-triggered and int
     - [1.3 Text Animations](#13-text-animations)
     - [1.4 Appear Animations](#14-appear-animations)
     - [1.5 Parallax](#15-parallax)
-    - [1.6 Section Background Color](#16-section-background-color)
-    - [1.7 Section Clip](#17-section-clip)
-    - [1.8 Section Stack](#18-section-stack)
-    - [1.9 Pin (GSAP-Powered Sticky)](#19-pin-gsap-powered-sticky)
+    - [1.6 Glide](#16-glide)
+    - [1.7 Section Background Color](#17-section-background-color)
+    - [1.8 Section Clip](#18-section-clip)
+    - [1.9 Section Stack](#19-section-stack)
+    - [1.10 Pin (GSAP-Powered Sticky)](#110-pin-gsap-powered-sticky)
   - [2. Hover Animations](#2-hover-animations)
   - [3. Interactive Components](#3-interactive-components)
     - [3.1 Slider](#31-slider)
@@ -95,7 +96,7 @@ Perfect for simple animations and getting started quickly:
         scrollStart: "top 80%",
         
         // Enable GSAP features
-        gsapFeatures: ['text', 'slider', 'nav', 'accordion'],
+        gsapFeatures: ['text', 'slider', 'nav', 'accordion', 'parallax'],
         
         // Template system for class-based animations
         templates: {
@@ -145,7 +146,7 @@ Full-featured setup with GSAP animations, smooth scrolling, and modals:
         scrollStart: "top 80%",
         
         // Enable GSAP features
-        gsapFeatures: ['text', 'slider', 'nav', 'accordion'],
+        gsapFeatures: ['text', 'slider', 'nav', 'accordion', 'parallax'],
         
         // Enable smooth scroll
         smoothScroll: {
@@ -463,7 +464,7 @@ Smooth transitions and reveals with GSAP.
 
 Scroll-driven movement effects.
 
-**Setup:** `gsapFeatures: ['section']`
+**Setup:** `gsapFeatures: ['parallax']`
 
 **Attributes & Defaults:**
 | Attribute | Values | Default | Description |
@@ -492,7 +493,61 @@ Scroll-driven movement effects.
 
 ---
 
-### 1.6 Section Background Color
+### 1.6 Glide
+
+Velocity-based floating effect where elements lag behind scroll position and smoothly catch up, creating a staggered gliding appearance.
+
+**Setup:** `gsapFeatures: ['parallax']`
+
+**How It Works:**
+- Elements drift in the opposite direction of scroll (scrolling down makes elements move up)
+- Effect is continuous while element is in viewport
+- Uses frame-based updates (60fps) for smooth damping and decay
+- Automatically disabled on mobile (< 1080px) for better performance
+
+**Attributes & Defaults:**
+| Attribute | Values | Default | Description |
+|-----------|--------|---------|-------------|
+| `aa-animate` | `glide` | - | Glide animation type |
+| `aa-delay` | Number (0.85-0.95) | `0.9` | Damping factor - controls how quickly elements return to position. Lower = snappier (0.85), Higher = floatier (0.95) |
+| `aa-distance` | Number | `1` | Float intensity multiplier - controls how far elements drift. Higher = more dramatic effect |
+
+**Examples:**
+```html
+<!-- Basic glide with default settings -->
+<div aa-animate="glide">
+  Floats smoothly as you scroll
+</div>
+
+<!-- Light float, loose damping -->
+<div aa-animate="glide" aa-distance="0.5" aa-delay="0.95">
+  Subtle floating effect
+</div>
+
+<!-- Heavy float, snappy return -->
+<div aa-animate="glide" aa-distance="1.5" aa-delay="0.85">
+  Dramatic floating with quick return
+</div>
+
+<!-- Staggered glide on individual letters -->
+<h1>
+  <span aa-animate="glide" aa-distance="0.4">G</span>
+  <span aa-animate="glide" aa-distance="0.6">l</span>
+  <span aa-animate="glide" aa-distance="0.8">i</span>
+  <span aa-animate="glide" aa-distance="1.0">d</span>
+  <span aa-animate="glide" aa-distance="1.2">e</span>
+</h1>
+```
+
+**Performance Notes:**
+- Only runs when element is in viewport (automatic optimization)
+- Uses GPU-accelerated transforms
+- Frame-based updates for smooth 60fps performance
+- Mobile devices automatically excluded for better performance
+
+---
+
+### 1.7 Section Background Color
 
 Animated background transitions between sections.
 
@@ -518,7 +573,7 @@ Animated background transitions between sections.
 
 ---
 
-### 1.7 Section Clip
+### 1.8 Section Clip
 
 Clip path animations for sections.
 
@@ -538,7 +593,7 @@ Clip path animations for sections.
 
 ---
 
-### 1.8 Section Stack
+### 1.9 Section Stack
 
 Stacking scroll effects.
 
@@ -558,7 +613,7 @@ Stacking scroll effects.
 
 ---
 
-### 1.9 Pin (GSAP-Powered Sticky)
+### 1.10 Pin (GSAP-Powered Sticky)
 
 Pin elements during scroll using GSAP's ScrollTrigger. This is **superior to CSS `position: sticky`** when working with ScrollTrigger animations because:
 - ✅ ScrollTrigger is aware of pinned elements and adjusts calculations automatically
@@ -2060,7 +2115,7 @@ By default, AlrdyAnimate uses Webflow's included GSAP library (`includeGSAP: fal
 ```javascript
 AlrdyAnimate.init({
   includeGSAP: true,  // Bundle GSAP with AlrdyAnimate
-  gsapFeatures: ['text', 'slider', 'accordion', 'nav']
+  gsapFeatures: ['text', 'slider', 'accordion', 'nav', 'parallax']
 });
 ```
 
