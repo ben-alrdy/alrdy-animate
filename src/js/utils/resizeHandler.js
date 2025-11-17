@@ -56,6 +56,13 @@ export function setupResizeHandler(modules, initOptions, isMobile, setupGSAPAnim
           // Get new settings with updated animation type
           const aaAttributeType = element._aaAttributeType;
           const settings = updateElementSettingsOnResize(element, element.settings, initOptions, isMobile, aaAttributeType);
+          
+          // Clear any existing GSAP tweens and properties before rebuilding
+          if (modules.gsap) {
+            modules.gsap.killTweensOf(element);
+            modules.gsap.set(element, { clearProps: "all" });
+          }
+          
           element.settings = settings;
           setupGSAPAnimations(element, settings, initOptions, isMobile, modules);
         }
@@ -97,6 +104,12 @@ export function setupResizeHandler(modules, initOptions, isMobile, setupGSAPAnim
                 const hasMobileVariant = updatedSettings.animationType?.includes('|');
                 
                 if (isTextAnimation || hasMobileVariant) {
+                  // Clear any existing GSAP tweens and properties before rebuilding
+                  if (modules.gsap) {
+                    modules.gsap.killTweensOf(element);
+                    modules.gsap.set(element, { clearProps: "all" });
+                  }
+                  
                   element.settings = updatedSettings;
                   setupGSAPAnimations(element, element.settings, initOptions, isMobile, modules);
                 }
