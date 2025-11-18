@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', function() {
         duration: 1,
         again: true,
         gsapFeatures: ['section', 'appear', 'marquee', 'text', 'slider', 'hover', 'nav', 'modal', 'accordion', 'parallax'],
-        debug: true,
+        debug: false,
         deferInit: "all",
         modals: false,
         enforceReducedMotion: false,

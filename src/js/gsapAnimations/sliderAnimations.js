@@ -1,5 +1,6 @@
 export function createSliderAnimations(gsap, Draggable) {
   const activeSliders = new Set();
+  let sliderInstanceCounter = 0;
 
   function horizontalLoop(items, config) {
     /*
@@ -549,6 +550,9 @@ export function createSliderAnimations(gsap, Draggable) {
       return;
     }
 
+    // Generate unique instance ID for this slider
+    const sliderInstanceId = sliderInstanceCounter++;
+
     // Normalize animation types and create configuration
     const sliderType = normalizeAnimationType(animationType);
 
@@ -561,7 +565,7 @@ export function createSliderAnimations(gsap, Draggable) {
     const config = setupSliderConfig(element, sliderType, duration);
 
     // Add navigation controls if they exist
-    setupNavigationControls(element, items, config);
+    setupNavigationControls(element, items, config, sliderInstanceId);
 
     // Initialize the slider based on direction
     const slider = sliderType.isVertical 
@@ -884,7 +888,7 @@ export function createSliderAnimations(gsap, Draggable) {
     }
   }
 
-  function setupNavigationControls(element, items, config) {
+  function setupNavigationControls(element, items, config, sliderInstanceId) {
     const totalSlides = items.length;
     const nextButton = element.querySelector('[aa-slider-next]');
     const prevButton = element.querySelector('[aa-slider-prev]');
@@ -897,6 +901,9 @@ export function createSliderAnimations(gsap, Draggable) {
          ...document.querySelectorAll(`[aa-slider-button][aa-slider-target="${element.id}"]`)]
       : element.querySelectorAll('[aa-slider-button]');
 
+    // Create unique ID prefix using instance ID
+    const sliderIdPrefix = element.id || `slider-${sliderInstanceId}`;
+
     // Setup ARIA attributes for slider
     element.setAttribute('role', 'region');
     element.setAttribute('aria-roledescription', 'carousel');
@@ -906,7 +913,7 @@ export function createSliderAnimations(gsap, Draggable) {
       slide.setAttribute('role', 'tabpanel');
       slide.setAttribute('aria-roledescription', 'slide');
       slide.setAttribute('aria-label', `Slide ${i + 1} of ${totalSlides}`);
-      slide.setAttribute('id', `${element.id || 'slider'}-slide-${i}`);
+      slide.setAttribute('id', `${sliderIdPrefix}-slide-${i}`);
     });
 
     // Setup navigation buttons with ARIA
@@ -949,7 +956,7 @@ export function createSliderAnimations(gsap, Draggable) {
       slideButtons.forEach((button, i) => {
         button.setAttribute('role', 'tab');
         button.setAttribute('aria-label', `Go to slide ${i + 1}`);
-        button.setAttribute('aria-controls', `${element.id || 'slider'}-slide-${i}`);
+        button.setAttribute('aria-controls', `${sliderIdPrefix}-slide-${i}`);
         button.setAttribute('tabindex', '0');
       });
     }

@@ -1,5 +1,8 @@
 import { triggerAnimations } from '../utils/animationEventTrigger';
 
+// Global counter for unique accordion IDs
+let accordionInstanceCounter = 0;
+
 //
 // AccordionState Class for Element Caching
 //
@@ -324,10 +327,10 @@ class AccordionController {
 //
 // Helper Functions
 //
-function setupAriaAttributes(toggle, content, visual, toggleId) {
-  const ariaToggleId = `accordion-toggle-${toggleId}`;
-  const ariaContentId = `accordion-content-${toggleId}`;
-  const ariaVisualId = `accordion-visual-${toggleId}`;
+function setupAriaAttributes(toggle, content, visual, toggleId, accordionInstanceId) {
+  const ariaToggleId = `accordion-${accordionInstanceId}-toggle-${toggleId}`;
+  const ariaContentId = `accordion-${accordionInstanceId}-content-${toggleId}`;
+  const ariaVisualId = `accordion-${accordionInstanceId}-visual-${toggleId}`;
   
   // Always set up toggle
   toggle.setAttribute('id', ariaToggleId);
@@ -402,7 +405,7 @@ function autoAssignIds(accordion) {
   });
 }
 
-function initializeAccordionElements(accordion, state, animations, splitText, defaultDuration = 1) {
+function initializeAccordionElements(accordion, state, animations, splitText, defaultDuration = 1, accordionInstanceId = 0) {
   const initialToggle = accordion.querySelector('[aa-accordion-initial]');
   const accordionType = accordion.getAttribute('aa-accordion') || 'basic';
   const isSingle = accordionType === 'single';
@@ -420,13 +423,21 @@ function initializeAccordionElements(accordion, state, animations, splitText, de
     }
     
     // Setup ARIA attributes for all scenarios
-    setupAriaAttributes(toggle, elementData.content, elementData.visual, toggleId);
+    setupAriaAttributes(toggle, elementData.content, elementData.visual, toggleId, accordionInstanceId);
     
     if (elementData.visual) {
       elementData.visual.setAttribute('aa-accordion-status', 'inactive');
       gsap.set(elementData.visual, { visibility: 'hidden' });
     }
   });
+  
+  // Add role="tablist" to parent container if this is a tab interface (visual-only)
+  if (state.contents.length === 0 && state.visuals.length > 0 && state.toggles.length > 0) {
+    const togglesContainer = state.toggles[0].parentElement;
+    if (togglesContainer) {
+      togglesContainer.setAttribute('role', 'tablist');
+    }
+  }
   
   // Set CSS variables for content elements
   state.contents.forEach((content) => {
@@ -916,6 +927,9 @@ function initializeScrollAccordion(accordion, state, controller, defaultDuration
 // 
 
 function initializeAccordion(accordion, animations = null, splitText = null, defaultDuration = 1, accordionType = null) {
+  // Generate unique instance ID for this accordion
+  const accordionInstanceId = accordionInstanceCounter++;
+  
   // Auto-assign IDs if not provided
   autoAssignIds(accordion);
   
@@ -930,7 +944,7 @@ function initializeAccordion(accordion, animations = null, splitText = null, def
   const controller = new AccordionController(accordion, state, defaultDuration);
   
   // Initialize accordion elements: states and animations
-  initializeAccordionElements(accordion, state, animations, splitText, defaultDuration);
+  initializeAccordionElements(accordion, state, animations, splitText, defaultDuration, accordionInstanceId);
   
   // Initialize based on accordion type
   if (accordionType === 'scroll') {
