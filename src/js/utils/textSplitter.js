@@ -14,8 +14,14 @@ export function splitText(element, split, hideFromScreenReaders = false, onSplit
   // Find the first matching type or default to 'lines'
   const splitConfig = Object.entries(splitMap).find(([key]) => splitType?.startsWith(key))?.[1] || splitMap.lines;
   
+  // Store original text content before splitting (for accessibility fix)
+  const originalText = element.textContent;
+  const disableAria = element.hasAttribute('aa-aria-false');
+  
   // Set aria handling based on hideFromScreenReaders - used for duplicate elements
-  splitConfig.aria = hideFromScreenReaders ? 'hidden' : 'auto';
+  // Check for aa-aria-false attribute to skip ARIA (used for accordion content)
+  const skipAria = element.hasAttribute('aa-aria-false');
+  splitConfig.aria = hideFromScreenReaders ? 'hidden' : (disableAria ? 'none' : 'auto');
   
   // Check for mask type in animation
   const maskTypes = ['-clip', '-lines', '-words', '-chars'];
@@ -67,6 +73,19 @@ export function splitText(element, split, hideFromScreenReaders = false, onSplit
   
   // Split the text using GSAP SplitText
   let splitInstance = new SplitText(element, splitConfig);
+
+  // Fix ARIA for accordion content
+  if (disableAria) {
+    element.setAttribute('aria-hidden', 'true');
+    
+    // Add visually-hidden span with original text for screen readers as a sibling
+    const srSpan = document.createElement('span');
+    srSpan.className = 'aa-screenreader-only';
+    srSpan.textContent = originalText;
+    
+    // Insert as sibling BEFORE the animated element (outside aria-hidden)
+    element.parentElement.insertBefore(srSpan, element);
+  }
 
   return { splitInstance }; // Only return the SplitText instance for cleanup
 }

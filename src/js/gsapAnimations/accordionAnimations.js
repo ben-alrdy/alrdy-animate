@@ -506,6 +506,12 @@ function initializeAccordionElements(accordion, state, animations, splitText, de
     // Setup ARIA attributes for all scenarios
     setupAriaAttributes(toggle, elementData.content, elementData.visual, toggleId, accordionInstanceId);
     
+    // Mark text elements inside accordion content to skip ARIA in SplitText
+    if (elementData.content) {
+      const textElements = elementData.content.querySelectorAll('[aa-animate*="text"]');
+      textElements.forEach(el => el.setAttribute('aa-aria-false', ''));
+    }
+    
     if (elementData.visual) {
       elementData.visual.setAttribute('aa-accordion-status', 'inactive');
       gsap.set(elementData.visual, { visibility: 'hidden' });
