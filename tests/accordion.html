@@ -274,6 +274,26 @@
             transition: transform 0.6s ease, opacity 0.6s ease;
         }
         
+        /* Accordion Item Wrapper Styles */
+        .accordion-item-wrapper {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .accordion-item-wrapper:hover {
+            border-color: #007bff;
+            box-shadow: 0 2px 8px rgba(0,123,255,0.1);
+        }
+        
+        .accordion-item-wrapper[aa-accordion-status="active"],
+        [aa-accordion-wrapper][aa-accordion-status="active"] {
+            border-color: #007bff;
+            box-shadow: 0 4px 12px rgba(0,123,255,0.15);
+        }
+        
     </style>
 </head>
 <body>
@@ -957,6 +977,61 @@
                             <div class="content-wrapper">
                                 <div aa-animate="slide-left" aa-delay="0">
                                     <p>Each accordion maintains its own auto-generated ID sequence.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Accordion Wrapper Section -->
+        <div class="section">
+            <h2>Accordion Wrapper (Optional Pattern)</h2>
+            <p>Wrap toggle and content in <code>aa-accordion-wrapper</code> for simplified styling and state management. Status is applied to the wrapper instead of individual elements.</p>
+            <div class="accordion-basic" aa-accordion="single" aa-duration="1">
+                <div aa-accordion-wrapper class="accordion-item-wrapper">
+                    <div class="accordion-toggle" aa-accordion-toggle aa-accordion-initial>
+                        <span>FAQ Item 1</span>
+                        <span>▼</span>
+                    </div>
+                    <div class="accordion-content" aa-accordion-content aa-animate aa-duration="0.6" aa-ease="power4.inOut">
+                        <div class="content-inner">
+                            <div class="content-wrapper">
+                                <div aa-animate="fade-up" aa-delay="0">
+                                    <p>The wrapper pattern makes it easier to apply hover states and styling to the entire accordion item.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div aa-accordion-wrapper class="accordion-item-wrapper">
+                    <div class="accordion-toggle" aa-accordion-toggle>
+                        <span>FAQ Item 2</span>
+                        <span>▼</span>
+                    </div>
+                    <div class="accordion-content" aa-accordion-content aa-animate aa-duration="0.6" aa-ease="power4.inOut">
+                        <div class="content-inner">
+                            <div class="content-wrapper">
+                                <div aa-animate="slide-up" aa-delay="0">
+                                    <p>The aa-accordion-status attribute is applied to the wrapper, simplifying CSS targeting.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div aa-accordion-wrapper class="accordion-item-wrapper">
+                    <div class="accordion-toggle" aa-accordion-toggle>
+                        <span>FAQ Item 3</span>
+                        <span>▼</span>
+                    </div>
+                    <div class="accordion-content" aa-accordion-content aa-animate aa-duration="0.6" aa-ease="power4.inOut">
+                        <div class="content-inner">
+                            <div class="content-wrapper">
+                                <div aa-animate="appear-up" aa-delay="0">
+                                    <p>This pattern is fully backwards compatible and completely optional.</p>
                                 </div>
                             </div>
                         </div>

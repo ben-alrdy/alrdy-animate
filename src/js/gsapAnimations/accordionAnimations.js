@@ -10,15 +10,21 @@ class AccordionState {
   constructor(accordion, defaultDuration = 1) {
     this.accordion = accordion;
     this.defaultDuration = defaultDuration;
+    this.wrappers = [];
     this.toggles = [];
     this.contents = [];
     this.visuals = [];
-    this.elementMap = new Map(); // toggleId -> { toggle, content, visual, progressElement }
+    this.useWrapperPattern = false;
+    this.elementMap = new Map(); // toggleId -> { toggle, content, visual, progressElement, wrapper }
     
     this.initializeElements();
   }
   
   initializeElements() {
+    // Check if wrapper pattern is being used
+    this.wrappers = Array.from(this.accordion.querySelectorAll('[aa-accordion-wrapper]'));
+    this.useWrapperPattern = this.wrappers.length > 0;
+    
     // Get all elements once
     this.toggles = Array.from(this.accordion.querySelectorAll('[aa-accordion-toggle]'));
     this.contents = Array.from(this.accordion.querySelectorAll('[aa-accordion-content]'));
@@ -30,6 +36,12 @@ class AccordionState {
       const content = this.accordion.querySelector(`[aa-accordion-content="${toggleId}"]`);
       const visual = this.accordion.querySelector(`[aa-accordion-visual="${toggleId}"]`);
       const progressElement = toggle.querySelector('[aa-accordion-progress]');
+      
+      // Find wrapper if using wrapper pattern
+      let wrapper = null;
+      if (this.useWrapperPattern) {
+        wrapper = toggle.closest('[aa-accordion-wrapper]');
+      }
       
       // Parse attributes once
       const duration = parseFloat(toggle.getAttribute('aa-duration')) || this.defaultDuration;
@@ -46,6 +58,7 @@ class AccordionState {
         content,
         visual,
         progressElement,
+        wrapper,
         duration,
         delay,
         contentDuration,
@@ -98,7 +111,14 @@ class AccordionState {
   }
   
   getActiveToggle() {
-    return this.accordion.querySelector('[aa-accordion-toggle][aa-accordion-status="active"]');
+    if (this.useWrapperPattern) {
+      // With wrapper pattern, find the active wrapper and return its toggle
+      const activeWrapper = this.accordion.querySelector('[aa-accordion-wrapper][aa-accordion-status="active"]');
+      return activeWrapper ? activeWrapper.querySelector('[aa-accordion-toggle]') : null;
+    } else {
+      // Without wrapper pattern, find the active toggle directly
+      return this.accordion.querySelector('[aa-accordion-toggle][aa-accordion-status="active"]');
+    }
   }
   
   getActiveVisual() {
@@ -112,6 +132,25 @@ class AccordionState {
     // Find the toggle that corresponds to this visual
     const visualId = activeVisual.getAttribute('aa-accordion-visual');
     return this.getElementData(visualId);
+  }
+  
+  // Helper: Get the correct element to check/set status on based on wrapper pattern
+  getStatusElement(elementData, toggle) {
+    return this.useWrapperPattern && elementData.wrapper 
+      ? elementData.wrapper 
+      : toggle;
+  }
+  
+  // Helper: Check if an accordion is active based on wrapper pattern
+  isAccordionActive(elementData, toggle) {
+    const statusElement = this.getStatusElement(elementData, toggle);
+    return statusElement.getAttribute('aa-accordion-status') === 'active';
+  }
+  
+  // Helper: Set status on the correct element based on wrapper pattern
+  setAccordionStatus(elementData, toggle, status) {
+    const statusElement = this.getStatusElement(elementData, toggle);
+    statusElement.setAttribute('aa-accordion-status', status);
   }
   
 }
@@ -175,7 +214,7 @@ class AccordionController {
     const elementData = this.state.getElementData(toggleId);
     if (!elementData) return;
     
-    const isActive = toggle.getAttribute('aa-accordion-status') === 'active';
+    const isActive = this.state.isAccordionActive(elementData, toggle);
     
     // For single type, prevent closing the active accordion
     if (isActive && this.isSingle) {
@@ -190,7 +229,7 @@ class AccordionController {
   }
   
   openAccordion(toggle, elementData) {
-    const { toggleId, content, visual } = elementData;
+    const { toggleId, content, visual, wrapper } = elementData;
     
     // Close other accordions if not multi
     if (!this.isMulti) {
@@ -205,7 +244,7 @@ class AccordionController {
     }
     
     // Set current accordion to active
-    toggle.setAttribute('aa-accordion-status', 'active');
+    this.state.setAccordionStatus(elementData, toggle, 'active');
     
     // Set appropriate ARIA state based on content presence
     if (content) {
@@ -227,7 +266,10 @@ class AccordionController {
     
     if (content) {
       gsap.set(content, { gridTemplateRows: '1fr' });
-      content.setAttribute('aa-accordion-status', 'active');
+      // Only set status on content if not using wrapper pattern
+      if (!this.state.useWrapperPattern) {
+        content.setAttribute('aa-accordion-status', 'active');
+      }
       triggerAccordionAnimations(content, 'play');
     }
     
@@ -243,9 +285,10 @@ class AccordionController {
   }
   
   closeAccordion(toggle, elementData) {
-    const { content, visual, contentDuration, reverseDuration } = elementData;
+    const { content, visual, contentDuration, reverseDuration, wrapper } = elementData;
     
-    toggle.setAttribute('aa-accordion-status', 'inactive');
+    // Set current accordion to inactive
+    this.state.setAccordionStatus(elementData, toggle, 'inactive');
     
     // Set appropriate ARIA state based on content presence
     if (content) {
@@ -260,7 +303,10 @@ class AccordionController {
     }
     
     if (content) {
-      content.setAttribute('aa-accordion-status', 'inactive');
+      // Only set status on content if not using wrapper pattern
+      if (!this.state.useWrapperPattern) {
+        content.setAttribute('aa-accordion-status', 'inactive');
+      }
       gsap.set(content, { gridTemplateRows: '0fr' });
       triggerAccordionAnimations(content, 'reverse');
     }
@@ -382,27 +428,62 @@ function triggerAccordionAnimations(container, action) {
 }
 
 function autoAssignIds(accordion) {
-  const toggles = accordion.querySelectorAll('[aa-accordion-toggle]');
-  const contents = accordion.querySelectorAll('[aa-accordion-content]');
-  const visuals = accordion.querySelectorAll('[aa-accordion-visual]');
+  // Check if wrapper pattern is being used
+  const wrappers = accordion.querySelectorAll('[aa-accordion-wrapper]');
+  const useWrapperPattern = wrappers.length > 0;
   
-  toggles.forEach((toggle, index) => {
-    if (!toggle.getAttribute('aa-accordion-toggle')) {
-      toggle.setAttribute('aa-accordion-toggle', `accordion-${index}`);
-    }
-  });
-  
-  contents.forEach((content, index) => {
-    if (!content.getAttribute('aa-accordion-content')) {
-      content.setAttribute('aa-accordion-content', `accordion-${index}`);
-    }
-  });
-  
-  visuals.forEach((visual, index) => {
-    if (!visual.getAttribute('aa-accordion-visual')) {
-      visual.setAttribute('aa-accordion-visual', `accordion-${index}`);
-    }
-  });
+  if (useWrapperPattern) {
+    // Wrapper pattern: assign IDs to wrappers, then find toggles/contents within
+    wrappers.forEach((wrapper, index) => {
+      const wrapperId = wrapper.getAttribute('aa-accordion-wrapper') || `accordion-${index}`;
+      if (!wrapper.getAttribute('aa-accordion-wrapper')) {
+        wrapper.setAttribute('aa-accordion-wrapper', wrapperId);
+      }
+      
+      // Find toggle and content within this wrapper
+      const toggle = wrapper.querySelector('[aa-accordion-toggle]');
+      const content = wrapper.querySelector('[aa-accordion-content]');
+      
+      // Assign matching IDs to toggle and content
+      if (toggle && !toggle.getAttribute('aa-accordion-toggle')) {
+        toggle.setAttribute('aa-accordion-toggle', wrapperId);
+      }
+      if (content && !content.getAttribute('aa-accordion-content')) {
+        content.setAttribute('aa-accordion-content', wrapperId);
+      }
+    });
+    
+    // Visuals can still be outside the wrapper (for tab interfaces)
+    const visuals = accordion.querySelectorAll('[aa-accordion-visual]');
+    visuals.forEach((visual, index) => {
+      if (!visual.getAttribute('aa-accordion-visual')) {
+        visual.setAttribute('aa-accordion-visual', `accordion-${index}`);
+      }
+    });
+  } else {
+    // Current pattern: direct children, no wrappers
+    const toggles = accordion.querySelectorAll('[aa-accordion-toggle]');
+    const contents = accordion.querySelectorAll('[aa-accordion-content]');
+    const visuals = accordion.querySelectorAll('[aa-accordion-visual]');
+    
+    toggles.forEach((toggle, index) => {
+      if (!toggle.getAttribute('aa-accordion-toggle')) {
+        toggle.setAttribute('aa-accordion-toggle', `accordion-${index}`);
+      }
+    });
+    
+    contents.forEach((content, index) => {
+      if (!content.getAttribute('aa-accordion-content')) {
+        content.setAttribute('aa-accordion-content', `accordion-${index}`);
+      }
+    });
+    
+    visuals.forEach((visual, index) => {
+      if (!visual.getAttribute('aa-accordion-visual')) {
+        visual.setAttribute('aa-accordion-visual', `accordion-${index}`);
+      }
+    });
+  }
 }
 
 function initializeAccordionElements(accordion, state, animations, splitText, defaultDuration = 1, accordionInstanceId = 0) {
@@ -416,9 +497,9 @@ function initializeAccordionElements(accordion, state, animations, splitText, de
     const elementData = state.getElementData(toggleId);
     
     // Set initial states
-    toggle.setAttribute('aa-accordion-status', 'inactive');
-    
-    if (elementData.content) {
+    state.setAccordionStatus(elementData, toggle, 'inactive');
+    // Set status on content only if not using wrapper pattern
+    if (!state.useWrapperPattern && elementData.content) {
       elementData.content.setAttribute('aa-accordion-status', 'inactive');
     }
     
@@ -462,7 +543,7 @@ function initializeAccordionElements(accordion, state, animations, splitText, de
       // Store the opening function for this accordion
       const openInitialAccordion = () => {
         // Set current accordion to active
-        toggleToOpen.setAttribute('aa-accordion-status', 'active');
+        state.setAccordionStatus(elementData, toggleToOpen, 'active');
         
         // Set appropriate ARIA state based on content presence
         if (elementData.content) {
@@ -478,7 +559,10 @@ function initializeAccordionElements(accordion, state, animations, splitText, de
         
         if (elementData.content) {
           gsap.set(elementData.content, { gridTemplateRows: '1fr' });
-          elementData.content.setAttribute('aa-accordion-status', 'active');
+          // Only set status on content if not using wrapper pattern
+          if (!state.useWrapperPattern) {
+            elementData.content.setAttribute('aa-accordion-status', 'active');
+          }
           triggerAccordionAnimations(elementData.content, 'play');
         }
         
@@ -496,7 +580,7 @@ function initializeAccordionElements(accordion, state, animations, splitText, de
       // Fallback: if no text elements exist, open immediately
       // This handles cases where there are no text animations on the page
       gsap.delayedCall(0.1, () => {
-        if (toggleToOpen.getAttribute('aa-accordion-status') !== 'active') {
+        if (!state.isAccordionActive(elementData, toggleToOpen)) {
           openInitialAccordion();
         }
       });
@@ -575,7 +659,7 @@ function initializeAutoplayAccordion(accordion, state, controller, animations, s
     const elementData = state.getElementData(initialToggleId);
     if (elementData) {
       // Set initial accordion to active
-      initialToggle.setAttribute('aa-accordion-status', 'active');
+      state.setAccordionStatus(elementData, initialToggle, 'active');
       
       // Set appropriate ARIA state based on content presence
       if (elementData.content) {
@@ -591,7 +675,10 @@ function initializeAutoplayAccordion(accordion, state, controller, animations, s
       
       if (elementData.content) {
         gsap.set(elementData.content, { gridTemplateRows: '1fr' });
-        elementData.content.setAttribute('aa-accordion-status', 'active');
+        // Only set status on content if not using wrapper pattern
+        if (!state.useWrapperPattern) {
+          elementData.content.setAttribute('aa-accordion-status', 'active');
+        }
         triggerAccordionAnimations(elementData.content, 'play');
       }
       
@@ -611,7 +698,7 @@ function initializeAutoplayAccordion(accordion, state, controller, animations, s
     const elementData = state.getElementData(toggleId);
     if (!elementData) return;
     
-    const isActive = toggle.getAttribute('aa-accordion-status') === 'active';
+    const isActive = state.isAccordionActive(elementData, toggle);
     const hasInitialToggle = accordion.querySelector('[aa-accordion-initial]');
     
     if (progressTween?.isActive()) {
@@ -634,7 +721,7 @@ function initializeAutoplayAccordion(accordion, state, controller, animations, s
         if (otherToggle !== toggle) {
           const otherId = otherToggle.getAttribute('aa-accordion-toggle');
           const otherElementData = state.getElementData(otherId);
-          if (otherToggle.getAttribute('aa-accordion-status') === 'active' && otherElementData) {
+          if (state.isAccordionActive(otherElementData, otherToggle) && otherElementData) {
             controller.closeAccordion(otherToggle, otherElementData);
           }
         }
@@ -781,8 +868,7 @@ function initializeAutoplayAccordion(accordion, state, controller, animations, s
       }
     }
     
-    const isActive = toggle.getAttribute('aa-accordion-status') === 'active';
-    if (!isActive) {
+    if (!state.isAccordionActive(elementData, toggle)) {
       controller.openAccordion(toggle, elementData);
       currentlyOpenAccordion = toggle;
     }

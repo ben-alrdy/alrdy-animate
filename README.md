@@ -1145,6 +1145,7 @@ Accessible accordion functionality with GSAP animations. Create expandable/colla
 - `aa-accordion-toggle=ID` - Marks the clickable toggle element (ID optional - auto-generated if not provided)
 - `aa-accordion-content=ID` - Marks the expandable content element (ID optional - auto-generated if not provided)
 - `aa-accordion-visual=ID` - Marks connected visual content element (ID optional - auto-generated if not provided)
+- `aa-accordion-wrapper` - Optional wrapper for toggle and content (enables simplified styling)
 - `aa-accordion-initial` - On load, activates this toggle, opens content, shows visual
 
 **Auto-Generated IDs:**
@@ -1319,16 +1320,62 @@ Manual IDs take precedence over auto-generated ones.
 - **Screen Reader Support**: Proper announcements and state changes
 - **Focus Management**: Maintains focus during interactions
 
+#### Optional Wrapper Pattern
+
+For simplified styling and state management (especially useful for FAQ-style accordions with hover states), wrap toggle and content in an `aa-accordion-wrapper` element:
+
+```html
+<div aa-accordion>
+  <div aa-accordion-wrapper class="accordion-item">
+    <div aa-accordion-toggle>
+      <h3>Question 1</h3>
+    </div>
+    <div aa-accordion-content aa-animate aa-duration="0.6">
+      <div class="content-inner">
+        <div class="content-wrapper">
+          <p>Answer 1</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div aa-accordion-wrapper class="accordion-item">
+    <div aa-accordion-toggle>
+      <h3>Question 2</h3>
+    </div>
+    <div aa-accordion-content aa-animate aa-duration="0.6">
+      <div class="content-inner">
+        <div class="content-wrapper">
+          <p>Answer 2</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+```
+
+**Benefits:**
+- Status attribute applied to wrapper instead of individual elements
+- Simplified hover state styling (hover entire item, not just toggle)
+- Cleaner CSS targeting for active/inactive states
+- Fully backwards compatible - use only when needed
+
 #### CSS Targeting
 
 Use status attributes for styling:
 ```css
-[aa-accordion-status="active"] {
-  /* Active styles */
-}
-
+/* Standard approach */
 [aa-accordion-toggle][aa-accordion-status="active"] {
   /* Active toggle styles */
+}
+
+/* With wrapper pattern */
+[aa-accordion-wrapper][aa-accordion-status="active"] {
+  /* Active wrapper styles */
+}
+
+[aa-accordion-wrapper]:hover {
+  /* Hover entire accordion item */
 }
 ```
 

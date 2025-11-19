@@ -1,3 +1,8 @@
+@use 'keyframes';
+@use 'animations';
+@use 'easing';
+@use 'transitions';
+
 html {
   // Fix to reduce mobile viewport stuttering
   height: -webkit-fill-available;
@@ -22,11 +27,6 @@ body {
   --aa-delay: var(--aa-default-hover-delay);
   --aa-distance: var(--aa-default-hover-distance);
 }
-
-@import 'keyframes';
-@import 'animations';
-@import 'easing';
-@import 'transitions';
 
 // Hide elements with aa-children initially
 [aa-children] {
