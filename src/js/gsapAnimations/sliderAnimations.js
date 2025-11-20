@@ -910,7 +910,15 @@ export function createSliderAnimations(gsap, Draggable) {
 
     // Setup slides with proper ARIA attributes
     items.forEach((slide, i) => {
-      slide.setAttribute('role', 'group');
+      // Check if this is a Webflow CMS item (w-dyn-item)
+      // If so, preserve role="listitem", otherwise use role="group"
+      const isWebflowCMSItem = slide.classList.contains('w-dyn-item');
+      
+      if (!isWebflowCMSItem) {
+        slide.setAttribute('role', 'group');
+      }
+      // For Webflow CMS items, don't set role - let Webflow's role="listitem" remain
+      
       slide.setAttribute('aria-roledescription', 'slide');
       slide.setAttribute('aria-label', `Slide ${i + 1} of ${totalSlides}`);
       slide.setAttribute('id', `${sliderIdPrefix}-slide-${i}`);
