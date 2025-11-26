@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nav Section Classes - AlrdyAnimate Tests</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="../dist/AlrdyAnimate.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: system-ui, -apple-system, sans-serif;
+        }
+
+        /* Fixed Navigation */
+        .main-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            padding: 1.5rem 2rem;
+            transition: background-color 0.3s ease, color 0.3s ease;
+            background-color: transparent;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #000;
+            transition: color 0.3s ease;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .nav-links a {
+            color: #000;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        /* Nav state: Light background section (dark nav) */
+        .main-nav.nav-dark {
+            background-color: rgba(255, 255, 255, 0.95);
+            border-bottom-color: rgba(0, 0, 0, 0.1);
+        }
+
+        .main-nav.nav-dark .nav-logo,
+        .main-nav.nav-dark .nav-links a {
+            color: #000;
+        }
+
+        /* Nav state: Dark background section (light nav) */
+        .main-nav.nav-light {
+            background-color: rgba(0, 0, 0, 0.95);
+            border-bottom-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .main-nav.nav-light .nav-logo,
+        .main-nav.nav-light .nav-links a {
+            color: #fff;
+        }
+
+        /* Nav state: Blue background section (white nav) */
+        .main-nav.nav-white {
+            background-color: rgba(255, 255, 255, 0.95);
+            border-bottom-color: rgba(0, 0, 0, 0.1);
+        }
+
+        .main-nav.nav-white .nav-logo,
+        .main-nav.nav-white .nav-links a {
+            color: #1a1a1a;
+        }
+
+        /* Nav state: Orange background section (dark nav) */
+        .main-nav.nav-orange {
+            background-color: rgba(255, 255, 255, 0.5);
+            border-bottom-color: rgba(0, 0, 0, 0.1);
+        }
+
+        .main-nav.nav-orange .nav-logo,
+        .main-nav.nav-orange .nav-links a {
+            color: #000;
+        }
+
+        /* Sections */
+        .section {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8rem 2rem 4rem;
+            position: relative;
+        }
+
+        .section-content {
+            max-width: 800px;
+            text-align: center;
+        }
+
+        .section h1 {
+            font-size: 4rem;
+            margin: 0 0 1rem;
+            font-weight: 700;
+        }
+
+        .section p {
+            font-size: 1.25rem;
+            line-height: 1.8;
+            margin: 0 0 2rem;
+        }
+
+        .section-code {
+            background: rgba(0, 0, 0, 0.05);
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 0.9rem;
+            text-align: left;
+            line-height: 1.6;
+            overflow-x: auto;
+        }
+
+        /* Section 1: Light Gray */
+        .section-1 {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            color: #1a1a1a;
+        }
+
+        .section-1 .section-code {
+            background: rgba(0, 0, 0, 0.08);
+        }
+
+        /* Section 2: Dark */
+        .section-2 {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d3436 100%);
+            color: #fff;
+        }
+
+        .section-2 .section-code {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Section 3: Blue */
+        .section-3 {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+        }
+
+        .section-3 .section-code {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        /* Section 4: Orange */
+        .section-4 {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: #fff;
+        }
+
+        .section-4 .section-code {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        /* Info banner */
+        .info-banner {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            max-width: 300px;
+            z-index: 999;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .info-banner h4 {
+            margin: 0 0 0.5rem;
+            font-size: 1rem;
+        }
+
+        .info-banner p {
+            margin: 0;
+            line-height: 1.6;
+            opacity: 0.9;
+        }
+
+        @media (max-width: 768px) {
+            .section h1 {
+                font-size: 2.5rem;
+            }
+
+            .section p {
+                font-size: 1rem;
+            }
+
+            .info-banner {
+                display: none;
+            }
+
+            .nav-links {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Fixed Navigation with aa-nav attribute -->
+    <nav class="main-nav" aa-nav="change">
+        <div class="nav-content">
+            <div class="nav-logo">AlrdyAnimate</div>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="scroll.html">Scroll</a></li>
+                <li><a href="text.html">Text</a></li>
+                <li><a href="nav-section.html" class="active">Nav Sections</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Section 1: Light Background - Dark Nav -->
+    <section class="section section-1" 
+             aa-nav-section="nav-dark" 
+             aa-scroll-start="top 5%" 
+             aa-scroll-end="bottom 2.5%">
+        <div class="section-content" aa-animate="fade-up">
+            <h1>Light Section</h1>
+            <p>This section has a light background, so the navigation switches to dark text with a white background.</p>
+            <div class="section-code">
+                &lt;section aa-nav-section="nav-dark"<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;aa-scroll-start="top 5%"<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;aa-scroll-end="bottom 2.5%"&gt;<br>
+                &nbsp;&nbsp;...<br>
+                &lt;/section&gt;
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 2: Dark Background - Light Nav -->
+    <section class="section section-2" 
+             aa-nav-section="nav-light" 
+             aa-scroll-start="top 5%" 
+             aa-scroll-end="bottom 2.5%">
+        <div class="section-content" aa-animate="fade-up">
+            <h1>Dark Section</h1>
+            <p>This section has a dark background, so the navigation switches to light text with a dark background.</p>
+            <div class="section-code">
+                &lt;section aa-nav-section="nav-light"<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;aa-scroll-start="top 5%"<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;aa-scroll-end="bottom 2.5%"&gt;<br>
+                &nbsp;&nbsp;...<br>
+                &lt;/section&gt;
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 3: Blue Background - White Nav -->
+    <section class="section section-3" 
+             aa-nav-section="nav-white" 
+             aa-scroll-start="top 5%" 
+             aa-scroll-end="bottom 2.5%">
+        <div class="section-content" aa-animate="fade-up">
+            <h1>Blue Section</h1>
+            <p>This section has a blue/purple gradient, so the navigation switches to a white background with dark text.</p>
+            <div class="section-code">
+                &lt;section aa-nav-section="nav-white"<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;aa-scroll-start="top 5%"<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;aa-scroll-end="bottom 2.5%"&gt;<br>
+                &nbsp;&nbsp;...<br>
+                &lt;/section&gt;
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 4: Orange/Pink Background - Orange Nav -->
+    <section class="section section-4" 
+             aa-nav-section="nav-orange" 
+             aa-scroll-start="top 5%" 
+             aa-scroll-end="bottom 2.5%">
+        <div class="section-content" aa-animate="fade-up">
+            <h1>Pink Section</h1>
+            <p>This section has a pink/red gradient, so the navigation switches to match the vibrant background.</p>
+            <div class="section-code">
+                &lt;section aa-nav-section="nav-orange"<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;aa-scroll-start="top 5%"<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;aa-scroll-end="bottom 2.5%"&gt;<br>
+                &nbsp;&nbsp;...<br>
+                &lt;/section&gt;
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 4: Orange/Pink Background - Orange Nav -->
+    <section class="section section-4" 
+             aa-nav-section="nav-test" 
+             aa-scroll-start="top 5%" 
+             aa-scroll-end="bottom 2.5%">
+        <div class="section-content" aa-animate="fade-up">
+            <h1>Pink Section</h1>
+            <p>This section has a pink/red gradient, so the navigation switches to match the vibrant background.</p>
+            <div class="section-code">
+                &lt;section aa-nav-section="nav-orange"<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;aa-scroll-start="top 5%"<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;aa-scroll-end="bottom 2.5%"&gt;<br>
+                &nbsp;&nbsp;...<br>
+                &lt;/section&gt;
+            </div>
+        </div>
+    </section>
+
+    <!-- Info Banner -->
+    <div class="info-banner">
+        <h4>Nav Section Classes</h4>
+        <p>Scroll to see the navigation automatically change color based on the section behind it. Each section adds its own class to the nav element.</p>
+    </div>
+
+    <script src="../dist/AlrdyAnimate.js"></script>
+    <script src="js/main.js"></script>
+</body>
+
+</html>
+

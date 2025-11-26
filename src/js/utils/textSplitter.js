@@ -16,11 +16,12 @@ export function splitText(element, split, hideFromScreenReaders = false, onSplit
   
   // Store original text content before splitting (for accessibility fix)
   const originalText = element.textContent;
-  const disableAria = element.hasAttribute('aa-aria-false');
+  const tagName = element.tagName.toLowerCase();
+  // Disable ARIA for accordion content, or for p/div elements where aria-label is prohibited
+  const disableAria = element.hasAttribute('aa-aria-false') || tagName === 'p' || tagName === 'div';
   
   // Set aria handling based on hideFromScreenReaders - used for duplicate elements
-  // Check for aa-aria-false attribute to skip ARIA (used for accordion content)
-  const skipAria = element.hasAttribute('aa-aria-false');
+  // Check for aa-aria-false attribute to skip ARIA (used for accordion conten and p/div elements)
   splitConfig.aria = hideFromScreenReaders ? 'hidden' : (disableAria ? 'none' : 'auto');
   
   // Check for mask type in animation
@@ -74,7 +75,8 @@ export function splitText(element, split, hideFromScreenReaders = false, onSplit
   // Split the text using GSAP SplitText
   let splitInstance = new SplitText(element, splitConfig);
 
-  // Fix ARIA for accordion content
+  // Fix ARIA for elements where aria-label is disabled/prohibited
+  // Hide the split element from screen readers and add visually-hidden text as sibling
   if (disableAria) {
     element.setAttribute('aria-hidden', 'true');
     

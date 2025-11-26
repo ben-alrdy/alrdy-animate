@@ -1525,9 +1525,11 @@ Accessible, attribute-driven modals that work seamlessly with or without smooth 
 
 ### 3.5 Navigation
 
-Scroll-responsive navigation with animations.
+Scroll-responsive navigation with animations and dynamic styling.
 
 **Setup:** `gsapFeatures: ['nav']`
+
+#### Nav Hide/Show & Class Change
 
 **Available Types:**
 - **Hide**: `hide` (hide on scroll down, show on scroll up)
@@ -1559,11 +1561,76 @@ Scroll-responsive navigation with animations.
 <nav aa-nav="hide-change-50" aa-distance="2" style="position: fixed;">
   Hide/show + 'is-scrolled' class after 50px
 </nav>
+```
 
-<!-- Default threshold -->
-<nav aa-nav="change" style="position: fixed;">
-  Adds 'is-scrolled' class after 100px scroll (default)
+#### Nav Section Classes
+
+Add dynamic classes to your navigation based on which section is currently positioned behind it. Perfect for changing nav colors based on section backgrounds.
+
+**Attributes & Defaults:**
+| Attribute | Values | Default | Description |
+|-----------|--------|---------|-------------|
+| `aa-nav-section` | Class name | - | Class to add to nav when section is behind it |
+| `aa-scroll-start` | ScrollTrigger position | `top 0%` | When to add the class |
+| `aa-scroll-end` | ScrollTrigger position | `bottom 0%` | When to remove the class |
+
+**How It Works:**
+- Only one section class is active at a time
+- Previous section class is automatically removed before adding new one
+- Supports both percentage (`5%`) and rem units (`5rem`) in scroll positions
+- Works independently from `is-scrolled` and `is-current` classes
+
+**Examples:**
+```html
+<!-- Fixed navigation -->
+<nav aa-nav="hide" style="position: fixed;">
+  <div class="nav-content">Navigation</div>
 </nav>
+
+<!-- Sections with nav classes -->
+<section aa-nav-section="nav-dark" 
+         aa-scroll-start="top 5%" 
+         aa-scroll-end="bottom 2.5%">
+  Light background section - adds 'nav-dark' class to nav
+</section>
+
+<section aa-nav-section="nav-light" 
+         aa-scroll-start="top 5%" 
+         aa-scroll-end="bottom 2.5%">
+  Dark background section - adds 'nav-light' class to nav
+</section>
+
+<section aa-nav-section="nav-accent" 
+         aa-scroll-start="top 10%" 
+         aa-scroll-end="bottom 5%">
+  Colored section - adds 'nav-accent' class to nav
+</section>
+```
+
+**CSS Styling:**
+```css
+/* Default nav state */
+nav {
+  background-color: transparent;
+  color: #000;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Nav states based on sections */
+nav.nav-dark {
+  background-color: rgba(255, 255, 255, 0.95);
+  color: #000;
+}
+
+nav.nav-light {
+  background-color: rgba(0, 0, 0, 0.95);
+  color: #fff;
+}
+
+nav.nav-accent {
+  background-color: rgba(59, 130, 246, 0.95);
+  color: #fff;
+}
 ```
 
 ---

@@ -83,6 +83,72 @@ export function createNavAnimations(gsap) {
     });
   };
 
+  // Initialize nav section classes functionality using GSAP ScrollTrigger
+  const initNavSectionClasses = (ScrollTrigger) => {
+    // Only proceed if ScrollTrigger is available
+    if (!ScrollTrigger) {
+      console.warn('GSAP ScrollTrigger not available for nav section classes');
+      return;
+    }
+
+    // Get the nav element
+    const navElement = document.querySelector('[aa-nav]');
+    if (!navElement) return;
+
+    // Get all sections with aa-nav-section attribute
+    const navSections = document.querySelectorAll('[aa-nav-section]');
+    
+    // Early return if no nav sections found
+    if (navSections.length === 0) return;
+
+    // Store all section classes for cleanup
+    const allSectionClasses = [];
+
+    // Create ScrollTrigger for each section
+    navSections.forEach(section => {
+      const sectionClass = section.getAttribute('aa-nav-section');
+      if (!sectionClass) return;
+
+      // Store class for later cleanup
+      allSectionClasses.push(sectionClass);
+
+      // Get scroll positions with defaults
+      const scrollStart = section.getAttribute('aa-scroll-start') || 'top 0%';
+      const scrollEnd = section.getAttribute('aa-scroll-end') || 'bottom 0%';
+
+      // Create ScrollTrigger for this section
+      ScrollTrigger.create({
+        trigger: section,
+        start: scrollStart,
+        end: scrollEnd,
+        onEnter: () => {
+          // Remove all section classes from nav
+          allSectionClasses.forEach(cls => {
+            navElement.classList.remove(cls);
+          });
+          // Add current section class
+          navElement.classList.add(sectionClass);
+        },
+        onEnterBack: () => {
+          // Remove all section classes from nav
+          allSectionClasses.forEach(cls => {
+            navElement.classList.remove(cls);
+          });
+          // Add current section class
+          navElement.classList.add(sectionClass);
+        },
+        onLeave: () => {
+          // Remove current section class
+          navElement.classList.remove(sectionClass);
+        },
+        onLeaveBack: () => {
+          // Remove current section class
+          navElement.classList.remove(sectionClass);
+        }
+      });
+    });
+  };
+
   // Initialize nav animations
   const initializeNav = (ScrollTrigger) => {
     const navElement = document.querySelector('[aa-nav]');
@@ -145,6 +211,7 @@ export function createNavAnimations(gsap) {
 
   return {
     nav: initializeNav,
-    initNavigationTracking
+    initNavigationTracking,
+    initNavSectionClasses
   };
 } 
