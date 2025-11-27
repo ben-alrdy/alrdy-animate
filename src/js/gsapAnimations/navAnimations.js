@@ -218,8 +218,10 @@ export function createNavAnimations(gsap, Flip) {
     overwrite: 'auto'
   });
 
-  // Shared helper to get current nav item
-  const getCurrentNavItem = () => document.querySelector("[aa-scroll-target].is-current");
+  // Shared helper to get current nav item (scoped to nav element)
+  const getCurrentNavItem = (navElement) => {
+    return navElement.querySelector("[aa-scroll-target].is-current");
+  };
 
   // Initialize current indicator functionality using GSAP Flip
   const initCurrentIndicator = (Flip) => {
@@ -233,13 +235,13 @@ export function createNavAnimations(gsap, Flip) {
 
     const duration = parseFloat(indicator.getAttribute('aa-duration')) || 0.4;
     const ease = indicator.getAttribute('aa-ease') || 'power2.out';
-    const navigationItems = document.querySelectorAll("[aa-scroll-target]");
+    const navigationItems = navElement.querySelectorAll("[aa-scroll-target]");
     
     if (navigationItems.length === 0) return;
 
     // Initialize position to first current item
     requestAnimationFrame(() => {
-      const currentItem = getCurrentNavItem();
+      const currentItem = getCurrentNavItem(navElement);
       if (currentItem) {
         Flip.fit(indicator, currentItem, { duration: 0, absolute: true, simple: true });
         // Show indicator after short delay to ensure positioning is complete
@@ -284,7 +286,7 @@ export function createNavAnimations(gsap, Flip) {
 
     const duration = parseFloat(hoverIndicator.getAttribute('aa-duration')) || 0.4;
     const ease = hoverIndicator.getAttribute('aa-ease') || 'power2.out';
-    const navigationItems = document.querySelectorAll("[aa-scroll-target]");
+    const navigationItems = navElement.querySelectorAll("[aa-scroll-target]");
     
     if (navigationItems.length === 0) return;
 
@@ -297,7 +299,7 @@ export function createNavAnimations(gsap, Flip) {
 
     // Return to appropriate position based on state
     const returnToHome = () => {
-      const currentItem = getCurrentNavItem();
+      const currentItem = getCurrentNavItem(navElement);
       if (currentItem) {
         // If there's an active nav item, animate to it
         animateTo(currentItem);
@@ -309,7 +311,7 @@ export function createNavAnimations(gsap, Flip) {
 
     // Initialize position to current item
     requestAnimationFrame(() => {
-      const currentItem = getCurrentNavItem();
+      const currentItem = getCurrentNavItem(navElement);
       if (currentItem) {
         Flip.fit(hoverIndicator, currentItem, { duration: 0, absolute: true, simple: true });
         // Show indicator after short delay to ensure positioning is complete
