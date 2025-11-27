@@ -271,10 +271,15 @@ export function createNavAnimations(gsap, Flip) {
   const initHoverIndicator = (Flip) => {
     if (!Flip) return;
 
+    // Disable on touch devices (no hover capability)
+    const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    if (isTouchDevice) return;
+
     const navElement = document.querySelector('[aa-nav]');
     if (!navElement) return;
 
     const hoverIndicator = navElement.querySelector('[aa-nav-hover-indicator]');
+    const currentIndicator = navElement.querySelector('[aa-nav-current-indicator]');
     if (!hoverIndicator) return;
 
     const duration = parseFloat(hoverIndicator.getAttribute('aa-duration')) || 0.4;
@@ -288,6 +293,18 @@ export function createNavAnimations(gsap, Flip) {
     // Animate to target with shared config
     const animateTo = (target, animDuration = duration) => {
       if (target) Flip.fit(hoverIndicator, target, createFlipConfig(animDuration, ease));
+    };
+
+    // Return to appropriate position based on state
+    const returnToHome = () => {
+      const currentItem = getCurrentNavItem();
+      if (currentItem) {
+        // If there's an active nav item, animate to it
+        animateTo(currentItem);
+      } else if (currentIndicator) {
+        // If no active item, match the current indicator position
+        Flip.fit(hoverIndicator, currentIndicator, createFlipConfig(duration, ease));
+      }
     };
 
     // Initialize position to current item
@@ -305,8 +322,7 @@ export function createNavAnimations(gsap, Flip) {
     // Update hover indicator when current changes (only if not hovering)
     const observer = new MutationObserver(() => {
       if (!isHovering) {
-        const currentItem = getCurrentNavItem();
-        if (currentItem) animateTo(currentItem);
+        returnToHome();
       }
     });
 
@@ -321,7 +337,7 @@ export function createNavAnimations(gsap, Flip) {
 
     navElement.addEventListener('mouseleave', () => {
       isHovering = false;
-      animateTo(getCurrentNavItem());
+      returnToHome();
     });
   };
 
