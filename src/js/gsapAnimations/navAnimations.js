@@ -1,4 +1,7 @@
 export function createNavAnimations(gsap, Flip) {
+  // Query nav element once at initialization
+  const navElement = document.querySelector('[aa-nav]');
+  
   // Track class state to avoid unnecessary DOM operations
   let hasScrolledClass = false;
 
@@ -26,8 +29,11 @@ export function createNavAnimations(gsap, Flip) {
       return;
     }
 
-    // Get all scroll target elements and their corresponding sections
-    const navigationItems = document.querySelectorAll("[aa-scroll-target]");
+    // Use cached nav element
+    if (!navElement) return;
+
+    // Get all scroll target elements within nav and their corresponding sections
+    const navigationItems = navElement.querySelectorAll("[aa-scroll-target]");
     
     // Early return if no navigation items found
     if (navigationItems.length === 0) return;
@@ -91,8 +97,7 @@ export function createNavAnimations(gsap, Flip) {
       return;
     }
 
-    // Get the nav element
-    const navElement = document.querySelector('[aa-nav]');
+    // Use cached nav element
     if (!navElement) return;
 
     // Get all sections with aa-nav-section attribute
@@ -151,7 +156,7 @@ export function createNavAnimations(gsap, Flip) {
 
   // Initialize nav animations
   const initializeNav = (ScrollTrigger) => {
-    const navElement = document.querySelector('[aa-nav]');
+    // Use cached nav element
     if (!navElement) return;
 
     // Get attributes with defaults
@@ -227,7 +232,7 @@ export function createNavAnimations(gsap, Flip) {
   const initCurrentIndicator = (Flip) => {
     if (!Flip) return;
 
-    const navElement = document.querySelector('[aa-nav]');
+    // Use cached nav element
     if (!navElement) return;
 
     const indicator = navElement.querySelector('[aa-nav-current-indicator]');
@@ -277,7 +282,7 @@ export function createNavAnimations(gsap, Flip) {
     const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
     if (isTouchDevice) return;
 
-    const navElement = document.querySelector('[aa-nav]');
+    // Use cached nav element
     if (!navElement) return;
 
     const hoverIndicator = navElement.querySelector('[aa-nav-hover-indicator]');
