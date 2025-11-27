@@ -467,6 +467,12 @@ async function init(options = {}) {
               loadedModules.animations.nav(loadedModules.ScrollTrigger);
               loadedModules.animations.initNavigationTracking(loadedModules.ScrollTrigger);
               loadedModules.animations.initNavSectionClasses(loadedModules.ScrollTrigger);
+              
+              // Initialize indicators if Flip is available
+              if (loadedModules.Flip) {
+                loadedModules.animations.initCurrentIndicator(loadedModules.Flip);
+                loadedModules.animations.initHoverIndicator(loadedModules.Flip);
+              }
             }
 
             // Setup modal animations if feature is enabled

@@ -48,6 +48,7 @@
             list-style: none;
             margin: 0;
             padding: 0;
+            position: relative;
         }
 
         .nav-links a {
@@ -55,6 +56,53 @@
             text-decoration: none;
             font-weight: 500;
             transition: color 0.3s ease;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            border: 1px solid #000;
+            position: relative;
+            z-index: 2;
+        }
+
+        /* Navigation Indicators */
+        [aa-nav-current-indicator] {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.4);
+            pointer-events: none;
+            z-index: 1;
+            border-radius: 0.5rem;
+            
+        }
+        
+        [aa-nav-hover-indicator] {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.05);
+            pointer-events: none;
+            z-index: 0;
+            border-radius: 0.5rem;
+            
+        }
+        
+        .nav-links a.is-current {
+            font-weight: 600;
+        }
+
+       
+        
+        /* Adjust indicator colors based on nav state */
+        .main-nav.nav-dark [aa-nav-current-indicator] {
+            background: rgba(0, 0, 0, 0.08);
+        }
+        
+        .main-nav.nav-dark [aa-nav-hover-indicator] {
+            background: rgba(0, 0, 0, 0.04);
+        }
+        
+        .main-nav.nav-light [aa-nav-current-indicator] {
+            background: rgba(255, 255, 255, 0.15);
+        }
+        
+        .main-nav.nav-light [aa-nav-hover-indicator] {
+            background: rgba(255, 255, 255, 0.08);
         }
 
         /* Nav state: Light background section (dark nav) */
@@ -204,6 +252,8 @@
             line-height: 1.6;
             opacity: 0.9;
         }
+        
+         
 
         @media (max-width: 768px) {
             .section h1 {
@@ -231,108 +281,109 @@
         <div class="nav-content">
             <div class="nav-logo">AlrdyAnimate</div>
             <ul class="nav-links">
-                <li><a href="index.html">Home</a></li>
-                <li><a href="scroll.html">Scroll</a></li>
-                <li><a href="text.html">Text</a></li>
-                <li><a href="nav-section.html" class="active">Nav Sections</a></li>
+                <span href="#section-0" aa-scroll-target="#section-0" style="width: 0px;"></span>
+                <a href="#section-1" aa-scroll-target="#section-1">Light longer title</a>
+                <a href="#section-2" aa-scroll-target="#section-2">Dark</a>
+                <a href="#section-3" aa-scroll-target="#section-3">Blue</a>
+                <a href="#section-4" aa-scroll-target="#section-4">Pink</a>
+                <!-- Current indicator - tracks active section -->
+                <div aa-nav-current-indicator aa-duration="0.4" aa-ease="power2.out"></div>
+                <!-- Hover indicator - follows mouse, returns to current -->
+                <div aa-nav-hover-indicator aa-duration="0.4" aa-ease="power2.out"></div>
             </ul>
         </div>
     </nav>
+    <!-- Section 1: Light Background - Dark Nav -->
+    <section id="section-0" class="section section-1" 
+        <div class="section-content" aa-animate="fade-up">
+            <h1>HERO</h1>
+            <div class="section-code">
+                &lt;div aa-nav-current-indicator <br>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;aa-duration="0.4" <br>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;aa-ease="power2.out"&gt;&lt;/div&gt;<br><br>
+                &lt;div aa-nav-hover-indicator <br>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;aa-duration="0.25" <br>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;aa-ease="power2.out"&gt;&lt;/div&gt;
+            </div>
+        </div>
+    </section>
 
     <!-- Section 1: Light Background - Dark Nav -->
-    <section class="section section-1" 
+    <section id="section-1" class="section section-1" 
              aa-nav-section="nav-dark" 
              aa-scroll-start="top 5%" 
              aa-scroll-end="bottom 2.5%">
         <div class="section-content" aa-animate="fade-up">
-            <h1>Light Section</h1>
-            <p>This section has a light background, so the navigation switches to dark text with a white background.</p>
+            <h1>Navigation Indicators</h1>
+            <p>Watch the current indicator (darker) track your scroll position, while the hover indicator (lighter) follows your mouse and bounces back!</p>
             <div class="section-code">
-                &lt;section aa-nav-section="nav-dark"<br>
-                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;aa-scroll-start="top 5%"<br>
-                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;aa-scroll-end="bottom 2.5%"&gt;<br>
-                &nbsp;&nbsp;...<br>
-                &lt;/section&gt;
+                &lt;div aa-nav-current-indicator <br>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;aa-duration="0.4" <br>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;aa-ease="power2.out"&gt;&lt;/div&gt;<br><br>
+                &lt;div aa-nav-hover-indicator <br>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;aa-duration="0.25" <br>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;aa-ease="power2.out"&gt;&lt;/div&gt;
             </div>
         </div>
     </section>
 
     <!-- Section 2: Dark Background - Light Nav -->
-    <section class="section section-2" 
+    <section id="section-2" class="section section-2" 
              aa-nav-section="nav-light" 
              aa-scroll-start="top 5%" 
              aa-scroll-end="bottom 2.5%">
         <div class="section-content" aa-animate="fade-up">
-            <h1>Dark Section</h1>
-            <p>This section has a dark background, so the navigation switches to light text with a dark background.</p>
+            <h1>FLIP Animation</h1>
+            <p>Uses GSAP's FLIP plugin for smooth, performant position and size transitions between nav items.</p>
             <div class="section-code">
-                &lt;section aa-nav-section="nav-light"<br>
-                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;aa-scroll-start="top 5%"<br>
-                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;aa-scroll-end="bottom 2.5%"&gt;<br>
-                &nbsp;&nbsp;...<br>
-                &lt;/section&gt;
+                &lt;a href="#section-2" <br>
+                &nbsp;&nbsp;&nbsp;aa-scroll-target="#section-2"&gt;<br>
+                &nbsp;&nbsp;Dark<br>
+                &lt;/a&gt;
             </div>
         </div>
     </section>
 
     <!-- Section 3: Blue Background - White Nav -->
-    <section class="section section-3" 
+    <section id="section-3" class="section section-3" 
              aa-nav-section="nav-white" 
              aa-scroll-start="top 5%" 
              aa-scroll-end="bottom 2.5%">
         <div class="section-content" aa-animate="fade-up">
-            <h1>Blue Section</h1>
-            <p>This section has a blue/purple gradient, so the navigation switches to a white background with dark text.</p>
+            <h1>Scroll Tracking</h1>
+            <p>The current indicator automatically follows the active section. Notice how the nav adapts its colors based on the section background.</p>
             <div class="section-code">
-                &lt;section aa-nav-section="nav-white"<br>
-                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;aa-scroll-start="top 5%"<br>
-                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;aa-scroll-end="bottom 2.5%"&gt;<br>
-                &nbsp;&nbsp;...<br>
-                &lt;/section&gt;
+                Flip.fit(indicator, activeNavItem, {<br>
+                &nbsp;&nbsp;duration: 0.4,<br>
+                &nbsp;&nbsp;ease: 'power2.out',<br>
+                &nbsp;&nbsp;absolute: true,<br>
+                &nbsp;&nbsp;scale: true,<br>
+                &nbsp;&nbsp;simple: true<br>
+                });
             </div>
         </div>
     </section>
 
     <!-- Section 4: Orange/Pink Background - Orange Nav -->
-    <section class="section section-4" 
+    <section id="section-4" class="section section-4" 
              aa-nav-section="nav-orange" 
              aa-scroll-start="top 5%" 
              aa-scroll-end="bottom 2.5%">
         <div class="section-content" aa-animate="fade-up">
-            <h1>Pink Section</h1>
-            <p>This section has a pink/red gradient, so the navigation switches to match the vibrant background.</p>
+            <h1>Hover Interaction</h1>
+            <p>Try hovering over the navigation links above. The hover indicator originates from the current position and returns when you move away - creating a smooth, elastic effect.</p>
             <div class="section-code">
-                &lt;section aa-nav-section="nav-orange"<br>
-                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;aa-scroll-start="top 5%"<br>
-                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;aa-scroll-end="bottom 2.5%"&gt;<br>
-                &nbsp;&nbsp;...<br>
-                &lt;/section&gt;
-            </div>
-        </div>
-    </section>
-
-    <!-- Section 4: Orange/Pink Background - Orange Nav -->
-    <section class="section section-4" 
-             aa-nav-section="nav-test" 
-             aa-scroll-start="top 5%" 
-             aa-scroll-end="bottom 2.5%">
-        <div class="section-content" aa-animate="fade-up">
-            <h1>Pink Section</h1>
-            <p>This section has a pink/red gradient, so the navigation switches to match the vibrant background.</p>
-            <div class="section-code">
-                &lt;section aa-nav-section="nav-orange"<br>
-                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;aa-scroll-start="top 5%"<br>
-                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;aa-scroll-end="bottom 2.5%"&gt;<br>
-                &nbsp;&nbsp;...<br>
-                &lt;/section&gt;
+                mouseenter: Flip.fit(hover, item)<br>
+                mouseleave: Flip.fit(hover, current)<br><br>
+                // Returns to current indicator!
             </div>
         </div>
     </section>
 
     <!-- Info Banner -->
     <div class="info-banner">
-        <h4>Nav Section Classes</h4>
-        <p>Scroll to see the navigation automatically change color based on the section behind it. Each section adds its own class to the nav element.</p>
+        <h4>Nav Indicators Demo</h4>
+        <p>Scroll to see the current indicator track sections. Hover over nav links to see the hover indicator in action!</p>
     </div>
 
     <script src="../dist/AlrdyAnimate.js"></script>

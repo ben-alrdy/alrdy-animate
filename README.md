@@ -1563,6 +1563,37 @@ Scroll-responsive navigation with animations and dynamic styling.
 </nav>
 ```
 
+#### Navigation Tracking with `is-current`
+
+When using scroll-to functionality with Lenis, AlrdyAnimate automatically tracks which sections are in view and adds the `is-current` class to corresponding navigation elements.
+
+```html
+<!-- Navigation links -->
+<nav>
+  <a href="#section1" aa-scroll-target="#section1">Section 1</a>
+  <a href="#section2" aa-scroll-target="#section2">Section 2</a>
+  <a href="#section3" aa-scroll-target="#section3">Section 3</a>
+</nav>
+
+<!-- Sections -->
+<section id="section1">Content 1</section>
+<section id="section2">Content 2</section>
+<section id="section3">Content 3</section>
+```
+
+**How it works:**
+- Triggers when section reaches 50% of viewport
+- Automatically adds `is-current` class to corresponding nav link
+- Removes class when section leaves view
+
+**CSS Example:**
+```css
+nav a.is-current {
+  color: #007bff;
+  font-weight: bold;
+}
+```
+
 #### Nav Section Classes
 
 Add dynamic classes to your navigation based on which section is currently positioned behind it. Perfect for changing nav colors based on section backgrounds.
@@ -1630,6 +1661,66 @@ nav.nav-light {
 nav.nav-accent {
   background-color: rgba(59, 130, 246, 0.95);
   color: #fff;
+}
+```
+
+#### Nav Indicators (Current + Hover)
+
+Animated indicators that track the active navigation item and follow hover interactions using GSAP's FLIP plugin. Perfect for creating sophisticated navigation highlighting effects.
+
+**How It Works:**
+- **Current Indicator**: Automatically follows the `.is-current` class on navigation items
+- **Hover Indicator**: Follows mouse hover, returns to current indicator when mouse leaves nav
+- **FLIP Animation**: Smoothly animates position and size between nav items without distortion
+
+**Attributes & Defaults:**
+| Attribute | Element | Default | Description |
+|-----------|---------|---------|-------------|
+| `aa-nav-current-indicator` | Indicator element | - | Tracks active navigation item |
+| `aa-nav-hover-indicator` | Indicator element | - | Follows hover on nav items |
+| `aa-duration` | Indicator element | `0.4` | Animation duration |
+| `aa-ease` | Indicator element | `power2.out` | Animation easing |
+| `aa-scroll-target` | Nav links | - | Required on nav items for tracking |
+
+**Examples:**
+```html
+<!-- Navigation with both indicators -->
+<nav aa-nav="hide">
+  <ul class="nav-links">
+    <a href="#section-1" aa-scroll-target="#section-1">Section 1</a>
+    <a href="#section-2" aa-scroll-target="#section-2">Section 2</a>
+    <a href="#section-3" aa-scroll-target="#section-3">Section 3</a>
+    
+    <!-- Current indicator (darker) -->
+    <div aa-nav-current-indicator aa-duration="0.4" aa-ease="power2.out"></div>
+    
+    <!-- Hover indicator (lighter) -->
+    <div aa-nav-hover-indicator aa-duration="0.25" aa-ease="power2.out"></div>
+  </ul>
+</nav>
+```
+
+**CSS Requirements:**
+```css
+
+/* Current indicator (darker, tracks active section) */
+[aa-nav-current-indicator] {
+  position: absolute;
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 0.5rem;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0; /* Hidden until initialized */
+}
+
+/* Hover indicator (lighter, follows mouse) */
+[aa-nav-hover-indicator] {
+  position: absolute;
+  background: rgba(0, 0, 0, 0.08);
+  border-radius: 0.5rem;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0; /* Hidden until initialized */
 }
 ```
 
@@ -1733,37 +1824,6 @@ AlrdyAnimate.init({
     }
   }
 });
-```
-
-#### Navigation Tracking with `is-current`
-
-When using scroll-to functionality with Lenis, AlrdyAnimate automatically tracks which sections are in view and adds the `is-current` class to corresponding navigation elements.
-
-```html
-<!-- Navigation links -->
-<nav>
-  <a href="#section1" aa-scroll-target="#section1">Section 1</a>
-  <a href="#section2" aa-scroll-target="#section2">Section 2</a>
-  <a href="#section3" aa-scroll-target="#section3">Section 3</a>
-</nav>
-
-<!-- Sections -->
-<section id="section1">Content 1</section>
-<section id="section2">Content 2</section>
-<section id="section3">Content 3</section>
-```
-
-**How it works:**
-- Triggers when section reaches 50% of viewport
-- Automatically adds `is-current` class to corresponding nav link
-- Removes class when section leaves view
-
-**CSS Example:**
-```css
-nav a.is-current {
-  color: #007bff;
-  font-weight: bold;
-}
 ```
 
 #### Lenis Control & Features

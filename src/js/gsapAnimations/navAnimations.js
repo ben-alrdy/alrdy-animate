@@ -1,4 +1,4 @@
-export function createNavAnimations(gsap) {
+export function createNavAnimations(gsap, Flip) {
   // Track class state to avoid unnecessary DOM operations
   let hasScrolledClass = false;
 
@@ -209,9 +209,127 @@ export function createNavAnimations(gsap) {
     });
   };
 
+  // Shared helper to create FLIP config
+  const createFlipConfig = (duration, ease) => ({
+    duration,
+    ease,
+    absolute: true,
+    simple: true,
+    overwrite: 'auto'
+  });
+
+  // Shared helper to get current nav item
+  const getCurrentNavItem = () => document.querySelector("[aa-scroll-target].is-current");
+
+  // Initialize current indicator functionality using GSAP Flip
+  const initCurrentIndicator = (Flip) => {
+    if (!Flip) return;
+
+    const navElement = document.querySelector('[aa-nav]');
+    if (!navElement) return;
+
+    const indicator = navElement.querySelector('[aa-nav-current-indicator]');
+    if (!indicator) return;
+
+    const duration = parseFloat(indicator.getAttribute('aa-duration')) || 0.4;
+    const ease = indicator.getAttribute('aa-ease') || 'power2.out';
+    const navigationItems = document.querySelectorAll("[aa-scroll-target]");
+    
+    if (navigationItems.length === 0) return;
+
+    // Initialize position to first current item
+    requestAnimationFrame(() => {
+      const currentItem = getCurrentNavItem();
+      if (currentItem) {
+        Flip.fit(indicator, currentItem, { duration: 0, absolute: true, simple: true });
+        // Show indicator after short delay to ensure positioning is complete
+        gsap.delayedCall(duration, () => {
+          gsap.set(indicator, { opacity: 1 });
+        });
+      }
+    });
+
+    // Update indicator on class changes
+    const observer = new MutationObserver((mutations) => {
+      for (const mutation of mutations) {
+        if (mutation.type === 'attributes') {
+          const target = mutation.target;
+          if (target.classList.contains('is-current')) {
+            Flip.fit(indicator, target, createFlipConfig(duration, ease));
+            break; // Only one item can be current at a time
+          }
+        }
+      }
+    });
+
+    navigationItems.forEach(item => {
+      observer.observe(item, { attributes: true, attributeFilter: ['class'] });
+    });
+  };
+
+  // Initialize hover indicator functionality using GSAP Flip
+  const initHoverIndicator = (Flip) => {
+    if (!Flip) return;
+
+    const navElement = document.querySelector('[aa-nav]');
+    if (!navElement) return;
+
+    const hoverIndicator = navElement.querySelector('[aa-nav-hover-indicator]');
+    if (!hoverIndicator) return;
+
+    const duration = parseFloat(hoverIndicator.getAttribute('aa-duration')) || 0.4;
+    const ease = hoverIndicator.getAttribute('aa-ease') || 'power2.out';
+    const navigationItems = document.querySelectorAll("[aa-scroll-target]");
+    
+    if (navigationItems.length === 0) return;
+
+    let isHovering = false;
+
+    // Animate to target with shared config
+    const animateTo = (target, animDuration = duration) => {
+      if (target) Flip.fit(hoverIndicator, target, createFlipConfig(animDuration, ease));
+    };
+
+    // Initialize position to current item
+    requestAnimationFrame(() => {
+      const currentItem = getCurrentNavItem();
+      if (currentItem) {
+        Flip.fit(hoverIndicator, currentItem, { duration: 0, absolute: true, simple: true });
+        // Show indicator after short delay to ensure positioning is complete
+        gsap.delayedCall(duration, () => {
+          gsap.set(hoverIndicator, { opacity: 1 });
+        });
+      }
+    });
+
+    // Update hover indicator when current changes (only if not hovering)
+    const observer = new MutationObserver(() => {
+      if (!isHovering) {
+        const currentItem = getCurrentNavItem();
+        if (currentItem) animateTo(currentItem);
+      }
+    });
+
+    navigationItems.forEach(item => {
+      observer.observe(item, { attributes: true, attributeFilter: ['class'] });
+      
+      item.addEventListener('mouseenter', () => {
+        isHovering = true;
+        animateTo(item);
+      });
+    });
+
+    navElement.addEventListener('mouseleave', () => {
+      isHovering = false;
+      animateTo(getCurrentNavItem());
+    });
+  };
+
   return {
     nav: initializeNav,
     initNavigationTracking,
-    initNavSectionClasses
+    initNavSectionClasses,
+    initCurrentIndicator,
+    initHoverIndicator
   };
 } 

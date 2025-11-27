@@ -119,3 +119,9 @@ html.lenis {
   white-space: nowrap;
   border: 0;
 }
+
+[aa-nav-current-indicator], [aa-nav-hover-indicator] {
+  position: absolute;
+  pointer-events: none;
+  opacity: 0;
+}
