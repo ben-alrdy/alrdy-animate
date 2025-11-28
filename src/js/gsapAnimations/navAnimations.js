@@ -246,7 +246,7 @@ export function createNavAnimations(gsap, Flip) {
 
     // Initialize position to first current item
     requestAnimationFrame(() => {
-      const currentItem = getCurrentNavItem(navElement);
+      const currentItem = getCurrentNavItem(navElement) || navigationItems[0];
       if (currentItem) {
         Flip.fit(indicator, currentItem, { duration: 0, absolute: true, simple: true });
         // Show indicator after short delay to ensure positioning is complete
@@ -316,7 +316,7 @@ export function createNavAnimations(gsap, Flip) {
 
     // Initialize position to current item
     requestAnimationFrame(() => {
-      const currentItem = getCurrentNavItem(navElement);
+      const currentItem = getCurrentNavItem(navElement) || navigationItems[0];
       if (currentItem) {
         Flip.fit(hoverIndicator, currentItem, { duration: 0, absolute: true, simple: true });
         // Show indicator after short delay to ensure positioning is complete

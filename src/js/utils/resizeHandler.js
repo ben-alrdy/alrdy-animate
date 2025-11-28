@@ -118,6 +118,42 @@ export function setupResizeHandler(modules, initOptions, isMobile, setupGSAPAnim
           });
         }
       }
+
+      // Recalculate nav indicators
+      if (modules.Flip) {
+        const navElement = document.querySelector('[aa-nav]');
+        if (navElement) {
+          const currentIndicator = navElement.querySelector('[aa-nav-current-indicator]');
+          const hoverIndicator = navElement.querySelector('[aa-nav-hover-indicator]');
+          const navigationItems = navElement.querySelectorAll("[aa-scroll-target]");
+          
+          if (navigationItems.length > 0) {
+            // Get current item or fallback to first
+            const getCurrentItem = () => navElement.querySelector("[aa-scroll-target].is-current") || navigationItems[0];
+            const currentItem = getCurrentItem();
+            
+            if (currentItem) {
+              // Reposition current indicator
+              if (currentIndicator) {
+                modules.Flip.fit(currentIndicator, currentItem, { 
+                  duration: 0, 
+                  absolute: true, 
+                  simple: true 
+                });
+              }
+              
+              // Reposition hover indicator
+              if (hoverIndicator) {
+                modules.Flip.fit(hoverIndicator, currentItem, { 
+                  duration: 0, 
+                  absolute: true, 
+                  simple: true 
+                });
+              }
+            }
+          }
+        }
+      }
       
       // Refresh ScrollTrigger after rebuilding animations
       if (modules.ScrollTrigger) {
