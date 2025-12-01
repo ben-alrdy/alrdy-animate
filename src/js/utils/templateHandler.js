@@ -67,6 +67,32 @@ export function processTemplates(options) {
 }
 
 /**
+ * Find a matching template for an element by checking each class name
+ * @param {HTMLElement} element - The element to find template for
+ * @returns {Object|null} Matching template or null if no match
+ */
+function findTemplateForElement(element) {
+  if (!processedTemplates) return null;
+  
+  // Handle both string className and className.baseVal (for SVG elements)
+  const className = typeof element.className === 'string' 
+    ? element.className 
+    : element.className?.baseVal || '';
+  
+  if (!className) return null;
+  
+  // Split by spaces and check each class individually
+  const classes = className.trim().split(/\s+/);
+  for (const cls of classes) {
+    if (processedTemplates[cls]) {
+      return processedTemplates[cls];
+    }
+  }
+  
+  return null;
+}
+
+/**
  * Get animation settings for an element based on templates
  * @param {HTMLElement} element - The element to get settings for
  * @returns {Object|null} Animation settings or null if no match
@@ -74,8 +100,7 @@ export function processTemplates(options) {
 export function getElementTemplateSettings(element, isMobile) {
   if (!processedTemplates) return null;
 
-  const className = element.className;
-  const template = processedTemplates[className];
+  const template = findTemplateForElement(element);
   
   if (!template) return null;
   
@@ -153,8 +178,7 @@ export function getFinalSettings(element, defaultSettings, isMobile) {
 export function updateTemplateSettingsOnResize(element, existingSettings, isMobile) {
   if (!processedTemplates) return null;
 
-  const className = element.className;
-  const template = processedTemplates[className];
+  const template = findTemplateForElement(element);
   
   if (!template) return null;
   
