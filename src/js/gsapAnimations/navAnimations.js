@@ -244,10 +244,14 @@ export function createNavAnimations(gsap, Flip) {
     
     if (navigationItems.length === 0) return;
 
-    // Initialize position to first current item
+    // Track last known current item
+    let lastCurrentItem = null;
+
+    // Initialize position to first current item or first nav item
     requestAnimationFrame(() => {
       const currentItem = getCurrentNavItem(navElement) || navigationItems[0];
       if (currentItem) {
+        lastCurrentItem = currentItem;
         Flip.fit(indicator, currentItem, { duration: 0, absolute: true, simple: true });
         // Show indicator after short delay to ensure positioning is complete
         gsap.delayedCall(duration, () => {
@@ -256,12 +260,14 @@ export function createNavAnimations(gsap, Flip) {
       }
     });
 
-    // Update indicator on class changes
+    // Update indicator only when is-current is ADDED (not removed)
     const observer = new MutationObserver((mutations) => {
       for (const mutation of mutations) {
         if (mutation.type === 'attributes') {
           const target = mutation.target;
+          // Only respond to additions of is-current class
           if (target.classList.contains('is-current')) {
+            lastCurrentItem = target;
             Flip.fit(indicator, target, createFlipConfig(duration, ease));
             break; // Only one item can be current at a time
           }
@@ -286,7 +292,6 @@ export function createNavAnimations(gsap, Flip) {
     if (!navElement) return;
 
     const hoverIndicator = navElement.querySelector('[aa-nav-hover-indicator]');
-    const currentIndicator = navElement.querySelector('[aa-nav-current-indicator]');
     if (!hoverIndicator) return;
 
     const duration = parseFloat(hoverIndicator.getAttribute('aa-duration')) || 0.4;
@@ -295,6 +300,8 @@ export function createNavAnimations(gsap, Flip) {
     
     if (navigationItems.length === 0) return;
 
+    // Track last known current item and hover state
+    let lastCurrentItem = null;
     let isHovering = false;
 
     // Animate to target with shared config
@@ -302,22 +309,11 @@ export function createNavAnimations(gsap, Flip) {
       if (target) Flip.fit(hoverIndicator, target, createFlipConfig(animDuration, ease));
     };
 
-    // Return to appropriate position based on state
-    const returnToHome = () => {
-      const currentItem = getCurrentNavItem(navElement);
-      if (currentItem) {
-        // If there's an active nav item, animate to it
-        animateTo(currentItem);
-      } else if (currentIndicator) {
-        // If no active item, match the current indicator position
-        Flip.fit(hoverIndicator, currentIndicator, createFlipConfig(duration, ease));
-      }
-    };
-
-    // Initialize position to current item
+    // Initialize position to current item or first nav item
     requestAnimationFrame(() => {
       const currentItem = getCurrentNavItem(navElement) || navigationItems[0];
       if (currentItem) {
+        lastCurrentItem = currentItem;
         Flip.fit(hoverIndicator, currentItem, { duration: 0, absolute: true, simple: true });
         // Show indicator after short delay to ensure positioning is complete
         gsap.delayedCall(duration, () => {
@@ -326,10 +322,21 @@ export function createNavAnimations(gsap, Flip) {
       }
     });
 
-    // Update hover indicator when current changes (only if not hovering)
-    const observer = new MutationObserver(() => {
-      if (!isHovering) {
-        returnToHome();
+    // Update last known current item only when is-current is ADDED (not removed)
+    const observer = new MutationObserver((mutations) => {
+      for (const mutation of mutations) {
+        if (mutation.type === 'attributes') {
+          const target = mutation.target;
+          // Only respond to additions of is-current class
+          if (target.classList.contains('is-current')) {
+            lastCurrentItem = target;
+            // If not hovering, move to the new current item
+            if (!isHovering) {
+              animateTo(target);
+            }
+            break;
+          }
+        }
       }
     });
 
@@ -344,7 +351,10 @@ export function createNavAnimations(gsap, Flip) {
 
     navElement.addEventListener('mouseleave', () => {
       isHovering = false;
-      returnToHome();
+      // Return to last known current position
+      if (lastCurrentItem) {
+        animateTo(lastCurrentItem);
+      }
     });
   };
 
