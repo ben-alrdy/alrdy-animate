@@ -29,7 +29,9 @@ function createAppearTimeline(element, gsap, duration, ease, delay, distance, an
 }
 
 function createRevealTimeline(element, gsap, duration, ease, delay, animationType, opacity = 1) {
-  const [_, direction] = animationType.split('-');
+  // Extract direction, handling multi-part directions like "oval-up"
+  const parts = animationType.split('-');
+  const direction = parts.length > 2 ? `${parts[1]}-${parts[2]}` : parts[1];
 
   // Cleanup: clear transform, opacity, and clip-path before setting up animation
   gsap.set(element, { x: 0, y: 0, opacity, clipPath: 'none' });
@@ -54,6 +56,22 @@ function createRevealTimeline(element, gsap, duration, ease, delay, animationTyp
     center: {
       start: 'circle(0% at 50% 50%)',
       end: 'circle(150% at 50% 50%)'
+    },
+    'oval-up': {
+      start: 'ellipse(20% 0% at 50% 0%)',
+      end: 'ellipse(100% 120% at 50% 0%)'
+    },
+    'oval-down': {
+      start: 'ellipse(20% 0% at 50% 100%)',
+      end: 'ellipse(100% 120% at 50% 100%)'
+    },
+    'oval-left': {
+      start: 'ellipse(0% 20% at 0% 50%)',
+      end: 'ellipse(120% 100% at 0% 50%)'
+    },
+    'oval-right': {
+      start: 'ellipse(0% 20% at 100% 50%)',
+      end: 'ellipse(120% 100% at 100% 50%)'
     }
   };
   

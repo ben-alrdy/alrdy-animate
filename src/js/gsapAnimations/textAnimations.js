@@ -215,6 +215,86 @@ export function createTextAnimations(gsap) {
     });
   }
 
+  // Oval animation factory for up, down
+  function createOvalAnimation(direction) {
+    const config = {
+      up: {
+        initialClip: 'ellipse(20% 0% at 50% 0%)',
+        finalClip: 'ellipse(100% 120% at 50% 0%)'
+      },
+      down: {
+        initialClip: 'ellipse(20% 0% at 50% 100%)',
+        finalClip: 'ellipse(100% 120% at 50% 100%)'
+      }
+    };
+    return (element, split, duration, stagger, delay, ease) => ({
+      onSplit: (self) => {
+        const tl = gsap.timeline({ delay });
+        
+        // Parse aa-color
+        const colorProps = element.settings?.colors || {};
+        
+        // For scrubbed animations, set visibility before creating the animation
+        const isScrubbed = element.hasAttribute('aa-scrub');
+        if (isScrubbed) {
+          gsap.set(element, { visibility: 'visible' });
+        }
+        
+        const { initialClip, finalClip } = config[direction];
+
+        // Wrap each line in a div with overflow: clip (following text-rotate-soft pattern)
+        const wrappers = [];
+        self.lines.forEach(line => {
+          const wrapper = document.createElement('div');
+          wrapper.classList.add('aa-oval-line-clip-wrap');
+          line.parentNode.insertBefore(wrapper, line);
+          wrapper.appendChild(line);
+          wrappers.push(wrapper);
+        });
+
+        // Set overflow: clip on all wrappers
+        gsap.set('.aa-oval-line-clip-wrap', { overflow: 'clip' });
+
+        // Animate each line with stagger
+        self.lines.forEach((line, i) => {
+          const wrapper = wrappers[i];
+          
+          // Set initial clip-path
+          gsap.set(wrapper, { clipPath: initialClip });
+
+          const lineTl = gsap.timeline({
+            onStart: () => {
+              // For non-scrubbed animations, set visibility when animation starts (only once)
+              if (!isScrubbed && i === 0) {
+                gsap.set(element, { visibility: 'visible' });
+              }
+            }
+          });
+          
+          // Animate wrapper clip-path
+          lineTl.to(wrapper, {
+            clipPath: finalClip,
+            duration: duration ?? defaults.slide.duration,
+            ease: ease ?? defaults.slide.ease
+          });
+          
+          // If color props exist, animate line colors
+          if (Object.keys(colorProps).length > 0) {
+            lineTl.from(line, {
+              ...colorProps,
+              duration: duration ?? defaults.slide.duration,
+              ease: ease ?? defaults.slide.ease
+            }, 0);
+          }
+
+          tl.add(lineTl, i * (stagger ?? defaults.slide.stagger));
+        });
+
+        return tl;
+      }
+    });
+  }
+
   // Define all text animations in one place
   const textAnimations = {
     'text-slide-up': createAnimation(
@@ -314,6 +394,9 @@ export function createTextAnimations(gsap) {
     'text-block-right': createBlockAnimation('right'),
     'text-block-up': createBlockAnimation('up'),
     'text-block-down': createBlockAnimation('down'),
+    
+    'text-oval-up': createOvalAnimation('up'),
+    'text-oval-down': createOvalAnimation('down'),
     
     'text-rotate-soft': (element, split, duration, stagger, delay, ease) => {
       return {
