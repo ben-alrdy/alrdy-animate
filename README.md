@@ -382,6 +382,9 @@ Advanced text splitting and animation effects.
 - **Block**: `text-block-[direction]` where `[direction]` = `up`, `down`, `left`, `right`
   - Use `aa-color` to define block background and optional text color
   - Format: `aa-color="bg:#hex"` or `aa-color="bg:#hex text:#hex"`
+- **Oval**: `text-oval-[direction]` where `[direction]` = `up`, `down`
+  - Uses ellipse clip-path to reveal text line by line
+  - Supports `aa-color` attribute for color transitions
 
 **Color Transitions:**
 All text animations support the `aa-color` attribute for smooth color transitions. Colors animate **from** the specified `aa-color` values **to** the original element colors.
@@ -430,6 +433,7 @@ Smooth transitions and reveals with GSAP.
 **Available Animations:**
 - **Appear**: `appear`, `appear-up/down/left/right`
 - **Reveal**: `reveal-up/down/left/right/center` (clip path)
+  - **Oval Reveal**: `reveal-oval-up/down/left/right` (ellipse clip path)
 - **Counter**: `counter`, `counter-[startNumber]`
 - **Grow**: `grow-horizontal`, `grow-vertical` (animates from 0 to auto size with optional color transitions)
 
