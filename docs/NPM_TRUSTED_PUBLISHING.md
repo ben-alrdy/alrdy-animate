@@ -86,16 +86,17 @@ https://www.npmjs.com/package/alrdy-animate?activeTab=provenance
 - Ensure tag format matches `v*.*.*` (e.g., `v7.1.11`)
 - Check that tags were pushed: `git push --tags`
 
-### Publish fails with "Unable to authenticate" or 404 error
-- Verify trusted publisher configuration on npmjs.com exactly matches:
-  - Organization/User: `ben-alrdy`
-  - Repository: `alrdy-animate` (check your actual GitHub repo name - it should match exactly)
+### Publish fails with "Unable to authenticate" or ENEEDAUTH error
+- **Most Common Issue**: Verify trusted publisher configuration on npmjs.com exactly matches:
+  - Organization/User: `ben-alrdy` (must match your GitHub username/org exactly)
+  - Repository: `alrdy-animate` (check your actual GitHub repo name - it must match exactly, case-sensitive)
   - Workflow filename: `publish.yml` (case-sensitive, include `.yml` - this is just the filename, not the full path)
 - Ensure workflow has `id-token: write` permission (already configured)
 - Confirm you're using GitHub-hosted runners (not self-hosted)
-- Verify npm registry is set correctly (workflow now explicitly sets it)
-- Check that you're using npm 10.5.0+ (Node 22 includes npm 11+)
+- Verify npm version is 11.5.1+ (workflow now upgrades to latest)
+- Check the workflow logs for OIDC token availability (ACTIONS_ID_TOKEN_REQUEST_URL should be set)
 - Ensure the workflow file is located at `.github/workflows/publish.yml`
+- **Important**: The trusted publisher must be added on npmjs.com BEFORE the workflow runs - it won't work retroactively
 
 ### Provenance not showing
 - With trusted publishing, provenance is automatic (no flag needed)
