@@ -246,14 +246,14 @@ export function createTextAnimations(gsap) {
         const wrappers = [];
         self.lines.forEach(line => {
           const wrapper = document.createElement('div');
-          wrapper.classList.add('aa-oval-line-clip-wrap');
+          wrapper.classList.add('aa-oval-line');
           line.parentNode.insertBefore(wrapper, line);
           wrapper.appendChild(line);
           wrappers.push(wrapper);
         });
 
         // Set overflow: clip on all wrappers
-        gsap.set('.aa-oval-line-clip-wrap', { overflow: 'clip' });
+        gsap.set('.aa-oval-line', { overflow: 'clip' });
 
         // Animate each line with stagger
         self.lines.forEach((line, i) => {

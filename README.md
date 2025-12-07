@@ -772,6 +772,10 @@ Interactive hover effects with sophisticated animations and state management. Ad
 - **Curve**: `bg-curve` - Animates SVG path for wave effects
   - **Direction Control**: Include direction in animation name (e.g., `bg-curve-up`, `bg-curve-horizontal`)
   - **Options**: `all` (default), `vertical`, `horizontal`, `top`, `bottom`, `left`, `right`
+- **Block**: `bg-block` - Slides a rectangular div in/out based on mouse direction
+  - **Direction Control**: Include direction in animation name (e.g., `bg-block-vertical`, `bg-block-horizontal`)
+  - **Options**: `all` (default), `vertical`, `horizontal`, `top`, `bottom`, `left`, `right`
+  - Uses a div element (like `bg-expand`) that slides in from the direction of mouse entry
 - **Expand**: `bg-expand` - Expands shape to fill element
 
 **Required Element Tags:**
@@ -877,6 +881,19 @@ Add color changes to any hover animation using the unified `aa-color` attribute 
   <svg aa-hover-bg viewBox="0 0 100 100" class="absolute inset-0 w-full h-full">
     <path d="M 0 100 V 0 Q 50 0 100 0 V 100 z" fill="currentColor"></path>
   </svg>
+</a>
+```
+
+#### Block Background Animation
+```html
+<a aa-hover="bg-block-horizontal" aa-duration="0.5">
+  <span aa-hover-content>Sliding Block</span>
+  <div aa-hover-bg class="absolute inset-0 bg-blue-500"></div>
+</a>
+
+<a aa-hover="bg-block-vertical" aa-duration="0.5">
+  <span aa-hover-content>Vertical Block</span>
+  <div aa-hover-bg class="absolute inset-0 bg-blue-500"></div>
 </a>
 ```
 

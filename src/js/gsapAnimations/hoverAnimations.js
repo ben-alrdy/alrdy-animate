@@ -229,6 +229,82 @@ function initializeCurveAnimation(element, gsap, settings) {
     });
 }
 
+function initializeBlockAnimation(element, gsap, settings) {
+    const {
+        hoverDuration: duration,
+        hoverEase: ease,
+        hoverDelay: delay,
+        hoverDirection,
+        bg        
+    } = settings;
+
+    if (!bg) return;
+
+    const originalColors = storeOriginalColors(element);
+
+    // Direction to transform mapping
+    const directionMap = {
+        top: { x: 0, y: -100 },
+        bottom: { x: 0, y: 100 },
+        left: { x: -100, y: 0 },
+        right: { x: 100, y: 0 }
+    };
+
+    // Set initial state - hide the block based on default direction
+    const defaultDirection = hoverDirection === 'all' ? 'bottom' : hoverDirection;
+    const initialTransform = directionMap[defaultDirection] || directionMap.bottom;
+    gsap.set(bg, { xPercent: initialTransform.x, yPercent: initialTransform.y });
+
+    function animateHover(direction, isEnter) {
+        // Kill any existing timeline on the element
+        if (element.timeline) {
+            element.timeline.kill();
+        }
+
+        const transform = directionMap[direction] || directionMap.bottom;
+        const timeline = gsap.timeline({
+            defaults: { duration, ease },
+            data: { originalColors }
+        });
+
+        element.timeline = timeline; // Store timeline reference
+
+        if (isEnter) {
+            timeline.fromTo(bg,
+                { xPercent: transform.x, yPercent: transform.y },
+                { 
+                    xPercent: 0,
+                    yPercent: 0,
+                    delay: delay
+                }
+            );
+        } else {
+            timeline.fromTo(bg,
+                { xPercent: 0, yPercent: 0 },
+                {
+                    xPercent: transform.x,
+                    yPercent: transform.y
+                }
+            );
+        }
+
+        setupColorAnimation(element, timeline, isEnter, settings);
+        return timeline;
+    }
+
+    element.addEventListener('mouseenter', event => {
+        const mouseDirection = getMouseEnterDirection(event, element);
+        const direction = getAdjustedDirection(mouseDirection, hoverDirection, true);
+        animateHover(direction, true);
+    });
+
+    element.addEventListener('mouseleave', event => {
+        const mouseDirection = getMouseEnterDirection(event, element);
+        const direction = getAdjustedDirection(mouseDirection, hoverDirection, false);
+        animateHover(direction, false);
+    });
+}
+
 function initializeCircleAnimation(element, gsap, settings) {
     const {
         hoverDuration: duration,
@@ -677,6 +753,9 @@ function createHoverAnimations(gsap, splitText) {
                     break;
                 case 'expand':
                     initializeExpandAnimation(element, gsap, settings);
+                    break;
+                case 'block':
+                    initializeBlockAnimation(element, gsap, settings);
                     break;
             }
         },
