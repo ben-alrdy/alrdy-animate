@@ -18,7 +18,7 @@
     "build:cdn": "npm run build && node scripts/deploy-cdn.js",
     "prepublishOnly": "npm run build",
     "version": "npm run build:cdn && git add cdn",
-    "postversion": "git tag -f latest && git push && git push --tags -f && npm publish"
+    "postversion": "git tag -f latest && git push && git push --tags -f"
   },
   "keywords": [
     "animations",
