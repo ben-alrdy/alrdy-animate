@@ -31,4 +31,6 @@ jobs:
         run: npm run build
       
       - name: Publish to npm with provenance
-        run: npm publish --access public
+        run: npm publish --provenance --access public
+        env:
+          NPM_CONFIG_PROVENANCE: true
