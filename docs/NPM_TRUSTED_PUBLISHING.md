@@ -89,10 +89,13 @@ https://www.npmjs.com/package/alrdy-animate?activeTab=provenance
 ### Publish fails with "Unable to authenticate" or 404 error
 - Verify trusted publisher configuration on npmjs.com exactly matches:
   - Organization/User: `ben-alrdy`
-  - Repository: `alrdy-animate`
-  - Workflow filename: `publish.yml` (case-sensitive, include `.yml`)
-- Ensure workflow has `id-token: write` permission
+  - Repository: `alrdy-animate` (check your actual GitHub repo name - it should match exactly)
+  - Workflow filename: `publish.yml` (case-sensitive, include `.yml` - this is just the filename, not the full path)
+- Ensure workflow has `id-token: write` permission (already configured)
 - Confirm you're using GitHub-hosted runners (not self-hosted)
+- Verify npm registry is set correctly (workflow now explicitly sets it)
+- Check that you're using npm 10.5.0+ (Node 22 includes npm 11+)
+- Ensure the workflow file is located at `.github/workflows/publish.yml`
 
 ### Provenance not showing
 - With trusted publishing, provenance is automatic (no flag needed)

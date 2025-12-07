@@ -23,6 +23,15 @@ jobs:
         with:
           node-version: '22'  # Node 22 includes npm 11+
       
+      - name: Configure npm registry
+        run: npm config set registry https://registry.npmjs.org
+      
+      - name: Verify npm configuration
+        run: |
+          echo "npm version: $(npm --version)"
+          echo "registry: $(npm config get registry)"
+          echo "Node version: $(node --version)"
+      
       - name: Install dependencies
         run: npm ci
       
@@ -30,4 +39,4 @@ jobs:
         run: npm run build
       
       - name: Publish to npm with OIDC
-        run: npm publish --access public
+        run: npm publish --access public --provenance
