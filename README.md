@@ -434,6 +434,7 @@ Smooth transitions and reveals with GSAP.
 - **Appear**: `appear`, `appear-up/down/left/right`
 - **Reveal**: `reveal-up/down/left/right/center` (clip path)
   - **Oval Reveal**: `reveal-oval-up/down/left/right` (ellipse clip path)
+  - **Slices Reveal**: `reveal-slices-7`, `reveal-slices-up/down/left/right`, `reveal-slices-[direction]-[count]` (horizontal slices with staggered vertical reveal)
 - **Counter**: `counter`, `counter-[startNumber]`
 - **Grow**: `grow-horizontal`, `grow-vertical` (animates from 0 to auto size with optional color transitions)
 
@@ -443,7 +444,8 @@ Smooth transitions and reveals with GSAP.
 | `aa-animate` | Animation name | - | Animation type |
 | `aa-duration` | Number (seconds) | `0.8` | Animation duration |
 | `aa-delay` | Number (seconds) | `0` | Animation delay |
-| `aa-distance` | Number | `1` | Distance multiplier |
+| `aa-distance` | Number | `1` | Distance multiplier (for slices: controls slice height variation) |
+| `aa-stagger` | Number (seconds) | `0.02` | Stagger delay between slices (slices reveal only) |
 | `aa-scrub` | empty or number | `true` | Scroll-driven animation. `true` = direct mapping, number = lag (higher = more lag) |
 | `aa-color` | `bg:#hex text:#hex border:#hex` | - | Color transitions for grow animation |
 
@@ -453,6 +455,12 @@ Smooth transitions and reveals with GSAP.
 <img aa-animate="reveal-center" aa-scrub="1" src="image.jpg">
 <span aa-animate="counter">1,250</span>
 <span aa-animate="counter-100" aa-scrub="2">500</span>
+
+<!-- Slices reveal animations -->
+<div aa-animate="reveal-slices" aa-stagger="0.05">5 slices (default)</div>
+<div aa-animate="reveal-slices-up-7" aa-stagger="0.03">7 slices, up direction</div>
+<div aa-animate="reveal-slices-down" aa-distance="2" aa-stagger="0.02">Variable slice heights</div>
+<img aa-animate="reveal-slices-left-10" aa-stagger="0.04" src="image.jpg">
 
 <!-- Grow animations -->
 <div aa-animate="grow-horizontal" aa-duration="1">Grows width from 0 to auto</div>

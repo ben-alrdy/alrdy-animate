@@ -21,12 +21,32 @@ export function setupResizeHandler(modules, initOptions, isMobile, setupGSAPAnim
     }
     
     // Desktop vertical resize only - update pin animations (don't rebuild from scratch)
-    if (!widthChanged && heightChanged && initOptions.gsapFeatures.includes('section')) {
-      document.querySelectorAll('[aa-animate="pin-stack"]').forEach(element => {
-        if (modules.animations?.updatePinStackOnResize) {
-          modules.animations.updatePinStackOnResize(element);
-        }
-      });
+    // Also rebuild reveal-slices on height change (dimensions matter)
+    if (!widthChanged && heightChanged) {
+      if (initOptions.gsapFeatures.includes('section')) {
+        document.querySelectorAll('[aa-animate="pin-stack"]').forEach(element => {
+          if (modules.animations?.updatePinStackOnResize) {
+            modules.animations.updatePinStackOnResize(element);
+          }
+        });
+      }
+      
+      // Rebuild reveal-slices animations on height change
+      if (modules.animations?.cleanupRevealSlices) {
+        document.querySelectorAll("[aa-animate*='reveal-slices']").forEach(element => {
+          const animType = element.getAttribute('aa-animate');
+          if (animType && animType.includes('reveal-slices')) {
+            // Cleanup existing animation
+            modules.animations.cleanupRevealSlices(element);
+            
+            // Get new settings and rebuild
+            const aaAttributeType = element._aaAttributeType;
+            const settings = updateElementSettingsOnResize(element, element.settings, initOptions, isMobile, aaAttributeType);
+            element.settings = settings;
+            setupGSAPAnimations(element, settings, initOptions, isMobile, modules);
+          }
+        });
+      }
       
       // Refresh ScrollTrigger after updating
       if (modules.ScrollTrigger) {
@@ -46,10 +66,32 @@ export function setupResizeHandler(modules, initOptions, isMobile, setupGSAPAnim
         modules.animations.cleanupSliders();
       }
 
+      // Cleanup and rebuild reveal-slices animations (dimensions matter, so rebuild on any resize)
+      if (modules.animations?.cleanupRevealSlices) {
+        document.querySelectorAll("[aa-animate*='reveal-slices']").forEach(element => {
+          const animType = element.getAttribute('aa-animate');
+          if (animType && animType.includes('reveal-slices')) {
+            // Cleanup existing animation
+            modules.animations.cleanupRevealSlices(element);
+            
+            // Get new settings and rebuild
+            const aaAttributeType = element._aaAttributeType;
+            const settings = updateElementSettingsOnResize(element, element.settings, initOptions, isMobile, aaAttributeType);
+            element.settings = settings;
+            setupGSAPAnimations(element, settings, initOptions, isMobile, modules);
+          }
+        });
+      }
+
       // Rebuild scroll animations for elements that need updating
       document.querySelectorAll("[aa-animate], [aa-animate-original]").forEach(element => {
         const animType = element.getAttribute('aa-animate');
         const animTypeOriginal = element.getAttribute('aa-animate-original');
+        
+        // Skip reveal-slices as they're already handled above
+        if (animType && animType.includes('reveal-slices')) {
+          return;
+        }
         
         // Rebuild if has mobile/desktop variants (contains |)
         if ((animType && animType.includes('|')) || animTypeOriginal) {

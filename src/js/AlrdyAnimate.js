@@ -924,7 +924,12 @@ function setupGSAPAnimations(element, elementSettings, initOptions, isMobile, mo
         break;
 
       case 'reveal':
-        tl.add(modules.animations.reveal(element, duration, ease, delay, animationType, opacity));
+        // Check if this is reveal-slices animation
+        if (animationType.startsWith('reveal-slices')) {
+          tl.add(modules.animations.revealSlices(element, duration, ease, delay, animationType, opacity, stagger, distance));
+        } else {
+          tl.add(modules.animations.reveal(element, duration, ease, delay, animationType, opacity));
+        }
         break;
 
       case 'counter':
