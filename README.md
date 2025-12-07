@@ -775,7 +775,7 @@ Interactive hover effects with sophisticated animations and state management. Ad
 - **Block**: `bg-block` - Slides a rectangular div in/out based on mouse direction
   - **Direction Control**: Include direction in animation name (e.g., `bg-block-vertical`, `bg-block-horizontal`)
   - **Options**: `all` (default), `vertical`, `horizontal`, `top`, `bottom`, `left`, `right`
-  - Uses a div element (like `bg-expand`) that slides in from the direction of mouse entry
+  - The bg div element needs to be positioned absolutely, cover fully and have the proper z-index; you can set it to visibility:hidden in webflow.
 - **Expand**: `bg-expand` - Expands shape to fill element
 
 **Required Element Tags:**

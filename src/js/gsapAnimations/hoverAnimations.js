@@ -253,7 +253,7 @@ function initializeBlockAnimation(element, gsap, settings) {
     // Set initial state - hide the block based on default direction
     const defaultDirection = hoverDirection === 'all' ? 'bottom' : hoverDirection;
     const initialTransform = directionMap[defaultDirection] || directionMap.bottom;
-    gsap.set(bg, { xPercent: initialTransform.x, yPercent: initialTransform.y });
+    gsap.set(bg, { xPercent: initialTransform.x, yPercent: initialTransform.y, autoAlpha: 1 });
 
     function animateHover(direction, isEnter) {
         // Kill any existing timeline on the element
