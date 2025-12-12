@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Appear & Reveal Animations - AlrdyAnimate Tests</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="../dist/AlrdyAnimate.css">
+    <style>
+        .spacer {
+            height: 100vh;
+        }
+        .demo-box-large {
+            background: white;
+            border-radius: 8px;
+            padding: 3rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 200px;
+            text-align: center;
+            margin: 2rem 0;
+        }
+        .demo-box-large .content {
+            font-family: monospace;
+            font-size: 1.1rem;
+            color: var(--text-color);
+            font-weight: bold;
+        }
+        .demo-box-slices {
+            padding: 0;
+            height: 200px;
+        }
+        .demo-box-slices .content {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--primary-color), #8b7ff5);
+            border-radius: 8px;
+        }
+        .section-title {
+            font-size: 1.5rem;
+            margin: 3rem 0 1rem;
+            color: var(--primary-color);
+        }
+        .info-text {
+            background: #f0f0f0;
+            padding: 1rem;
+            border-radius: 4px;
+            margin: 1rem 0;
+            font-size: 0.9rem;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav aa-nav="change-200" aa-distance="2">
+            <div class="logo">
+                <img src="https://placehold.co/100x50" alt="Logo">
+            </div>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="css-animations.html">CSS Animations</a></li>
+                <li><a href="text.html">Text Animations</a></li>
+                <li><a href="sliders.html">Sliders</a></li>
+                <li><a href="hover.html">Hover Effects</a></li>
+                <li><a href="load-animations.html">Load Animations</a></li>
+                <li><a href="scroll.html">Scroll Effects</a></li>
+                <li><a href="appear-reveal.html" class="active">Appear & Reveal</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <div class="container">
+            <div class="spacer"></div>
+            
+            <h1>Appear & Reveal Animations with Scroll Scrub</h1>
+            <div class="info-text">
+                All animations below use <code>aa-scrub="1"</code> to create scroll-driven animations. 
+                Scroll down to see each animation progress as you scroll.
+            </div>
+
+            <!-- Appear Animations -->
+            <section class="animation-section">
+                <h2 class="section-title">Appear Animations</h2>
+                <p>Fade and slide animations that appear as you scroll.</p>
+                
+                <div class="demo-box-large" aa-animate="appear" aa-scrub="1" aa-duration="1">
+                    <div class="content">appear</div>
+                </div>
+
+                <div class="demo-box-large" aa-animate="appear-up" aa-scrub="1" aa-duration="1">
+                    <div class="content">appear-up</div>
+                </div>
+
+                <div class="demo-box-large" aa-animate="appear-down" aa-scrub="1" aa-duration="1">
+                    <div class="content">appear-down</div>
+                </div>
+
+                <div class="demo-box-large" aa-animate="appear-left" aa-scrub="1" aa-duration="1">
+                    <div class="content">appear-left</div>
+                </div>
+
+                <div class="demo-box-large" aa-animate="appear-right" aa-scrub="1" aa-duration="1">
+                    <div class="content">appear-right</div>
+                </div>
+            </section>
+
+            <!-- Basic Reveal Animations -->
+            <section class="animation-section">
+                <h2 class="section-title">Basic Reveal Animations</h2>
+                <p>Clip-path based reveals that unmask content as you scroll.</p>
+                
+                <div class="demo-box-large" aa-animate="reveal-up" aa-scrub="1" aa-duration="1">
+                    <div class="content">reveal-up</div>
+                </div>
+
+                <div class="demo-box-large" aa-animate="reveal-down" aa-scrub="1" aa-duration="1">
+                    <div class="content">reveal-down</div>
+                </div>
+
+                <div class="demo-box-large" aa-animate="reveal-left" aa-scrub="1" aa-duration="1">
+                    <div class="content">reveal-left</div>
+                </div>
+
+                <div class="demo-box-large" aa-animate="reveal-right" aa-scrub="1" aa-duration="1">
+                    <div class="content">reveal-right</div>
+                </div>
+
+                <div class="demo-box-large" aa-animate="reveal-center" aa-scrub="1" aa-duration="1">
+                    <div class="content">reveal-center</div>
+                </div>
+            </section>
+
+            <!-- Oval Reveal Animations -->
+            <section class="animation-section">
+                <h2 class="section-title">Oval Reveal Animations</h2>
+                <p>Elliptical clip-path reveals that create an oval-shaped reveal effect.</p>
+                
+                <div class="demo-box-large" aa-animate="reveal-oval-up" aa-scrub="1" aa-duration="1">
+                    <div class="content">reveal-oval-up</div>
+                </div>
+
+                <div class="demo-box-large" aa-animate="reveal-oval-down" aa-scrub="1" aa-duration="1">
+                    <div class="content">reveal-oval-down</div>
+                </div>
+
+                <div class="demo-box-large" aa-animate="reveal-oval-left" aa-scrub="1" aa-duration="1">
+                    <div class="content">reveal-oval-left</div>
+                </div>
+
+                <div class="demo-box-large" aa-animate="reveal-oval-right" aa-scrub="1" aa-duration="1">
+                    <div class="content">reveal-oval-right</div>
+                </div>
+            </section>
+
+            <!-- Reveal Slices Animations -->
+            <section class="animation-section">
+                <h2 class="section-title">Reveal Slices Animations</h2>
+                <p>Content split into slices that reveal with staggered timing.</p>
+                
+                <div class="demo-box-large demo-box-slices" aa-animate="reveal-slices" aa-scrub="1" aa-duration="1">
+                    <div class="content"></div>
+                </div>
+
+                <div class="demo-box-large demo-box-slices" aa-animate="reveal-slices-up" aa-scrub="1" aa-duration="1">
+                    <div class="content"></div>
+                </div>
+
+                <div class="demo-box-large demo-box-slices" aa-animate="reveal-slices-down" aa-scrub="1" aa-duration="1">
+                    <div class="content"></div>
+                </div>
+
+                <div class="demo-box-large demo-box-slices" aa-animate="reveal-slices-left" aa-scrub="1" aa-duration="1">
+                    <div class="content"></div>
+                </div>
+
+                <div class="demo-box-large demo-box-slices" aa-animate="reveal-slices-right" aa-scrub="1" aa-duration="1">
+                    <div class="content"></div>
+                </div>
+
+                <div class="demo-box-large demo-box-slices" aa-animate="reveal-slices-7" aa-scrub="1" aa-duration="1">
+                    <div class="content"></div>
+                </div>
+
+                <div class="demo-box-large demo-box-slices" aa-animate="reveal-slices-up-10" aa-scrub="1" aa-duration="1">
+                    <div class="content"></div>
+                </div>
+
+                <div class="demo-box-large demo-box-slices" aa-animate="reveal-slices-down-8" aa-scrub="1" aa-duration="1">
+                    <div class="content"></div>
+                </div>
+
+                <div class="demo-box-large demo-box-slices" aa-animate="reveal-slices-left-12" aa-scrub="1" aa-duration="1">
+                    <div class="content"></div>
+                </div>
+
+                <div class="demo-box-large demo-box-slices" aa-animate="reveal-slices-right-6" aa-scrub="1" aa-duration="1">
+                    <div class="content"></div>
+                </div>
+            </section>
+
+            <!-- Variations with Different Settings -->
+            <section class="animation-section">
+                <h2 class="section-title">Variations with Different Settings</h2>
+                <p>Examples with custom duration, distance, and opacity settings.</p>
+                
+                <div class="demo-box-large" aa-animate="appear-up" aa-scrub="1" aa-duration="2" aa-distance="2">
+                    <div class="content">appear-up (duration: 2s, distance: 2)</div>
+                </div>
+
+                <div class="demo-box-large" aa-animate="reveal-up" aa-scrub="1" aa-duration="1.5" aa-opacity="0.8">
+                    <div class="content">reveal-up (duration: 1.5s, opacity: 0.8)</div>
+                </div>
+
+                <div class="demo-box-large demo-box-slices" aa-animate="reveal-slices-up-5" aa-scrub="1" aa-duration="1" aa-stagger="0.05" aa-distance="2">
+                    <div class="content"></div>
+                </div>
+
+                <div class="demo-box-large" aa-animate="appear" aa-scrub="1" aa-duration="3" aa-opacity="0.5">
+                    <div class="content">appear (duration: 3s, opacity: 0.5)</div>
+                </div>
+            </section>
+
+            <div class="spacer"></div>
+        </div>
+    </main>
+    <script src="../dist/AlrdyAnimate.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>
+

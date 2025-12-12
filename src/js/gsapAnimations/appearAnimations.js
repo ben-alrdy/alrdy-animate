@@ -58,20 +58,20 @@ function createRevealTimeline(element, gsap, duration, ease, delay, animationTyp
       end: 'circle(150% at 50% 50%)'
     },
     'oval-up': {
-      start: 'ellipse(20% 0% at 50% 0%)',
-      end: 'ellipse(100% 120% at 50% 0%)'
+      start: 'ellipse(0% 0% at 50% 0%)',
+      end: 'ellipse(150% 150% at 50% 0%)'
     },
     'oval-down': {
-      start: 'ellipse(20% 0% at 50% 100%)',
-      end: 'ellipse(100% 120% at 50% 100%)'
+      start: 'ellipse(0% 0% at 50% 100%)',
+      end: 'ellipse(150% 150% at 50% 100%)'
     },
     'oval-left': {
-      start: 'ellipse(0% 20% at 0% 50%)',
-      end: 'ellipse(120% 100% at 0% 50%)'
+      start: 'ellipse(0% 0% at 0% 50%)',
+      end: 'ellipse(150% 150% at 0% 50%)'
     },
     'oval-right': {
-      start: 'ellipse(0% 20% at 100% 50%)',
-      end: 'ellipse(120% 100% at 100% 50%)'
+      start: 'ellipse(0% 0% at 100% 50%)',
+      end: 'ellipse(150% 150% at 100% 50%)'
     }
   };
   
