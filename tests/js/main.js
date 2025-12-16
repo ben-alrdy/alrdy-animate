@@ -16,11 +16,12 @@ document.addEventListener('DOMContentLoaded', function() {
             theme: 'tilt',
             custom: {
                 'heading-style-h2': {
-                animationType: 'text-tilt-up-lines|slide-left',
+                animationType: 'text-block-left|slide-left',
                 split: 'lines',
                 ease: 'power4.out',
                 duration: 0.9,
                 stagger: 0.1,
+                color: 'bg:green'
                 },
                 'heading-style-h3': {
                 animationType: 'text-tilt-up-lines',

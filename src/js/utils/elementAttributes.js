@@ -33,7 +33,7 @@ function parseHoverDirection(hoverType) {
 // Helper to parse aa-color attribute
 // Format: "bg:#hex text:#hex border:#hex"
 // Returns: { backgroundColor: '#hex', color: '#hex', borderColor: '#hex' }
-function parseColorAttribute(attribute) {
+export function parseColorAttribute(attribute) {
   if (!attribute) return {};
   
   return attribute.split(' ').reduce((colors, current) => {

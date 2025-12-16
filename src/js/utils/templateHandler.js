@@ -1,5 +1,5 @@
 import { getTheme } from './themeRegistry';
-import { parseResponsiveAttribute } from './elementAttributes';
+import { parseResponsiveAttribute, parseColorAttribute } from './elementAttributes';
 
 // Store for processed templates
 let processedTemplates = null;
@@ -111,6 +111,19 @@ export function getElementTemplateSettings(element, isMobile) {
   if (settings.animationType && settings.animationType.includes('|')) {
     const [desktopAnim, mobileAnim] = settings.animationType.split('|');
     settings.animationType = isMobile ? mobileAnim : desktopAnim;
+  }
+  
+  // Parse color settings if present (supports both string format and object format)
+  if (settings.color) {
+    if (typeof settings.color === 'string') {
+      // Parse string format: "bg:#hex text:#hex border:#hex"
+      settings.colors = parseColorAttribute(settings.color);
+    } else if (typeof settings.color === 'object') {
+      // Already in object format: { backgroundColor: '#hex', color: '#hex', borderColor: '#hex' }
+      settings.colors = settings.color;
+    }
+    // Remove the original color property to avoid confusion
+    delete settings.color;
   }
   
   // Check if it's a CSS animation and set aa-animate attribute
