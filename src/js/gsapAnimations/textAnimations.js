@@ -218,11 +218,11 @@ export function createTextAnimations(gsap) {
   // Oval animation factory for up, down
   function createOvalAnimation(direction) {
     const config = {
-      up: {
+      down: {
         initialClip: 'ellipse(20% 0% at 50% 0%)',
         finalClip: 'ellipse(100% 120% at 50% 0%)'
       },
-      down: {
+      up: {
         initialClip: 'ellipse(20% 0% at 50% 100%)',
         finalClip: 'ellipse(100% 120% at 50% 100%)'
       }
