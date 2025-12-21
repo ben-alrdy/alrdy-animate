@@ -57,11 +57,11 @@ function createRevealTimeline(element, gsap, duration, ease, delay, animationTyp
       start: 'circle(0% at 50% 50%)',
       end: 'circle(150% at 50% 50%)'
     },
-    'oval-up': {
+    'oval-down': {
       start: 'ellipse(0% 0% at 50% 0%)',
       end: 'ellipse(150% 150% at 50% 0%)'
     },
-    'oval-down': {
+    'oval-up': {
       start: 'ellipse(0% 0% at 50% 100%)',
       end: 'ellipse(150% 150% at 50% 100%)'
     },
