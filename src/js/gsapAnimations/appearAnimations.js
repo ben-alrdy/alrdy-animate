@@ -45,11 +45,11 @@ function createRevealTimeline(element, gsap, duration, ease, delay, animationTyp
       start: 'inset(0 0 100% 0)',
       end: 'inset(0 0 0% 0)'
     },
-    left: {
+    right: {
       start: 'inset(0 100% 0 0)',
       end: 'inset(0 0% 0 0)'
     },
-    right: {
+    left: {
       start: 'inset(0 0 0 100%)',
       end: 'inset(0 0 0 0%)'
     },
@@ -65,11 +65,11 @@ function createRevealTimeline(element, gsap, duration, ease, delay, animationTyp
       start: 'ellipse(0% 0% at 50% 100%)',
       end: 'ellipse(150% 150% at 50% 100%)'
     },
-    'oval-left': {
+    'oval-right': {
       start: 'ellipse(0% 0% at 0% 50%)',
       end: 'ellipse(150% 150% at 0% 50%)'
     },
-    'oval-right': {
+    'oval-left': {
       start: 'ellipse(0% 0% at 100% 50%)',
       end: 'ellipse(150% 150% at 100% 50%)'
     }
