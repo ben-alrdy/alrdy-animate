@@ -20,6 +20,20 @@ export function splitText(element, split, hideFromScreenReaders = false, onSplit
   // Disable ARIA for accordion content, or for p/div elements where aria-label is prohibited
   const disableAria = element.hasAttribute('aa-aria-false') || tagName === 'p' || tagName === 'div';
   
+  // Fix ARIA for elements where aria-label is disabled/prohibited
+  // Set aria-hidden BEFORE SplitText creation to ensure it's applied before any DOM manipulation
+  if (disableAria) {
+    element.setAttribute('aria-hidden', 'true');
+    
+    // Add visually-hidden span with original text for screen readers as a sibling
+    const srSpan = document.createElement('span');
+    srSpan.className = 'aa-screenreader-only';
+    srSpan.textContent = originalText;
+    
+    // Insert as sibling BEFORE the animated element (outside aria-hidden)
+    element.parentElement.insertBefore(srSpan, element);
+  }
+  
   // Set aria handling based on hideFromScreenReaders - used for duplicate elements
   // Check for aa-aria-false attribute to skip ARIA (used for accordion conten and p/div elements)
   splitConfig.aria = hideFromScreenReaders ? 'hidden' : (disableAria ? 'none' : 'auto');
@@ -74,20 +88,6 @@ export function splitText(element, split, hideFromScreenReaders = false, onSplit
   
   // Split the text using GSAP SplitText
   let splitInstance = new SplitText(element, splitConfig);
-
-  // Fix ARIA for elements where aria-label is disabled/prohibited
-  // Hide the split element from screen readers and add visually-hidden text as sibling
-  if (disableAria) {
-    element.setAttribute('aria-hidden', 'true');
-    
-    // Add visually-hidden span with original text for screen readers as a sibling
-    const srSpan = document.createElement('span');
-    srSpan.className = 'aa-screenreader-only';
-    srSpan.textContent = originalText;
-    
-    // Insert as sibling BEFORE the animated element (outside aria-hidden)
-    element.parentElement.insertBefore(srSpan, element);
-  }
 
   return { splitInstance }; // Only return the SplitText instance for cleanup
 }
