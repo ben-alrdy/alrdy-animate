@@ -61,6 +61,7 @@ export function createNavAnimations(gsap, Flip) {
         trigger: section,
         start: '0% 50%',
         end: '100% 50%',
+        invalidateOnRefresh: true, // Recalculate trigger points when pinned sections change layout
         onEnter: () => {
           // Remove 'is-current' class from all navigation items
           navigationItems.forEach(item => {
@@ -126,6 +127,7 @@ export function createNavAnimations(gsap, Flip) {
         trigger: section,
         start: scrollStart,
         end: scrollEnd,
+        invalidateOnRefresh: true, // Recalculate trigger points when pinned sections change layout
         onEnter: () => {
           // Remove all section classes from nav
           allSectionClasses.forEach(cls => {

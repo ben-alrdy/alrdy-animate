@@ -17,6 +17,76 @@
       line-height: 1.6;
     }
 
+    /* Fixed Navigation */
+    .main-nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      padding: 1.5rem 2rem;
+      background-color: rgba(255, 255, 255, 0.95);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+      backdrop-filter: blur(10px);
+    }
+
+    .nav-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .nav-logo {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #000;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 1rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      position: relative;
+    }
+
+    .nav-links a {
+      color: #000;
+      text-decoration: none;
+      font-weight: 500;
+      padding: 0.5rem 1rem;
+      border-radius: 0.5rem;
+      position: relative;
+      z-index: 2;
+      font-size: 0.9rem;
+    }
+
+    /* Navigation Indicators */
+    [aa-nav-current-indicator] {
+      position: absolute;
+      background: rgba(0, 0, 0, 0.1);
+      pointer-events: none;
+      z-index: 1;
+      border-radius: 0.5rem;
+      opacity: 0;
+    }
+    
+    [aa-nav-hover-indicator] {
+      position: absolute;
+      background: rgba(0, 0, 0, 0.05);
+      pointer-events: none;
+      z-index: 0;
+      border-radius: 0.5rem;
+      opacity: 0;
+    }
+    
+    .nav-links a.is-current {
+      font-weight: 600;
+    }
+
     .spacer {
       height: 100vh;
       display: flex;
@@ -30,7 +100,8 @@
     /* Test 1: Simple Pin */
     .test-section {
       margin: 4rem 0;
-      padding: 0 2rem;
+      padding: 4rem 2rem 0;
+      scroll-margin-top: 6rem;
     }
 
     .test-title {
@@ -119,12 +190,32 @@
 </head>
 <body>
 
-  <div class="spacer">
+  <!-- Fixed Navigation with current tracking -->
+  <nav class="main-nav" aa-nav="change">
+    <div class="nav-content">
+      <div class="nav-logo">Pin Tests</div>
+      <ul class="nav-links">
+        <a href="#intro" aa-scroll-target="#intro">Intro</a>
+        <a href="#test1" aa-scroll-target="#test1">Simple Pin</a>
+        <a href="#test2" aa-scroll-target="#test2">Pin Stack</a>
+        <a href="#test3" aa-scroll-target="#test3">Fade In</a>
+        <a href="#test4" aa-scroll-target="#test4">Scale In</a>
+        <a href="#test5" aa-scroll-target="#test5">Rotate In</a>
+        <a href="#test6" aa-scroll-target="#test6">Perspective</a>
+        <!-- Current indicator - tracks active section -->
+        <div aa-nav-current-indicator aa-duration="0.4" aa-ease="power2.out"></div>
+        <!-- Hover indicator - follows mouse, returns to current -->
+        <div aa-nav-hover-indicator aa-duration="0.4" aa-ease="power2.out"></div>
+      </ul>
+    </div>
+  </nav>
+
+  <div id="intro" class="spacer">
     <h1>AlrdyAnimate Pin Tests (New API)</h1>
   </div>
 
   <!-- Test 1: Simple Pin -->
-  <section class="test-section">
+  <section id="test1" class="test-section">
     <h2 class="test-title">Test 1: Simple Pin</h2>
     <p style="margin-bottom: 1rem; color: #666;">Use <code>aa-animate="pin"</code> to pin an element during scroll.</p>
     
@@ -148,7 +239,7 @@
   </div>
 
   <!-- Test 2: Pin Stack - Simple (no in/out animations) -->
-  <section class="test-section">
+  <section id="test2" class="test-section">
     <h2 aa-animate="fade-up" class="test-title">Test 2: Pin Stack - Simple</h2>
     <p style="margin-bottom: 2rem; color: #666;">
       Use <code>aa-animate="pin-stack"</code> for a simple card reveal stack effect.
@@ -207,7 +298,7 @@
   <div class="spacer"></div>
 
   <!-- Test 3: Pin Stack - Fade In -->
-  <section class="test-section">
+  <section id="test3" class="test-section">
     <h2 aa-animate="fade-up" class="test-title">Test 3: Pin Stack - Fade In</h2>
     <p style="margin-bottom: 2rem; color: #666;">
       Use <code>aa-pin-in="fade"</code> to fade cards in as they appear.
@@ -248,7 +339,7 @@
   <div class="spacer"></div>
 
   <!-- Test 4: Pin Stack - Scale In -->
-  <section class="test-section">
+  <section id="test4" class="test-section">
     <h2 class="test-title">Test 4: Pin Stack - Scale In</h2>
     <p style="margin-bottom: 2rem; color: #666;">
       Use <code>aa-pin-in="scale"</code> for cards that scale up as they appear.
@@ -290,7 +381,7 @@
   <div class="spacer"></div>
 
   <!-- Test 5: Pin Stack - Rotate In -->
-  <section class="test-section">
+  <section id="test5" class="test-section">
     <h2 class="test-title">Test 5: Pin Stack - Rotate In</h2>
     <p style="margin-bottom: 2rem; color: #666;">
       Use <code>aa-pin-in="rotate"</code> for cards that rotate as they slide up.
@@ -332,7 +423,7 @@
   <div class="spacer"></div>
 
   <!-- Test 6: Pin Stack - Perspective Out -->
-  <section class="test-section">
+  <section id="test6" class="test-section">
     <h2 class="test-title">Test 6: Pin Stack - Perspective Out</h2>
     <p style="margin-bottom: 2rem; color: #666;">
       Use <code>aa-pin-out="perspective"</code> for 3D perspective effect as cards get covered.

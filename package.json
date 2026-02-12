@@ -44,6 +44,7 @@
     "@babel/plugin-syntax-dynamic-import": "^7.8.3",
     "@babel/preset-env": "^7.25.8",
     "babel-loader": "^9.2.1",
+    "baseline-browser-mapping": "^2.9.19",
     "css-loader": "^7.1.2",
     "fs-extra": "^11.2.0",
     "mini-css-extract-plugin": "^2.9.0",
