@@ -713,39 +713,16 @@ const featureAvailabilityCache = new Map();
 function setupGSAPAnimations(element, elementSettings, initOptions, isMobile, modules) {
   const { animationType, split, scrub, duration, stagger, delay, ease, opacity, distance, anchorElement, anchorSelector, scrollStart, scrollEnd } = elementSettings;
   
-  // 0. Hybrid elements (aa-load + aa-animate) get two levels of protection against
-  //    double-running with the CSS load animation.
+  // Hybrid elements (aa-load + aa-animate): if the head script committed to
+  // CSS fallback, stay out entirely. Otherwise aa-load-js-ready is set on
+  // <html>, which triggers `animation-name: none` on hybrids via CSS — so
+  // there's no CSS animation for GSAP to compete with.
   const isHybrid = element._aaAttributeType?.isHybrid || false;
-  if (isHybrid) {
-    // a) Head-script committed to CSS fallback — stay out entirely.
-    if (document.documentElement.hasAttribute('aa-load-css-fallback')) {
-      if (initOptions.debug) {
-        console.log('AlrdyAnimate: aa-load-css-fallback is set, CSS load animations run instead of GSAP');
-      }
-      return;
+  if (isHybrid && document.documentElement.hasAttribute('aa-load-css-fallback')) {
+    if (initOptions.debug) {
+      console.log('AlrdyAnimate: aa-load-css-fallback is set, CSS load animations run instead of GSAP');
     }
-    // b) Per-element safety net: if the CSS keyframe animation has already
-    //    started painting frames on this element, leave it alone. Otherwise
-    //    cancel the pending (delay-phase) CSS animation so GSAP can control it
-    //    cleanly. Note: a CSS animation's playState is "running" throughout its
-    //    animation-delay too, so we must also check that we're past the delay
-    //    (progress is null during delay, non-null in the active phase).
-    if (typeof element.getAnimations === 'function') {
-      const cssAnims = element.getAnimations().filter(a => a instanceof CSSAnimation);
-      const cssActive = cssAnims.some(a => {
-        if (a.playState === 'finished') return true;
-        if (a.playState !== 'running') return false;
-        const progress = a.effect?.getComputedTiming?.()?.progress;
-        return progress != null;
-      });
-      if (cssActive) {
-        if (initOptions.debug) {
-          console.log('AlrdyAnimate: CSS load animation already in flight, skipping GSAP for element', element);
-        }
-        return;
-      }
-      cssAnims.forEach(a => a.cancel());
-    }
+    return;
   }
   
   // 1. Variables setup

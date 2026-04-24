@@ -1798,10 +1798,9 @@ This tiny inline script decides which path takes ownership. It must be in `<head
 - Hybrid elements are hidden on load via `html:not([aa-load-css-fallback]) [aa-load][aa-animate] { opacity: 0 }`.
 - The head script above runs at page parse. It immediately commits to CSS if the user has `Save-Data` on or a slow‑2g/2g connection. Otherwise it starts a 500ms timer.
 - The main bundle sets `aa-load-js-ready` on `<html>` at the top of `AlrdyAnimate.init()` — unless `aa-load-css-fallback` is already there (the bundle was too slow or the head script committed to CSS first). Call `init()` as early as possible so this signal beats the threshold.
+- As soon as `aa-load-js-ready` lands on `<html>`, a CSS rule sets `animation-name: none !important` on every `[aa-load][aa-animate]` element. The browser removes their CSSAnimations so GSAP has no CSS animation to race against — regardless of how long GSAP's async module load takes.
 - At 500ms the head script checks: if `aa-load-js-ready` isn't set, it commits to CSS by setting `aa-load-css-fallback`.
-- In GSAP setup, hybrid elements do a two‑step check:
-  1. If `aa-load-css-fallback` is on `<html>`, skip entirely.
-  2. Otherwise call `element.getAnimations()` — if the CSS animation is past its `animation-delay` and actually painting frames (or already finished), skip; if it's still in its delay phase, cancel it and run the GSAP tween. (A CSS animation's `playState` is `"running"` during the delay too, so the check also looks at `effect.getComputedTiming().progress` — `null` means we're still in delay and safe to cancel.)
+- In GSAP setup, each hybrid element checks `<html>` for `aa-load-css-fallback` one last time. If it's there, GSAP stays out and the CSS keyframe animation plays; otherwise GSAP creates its tween, using `fromTo` with immediate render so the initial state is written inline right away (no FOUC).
 
 The two attributes are mutually exclusive by construction — whichever setter fires first wins, and the loser reads the winner's flag and stands down.
 

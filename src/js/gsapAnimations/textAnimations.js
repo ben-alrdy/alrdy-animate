@@ -14,7 +14,7 @@ export function createTextAnimations(gsap) {
     // This ensures the element is visible and GSAP controls it via the timeline
     const isScrubbed = element.hasAttribute('aa-scrub');
     if (isScrubbed) {
-      gsap.set(element, { visibility: 'visible' });
+      gsap.set(element, { visibility: 'visible', opacity: 1 });
     }
     
     const baseProps = {
@@ -24,7 +24,7 @@ export function createTextAnimations(gsap) {
       onStart: () => {
         // For non-scrubbed animations, set visibility when animation starts
         if (!isScrubbed) {
-          gsap.set(element, { visibility: 'visible' });
+          gsap.set(element, { visibility: 'visible', opacity: 1 });
         }
       }
     };
@@ -165,7 +165,7 @@ export function createTextAnimations(gsap) {
         // For scrubbed animations, set visibility before creating the animation
         const isScrubbed = element.hasAttribute('aa-scrub');
         if (isScrubbed) {
-          gsap.set(element, { visibility: 'visible' });
+          gsap.set(element, { visibility: 'visible', opacity: 1 });
         }
         
         const { initialClip, revealClip, hideClip, textInit, textFinal } = config[direction];
@@ -237,7 +237,7 @@ export function createTextAnimations(gsap) {
         // For scrubbed animations, set visibility before creating the animation
         const isScrubbed = element.hasAttribute('aa-scrub');
         if (isScrubbed) {
-          gsap.set(element, { visibility: 'visible' });
+          gsap.set(element, { visibility: 'visible', opacity: 1 });
         }
         
         const { initialClip, finalClip } = config[direction];
@@ -266,7 +266,7 @@ export function createTextAnimations(gsap) {
             onStart: () => {
               // For non-scrubbed animations, set visibility when animation starts (only once)
               if (!isScrubbed && i === 0) {
-                gsap.set(element, { visibility: 'visible' });
+                gsap.set(element, { visibility: 'visible', opacity: 1 });
               }
             }
           });
@@ -411,7 +411,7 @@ export function createTextAnimations(gsap) {
           // For scrubbed animations, set visibility before creating the animation
           const isScrubbed = element.hasAttribute('aa-scrub');
           if (isScrubbed) {
-            gsap.set(element, { visibility: 'visible' });
+            gsap.set(element, { visibility: 'visible', opacity: 1 });
           }
 
           // Calculate perspective
@@ -447,7 +447,7 @@ export function createTextAnimations(gsap) {
             onStart: () => {
               // For non-scrubbed animations, set visibility when animation starts
               if (!isScrubbed) {
-                gsap.set(element, { visibility: 'visible' });
+                gsap.set(element, { visibility: 'visible', opacity: 1 });
               }
             }
           });
