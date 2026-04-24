@@ -21,11 +21,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '22'  # Node 22 ships with npm 10.x
+          node-version: '24'  # Ships with npm 11, required for tokenless OIDC publish
           registry-url: 'https://registry.npmjs.org'
-
-      - name: Upgrade npm to 11+ (required for tokenless OIDC publish)
-        run: npm install -g npm@latest
 
       - name: Verify npm configuration and OIDC
         run: |
