@@ -1759,51 +1759,74 @@ Animated indicators that track the active navigation item and follow hover inter
 
 ### Hybrid Load Animations (CSS Fallback + GSAP Enhancement)
 
-Combine `aa-load` (CSS) with `aa-animate` (GSAP) for above the fold loading animations. If page load speed is too slow, animations will fallback to CSS.
+Combine `aa-load` (CSS) with `aa-animate` (GSAP) for above-the-fold loading animations. If the main JS bundle doesn't arrive in time, the CSS keyframe animation runs as a fallback. If it does arrive in time, GSAP takes over and the CSS animation is cancelled per element — no double animation, no mid‑flight pop.
 
-**How to Use:**
+**How to use:**
 ```html
-
 <div aa-load="fade-up" aa-animate="text-slide-up-lines" aa-split="chars" aa-duration="0.8">
   Enhanced content with fallback
 </div>
-
 ```
 
-**How It Works:**
-  - Hybrid element hidden initially (prevents FOUC)
-  - If JS loads within grace period (< 0.35s): GSAP animation plays
-  - Otherwise CSS animation plays as fallback after CSS load delay variable
-  - **Prevents double animation** - only one system animates per element
+**Required head script (paste in Webflow → Site settings → Head code):**
+
+This tiny inline script decides which path takes ownership. It must be in `<head>`, *before* the stylesheet and the main bundle.
+
+```html
+<script>
+(function () {
+  var html = document.documentElement;
+  if (!html) return;
+  var FALLBACK_THRESHOLD_MS = 500; // keep in sync with --load-base-delay
+  var conn = navigator.connection;
+  if (conn && (conn.saveData || conn.effectiveType === 'slow-2g' || conn.effectiveType === '2g')) {
+    html.setAttribute('aa-load-css-fallback', '');
+    return;
+  }
+  setTimeout(function () {
+    if (!html.hasAttribute('aa-load-js-ready')) {
+      html.setAttribute('aa-load-css-fallback', '');
+    }
+  }, FALLBACK_THRESHOLD_MS);
+})();
+</script>
+```
+
+(Source file: `src/load-head.js`.)
+
+**How it works:**
+- Hybrid elements are hidden on load via `html:not([aa-load-css-fallback]) [aa-load][aa-animate] { opacity: 0 }`.
+- The head script above runs at page parse. It immediately commits to CSS if the user has `Save-Data` on or a slow‑2g/2g connection. Otherwise it starts a 500ms timer.
+- The main bundle sets `aa-load-js-ready` on `<html>` at the top of `AlrdyAnimate.init()` — unless `aa-load-css-fallback` is already there (the bundle was too slow or the head script committed to CSS first). Call `init()` as early as possible so this signal beats the threshold.
+- At 500ms the head script checks: if `aa-load-js-ready` isn't set, it commits to CSS by setting `aa-load-css-fallback`.
+- In GSAP setup, hybrid elements do a two‑step check:
+  1. If `aa-load-css-fallback` is on `<html>`, skip entirely.
+  2. Otherwise call `element.getAnimations()` — if the CSS animation is already running or finished, skip; if it's still in its delay phase, cancel it and run the GSAP tween.
+
+The two attributes are mutually exclusive by construction — whichever setter fires first wins, and the loser reads the winner's flag and stands down.
+
+**Timing sync:**
+Hybrid JS animations delay their start so they begin at the same absolute moment as CSS‑only `aa-load` animations (i.e. `--load-base-delay` seconds after page load, plus any `aa-delay`). A hybrid headline and a CSS‑only button with matching `aa-delay` will animate in lockstep.
 
 **Configuration:**
-
-
 ```css
 /* In your custom CSS or Webflow's custom code */
 :root {
-  --load-base-delay: 0.4s; /* adjust based on your JS load time */
+  --load-base-delay: 0.5s; /* must match FALLBACK_THRESHOLD_MS in the head script */
 }
 ```
 
-```javascript
-AlrdyAnimate.init({
-  loadGracePeriod: 0.35, // Should be slightly earlier than the --load-base-delay
-  gsapFeatures: ['appear', 'text'],
-  // ... other options
-});
-```
+No JS option is required — the bundle reads `--load-base-delay` from CSS at init.
 
 **Recommendations:**
-- Use pure `aa-load` for critical above-the-fold content (hero, headlines, CTAs)
-- Use hybrid for below-the-fold content where you want GSAP features with CSS fallback
-- Match animation styles (e.g., `aa-load="fade-up"` with `aa-animate="appear-up"`)
-- Test with throttled network (DevTools → Slow 3G) to verify fallback behavior
+- Use pure `aa-load` for critical above-the-fold content (hero, headlines, CTAs).
+- Use hybrid for elements where the GSAP version adds something CSS can't (text splits, staggered character reveals, etc.) — if the JS animation is just fade/slide that CSS could do identically, drop `aa-animate` and let CSS own it.
+- Match animation styles (e.g., `aa-load="fade-up"` with `aa-animate="appear-up"`).
+- Test with throttled network (DevTools → Slow 3G) to verify the fallback triggers and looks right.
 
-**Performance Notes:**
-- **Pure `aa-load`**: 0ms to animate - no hiding, no waiting for JS
-- **Hybrid elements**: Hidden until JS ready or grace period expires
-- **Body attributes**: `aa-js-ready` (JS loaded), `aa-load-grace-expired` (CSS owns hybrid elements)
+**Attributes on `<html>`:**
+- `aa-load-js-ready` — main bundle arrived before the threshold; GSAP will take over hybrid elements.
+- `aa-load-css-fallback` — head script threshold elapsed (or slow connection detected); CSS keyframe animation runs the load, GSAP stays out of hybrid elements.
 
 ### Template System
 Define animations for CSS classes instead of individual elements.
@@ -2240,8 +2263,7 @@ AlrdyAnimate.init({
   // Advanced options
   includeGSAP: false,       // Include GSAP in bundle vs use Webflow's
   initTimeout: 3,            // Initialization timeout (seconds), shows all elements after this time
-  loadGracePeriod: 0.35,     // Grace period for hybrid aa-load + aa-animate (seconds)
-  
+
   // Smooth scrolling
   smoothScroll: {
     enabled: false,

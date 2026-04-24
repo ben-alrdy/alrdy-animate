@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(wc -l /Users/ben/alrdy/alrdy-animate/src/js/gsapAnimations/*.js /Users/ben/alrdy/alrdy-animate/src/js/utils/*.js)"
+    ]
+  }
+}

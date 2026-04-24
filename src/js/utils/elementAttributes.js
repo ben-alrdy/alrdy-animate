@@ -64,7 +64,7 @@ export function parseResponsiveAttribute(attribute, defaultValue, isMobile) {
   return attribute.trim();
 }
 
-export function getElementSettings(element, settings, isMobile, loadGracePeriod = 0, aaAttributeType = null) {
+export function getElementSettings(element, settings, isMobile, loadBaseDelay = 0, aaAttributeType = null) {
 
   // Handle mobile animations
   const originalAnimationType = element.getAttribute('aa-animate-original') || element.getAttribute('aa-animate');
@@ -156,7 +156,14 @@ export function getElementSettings(element, settings, isMobile, loadGracePeriod 
     delay: (() => {
       const baseDelay = element.hasAttribute('aa-delay') ? parseFloat(element.getAttribute('aa-delay')) : settings.delay;
       const isHybrid = element.hasAttribute('aa-load') && element.hasAttribute('aa-animate');
-      return isHybrid && loadGracePeriod > 0 ? baseDelay + loadGracePeriod : baseDelay;
+      if (isHybrid && loadBaseDelay > 0) {
+        // Sync hybrid JS animations with CSS-only ones: both should start at
+        // loadBaseDelay seconds from page load, plus any user-set aa-delay.
+        // GSAP's tween delay runs from tween-creation time, so subtract elapsed.
+        const elapsed = performance.now() / 1000;
+        return Math.max(0, loadBaseDelay - elapsed) + baseDelay;
+      }
+      return baseDelay;
     })(),
     delayMobile: element.hasAttribute('aa-delay-mobile') ? parseFloat(element.getAttribute('aa-delay-mobile')) : undefined,
     stagger: element.hasAttribute('aa-stagger') ? parseFloat(element.getAttribute('aa-stagger')) : undefined,

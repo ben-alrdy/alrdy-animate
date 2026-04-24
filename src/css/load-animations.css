@@ -7,31 +7,28 @@
   --load-ease: cubic-bezier(0.25, 0.1, 0.25, 1.0);
   --load-distance: 1;
   --load-stagger: 0.1s;
-  --load-base-delay: 0.4s;
+  --load-base-delay: 0.5s;
   --load-delay: var(--load-base-delay);
 }
 
 /**
- * Initial Hidden State - prevents FOUC
- * ONLY hide elements that have both aa-load AND aa-animate (hybrid elements)
- * Pure aa-load elements animate immediately without waiting for JS
- * 
- * Important: Use opacity instead of visibility so CSS animations can show the element
- * even if JS never loads. Visibility hidden would keep them hidden forever.
+ * Initial Hidden State - prevents FOUC for hybrid elements (aa-load + aa-animate).
+ *
+ * Pure aa-load elements animate immediately and are never hidden by this rule.
+ *
+ * Hybrid elements stay hidden until one of two flags is set on <html> by the
+ * load-head.js script and/or the main bundle:
+ *   aa-load-js-ready      — bundle arrived in time; GSAP will take over.
+ *   aa-load-css-fallback  — bundle was too slow (or data-saver is on); CSS keyframe
+ *                           animation runs to completion.
+ *
+ * Only aa-load-css-fallback lifts the hidden state here — while aa-load-js-ready
+ * is set and GSAP hasn't yet processed the element, we keep it hidden via this
+ * rule so there's no flash before GSAP's tween begins. GSAP's inline opacity
+ * (no !important) overrides this static rule as soon as the tween runs.
  */
-body:not([aa-js-ready]) [aa-load][aa-animate] {
+html:not([aa-load-css-fallback]) [aa-load][aa-animate] {
   opacity: 0;
-}
-
-/**
- * When JS is ready, it adds aa-js-ready attribute to body
- * Disable CSS animations ONLY for hybrid elements (those with both aa-load and aa-animate)
- * This allows pure aa-load elements to animate normally without JS interference
- * Reset opacity to initial so GSAP can control it from its own initial state
- */
-body[aa-js-ready] [aa-load][aa-animate] {
-  animation: none !important;
-  opacity: initial !important;
 }
 
 /**
