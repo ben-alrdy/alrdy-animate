@@ -1801,7 +1801,7 @@ This tiny inline script decides which path takes ownership. It must be in `<head
 - At 500ms the head script checks: if `aa-load-js-ready` isn't set, it commits to CSS by setting `aa-load-css-fallback`.
 - In GSAP setup, hybrid elements do a two‑step check:
   1. If `aa-load-css-fallback` is on `<html>`, skip entirely.
-  2. Otherwise call `element.getAnimations()` — if the CSS animation is already running or finished, skip; if it's still in its delay phase, cancel it and run the GSAP tween.
+  2. Otherwise call `element.getAnimations()` — if the CSS animation is past its `animation-delay` and actually painting frames (or already finished), skip; if it's still in its delay phase, cancel it and run the GSAP tween. (A CSS animation's `playState` is `"running"` during the delay too, so the check also looks at `effect.getComputedTiming().progress` — `null` means we're still in delay and safe to cancel.)
 
 The two attributes are mutually exclusive by construction — whichever setter fires first wins, and the loser reads the winner's flag and stands down.
 

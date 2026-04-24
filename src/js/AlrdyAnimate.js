@@ -725,11 +725,19 @@ function setupGSAPAnimations(element, elementSettings, initOptions, isMobile, mo
       return;
     }
     // b) Per-element safety net: if the CSS keyframe animation has already
-    //    started or finished on this element, leave it alone. Otherwise cancel
-    //    the pending (delay-phase) CSS animation so GSAP can control it cleanly.
+    //    started painting frames on this element, leave it alone. Otherwise
+    //    cancel the pending (delay-phase) CSS animation so GSAP can control it
+    //    cleanly. Note: a CSS animation's playState is "running" throughout its
+    //    animation-delay too, so we must also check that we're past the delay
+    //    (progress is null during delay, non-null in the active phase).
     if (typeof element.getAnimations === 'function') {
       const cssAnims = element.getAnimations().filter(a => a instanceof CSSAnimation);
-      const cssActive = cssAnims.some(a => a.playState === 'running' || a.playState === 'finished');
+      const cssActive = cssAnims.some(a => {
+        if (a.playState === 'finished') return true;
+        if (a.playState !== 'running') return false;
+        const progress = a.effect?.getComputedTiming?.()?.progress;
+        return progress != null;
+      });
       if (cssActive) {
         if (initOptions.debug) {
           console.log('AlrdyAnimate: CSS load animation already in flight, skipping GSAP for element', element);
