@@ -155,13 +155,12 @@ async function init(options = {}) {
   const initOptions = { ...defaultOptions, ...options };
   let lenis = null;
 
-  // Signal to the head script (load-head.js) that the library has been activated.
-  // Only claim ownership if the head script hasn't already committed to the CSS
-  // fallback — the two attributes are mutually exclusive.
-  const html = document.documentElement;
-  if (html && !html.hasAttribute('aa-load-css-fallback')) {
-    html.setAttribute('aa-load-js-ready', '');
-  }
+  // Note: aa-load-js-ready is set later, after all hybrid GSAP tweens have been
+  // created (with initial state written inline via fromTo immediateRender). See
+  // the end of setupAnimations(). Setting it there instead of here means the
+  // head-script's 500ms timer is more likely to win the race on cold loads
+  // (first-time visitors get the CSS fallback), but return visitors with the
+  // bundle cached get clean GSAP animations with no pre-claim FOUC window.
 
   // Check for reduced motion preference
   isReducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -654,7 +653,16 @@ function setupAnimations(elements, initOptions, isMobile, modules) {
       }
     }
   });
-  
+
+  // All hybrid elements (aa-load + aa-animate) live in nonTextElements, so by
+  // this point every hybrid has its GSAP tween created with initial state
+  // inline. Claim ownership now — unless the head-script already committed to
+  // CSS fallback (slow bundle / data-saver). This flag also triggers the
+  // `animation-name: none` CSS rule, removing the now-redundant CSSAnimations.
+  if (enableGSAP && !document.documentElement.hasAttribute('aa-load-css-fallback')) {
+    document.documentElement.setAttribute('aa-load-js-ready', '');
+  }
+
   // Batch process text elements with RAF to prevent forced reflows
   // Pass a callback to trigger accordion initialization when text splitting is complete
   batchProcessTextElements(textElements, initOptions, isMobile, modules, () => {

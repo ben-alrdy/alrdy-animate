@@ -1797,10 +1797,12 @@ This tiny inline script decides which path takes ownership. It must be in `<head
 **How it works:**
 - Hybrid elements are hidden on load via `html:not([aa-load-css-fallback]) [aa-load][aa-animate] { opacity: 0 }`.
 - The head script above runs at page parse. It immediately commits to CSS if the user has `Save-Data` on or a slow‑2g/2g connection. Otherwise it starts a 500ms timer.
-- The main bundle sets `aa-load-js-ready` on `<html>` at the top of `AlrdyAnimate.init()` — unless `aa-load-css-fallback` is already there (the bundle was too slow or the head script committed to CSS first). Call `init()` as early as possible so this signal beats the threshold.
-- As soon as `aa-load-js-ready` lands on `<html>`, a CSS rule sets `animation-name: none !important` on every `[aa-load][aa-animate]` element. The browser removes their CSSAnimations so GSAP has no CSS animation to race against — regardless of how long GSAP's async module load takes.
+- The main bundle sets `aa-load-js-ready` on `<html>` only **after** every hybrid element has had its GSAP tween created (initial state written inline via `fromTo` immediate render). So the race the head script is timing is "did GSAP modules load + hybrid setup finish in under 500ms?" — *not* just "did the bundle parse?". Before that moment, the bundle stays silent and `aa-load-css-fallback` is still free to fire.
+- As soon as `aa-load-js-ready` lands on `<html>`, a CSS rule sets `animation-name: none !important` on every `[aa-load][aa-animate]` element. The browser removes their CSSAnimations so only the GSAP tweens remain — the initial state is already inline, so the switch is seamless.
 - At 500ms the head script checks: if `aa-load-js-ready` isn't set, it commits to CSS by setting `aa-load-css-fallback`.
-- In GSAP setup, each hybrid element checks `<html>` for `aa-load-css-fallback` one last time. If it's there, GSAP stays out and the CSS keyframe animation plays; otherwise GSAP creates its tween, using `fromTo` with immediate render so the initial state is written inline right away (no FOUC).
+- In GSAP setup, each hybrid element checks `<html>` for `aa-load-css-fallback`. If it's there (rare — means the head-script timer fired before GSAP finished loading), GSAP stays out and the CSS keyframe animation plays.
+
+**Cold vs warm loads:** on first visit (uncached bundle, slow JS parse/module-load), the head-script timer usually wins and users see the CSS animations — no GSAP enhancement but also no blank page. On return visits (bundle cached), GSAP usually wins and users see the enhanced JS animations. Tune `FALLBACK_THRESHOLD_MS` / `--load-base-delay` (keep them in sync) if you want to give GSAP a bigger budget.
 
 The two attributes are mutually exclusive by construction — whichever setter fires first wins, and the loser reads the winner's flag and stands down.
 
