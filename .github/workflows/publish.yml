@@ -19,7 +19,7 @@ jobs:
           fetch-depth: 0  # Fetch all history for proper versioning
       
       - name: Setup Node.js
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@v4
         with:
           node-version: '22'  # Node 22 includes npm 11+
           registry-url: 'https://registry.npmjs.org'
@@ -38,5 +38,14 @@ jobs:
       - name: Build
         run: npm run build
       
+      - name: Debug auth state
+        run: |
+          echo "--- npm whoami ---"
+          npm whoami || echo "whoami failed"
+          echo "--- npm config ---"
+          npm config ls -l 2>&1 | grep -Ei 'registry|auth|scope|always' || true
+          echo "--- cat .npmrc (if present) ---"
+          cat ~/.npmrc 2>/dev/null | sed 's/_authToken=.*/_authToken=***/' || echo "no ~/.npmrc"
+
       - name: Publish to npm with OIDC
-        run: npm publish --access public --provenance
+        run: npm publish --access public --provenance --loglevel=verbose
