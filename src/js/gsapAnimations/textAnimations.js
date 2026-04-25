@@ -155,15 +155,24 @@ export function createTextAnimations(gsap) {
     };
     return (element, split, duration, stagger, delay, ease) => ({
       onSplit: (self) => {
-        const tl = gsap.timeline({ delay });
-        
+        const isScrubbed = element.hasAttribute('aa-scrub');
+
+        const tl = gsap.timeline({
+          delay,
+          onStart: () => {
+            // For non-scrubbed animations, set visibility when animation starts
+            if (!isScrubbed) {
+              gsap.set(element, { visibility: 'visible', opacity: 1 });
+            }
+          }
+        });
+
         // Parse aa-color - must be in format "bg:#hex" or "bg:#hex text:#hex"
         const parsedColors = element.settings?.colors || {};
         const blockColor = parsedColors.backgroundColor || '#000000'; // Default if not specified
         const textColor = parsedColors.color; // Optional text color
-        
+
         // For scrubbed animations, set visibility before creating the animation
-        const isScrubbed = element.hasAttribute('aa-scrub');
         if (isScrubbed) {
           gsap.set(element, { visibility: 'visible', opacity: 1 });
         }
