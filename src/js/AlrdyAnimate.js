@@ -665,9 +665,20 @@ function setupAnimations(elements, initOptions, isMobile, modules) {
 
   // Batch process text elements with RAF to prevent forced reflows
   // Pass a callback to trigger accordion initialization when text splitting is complete
-  batchProcessTextElements(textElements, initOptions, isMobile, modules, () => {
+  batchProcessTextElements(textElements, initOptions, isMobile, modules, async () => {
     // Text splitting complete - trigger any pending accordion initializations
     document.dispatchEvent(new CustomEvent('aa-text-splitting-complete'));
+
+    // SplitText with autoSplit defers its initial split until document.fonts.ready,
+    // which means scrubbed text timelines may have their inner tweens added AFTER
+    // ScrollTrigger.create() ran with an empty outer timeline. Wait for fonts and
+    // refresh so scrubbed text picks up the right initial progress.
+    if (modules.ScrollTrigger) {
+      try {
+        if (document.fonts?.ready) await document.fonts.ready;
+      } catch (e) { /* ignore */ }
+      modules.ScrollTrigger.refresh(true);
+    }
   });
 }
 
