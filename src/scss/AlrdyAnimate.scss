@@ -64,6 +64,22 @@ body {
   display: inline-block !important;
 }
 
+/* Split-line mask descender fix. GSAP wraps each line in `.aa-line-mask`
+   with `overflow: clip`; at tight line-heights the mask's bottom edge sits
+   on the baseline and slices descenders (g, j, p, q, y). Padding the inner
+   `.aa-line` enlarges the reveal window, the matching negative margin on
+   the mask cancels the layout bump, and `translateY(100%)` still resolves
+   to the new (taller) line height so the FROM state stays fully hidden.
+   Override globally on `:root` or per-element by setting `--aa-line-mask-pad`
+   (e.g. `--aa-line-mask-pad: 0.22em` for fonts with deeper descenders, or
+   `0` to opt out). */
+.aa-line-mask {
+  margin-bottom: calc(var(--aa-line-mask-pad, 0.15em) * -1);
+}
+.aa-line-mask > .aa-line {
+  padding-bottom: var(--aa-line-mask-pad, 0.15em);
+}
+
 .aa-block-bg {
   position: absolute;
   top: 0;
