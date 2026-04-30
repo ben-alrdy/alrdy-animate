@@ -1,0 +1,79 @@
+:root {
+  --aa-duration: 600ms;
+  --aa-delay: 0ms;
+  --aa-distance: 1;
+  --aa-ease: cubic-bezier(0.215, 0.61, 0.355, 1);
+}
+
+[aa-animate] {
+  will-change: transform, opacity;
+}
+
+[aa-animate="fade"],
+[aa-animate^="fade-"] {
+  opacity: 0;
+  transition:
+    opacity var(--aa-duration) var(--aa-ease) var(--aa-delay),
+    transform var(--aa-duration) var(--aa-ease) var(--aa-delay);
+}
+
+[aa-animate="fade-up"]   { transform: translateY(calc(50px * var(--aa-distance))); }
+[aa-animate="fade-down"] { transform: translateY(calc(-50px * var(--aa-distance))); }
+[aa-animate="fade-left"] { transform: translateX(calc(50px * var(--aa-distance))); }
+[aa-animate="fade-right"]{ transform: translateX(calc(-50px * var(--aa-distance))); }
+
+[aa-animate="fade"].in-view,
+[aa-animate^="fade-"].in-view {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+}
+
+[aa-animate="zoom-in"],
+[aa-animate="zoom-out"] {
+  opacity: 0;
+  transition:
+    opacity var(--aa-duration) var(--aa-ease) var(--aa-delay),
+    transform var(--aa-duration) var(--aa-ease) var(--aa-delay);
+}
+
+[aa-animate="zoom-in"]  { transform: scale(0.85); }
+[aa-animate="zoom-out"] { transform: scale(1.15); }
+
+[aa-animate="zoom-in"].in-view,
+[aa-animate="zoom-out"].in-view {
+  opacity: 1;
+  transform: scale(1);
+}
+
+[aa-animate^="slide-"] {
+  transition: transform var(--aa-duration) var(--aa-ease) var(--aa-delay);
+}
+
+[aa-animate="slide-up"]    { transform: translateY(calc(100px * var(--aa-distance))); }
+[aa-animate="slide-down"]  { transform: translateY(calc(-100px * var(--aa-distance))); }
+[aa-animate="slide-left"]  { transform: translateX(calc(100px * var(--aa-distance))); }
+[aa-animate="slide-right"] { transform: translateX(calc(-100px * var(--aa-distance))); }
+
+[aa-animate^="slide-"].in-view {
+  transform: translate3d(0, 0, 0);
+}
+
+[aa-animate="blur-in"] {
+  opacity: 0;
+  filter: blur(20px);
+  transition:
+    opacity var(--aa-duration) var(--aa-ease) var(--aa-delay),
+    filter var(--aa-duration) var(--aa-ease) var(--aa-delay);
+}
+
+[aa-animate="blur-in"].in-view {
+  opacity: 1;
+  filter: blur(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [aa-animate] {
+    transition-duration: 0ms !important;
+    animation-duration: 0ms !important;
+  }
+}

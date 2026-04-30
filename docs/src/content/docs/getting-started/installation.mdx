@@ -1,0 +1,56 @@
+---
+title: Installation
+description: Add alrdy-animate to a Webflow site or a Next.js project.
+---
+
+alrdy-animate ships GSAP as an external dependency. You add GSAP via script tags (Webflow) or `npm install gsap` (Next.js); alrdy-animate detects `window.gsap` at init and warns clearly in dev mode if a required plugin is missing.
+
+## Webflow
+
+Add the following to your site's custom code, before `</body>`. Order matters — GSAP must be available before alrdy-animate calls `init()`.
+
+```html
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alrdy-animate@8/dist/alrdy-animate.css">
+<script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/alrdy-animate@8/dist/alrdy-animate.umd.cjs"></script>
+<script>
+  AlrdyAnimate.init({ debug: false })
+</script>
+```
+
+## Next.js
+
+```bash
+npm install alrdy-animate gsap
+```
+
+```tsx
+'use client'
+import { useEffect } from 'react'
+import 'alrdy-animate/style'
+
+export function AlrdyInit() {
+  useEffect(() => {
+    let cancelled = false
+    Promise.all([
+      import('gsap').then(m => { (window as any).gsap = m.gsap }),
+      import('gsap/ScrollTrigger').then(m => { (window as any).ScrollTrigger = m.ScrollTrigger }),
+    ]).then(async () => {
+      if (cancelled) return
+      const { init, destroy } = await import('alrdy-animate')
+      init({ debug: false })
+      ;(window as any).__alrdyDestroy = destroy
+    })
+    return () => {
+      cancelled = true
+      ;(window as any).__alrdyDestroy?.()
+    }
+  }, [])
+  return null
+}
+```
+
+## Required GSAP plugins
+
+alrdy-animate auto-detects which features are used on your page and tells you which GSAP plugins to add. In dev mode (`init({ debug: true })`), check the console for any "Missing GSAP plugins" warning — it lists the exact `<script>` tags you need to add.
