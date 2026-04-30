@@ -13,6 +13,7 @@ export interface GsapInstance {
   fromTo: (...args: unknown[]) => GsapTween
   set: (...args: unknown[]) => GsapTween
   timeline: (...args: unknown[]) => GsapTimeline
+  defaults: (vars?: Record<string, unknown>) => Record<string, unknown>
   ticker: {
     add: (fn: (time: number) => void) => void
     remove: (fn: (time: number) => void) => void
@@ -34,7 +35,12 @@ export interface GsapMatchMedia {
 
 export interface GsapTween {
   kill: () => void
-  progress: (value?: number) => number | GsapTween
+  progress: {
+    (): number
+    (value: number): GsapTween
+  }
+  play: () => GsapTween
+  pause: () => GsapTween
 }
 
 export interface GsapTimeline extends GsapTween {
@@ -42,6 +48,12 @@ export interface GsapTimeline extends GsapTween {
   from: (...args: unknown[]) => GsapTimeline
   fromTo: (...args: unknown[]) => GsapTimeline
   add: (...args: unknown[]) => GsapTimeline
+  progress: {
+    (): number
+    (value: number): GsapTimeline
+  }
+  play: () => GsapTimeline
+  pause: () => GsapTimeline
 }
 
 const PLUGIN_GLOBAL_NAMES: Record<string, string> = {
@@ -50,6 +62,7 @@ const PLUGIN_GLOBAL_NAMES: Record<string, string> = {
   Draggable: 'Draggable',
   InertiaPlugin: 'InertiaPlugin',
   Flip: 'Flip',
+  CustomEase: 'CustomEase',
 }
 
 export function detectGsap(

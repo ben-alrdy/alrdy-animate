@@ -51,8 +51,9 @@ declare namespace JSX {
     'aa-scroll-end-lg'?: string
     'aa-scroll-end-xl'?: string
     'aa-scrub'?: string | number
-    'aa-children'?: '' | boolean
     'aa-anchor'?: string
+    'aa-parallax-start'?: string | number
+    'aa-parallax-end'?: string | number
 
     // Feature anchors
     'aa-accordion'?: string | boolean
@@ -84,6 +85,9 @@ declare namespace JSX {
     'aa-modal-target'?: string
     'aa-modal-close'?: string | boolean
     'aa-modal-backdrop'?: string | boolean
+
+    'aa-hover-bg'?: string | boolean
+    'aa-hover-text'?: string | boolean
   }
 
   interface IntrinsicAttributes extends AlrdyAnimateAttributes {}

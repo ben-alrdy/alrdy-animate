@@ -1,0 +1,67 @@
+---
+title: slide
+description: Translate-only entrance. Element slides in from a direction at full opacity — useful when you don't want a fade.
+---
+
+import Demo from '../../../../components/Demo.astro'
+
+`slide-up`, `slide-down`, `slide-left`, `slide-right` translate the element into place from the corresponding direction. **No opacity tween** — the element is visible the whole time. Pair with `overflow: hidden` on a parent if you want a clipping reveal effect.
+
+For an entrance that *also* fades, use [fade-up/down/left/right](/animations/appear/fade/).
+
+## Variants
+
+| `aa-animate` | Starts at                |
+| ------------ | ------------------------ |
+| `slide-up`   | translateY(100px × distance) |
+| `slide-down` | translateY(-100px × distance) |
+| `slide-left` | translateX(100px × distance) |
+| `slide-right`| translateX(-100px × distance) |
+
+## Attributes
+
+| Attribute     | Default      | Notes                                                     |
+| ------------- | ------------ | --------------------------------------------------------- |
+| `aa-animate`  | (required)   | one of the variants above                                 |
+| `aa-distance` | `1`          | multiplier on the 100px offset                            |
+| `aa-duration` | `0.6`        | seconds                                                   |
+| `aa-delay`    | `0`          | seconds                                                   |
+| `aa-ease`     | `power4.out` | any GSAP ease                                             |
+| `aa-stagger`  | (off)        | when set on a parent with children, staggers the children |
+| `aa-scrub`    | (off)        | `true` or seconds — bind progress to scroll               |
+
+## Required GSAP plugins
+
+`gsap`, `ScrollTrigger`.
+
+## Live demo
+
+<Demo>
+  <div data-demo-stage>
+    <div data-spacer></div>
+    <div class="demo-grid">
+      <div class="slide-frame">
+        <div class="demo-card" aa-animate="slide-up">slide-up</div>
+      </div>
+      <div class="slide-frame">
+        <div class="demo-card" aa-animate="slide-left">slide-left</div>
+      </div>
+    </div>
+    <div data-spacer></div>
+  </div>
+</Demo>
+
+<style>{`
+  .demo-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+  .slide-frame {
+    overflow: hidden;
+    border-radius: 8px;
+  }
+  .slide-frame .demo-card {
+    margin: 0;
+  }
+`}</style>

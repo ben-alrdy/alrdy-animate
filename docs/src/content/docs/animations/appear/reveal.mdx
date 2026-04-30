@@ -1,0 +1,63 @@
+---
+title: reveal
+description: Clip-path entrances — directional inset reveals plus circle and oval expansions. Pair with aa-scrub to drive the reveal from scroll position.
+---
+
+import Demo from '../../../../components/Demo.astro'
+
+`reveal-up` / `reveal-down` / `reveal-left` / `reveal-right` slide a `clip-path: inset(...)` open from the corresponding edge. `reveal-center` expands a circle from the middle (it also fades opacity 0→1). `reveal-oval-up` and `reveal-oval-down` use an ellipse anchored to a corner — ideal for image reveals.
+
+## Attributes
+
+| Attribute     | Default     | Notes                                            |
+| ------------- | ----------- | ------------------------------------------------ |
+| `aa-animate`  | (required)  | `reveal-up/down/left/right/center/oval-up/down`  |
+| `aa-duration` | `0.9`       | seconds                                          |
+| `aa-delay`    | `0`         | seconds                                          |
+| `aa-ease`     | `power3.out`| any GSAP ease                                    |
+| `aa-scrub`    | (off)       | `true` or seconds — drive reveal from scroll     |
+
+## Required GSAP plugins
+
+`gsap`, `ScrollTrigger`.
+
+## Live demo
+
+<Demo>
+  <div data-demo-stage>
+    <div data-spacer></div>
+    <div class="demo-grid">
+      <div class="demo-image-card" aa-animate="reveal-up">
+        <span>reveal-up</span>
+      </div>
+      <div class="demo-image-card" aa-animate="reveal-right">
+        <span>reveal-right</span>
+      </div>
+      <div class="demo-image-card" aa-animate="reveal-center">
+        <span>reveal-center</span>
+      </div>
+      <div class="demo-image-card" aa-animate="reveal-oval-up">
+        <span>reveal-oval-up</span>
+      </div>
+    </div>
+    <div data-spacer></div>
+  </div>
+</Demo>
+
+<style>{`
+  .demo-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+  .demo-image-card {
+    aspect-ratio: 4 / 3;
+    background: linear-gradient(135deg, var(--sl-color-accent), var(--sl-color-accent-low));
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 600;
+  }
+`}</style>

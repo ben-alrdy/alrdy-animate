@@ -13,7 +13,7 @@ const FEATURE_ANCHOR_ATTRS = [
 export type FeatureName =
   | 'scroll'
   | 'text'
-  | 'appear'
+  | 'reveal'
   | 'parallax'
   | 'hover'
   | 'accordion'
@@ -32,7 +32,7 @@ const ANIMATE_TO_FEATURE: Array<[RegExp, FeatureName]> = [
   [/^text-/, 'text'],
   [/^hover-/, 'hover'],
   [/^parallax/, 'parallax'],
-  [/^(appear|reveal)/, 'appear'],
+  [/^reveal/, 'reveal'],
 ]
 
 function classifyAnimateValue(value: string | null): FeatureName {

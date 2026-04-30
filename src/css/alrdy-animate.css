@@ -1,74 +1,45 @@
+/*
+ * alrdy-animate — companion stylesheet
+ *
+ * Animations are GSAP-driven. This file only ships the helper classes the
+ * split utility produces (.aa-word / .aa-char / .aa-line) plus a global
+ * reduced-motion safety net.
+ */
+
+/*
+ * Named eases as CSS custom properties — usable in any transition or animation
+ * declaration outside of GSAP (e.g. hover states in Webflow projects). Keep in
+ * sync with src/core/named-eases.ts. `elastic` and `bounce` are multi-segment
+ * paths and aren't expressible as cubic-bezier; use the GSAP names (aa-ease).
+ */
 :root {
-  --aa-duration: 600ms;
-  --aa-delay: 0ms;
-  --aa-distance: 1;
-  --aa-ease: cubic-bezier(0.215, 0.61, 0.355, 1);
+  --aa-ease-osmo: cubic-bezier(0.625, 0.05, 0, 1);
+  --aa-ease-energy: cubic-bezier(0.32, 0.72, 0, 1);
+  --aa-ease-smooth: cubic-bezier(0.38, 0.005, 0.215, 1);
+  --aa-ease-punch: cubic-bezier(0.19, 1, 0.22, 1);
+  --aa-ease-relaxed: cubic-bezier(0.7, 0, 0.3, 1);
+  --aa-ease-jump: cubic-bezier(0.35, 1.5, 0.6, 1);
+  --aa-ease-pop: cubic-bezier(0.17, 0.67, 0.3, 1.33);
+  --aa-ease-anticipate: cubic-bezier(0.8, -0.4, 0.5, 1);
+  --aa-ease-fade: cubic-bezier(0.25, 0.1, 0.25, 1);
 }
 
 [aa-animate] {
   will-change: transform, opacity;
 }
 
-[aa-animate="fade"],
-[aa-animate^="fade-"] {
-  opacity: 0;
-  transition:
-    opacity var(--aa-duration) var(--aa-ease) var(--aa-delay),
-    transform var(--aa-duration) var(--aa-ease) var(--aa-delay);
+[aa-animate*="blur"] {
+  will-change: transform, opacity, filter;
 }
 
-[aa-animate="fade-up"]   { transform: translateY(calc(50px * var(--aa-distance))); }
-[aa-animate="fade-down"] { transform: translateY(calc(-50px * var(--aa-distance))); }
-[aa-animate="fade-left"] { transform: translateX(calc(50px * var(--aa-distance))); }
-[aa-animate="fade-right"]{ transform: translateX(calc(-50px * var(--aa-distance))); }
-
-[aa-animate="fade"].in-view,
-[aa-animate^="fade-"].in-view {
-  opacity: 1;
-  transform: translate3d(0, 0, 0);
+.aa-word,
+.aa-char {
+  display: inline-block;
+  will-change: transform, opacity, filter;
 }
 
-[aa-animate="zoom-in"],
-[aa-animate="zoom-out"] {
-  opacity: 0;
-  transition:
-    opacity var(--aa-duration) var(--aa-ease) var(--aa-delay),
-    transform var(--aa-duration) var(--aa-ease) var(--aa-delay);
-}
-
-[aa-animate="zoom-in"]  { transform: scale(0.85); }
-[aa-animate="zoom-out"] { transform: scale(1.15); }
-
-[aa-animate="zoom-in"].in-view,
-[aa-animate="zoom-out"].in-view {
-  opacity: 1;
-  transform: scale(1);
-}
-
-[aa-animate^="slide-"] {
-  transition: transform var(--aa-duration) var(--aa-ease) var(--aa-delay);
-}
-
-[aa-animate="slide-up"]    { transform: translateY(calc(100px * var(--aa-distance))); }
-[aa-animate="slide-down"]  { transform: translateY(calc(-100px * var(--aa-distance))); }
-[aa-animate="slide-left"]  { transform: translateX(calc(100px * var(--aa-distance))); }
-[aa-animate="slide-right"] { transform: translateX(calc(-100px * var(--aa-distance))); }
-
-[aa-animate^="slide-"].in-view {
-  transform: translate3d(0, 0, 0);
-}
-
-[aa-animate="blur-in"] {
-  opacity: 0;
-  filter: blur(20px);
-  transition:
-    opacity var(--aa-duration) var(--aa-ease) var(--aa-delay),
-    filter var(--aa-duration) var(--aa-ease) var(--aa-delay);
-}
-
-[aa-animate="blur-in"].in-view {
-  opacity: 1;
-  filter: blur(0);
+.aa-line {
+  display: block;
 }
 
 @media (prefers-reduced-motion: reduce) {

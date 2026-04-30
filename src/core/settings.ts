@@ -13,6 +13,8 @@ export const VALUE_BEARING_ATTRS = [
   'aa-scroll-end',
   'aa-scrub',
   'aa-anchor',
+  'aa-parallax-start',
+  'aa-parallax-end',
 ] as const
 
 export type ValueAttr = (typeof VALUE_BEARING_ATTRS)[number]

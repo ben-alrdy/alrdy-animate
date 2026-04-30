@@ -9,7 +9,7 @@ test.describe('fade-up demo page', () => {
     page.on('console', (m) => messages.push(m.text()))
 
     const initLog = page.waitForEvent('console', { predicate: initialized, timeout: 8000 })
-    await page.goto('/animations/fade-up/')
+    await page.goto('/animations/appear/fade/')
     await initLog
 
     expect(messages.find((m) => m.includes('window.gsap not found'))).toBeUndefined()
@@ -24,7 +24,7 @@ test.describe('fade-up demo page', () => {
   test('animation plays when card is scrolled into view', async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 800 })
     const initLog = page.waitForEvent('console', { predicate: initialized, timeout: 8000 })
-    await page.goto('/animations/fade-up/')
+    await page.goto('/animations/appear/fade/')
     await initLog
 
     const card = page.locator('.demo-card').last()
@@ -35,7 +35,7 @@ test.describe('fade-up demo page', () => {
   })
 
   test('public API surface is attached to window', async ({ page }) => {
-    await page.goto('/animations/fade-up/')
+    await page.goto('/animations/appear/fade/')
     await page.waitForFunction(() => typeof window.AlrdyAnimate !== 'undefined')
     const surface = await page.evaluate(() => ({
       hasInit: typeof window.AlrdyAnimate.init === 'function',

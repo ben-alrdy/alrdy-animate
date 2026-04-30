@@ -1,0 +1,60 @@
+---
+title: blur
+description: Blur-in entrance. Element fades in while a 20px blur dissipates to zero. Soft, atmospheric.
+---
+
+import Demo from '../../../../components/Demo.astro'
+
+`blur-in` fades opacity 0 → 1 while the CSS blur filter shrinks from 20px to 0. The result is a soft, hazy entrance — useful for hero imagery and editorial layouts.
+
+For per-character blur on text, see [text-blur](/animations/text/text-blur/) instead.
+
+## Attributes
+
+| Attribute     | Default      | Notes                                                     |
+| ------------- | ------------ | --------------------------------------------------------- |
+| `aa-animate`  | (required)   | `blur-in`                                                 |
+| `aa-duration` | `0.6`        | seconds                                                   |
+| `aa-delay`    | `0`          | seconds                                                   |
+| `aa-ease`     | `power4.out` | any GSAP ease                                             |
+| `aa-stagger`  | (off)        | when set on a parent with children, staggers the children |
+| `aa-scrub`    | (off)        | `true` or seconds — bind progress to scroll               |
+
+## Required GSAP plugins
+
+`gsap`, `ScrollTrigger`.
+
+## Live demo
+
+<Demo>
+  <div data-demo-stage>
+    <div data-spacer></div>
+    <div class="demo-card demo-card-tall" aa-animate="blur-in" aa-duration="1.2">
+      blur-in
+    </div>
+    <div data-spacer></div>
+    <div class="demo-grid demo-grid-3" aa-animate="blur-in" aa-stagger="0.08">
+      <div class="demo-card">stagger</div>
+      <div class="demo-card">blur</div>
+      <div class="demo-card">across</div>
+      <div class="demo-card">a</div>
+      <div class="demo-card">grid</div>
+      <div class="demo-card">of</div>
+    </div>
+    <div data-spacer></div>
+  </div>
+</Demo>
+
+<style>{`
+  .demo-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+  .demo-grid-3 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .demo-card-tall {
+    padding: 2.5rem 1rem;
+  }
+`}</style>

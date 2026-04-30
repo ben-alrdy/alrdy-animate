@@ -1,0 +1,112 @@
+---
+title: fade
+description: Opacity entrance, optionally combined with a translate. The most common entrance animation — opacity 0 → 1 with directional offset.
+---
+
+import Demo from '../../../../components/Demo.astro'
+
+`fade` brings an element from invisible to visible. Add a direction suffix (`fade-up`, `fade-down`, `fade-left`, `fade-right`) to combine the opacity tween with a translate from that direction.
+
+## Variants
+
+| `aa-animate` | What it does                          |
+| ------------ | ------------------------------------- |
+| `fade`       | opacity 0 → 1, no transform           |
+| `fade-up`    | opacity + translateY from below (50px) |
+| `fade-down`  | opacity + translateY from above        |
+| `fade-left`  | opacity + translateX from the right    |
+| `fade-right` | opacity + translateX from the left     |
+
+## Attributes
+
+| Attribute     | Default     | Notes                                                     |
+| ------------- | ----------- | --------------------------------------------------------- |
+| `aa-animate`  | (required)  | one of the variants above                                 |
+| `aa-distance` | `1`         | multiplier on the 50px translate                          |
+| `aa-duration` | `0.6`       | seconds                                                   |
+| `aa-delay`    | `0`         | seconds                                                   |
+| `aa-ease`     | `power4.out`| any GSAP ease                                             |
+| `aa-stagger`  | (off)       | when set on a parent with children, staggers the children |
+| `aa-scrub`    | (off)       | `true` or seconds — bind progress to scroll               |
+
+## Required GSAP plugins
+
+`gsap`, `ScrollTrigger`.
+
+## Directions
+
+<Demo>
+  <div data-demo-stage>
+    <div data-spacer></div>
+    <div class="demo-grid">
+      <div class="demo-card" aa-animate="fade-up">fade-up</div>
+      <div class="demo-card" aa-animate="fade-down">fade-down</div>
+      <div class="demo-card" aa-animate="fade-left">fade-left</div>
+      <div class="demo-card" aa-animate="fade-right">fade-right</div>
+    </div>
+    <div data-spacer></div>
+  </div>
+</Demo>
+
+## Distance
+
+`aa-distance` scales the 50px translate offset.
+
+<Demo>
+  <div data-demo-stage>
+    <div data-spacer></div>
+    <div class="demo-grid demo-grid-3" data-distance-anchor>
+      <div class="demo-card" aa-animate="fade-up" aa-distance="1" aa-anchor="[data-distance-anchor]">distance 1</div>
+      <div class="demo-card" aa-animate="fade-up" aa-distance="3" aa-anchor="[data-distance-anchor]">distance 3</div>
+      <div class="demo-card" aa-animate="fade-up" aa-distance="6" aa-anchor="[data-distance-anchor]">distance 6</div>
+    </div>
+    <div data-spacer></div>
+  </div>
+</Demo>
+
+## Stagger children
+
+Add `aa-stagger` to a wrapper to animate its direct children in sequence. Each child runs the same animation with the stagger value (in seconds) between starts.
+
+<Demo>
+  <div data-demo-stage>
+    <div data-spacer></div>
+    <div class="demo-grid demo-grid-3" aa-animate="fade-up" aa-stagger="0.1">
+      <div class="demo-card">child 1</div>
+      <div class="demo-card">child 2</div>
+      <div class="demo-card">child 3</div>
+      <div class="demo-card">child 4</div>
+      <div class="demo-card">child 5</div>
+      <div class="demo-card">child 6</div>
+    </div>
+    <div data-spacer></div>
+  </div>
+</Demo>
+
+## Scrub-driven
+
+Add `aa-scrub` to bind animation progress to scroll position. The element starts hidden and reveals progressively as you scroll. Pass `true` for an instant lock, or a number of seconds for smoothing lag.
+
+<Demo>
+  <div data-demo-stage>
+    <div data-spacer></div>
+    <div class="demo-card demo-card-tall" aa-animate="fade-up" aa-scrub="1" aa-distance="3">
+      aa-scrub="1" — 1s smoothing
+    </div>
+    <div data-spacer></div>
+  </div>
+</Demo>
+
+<style>{`
+  .demo-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+  .demo-grid-3 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .demo-card-tall {
+    padding: 2.5rem 1rem;
+  }
+`}</style>

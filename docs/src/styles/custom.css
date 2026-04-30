@@ -1,0 +1,190 @@
+/*
+ * alrdy-animate docs — branding
+ * Palette + typography lifted from alrdy-cohort so the docs site matches the
+ * agency look (cream paper / ink type / lime accent, Neue Montreal +
+ * PP Editorial New italic for emphasis, JetBrains Mono for code).
+ */
+
+@font-face {
+  font-family: 'Neue Montreal';
+  src: url('/fonts/NeueMontreal-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Neue Montreal';
+  src: url('/fonts/NeueMontreal-Medium.otf') format('opentype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'PP Editorial New';
+  src: url('/fonts/PPEditorialNew-Italic.woff2') format('woff2');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'JetBrains Mono';
+  src: url('/fonts/JetBrainsMono-VariableFont_wght.ttf') format('truetype-variations');
+  font-weight: 100 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  /* Brand palette */
+  --aa-cream-50:  #FCF8F1;
+  --aa-cream-100: #F6F0E5;
+  --aa-cream-200: #ECE4D5;
+  --aa-ink-950:   #0B0B0B;
+  --aa-ink-900:   #111111;
+  --aa-ink-700:   #2B2B2B;
+  --aa-ink-500:   #6B6B6B;
+  --aa-ink-300:   #A9A39A;
+  --aa-lime:      #D4FF4F;
+  --aa-lime-ink:  #1A2A00;
+
+  /* Fonts → Starlight variables */
+  --sl-font: 'Neue Montreal', ui-sans-serif, system-ui, sans-serif;
+  --sl-font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+/*
+ * Dark mode (Starlight default) — the bare :root block. Light-mode overrides
+ * sit in the [data-theme='light'] block below.
+ */
+:root,
+::backdrop {
+  --sl-color-white: var(--aa-cream-50);
+  --sl-color-gray-1: var(--aa-cream-100);
+  --sl-color-gray-2: var(--aa-cream-200);
+  --sl-color-gray-3: var(--aa-ink-300);
+  --sl-color-gray-4: var(--aa-ink-500);
+  --sl-color-gray-5: var(--aa-ink-700);
+  --sl-color-gray-6: var(--aa-ink-900);
+  --sl-color-black: var(--aa-ink-950);
+
+  --sl-color-accent-low: var(--aa-ink-700);
+  --sl-color-accent: var(--aa-lime);
+  --sl-color-accent-high: var(--aa-cream-50);
+
+  --sl-color-text: var(--aa-cream-100);
+  /* `text-accent` doubles as the active-sidebar background AND the link
+     colour. Bright lime works for both — text-invert (lime-ink) stays
+     legible on it. */
+  --sl-color-text-accent: var(--aa-lime);
+  --sl-color-text-invert: var(--aa-lime-ink);
+
+  --sl-color-bg: var(--aa-ink-950);
+  --sl-color-bg-nav: var(--aa-ink-900);
+  --sl-color-bg-sidebar: var(--aa-ink-900);
+  --sl-color-bg-inline-code: var(--aa-ink-700);
+  --sl-color-bg-accent: var(--aa-lime);
+
+  --sl-color-hairline-light: var(--aa-ink-700);
+  --sl-color-hairline: var(--aa-ink-900);
+  --sl-color-hairline-shade: var(--aa-ink-950);
+}
+
+/* Light mode — cream paper, ink type */
+:root[data-theme='light'],
+[data-theme='light'] ::backdrop {
+  --sl-color-white: var(--aa-ink-900);
+  --sl-color-gray-1: var(--aa-ink-700);
+  --sl-color-gray-2: var(--aa-ink-500);
+  --sl-color-gray-3: var(--aa-ink-300);
+  --sl-color-gray-4: #C9C2B5;
+  --sl-color-gray-5: var(--aa-cream-200);
+  --sl-color-gray-6: var(--aa-cream-100);
+  --sl-color-gray-7: var(--aa-cream-50);
+  --sl-color-black: var(--aa-cream-50);
+
+  --sl-color-accent-low: var(--aa-cream-200);
+  --sl-color-accent: var(--aa-lime);
+  --sl-color-accent-high: var(--aa-lime-ink);
+
+  --sl-color-text: var(--aa-ink-900);
+  /* On cream, lime is too acidic for text/icons — keep accent text in ink.
+     The sidebar's active-page pill is restored to lime via an explicit
+     override below. */
+  --sl-color-text-accent: var(--aa-ink-900);
+  --sl-color-text-invert: var(--aa-lime-ink);
+
+  --sl-color-bg: var(--aa-cream-50);
+  --sl-color-bg-nav: var(--aa-cream-100);
+  --sl-color-bg-sidebar: var(--aa-cream-50);
+  --sl-color-bg-inline-code: var(--aa-cream-200);
+  --sl-color-bg-accent: var(--aa-lime);
+
+  --sl-color-hairline-light: var(--aa-cream-200);
+  --sl-color-hairline: var(--aa-cream-200);
+  --sl-color-hairline-shade: var(--aa-ink-300);
+}
+
+/*
+ * Active sidebar pill: keep lime bg + dark text in light mode. The
+ * SidebarSublist component uses `background-color: var(--sl-color-text-accent)`
+ * by default; we point text-accent at ink so the rest of the UI (site title,
+ * social icons, TOC active item) stays in ink, and restore lime for the
+ * pill specifically.
+ */
+:root[data-theme='light'] [aria-current='page'] {
+  background-color: var(--aa-lime);
+}
+
+/*
+ * Inline links — lime is too loud for body link colour, so we keep the
+ * label in ink/cream and use lime as the underline (and as the hover
+ * highlight bg).
+ */
+.sl-markdown-content a:not(.not-content a) {
+  color: var(--aa-cream-50);
+  text-decoration-color: var(--aa-lime);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 2px;
+}
+:root[data-theme='light'] .sl-markdown-content a:not(.not-content a) {
+  color: var(--aa-ink-900);
+}
+.sl-markdown-content a:not(.not-content a):hover {
+  color: var(--aa-lime-ink);
+  background: var(--aa-lime);
+  text-decoration: none;
+}
+
+/* Headings — tighter tracking, slightly less bold to feel editorial */
+.sl-markdown-content :is(h1, h2, h3, h4, h5, h6) {
+  font-weight: 500;
+  letter-spacing: -0.015em;
+}
+.sl-markdown-content h1 {
+  letter-spacing: -0.02em;
+  line-height: 1.02;
+}
+.sl-markdown-content h2 {
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+}
+
+/* Italic emphasis can opt into PP Editorial New */
+.italic-emphasis,
+.sl-markdown-content em.italic-emphasis {
+  font-family: 'PP Editorial New', 'Neue Montreal', serif;
+  font-style: italic;
+  font-weight: 400;
+  font-feature-settings: 'liga' 1;
+}
+
+/* Inline code — mono, slight padding, contrast against cream */
+.sl-markdown-content :not(pre) > code {
+  font-family: var(--sl-font-mono);
+  font-size: 0.92em;
+  padding: 0.1em 0.35em;
+  border-radius: 4px;
+}

@@ -22,7 +22,7 @@ type Loader = () => Promise<{ default: FeatureModule }>
 const loaders: Record<FeatureName, Loader> = {
   scroll: () => import('../features/scroll/index'),
   text: () => import('../features/text/index'),
-  appear: () => import('../features/appear/index'),
+  reveal: () => import('../features/reveal/index'),
   parallax: () => import('../features/parallax/index'),
   hover: () => import('../features/hover/index'),
   accordion: () => import('../features/accordion/index'),

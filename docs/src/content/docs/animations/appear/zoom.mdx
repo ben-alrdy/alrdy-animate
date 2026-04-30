@@ -1,0 +1,63 @@
+---
+title: zoom
+description: Scale-in entrance. zoom-in starts at 0.85x and grows to natural size; zoom-out starts at 1.15x and shrinks in.
+---
+
+import Demo from '../../../../components/Demo.astro'
+
+`zoom-in` and `zoom-out` combine an opacity fade with a scale tween. `zoom-in` starts smaller and grows; `zoom-out` starts larger and shrinks in.
+
+## Variants
+
+| `aa-animate` | What it does                              |
+| ------------ | ----------------------------------------- |
+| `zoom-in`    | opacity 0 → 1 + scale 0.85 → 1            |
+| `zoom-out`   | opacity 0 → 1 + scale 1.15 → 1            |
+
+## Attributes
+
+| Attribute     | Default      | Notes                                                     |
+| ------------- | ------------ | --------------------------------------------------------- |
+| `aa-animate`  | (required)   | `zoom-in` or `zoom-out`                                   |
+| `aa-duration` | `0.6`        | seconds                                                   |
+| `aa-delay`    | `0`          | seconds                                                   |
+| `aa-ease`     | `power4.out` | any GSAP ease                                             |
+| `aa-stagger`  | (off)        | when set on a parent with children, staggers the children |
+| `aa-scrub`    | (off)        | `true` or seconds — bind progress to scroll               |
+
+## Required GSAP plugins
+
+`gsap`, `ScrollTrigger`.
+
+## Live demo
+
+<Demo>
+  <div data-demo-stage>
+    <div data-spacer></div>
+    <div class="demo-grid">
+      <div class="demo-card" aa-animate="zoom-in">zoom-in</div>
+      <div class="demo-card" aa-animate="zoom-out">zoom-out</div>
+    </div>
+    <div data-spacer></div>
+    <div class="demo-grid demo-grid-3" aa-animate="zoom-in" aa-stagger="0.08">
+      <div class="demo-card">staggered</div>
+      <div class="demo-card">zoom-in</div>
+      <div class="demo-card">grid</div>
+      <div class="demo-card">of</div>
+      <div class="demo-card">six</div>
+      <div class="demo-card">cards</div>
+    </div>
+    <div data-spacer></div>
+  </div>
+</Demo>
+
+<style>{`
+  .demo-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+  .demo-grid-3 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+`}</style>

@@ -1,0 +1,41 @@
+---
+title: aa-split
+description: Standalone text splitter. Splits an element into words, chars, or lines without animating — pair it with CSS or your own GSAP code.
+---
+
+import Demo from '../../../../components/Demo.astro'
+
+`aa-split` splits an element into `.aa-word`, `.aa-char`, or `.aa-line` parts and stops there. Use it when you want a CSS-only stagger, a hover effect, or you're driving the animation yourself. If GSAP's SplitText plugin is loaded, it's used for accuracy; otherwise words/chars fall back to a tiny regex splitter (`lines` requires SplitText).
+
+## Attributes
+
+| Attribute   | Values                          | Notes                                   |
+| ----------- | ------------------------------- | --------------------------------------- |
+| `aa-split`  | `words`, `chars`, `lines`       | with `\|` shorthand and suffixes        |
+
+## Live demo
+
+The headline below is split into words. Hover any word — pure CSS picks up the `.aa-word` class to apply a per-word transform.
+
+<Demo>
+  <div data-demo-stage>
+    <h2 class="split-demo" aa-split="words">
+      Hover any word in this headline.
+    </h2>
+  </div>
+</Demo>
+
+<style>{`
+  .split-demo {
+    font-size: clamp(1.5rem, 3vw, 2.5rem);
+    line-height: 1.3;
+    padding: 2rem 0;
+  }
+  .split-demo :global(.aa-word) {
+    transition: transform 200ms ease, color 200ms ease;
+  }
+  .split-demo :global(.aa-word:hover) {
+    transform: translateY(-0.25em);
+    color: var(--sl-color-accent);
+  }
+`}</style>

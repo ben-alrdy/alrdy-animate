@@ -7,16 +7,16 @@ type ToState = Record<string, number | string>
 
 const FROM_FOR: Record<string, (distance: number) => FromState> = {
   fade: () => ({ opacity: 0 }),
-  'fade-up': (d) => ({ y: 50 * d, opacity: 0 }),
-  'fade-down': (d) => ({ y: -50 * d, opacity: 0 }),
-  'fade-left': (d) => ({ x: 50 * d, opacity: 0 }),
-  'fade-right': (d) => ({ x: -50 * d, opacity: 0 }),
+  'fade-up': (d) => ({ y: `${3 * d}rem`, opacity: 0 }),
+  'fade-down': (d) => ({ y: `${-3 * d}rem`, opacity: 0 }),
+  'fade-left': (d) => ({ x: `${3 * d}rem`, opacity: 0 }),
+  'fade-right': (d) => ({ x: `${-3 * d}rem`, opacity: 0 }),
   'zoom-in': () => ({ scale: 0.85, opacity: 0 }),
   'zoom-out': () => ({ scale: 1.15, opacity: 0 }),
-  'slide-up': (d) => ({ y: 100 * d }),
-  'slide-down': (d) => ({ y: -100 * d }),
-  'slide-left': (d) => ({ x: 100 * d }),
-  'slide-right': (d) => ({ x: -100 * d }),
+  'slide-up': (d) => ({ y: `${6 * d}rem` }),
+  'slide-down': (d) => ({ y: `${-6 * d}rem` }),
+  'slide-left': (d) => ({ x: `${6 * d}rem` }),
+  'slide-right': (d) => ({ x: `${-6 * d}rem` }),
   'blur-in': () => ({ opacity: 0, filter: 'blur(20px)' }),
 }
 
@@ -63,6 +63,14 @@ function parseScrub(value: string | undefined): number | boolean | undefined {
   return Number.isFinite(n) ? n : true
 }
 
+function resolveAnchor(element: Element, anchor: string | undefined): Element {
+  if (!anchor) return element
+  const root = element.closest(anchor)
+  if (root) return root
+  const found = document.querySelector(anchor)
+  return found ?? element
+}
+
 function setupOne(
   ctx: FeatureContext,
   element: Element,
@@ -79,40 +87,84 @@ function setupOne(
   const delay = parseNum(config['aa-delay'], 0)
   const ease = config['aa-ease'] ?? opts.ease ?? 'power4.out'
   const distance = parseNum(config['aa-distance'], opts.distance ?? 1)
-  const scrollStart = config['aa-scroll-start'] ?? opts.scrollStart ?? 'top 92%'
   const scrollEnd = config['aa-scroll-end'] ?? opts.scrollEnd ?? 'bottom 70%'
   const scrub = parseScrub(config['aa-scrub'])
+  const scrollStart =
+    config['aa-scroll-start'] ??
+    (scrub !== undefined ? opts.scrubStart : undefined) ??
+    opts.scrollStart ??
+    'top 92%'
   const again = opts.again !== false
+
+  // aa-stagger present + element has children → stagger the children.
+  // aa-stagger present but no children → silently fall through and animate the element itself.
+  const wantsStagger = config['aa-stagger'] !== undefined
+  const children = wantsStagger
+    ? Array.from(element.children).filter((c): c is Element => c.nodeType === 1)
+    : []
+  const targets: Element[] = children.length > 0 ? children : [element]
+  const stagger = children.length > 0 ? parseNum(config['aa-stagger'], 0.1) : 0
 
   const fromState = fromBuilder(distance)
   const trigger = parseTrigger(config['aa-trigger'])
 
   if (trigger.kind === 'event' && trigger.eventName) {
-    ctx.gsap.gsap.set(element, fromState)
+    ctx.gsap.gsap.set(targets, fromState)
     const eventName = trigger.eventName
     const off = onCustomTrigger((target, name) => {
       if (name !== eventName) return
       if (target !== element && !target.contains(element)) return
-      ctx.gsap.gsap.to(element, { ...toState, duration, ease, delay })
+      ctx.gsap.gsap.to(targets, { ...toState, duration, ease, delay, stagger })
     })
     return () => off()
   }
 
-  const stConfig: Record<string, unknown> = {
-    trigger: element,
-    start: scrollStart,
-    end: scrollEnd,
-    toggleActions: again ? 'play none none reverse' : 'play none none none',
-  }
-  if (scrub !== undefined) stConfig.scrub = scrub
+  const triggerEl = resolveAnchor(element, config['aa-anchor'])
 
-  ctx.gsap.gsap.fromTo(element, fromState, {
-    ...toState,
-    duration,
-    ease,
-    delay,
-    scrollTrigger: stConfig,
+  if (scrub !== undefined) {
+    ctx.gsap.gsap.fromTo(targets, fromState, {
+      ...toState,
+      duration,
+      ease,
+      delay,
+      stagger,
+      scrollTrigger: {
+        trigger: triggerEl,
+        start: scrollStart,
+        end: scrollEnd,
+        scrub,
+      },
+    })
+    return undefined
+  }
+
+  const ScrollTrigger = ctx.gsap.plugins.ScrollTrigger as
+    | { create: (vars: Record<string, unknown>) => unknown }
+    | undefined
+  if (!ScrollTrigger) return undefined
+
+  const tl = ctx.gsap.gsap.timeline({ paused: true })
+  tl.fromTo(targets, fromState, { ...toState, duration, ease, delay, stagger })
+
+  ScrollTrigger.create({
+    trigger: triggerEl,
+    start: scrollStart,
+    onEnter: () => tl.play(),
   })
+
+  if (again) {
+    ScrollTrigger.create({
+      trigger: triggerEl,
+      start: () => {
+        const rect = triggerEl.getBoundingClientRect()
+        const matrix = new DOMMatrix(getComputedStyle(triggerEl).transform)
+        return rect.top + window.scrollY - matrix.f - window.innerHeight
+      },
+      onLeaveBack: () => {
+        tl.progress(0).pause()
+      },
+    })
+  }
 
   return undefined
 }

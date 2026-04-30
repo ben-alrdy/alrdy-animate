@@ -36,18 +36,18 @@ src/
 │   ├── gsap-detect.ts      # window.gsap detection + dev-mode warnings
 │   └── state.ts            # internal singleton state (initialized, options, breakpoints)
 ├── features/
-│   ├── scroll/index.ts     # REAL: fade/zoom/slide/blur via fromTo + ScrollTrigger
-│   ├── text/index.ts       # stub
-│   ├── appear/index.ts     # stub
-│   ├── parallax/index.ts   # stub
-│   ├── hover/index.ts      # stub
+│   ├── scroll/index.ts     # fade/zoom/slide/blur via fromTo + ScrollTrigger; supports aa-children + aa-scrub
+│   ├── text/index.ts       # text-fade / text-blur / text-slide-* (uses split runtime)
+│   ├── reveal/index.ts     # reveal-* (clip-path inset / circle / oval entrances)
+│   ├── parallax/index.ts   # parallax / parallax-horizontal — aa-parallax-start/end overrides
+│   ├── hover/index.ts      # hover-bg-block (direction-aware bg slide)
 │   ├── accordion/index.ts  # stub
 │   ├── marquee/index.ts    # stub
 │   ├── nav/index.ts        # stub
 │   ├── slider/index.ts     # stub
 │   └── modal/index.ts      # stub
-├── split/index.ts          # stub (standalone aa-split utility)
-├── css/alrdy-animate.css   # CSS-only animations (basic fade/zoom/slide/blur with .in-view)
+├── split/index.ts          # standalone aa-split utility (SplitText + regex fallback)
+├── css/alrdy-animate.css   # companion stylesheet: split helper classes + reduced-motion
 └── types/
     ├── index.ts            # public TS types
     ├── jsx.d.ts            # JSX.IntrinsicElements ambient types for aa-* (for Next.js autocomplete)
@@ -112,7 +112,7 @@ After implementing a feature, drive its docs demo through Playwright MCP (the `m
 - **Form-submit** feature (no production use; dropped)
 - **Templates / theme registry** (dropped)
 - **Lazy-load image handler** (delegate to native `loading="lazy"`)
-- **CSS-only `.in-view` IntersectionObserver** — CSS file is shipped but no JS toggle yet; GSAP path covers the same animations until Phase 5.
+- **CSS-only animations / `.in-view` IntersectionObserver** — dropped. All animations are GSAP-driven; the shipped CSS file only carries split-utility classes and a reduced-motion safety net.
 - **Page transitions** are out of scope; `init/destroy/refresh` lifecycle hooks let users wire Barba (Webflow) or View Transitions (Next.js) themselves. Recipes will live in `docs/src/content/docs/recipes/` in Phase 5.
 
 ## When in doubt

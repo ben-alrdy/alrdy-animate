@@ -1,0 +1,85 @@
+---
+title: hover-bg-block
+description: Direction-aware sliding background for buttons and links. Looks at the mouse-enter edge and slides the bg in from that direction.
+---
+
+import Demo from '../../../../components/Demo.astro'
+
+Detects which edge the mouse crossed on enter/leave and slides a child `[aa-hover-bg]` element in from that direction. The element you put `aa-animate="hover-bg-block"` on is your interactive surface; place a positioned-absolute child with `aa-hover-bg` underneath your text content.
+
+## Required structure
+
+```html
+<a class="my-btn" aa-animate="hover-bg-block">
+  <span aa-hover-bg></span>
+  <span class="label">Hover me</span>
+</a>
+```
+
+## Attributes
+
+| Attribute     | Default       | Notes                                   |
+| ------------- | ------------- | --------------------------------------- |
+| `aa-animate`  | (required)    | `hover-bg-block`                        |
+| `aa-duration` | `0.5`         | seconds                                 |
+| `aa-ease`     | `power2.out`  | any GSAP ease                           |
+
+## Required GSAP plugins
+
+`gsap` only — no plugins needed.
+
+## Behavior
+
+The hover effect is automatically disabled on devices without hover support (touch, e.g. mobile/tablet) via `(hover: hover)` matchMedia.
+
+## Live demo
+
+<Demo>
+  <div data-demo-stage>
+    <div class="hover-row">
+      <a class="hover-btn" aa-animate="hover-bg-block" href="#">
+        <span class="hover-bg" aa-hover-bg></span>
+        <span class="hover-label">Hover me →</span>
+      </a>
+      <a class="hover-btn" aa-animate="hover-bg-block" href="#">
+        <span class="hover-bg" aa-hover-bg></span>
+        <span class="hover-label">Or me →</span>
+      </a>
+    </div>
+  </div>
+</Demo>
+
+<style>{`
+  .hover-row {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    padding: 4rem 0;
+  }
+  .hover-btn {
+    position: relative;
+    display: inline-block;
+    padding: 1rem 2rem;
+    border: 2px solid var(--sl-color-accent);
+    color: var(--sl-color-accent);
+    border-radius: 999px;
+    overflow: hidden;
+    text-decoration: none;
+    font-weight: 600;
+    background: transparent;
+    isolation: isolate;
+    cursor: pointer;
+  }
+  .hover-bg {
+    position: absolute;
+    inset: 0;
+    background: var(--sl-color-accent);
+    z-index: 0;
+  }
+  .hover-label {
+    position: relative;
+    z-index: 1;
+    mix-blend-mode: difference;
+    color: white;
+  }
+`}</style>

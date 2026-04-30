@@ -8,12 +8,40 @@ import type {
 } from '../types/index'
 import { detectGsap, type GsapHandle } from './gsap-detect'
 import { createResponsiveController, type ResponsiveController } from './match-media'
+import { NAMED_EASES } from './named-eases'
 import { loadFeatures, type FeatureContext } from './registry'
 import { clearAll as clearResize, subscribe as subscribeResize } from './resize'
 import { scan } from './scanner'
 import { addDisposer, resolveBreakpoints, runAllDisposers, state } from './state'
 
 let activeHandles: { gsap: GsapHandle; responsive: ResponsiveController } | null = null
+
+function registerCustomEases(handle: GsapHandle, debug: boolean): void {
+  const w = window as unknown as Record<string, unknown>
+  const CustomEase = w.CustomEase as
+    | { create: (id: string, value: string) => unknown }
+    | undefined
+  if (!CustomEase) {
+    if (debug) {
+      console.warn(
+        `[alrdy-animate] CustomEase not loaded — named eases (${Object.keys(NAMED_EASES).join(', ')}) are unavailable. Add <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/CustomEase.min.js"></script> before alrdy-animate.`,
+      )
+    }
+    return
+  }
+  try {
+    handle.gsap.registerPlugin(CustomEase)
+  } catch {
+    // already registered; ignore
+  }
+  for (const [name, path] of Object.entries(NAMED_EASES)) {
+    try {
+      CustomEase.create(name, path)
+    } catch (err) {
+      if (debug) console.warn(`[alrdy-animate] failed to register named ease "${name}"`, err)
+    }
+  }
+}
 
 export async function init(options: InitOptions = {}): Promise<void> {
   if (state.initialized) return
@@ -27,10 +55,10 @@ export async function init(options: InitOptions = {}): Promise<void> {
 
   const requiredPlugins = new Set<string>()
   for (const f of features) {
-    if (f === 'scroll' || f === 'text' || f === 'appear' || f === 'parallax' || f === 'nav') {
+    if (f === 'scroll' || f === 'text' || f === 'reveal' || f === 'parallax' || f === 'nav') {
       requiredPlugins.add('ScrollTrigger')
     }
-    if (f === 'text' || f === 'split') requiredPlugins.add('SplitText')
+    if (f === 'text') requiredPlugins.add('SplitText')
     if (f === 'slider') {
       requiredPlugins.add('Draggable')
       requiredPlugins.add('InertiaPlugin')
@@ -40,6 +68,15 @@ export async function init(options: InitOptions = {}): Promise<void> {
 
   const gsapHandle = detectGsap([...requiredPlugins], debug)
   if (!gsapHandle) return
+
+  registerCustomEases(gsapHandle, debug)
+  if (options.ease) {
+    try {
+      gsapHandle.gsap.defaults({ ease: options.ease })
+    } catch {
+      // ignore
+    }
+  }
 
   const responsive = createResponsiveController(gsapHandle, state.breakpoints)
   activeHandles = { gsap: gsapHandle, responsive }

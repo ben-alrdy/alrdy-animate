@@ -24,6 +24,7 @@ export interface InitOptions {
   distance?: number
   scrollStart?: string
   scrollEnd?: string
+  scrubStart?: string
   again?: boolean
   breakpoints?: Partial<Breakpoints>
   reducedMotion?: ReducedMotionOptions

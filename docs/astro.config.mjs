@@ -7,6 +7,7 @@ export default defineConfig({
     starlight({
       title: 'alrdy-animate',
       description: 'Attribute-driven scroll-animation and interactive-component library.',
+      customCss: ['./src/styles/custom.css'],
       social: [
         {
           icon: 'github',
@@ -16,7 +17,10 @@ export default defineConfig({
       ],
       sidebar: [
         { label: 'Getting started', autogenerate: { directory: 'getting-started' } },
-        { label: 'Animations', autogenerate: { directory: 'animations' } },
+        { label: 'Appear animations', autogenerate: { directory: 'animations/appear' } },
+        { label: 'Text animations', autogenerate: { directory: 'animations/text' } },
+        { label: 'Interactive', autogenerate: { directory: 'animations/interactive' } },
+        { label: 'Utilities', autogenerate: { directory: 'animations/utilities' } },
       ],
     }),
   ],

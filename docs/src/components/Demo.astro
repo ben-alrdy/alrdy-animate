@@ -12,12 +12,14 @@ interface Props {}
 
 <script is:inline src="https://cdn.jsdelivr.net/npm/gsap@3/dist/gsap.min.js"></script>
 <script is:inline src="https://cdn.jsdelivr.net/npm/gsap@3/dist/ScrollTrigger.min.js"></script>
+<script is:inline src="https://cdn.jsdelivr.net/npm/gsap@3/dist/SplitText.min.js"></script>
+<script is:inline src="https://cdn.jsdelivr.net/npm/gsap@3/dist/CustomEase.min.js"></script>
 
 <script>
   import { init } from 'alrdy-animate'
 
   function ready(): void {
-    init({ debug: true })
+    init({ debug: true, scrollStart: 'top 70%', scrubStart: 'top 90%' })
   }
 
   if (document.readyState === 'loading') {
@@ -35,6 +37,10 @@ interface Props {}
     margin: 1rem 0;
     background: var(--sl-color-bg-nav);
     overflow: hidden;
+    /* Kill the prose `* + *` sibling margin for everything inside the demo
+       frame. The Starlight rule reads `margin-top: var(--sl-content-gap-y)`,
+       so zeroing the variable here silences it for demo content. */
+    --sl-content-gap-y: 0;
   }
 
   .demo-frame :global([data-demo-stage]) {
@@ -43,17 +49,28 @@ interface Props {}
     gap: 1rem;
   }
 
+  /* Spacers separate demo blocks vertically and give scroll triggers some
+     room to engage. Kept small so the demo frame doesn't stretch the
+     surrounding content unnecessarily. */
   .demo-frame :global([data-spacer]) {
-    height: 50vh;
+    height: 100px;
   }
 
   .demo-frame :global(.demo-card) {
-    padding: 2.5rem 2rem;
+    /* Starlight's prose styles set `* + * { margin-block-start: 16px }` on
+       siblings inside .sl-markdown-content. Inside a grid cell that offsets
+       cards downward so the first row looks taller than the second. Kill
+       the prose sibling margin and any auto-hyphenation. */
+    margin: 0 !important;
+    padding: 0.85rem 1rem;
     background: var(--sl-color-accent);
-    color: var(--sl-color-white);
-    border-radius: 8px;
-    font-weight: 600;
+    color: var(--sl-color-text-invert, var(--sl-color-white));
+    border-radius: 6px;
+    font-size: 0.95rem;
+    font-weight: 400;
     text-align: center;
-    box-shadow: 0 8px 32px hsl(var(--sl-hue-accent) 60% 40% / 0.25);
+    hyphens: none;
+    overflow-wrap: normal;
+    word-break: normal;
   }
 </style>

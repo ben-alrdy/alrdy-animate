@@ -1,0 +1,47 @@
+---
+title: text-blur
+description: Per-character blur entrance for headlines and hero copy. Splits the element into chars and fades each in with a stagger.
+---
+
+import Demo from '../../../../components/Demo.astro'
+
+`text-blur` splits the element into individual characters (via the standalone split utility) and fades each one in while the blur dissipates. The default split is `chars`, but `aa-split="words"` switches to per-word stagger for longer text.
+
+## Attributes
+
+| Attribute     | Default     | Notes                                  |
+| ------------- | ----------- | -------------------------------------- |
+| `aa-animate`  | (required)  | `text-blur`                            |
+| `aa-split`    | `chars`     | `chars`, `words`, or `lines`           |
+| `aa-stagger`  | `0.02`      | seconds between parts                  |
+| `aa-duration` | `0.6`       | seconds                                |
+| `aa-delay`    | `0`         | seconds                                |
+| `aa-ease`     | `power3.out`| any GSAP ease                          |
+
+## Required GSAP plugins
+
+`gsap`, `ScrollTrigger`, `SplitText` (for `aa-split="lines"`; chars/words fall back to a regex splitter if SplitText is missing).
+
+## Live demo
+
+<Demo>
+  <div data-demo-stage>
+    <div data-spacer></div>
+    <h2 class="demo-card demo-text" aa-animate="text-blur">
+      Per-character blur entrance.
+    </h2>
+    <div data-spacer></div>
+    <h2 class="demo-card demo-text" aa-animate="text-blur" aa-split="words" aa-stagger="0.08">
+      Per-word stagger for longer copy.
+    </h2>
+    <div data-spacer></div>
+  </div>
+</Demo>
+
+<style>{`
+  .demo-text {
+    font-size: clamp(1.5rem, 3vw, 2.5rem);
+    line-height: 1.2;
+    text-align: left;
+  }
+`}</style>
