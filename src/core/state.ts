@@ -7,6 +7,26 @@ export const DEFAULT_BREAKPOINTS: Breakpoints = {
   xl: 1280,
 }
 
+/**
+ * Single source of truth for init-time defaults. Features must NOT carry
+ * their own per-animation duration / ease fallbacks — they always pull from
+ * `ctx.options`, which has these merged in.
+ */
+export const DEFAULT_OPTIONS: Required<
+  Pick<InitOptions, 'duration' | 'ease' | 'distance' | 'scrollStart' | 'scrollEnd' | 'again'>
+> = {
+  duration: 0.6,
+  ease: 'power4.out',
+  distance: 1,
+  scrollStart: 'top 92%',
+  scrollEnd: 'bottom 70%',
+  again: true,
+}
+
+export function resolveOptions(opts: InitOptions): InitOptions {
+  return { ...DEFAULT_OPTIONS, ...opts }
+}
+
 export interface InternalState {
   initialized: boolean
   options: InitOptions

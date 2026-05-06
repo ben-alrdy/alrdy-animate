@@ -1,0 +1,81 @@
+---
+title: reveal-slices
+description: Shutter-style reveal. A panel of N rows overlays the element and scales away in sequence to expose its content. Smoother than clip-path slices — pure GPU transforms.
+---
+
+import Demo from '../../../../components/Demo.astro'
+
+`reveal-slices` overlays the element with a stack of N rows (default 6) that match its `currentColor`. As you scroll past, each row scales vertically to zero — staggered from the last row first — to expose the element's content. The technique is the same as Osmo's shutter transition: transform-only, no clip-path, GPU-friendly.
+
+Set the wrapper's `color` (CSS) to control the slice colour — it should match the surrounding background so the reveal looks seamless.
+
+## Variants
+
+The mode and slice count are packed into the `aa-animate` value: `reveal-slices[-mode][-N]`. Both segments are optional and order-independent.
+
+| Value                       | Mode    | Rows | Notes                                          |
+| --------------------------- | ------- | ---- | ---------------------------------------------- |
+| `reveal-slices`             | reveal  | 6    | Default — slices vanish upward to expose content.|
+| `reveal-slices-12`          | reveal  | 12   | More rows = finer reveal.                      |
+| `reveal-slices-cover`       | cover   | 6    | Slices grow upward to cover content.           |
+| `reveal-slices-cover-8`     | cover   | 8    | Cover with custom row count.                   |
+
+`reveal` (default) starts with the slices fully covering the element and scales them away (origin: top, so they retract upward) to expose the content. `cover` is the inverse — slices start hidden and scale in (origin: bottom) to fill the element. Useful as a section transition layer between two adjacent backgrounds.
+
+## Attributes
+
+| Attribute     | Default     | Notes                                                           |
+| ------------- | ----------- | --------------------------------------------------------------- |
+| `aa-animate`  | (required)  | See variants table above.                                       |
+| `aa-stagger`  | `0.04`      | Seconds between rows.                                           |
+| `aa-duration` | `0.6`       | Seconds per row.                                                |
+| `aa-ease`     | `power3.out`| Any GSAP ease.                                                  |
+| `aa-scrub`    | (off)       | `true` or seconds — drive the reveal from scroll position.      |
+| `aa-scroll-start` / `aa-scroll-end` | `top 92%` / `bottom 70%` | ScrollTrigger range. |
+
+The element is given `position: relative` and `overflow: hidden` if it wasn't already. The slice panel is appended as the last child with `z-index: 2`.
+
+## Required GSAP plugins
+
+`gsap`, `ScrollTrigger`.
+
+## Live demo
+
+<Demo>
+  <div data-demo-stage>
+    <div data-spacer></div>
+    <div class="demo-image-card" aa-animate="reveal-slices">
+      <span>reveal-slices · 6 rows · scrub off</span>
+    </div>
+    <div data-spacer></div>
+    <div class="demo-image-card" aa-animate="reveal-slices-12" aa-scrub="0.3">
+      <span>reveal-slices-12 · scrub 0.3</span>
+    </div>
+    <div data-spacer></div>
+  </div>
+</Demo>
+
+<style>{`
+  .demo-image-card {
+    aspect-ratio: 16 / 9;
+    background: linear-gradient(135deg, var(--sl-color-accent), var(--sl-color-accent-low));
+    /* color drives the slice colour via currentColor; match the demo-frame bg
+       so the slices look like the surrounding surface */
+    color: var(--sl-color-bg-nav);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 1.1rem;
+  }
+  .demo-image-card span {
+    /* keep label above the slice panel (z-index: 2) */
+    position: relative;
+    z-index: 3;
+    color: var(--sl-color-white);
+    background: rgba(0,0,0,0.4);
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+  }
+`}</style>

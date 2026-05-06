@@ -1,0 +1,94 @@
+---
+interface Props {
+  animate: string
+  color?: string
+}
+const { animate, color } = Astro.props
+---
+
+<div class="bd-block">
+  <div class="bd-label">
+    <code>{animate}</code>
+    {color && <span class="bd-color"> · <code>aa-color="{color}"</code></span>}
+  </div>
+
+  <h1 class="bd-h1" aa-animate={animate} {...(color ? { 'aa-color': color } : {})}>
+    A short hero line
+  </h1>
+
+  <h3 class="bd-h3" aa-animate={animate} {...(color ? { 'aa-color': color } : {})}>
+    A two-line subhead that wraps onto a second line to show per-line behaviour.
+  </h3>
+
+  <p class="bd-p" aa-animate={animate} {...(color ? { 'aa-color': color } : {})}>
+    A three-line paragraph of body copy so we can see how the animation reads at a longer scale, with several lines of text wrapping naturally across the page width.
+  </p>
+
+  <div class="bd-scrub-label">scrubbed (<code>aa-scrub="0.5"</code>)</div>
+  <p class="bd-p" aa-animate={animate} aa-scrub="0.5" {...(color ? { 'aa-color': color } : {})}>
+    Same animation tied to scroll position. Scrub up and down to see the easing curve at half a second of lag — useful when an animation should respond to the user's scroll rather than playing once on enter.
+  </p>
+</div>
+
+<style>
+  .bd-block {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    padding: 2rem 0;
+    border-top: 1px dashed var(--sl-color-gray-5);
+  }
+  .bd-block:first-child {
+    border-top: 0;
+    padding-top: 0;
+  }
+  .bd-label {
+    font-family: var(--sl-font-system-mono, monospace);
+    font-size: 0.85rem;
+    color: var(--sl-color-gray-3);
+  }
+  .bd-label code {
+    background: var(--sl-color-bg-inline-code, var(--sl-color-bg-nav));
+    padding: 0.1em 0.4em;
+    border-radius: 3px;
+  }
+  .bd-color {
+    color: var(--sl-color-gray-3);
+  }
+  /* Tighter line-heights so adjacent marker bars touch (or nearly so). The
+   * negative margin/inset trick in the JS extends each bar by 0.055em above
+   * and below; line-height 1 gives a clean continuous block effect. */
+  .bd-h1 {
+    font-size: clamp(2rem, 4vw, 3rem);
+    line-height: 1;
+    letter-spacing: -0.02em;
+    margin: 0;
+    text-align: left;
+  }
+  .bd-h3 {
+    font-size: clamp(1.25rem, 2.4vw, 1.75rem);
+    line-height: 1.1;
+    margin: 0;
+    text-align: left;
+  }
+  .bd-p {
+    font-size: 1rem;
+    line-height: 1.25;
+    max-width: 60ch;
+    margin: 0;
+    text-align: left;
+  }
+  .bd-scrub-label {
+    font-size: 0.8rem;
+    color: var(--sl-color-gray-3);
+    margin-top: 0.5rem;
+    border-top: 1px dotted var(--sl-color-gray-5);
+    padding-top: 0.75rem;
+  }
+  .bd-scrub-label code {
+    background: var(--sl-color-bg-inline-code, var(--sl-color-bg-nav));
+    padding: 0.1em 0.4em;
+    border-radius: 3px;
+    font-size: 0.85em;
+  }
+</style>

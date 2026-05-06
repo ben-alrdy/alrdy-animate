@@ -85,9 +85,6 @@ declare namespace JSX {
     'aa-modal-target'?: string
     'aa-modal-close'?: string | boolean
     'aa-modal-backdrop'?: string | boolean
-
-    'aa-hover-bg'?: string | boolean
-    'aa-hover-text'?: string | boolean
   }
 
   interface IntrinsicAttributes extends AlrdyAnimateAttributes {}

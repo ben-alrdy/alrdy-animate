@@ -1,47 +1,40 @@
 ---
 title: text-blur
-description: Per-character blur entrance for headlines and hero copy. Splits the element into chars and fades each in with a stagger.
+description: Per-character blur entrances. Plain text-blur fades each character in behind a 20px blur; directional variants add a positional offset behind a 10px blur.
 ---
 
 import Demo from '../../../../components/Demo.astro'
+import TextDemo from '../../../../components/TextDemo.astro'
 
-`text-blur` splits the element into individual characters (via the standalone split utility) and fades each one in while the blur dissipates. The default split is `chars`, but `aa-split="words"` switches to per-word stagger for longer text.
+The blur family splits the element into characters and fades each one in while a CSS blur filter dissipates. The plain variant has no positional offset; directional variants add an offset so characters drift into place behind the blur.
+
+`text-blur-up` / `text-blur-down` are line-masked — characters slide vertically by 110% of their own height and are clipped by their parent line. `text-blur-left` / `text-blur-right` slide horizontally by `30 × distance` pixels.
 
 ## Attributes
 
-| Attribute     | Default     | Notes                                  |
-| ------------- | ----------- | -------------------------------------- |
-| `aa-animate`  | (required)  | `text-blur`                            |
-| `aa-split`    | `chars`     | `chars`, `words`, or `lines`           |
-| `aa-stagger`  | `0.02`      | seconds between parts                  |
-| `aa-duration` | `0.6`       | seconds                                |
-| `aa-delay`    | `0`         | seconds                                |
-| `aa-ease`     | `power3.out`| any GSAP ease                          |
+| Attribute     | Default     | Notes                                              |
+| ------------- | ----------- | -------------------------------------------------- |
+| `aa-animate`  | (required)  | One of the variants above.                         |
+| `aa-split`    | `chars`     | Override split mode.                               |
+| `aa-stagger`  | `0.02`      | Seconds between parts.                             |
+| `aa-duration` | (init)      | Seconds.                                           |
+| `aa-delay`    | `0`         | Seconds.                                           |
+| `aa-distance` | `1`         | Multiplier on the horizontal offset (left/right). |
+| `aa-ease`     | (init)      | Any GSAP ease.                                     |
+| `aa-scrub`    | (off)       | `true` or seconds — bind progress to scroll.       |
 
 ## Required GSAP plugins
 
-`gsap`, `ScrollTrigger`, `SplitText` (for `aa-split="lines"`; chars/words fall back to a regex splitter if SplitText is missing).
+`gsap`, `ScrollTrigger`, `SplitText`.
 
 ## Live demo
 
 <Demo>
   <div data-demo-stage>
-    <div data-spacer></div>
-    <h2 class="demo-card demo-text" aa-animate="text-blur">
-      Per-character blur entrance.
-    </h2>
-    <div data-spacer></div>
-    <h2 class="demo-card demo-text" aa-animate="text-blur" aa-split="words" aa-stagger="0.08">
-      Per-word stagger for longer copy.
-    </h2>
-    <div data-spacer></div>
+    <TextDemo animate="text-blur" />
+    <TextDemo animate="text-blur-up" />
+    <TextDemo animate="text-blur-down" />
+    <TextDemo animate="text-blur-left" />
+    <TextDemo animate="text-blur-right" />
   </div>
 </Demo>
-
-<style>{`
-  .demo-text {
-    font-size: clamp(1.5rem, 3vw, 2.5rem);
-    line-height: 1.2;
-    text-align: left;
-  }
-`}</style>

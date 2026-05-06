@@ -2,6 +2,13 @@ import type { GsapHandle } from '../core/gsap-detect'
 
 export type SplitMode = 'words' | 'chars' | 'lines'
 
+export interface SplitConfig {
+  mode: SplitMode
+  /** When set, animation tools should group units by line (e.g. "lines-chars"). */
+  groupBy?: 'lines'
+  mask: boolean
+}
+
 export interface SplitResult {
   mode: SplitMode
   words: HTMLElement[]
@@ -17,7 +24,19 @@ interface SplitTextOptions {
   wordsClass?: string
   charsClass?: string
   mask?: string
-  aria?: string
+  aria?: 'auto' | 'hidden' | 'none'
+}
+
+// Tags where aria-label is permitted by the ARIA-in-HTML spec. Anything not in
+// this set (p, div, span, blockquote, …) gets a sibling sr-only clone instead,
+// because aria-label on those tags is flagged by axe/Lighthouse.
+const ARIA_LABEL_ALLOWED = new Set([
+  'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+  'a', 'button', 'label', 'summary',
+])
+
+function tagAllowsAriaLabel(el: Element): boolean {
+  return ARIA_LABEL_ALLOWED.has(el.tagName.toLowerCase())
 }
 
 interface SplitTextInstance {
@@ -29,18 +48,34 @@ interface SplitTextInstance {
 
 type SplitTextCtor = new (target: Element | string, opts: SplitTextOptions) => SplitTextInstance
 
-export function parseSplitMode(value: string | undefined): SplitMode | null {
+export function parseSplit(value: string | undefined): SplitConfig | null {
   if (!value) return null
   const head = value.split('|')[0].trim().toLowerCase()
-  if (head === 'words' || head === 'word') return 'words'
-  if (head === 'chars' || head === 'char') return 'chars'
-  if (head === 'lines' || head === 'line') return 'lines'
-  return null
+  if (!head) return null
+  const tokens = head.split(/\s+/)
+  const modeToken = tokens[0]
+  let mode: SplitMode | null = null
+  let groupBy: 'lines' | undefined
+  if (modeToken === 'words' || modeToken === 'word') mode = 'words'
+  else if (modeToken === 'chars' || modeToken === 'char') mode = 'chars'
+  else if (modeToken === 'lines' || modeToken === 'line') mode = 'lines'
+  else if (modeToken === 'lines-chars' || modeToken === 'line-chars') {
+    mode = 'chars'
+    groupBy = 'lines'
+  } else if (modeToken === 'lines-words' || modeToken === 'line-words') {
+    mode = 'words'
+    groupBy = 'lines'
+  }
+  if (!mode) return null
+  const mask = tokens.slice(1).includes('mask')
+  return groupBy ? { mode, groupBy, mask } : { mode, mask }
 }
 
 interface ApplyOptions {
-  /** When true, wrap each line in an overflow-clipped wrapper (for slide-up reveals). */
-  maskLines?: boolean
+  /** When set, wrap each split unit at this granularity in an overflow-clipped wrapper. */
+  mask?: SplitMode
+  /** When 'lines', force SplitText to also produce lines (needed for line-grouping). */
+  ensureLines?: boolean
 }
 
 export function applySplit(
@@ -50,90 +85,63 @@ export function applySplit(
   opts: ApplyOptions = {},
 ): SplitResult {
   const SplitTextCtor = gsapHandle?.plugins?.SplitText as SplitTextCtor | undefined
-  if (SplitTextCtor) {
-    const type = mode === 'lines' ? 'lines' : mode === 'words' ? 'words,lines' : 'chars,words,lines'
-    const splitOpts: SplitTextOptions = {
-      type,
-      autoSplit: true,
-      linesClass: 'aa-line',
-      wordsClass: 'aa-word',
-      charsClass: 'aa-char',
-    }
-    if (opts.maskLines) splitOpts.mask = 'lines'
-    const inst = new SplitTextCtor(element, splitOpts)
-    return {
-      mode,
-      words: inst.words ?? [],
-      chars: inst.chars ?? [],
-      lines: inst.lines ?? [],
-      revert: () => {
-        try {
-          inst.revert()
-        } catch {
-          /* already reverted */
-        }
-      },
-    }
-  }
-  if (mode === 'lines') {
-    console.warn(
-      '[alrdy-animate] aa-split="lines" requires the SplitText plugin. Falling back to whole element.',
-    )
+  if (!SplitTextCtor) {
+    console.warn('[alrdy-animate] aa-split requires the GSAP SplitText plugin.')
     return { mode, words: [], chars: [], lines: [element as HTMLElement], revert: () => {} }
   }
-  return regexSplit(element, mode)
-}
+  const needsLines = mode === 'lines' || opts.ensureLines === true
+  const type =
+    mode === 'lines'
+      ? 'lines'
+      : mode === 'words'
+        ? 'words,lines'
+        : needsLines
+          ? 'chars,words,lines'
+          : 'chars,words,lines'
+  const splitOpts: SplitTextOptions = {
+    type,
+    autoSplit: true,
+    linesClass: 'aa-line',
+    wordsClass: 'aa-word',
+    charsClass: 'aa-char',
+  }
+  if (opts.mask) splitOpts.mask = opts.mask
 
-function regexSplit(element: Element, mode: 'words' | 'chars'): SplitResult {
-  const originalHtml = element.innerHTML
-  const parts: HTMLElement[] = []
-
-  const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT)
-  const textNodes: Text[] = []
-  let n: Node | null
-  while ((n = walker.nextNode())) textNodes.push(n as Text)
-
-  for (const node of textNodes) {
-    const parent = node.parentNode
-    if (!parent) continue
-    const text = node.nodeValue ?? ''
-    const frag = document.createDocumentFragment()
-    if (mode === 'words') {
-      for (const part of text.split(/(\s+)/)) {
-        if (!part) continue
-        if (/^\s+$/.test(part)) {
-          frag.appendChild(document.createTextNode(part))
-        } else {
-          const span = document.createElement('span')
-          span.className = 'aa-word'
-          span.textContent = part
-          parts.push(span)
-          frag.appendChild(span)
-        }
-      }
-    } else {
-      for (const ch of text) {
-        if (/\s/.test(ch)) {
-          frag.appendChild(document.createTextNode(ch))
-        } else {
-          const span = document.createElement('span')
-          span.className = 'aa-char'
-          span.textContent = ch
-          parts.push(span)
-          frag.appendChild(span)
-        }
-      }
+  const allowAriaLabel = tagAllowsAriaLabel(element)
+  let srSpan: HTMLSpanElement | null = null
+  let priorAriaHidden: string | null = null
+  if (allowAriaLabel) {
+    splitOpts.aria = 'auto'
+  } else {
+    splitOpts.aria = 'none'
+    priorAriaHidden = element.getAttribute('aria-hidden')
+    element.setAttribute('aria-hidden', 'true')
+    const text = element.textContent ?? ''
+    if (text.trim() && element.parentElement) {
+      srSpan = document.createElement('span')
+      srSpan.className = 'aa-sr-only'
+      srSpan.textContent = text
+      element.parentElement.insertBefore(srSpan, element)
     }
-    parent.replaceChild(frag, node)
   }
 
+  const inst = new SplitTextCtor(element, splitOpts)
   return {
     mode,
-    words: mode === 'words' ? parts : [],
-    chars: mode === 'chars' ? parts : [],
-    lines: [],
+    words: inst.words ?? [],
+    chars: inst.chars ?? [],
+    lines: inst.lines ?? [],
     revert: () => {
-      element.innerHTML = originalHtml
+      try {
+        inst.revert()
+      } catch {
+        /* already reverted */
+      }
+      if (srSpan) srSpan.remove()
+      if (!allowAriaLabel) {
+        if (priorAriaHidden === null) element.removeAttribute('aria-hidden')
+        else element.setAttribute('aria-hidden', priorAriaHidden)
+      }
     },
   }
 }

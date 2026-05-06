@@ -188,3 +188,16 @@
   padding: 0.1em 0.35em;
   border-radius: 4px;
 }
+
+/* Attribute tables: keep the first column on a single line. Otherwise short
+   tokens like `aa-stagger` wrap to `aa-` / `stagger` once the notes column
+   gets wide. */
+.sl-markdown-content table :is(th, td):first-child {
+  white-space: nowrap;
+}
+
+/* Give every page room to scroll past the prev/next pagination so demos at
+   the bottom can engage their scroll triggers. */
+.pagination-links {
+  margin-block-end: max(30vh, 4rem);
+}

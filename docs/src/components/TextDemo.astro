@@ -1,0 +1,110 @@
+---
+interface Props {
+  animate: string
+  variant?: 'default' | 'large'
+  centered?: boolean
+  duration?: string
+  stagger?: string
+}
+const { animate, variant = 'default', centered = false, duration, stagger } = Astro.props
+const large = variant === 'large'
+const blockClass = ['td-block', large && 'td-block--large', centered && 'td-block--centered']
+  .filter(Boolean)
+  .join(' ')
+---
+
+<div class={blockClass}>
+  <div class="td-label"><code>{animate}</code></div>
+
+  <h1 class="td-h1" aa-animate={animate} aa-duration={duration} aa-stagger={stagger}>A short hero line</h1>
+
+  <h3 class="td-h3" aa-animate={animate} aa-duration={duration} aa-stagger={stagger}>
+    A two-line subhead that wraps onto a second line to show per-line behaviour.
+  </h3>
+
+  {!large && (
+    <p class="td-p" aa-animate={animate}>
+      A three-line paragraph of body copy so we can see how the animation reads at a longer scale, with several lines of text wrapping naturally across the page width.
+    </p>
+  )}
+
+  <div class="td-scrub-label">scrubbed (<code>aa-scrub="1"</code>)</div>
+  <h1 class="td-h1 td-h1--scrub" aa-animate={animate} aa-scrub="1" aa-duration={duration} aa-stagger={stagger}>
+    Tied to scroll position. Scrub up and down to feel the easing curve unfold.
+  </h1>
+</div>
+
+<style>
+  .td-block {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    padding: 2rem 0;
+    border-top: 1px dashed var(--sl-color-gray-5);
+  }
+  .td-block:first-child {
+    border-top: 0;
+    padding-top: 0;
+  }
+  .td-label {
+    font-family: var(--sl-font-system-mono, monospace);
+    font-size: 0.85rem;
+    color: var(--sl-color-gray-3);
+  }
+  .td-label code {
+    background: var(--sl-color-bg-inline-code, var(--sl-color-bg-nav));
+    padding: 0.1em 0.4em;
+    border-radius: 3px;
+  }
+  .td-h1 {
+    font-size: clamp(2rem, 4vw, 3rem);
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    margin: 0;
+    text-align: left;
+  }
+  .td-h3 {
+    font-size: clamp(1.25rem, 2.4vw, 1.75rem);
+    line-height: 1.2;
+    margin: 0;
+    text-align: left;
+  }
+  .td-block--large .td-h1 {
+    font-size: clamp(4rem, 8vw, 6rem);
+  }
+  .td-block--large .td-h1--scrub {
+    font-size: clamp(2rem, 4vw, 3rem);
+  }
+  .td-block--large .td-h3 {
+    font-size: clamp(2.5rem, 4.8vw, 3.5rem);
+  }
+  .td-block--centered {
+    align-items: center;
+    text-align: center;
+  }
+  .td-block--centered .td-h1,
+  .td-block--centered .td-h3,
+  .td-block--centered .td-p {
+    text-align: center;
+  }
+  .td-p {
+    font-size: 1rem;
+    line-height: 1.6;
+    max-width: 60ch;
+    margin: 0;
+    text-align: left;
+  }
+  .td-scrub-label {
+    font-size: 0.8rem;
+    color: var(--sl-color-gray-3);
+    margin-top: 0.5rem;
+    border-top: 1px dotted var(--sl-color-gray-5);
+    padding-top: 0.75rem;
+  }
+  .td-scrub-label code {
+    background: var(--sl-color-bg-inline-code, var(--sl-color-bg-nav));
+    padding: 0.1em 0.4em;
+    border-radius: 3px;
+    font-size: 0.85em;
+  }
+</style>

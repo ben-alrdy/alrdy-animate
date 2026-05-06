@@ -1,0 +1,140 @@
+---
+title: aa-stagger
+description: Cascade child or split-text animations with origin, randomness, and grid-aware spatial distribution.
+---
+
+import Demo from '../../../../components/Demo.astro'
+import StaggerGrid from '../../../../components/StaggerGrid.astro'
+
+`aa-stagger` adds time between sibling animations — either children of an animated parent (e.g. `aa-animate="fade-up"` + `aa-stagger="0.1"`) or split-text units inside a `text-*` animation. The first numeric token is the unit time in seconds; flags after it change origin, randomize the order, or treat the elements as a 2D grid.
+
+## Grammar
+
+| Token        | What it does                                                              |
+| ------------ | ------------------------------------------------------------------------- |
+| `0.1`        | unit stagger in seconds (required)                                        |
+| `start`      | fire from the first element (default)                                     |
+| `center`     | fire from the middle outward                                              |
+| `end`        | fire from the last element backwards                                      |
+| `edges`      | fire from both ends towards the middle                                    |
+| `random`     | every element gets a random delay                                         |
+| `random:N`   | shuffle into batches of `N` — `N` scattered elements share each delay     |
+| `grid`       | treat elements as a 2D grid (auto-detected from layout)                   |
+
+Combine flags with spaces: `aa-stagger="0.1 center grid"`. Random ignores origin and grid — if both are present, random wins.
+
+For text animations, a second number sets the per-line offset in line-grouped modes (`aa-split="lines-chars"` / `"lines-words"`): `aa-stagger="0.02 0.2"` staggers chars 0.02s apart and lines 0.2s apart. Flags only apply to the unit stagger (chars/words), not to the line cascade.
+
+## Origin (1D)
+
+Sequential stagger across 25 squares. The unit stagger flows in DOM order; the origin flag controls where the wave starts.
+
+<Demo>
+  <div data-demo-stage>
+    <div data-spacer></div>
+    <StaggerGrid stagger="0.05" description="default (start)" />
+    <div data-spacer></div>
+    <StaggerGrid stagger="0.05 center" />
+    <div data-spacer></div>
+    <StaggerGrid stagger="0.05 end" />
+    <div data-spacer></div>
+    <StaggerGrid stagger="0.05 edges" />
+    <div data-spacer></div>
+  </div>
+</Demo>
+
+## Random and grouped random
+
+`random` shuffles every element. `random:N` reveals `N` scattered elements per beat — every element gets a random rank and elements with ranks `0..N-1` fire first, then `N..2N-1`, and so on. The batches are random subsets, not adjacent runs.
+
+<Demo>
+  <div data-demo-stage>
+    <div data-spacer></div>
+    <StaggerGrid stagger="0.05 random" />
+    <div data-spacer></div>
+    <StaggerGrid stagger="0.1 random:5" description="5 random squares per beat" />
+    <div data-spacer></div>
+  </div>
+</Demo>
+
+## Grid (2D)
+
+Add `grid` to treat the elements as a 2D layout. GSAP measures each element's screen position so distance is geometric, not DOM-order — exactly what you want for blog cards, image grids, or any wrapping flex/grid layout.
+
+<Demo>
+  <div data-demo-stage>
+    <div data-spacer></div>
+    <StaggerGrid stagger="0.08 grid" description="start corner — diagonal wave" />
+    <div data-spacer></div>
+    <StaggerGrid stagger="0.08 center grid" description="ripple from the middle" />
+    <div data-spacer></div>
+    <StaggerGrid stagger="0.08 edges grid" description="corners collapse inward" />
+    <div data-spacer></div>
+    <StaggerGrid stagger="0.08 end grid" description="from the bottom-right corner" />
+    <div data-spacer></div>
+  </div>
+</Demo>
+
+## Text
+
+`random:N` is most useful on character-split text — five scattered chars light up per beat for a sparkle/decode effect. Add a second number to cascade lines: chars stagger within each line, lines fall in order.
+
+<Demo>
+  <div data-demo-stage>
+    <div class="ts-block">
+      <div class="ts-label"><code>aa-stagger="0.02 random"</code></div>
+      <h2 class="ts-h" aa-animate="text-fade" aa-stagger="0.02 random" aa-duration="0.4">
+        A three-line headline that fades in with each character revealed in random order across the entire heading.
+      </h2>
+    </div>
+    <div class="ts-block">
+      <div class="ts-label"><code>aa-stagger="0.02 random:5"</code></div>
+      <h2 class="ts-h" aa-animate="text-fade" aa-stagger="0.02 random:5" aa-duration="0.4">
+        A three-line headline that fades in five scattered characters per beat — a decode-style reveal.
+      </h2>
+    </div>
+    <div class="ts-block">
+      <div class="ts-label"><code>aa-stagger="0.04 0.3 random:4" aa-split="lines-chars"</code></div>
+      <h2 class="ts-h" aa-animate="text-fade" aa-split="lines-chars" aa-stagger="0.04 0.3 random:4" aa-duration="0.4">
+        A three-line headline where four scattered chars reveal per beat within each line, and the lines themselves cascade top to bottom.
+      </h2>
+    </div>
+    <div class="ts-block">
+      <div class="ts-label"><code>aa-stagger="0.04 center"</code></div>
+      <h2 class="ts-h" aa-animate="text-fade" aa-stagger="0.04 center" aa-duration="0.4">
+        A three-line headline that fades in starting from the centre character outwards.
+      </h2>
+    </div>
+  </div>
+</Demo>
+
+<style>{`
+  .ts-block {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 1.5rem 0;
+    border-top: 1px dashed var(--sl-color-gray-5);
+  }
+  .ts-block:first-child {
+    border-top: 0;
+    padding-top: 0;
+  }
+  .ts-label {
+    font-family: var(--sl-font-system-mono, monospace);
+    font-size: 0.85rem;
+    color: var(--sl-color-gray-3);
+  }
+  .ts-label code {
+    background: var(--sl-color-bg-inline-code, var(--sl-color-bg-nav));
+    padding: 0.1em 0.4em;
+    border-radius: 3px;
+  }
+  .ts-h {
+    font-size: clamp(1.5rem, 3vw, 2.25rem);
+    line-height: 1.2;
+    margin: 0;
+    max-width: 28ch;
+    text-align: left;
+  }
+`}</style>

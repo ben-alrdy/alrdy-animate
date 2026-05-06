@@ -1,0 +1,35 @@
+---
+title: text-oval
+description: Per-line ellipse clip-path reveal. Each line emerges from a small ellipse anchored at the bottom (or top) edge — like type rising over a horizon.
+---
+
+import Demo from '../../../../components/Demo.astro'
+import TextDemo from '../../../../components/TextDemo.astro'
+
+`text-oval-up` and `text-oval-down` wrap each line and animate a `clip-path: ellipse(...)` open from a small starting ellipse to a fully-revealed line. `up` anchors the ellipse at the bottom edge (line emerges over the horizon); `down` anchors at the top.
+
+This is purely CSS clip-path — no opacity fade — so the silhouette of the type is visible during the reveal.
+
+## Attributes
+
+| Attribute     | Default     | Notes                                              |
+| ------------- | ----------- | -------------------------------------------------- |
+| `aa-animate`  | (required)  | `text-oval-up` or `text-oval-down`.                |
+| `aa-stagger`  | `0.2`       | Seconds between lines.                             |
+| `aa-duration` | (init)      | Seconds.                                           |
+| `aa-delay`    | `0`         | Seconds.                                           |
+| `aa-ease`     | (init)      | Any GSAP ease.                                     |
+| `aa-scrub`    | (off)       | `true` or seconds — bind progress to scroll.       |
+
+## Required GSAP plugins
+
+`gsap`, `ScrollTrigger`, `SplitText`.
+
+## Live demo
+
+<Demo>
+  <div data-demo-stage>
+    <TextDemo animate="text-oval-up" />
+    <TextDemo animate="text-oval-down" />
+  </div>
+</Demo>

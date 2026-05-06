@@ -1,0 +1,71 @@
+---
+interface Props {
+  stagger: string
+  animate?: string
+  count?: number
+  cols?: number
+  description?: string
+}
+const {
+  stagger,
+  animate = 'fade',
+  count = 25,
+  cols = 5,
+  description,
+} = Astro.props
+const items = Array.from({ length: count })
+---
+
+<div class="sg-block">
+  <div class="sg-label">
+    <code>aa-stagger="{stagger}"</code>
+    {description && <span class="sg-desc"> — {description}</span>}
+  </div>
+  <div
+    class="sg-grid"
+    aa-animate={animate}
+    aa-stagger={stagger}
+    style={`grid-template-columns: repeat(${cols}, 1fr);`}
+  >
+    {items.map(() => <div class="sg-cell"></div>)}
+  </div>
+</div>
+
+<style>
+  .sg-block {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    padding: 1rem 0;
+    border-top: 1px dashed var(--sl-color-gray-5);
+  }
+  .sg-block:first-child {
+    border-top: 0;
+    padding-top: 0;
+  }
+  .sg-label {
+    font-family: var(--sl-font-system-mono, monospace);
+    font-size: 0.85rem;
+    color: var(--sl-color-gray-3);
+  }
+  .sg-label code {
+    background: var(--sl-color-bg-inline-code, var(--sl-color-bg-nav));
+    padding: 0.1em 0.4em;
+    border-radius: 3px;
+  }
+  .sg-desc {
+    color: var(--sl-color-gray-3);
+  }
+  .sg-grid {
+    display: grid;
+    gap: 0.4rem;
+    width: 100%;
+    max-width: 320px;
+    aspect-ratio: 1 / 1;
+  }
+  .sg-cell {
+    background: var(--sl-color-accent);
+    border-radius: 4px;
+    aspect-ratio: 1 / 1;
+  }
+</style>

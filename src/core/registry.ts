@@ -24,7 +24,6 @@ const loaders: Record<FeatureName, Loader> = {
   text: () => import('../features/text/index'),
   reveal: () => import('../features/reveal/index'),
   parallax: () => import('../features/parallax/index'),
-  hover: () => import('../features/hover/index'),
   accordion: () => import('../features/accordion/index'),
   marquee: () => import('../features/marquee/index'),
   nav: () => import('../features/nav/index'),

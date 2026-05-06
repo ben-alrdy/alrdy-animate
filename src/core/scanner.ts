@@ -15,7 +15,6 @@ export type FeatureName =
   | 'text'
   | 'reveal'
   | 'parallax'
-  | 'hover'
   | 'accordion'
   | 'marquee'
   | 'nav'
@@ -30,7 +29,6 @@ export interface ScanResult {
 
 const ANIMATE_TO_FEATURE: Array<[RegExp, FeatureName]> = [
   [/^text-/, 'text'],
-  [/^hover-/, 'hover'],
   [/^parallax/, 'parallax'],
   [/^reveal/, 'reveal'],
 ]

@@ -1,0 +1,33 @@
+---
+title: text-slide
+description: Per-line slide entrances. Each line is masked so it slides in from outside its own bounding box for a clean type-setting reveal.
+---
+
+import Demo from '../../../../components/Demo.astro'
+import TextDemo from '../../../../components/TextDemo.astro'
+
+`text-slide-up` and `text-slide-down` split the element into lines, mask each line, and slide the inner text into place. The mask clips the offscreen portion so adjacent lines stay clean during animation.
+
+## Attributes
+
+| Attribute     | Default     | Notes                                              |
+| ------------- | ----------- | -------------------------------------------------- |
+| `aa-animate`  | (required)  | `text-slide-up` or `text-slide-down`.              |
+| `aa-stagger`  | `0.2`       | Seconds between lines.                             |
+| `aa-duration` | (init)      | Seconds.                                           |
+| `aa-delay`    | `0`         | Seconds.                                           |
+| `aa-ease`     | (init)      | Any GSAP ease.                                     |
+| `aa-scrub`    | (off)       | `true` or seconds — bind progress to scroll.       |
+
+## Required GSAP plugins
+
+`gsap`, `ScrollTrigger`, `SplitText` (line splitting requires SplitText).
+
+## Live demo
+
+<Demo>
+  <div data-demo-stage>
+    <TextDemo animate="text-slide-up" />
+    <TextDemo animate="text-slide-down" />
+  </div>
+</Demo>

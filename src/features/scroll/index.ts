@@ -1,5 +1,7 @@
 import type { FeatureContext, FeatureModule } from '../../core/registry'
+import { bindAgainTrigger } from '../../core/scroll-trigger'
 import { readAttrs, type Config } from '../../core/settings'
+import { buildStagger, parseStaggerSpec, type StaggerValue } from '../../core/stagger'
 import { onCustomTrigger, parseTrigger } from '../../core/trigger'
 
 type FromState = Record<string, number | string>
@@ -83,17 +85,16 @@ function setupOne(
   if (!fromBuilder || !toState) return
 
   const opts = ctx.options
-  const duration = parseNum(config['aa-duration'], opts.duration ?? 0.6)
+  const duration = parseNum(config['aa-duration'], opts.duration!)
   const delay = parseNum(config['aa-delay'], 0)
-  const ease = config['aa-ease'] ?? opts.ease ?? 'power4.out'
-  const distance = parseNum(config['aa-distance'], opts.distance ?? 1)
-  const scrollEnd = config['aa-scroll-end'] ?? opts.scrollEnd ?? 'bottom 70%'
+  const ease = config['aa-ease'] ?? opts.ease!
+  const distance = parseNum(config['aa-distance'], opts.distance!)
+  const scrollEnd = config['aa-scroll-end'] ?? opts.scrollEnd!
   const scrub = parseScrub(config['aa-scrub'])
   const scrollStart =
     config['aa-scroll-start'] ??
     (scrub !== undefined ? opts.scrubStart : undefined) ??
-    opts.scrollStart ??
-    'top 92%'
+    opts.scrollStart!
   const again = opts.again !== false
 
   // aa-stagger present + element has children → stagger the children.
@@ -103,7 +104,9 @@ function setupOne(
     ? Array.from(element.children).filter((c): c is Element => c.nodeType === 1)
     : []
   const targets: Element[] = children.length > 0 ? children : [element]
-  const stagger = children.length > 0 ? parseNum(config['aa-stagger'], 0.1) : 0
+  const staggerSpec = parseStaggerSpec(config['aa-stagger'], 0.1)
+  const stagger: StaggerValue =
+    children.length > 0 ? buildStagger(staggerSpec.unit, staggerSpec.flags) : 0
 
   const fromState = fromBuilder(distance)
   const trigger = parseTrigger(config['aa-trigger'])
@@ -138,33 +141,19 @@ function setupOne(
     return undefined
   }
 
-  const ScrollTrigger = ctx.gsap.plugins.ScrollTrigger as
-    | { create: (vars: Record<string, unknown>) => unknown }
-    | undefined
-  if (!ScrollTrigger) return undefined
-
   const tl = ctx.gsap.gsap.timeline({ paused: true })
   tl.fromTo(targets, fromState, { ...toState, duration, ease, delay, stagger })
 
-  ScrollTrigger.create({
+  bindAgainTrigger({
+    gsap: ctx.gsap,
     trigger: triggerEl,
     start: scrollStart,
-    onEnter: () => tl.play(),
+    again,
+    onPlay: () => tl.play(),
+    onReset: () => {
+      tl.progress(0).pause()
+    },
   })
-
-  if (again) {
-    ScrollTrigger.create({
-      trigger: triggerEl,
-      start: () => {
-        const rect = triggerEl.getBoundingClientRect()
-        const matrix = new DOMMatrix(getComputedStyle(triggerEl).transform)
-        return rect.top + window.scrollY - matrix.f - window.innerHeight
-      },
-      onLeaveBack: () => {
-        tl.progress(0).pause()
-      },
-    })
-  }
 
   return undefined
 }

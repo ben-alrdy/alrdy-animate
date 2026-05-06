@@ -101,6 +101,10 @@ After implementing a feature, drive its docs demo through Playwright MCP (the `m
 ## Conventions
 
 - **Attribute prefix is `aa-`**, not `data-aa-`. Spec-permissive, matches HTMX precedent. Next.js users `import 'alrdy-animate/jsx'` once for autocomplete.
+- **Attribute value syntax**:
+  - **Dashes** join parts of a single compound name: `text-blur-up`, `fade-up`, `hover-bg-block`. One concept, one token.
+  - **Spaces** separate independent flags/modifiers on the same attribute: `aa-split="lines mask"`. Order-independent and extensible.
+  - **Pipes `|`** are reserved for responsive breakpoint variants (see below).
 - **Responsive variants**: `|` shorthand splits at `md` (768px). Suffixes (`-sm`, `-md`, `-lg`, `-xl`) follow Tailwind semantics ("at this breakpoint and up"). Both compile to exclusive width ranges in `resolveRanges()`. Only one variant ever runs at once.
 - **`none` as a value** opts out at that breakpoint (e.g. `aa-slider="snap|none"`).
 - **No JSDoc, no Storybook.** Docs live in `docs/src/content/docs/`. Each animation gets one MDX page with prose + attribute table + live `<Demo>`.

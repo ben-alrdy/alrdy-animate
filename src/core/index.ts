@@ -12,7 +12,7 @@ import { NAMED_EASES } from './named-eases'
 import { loadFeatures, type FeatureContext } from './registry'
 import { clearAll as clearResize, subscribe as subscribeResize } from './resize'
 import { scan } from './scanner'
-import { addDisposer, resolveBreakpoints, runAllDisposers, state } from './state'
+import { addDisposer, resolveBreakpoints, resolveOptions, runAllDisposers, state } from './state'
 
 let activeHandles: { gsap: GsapHandle; responsive: ResponsiveController } | null = null
 
@@ -45,7 +45,7 @@ function registerCustomEases(handle: GsapHandle, debug: boolean): void {
 
 export async function init(options: InitOptions = {}): Promise<void> {
   if (state.initialized) return
-  state.options = options
+  state.options = resolveOptions(options)
   state.breakpoints = resolveBreakpoints(options.breakpoints)
   state.initialized = true
 
@@ -58,7 +58,7 @@ export async function init(options: InitOptions = {}): Promise<void> {
     if (f === 'scroll' || f === 'text' || f === 'reveal' || f === 'parallax' || f === 'nav') {
       requiredPlugins.add('ScrollTrigger')
     }
-    if (f === 'text') requiredPlugins.add('SplitText')
+    if (f === 'text' || f === 'split') requiredPlugins.add('SplitText')
     if (f === 'slider') {
       requiredPlugins.add('Draggable')
       requiredPlugins.add('InertiaPlugin')
@@ -70,12 +70,10 @@ export async function init(options: InitOptions = {}): Promise<void> {
   if (!gsapHandle) return
 
   registerCustomEases(gsapHandle, debug)
-  if (options.ease) {
-    try {
-      gsapHandle.gsap.defaults({ ease: options.ease })
-    } catch {
-      // ignore
-    }
+  try {
+    gsapHandle.gsap.defaults({ ease: state.options.ease })
+  } catch {
+    // ignore
   }
 
   const responsive = createResponsiveController(gsapHandle, state.breakpoints)
@@ -86,7 +84,7 @@ export async function init(options: InitOptions = {}): Promise<void> {
     gsap: gsapHandle,
     responsive,
     elements,
-    options,
+    options: state.options,
     debug,
   }
   for (const mod of featureModules) {
@@ -96,6 +94,15 @@ export async function init(options: InitOptions = {}): Promise<void> {
     } catch (err) {
       console.error(`[alrdy-animate] feature "${mod.name}" failed to init`, err)
     }
+  }
+
+  // Reveal everything in one pass. Features have already applied their
+  // from-states inside matchMedia callbacks (which fire synchronously), so
+  // flipping aa-ready here only changes `visibility: hidden` → `visible`
+  // without exposing pre-animation content. Elements that never matched any
+  // breakpoint still get revealed so the page isn't stuck blank.
+  for (const el of elements) {
+    if (el.hasAttribute('aa-animate')) el.setAttribute('aa-ready', '')
   }
 
   if (debug) {

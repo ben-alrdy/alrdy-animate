@@ -1,0 +1,33 @@
+---
+title: text-tilt
+description: Per-line slide-in with a small rotation for a more energetic reveal. Each line slides into place from outside its bounding box while rotating from a corner pivot.
+---
+
+import Demo from '../../../../components/Demo.astro'
+import TextDemo from '../../../../components/TextDemo.astro'
+
+`text-tilt-up` and `text-tilt-down` are the same shape as `text-slide-*` but add a 10° rotation pivoting from the bottom-left (up) or top-left (down) corner of each line. The result has more weight than a flat slide-up — useful when you want type to feel like it lands rather than glides.
+
+## Attributes
+
+| Attribute     | Default     | Notes                                              |
+| ------------- | ----------- | -------------------------------------------------- |
+| `aa-animate`  | (required)  | `text-tilt-up` or `text-tilt-down`.                |
+| `aa-stagger`  | `0.2`       | Seconds between lines.                             |
+| `aa-duration` | (init)      | Seconds.                                           |
+| `aa-delay`    | `0`         | Seconds.                                           |
+| `aa-ease`     | (init)      | Any GSAP ease.                                     |
+| `aa-scrub`    | (off)       | `true` or seconds — bind progress to scroll.       |
+
+## Required GSAP plugins
+
+`gsap`, `ScrollTrigger`, `SplitText`.
+
+## Live demo
+
+<Demo>
+  <div data-demo-stage>
+    <TextDemo animate="text-tilt-up" />
+    <TextDemo animate="text-tilt-down" />
+  </div>
+</Demo>

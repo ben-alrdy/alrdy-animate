@@ -1,0 +1,32 @@
+---
+title: text-rotate
+description: 3D perspective rotation per line. Each line drops in with a soft rotateX from -90° while scaling and fading into place. Built for editorial headlines with weight.
+---
+
+import Demo from '../../../../components/Demo.astro'
+import TextDemo from '../../../../components/TextDemo.astro'
+
+`text-rotate` wraps each split line in a perspective container and rotates the line in from `rotateX(-90deg)` while sliding up from below and scaling out from 75% horizontally. The wrapper uses `perspective: 5em` (relative to the element's font size) so depth scales naturally with the headline.
+
+## Attributes
+
+| Attribute     | Default     | Notes                                              |
+| ------------- | ----------- | -------------------------------------------------- |
+| `aa-animate`  | (required)  | `text-rotate`.                                     |
+| `aa-stagger`  | `0.2`       | Seconds between lines.                             |
+| `aa-duration` | (init)      | Seconds.                                           |
+| `aa-delay`    | `0`         | Seconds.                                           |
+| `aa-ease`     | (init)      | Any GSAP ease.                                     |
+| `aa-scrub`    | (off)       | `true` or seconds — bind progress to scroll.       |
+
+## Required GSAP plugins
+
+`gsap`, `ScrollTrigger`, `SplitText`.
+
+## Live demo
+
+<Demo>
+  <div data-demo-stage>
+    <TextDemo animate="text-rotate" variant="large" centered duration="1" stagger="0.3" />
+  </div>
+</Demo>

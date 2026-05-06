@@ -1,0 +1,39 @@
+---
+title: text-marker
+description: Highlight-marker text reveal. Each line starts covered by a colored bar that scales away toward one edge, exposing the text underneath.
+---
+
+import Demo from '../../../../components/Demo.astro'
+import BlockDemo from '../../../../components/BlockDemo.astro'
+
+`text-marker-{up,down,left,right}` splits the element into lines, places a colored bar over each line, and scales the bar away toward the named edge. There's no enter phase — the bars are visible from the moment the page loads, mimicking a highlighter being pulled across the text.
+
+The default color is `currentColor` so the bars match the element's text color out of the box. Override with `aa-color` for a contrasting highlight.
+
+## Attributes
+
+| Attribute     | Default          | Notes                                                                                  |
+| ------------- | ---------------- | -------------------------------------------------------------------------------------- |
+| `aa-animate`  | (required)       | `text-marker-up`, `-down`, `-left`, or `-right`. The named edge is where the bar collapses to. |
+| `aa-color`    | `currentColor`   | Bar color. Raw CSS color (`#hex`, `rgb()`, named) or a CSS custom property name (`--brand`). |
+| `aa-stagger`  | `0.1`            | Seconds between lines.                                                                 |
+| `aa-duration` | `0.6`            | Seconds.                                                                               |
+| `aa-delay`    | `0`              | Seconds.                                                                               |
+| `aa-ease`     | `power3.inOut`   | Any GSAP ease.                                                                         |
+| `aa-scrub`    | (off)            | `true` or seconds — bind progress to scroll.                                           |
+
+## Required GSAP plugins
+
+`gsap`, `ScrollTrigger`, `SplitText`.
+
+## Live demo
+
+<Demo>
+  <div data-demo-stage>
+    <BlockDemo animate="text-marker-right" />
+    <BlockDemo animate="text-marker-left" />
+    <BlockDemo animate="text-marker-up" />
+    <BlockDemo animate="text-marker-down" />
+    <BlockDemo animate="text-marker-right" color="#C700EF" />
+  </div>
+</Demo>

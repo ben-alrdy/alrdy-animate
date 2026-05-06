@@ -1,0 +1,41 @@
+---
+title: text-block
+description: Per-line block reveal. A solid bar grows in from one edge, covers each line, then exits to the opposite edge while the text fades into place.
+---
+
+import Demo from '../../../../components/Demo.astro'
+import BlockDemo from '../../../../components/BlockDemo.astro'
+
+`text-block-{up,down,left,right}` splits the element into lines and runs a two-phase reveal per line: a colored bar grows in from one edge to fully cover the line, then shrinks out the opposite edge while the underlying text fades into place from a small offset.
+
+The animation is transform-only — the bar uses `scaleX` / `scaleY` with `transformOrigin` flipped at the half-way point — so it stays GPU-cheap even on long paragraphs.
+
+## Attributes
+
+| Attribute     | Default          | Notes                                                                                  |
+| ------------- | ---------------- | -------------------------------------------------------------------------------------- |
+| `aa-animate`  | (required)       | `text-block-up`, `-down`, `-left`, or `-right`. The named edge is where the bar **exits to**. |
+| `aa-color`    | `currentColor`   | Bar color. Raw CSS color (`#hex`, `rgb()`, named) or a CSS custom property name (`--brand`). |
+| `aa-stagger`  | `0.1`            | Seconds between lines.                                                                 |
+| `aa-duration` | `1`              | Seconds. Total length of one line's animation.                                         |
+| `aa-delay`    | `0`              | Seconds.                                                                               |
+| `aa-ease`     | (init)           | Any GSAP ease.                                                                         |
+| `aa-scrub`    | (off)            | `true` or seconds — bind progress to scroll.                                           |
+
+The duration is split internally as `0.4 × duration` for the bar enter and `0.6 × duration` for the bar exit. The text fade overlaps the exit phase.
+
+## Required GSAP plugins
+
+`gsap`, `ScrollTrigger`, `SplitText`.
+
+## Live demo
+
+<Demo>
+  <div data-demo-stage>
+    <BlockDemo animate="text-block-right" />
+    <BlockDemo animate="text-block-left" />
+    <BlockDemo animate="text-block-up" />
+    <BlockDemo animate="text-block-down" />
+    <BlockDemo animate="text-block-right" color="#C700EF" />
+  </div>
+</Demo>

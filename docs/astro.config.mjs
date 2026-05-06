@@ -19,7 +19,6 @@ export default defineConfig({
         { label: 'Getting started', autogenerate: { directory: 'getting-started' } },
         { label: 'Appear animations', autogenerate: { directory: 'animations/appear' } },
         { label: 'Text animations', autogenerate: { directory: 'animations/text' } },
-        { label: 'Interactive', autogenerate: { directory: 'animations/interactive' } },
         { label: 'Utilities', autogenerate: { directory: 'animations/utilities' } },
       ],
     }),

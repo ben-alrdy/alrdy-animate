@@ -1,0 +1,40 @@
+---
+title: text-fade
+description: Per-character fade entrances. text-fade fades each character; text-fade-up/down/left/right adds a directional offset; text-fade-30 / text-fade-10 fade from a partial opacity for soft paragraph reveals.
+---
+
+import Demo from '../../../../components/Demo.astro'
+import TextDemo from '../../../../components/TextDemo.astro'
+
+The fade family splits the element into characters and animates the opacity of each one. `text-fade` is plain. `text-fade-up`, `-down`, `-left`, `-right` add a directional offset. `text-fade-30` / `text-fade-10` start at 30% / 10% opacity instead of 0 — pair them with `aa-scrub` to dim a paragraph as it enters view.
+
+## Attributes
+
+| Attribute     | Default     | Notes                                              |
+| ------------- | ----------- | -------------------------------------------------- |
+| `aa-animate`  | (required)  | One of the variants above.                         |
+| `aa-split`    | `chars`     | Override split mode (`chars`, `words`, `lines`).   |
+| `aa-stagger`  | `0.02`      | Seconds between parts.                             |
+| `aa-duration` | (init)      | Seconds.                                           |
+| `aa-delay`    | `0`         | Seconds.                                           |
+| `aa-distance` | `1`         | Multiplier on offset variants.                     |
+| `aa-ease`     | (init)      | Any GSAP ease.                                     |
+| `aa-scrub`    | (off)       | `true` or seconds — bind progress to scroll.       |
+
+## Required GSAP plugins
+
+`gsap`, `ScrollTrigger`, `SplitText` (chars fall back to a regex splitter when SplitText is missing).
+
+## Live demo
+
+<Demo>
+  <div data-demo-stage>
+    <TextDemo animate="text-fade" />
+    <TextDemo animate="text-fade-up" />
+    <TextDemo animate="text-fade-down" />
+    <TextDemo animate="text-fade-left" />
+    <TextDemo animate="text-fade-right" />
+    <TextDemo animate="text-fade-30" />
+    <TextDemo animate="text-fade-10" />
+  </div>
+</Demo>

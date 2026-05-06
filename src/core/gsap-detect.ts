@@ -12,6 +12,7 @@ export interface GsapInstance {
   from: (...args: unknown[]) => GsapTween
   fromTo: (...args: unknown[]) => GsapTween
   set: (...args: unknown[]) => GsapTween
+  killTweensOf: (targets: unknown, props?: string) => void
   timeline: (...args: unknown[]) => GsapTimeline
   defaults: (vars?: Record<string, unknown>) => Record<string, unknown>
   ticker: {
@@ -47,6 +48,7 @@ export interface GsapTimeline extends GsapTween {
   to: (...args: unknown[]) => GsapTimeline
   from: (...args: unknown[]) => GsapTimeline
   fromTo: (...args: unknown[]) => GsapTimeline
+  set: (...args: unknown[]) => GsapTimeline
   add: (...args: unknown[]) => GsapTimeline
   progress: {
     (): number
