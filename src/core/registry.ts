@@ -1,4 +1,4 @@
-import type { InitOptions } from '../types/index'
+import type { InitOptions, ResizeCallback, ResizeUnsubscribe } from '../types/index'
 import type { GsapHandle } from './gsap-detect'
 import type { ResponsiveController } from './match-media'
 import type { FeatureName } from './scanner'
@@ -9,6 +9,7 @@ export interface FeatureContext {
   elements: Element[]
   options: InitOptions
   debug: boolean
+  onResize: (fn: ResizeCallback, debounce?: number) => ResizeUnsubscribe
 }
 
 export interface FeatureModule {

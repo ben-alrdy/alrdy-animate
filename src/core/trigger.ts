@@ -18,6 +18,48 @@ export function parseTrigger(value: string | undefined): ParsedTrigger {
   return { kind: 'scroll' }
 }
 
+/**
+ * Containers that auto-emit lifecycle events on their items. An animation
+ * inside one of these inherits the matching event trigger unless it sets an
+ * explicit `aa-trigger` value.
+ *
+ * Order matters: the *closest* match wins, which is the right call for nested
+ * components (e.g. an accordion inside a slider — accordion-open beats
+ * slide-active because it's closer to the animated element).
+ */
+const INFERENCE_CONTAINERS: ReadonlyArray<{ selector: string; eventName: string }> = [
+  { selector: '[aa-modal-target]', eventName: 'modal-open' },
+  { selector: '[aa-accordion-content]', eventName: 'accordion-open' },
+  { selector: '[aa-slider-item]', eventName: 'slide-active' },
+]
+
+/**
+ * Resolve the trigger for an animated element.
+ *
+ * If the user set `aa-trigger` explicitly, that wins (this is the escape
+ * hatch — `aa-trigger="scroll"` forces scroll behavior even inside a
+ * container). Otherwise, walk up the DOM looking for a known container
+ * ancestor and return the matching event trigger. Default is scroll.
+ */
+export function resolveTrigger(element: Element, explicit: string | undefined): ParsedTrigger {
+  if (explicit !== undefined && explicit.trim() !== '') return parseTrigger(explicit)
+
+  // Find the closest container ancestor across all known patterns. We compute
+  // the matched element for each, then pick the deepest (the one that doesn't
+  // contain any of the others).
+  let best: { container: Element; eventName: string } | null = null
+  for (const { selector, eventName } of INFERENCE_CONTAINERS) {
+    const match = element.closest(selector)
+    if (!match) continue
+    if (!best || best.container.contains(match)) {
+      best = { container: match, eventName }
+    }
+  }
+
+  if (best) return { kind: 'event', eventName: best.eventName }
+  return { kind: 'scroll' }
+}
+
 type Listener = (element: Element, eventName: string) => void
 
 const listeners = new Set<Listener>()
@@ -52,4 +94,41 @@ export function onCustomTrigger(fn: Listener): () => void {
 
 export function emitTrigger(target: EventTarget, name: string): void {
   target.dispatchEvent(new CustomEvent(CUSTOM_EVENT_NAME, { detail: { name }, bubbles: true }))
+}
+
+/**
+ * Names ending in `-active` pair with the same name ending in `-inactive` for
+ * reverse. e.g. `slide-active` ↔ `slide-inactive`. Returning null means no
+ * paired reverse event.
+ */
+export function pairedReverseName(eventName: string): string | null {
+  return eventName.endsWith('-active')
+    ? eventName.slice(0, -'-active'.length) + '-inactive'
+    : null
+}
+
+export interface PairedTriggerHandlers {
+  element: Element
+  forwardName: string
+  onForward: () => void
+  onReverse?: () => void
+}
+
+/**
+ * Subscribe to a forward event and (when the name ends in `-active`) the
+ * matching `-inactive` reverse event. Filters by element ancestry so animations
+ * only react to events emitted on themselves or an ancestor.
+ */
+export function subscribeWithPair({
+  element,
+  forwardName,
+  onForward,
+  onReverse,
+}: PairedTriggerHandlers): () => void {
+  const reverseName = onReverse ? pairedReverseName(forwardName) : null
+  return onCustomTrigger((target, name) => {
+    if (target !== element && !target.contains(element)) return
+    if (name === forwardName) onForward()
+    else if (reverseName && name === reverseName && onReverse) onReverse()
+  })
 }

@@ -86,6 +86,7 @@ export async function init(options: InitOptions = {}): Promise<void> {
     elements,
     options: state.options,
     debug,
+    onResize: (fn, debounce = 150) => subscribeResize(fn, debounce),
   }
   for (const mod of featureModules) {
     try {

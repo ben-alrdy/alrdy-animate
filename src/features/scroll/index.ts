@@ -2,7 +2,7 @@ import type { FeatureContext, FeatureModule } from '../../core/registry'
 import { bindAgainTrigger } from '../../core/scroll-trigger'
 import { readAttrs, type Config } from '../../core/settings'
 import { buildStagger, parseStaggerSpec, type StaggerValue } from '../../core/stagger'
-import { onCustomTrigger, parseTrigger } from '../../core/trigger'
+import { resolveTrigger, subscribeWithPair } from '../../core/trigger'
 
 type FromState = Record<string, number | string>
 type ToState = Record<string, number | string>
@@ -109,15 +109,19 @@ function setupOne(
     children.length > 0 ? buildStagger(staggerSpec.unit, staggerSpec.flags) : 0
 
   const fromState = fromBuilder(distance)
-  const trigger = parseTrigger(config['aa-trigger'])
+  const trigger = resolveTrigger(element, config['aa-trigger'])
 
   if (trigger.kind === 'event' && trigger.eventName) {
     ctx.gsap.gsap.set(targets, fromState)
-    const eventName = trigger.eventName
-    const off = onCustomTrigger((target, name) => {
-      if (name !== eventName) return
-      if (target !== element && !target.contains(element)) return
-      ctx.gsap.gsap.to(targets, { ...toState, duration, ease, delay, stagger })
+    const off = subscribeWithPair({
+      element,
+      forwardName: trigger.eventName,
+      onForward: () => {
+        ctx.gsap.gsap.to(targets, { ...toState, duration, ease, delay, stagger })
+      },
+      onReverse: () => {
+        ctx.gsap.gsap.to(targets, { ...fromState, duration, ease })
+      },
     })
     return () => off()
   }

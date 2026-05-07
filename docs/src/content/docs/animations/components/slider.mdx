@@ -1,0 +1,349 @@
+---
+title: slider
+description: Attribute-driven horizontal carousel with autoplay, drag, centered mode, thumbnail navigation, keyboard support, and per-slide animation triggers.
+---
+
+import Demo from '../../../../components/Demo.astro'
+
+`aa-slider` turns a list of `[aa-slider-item]` elements into a seamless looping carousel powered by GSAP's `horizontalLoop` helper. Modes are space-separated tokens inside the attribute value; combine freely.
+
+## Modes
+
+| Token             | Effect                                                                                                |
+| ----------------- | ----------------------------------------------------------------------------------------------------- |
+| (empty)           | Basic slider; prev/next + thumb buttons advance one slide. No autoplay, no drag.                      |
+| `autoplay`        | Autoplay with `aa-delay` dwell + progress bars + offscreen-pause. **No hover pause.**                 |
+| `autoplay-hover`  | Same as `autoplay` *plus* pauses on `mouseenter` (non-touch only), resumes on `mouseleave`.           |
+| `draggable`       | Mouse + touch drag with InertiaPlugin throw, snaps to nearest slide.                                  |
+| `center`          | Centers the active slide horizontally in the container.                                               |
+| `none`            | Don't init at this breakpoint. Combine with the `\|` shorthand (splits at `md`) or any of the `-sm` / `-md` / `-lg` / `-xl` suffix attributes for responsive on/off. |
+
+```html
+<div aa-slider="autoplay-hover draggable center" aa-duration="0.6" aa-delay="3">…</div>
+
+<!-- Bento on desktop, autoplay carousel on mobile -->
+<div aa-slider="none|autoplay">…</div>
+```
+
+## Structural attributes
+
+| Attribute             | What it marks                                                              |
+| --------------------- | -------------------------------------------------------------------------- |
+| `aa-slider`           | Slider root.                                                               |
+| `aa-slider-item`      | Each slide. Keep it as a thin flex wrapper — put visual styling on a child element so borders/shadows don't get caught by the slider's transform math. |
+| `aa-slider-prev`      | Previous-slide button.                                                     |
+| `aa-slider-next`      | Next-slide button.                                                         |
+| `aa-slider-button`    | Thumbnail / pagination button. Index inferred from DOM order.              |
+| `aa-slider-target`    | When set on an external `aa-slider-button`, references the slider's `id`.  |
+| `aa-slider-current`   | Element whose text content reflects the current 1-based slide index.       |
+| `aa-slider-total`     | Element whose text content reflects the total slide count.                 |
+| `aa-slider-progress`  | Inside `aa-slider-button`, fills over `aa-delay`. Value is `width` (default), `height`, or `circle`. For `circle`, mark an SVG (or place an SVG inside the marked element) — the lib finds the inner `<circle>` and tweens its `stroke-dashoffset` from full circumference to zero. |
+
+## Config attributes
+
+| Attribute     | Default     | Notes                                                     |
+| ------------- | ----------- | --------------------------------------------------------- |
+| `aa-duration` | (init)      | Seconds for each slide transition.                        |
+| `aa-delay`    | `3`         | Seconds an autoplay slide stays before advancing.         |
+| `aa-ease`     | (init)      | Any GSAP ease — used for transitions and progress bars.   |
+
+## Required GSAP plugins
+
+`gsap`, `ScrollTrigger`, `Draggable`, `InertiaPlugin`.
+
+## Animations triggered by slide activation
+
+`aa-animate` elements inside an `[aa-slider-item]` are **automatically driven by slide activation**: they play when the slide becomes active and reverse when it becomes inactive. No `aa-trigger` attribute needed — the slider emits `slide-active` / `slide-inactive` events on each slide and the closest container ancestor is the inferred trigger.
+
+```html
+<div aa-slider="autoplay" aa-delay="3">
+  <div class="track">
+    <div aa-slider-item>
+      <div class="slide-card">
+        <h2 aa-animate="fade-up">Headline</h2>   <!-- inferred: event:slide-active -->
+      </div>
+    </div>
+  </div>
+</div>
+```
+
+If you need to opt out — e.g. an animation inside a slide that should still respond to scroll position — set `aa-trigger="scroll"` explicitly to override the inference.
+
+## Keyboard navigation
+
+When the slider has focus, **Arrow Left** / **Arrow Right** step backwards / forwards, **Home** jumps to the first slide, **End** to the last. The slider root gets `tabindex="0"` automatically.
+
+## Live demo — basic prev / next
+
+<Demo>
+  <div data-demo-stage>
+    <div data-spacer></div>
+    <div class="aa-slider-demo" aa-slider>
+      <div class="aa-slider-track">
+        <div class="aa-slider-card" aa-slider-item><div class="aa-slider-card__inner">Slide 1</div></div>
+        <div class="aa-slider-card" aa-slider-item><div class="aa-slider-card__inner">Slide 2</div></div>
+        <div class="aa-slider-card" aa-slider-item><div class="aa-slider-card__inner">Slide 3</div></div>
+        <div class="aa-slider-card" aa-slider-item><div class="aa-slider-card__inner">Slide 4</div></div>
+        <div class="aa-slider-card" aa-slider-item><div class="aa-slider-card__inner">Slide 5</div></div>
+      </div>
+      <div class="aa-slider-controls">
+        <button aa-slider-prev>Prev</button>
+        <span><span aa-slider-current>01</span>/<span aa-slider-total>05</span></span>
+        <button aa-slider-next>Next</button>
+      </div>
+    </div>
+    <div data-spacer></div>
+  </div>
+</Demo>
+
+## Live demo — centered, autoplay-hover, draggable, with thumb-bullets and progress
+
+A slider with `aa-slider="autoplay-hover draggable center"` shows multiple slides at once with the active one centered. Hover pauses the autoplay; mouseleave resumes. Each thumb has an inner `[aa-slider-progress]` that fills during the dwell.
+
+<Demo>
+  <div data-demo-stage>
+    <div data-spacer></div>
+    <div id="aa-slider-centered" class="aa-slider-demo aa-slider-demo-wide" aa-slider="autoplay-hover draggable center" aa-duration="0.6" aa-delay="3">
+      <div class="aa-slider-track">
+        <div class="aa-slider-card aa-slider-card-narrow" aa-slider-item><div class="aa-slider-card__inner">Slide A</div></div>
+        <div class="aa-slider-card aa-slider-card-narrow" aa-slider-item><div class="aa-slider-card__inner">Slide B</div></div>
+        <div class="aa-slider-card aa-slider-card-narrow" aa-slider-item><div class="aa-slider-card__inner">Slide C</div></div>
+        <div class="aa-slider-card aa-slider-card-narrow" aa-slider-item><div class="aa-slider-card__inner">Slide D</div></div>
+        <div class="aa-slider-card aa-slider-card-narrow" aa-slider-item><div class="aa-slider-card__inner">Slide E</div></div>
+        <div class="aa-slider-card aa-slider-card-narrow" aa-slider-item><div class="aa-slider-card__inner">Slide F</div></div>
+        <div class="aa-slider-card aa-slider-card-narrow" aa-slider-item><div class="aa-slider-card__inner">Slide G</div></div>
+      </div>
+      <div class="aa-slider-thumbs">
+        <button aa-slider-button aria-label="Slide 1"><span class="aa-slider-progress" aa-slider-progress="width" aa-ease="none"></span></button>
+        <button aa-slider-button aria-label="Slide 2"><span class="aa-slider-progress" aa-slider-progress="width" aa-ease="none"></span></button>
+        <button aa-slider-button aria-label="Slide 3"><span class="aa-slider-progress" aa-slider-progress="width" aa-ease="none"></span></button>
+        <button aa-slider-button aria-label="Slide 4"><span class="aa-slider-progress" aa-slider-progress="width" aa-ease="none"></span></button>
+        <button aa-slider-button aria-label="Slide 5"><span class="aa-slider-progress" aa-slider-progress="width" aa-ease="none"></span></button>
+        <button aa-slider-button aria-label="Slide 6"><span class="aa-slider-progress" aa-slider-progress="width" aa-ease="none"></span></button>
+        <button aa-slider-button aria-label="Slide 7"><span class="aa-slider-progress" aa-slider-progress="width" aa-ease="none"></span></button>
+      </div>
+    </div>
+    <div data-spacer></div>
+  </div>
+</Demo>
+
+## Live demo — circular progress thumbs
+
+`aa-slider-progress="circle"` on an SVG (or a wrapper containing one) animates the inner `<circle>`'s `stroke-dashoffset` to draw the ring during the dwell. The user controls the visual — viewBox, radius, stroke colour and width — entirely via the SVG markup and CSS.
+
+<Demo>
+  <div data-demo-stage>
+    <div data-spacer></div>
+    <div id="aa-slider-circle" class="aa-slider-demo" aa-slider="autoplay-hover" aa-duration="0.5" aa-delay="3">
+      <div class="aa-slider-track">
+        <div class="aa-slider-card" aa-slider-item><div class="aa-slider-card__inner">Slide 1</div></div>
+        <div class="aa-slider-card" aa-slider-item><div class="aa-slider-card__inner">Slide 2</div></div>
+        <div class="aa-slider-card" aa-slider-item><div class="aa-slider-card__inner">Slide 3</div></div>
+        <div class="aa-slider-card" aa-slider-item><div class="aa-slider-card__inner">Slide 4</div></div>
+      </div>
+      <div class="aa-slider-thumbs aa-slider-thumbs-circle">
+        <button aa-slider-button aria-label="Slide 1">
+          <span class="aa-slider-thumb-dot"></span>
+          <svg class="aa-slider-thumb-ring" aa-slider-progress="circle" aa-ease="none" viewBox="0 0 36 36" aria-hidden="true">
+            <circle cx="18" cy="18" r="16" fill="none" stroke="currentColor" stroke-width="2" />
+          </svg>
+        </button>
+        <button aa-slider-button aria-label="Slide 2">
+          <span class="aa-slider-thumb-dot"></span>
+          <svg class="aa-slider-thumb-ring" aa-slider-progress="circle" aa-ease="none" viewBox="0 0 36 36" aria-hidden="true">
+            <circle cx="18" cy="18" r="16" fill="none" stroke="currentColor" stroke-width="2" />
+          </svg>
+        </button>
+        <button aa-slider-button aria-label="Slide 3">
+          <span class="aa-slider-thumb-dot"></span>
+          <svg class="aa-slider-thumb-ring" aa-slider-progress="circle" aa-ease="none" viewBox="0 0 36 36" aria-hidden="true">
+            <circle cx="18" cy="18" r="16" fill="none" stroke="currentColor" stroke-width="2" />
+          </svg>
+        </button>
+        <button aa-slider-button aria-label="Slide 4">
+          <span class="aa-slider-thumb-dot"></span>
+          <svg class="aa-slider-thumb-ring" aa-slider-progress="circle" aa-ease="none" viewBox="0 0 36 36" aria-hidden="true">
+            <circle cx="18" cy="18" r="16" fill="none" stroke="currentColor" stroke-width="2" />
+          </svg>
+        </button>
+      </div>
+    </div>
+    <div data-spacer></div>
+  </div>
+</Demo>
+
+## Live demo — animations triggered on slide activation
+
+Each slide contains a heading and paragraph with plain `aa-animate="fade-up"` — no `aa-trigger` attribute. Because they live inside `[aa-slider-item]`, they're inferred to use `event:slide-active`: they fade up on activation and reverse on deactivation.
+
+<Demo>
+  <div data-demo-stage>
+    <div data-spacer></div>
+    <div class="aa-slider-demo" aa-slider="autoplay" aa-duration="0.5" aa-delay="3">
+      <div class="aa-slider-track">
+        <div class="aa-slider-card aa-slider-card-tall" aa-slider-item>
+          <div class="aa-slider-card__inner">
+            <h3 class="aa-slider-h" aa-animate="fade-up">Discover</h3>
+            <p class="aa-slider-p" aa-animate="fade-up" aa-delay="0.15">Headlines fade up when the slide becomes active and reverse when it leaves.</p>
+          </div>
+        </div>
+        <div class="aa-slider-card aa-slider-card-tall" aa-slider-item>
+          <div class="aa-slider-card__inner">
+            <h3 class="aa-slider-h" aa-animate="fade-up">Iterate</h3>
+            <p class="aa-slider-p" aa-animate="fade-up" aa-delay="0.15">Same primitive — different trigger, picked up automatically from the container.</p>
+          </div>
+        </div>
+        <div class="aa-slider-card aa-slider-card-tall" aa-slider-item>
+          <div class="aa-slider-card__inner">
+            <h3 class="aa-slider-h" aa-animate="fade-up">Ship</h3>
+            <p class="aa-slider-p" aa-animate="fade-up" aa-delay="0.15">Names ending in <code>-active</code> auto-pair with <code>-inactive</code> for reverse.</p>
+          </div>
+        </div>
+      </div>
+      <div class="aa-slider-controls">
+        <button aa-slider-prev>Prev</button>
+        <button aa-slider-next>Next</button>
+      </div>
+    </div>
+    <div data-spacer></div>
+  </div>
+</Demo>
+
+<style>{`
+  .aa-slider-demo {
+    width: 100%;
+    outline: none;
+  }
+  .aa-slider-demo:focus-visible {
+    box-shadow: 0 0 0 2px var(--sl-color-accent);
+    border-radius: 6px;
+  }
+  .aa-slider-track {
+    display: flex;
+    gap: 1rem;
+    overflow: hidden;
+    width: 100%;
+  }
+  .aa-slider-demo-wide .aa-slider-track {
+    overflow: visible;
+  }
+  /* Slider-item: thin flex wrapper. NO visual styling, no padding, no border —
+     so the slider's width math reads a clean rect with no sub-pixel surprises. */
+  .aa-slider-card {
+    flex: 0 0 100%;
+  }
+  .aa-slider-card-narrow {
+    flex: 0 0 auto;
+    width: 14rem;
+  }
+  /* All visual treatment lives on the inner element. A small horizontal
+     margin gives the active border breathing room from the slide-item edges
+     so it doesn't get clipped by the track's overflow on 100%-width slides. */
+  .aa-slider-card__inner {
+    box-sizing: border-box;
+    margin: 0 2px;
+    background: var(--sl-color-accent);
+    color: var(--sl-color-text-invert, var(--sl-color-white));
+    border-radius: 6px;
+    padding: 2rem 1rem;
+    text-align: center;
+    font-weight: 500;
+    border: 2px solid transparent;
+    transition: border-color 0.25s ease, opacity 0.25s ease;
+  }
+  .aa-slider-card.is-active .aa-slider-card__inner {
+    border-color: var(--sl-color-text);
+  }
+  .aa-slider-card-narrow .aa-slider-card__inner {
+    opacity: 0.45;
+  }
+  .aa-slider-card-narrow.is-active .aa-slider-card__inner {
+    opacity: 1;
+  }
+  .aa-slider-card-tall .aa-slider-card__inner {
+    padding: 3rem 1.5rem;
+    min-height: 9rem;
+  }
+  .aa-slider-h {
+    margin: 0 0 0.5rem;
+    font-size: 1.5rem;
+  }
+  .aa-slider-p {
+    margin: 0;
+    font-size: 0.95rem;
+    opacity: 0.9;
+  }
+  .aa-slider-controls {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+    justify-content: center;
+    margin-top: 1rem;
+  }
+  .aa-slider-controls button {
+    background: var(--sl-color-bg-nav);
+    color: var(--sl-color-text);
+    border: 1px solid var(--sl-color-gray-5);
+    border-radius: 4px;
+    padding: 0.45rem 0.85rem;
+    cursor: pointer;
+    font: inherit;
+  }
+  .aa-slider-thumbs {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+    margin-top: 1rem;
+  }
+  .aa-slider-thumbs button {
+    width: 3rem;
+    height: 6px;
+    background: var(--sl-color-gray-5);
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    padding: 0;
+    overflow: hidden;
+    position: relative;
+  }
+  .aa-slider-thumbs .aa-slider-progress {
+    display: block;
+    width: 0%;
+    height: 100%;
+    background: var(--sl-color-accent);
+  }
+  /* Circular thumbs: a small filled dot + an SVG ring that draws around it. */
+  .aa-slider-thumbs-circle {
+    gap: 0.75rem;
+  }
+  .aa-slider-thumbs-circle button {
+    width: 28px;
+    height: 28px;
+    background: transparent;
+    border-radius: 50%;
+    overflow: visible;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--sl-color-text);
+    position: relative;
+  }
+  .aa-slider-thumb-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--sl-color-gray-5);
+    transition: background 0.25s ease;
+  }
+  .aa-slider-thumbs-circle button.is-active .aa-slider-thumb-dot {
+    background: var(--sl-color-accent);
+  }
+  .aa-slider-thumb-ring {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    /* Start the ring at 12 o'clock and draw clockwise. */
+    transform: rotate(-90deg);
+  }
+`}</style>
