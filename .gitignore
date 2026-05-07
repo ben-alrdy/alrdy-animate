@@ -31,3 +31,11 @@ yarn-error.log*
 /coverage
 /test-results
 /playwright-report
+
+# Playwright MCP screenshot/console output
+/.playwright-mcp
+
+# Stray root-level images (Playwright MCP screenshots when no path is given)
+/*.png
+/*.jpg
+/*.jpeg
