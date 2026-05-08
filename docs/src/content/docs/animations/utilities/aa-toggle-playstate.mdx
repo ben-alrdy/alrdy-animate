@@ -1,0 +1,74 @@
+---
+title: aa-toggle-playstate
+description: Pause and resume the Web Animations API timelines on a container's direct children whenever the container leaves or re-enters the viewport.
+---
+
+import Demo from '../../../../components/Demo.astro'
+
+`aa-toggle-playstate` is a tiny IntersectionObserver utility — drop it on any container and the library walks its direct children, calls `getAnimations()` on each, and pauses every Web Animations API timeline while the container is out of view. Resumes from the same phase when the container scrolls back in.
+
+Works on:
+
+- CSS `@keyframes` animations applied via the `animation` shorthand or `animation-name`.
+- Anything started with `element.animate({…}, {…})`.
+
+Doesn't touch GSAP timelines (use ScrollTrigger for those).
+
+## Why
+
+Background loops, marquees, gradient cycles — they keep running in the background and burn CPU/battery while the user is somewhere else on the page. `getAnimations().pause()` is the cheapest way to stop them; this attribute is the smallest possible API to wire it up.
+
+## How
+
+Add the attribute to the container whose visibility should drive the play/pause. The lib walks `element.children`, so animations on the container itself aren't toggled — apply them to a wrapping or nested element if you want them controlled too.
+
+```html
+<div aa-toggle-playstate>
+  <div class="ambient-loop"></div>     <!-- has @keyframes pulse infinite -->
+  <div class="ambient-loop"></div>
+</div>
+```
+
+Always-on; no opt-in needed. (Can be turned off globally via `init({ scrollState: false })` along with the body scroll-state attributes.)
+
+## Live demo
+
+Three CSS-keyframe dots pulsing in cascade. Scroll past them and the lib pauses each animation; scroll back and they resume from the same frame they were paused at — no restart, no flicker.
+
+<Demo>
+  <div data-demo-stage>
+    <div data-spacer></div>
+    <div class="aa-playstate-stage" aa-toggle-playstate>
+      <div class="aa-playstate-dot"></div>
+      <div class="aa-playstate-dot aa-playstate-dot--late"></div>
+      <div class="aa-playstate-dot aa-playstate-dot--later"></div>
+    </div>
+    <div data-spacer></div>
+  </div>
+</Demo>
+
+<style>{`
+  .aa-playstate-stage {
+    display: flex;
+    gap: 1.5rem;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    background: var(--sl-color-bg);
+    border: 1px solid var(--sl-color-gray-5);
+    border-radius: 6px;
+  }
+  .aa-playstate-dot {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--sl-color-accent);
+    animation: aa-playstate-pulse 1.4s ease-in-out infinite;
+  }
+  .aa-playstate-dot--late { animation-delay: 0.2s; }
+  .aa-playstate-dot--later { animation-delay: 0.4s; }
+  @keyframes aa-playstate-pulse {
+    0%, 100% { transform: scale(0.6); opacity: 0.4; }
+    50%      { transform: scale(1.2); opacity: 1; }
+  }
+`}</style>

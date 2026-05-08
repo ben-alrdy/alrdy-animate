@@ -12,6 +12,8 @@ import { NAMED_EASES } from './named-eases'
 import { loadFeatures, type FeatureContext } from './registry'
 import { clearAll as clearResize, subscribe as subscribeResize } from './resize'
 import { scan } from './scanner'
+import { initScrollState } from './scroll-state'
+import { initScrollTarget } from './scroll-target'
 import {
   DEFAULT_OPTIONS,
   addDisposer,
@@ -89,6 +91,9 @@ export async function init(options: InitOptions = {}): Promise<void> {
     const smooth = initSmoothScroll(gsapHandle, smoothScrollOpt, debug)
     if (smooth) addDisposer(smooth.dispose)
   }
+
+  if (state.options.scrollState) addDisposer(initScrollState())
+  addDisposer(initScrollTarget())
 
   const responsive = createResponsiveController(gsapHandle, state.breakpoints)
   activeHandles = { gsap: gsapHandle, responsive }

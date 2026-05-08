@@ -1,0 +1,289 @@
+---
+title: nav
+description: Sticky navigation with hide-on-scroll, scroll-spy is-current link tracking, Flip-driven indicators, and section-keyed nav class swaps.
+---
+
+import Demo from '../../../../components/Demo.astro'
+
+`aa-nav` is a small cluster of behaviours bundled around a single nav element. Pick the ones you need by composing space-separated tokens on the `aa-nav` attribute and adding optional sub-attributes to children of the nav.
+
+## Modes
+
+| `aa-nav` token  | Effect                                                                                                      |
+| --------------- | ----------------------------------------------------------------------------------------------------------- |
+| (empty)         | No hide, no class. Other features (is-current tracking, indicators, section classes) still work.            |
+| `hide`          | CSS-translate the nav up off-screen when the user scrolls down (only past the global ~50px scroll-started threshold), slides it back in when they scroll up. |
+| `change`        | Add `is-scrolled` to the nav once `scrollY > 100`. Useful for shrinking padding or changing background.     |
+| `change-150`    | Same, threshold 150px (any pixel value).                                                                     |
+| `hide change`   | Both. Tokens are space-separated and order-independent.                                                      |
+| `none`          | Don't init at this breakpoint. Combine with `\|` or `-sm` / `-md` / `-lg` / `-xl` suffixes.                |
+
+The hide animation is **driven by CSS**, not GSAP. The library reads your `aa-distance` / `aa-duration` / `aa-ease` attributes and writes them onto the nav element as CSS variables — `--aa-nav-hide-y` (the precomputed off-screen translateY percentage), `--aa-nav-duration`, `--aa-nav-ease`. A single keyframe animation scoped on `body[aa-scroll-direction="down"][aa-scroll-started="true"]` then drives the nav. Cheap, no scroll-event listener, no GSAP cycle.
+
+The hide uses CSS **animation** (not transition) on purpose: that way you can freely add `transition: padding 0.3s, background 0.3s` on `.is-scrolled` (or any other state class on the nav) without worrying about the `transition` shorthand clobbering the hide. Animation and transition are independent shorthands.
+
+The hide threshold is shared, not per-nav: the body picks up `aa-scroll-started="true"` once `window.scrollY > 50` (set by the [body scroll-state](#body-scroll-state) tracker) and the hide rule is gated on that. This keeps the nav put while you're at the top of the page so a small mouse-wheel nudge downward doesn't immediately hide it. The `change` token, by contrast, is per-nav and configurable via `change-<px>` because it just toggles a class on its own element.
+
+| Attribute       | Default                  | Notes                                                                                                                                                                        |
+| --------------- | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `aa-distance`   | `1.5`                    | Multiplier on the `-100%` translate. `1` = the full nav height; `1.5` (default) clears most drop-shadows; `2` slides further still.                                          |
+| `aa-duration`   | (init `duration`)        | CSS transition duration in seconds.                                                                                                                                          |
+| `aa-ease`       | `osmo` (the lib default) | Any v8 named ease (osmo, energy, smooth, punch, relaxed, jump, pop, anticipate, fade), a `cubic-bezier(...)`, or a CSS keyword (`linear`, `ease`, `ease-in-out`, …).         |
+
+`elastic` and `bounce` aren't expressible as a single cubic-bezier; if you pass one of those, the nav falls back to `osmo` and a debug warning is logged. Use a GSAP-driven approach if you really need them — but they're rarely the right call for a sticky nav anyway.
+
+## Scroll-spy: is-current link tracking
+
+Any `[aa-scroll-target]` link inside the nav whose target selector resolves to a section automatically picks up an `is-current` class while that section is the one closest to the viewport's middle. ScrollTrigger watches each section between `0% 50%` and `100% 50%`. Style off `[aa-scroll-target].is-current` for active-state styling.
+
+This is independent of the click-to-scroll behaviour described in the [scroll-target](#aa-scroll-target-click-to-scroll) section below — both share the same attribute.
+
+## Indicators (Flip)
+
+Add an empty element inside the nav with one of these attributes and the lib will Flip-morph it to track the active or hovered link:
+
+| Attribute                    | Behaviour                                                                                                              |
+| ---------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `aa-nav-current-indicator`   | Morphs onto whichever `[aa-scroll-target]` has `is-current`. Updates via `MutationObserver` and on resize.             |
+| `aa-nav-hover-indicator`     | Morphs onto the hovered link, returns to the current link on `mouseleave` of the nav. Disabled on touch devices.       |
+
+Both read `aa-duration` (default `0.4s`) and `aa-ease` (default `power2.out`) **from the indicator element itself**. Indicator easing is GSAP-driven (it animates via `Flip.fit`), so the full GSAP ease vocabulary is available — including `elastic.out` and `bounce.out`.
+
+The lib starts indicators at `opacity: 0` until the first Flip lands; set the initial style yourself if you want a different fade-in.
+
+## Section classes
+
+Add `aa-nav-section="my-class"` to a section anywhere on the page. While that section is in view, `my-class` is on the nav element. Useful for swapping the nav's colour scheme per section (light header over a hero, dark over a content panel).
+
+```html
+<section aa-nav-section="is-light"  aa-scroll-start="top 0%" aa-scroll-end="bottom 0%">…</section>
+<section aa-nav-section="is-dark"  >…</section>
+```
+
+`aa-scroll-start` / `aa-scroll-end` on the section override the default ScrollTrigger window of `top 0%` / `bottom 0%`.
+
+## `aa-scroll-target` (click-to-scroll)
+
+A small global utility (not nav-specific): clicking any `[aa-scroll-target="#selector"]` element smooth-scrolls to that selector. If Lenis is loaded (the default), the scroll runs through `lenis.scrollTo` with a quartic ease and your `aa-duration`. If Lenis isn't active, the lib falls back to native `window.scrollTo({ behavior: 'smooth' })` — same `aa-distance` offset, no library configuration required.
+
+| Attribute      | Default | Notes                                                                                            |
+| -------------- | ------- | ------------------------------------------------------------------------------------------------ |
+| `aa-duration`  | `1.2`   | Lenis scroll duration in seconds. Ignored on the native fallback (browser controls duration).    |
+| `aa-distance`  | `0`     | Pixel offset applied to the target's top — negative pulls the target above the viewport edge.    |
+
+## Body scroll-state
+
+Two attributes the lib writes on `<body>` that any CSS rule can hook into. Always-on; opt out with `init({ scrollState: false })`.
+
+| Body attribute        | Values         | When                                                                                  |
+| --------------------- | -------------- | ------------------------------------------------------------------------------------- |
+| `aa-scroll-direction` | `up` / `down`  | Flips when scroll movement exceeds 5px in the new direction.                          |
+| `aa-scroll-started`   | `true` / `false` | Flips to `true` once `scrollY > 50`. Used by the nav-hide CSS rule to suppress the hide animation while at the top of the page. |
+
+```css
+body[aa-scroll-direction="down"] .my-floating-button { opacity: 0; pointer-events: none; }
+body[aa-scroll-started="true"] .hero { background: var(--page-bg-pinned); }
+```
+
+## Required GSAP plugins
+
+`ScrollTrigger` for is-current tracking and section classes, `Flip` for the indicators. The hide / change / scroll-target / scroll-state behaviours all run without any GSAP plugin (CSS variables + plain scroll listeners). If `Flip` is missing, indicators silently no-op.
+
+## Live demo — sticky pill nav with hover + current indicators and section colour swap
+
+A persistent (non-hiding) sticky nav. The current-link indicator (lime) sits behind the active link permanently; the hover indicator (accent-colour border, no fill) slides over whichever link the cursor is on and returns to the current link on `mouseleave`. While the third section is in view, `aa-nav-section="is-accent"` flips the nav into its accent colour scheme.
+
+`aa-nav` (no token — no hide, no `is-scrolled`). Indicators carry `aa-duration="0.45"` + `aa-ease="power3.out"` (current) and `aa-duration="0.35"` + `aa-ease="power2.out"` (hover). Both pills get `border-radius: 999px` via CSS so Flip morphs between rounded shapes.
+
+<Demo>
+  <div data-demo-stage>
+    <nav class="aa-nav-demo" aa-nav>
+      <a class="aa-nav-demo-brand" href="#">brand</a>
+      <div class="aa-nav-demo-links">
+        <a class="aa-nav-demo-link" aa-scroll-target="#pill-demo-1">overview</a>
+        <a class="aa-nav-demo-link" aa-scroll-target="#pill-demo-2">approach</a>
+        <a class="aa-nav-demo-link" aa-scroll-target="#pill-demo-3">work</a>
+        <a class="aa-nav-demo-link" aa-scroll-target="#pill-demo-4">contact</a>
+        <span class="aa-nav-demo-indicator-current" aa-nav-current-indicator aa-duration="0.45" aa-ease="power3.out"></span>
+        <span class="aa-nav-demo-indicator-hover" aa-nav-hover-indicator aa-duration="0.35" aa-ease="power2.out"></span>
+      </div>
+    </nav>
+    <section id="pill-demo-1" class="aa-nav-demo-section">
+      <h3>overview</h3>
+      <p>The current-link indicator (lime pill) follows whichever section's middle is in the viewport. Click any link to scroll to that section.</p>
+    </section>
+    <section id="pill-demo-2" class="aa-nav-demo-section">
+      <h3>approach</h3>
+      <p>Hover any link and the accent-bordered pill slides over it via Flip. Move the cursor away — it returns to the current pill.</p>
+    </section>
+    <section id="pill-demo-3" class="aa-nav-demo-section is-section-accent" aa-nav-section="is-accent" aa-scroll-start="top 50%" aa-scroll-end="bottom 50%">
+      <h3>work</h3>
+      <p>This section adds <code>is-accent</code> to the nav. The whole bar inverts; the current pill flips to white so it stays readable on the dark background.</p>
+    </section>
+    <section id="pill-demo-4" class="aa-nav-demo-section">
+      <h3>contact</h3>
+      <p>Scrolling back up cleans up the section class in reverse order.</p>
+    </section>
+  </div>
+</Demo>
+
+## Live demo — same nav, hides on scroll-down
+
+Identical pill styling, only the current indicator (no hover indicator) and an `aa-nav="hide change"` modifier so it slides up off-screen when you scroll down and returns on scroll-up. Once you're past 100px the `is-scrolled` class kicks in too.
+
+`aa-nav="hide change"` — default `aa-distance="1.5"` clears any drop-shadow. The current indicator carries `aa-duration="0.45"` + `aa-ease="power3.out"`.
+
+<Demo>
+  <div data-demo-stage>
+    <nav class="aa-nav-demo" aa-nav="hide change" aa-ease="osmo">
+      <a class="aa-nav-demo-brand" href="#">brand</a>
+      <div class="aa-nav-demo-links">
+        <a class="aa-nav-demo-link" aa-scroll-target="#bar-demo-1">overview</a>
+        <a class="aa-nav-demo-link" aa-scroll-target="#bar-demo-2">approach</a>
+        <a class="aa-nav-demo-link" aa-scroll-target="#bar-demo-3">work</a>
+        <a class="aa-nav-demo-link" aa-scroll-target="#bar-demo-4">contact</a>
+        <span class="aa-nav-demo-indicator-current" aa-nav-current-indicator aa-duration="0.45" aa-ease="power3.out"></span>
+      </div>
+    </nav>
+    <section id="bar-demo-1" class="aa-nav-demo-section">
+      <h3>overview</h3>
+      <p>Scroll down — the nav slides up out of view. Scroll back up and it returns.</p>
+    </section>
+    <section id="bar-demo-2" class="aa-nav-demo-section">
+      <h3>approach</h3>
+      <p>Once you've scrolled more than 100px, the nav picks up <code>is-scrolled</code> — the demo uses that to add a subtle drop-shadow.</p>
+    </section>
+    <section id="bar-demo-3" class="aa-nav-demo-section">
+      <h3>work</h3>
+      <p>The current pill tracks whichever section is in view, morphed via Flip.</p>
+    </section>
+    <section id="bar-demo-4" class="aa-nav-demo-section">
+      <h3>contact</h3>
+      <p>The body picks up <code>aa-scroll-direction</code> and <code>aa-scroll-started</code> attributes — the hide rule is just a CSS transform keyed on those.</p>
+    </section>
+  </div>
+</Demo>
+
+<style>{`
+  /* ─── Shared sections for both demos ─── */
+  .aa-nav-demo-section {
+    margin: 0;
+    padding: 4rem 1rem;
+    border-bottom: 1px dashed var(--sl-color-gray-5);
+  }
+  .aa-nav-demo-section h3 {
+    margin: 0 0 0.75rem;
+  }
+  .aa-nav-demo-section p {
+    margin: 0;
+    color: var(--sl-color-text-accent);
+  }
+  .aa-nav-demo-section.is-section-accent {
+    background: var(--sl-color-bg-nav);
+  }
+
+  /* ─── Shared pill-nav styling for both demos ─── */
+  .aa-nav-demo {
+    position: sticky;
+    /* Sit below the Starlight docs header (64px tall, z-index 10). In a real
+       app this would be top: 0 or top: 0.5rem. */
+    top: 4.5rem;
+    z-index: 5;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.4rem 0.5rem 0.4rem 1rem;
+    background: var(--sl-color-bg);
+    border: 1px solid var(--sl-color-gray-5);
+    border-radius: 999px;
+    margin: 0;
+    /* No transform here. The lib uses CSS animation (not transition) for the
+       hide, so user transitions on the same element don't clobber it. */
+    transition: background 0.4s ease, color 0.4s ease, border-color 0.4s ease,
+                box-shadow 0.3s ease;
+  }
+  .aa-nav-demo.is-accent {
+    background: var(--sl-color-text);
+    border-color: var(--sl-color-text);
+    color: var(--sl-color-bg);
+  }
+  .aa-nav-demo.is-scrolled {
+    box-shadow: 0 6px 18px -10px rgba(0, 0, 0, 0.3);
+  }
+  .aa-nav-demo .aa-nav-demo-brand {
+    font-weight: 600;
+    /* Starlight's prose styles target every <a> inside .sl-markdown-content;
+       !important is the cleanest way to keep our nav-scoped colour in this
+       docs context without layering on more specificity hacks. */
+    color: inherit !important;
+    text-decoration: none;
+  }
+  .aa-nav-demo .aa-nav-demo-brand:hover,
+  .aa-nav-demo .aa-nav-demo-brand:focus,
+  .aa-nav-demo .aa-nav-demo-brand:focus-visible {
+    background-color: transparent !important;
+    color: inherit !important;
+    text-decoration: none !important;
+  }
+  .aa-nav-demo-links {
+    position: relative;
+    display: flex;
+    gap: 0.25rem;
+    isolation: isolate;
+  }
+  .aa-nav-demo .aa-nav-demo-link {
+    position: relative;
+    padding: 0.4rem 0.85rem;
+    color: inherit !important;
+    text-decoration: none;
+    cursor: pointer;
+    border-radius: 999px;
+    z-index: 2;
+  }
+  /* Suppress all hover styling on the link itself — the hover indicator
+     already provides the visual response. Starlight's prose a:hover sets
+     background-color (longhand) and text-decoration; we need !important on
+     both to win the cascade. */
+  .aa-nav-demo .aa-nav-demo-link:hover,
+  .aa-nav-demo .aa-nav-demo-link:focus,
+  .aa-nav-demo .aa-nav-demo-link:focus-visible {
+    background-color: transparent !important;
+    color: inherit !important;
+    text-decoration: none !important;
+  }
+  /* Current link sits inside the lime (default) or white (is-accent) pill —
+     use the dark text colour either way for high contrast on the pill fill. */
+  .aa-nav-demo .aa-nav-demo-link.is-current,
+  .aa-nav-demo.is-accent .aa-nav-demo-link.is-current {
+    color: var(--sl-color-text) !important;
+  }
+  .aa-nav-demo-indicator-current {
+    position: absolute;
+    inset: 0;
+    background: var(--sl-color-accent);
+    border-radius: 999px;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .aa-nav-demo.is-accent .aa-nav-demo-indicator-current {
+    background: var(--sl-color-bg);
+  }
+  /* Hover indicator: accent-colour border, no fill. Sits above the current
+     pill (z-index 1) so when hovering a non-current link, the border outlines
+     the hovered pill while the lime current pill stays visible underneath. */
+  .aa-nav-demo-indicator-hover {
+    position: absolute;
+    inset: 0;
+    background: transparent;
+    border: 2px solid var(--sl-color-accent);
+    border-radius: 999px;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 1;
+  }
+  .aa-nav-demo.is-accent .aa-nav-demo-indicator-hover {
+    border-color: var(--sl-color-accent);
+  }
+`}</style>

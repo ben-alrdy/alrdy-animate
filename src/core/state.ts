@@ -41,6 +41,7 @@ export const DEFAULT_OPTIONS: ResolvedOptions = {
   stagger: DEFAULT_STAGGER,
   autoplay: DEFAULT_AUTOPLAY,
   smoothScroll: true,
+  scrollState: true,
 }
 
 export function resolveOptions(opts: InitOptions): ResolvedOptions {

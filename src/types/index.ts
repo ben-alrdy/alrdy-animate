@@ -58,6 +58,12 @@ export interface InitOptions {
   breakpoints?: Partial<Breakpoints>
   reducedMotion?: ReducedMotionOptions
   smoothScroll?: boolean | SmoothScrollOptions
+  /**
+   * Body scroll-state tracking: writes `aa-scroll-direction="up|down"` and
+   * `aa-scroll-started="true|false"` on `<body>`, and runs the
+   * `[aa-toggle-playstate]` IntersectionObserver. Pass `false` to opt out.
+   */
+  scrollState?: boolean
   debug?: boolean
 }
 
@@ -75,6 +81,7 @@ export interface ResolvedOptions extends InitOptions {
   stagger: StaggerOptions
   autoplay: AutoplayOptions
   smoothScroll: boolean | SmoothScrollOptions
+  scrollState: boolean
 }
 
 export interface OnResizeOptions {

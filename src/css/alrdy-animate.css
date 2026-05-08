@@ -101,6 +101,74 @@
   will-change: opacity;
 }
 
+/*
+ * Nav hide-on-scroll-down. The nav feature flips the [aa-nav-hide] boolean
+ * attribute on the [aa-nav] element when `aa-nav` includes `hide` for the
+ * current breakpoint, and writes per-element CSS variables for distance,
+ * duration, and ease (resolved from aa-distance / aa-duration / aa-ease).
+ *
+ * Driven by CSS animation, not transition. Authors very commonly add their
+ * own `transition: …` for the `is-scrolled` state on the same nav element;
+ * keeping the hide on `animation` puts the two on independent shorthands so
+ * they can't clobber each other in the cascade.
+ *
+ * Both keyframes carry explicit `from` AND `to` states. Without an explicit
+ * `from`, the show animation infers its starting point from the element's
+ * current computed transform — but at the moment the body's direction flips
+ * to "up", the previous hide-out rule has already stopped matching, so the
+ * computed transform has snapped back to translateY(0) and the show would
+ * animate from 0 to 0 (i.e. instant). Pinning `from` to the hidden position
+ * keeps the show working correctly.
+ */
+[aa-nav-hide] {
+  /* Default off-screen Y. JS overrides this via inline style based on the
+     element's `aa-distance` attribute (defaulting to 1.5 → -150%). The full
+     percentage is precomputed by the JS rather than expressed as
+     `calc(-100% * var(--aa-nav-distance))` in the keyframe — var() inside
+     calc() inside transform inside @keyframes doesn't resolve reliably from
+     inline styles across all browsers. */
+  --aa-nav-hide-y: -150%;
+  --aa-nav-duration: 0.6s;
+  --aa-nav-ease: var(--aa-ease-osmo);
+  will-change: transform;
+}
+
+body[aa-scroll-direction="down"][aa-scroll-started="true"] [aa-nav-hide] {
+  animation: aa-nav-hide-out var(--aa-nav-duration) var(--aa-nav-ease) forwards;
+}
+
+body[aa-scroll-direction="up"] [aa-nav-hide] {
+  animation: aa-nav-hide-in var(--aa-nav-duration) var(--aa-nav-ease) forwards;
+}
+
+@keyframes aa-nav-hide-out {
+  from { transform: translateY(0); }
+  to   { transform: translateY(var(--aa-nav-hide-y)); }
+}
+@keyframes aa-nav-hide-in {
+  from { transform: translateY(var(--aa-nav-hide-y)); }
+  to   { transform: translateY(0); }
+}
+
+/*
+ * Modal feature: scroll lock + pointer-event gating. The body class is set
+ * by JS while any modal is open (Lenis is preferred, this is the fallback
+ * for non-Lenis pages). Inactive groups are pointer-event-transparent so
+ * fixed-position chrome below them stays interactive.
+ */
+body.aa-modal-locked {
+  overflow: hidden;
+}
+[aa-modal-group] {
+  pointer-events: none;
+}
+[aa-modal-group][aa-modal-group-status="active"] {
+  pointer-events: auto;
+}
+[aa-modal-group] [aa-modal-name] {
+  will-change: transform, opacity;
+}
+
 @media (prefers-reduced-motion: reduce) {
   [aa-animate] {
     transition-duration: 0ms !important;

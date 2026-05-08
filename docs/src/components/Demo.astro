@@ -16,6 +16,7 @@ interface Props {}
 <script is:inline src="https://cdn.jsdelivr.net/npm/gsap@3/dist/CustomEase.min.js"></script>
 <script is:inline src="https://cdn.jsdelivr.net/npm/gsap@3/dist/Draggable.min.js"></script>
 <script is:inline src="https://cdn.jsdelivr.net/npm/gsap@3/dist/InertiaPlugin.min.js"></script>
+<script is:inline src="https://cdn.jsdelivr.net/npm/gsap@3/dist/Flip.min.js"></script>
 <script is:inline src="https://cdn.jsdelivr.net/npm/lenis@1/dist/lenis.min.js"></script>
 
 <script>
@@ -45,7 +46,10 @@ interface Props {}
     padding: 1rem;
     margin: 1rem 0;
     background: var(--sl-color-bg-nav);
-    overflow: hidden;
+    /* `overflow: clip` clips overflow without establishing a scroll container,
+       so `position: sticky` inside the frame still anchors to the viewport
+       (overflow: hidden would trap the sticky to the frame's own bounds). */
+    overflow: clip;
     /* Kill the prose `* + *` sibling margin for everything inside the demo
        frame. The Starlight rule reads `margin-top: var(--sl-content-gap-y)`,
        so zeroing the variable here silences it for demo content. */

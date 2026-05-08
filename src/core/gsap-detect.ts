@@ -13,6 +13,7 @@ export interface GsapInstance {
   fromTo: (...args: unknown[]) => GsapTween
   set: (...args: unknown[]) => GsapTween
   killTweensOf: (targets: unknown, props?: string) => void
+  delayedCall: (delay: number, callback: () => void, params?: unknown[], scope?: unknown) => GsapTween
   timeline: (...args: unknown[]) => GsapTimeline
   defaults: (vars?: Record<string, unknown>) => Record<string, unknown>
   ticker: {
