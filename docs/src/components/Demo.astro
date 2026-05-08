@@ -22,7 +22,13 @@ interface Props {}
   import { init } from 'alrdy-animate'
 
   function ready(): void {
-    init({ debug: true, scrollStart: 'top 70%', scrubStart: 'top 90%' })
+    init({
+      debug: true,
+      duration: 0.8,
+      ease: 'osmo',
+      scrollStart: 'top 70%',
+      scrubStart: 'top 90%',
+    })
   }
 
   if (document.readyState === 'loading') {

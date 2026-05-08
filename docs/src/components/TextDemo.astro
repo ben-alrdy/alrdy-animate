@@ -29,8 +29,10 @@ const blockClass = ['td-block', large && 'td-block--large', centered && 'td-bloc
   )}
 
   <div class="td-scrub-label">scrubbed (<code>aa-scrub="1"</code>)</div>
-  <h1 class="td-h1 td-h1--scrub" aa-animate={animate} aa-scrub="1" aa-duration={duration} aa-stagger={stagger}>
-    Tied to scroll position. Scrub up and down to feel the easing curve unfold.
+  <h1 class="td-h1" aa-animate={animate} aa-scrub="1" aa-duration={duration} aa-stagger={stagger}>
+    Tied to scroll.<br />
+    Watch the easing.<br />
+    Feel each beat.
   </h1>
 </div>
 
@@ -71,9 +73,6 @@ const blockClass = ['td-block', large && 'td-block--large', centered && 'td-bloc
   }
   .td-block--large .td-h1 {
     font-size: clamp(4rem, 8vw, 6rem);
-  }
-  .td-block--large .td-h1--scrub {
-    font-size: clamp(2rem, 4vw, 3rem);
   }
   .td-block--large .td-h3 {
     font-size: clamp(2.5rem, 4.8vw, 3.5rem);
