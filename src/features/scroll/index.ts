@@ -7,7 +7,12 @@ import {
   parseStaggerSpec,
   type StaggerValue,
 } from '../../core/stagger'
-import { REVERSE_TIME_SCALE, resolveTrigger, subscribeWithPair } from '../../core/trigger'
+import {
+  REVERSE_EASE,
+  REVERSE_TIME_SCALE,
+  resolveTrigger,
+  subscribeWithPair,
+} from '../../core/trigger'
 
 type FromState = Record<string, number | string>
 
@@ -149,6 +154,7 @@ function setupOne(
       ...fromState,
       duration,
       ease,
+      easeReverse: REVERSE_EASE,
       delay,
       stagger,
       paused: true,

@@ -8,7 +8,12 @@ import {
   parseStaggerSpec,
   type StaggerValue,
 } from '../../core/stagger'
-import { REVERSE_TIME_SCALE, resolveTrigger, subscribeWithPair } from '../../core/trigger'
+import {
+  REVERSE_EASE,
+  REVERSE_TIME_SCALE,
+  resolveTrigger,
+  subscribeWithPair,
+} from '../../core/trigger'
 import { applySplit, parseSplit, type SplitMode, type SplitResult } from '../../split/runtime'
 
 type GsapTarget = Element | Element[] | NodeList
@@ -465,7 +470,7 @@ function setupBarReveal(
   const trigger = resolveTrigger(element, config['aa-trigger'])
 
   if (trigger.kind === 'event' && trigger.eventName) {
-    const tl = buildTl({ paused: true, delay })
+    const tl = buildTl({ paused: true, delay, defaults: { easeReverse: REVERSE_EASE } })
     const off = subscribeWithPair({
       element,
       forwardName: trigger.eventName,
@@ -614,7 +619,11 @@ function setupOne(
   const trigger = resolveTrigger(element, config['aa-trigger'])
 
   if (trigger.kind === 'event' && trigger.eventName) {
-    const tl = ctx.gsap.gsap.timeline({ paused: true, delay })
+    const tl = ctx.gsap.gsap.timeline({
+      paused: true,
+      delay,
+      defaults: { easeReverse: REVERSE_EASE },
+    })
     addTweens(tl)
     // Lock the resting state explicitly so the paused-at-0 timeline shows the
     // from-state visually, not whatever GSAP would compute from a stale layout.

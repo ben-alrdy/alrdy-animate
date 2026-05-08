@@ -15,6 +15,13 @@ export const CUSTOM_EVENT_NAME = 'aa:trigger'
  */
 export const REVERSE_TIME_SCALE = 2
 
+/**
+ * Ease curve used on reverse via GSAP 3.15's `easeReverse`. A flat curve
+ * keeps exits clean — without it, eases like `anticipate`/`bounce` play
+ * their dip/overshoot at the END of the reverse, which reads as a glitch.
+ */
+export const REVERSE_EASE = 'power2.inOut'
+
 export function parseTrigger(value: string | undefined): ParsedTrigger {
   if (!value) return { kind: 'scroll' }
   const trimmed = value.trim()
