@@ -137,23 +137,17 @@ export function setupScroll(
 
     const w = window as unknown as Record<string, any>
     const lenis = w.lenis
-    const ScrollToPlugin = w.ScrollToPlugin
     if (lenis && typeof lenis.scrollTo === 'function') {
-      lenis.scrollTo(targetY, { duration: 1.2, offset: 0 })
-      return
-    }
-    if (ScrollToPlugin) {
-      gsap.to(window, {
-        duration: 1.2,
-        scrollTo: { y: targetY, autoKill: false },
-        ease: 'power2.inOut',
-      })
+      // Lenis is already smoothing every scroll input via its own RAF, so
+      // a short scrollTo blends naturally with momentum scrolling. Longer
+      // durations feel sluggish next to manual wheel scrolling.
+      lenis.scrollTo(targetY, { duration: 0.3, offset: 0 })
       return
     }
     // Manual smooth scroll via gsap on a dummy. The browser's native
     // `behavior: 'smooth'` truncates short of the target when scrolling
     // through a pinned section, so we drive window.scrollTo from a tween
-    // ourselves. Works without ScrollToPlugin.
+    // ourselves — no ScrollToPlugin required.
     const proxy = { y: window.scrollY }
     gsap.to(proxy, {
       y: targetY,

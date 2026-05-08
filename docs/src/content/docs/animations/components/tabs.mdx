@@ -59,7 +59,7 @@ import Demo from '../../../../components/Demo.astro'
 
 ## Required GSAP plugins
 
-`gsap` always; `ScrollTrigger` for `autoplay` (viewport gate) and `scroll` (pin) modes; `ScrollToPlugin` is optional in scroll mode for the click-to-jump animation (falls back to `window.scrollTo({ behavior: 'smooth' })` if not loaded).
+`gsap` always; `ScrollTrigger` for `autoplay` (viewport gate) and `scroll` (pin) modes. The scroll-mode click-to-jump animates the page itself with a short gsap tween — no `ScrollToPlugin` required. If Lenis is active (`smoothScroll: true` and the script is loaded) the click hands off to `lenis.scrollTo` so it blends with Lenis momentum.
 
 ## ARIA — automatic
 
