@@ -14,10 +14,21 @@ import Demo from '../../../../components/Demo.astro'
 | (empty)          | Default. One tab open at a time. Clicking the active toggle closes it.                                                                |
 | `single`         | One open at a time, but the active toggle can't be closed by clicking it. First toggle (or `aa-tabs-initial`) opens at init.          |
 | `multi`          | Multiple tabs open simultaneously. Each toggle is independent.                                                                        |
-| `autoplay`       | Auto-advances every `aa-delay` seconds. Per-toggle progress bars fill during the dwell. Viewport-gated (pauses when scrolled away).   |
-| `autoplay-hover` | Same as `autoplay` *plus* pause on `mouseenter` (non-touch only), resume on `mouseleave`.                                             |
 | `scroll`         | Pinned section; scrolling scrubs through tabs sequentially. Touch devices fall back to `single`. Optional click-to-jump on toggles.   |
 | `none`           | Don't init at this breakpoint. Combine with the `\|` shorthand or `-sm` / `-md` / `-lg` / `-xl` suffix attributes for responsive on/off. |
+
+Autoplay is a separate, standalone attribute — `aa-autoplay` — shared with `aa-slider` so the configuration shape is uniform across components. Adding `aa-autoplay` to a tabset activates autoplay mode and overrides the `aa-tabs` mode token; `aa-tabs="scroll"` + `aa-autoplay` is a conflict and autoplay wins (a dev-mode warning is logged).
+
+| `aa-autoplay` value           | Effect                                                                                       |
+| ----------------------------- | -------------------------------------------------------------------------------------------- |
+| (attribute absent)            | No autoplay; mode comes from `aa-tabs`.                                                      |
+| (empty: `aa-autoplay`)        | Autoplay enabled at the init default interval (`autoplay.interval`, default 4s). No hover pause. |
+| `<number>` (e.g. `"4"`)       | Autoplay with the given dwell in seconds.                                                    |
+| `hover-pause`                 | Add hover-pause: `mouseenter` pauses, `mouseleave` resumes (non-touch only).                  |
+| `<number> hover-pause`        | Both — e.g. `aa-autoplay="4 hover-pause"`.                                                   |
+| `none`                        | Opt out (e.g. `aa-autoplay="4\|none"` — autoplay on desktop, off on mobile).                 |
+
+Per-toggle override: place `aa-autoplay="6"` on a single `aa-tabs-toggle` to vary that tab's dwell while keeping the rest at the root (or init) value.
 
 ```html
 <!-- Accordion (FAQ): default mode -->
@@ -27,7 +38,7 @@ import Demo from '../../../../components/Demo.astro'
 <div aa-tabs="single">…</div>
 
 <!-- Autoplay carousel-style with hover pause -->
-<div aa-tabs="autoplay-hover" aa-delay="4">…</div>
+<div aa-tabs aa-autoplay="4 hover-pause">…</div>
 
 <!-- Scroll-driven on desktop, plain accordion below md -->
 <div aa-tabs="scroll|"></div>
@@ -42,8 +53,8 @@ import Demo from '../../../../components/Demo.astro'
 | `aa-tabs-content`     | Inline expanding panel — height tweens between 0 and natural on open / close. Pair with a toggle by matching the toggle's ID.    |
 | `aa-tabs-visual`      | Cross-fade panel — `autoAlpha` tweens between 0 and 1. Stacked layout (e.g. `position: absolute; inset: 0`) is the author's job. |
 | `aa-tabs-wrapper`     | Optional wrapper around toggle + content. When present, receives `aa-tabs-status="active"` for shared CSS targeting.             |
-| `aa-tabs-initial`     | Mark a toggle (or wrapper) to open at init. For `single` / `autoplay` / `scroll` modes, the first toggle is used if you omit it.  |
-| `aa-tabs-progress`    | Inside an `aa-tabs-toggle`. Value is `width` (default), `height`, or `circle`. Used in `autoplay` and `scroll` modes.             |
+| `aa-tabs-initial`     | Mark a toggle (or wrapper) to open at init. For `single` / autoplay / `scroll` modes, the first toggle is used if you omit it.  |
+| `aa-tabs-progress`    | Inside an `aa-tabs-toggle`. Value is `width` (default), `height`, or `circle`. Used in autoplay and `scroll` modes.             |
 | `aa-tabs-status`      | Set by the lib on the wrapper (or toggle, when no wrapper). Values: `active` / `inactive`. Style off it for hover and active states.|
 
 ## Config attributes
@@ -51,7 +62,7 @@ import Demo from '../../../../components/Demo.astro'
 | Attribute        | Default     | Notes                                                                                          |
 | ---------------- | ----------- | ---------------------------------------------------------------------------------------------- |
 | `aa-duration`    | (init)      | Seconds for the height + visual cross-fade. Override per toggle / per content / per visual.    |
-| `aa-delay`       | `5`         | (autoplay) Per-tab dwell. Override per toggle to vary cadence.                                 |
+| `aa-autoplay`    | (off; init `interval` when present) | See the autoplay table above. Per-toggle `aa-autoplay="6"` overrides that tab's dwell. |
 | `aa-ease`        | (init)      | Any GSAP ease — height tween, visual fade, and progress bar.                                   |
 | `aa-distance`    | `30`        | (scroll) vh per tab. Total pin range = N × distance.                                           |
 | `aa-scroll-start`| `top 20%`   | (scroll) ScrollTrigger start position for the pin.                                             |
@@ -89,7 +100,7 @@ Set `aa-trigger="scroll"` to opt out of inference for a specific element.
 
 Toggles get `tabindex="0"` so they're reachable via Tab. With focus on a toggle:
 
-- **Enter / Space** — toggles the active state (or, in `single` / `autoplay` / `scroll` modes, opens if not already active).
+- **Enter / Space** — toggles the active state (or, in `single` / autoplay / `scroll` modes, opens if not already active).
 - **Arrow Down / Right** — move focus to the next toggle (wraps).
 - **Arrow Up / Left** — move focus to the previous toggle (wraps).
 - **Home / End** — jump focus to the first / last toggle.
@@ -236,16 +247,16 @@ Combine content with a side-panel visual: the toggle expands its inline content 
   </div>
 </Demo>
 
-## Live demo — autoplay-hover (pause-on-interaction)
+## Live demo — autoplay with hover-pause (pause-on-interaction)
 
-`aa-tabs="autoplay-hover"` cycles every `aa-delay` seconds, fills the per-toggle width progress during the dwell, and pauses on mouse hover.
+`aa-autoplay="3 hover-pause"` cycles every 3 seconds, fills the per-toggle width progress during the dwell, and pauses on mouse hover.
 
-`aa-delay="3"` (per-tab dwell), `aa-duration="0.4"`. Each toggle holds an `aa-tabs-progress="width"` element with `aa-ease="none"` for a linear fill. Hover pause is guarded by `(hover: hover)` so it stays out of the way on touch devices. Click while hovering jumps to that tab and *stays paused* — mouseleave then starts a fresh cycle from there.
+`aa-autoplay="3 hover-pause"` (per-tab dwell + hover behaviour), `aa-duration="0.4"` (height + cross-fade). Each toggle holds an `aa-tabs-progress="width"` element with `aa-ease="none"` for a linear fill. Hover pause is guarded by `(hover: hover)` so it stays out of the way on touch devices. Click while hovering jumps to that tab and *stays paused* — mouseleave then starts a fresh cycle from there.
 
 <Demo>
   <div data-demo-stage>
     <div data-spacer></div>
-    <div class="aa-tabs-tabset" aa-tabs="autoplay-hover" aa-delay="3" aa-duration="0.4">
+    <div class="aa-tabs-tabset" aa-tabs aa-autoplay="3 hover-pause" aa-duration="0.4">
       <div class="aa-tabs-tablist">
         <button class="aa-tabs-tab" aa-tabs-toggle="auto-1">
           <span class="aa-tabs-tab-label">Step one</span>
@@ -281,14 +292,14 @@ Combine content with a side-panel visual: the toggle expands its inline content 
 
 ## Live demo — autoplay (no hover, click-to-restart)
 
-Same shape as the previous demo, but without the `autoplay-hover` flag. Cycling never pauses on hover. Clicking a tab restarts the cycle from that index — useful when you want a continuously-cycling carousel that responds to nudges instead of stopping on interaction.
+Same shape as the previous demo, but without the `hover-pause` flag. Cycling never pauses on hover. Clicking a tab restarts the cycle from that index — useful when you want a continuously-cycling carousel that responds to nudges instead of stopping on interaction.
 
-`aa-tabs="autoplay"` with `aa-delay="3"`, `aa-duration="0.4"`. Same `aa-tabs-progress="width"` element per toggle.
+`aa-autoplay="3"` (no hover-pause flag), `aa-duration="0.4"`. Same `aa-tabs-progress="width"` element per toggle.
 
 <Demo>
   <div data-demo-stage>
     <div data-spacer></div>
-    <div class="aa-tabs-tabset" aa-tabs="autoplay" aa-delay="3" aa-duration="0.4">
+    <div class="aa-tabs-tabset" aa-tabs aa-autoplay="3" aa-duration="0.4">
       <div class="aa-tabs-tablist">
         <button class="aa-tabs-tab" aa-tabs-toggle="auto-c-1">
           <span class="aa-tabs-tab-label">Capture</span>

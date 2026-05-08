@@ -2,7 +2,9 @@ import type { GsapHandle } from '../../core/gsap-detect'
 import type { SliderLoop } from './horizontal-loop'
 
 export interface AutoplayOptions {
-  delay: number
+  /** Seconds between slide advances. */
+  interval: number
+  /** Slide-transition duration (used by the slider tween, not autoplay timing). */
   duration: number
   ease: string
   hoverPause: boolean
@@ -59,7 +61,7 @@ export function setupAutoplay(
 ): AutoplayController {
   const gsap = gsapHandle.gsap as unknown as Record<string, any>
   const ScrollTrigger = gsapHandle.plugins.ScrollTrigger as ScrollTriggerLike | undefined
-  const { delay, duration, ease, hoverPause } = options
+  const { interval, duration, ease, hoverPause } = options
 
   let autoplayCall:
     | { kill: () => void; pause: () => void; resume: () => void; paused: () => boolean }
@@ -114,7 +116,7 @@ export function setupAutoplay(
       if (i === activeIndex) {
         gsap.fromTo(entry.target, progressFromValues(entry), {
           ...progressToValues(entry),
-          duration: delay,
+          duration: interval,
           ease: entry.ease,
           overwrite: true,
         })
@@ -157,10 +159,10 @@ export function setupAutoplay(
       gsap.delayedCall(duration / 2, () => {
         syncProgress(slider.current())
       })
-      autoplayCall = gsap.delayedCall(duration + delay, tick)
+      autoplayCall = gsap.delayedCall(duration + interval, tick)
     }
     syncProgress(slider.current())
-    autoplayCall = gsap.delayedCall(delay, tick)
+    autoplayCall = gsap.delayedCall(interval, tick)
   }
 
   const stop = (): void => {

@@ -1,4 +1,4 @@
-import type { InitOptions, ResizeCallback, ResizeUnsubscribe } from '../types/index'
+import type { ResizeCallback, ResizeUnsubscribe, ResolvedOptions } from '../types/index'
 import type { GsapHandle } from './gsap-detect'
 import type { ResponsiveController } from './match-media'
 import type { FeatureName } from './scanner'
@@ -7,7 +7,7 @@ export interface FeatureContext {
   gsap: GsapHandle
   responsive: ResponsiveController
   elements: Element[]
-  options: InitOptions
+  options: ResolvedOptions
   debug: boolean
   onResize: (fn: ResizeCallback, debounce?: number) => ResizeUnsubscribe
 }

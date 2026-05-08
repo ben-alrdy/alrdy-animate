@@ -45,6 +45,14 @@ export interface HorizontalLoopConfig {
   onChange?: (item: Element, index: number) => void
   /** Fires once on drag press-init, before the timeline pause. */
   onDragStart?: () => void
+  /**
+   * Fires on every drag release. `isThrowing` is true when the release
+   * triggered an inertia throw — `onThrowComplete` will fire after that
+   * lands. False on a static press / click with no movement, in which case
+   * `onThrowComplete` will NOT fire and the caller is responsible for any
+   * post-press cleanup.
+   */
+  onRelease?: (isThrowing: boolean) => void
   /** Fires after the inertia throw lands on a new slide boundary. */
   onThrowComplete?: (index: number) => void
 }
@@ -316,6 +324,7 @@ export function horizontalLoop(
       onRelease(this: DraggableInstance) {
         syncIndex()
         if (this.isThrowing) indexIsDirty = true
+        config.onRelease?.(!!this.isThrowing)
       },
       onThrowComplete: () => {
         syncIndex()

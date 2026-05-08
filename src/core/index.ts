@@ -12,7 +12,14 @@ import { NAMED_EASES } from './named-eases'
 import { loadFeatures, type FeatureContext } from './registry'
 import { clearAll as clearResize, subscribe as subscribeResize } from './resize'
 import { scan } from './scanner'
-import { addDisposer, resolveBreakpoints, resolveOptions, runAllDisposers, state } from './state'
+import {
+  DEFAULT_OPTIONS,
+  addDisposer,
+  resolveBreakpoints,
+  resolveOptions,
+  runAllDisposers,
+  state,
+} from './state'
 import { initSmoothScroll } from '../smooth-scroll/index'
 
 let activeHandles: { gsap: GsapHandle; responsive: ResponsiveController } | null = null
@@ -136,7 +143,7 @@ export function destroy(): void {
   clearResize()
   activeHandles = null
   state.initialized = false
-  state.options = {}
+  state.options = { ...DEFAULT_OPTIONS }
 }
 
 export async function refresh(): Promise<void> {

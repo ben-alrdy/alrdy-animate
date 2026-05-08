@@ -1,4 +1,22 @@
+import type { ResolvedOptions } from '../types/index'
+
 type StaggerFrom = 'start' | 'end' | 'center' | 'edges'
+
+/**
+ * Resolve the default stagger for a given split mode. Stagger is the lone
+ * timing default that varies per mode — chars cascade fast, lines cascade
+ * slow. `undefined` covers aa-children without a split (e.g. scroll feature
+ * staggering a card grid) and falls back to the `default` slot.
+ */
+export function defaultStaggerFor(
+  splitMode: 'chars' | 'words' | 'lines' | undefined,
+  options: ResolvedOptions,
+): number {
+  if (splitMode === 'chars') return options.stagger.chars
+  if (splitMode === 'words') return options.stagger.words
+  if (splitMode === 'lines') return options.stagger.lines
+  return options.stagger.default
+}
 
 export interface StaggerFlags {
   from: StaggerFrom

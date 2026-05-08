@@ -2,23 +2,25 @@ export type TabMode = 'default' | 'single' | 'multi' | 'autoplay' | 'scroll'
 
 export interface ParsedTabsConfig {
   mode: TabMode
-  hoverPause: boolean
   isNone: boolean
 }
 
+/**
+ * Mode tokens recognised on `aa-tabs`. Autoplay is no longer a token here —
+ * presence of `aa-autoplay` on the root activates autoplay mode (handled in
+ * setupOne after parseAutoplay).
+ */
 export function parseTabsValue(raw: string | undefined): ParsedTabsConfig {
   const tokens = (raw ?? '')
     .trim()
     .split(/\s+/)
     .filter(Boolean)
   const isNone = tokens.includes('none')
-  const hoverPause = tokens.includes('autoplay-hover')
   let mode: TabMode = 'default'
   if (tokens.includes('scroll')) mode = 'scroll'
-  else if (hoverPause || tokens.includes('autoplay')) mode = 'autoplay'
   else if (tokens.includes('multi')) mode = 'multi'
   else if (tokens.includes('single')) mode = 'single'
-  return { mode, hoverPause, isNone }
+  return { mode, isNone }
 }
 
 export interface TabEntry {
@@ -34,13 +36,14 @@ export interface TabEntry {
   /** Visual cross-fade duration. */
   visualDuration: number
   /** Per-tab dwell for autoplay; only meaningful when mode === 'autoplay'. */
-  delay: number
+  interval: number
   ease: string
 }
 
 export interface TabStateDefaults {
   duration: number
-  delay: number
+  /** Default autoplay interval (seconds) inherited from root or init.autoplay.interval. */
+  interval: number
   ease: string
 }
 
@@ -117,6 +120,22 @@ function readEase(el: HTMLElement | null, fallback: string): string {
   return v && v.length > 0 ? v : fallback
 }
 
+/**
+ * Read the autoplay interval declared on an element via `aa-autoplay`. The
+ * attribute syntax matches the global parser: a numeric token sets the
+ * interval; `hover-pause` is a flag the global parser handles (we ignore it
+ * per-tab). Absent attribute or no usable number → returns fallback.
+ */
+function readInterval(el: HTMLElement | null, fallback: number): number {
+  if (!el || !el.hasAttribute('aa-autoplay')) return fallback
+  const raw = el.getAttribute('aa-autoplay') ?? ''
+  for (const t of raw.trim().split(/\s+/)) {
+    const n = parseFloat(t)
+    if (Number.isFinite(n) && n > 0) return n
+  }
+  return fallback
+}
+
 export function createTabState(root: HTMLElement, defaults: TabStateDefaults): TabState {
   autoAssignIds(root)
 
@@ -127,10 +146,13 @@ export function createTabState(root: HTMLElement, defaults: TabStateDefaults): T
   const entries: TabEntry[] = []
   const byId = new Map<string, TabEntry>()
 
-  // Root-level overrides waterfall down to toggle/content/visual.
+  // Root-level overrides waterfall down to toggle/content/visual. Per-tab
+  // autoplay interval comes from each toggle's `aa-autoplay` (numeric token
+  // only); the root `aa-autoplay` is the per-tabset baseline; init.autoplay
+  // is the global default.
   const rootDuration = readDuration(root, defaults.duration)
   const rootEase = readEase(root, defaults.ease)
-  const rootDelay = parseNum(root.getAttribute('aa-delay'), defaults.delay)
+  const rootInterval = readInterval(root, defaults.interval)
 
   toggles.forEach((toggle, i) => {
     const id = toggle.getAttribute('aa-tabs-toggle') ?? `aa-tabs-${i}`
@@ -141,7 +163,7 @@ export function createTabState(root: HTMLElement, defaults: TabStateDefaults): T
 
     const toggleDuration = readDuration(toggle, rootDuration)
     const toggleEase = readEase(toggle, rootEase)
-    const toggleDelay = parseNum(toggle.getAttribute('aa-delay'), rootDelay)
+    const toggleInterval = readInterval(toggle, rootInterval)
 
     const contentDuration = readDuration(content, toggleDuration)
     const visualDuration = readDuration(visual, toggleDuration)
@@ -156,7 +178,7 @@ export function createTabState(root: HTMLElement, defaults: TabStateDefaults): T
       progress,
       contentDuration,
       visualDuration,
-      delay: toggleDelay,
+      interval: toggleInterval,
       ease: toggleEase,
     }
     entries.push(entry)

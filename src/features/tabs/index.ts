@@ -1,3 +1,4 @@
+import { parseAutoplay } from '../../core/autoplay'
 import type { FeatureContext, FeatureModule } from '../../core/registry'
 import { readAttrs, type Config } from '../../core/settings'
 import { REVERSE_TIME_SCALE } from '../../core/trigger'
@@ -36,18 +37,19 @@ function setupOne(ctx: FeatureContext, root: HTMLElement, config: Config): (() =
   const defaultDuration = (() => {
     const c = config['aa-duration']
     const n = c !== undefined ? parseFloat(c) : NaN
-    return Number.isFinite(n) ? n : opts.duration ?? 0.6
+    return Number.isFinite(n) ? n : opts.duration
   })()
-  const defaultEase = config['aa-ease'] ?? opts.ease ?? 'power2.inOut'
-  const defaultDelay = (() => {
-    const c = config['aa-delay']
-    const n = c !== undefined ? parseFloat(c) : NaN
-    return Number.isFinite(n) ? n : 5
-  })()
+  const defaultEase = config['aa-ease'] ?? opts.ease
+
+  const autoplay = parseAutoplay(
+    config['aa-autoplay'],
+    opts.autoplay,
+    'aa-autoplay' in config,
+  )
 
   const state = createTabState(root, {
     duration: defaultDuration,
-    delay: defaultDelay,
+    interval: autoplay.interval,
     ease: defaultEase,
   })
   if (state.entries.length === 0) return undefined
@@ -55,10 +57,22 @@ function setupOne(ctx: FeatureContext, root: HTMLElement, config: Config): (() =
   const gsap = ctx.gsap.gsap as unknown as Record<string, any>
   const ScrollTrigger = ctx.gsap.plugins.ScrollTrigger as ScrollTriggerLike | undefined
 
+  // Mode resolution: presence of `aa-autoplay` activates autoplay mode and
+  // overrides whatever `aa-tabs` declared. Conflict (`aa-tabs="scroll"` plus
+  // `aa-autoplay`) → autoplay wins; warn in dev so the override isn't silent.
+  let mode: TabMode = parsed.mode
+  if (autoplay.enabled) {
+    if (mode === 'scroll' && ctx.debug) {
+      console.warn(
+        '[alrdy-animate] aa-tabs="scroll" + aa-autoplay both set; autoplay overrides scroll mode.',
+        root,
+      )
+    }
+    mode = 'autoplay'
+  }
   // Touch fallback: scroll mode degrades to single — pin scrubbing on touch
   // is brittle and the click-to-jump behaviour is more useful. Keep mutation
   // local; never touch the DOM attribute (responsive bookkeeping owns that).
-  let mode: TabMode = parsed.mode
   if (mode === 'scroll' && ScrollTrigger && ScrollTrigger.isTouch) {
     mode = 'single'
   }
@@ -130,7 +144,7 @@ function setupOne(ctx: FeatureContext, root: HTMLElement, config: Config): (() =
   }
 
   // mode-specific controllers (forward-declared so click handler can stop autoplay).
-  let autoplay: AutoplayController | null = null
+  let autoplayCtl: AutoplayController | null = null
   let scrollCtrl: ScrollController | null = null
 
   // Determine which entry to open at init.
@@ -171,8 +185,8 @@ function setupOne(ctx: FeatureContext, root: HTMLElement, config: Config): (() =
       scrollCtrl.jumpToIndex(entry.index)
       return
     }
-    if (autoplay) {
-      autoplay.sync(entry.index)
+    if (autoplayCtl) {
+      autoplayCtl.sync(entry.index)
       return
     }
 
@@ -199,10 +213,10 @@ function setupOne(ctx: FeatureContext, root: HTMLElement, config: Config): (() =
   )
 
   if (mode === 'autoplay') {
-    autoplay = setupAutoplay(ctx.gsap, root, api, {
-      hoverPause: parsed.hoverPause,
+    autoplayCtl = setupAutoplay(ctx.gsap, root, api, {
+      hoverPause: autoplay.hoverPause,
     })
-    cleanups.push(() => autoplay?.destroy())
+    cleanups.push(() => autoplayCtl?.destroy())
   } else if (mode === 'scroll') {
     const distance = parseFloat(config['aa-distance'] ?? '') || 30
     const scrollStart = config['aa-scroll-start'] ?? 'top 20%'

@@ -54,6 +54,11 @@ declare namespace JSX {
     'aa-anchor'?: string
     'aa-parallax-start'?: string | number
     'aa-parallax-end'?: string | number
+    'aa-autoplay'?: string | boolean | number
+    'aa-autoplay-sm'?: string | number
+    'aa-autoplay-md'?: string | number
+    'aa-autoplay-lg'?: string | number
+    'aa-autoplay-xl'?: string | number
 
     // Feature anchors
     'aa-tabs'?: string | boolean

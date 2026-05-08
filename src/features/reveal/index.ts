@@ -1,6 +1,7 @@
 import type { FeatureContext, FeatureModule } from '../../core/registry'
 import { bindAgainTrigger } from '../../core/scroll-trigger'
 import { readAttrs, type Config } from '../../core/settings'
+import { defaultStaggerFor } from '../../core/stagger'
 import { onCustomTrigger, parseTrigger } from '../../core/trigger'
 
 interface RevealClip {
@@ -103,11 +104,11 @@ function setupClip(
   if (!reveal) return undefined
 
   const opts = ctx.options
-  const duration = parseNum(config['aa-duration'], opts.duration!)
+  const duration = parseNum(config['aa-duration'], opts.duration)
   const delay = parseNum(config['aa-delay'], 0)
-  const ease = config['aa-ease'] ?? opts.ease!
-  const scrollStart = config['aa-scroll-start'] ?? opts.scrollStart!
-  const scrollEnd = config['aa-scroll-end'] ?? opts.scrollEnd!
+  const ease = config['aa-ease'] ?? opts.ease
+  const scrollStart = config['aa-scroll-start'] ?? opts.scrollStart
+  const scrollEnd = config['aa-scroll-end'] ?? opts.scrollEnd
   const scrub = parseScrub(config['aa-scrub'])
   const again = opts.again !== false
 
@@ -220,11 +221,11 @@ function setupSlices(
 
   const opts = ctx.options
   const { mode, rows } = params
-  const stagger = parseNum(config['aa-stagger'], 0.04)
-  const duration = parseNum(config['aa-duration'], opts.duration!)
-  const ease = config['aa-ease'] ?? opts.ease!
-  const scrollStart = config['aa-scroll-start'] ?? opts.scrollStart!
-  const scrollEnd = config['aa-scroll-end'] ?? opts.scrollEnd!
+  const stagger = parseNum(config['aa-stagger'], defaultStaggerFor(undefined, opts))
+  const duration = parseNum(config['aa-duration'], opts.duration)
+  const ease = config['aa-ease'] ?? opts.ease
+  const scrollStart = config['aa-scroll-start'] ?? opts.scrollStart
+  const scrollEnd = config['aa-scroll-end'] ?? opts.scrollEnd
   const scrub = parseScrub(config['aa-scrub'])
   const again = opts.again !== false
 

@@ -1,3 +1,4 @@
+import { parseAutoplay } from '../../core/autoplay'
 import type { FeatureContext, FeatureModule } from '../../core/registry'
 import { readAttrs, type Config } from '../../core/settings'
 import { setupAutoplay, type AutoplayController } from './autoplay'
@@ -6,8 +7,6 @@ import { attachKeyboard } from './keyboard'
 import { setupNav } from './nav'
 
 interface ParsedTokens {
-  isAutoplay: boolean
-  isHoverPause: boolean
   isDraggable: boolean
   isCenter: boolean
   isNone: boolean
@@ -18,10 +17,7 @@ function parseSliderValue(raw: string | undefined): ParsedTokens {
     .trim()
     .split(/\s+/)
     .filter(Boolean)
-  const isHoverPause = tokens.includes('autoplay-hover')
   return {
-    isAutoplay: isHoverPause || tokens.includes('autoplay'),
-    isHoverPause,
     isDraggable: tokens.includes('draggable'),
     isCenter: tokens.includes('center'),
     isNone: tokens.includes('none'),
@@ -42,9 +38,13 @@ function setupOne(ctx: FeatureContext, root: HTMLElement, config: Config): (() =
   if (items.length === 0) return undefined
 
   const opts = ctx.options
-  const duration = parseNum(config['aa-duration'], opts.duration ?? 0.6)
-  const delay = parseNum(config['aa-delay'], 3)
-  const ease = config['aa-ease'] ?? opts.ease ?? 'power2.out'
+  const duration = parseNum(config['aa-duration'], opts.duration)
+  const ease = config['aa-ease'] ?? opts.ease
+  const autoplay = parseAutoplay(
+    config['aa-autoplay'],
+    opts.autoplay,
+    'aa-autoplay' in config,
+  )
 
   // Use the slider-item's parent (the track) for gap detection.
   const firstItemParent = items[0].parentElement
@@ -58,12 +58,25 @@ function setupOne(ctx: FeatureContext, root: HTMLElement, config: Config): (() =
 
   // Forward declare so the drag callbacks (which run via horizontalLoop) can
   // reach the autoplay controller defined below.
-  let autoplay: AutoplayController | null = null
+  let autoplayCtl: AutoplayController | null = null
 
-  const restartAutoplayIfNotHovered = (): void => {
-    if (!autoplay) return
-    const hovered = root.matches(':hover') && !window.matchMedia('(hover: none)').matches
-    if (!hovered) autoplay.start()
+  // Restart after a manual nav (button click, keyboard, drag throw). With
+  // hover-pause we must NOT restart while the cursor is still over the slider
+  // — restarting here would skip the mouseenter pause hook (mouseenter only
+  // fires on entry, not when already inside) and the autoplay would cycle
+  // through hover, defeating hover-pause. The autoplay's own mouseleave
+  // handler picks up the restart when the cursor leaves. Without hover-pause
+  // there is no mouseleave handler at all, so restart unconditionally —
+  // otherwise clicking next while the cursor sits on the button leaves
+  // autoplay stopped forever.
+  const restartAutoplayAfterManualNav = (): void => {
+    if (!autoplayCtl) return
+    if (autoplay.hoverPause) {
+      const hovered = root.matches(':hover') && !window.matchMedia('(hover: none)').matches
+      if (!hovered) autoplayCtl.start()
+    } else {
+      autoplayCtl.start()
+    }
   }
 
   const slider: SliderLoop = horizontalLoop(ctx.gsap, items, {
@@ -75,47 +88,57 @@ function setupOne(ctx: FeatureContext, root: HTMLElement, config: Config): (() =
     draggable: tokens.isDraggable,
     onChange: nav.onChange,
     onDragStart: () => {
-      autoplay?.setDragInProgress(true)
-      autoplay?.stop()
+      autoplayCtl?.setDragInProgress(true)
+      autoplayCtl?.stop()
+    },
+    onRelease: (isThrowing) => {
+      // No throw means a static press / click with no drag movement —
+      // onThrowComplete will never fire, so we must clear the drag flag and
+      // attempt a restart here. With a real throw, defer to onThrowComplete
+      // which runs after the inertia tween lands on its snap target.
+      if (!isThrowing) {
+        autoplayCtl?.setDragInProgress(false)
+        restartAutoplayAfterManualNav()
+      }
     },
     onThrowComplete: () => {
       // Throw landed on a snap target → safe to restart autoplay so the
       // progress bar starts fresh on the correct active slide.
-      autoplay?.setDragInProgress(false)
-      restartAutoplayIfNotHovered()
+      autoplayCtl?.setDragInProgress(false)
+      restartAutoplayAfterManualNav()
     },
   })
 
   const cleanups: Array<() => void> = []
 
   // Autoplay (optional). Hooks into ScrollTrigger viewport gating itself.
-  if (tokens.isAutoplay) {
-    autoplay = setupAutoplay(ctx.gsap, root, slider, {
-      delay,
+  if (autoplay.enabled) {
+    autoplayCtl = setupAutoplay(ctx.gsap, root, slider, {
+      interval: autoplay.interval,
       duration,
       ease,
-      hoverPause: tokens.isHoverPause,
+      hoverPause: autoplay.hoverPause,
     })
-    cleanups.push(() => autoplay?.destroy())
+    cleanups.push(() => autoplayCtl?.destroy())
   }
 
   const afterManualNav = (): void => {
-    if (autoplay) gsap.delayedCall(0.1, restartAutoplayIfNotHovered)
+    if (autoplayCtl) gsap.delayedCall(0.1, restartAutoplayAfterManualNav)
   }
 
   const navHandlers = {
     next: () => {
-      autoplay?.stop()
+      autoplayCtl?.stop()
       slider.next({ duration, ease })
       afterManualNav()
     },
     previous: () => {
-      autoplay?.stop()
+      autoplayCtl?.stop()
       slider.previous({ duration, ease })
       afterManualNav()
     },
     toIndex: (target: number) => {
-      autoplay?.stop()
+      autoplayCtl?.stop()
       slider.toIndex(target, { duration, ease })
       afterManualNav()
     },

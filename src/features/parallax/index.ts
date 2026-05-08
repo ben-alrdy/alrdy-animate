@@ -45,7 +45,7 @@ function setupOne(ctx: FeatureContext, element: Element, config: Config): undefi
   const prop = isHorizontal ? 'xPercent' : 'yPercent'
 
   const opts = ctx.options
-  const distance = parseNum(config['aa-distance'], opts.distance ?? 1)
+  const distance = parseNum(config['aa-distance'], opts.distance)
   const startVal = parseNum(config['aa-parallax-start'], 10 * distance)
   const endVal = parseNum(config['aa-parallax-end'], -10 * distance)
   const scrub = parseScrub(config['aa-scrub'])

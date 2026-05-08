@@ -1,7 +1,12 @@
 import type { FeatureContext, FeatureModule } from '../../core/registry'
 import { bindAgainTrigger } from '../../core/scroll-trigger'
 import { readAttrs, type Config } from '../../core/settings'
-import { buildStagger, parseStaggerSpec, type StaggerValue } from '../../core/stagger'
+import {
+  buildStagger,
+  defaultStaggerFor,
+  parseStaggerSpec,
+  type StaggerValue,
+} from '../../core/stagger'
 import { REVERSE_TIME_SCALE, resolveTrigger, subscribeWithPair } from '../../core/trigger'
 
 type FromState = Record<string, number | string>
@@ -105,20 +110,20 @@ function setupOne(
   if (!animate) return
 
   const opts = ctx.options
-  const duration = parseNum(config['aa-duration'], opts.duration!)
+  const duration = parseNum(config['aa-duration'], opts.duration)
   const delay = parseNum(config['aa-delay'], 0)
-  const ease = config['aa-ease'] ?? opts.ease!
-  const distance = parseNum(config['aa-distance'], opts.distance!)
+  const ease = config['aa-ease'] ?? opts.ease
+  const distance = parseNum(config['aa-distance'], opts.distance)
 
   const fromState = buildFromState(animate, distance)
   if (!fromState) return
 
-  const scrollEnd = config['aa-scroll-end'] ?? opts.scrollEnd!
+  const scrollEnd = config['aa-scroll-end'] ?? opts.scrollEnd
   const scrub = parseScrub(config['aa-scrub'])
   const scrollStart =
     config['aa-scroll-start'] ??
     (scrub !== undefined ? opts.scrubStart : undefined) ??
-    opts.scrollStart!
+    opts.scrollStart
   const again = opts.again !== false
 
   // aa-stagger present + element has children → stagger the children.
@@ -128,7 +133,7 @@ function setupOne(
     ? Array.from(element.children).filter((c): c is Element => c.nodeType === 1)
     : []
   const targets: Element[] = children.length > 0 ? children : [element]
-  const staggerSpec = parseStaggerSpec(config['aa-stagger'], 0.1)
+  const staggerSpec = parseStaggerSpec(config['aa-stagger'], defaultStaggerFor(undefined, opts))
   const stagger: StaggerValue =
     children.length > 0 ? buildStagger(staggerSpec.unit, staggerSpec.flags) : 0
 

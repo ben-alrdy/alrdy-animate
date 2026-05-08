@@ -8,6 +8,19 @@ import StaggerGrid from '../../../../components/StaggerGrid.astro'
 
 `aa-stagger` adds time between sibling animations — either children of an animated parent (e.g. `aa-animate="fade-up"` + `aa-stagger="0.1"`) or split-text units inside a `text-*` animation. The first numeric token is the unit time in seconds; flags after it change origin, randomize the order, or treat the elements as a 2D grid.
 
+If you omit `aa-stagger`, the unit defaults to a value chosen by the resolved split mode — `chars` cascades faster than `words`, which cascades faster than `lines`. The defaults are configurable on init:
+
+```js
+init({
+  stagger: {
+    chars: 0.02,    // per char
+    words: 0.05,    // per word
+    lines: 0.1,     // per line (or per group when line-grouped)
+    default: 0.1,   // aa-children with no aa-split
+  },
+})
+```
+
 ## Grammar
 
 | Token        | What it does                                                              |

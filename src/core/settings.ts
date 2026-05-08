@@ -17,6 +17,7 @@ export const VALUE_BEARING_ATTRS = [
   'aa-parallax-end',
   'aa-slider',
   'aa-tabs',
+  'aa-autoplay',
 ] as const
 
 export type ValueAttr = (typeof VALUE_BEARING_ATTRS)[number]

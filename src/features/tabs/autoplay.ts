@@ -95,7 +95,7 @@ export function setupAutoplay(
       if (!p) return
       gsap.killTweensOf(p.target)
       if (mode === 'play' && i === idx) {
-        const dwell = entries[i].delay > 0 ? entries[i].delay : 5
+        const dwell = entries[i].interval
         gsap.fromTo(p.target, progressFromValues(p), {
           ...progressToValues(p),
           duration: dwell,
@@ -128,14 +128,14 @@ export function setupAutoplay(
     currentIdx = next
     api.open(entries[next])
     setProgress(next, 'play')
-    const dwell = entries[next].delay > 0 ? entries[next].delay : 5
+    const dwell = entries[next].interval
     autoplayCall = gsap.delayedCall(dwell, tick)
   }
 
   const start = (): void => {
     if (autoplayCall) return
     setProgress(currentIdx, 'play')
-    const dwell = entries[currentIdx].delay > 0 ? entries[currentIdx].delay : 5
+    const dwell = entries[currentIdx].interval
     autoplayCall = gsap.delayedCall(dwell, tick)
   }
 
@@ -176,7 +176,7 @@ export function setupAutoplay(
     }
     isPausedByHover = false
     setProgress(idx, 'play')
-    const dwell = entries[idx].delay > 0 ? entries[idx].delay : 5
+    const dwell = entries[idx].interval
     autoplayCall = gsap.delayedCall(dwell, tick)
   }
 

@@ -2,7 +2,12 @@ import type { GsapTimeline } from '../../core/gsap-detect'
 import type { FeatureContext, FeatureModule } from '../../core/registry'
 import { bindAgainTrigger } from '../../core/scroll-trigger'
 import { readAttrs, type Config } from '../../core/settings'
-import { buildStagger, parseStaggerSpec, type StaggerValue } from '../../core/stagger'
+import {
+  buildStagger,
+  defaultStaggerFor,
+  parseStaggerSpec,
+  type StaggerValue,
+} from '../../core/stagger'
 import { REVERSE_TIME_SCALE, resolveTrigger, subscribeWithPair } from '../../core/trigger'
 import { applySplit, parseSplit, type SplitMode, type SplitResult } from '../../split/runtime'
 
@@ -24,7 +29,6 @@ interface SetupResult {
 
 interface TextAnim {
   defaultSplit: SplitMode
-  defaultStagger: number
   maskLines?: boolean
   /** Simple path: just animate the split parts from `buildFrom` to `to`. */
   buildFrom?: (distance: number) => State
@@ -65,108 +69,94 @@ function unwrapLines(wrappers: HTMLElement[]): void {
   }
 }
 
-// Per-animation defaults are intentionally limited to split mode and stagger.
-// Duration and ease always fall through to init({ duration, ease }) and the
-// global hard-coded fallback (0.6s, power3.out).
+// Per-animation entries declare only structural defaults: which split mode the
+// animation expects and whether lines are masked. All timing — duration, ease,
+// stagger — flows from init({...}); stagger varies per split mode via
+// defaultStaggerFor().
 const TEXT_ANIMS: Record<string, TextAnim> = {
-  // ---------- Fade (chars / 0.02) ----------
+  // ---------- Fade ----------
   'text-fade': {
     defaultSplit: 'chars',
-    defaultStagger: 0.02,
     buildFrom: () => ({ opacity: 0 }),
     to: { opacity: 1 },
   },
   'text-fade-30': {
     defaultSplit: 'chars',
-    defaultStagger: 0.02,
     buildFrom: () => ({ opacity: 0.3 }),
     to: { opacity: 1 },
   },
   'text-fade-10': {
     defaultSplit: 'chars',
-    defaultStagger: 0.02,
     buildFrom: () => ({ opacity: 0.1 }),
     to: { opacity: 1 },
   },
   'text-fade-up': {
     defaultSplit: 'chars',
-    defaultStagger: 0.02,
     buildFrom: (d) => ({ opacity: 0, yPercent: 60 * d }),
     to: { opacity: 1, yPercent: 0 },
   },
   'text-fade-down': {
     defaultSplit: 'chars',
-    defaultStagger: 0.02,
     buildFrom: (d) => ({ opacity: 0, yPercent: -60 * d }),
     to: { opacity: 1, yPercent: 0 },
   },
   'text-fade-left': {
     defaultSplit: 'chars',
-    defaultStagger: 0.02,
     buildFrom: (d) => ({ opacity: 0, xPercent: 60 * d }),
     to: { opacity: 1, xPercent: 0 },
   },
   'text-fade-right': {
     defaultSplit: 'chars',
-    defaultStagger: 0.02,
     buildFrom: (d) => ({ opacity: 0, xPercent: -60 * d }),
     to: { opacity: 1, xPercent: 0 },
   },
 
-  // ---------- Blur (chars / 0.02) ----------
+  // ---------- Blur ----------
   'text-blur': {
     defaultSplit: 'chars',
-    defaultStagger: 0.02,
     buildFrom: () => ({ opacity: 0, filter: 'blur(20px)' }),
     to: { opacity: 1, filter: 'blur(0px)' },
   },
   'text-blur-up': {
     defaultSplit: 'chars',
-    defaultStagger: 0.02,
     maskLines: true,
     buildFrom: () => ({ opacity: 0, filter: 'blur(10px)', yPercent: 110 }),
     to: { opacity: 1, filter: 'blur(0px)', yPercent: 0 },
   },
   'text-blur-down': {
     defaultSplit: 'chars',
-    defaultStagger: 0.02,
     maskLines: true,
     buildFrom: () => ({ opacity: 0, filter: 'blur(10px)', yPercent: -110 }),
     to: { opacity: 1, filter: 'blur(0px)', yPercent: 0 },
   },
   'text-blur-left': {
     defaultSplit: 'chars',
-    defaultStagger: 0.02,
     buildFrom: (d) => ({ opacity: 0, filter: 'blur(10px)', x: 30 * d }),
     to: { opacity: 1, filter: 'blur(0px)', x: 0 },
   },
   'text-blur-right': {
     defaultSplit: 'chars',
-    defaultStagger: 0.02,
     buildFrom: (d) => ({ opacity: 0, filter: 'blur(10px)', x: -30 * d }),
     to: { opacity: 1, filter: 'blur(0px)', x: 0 },
   },
 
-  // ---------- Slide (lines / 0.2) ----------
+  // ---------- Slide ----------
   'text-slide-up': {
     defaultSplit: 'lines',
-    defaultStagger: 0.2,
     maskLines: true,
     buildFrom: () => ({ yPercent: 110 }),
     to: { yPercent: 0 },
   },
   'text-slide-down': {
     defaultSplit: 'lines',
-    defaultStagger: 0.2,
     maskLines: true,
     buildFrom: () => ({ yPercent: -110 }),
     to: { yPercent: 0 },
   },
 
-  // ---------- Tilt (lines / 0.2) ----------
+  // ---------- Tilt ----------
   'text-tilt-up': {
     defaultSplit: 'lines',
-    defaultStagger: 0.2,
     maskLines: true,
     buildFrom: () => ({
       yPercent: 110,
@@ -178,7 +168,6 @@ const TEXT_ANIMS: Record<string, TextAnim> = {
   },
   'text-tilt-down': {
     defaultSplit: 'lines',
-    defaultStagger: 0.2,
     maskLines: true,
     buildFrom: () => ({
       yPercent: -110,
@@ -189,10 +178,9 @@ const TEXT_ANIMS: Record<string, TextAnim> = {
     to: { yPercent: 0, opacity: 1, rotation: 0 },
   },
 
-  // ---------- Per-line clip / perspective wrappers (lines / 0.2) ----------
+  // ---------- Per-line clip / perspective wrappers ----------
   'text-oval-up': {
     defaultSplit: 'lines',
-    defaultStagger: 0.2,
     setup: ({ split }) => {
       const wrappers = wrapLines(split.lines, 'aa-oval-line', OVAL_LINE_STYLE)
       return {
@@ -205,7 +193,6 @@ const TEXT_ANIMS: Record<string, TextAnim> = {
   },
   'text-oval-down': {
     defaultSplit: 'lines',
-    defaultStagger: 0.2,
     setup: ({ split }) => {
       const wrappers = wrapLines(split.lines, 'aa-oval-line', OVAL_LINE_STYLE)
       return {
@@ -218,7 +205,6 @@ const TEXT_ANIMS: Record<string, TextAnim> = {
   },
   'text-rotate': {
     defaultSplit: 'lines',
-    defaultStagger: 0.2,
     setup: ({ element, split }) => {
       const fontSize = parseFloat(window.getComputedStyle(element).fontSize) || 16
       const perspective = `${fontSize * 5}px`
@@ -396,12 +382,12 @@ function setupBarReveal(
   const { mode, dir } = parsed
   const isBlock = mode === 'block'
   const opts = ctx.options
-  const duration = parseNum(config['aa-duration'], isBlock ? 1 : 0.6)
+  const duration = parseNum(config['aa-duration'], opts.duration)
   const delay = parseNum(config['aa-delay'], 0)
-  const ease = config['aa-ease'] ?? (isBlock ? (opts.ease ?? 'power3.out') : 'power3.inOut')
-  const { unit: stagger } = parseStaggerSpec(config['aa-stagger'], 0.1)
-  const scrollStart = config['aa-scroll-start'] ?? opts.scrollStart!
-  const scrollEnd = config['aa-scroll-end'] ?? opts.scrollEnd!
+  const ease = config['aa-ease'] ?? opts.ease
+  const { unit: stagger } = parseStaggerSpec(config['aa-stagger'], defaultStaggerFor('lines', opts))
+  const scrollStart = config['aa-scroll-start'] ?? opts.scrollStart
+  const scrollEnd = config['aa-scroll-end'] ?? opts.scrollEnd
   const scrub = parseScrub(config['aa-scrub'])
   const again = opts.again !== false
 
@@ -541,20 +527,20 @@ function setupOne(
   const anim = TEXT_ANIMS[animate]
 
   const opts = ctx.options
-  const duration = parseNum(config['aa-duration'], opts.duration!)
+  const duration = parseNum(config['aa-duration'], opts.duration)
   const delay = parseNum(config['aa-delay'], 0)
-  const ease = config['aa-ease'] ?? opts.ease!
-  const distance = parseNum(config['aa-distance'], opts.distance!)
-  const staggerSpec = parseStaggerSpec(config['aa-stagger'], anim.defaultStagger)
-  const stagger: StaggerValue = buildStagger(staggerSpec.unit, staggerSpec.flags)
-  const lineStagger = staggerSpec.line
-  const scrollStart = config['aa-scroll-start'] ?? opts.scrollStart!
-  const scrollEnd = config['aa-scroll-end'] ?? opts.scrollEnd!
+  const ease = config['aa-ease'] ?? opts.ease
+  const distance = parseNum(config['aa-distance'], opts.distance)
+  const scrollStart = config['aa-scroll-start'] ?? opts.scrollStart
+  const scrollEnd = config['aa-scroll-end'] ?? opts.scrollEnd
   const scrub = parseScrub(config['aa-scrub'])
   const again = opts.again !== false
 
   const userSplit = parseSplit(config['aa-split'])
   const splitMode = userSplit?.mode ?? anim.defaultSplit
+  const staggerSpec = parseStaggerSpec(config['aa-stagger'], defaultStaggerFor(splitMode, opts))
+  const stagger: StaggerValue = buildStagger(staggerSpec.unit, staggerSpec.flags)
+  const lineStagger = staggerSpec.line
   const lineGrouped = userSplit?.groupBy === 'lines' && !anim.setup
   const maskGranularity: SplitMode | undefined = userSplit?.mask
     ? userSplit.groupBy === 'lines'
