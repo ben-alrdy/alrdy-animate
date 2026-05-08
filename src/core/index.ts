@@ -13,6 +13,7 @@ import { loadFeatures, type FeatureContext } from './registry'
 import { clearAll as clearResize, subscribe as subscribeResize } from './resize'
 import { scan } from './scanner'
 import { addDisposer, resolveBreakpoints, resolveOptions, runAllDisposers, state } from './state'
+import { initSmoothScroll } from '../smooth-scroll/index'
 
 let activeHandles: { gsap: GsapHandle; responsive: ResponsiveController } | null = null
 
@@ -76,6 +77,12 @@ export async function init(options: InitOptions = {}): Promise<void> {
     // ignore
   }
 
+  const smoothScrollOpt = state.options.smoothScroll
+  if (smoothScrollOpt) {
+    const smooth = initSmoothScroll(gsapHandle, smoothScrollOpt, debug)
+    if (smooth) addDisposer(smooth.dispose)
+  }
+
   const responsive = createResponsiveController(gsapHandle, state.breakpoints)
   activeHandles = { gsap: gsapHandle, responsive }
 
@@ -107,10 +114,12 @@ export async function init(options: InitOptions = {}): Promise<void> {
   }
 
   if (debug) {
+    const lenisActive = typeof window !== 'undefined' && !!window.lenis
     console.log(
       `[alrdy-animate] initialized. Features: ${[...features].join(', ') || '(none)'}; ` +
         `Plugins: ${[...requiredPlugins].join(', ') || '(none)'}; ` +
-        `Elements: ${elements.length}`,
+        `Elements: ${elements.length}; ` +
+        `SmoothScroll: ${lenisActive ? 'lenis' : 'off'}`,
     )
   }
 }

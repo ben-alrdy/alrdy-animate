@@ -13,7 +13,10 @@ export const DEFAULT_BREAKPOINTS: Breakpoints = {
  * `ctx.options`, which has these merged in.
  */
 export const DEFAULT_OPTIONS: Required<
-  Pick<InitOptions, 'duration' | 'ease' | 'distance' | 'scrollStart' | 'scrollEnd' | 'again'>
+  Pick<
+    InitOptions,
+    'duration' | 'ease' | 'distance' | 'scrollStart' | 'scrollEnd' | 'again' | 'smoothScroll'
+  >
 > = {
   duration: 0.6,
   ease: 'power4.out',
@@ -21,6 +24,7 @@ export const DEFAULT_OPTIONS: Required<
   scrollStart: 'top 92%',
   scrollEnd: 'bottom 70%',
   again: true,
+  smoothScroll: true,
 }
 
 export function resolveOptions(opts: InitOptions): InitOptions {
