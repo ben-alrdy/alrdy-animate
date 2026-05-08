@@ -3,7 +3,7 @@ import type { FeatureContext, FeatureModule } from '../../core/registry'
 import { bindAgainTrigger } from '../../core/scroll-trigger'
 import { readAttrs, type Config } from '../../core/settings'
 import { buildStagger, parseStaggerSpec, type StaggerValue } from '../../core/stagger'
-import { onCustomTrigger, parseTrigger } from '../../core/trigger'
+import { REVERSE_TIME_SCALE, resolveTrigger, subscribeWithPair } from '../../core/trigger'
 import { applySplit, parseSplit, type SplitMode, type SplitResult } from '../../split/runtime'
 
 type GsapTarget = Element | Element[] | NodeList
@@ -476,15 +476,23 @@ function setupBarReveal(
     split.revert()
   }
 
-  const trigger = parseTrigger(config['aa-trigger'])
+  const trigger = resolveTrigger(element, config['aa-trigger'])
 
   if (trigger.kind === 'event' && trigger.eventName) {
     const tl = buildTl({ paused: true, delay })
-    const eventName = trigger.eventName
-    const off = onCustomTrigger((target, name) => {
-      if (name !== eventName) return
-      if (target !== element && !target.contains(element)) return
-      tl.play()
+    const off = subscribeWithPair({
+      element,
+      forwardName: trigger.eventName,
+      onForward: () => {
+        // Always restart from the FROM state so an interrupted reverse doesn't
+        // leak into the next play. Matches the user-facing "fresh start"
+        // expectation when reopening a tab / reactivating a slide. Reset
+        // timeScale to 1 in case a prior reverse left it accelerated.
+        tl.timeScale(1).play(0)
+      },
+      onReverse: () => {
+        tl.timeScale(REVERSE_TIME_SCALE).reverse()
+      },
     })
     return () => {
       off()
@@ -617,16 +625,27 @@ function setupOne(
     }
   }
 
-  const trigger = parseTrigger(config['aa-trigger'])
+  const trigger = resolveTrigger(element, config['aa-trigger'])
 
   if (trigger.kind === 'event' && trigger.eventName) {
+    const tl = ctx.gsap.gsap.timeline({ paused: true, delay })
+    addTweens(tl)
+    // Lock the resting state explicitly so the paused-at-0 timeline shows the
+    // from-state visually, not whatever GSAP would compute from a stale layout.
     ctx.gsap.gsap.set(targets, fromState)
-    const eventName = trigger.eventName
-    const off = onCustomTrigger((target, name) => {
-      if (name !== eventName) return
-      if (target !== element && !target.contains(element)) return
-      const evtTl = ctx.gsap.gsap.timeline({ delay })
-      addTweens(evtTl)
+    const off = subscribeWithPair({
+      element,
+      forwardName: trigger.eventName,
+      onForward: () => {
+        // Always restart from the FROM state so an interrupted reverse doesn't
+        // leak into the next play. Matches the user-facing "fresh start"
+        // expectation when reopening a tab / reactivating a slide. Reset
+        // timeScale to 1 in case a prior reverse left it accelerated.
+        tl.timeScale(1).play(0)
+      },
+      onReverse: () => {
+        tl.timeScale(REVERSE_TIME_SCALE).reverse()
+      },
     })
     return () => {
       off()

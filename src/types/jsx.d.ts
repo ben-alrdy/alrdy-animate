@@ -56,14 +56,18 @@ declare namespace JSX {
     'aa-parallax-end'?: string | number
 
     // Feature anchors
-    'aa-accordion'?: string | boolean
-    'aa-accordion-toggle'?: string
-    'aa-accordion-content'?: string
-    'aa-accordion-wrapper'?: string | boolean
-    'aa-accordion-progress'?: string | boolean
-    'aa-accordion-status'?: string
-    'aa-accordion-initial'?: string
-    'aa-accordion-visual'?: string
+    'aa-tabs'?: string | boolean
+    'aa-tabs-sm'?: string
+    'aa-tabs-md'?: string
+    'aa-tabs-lg'?: string
+    'aa-tabs-xl'?: string
+    'aa-tabs-toggle'?: string
+    'aa-tabs-content'?: string
+    'aa-tabs-visual'?: string
+    'aa-tabs-wrapper'?: string | boolean
+    'aa-tabs-progress'?: string | boolean
+    'aa-tabs-status'?: string
+    'aa-tabs-initial'?: string | boolean
 
     'aa-marquee'?: string | boolean
     'aa-marquee-scroller'?: string | boolean

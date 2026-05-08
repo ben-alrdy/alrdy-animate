@@ -7,6 +7,14 @@ export interface ParsedTrigger {
 
 export const CUSTOM_EVENT_NAME = 'aa:trigger'
 
+/**
+ * Multiplier applied to event-triggered animations on reverse, so the
+ * exit feels snappier than the entrance (matches v7's 2× reverse).
+ * Forward = 1, reverse = `REVERSE_TIME_SCALE`. Consumers reset to 1 on
+ * forward so the scale doesn't leak between cycles.
+ */
+export const REVERSE_TIME_SCALE = 2
+
 export function parseTrigger(value: string | undefined): ParsedTrigger {
   if (!value) return { kind: 'scroll' }
   const trimmed = value.trim()
@@ -24,12 +32,13 @@ export function parseTrigger(value: string | undefined): ParsedTrigger {
  * explicit `aa-trigger` value.
  *
  * Order matters: the *closest* match wins, which is the right call for nested
- * components (e.g. an accordion inside a slider — accordion-open beats
- * slide-active because it's closer to the animated element).
+ * components (e.g. tabs inside a slider — tab-active beats slide-active
+ * because it's closer to the animated element).
  */
 const INFERENCE_CONTAINERS: ReadonlyArray<{ selector: string; eventName: string }> = [
   { selector: '[aa-modal-target]', eventName: 'modal-open' },
-  { selector: '[aa-accordion-content]', eventName: 'accordion-open' },
+  { selector: '[aa-tabs-content]', eventName: 'tab-active' },
+  { selector: '[aa-tabs-visual]', eventName: 'tab-active' },
   { selector: '[aa-slider-item]', eventName: 'slide-active' },
 ]
 

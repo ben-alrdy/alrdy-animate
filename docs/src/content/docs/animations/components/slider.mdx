@@ -179,24 +179,24 @@ Each slide contains a heading and paragraph with plain `aa-animate="fade-up"` â€
 <Demo>
   <div data-demo-stage>
     <div data-spacer></div>
-    <div class="aa-slider-demo" aa-slider="autoplay" aa-duration="0.5" aa-delay="3">
+    <div class="aa-slider-demo aa-slider-demo-wide" aa-slider="autoplay center" aa-duration="0.5" aa-delay="3">
       <div class="aa-slider-track">
         <div class="aa-slider-card aa-slider-card-tall" aa-slider-item>
           <div class="aa-slider-card__inner">
-            <h3 class="aa-slider-h" aa-animate="fade-up">Discover</h3>
-            <p class="aa-slider-p" aa-animate="fade-up" aa-delay="0.15">Headlines fade up when the slide becomes active and reverse when it leaves.</p>
+            <h3 class="aa-slider-h" aa-animate="text-fade-up" aa-split="lines mask">Discover the moment a slide takes the stage</h3>
+            <p class="aa-slider-p" aa-animate="text-fade-up" aa-split="lines mask" aa-delay="0.15">Headlines slide up by line when the slide becomes active and reverse on the way out.</p>
           </div>
         </div>
         <div class="aa-slider-card aa-slider-card-tall" aa-slider-item>
           <div class="aa-slider-card__inner">
-            <h3 class="aa-slider-h" aa-animate="fade-up">Iterate</h3>
-            <p class="aa-slider-p" aa-animate="fade-up" aa-delay="0.15">Same primitive â€” different trigger, picked up automatically from the container.</p>
+            <h3 class="aa-slider-h" aa-animate="text-fade-up" aa-split="lines mask">Iterate without rewriting the trigger</h3>
+            <p class="aa-slider-p" aa-animate="text-fade-up" aa-split="lines mask" aa-delay="0.15">Same primitive â€” different trigger, picked up automatically from the slider-item ancestor.</p>
           </div>
         </div>
         <div class="aa-slider-card aa-slider-card-tall" aa-slider-item>
           <div class="aa-slider-card__inner">
-            <h3 class="aa-slider-h" aa-animate="fade-up">Ship</h3>
-            <p class="aa-slider-p" aa-animate="fade-up" aa-delay="0.15">Names ending in <code>-active</code> auto-pair with <code>-inactive</code> for reverse.</p>
+            <h3 class="aa-slider-h" aa-animate="text-fade-up" aa-split="lines mask">Ship with paired forward and reverse events</h3>
+            <p class="aa-slider-p" aa-animate="text-fade-up" aa-split="lines mask" aa-delay="0.15">Names ending in <code>-active</code> auto-pair with <code>-inactive</code> so the timeline reverses cleanly.</p>
           </div>
         </div>
       </div>
@@ -259,6 +259,9 @@ Each slide contains a heading and paragraph with plain `aa-animate="fade-up"` â€
   }
   .aa-slider-card-narrow.is-active .aa-slider-card__inner {
     opacity: 1;
+  }
+  .aa-slider-card-tall {
+    flex: 0 0 80%;
   }
   .aa-slider-card-tall .aa-slider-card__inner {
     padding: 3rem 1.5rem;

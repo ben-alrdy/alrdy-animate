@@ -2,10 +2,9 @@ import type { FeatureContext, FeatureModule } from '../../core/registry'
 import { bindAgainTrigger } from '../../core/scroll-trigger'
 import { readAttrs, type Config } from '../../core/settings'
 import { buildStagger, parseStaggerSpec, type StaggerValue } from '../../core/stagger'
-import { resolveTrigger, subscribeWithPair } from '../../core/trigger'
+import { REVERSE_TIME_SCALE, resolveTrigger, subscribeWithPair } from '../../core/trigger'
 
 type FromState = Record<string, number | string>
-type ToState = Record<string, number | string>
 
 const FROM_FOR: Record<string, (distance: number) => FromState> = {
   fade: () => ({ opacity: 0 }),
@@ -22,32 +21,56 @@ const FROM_FOR: Record<string, (distance: number) => FromState> = {
   'blur-in': () => ({ opacity: 0, filter: 'blur(20px)' }),
 }
 
-const TO_FOR: Record<string, ToState> = {
-  fade: { opacity: 1 },
-  'fade-up': { y: 0, opacity: 1 },
-  'fade-down': { y: 0, opacity: 1 },
-  'fade-left': { x: 0, opacity: 1 },
-  'fade-right': { x: 0, opacity: 1 },
-  'zoom-in': { scale: 1, opacity: 1 },
-  'zoom-out': { scale: 1, opacity: 1 },
-  'slide-up': { y: 0 },
-  'slide-down': { y: 0 },
-  'slide-left': { x: 0 },
-  'slide-right': { x: 0 },
-  'blur-in': { opacity: 1, filter: 'blur(0px)' },
+const STATIC_SUPPORTED = new Set(Object.keys(FROM_FOR))
+
+const ROTATE_PATTERN = /^rotate(?:-up)?(?:-(?:tl|tr|bl|br))?(?:-ccw)?$/
+
+const CORNER_TO_ORIGIN: Record<string, string> = {
+  tl: 'left top',
+  tr: 'right top',
+  bl: 'left bottom',
+  br: 'right bottom',
 }
 
-const SUPPORTED = new Set(Object.keys(FROM_FOR))
+function isRotateValue(value: string): boolean {
+  return ROTATE_PATTERN.test(value)
+}
+
+function buildRotateFromState(value: string, distance: number): FromState {
+  const ccw = value.endsWith('-ccw')
+  const cornerMatch = value.match(/-(tl|tr|bl|br)(?:-|$)/)
+  const corner = cornerMatch ? cornerMatch[1] : null
+  const up = /^rotate-up(?:-|$)/.test(value)
+  // CSS rotation: positive = clockwise tilt. We start at the inverse of the
+  // intended motion direction and animate back to 0, so a clockwise (default)
+  // entrance starts from a negative tilt; -ccw starts positive.
+  const degrees = 5 * distance * (ccw ? 1 : -1)
+  const state: FromState = { rotation: degrees, opacity: 0 }
+  if (up) state.y = `${3 * distance}rem`
+  if (corner) state.transformOrigin = CORNER_TO_ORIGIN[corner]
+  return state
+}
+
+function buildFromState(animate: string, distance: number): FromState | undefined {
+  const builder = FROM_FOR[animate]
+  if (builder) return builder(distance)
+  if (isRotateValue(animate)) return buildRotateFromState(animate, distance)
+  return undefined
+}
+
+function isSupportedValue(value: string): boolean {
+  return STATIC_SUPPORTED.has(value) || isRotateValue(value)
+}
 
 function elementMatches(el: Element): boolean {
   const value = el.getAttribute('aa-animate')
   if (!value) return false
   for (const part of value.split('|')) {
-    if (SUPPORTED.has(part.trim())) return true
+    if (isSupportedValue(part.trim())) return true
   }
   for (const bp of ['sm', 'md', 'lg', 'xl']) {
     const v = el.getAttribute(`aa-animate-${bp}`)
-    if (v && SUPPORTED.has(v.trim())) return true
+    if (v && isSupportedValue(v.trim())) return true
   }
   return false
 }
@@ -80,15 +103,16 @@ function setupOne(
 ): (() => void) | undefined {
   const animate = config['aa-animate']
   if (!animate) return
-  const fromBuilder = FROM_FOR[animate]
-  const toState = TO_FOR[animate]
-  if (!fromBuilder || !toState) return
 
   const opts = ctx.options
   const duration = parseNum(config['aa-duration'], opts.duration!)
   const delay = parseNum(config['aa-delay'], 0)
   const ease = config['aa-ease'] ?? opts.ease!
   const distance = parseNum(config['aa-distance'], opts.distance!)
+
+  const fromState = buildFromState(animate, distance)
+  if (!fromState) return
+
   const scrollEnd = config['aa-scroll-end'] ?? opts.scrollEnd!
   const scrub = parseScrub(config['aa-scrub'])
   const scrollStart =
@@ -108,20 +132,30 @@ function setupOne(
   const stagger: StaggerValue =
     children.length > 0 ? buildStagger(staggerSpec.unit, staggerSpec.flags) : 0
 
-  const fromState = fromBuilder(distance)
   const trigger = resolveTrigger(element, config['aa-trigger'])
 
+  // Use gsap.from() (not fromTo) so the natural CSS state of each target —
+  // its existing rotation, opacity, transform — is the destination. Authors
+  // can pre-style elements (e.g. a card with permanent rotate(8deg)) and the
+  // entrance still resolves to that state instead of clobbering it to 0.
+
   if (trigger.kind === 'event' && trigger.eventName) {
-    ctx.gsap.gsap.set(targets, fromState)
+    const tween = ctx.gsap.gsap.from(targets, {
+      ...fromState,
+      duration,
+      ease,
+      delay,
+      stagger,
+      paused: true,
+    })
     const off = subscribeWithPair({
       element,
       forwardName: trigger.eventName,
-      onForward: () => {
-        ctx.gsap.gsap.to(targets, { ...toState, duration, ease, delay, stagger })
-      },
-      onReverse: () => {
-        ctx.gsap.gsap.to(targets, { ...fromState, duration, ease })
-      },
+      // Always restart from time 0 so a reactivation lands on the FROM state
+      // even if the previous reverse hadn't finished. Reset timeScale to 1
+      // so a prior reverse doesn't leave the forward accelerated.
+      onForward: () => tween.timeScale(1).play(0),
+      onReverse: () => tween.timeScale(REVERSE_TIME_SCALE).reverse(),
     })
     return () => off()
   }
@@ -129,8 +163,8 @@ function setupOne(
   const triggerEl = resolveAnchor(element, config['aa-anchor'])
 
   if (scrub !== undefined) {
-    ctx.gsap.gsap.fromTo(targets, fromState, {
-      ...toState,
+    ctx.gsap.gsap.from(targets, {
+      ...fromState,
       duration,
       ease,
       delay,
@@ -146,7 +180,7 @@ function setupOne(
   }
 
   const tl = ctx.gsap.gsap.timeline({ paused: true })
-  tl.fromTo(targets, fromState, { ...toState, duration, ease, delay, stagger })
+  tl.from(targets, { ...fromState, duration, ease, delay, stagger })
 
   bindAgainTrigger({
     gsap: ctx.gsap,

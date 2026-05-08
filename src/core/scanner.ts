@@ -1,7 +1,7 @@
 import { VALUE_BEARING_ATTRS } from './settings'
 
 const FEATURE_ANCHOR_ATTRS = [
-  'aa-accordion',
+  'aa-tabs',
   'aa-marquee',
   'aa-nav',
   'aa-slider',
@@ -15,7 +15,7 @@ export type FeatureName =
   | 'text'
   | 'reveal'
   | 'parallax'
-  | 'accordion'
+  | 'tabs'
   | 'marquee'
   | 'nav'
   | 'slider'
@@ -56,7 +56,7 @@ export function scan(root: ParentNode = document): ScanResult {
   for (const attr of FEATURE_ANCHOR_ATTRS) {
     for (const el of root.querySelectorAll(`[${attr}]`)) {
       elements.add(el)
-      if (attr === 'aa-accordion') features.add('accordion')
+      if (attr === 'aa-tabs') features.add('tabs')
       else if (attr === 'aa-marquee') features.add('marquee')
       else if (attr === 'aa-nav') features.add('nav')
       else if (attr === 'aa-slider') features.add('slider')

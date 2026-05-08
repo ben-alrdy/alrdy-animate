@@ -88,6 +88,19 @@
   border: 0;
 }
 
+/*
+ * Tabs feature: clip the expanding content while it animates between
+ * height: 0 and height: auto. JS sets the inline height on open/close, the
+ * overflow rule keeps children clipped instead of bursting out before the
+ * tween catches up. Visual panels get will-change so cross-fades stay smooth.
+ */
+[aa-tabs-content] {
+  overflow: hidden;
+}
+[aa-tabs-visual] {
+  will-change: opacity;
+}
+
 @media (prefers-reduced-motion: reduce) {
   [aa-animate] {
     transition-duration: 0ms !important;

@@ -40,8 +40,14 @@ export interface GsapTween {
     (): number
     (value: number): GsapTween
   }
-  play: () => GsapTween
-  pause: () => GsapTween
+  timeScale: {
+    (): number
+    (value: number): GsapTween
+  }
+  /** Optional `from` time / label to jump to before resuming forward. */
+  play: (from?: number | string, suppressEvents?: boolean) => GsapTween
+  pause: (atTime?: number | string, suppressEvents?: boolean) => GsapTween
+  reverse: (from?: number | string, suppressEvents?: boolean) => GsapTween
 }
 
 export interface GsapTimeline extends GsapTween {
@@ -54,8 +60,13 @@ export interface GsapTimeline extends GsapTween {
     (): number
     (value: number): GsapTimeline
   }
-  play: () => GsapTimeline
-  pause: () => GsapTimeline
+  timeScale: {
+    (): number
+    (value: number): GsapTimeline
+  }
+  play: (from?: number | string, suppressEvents?: boolean) => GsapTimeline
+  pause: (atTime?: number | string, suppressEvents?: boolean) => GsapTimeline
+  reverse: (from?: number | string, suppressEvents?: boolean) => GsapTimeline
 }
 
 const PLUGIN_GLOBAL_NAMES: Record<string, string> = {

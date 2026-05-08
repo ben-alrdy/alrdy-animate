@@ -123,14 +123,24 @@ test.describe('slider demo page', () => {
       .locator('[aa-slider]')
       .filter({ has: page.locator('text=Discover') })
       .first()
-    const firstHeading = triggerSlider.locator('[aa-slider-item]').nth(0).locator('h3').first()
-    const secondHeading = triggerSlider.locator('[aa-slider-item]').nth(1).locator('h3').first()
+    // text-fade-up + aa-split="lines mask" tweens the .aa-line wrappers, not
+    // the h3 itself. Read opacity off the first line of each heading.
+    const firstLine = triggerSlider
+      .locator('[aa-slider-item]')
+      .nth(0)
+      .locator('h3 .aa-line')
+      .first()
+    const secondLine = triggerSlider
+      .locator('[aa-slider-item]')
+      .nth(1)
+      .locator('h3 .aa-line')
+      .first()
 
-    // First slide is active on init → its heading should be near full opacity
-    // after the fade-up runs (~0.5s duration).
+    // First slide is active on init → its heading lines should be near full
+    // opacity after the fade-up runs (~0.5s duration).
     await page.waitForTimeout(900)
     const initialOpacity = parseFloat(
-      await firstHeading.evaluate((el) => getComputedStyle(el as HTMLElement).opacity),
+      await firstLine.evaluate((el) => getComputedStyle(el as HTMLElement).opacity),
     )
     expect(initialOpacity).toBeGreaterThan(0.85)
 
@@ -138,15 +148,15 @@ test.describe('slider demo page', () => {
     await triggerSlider.locator('[aa-slider-next]').click()
     await page.waitForTimeout(900)
 
-    // Slide 1's heading should reverse back toward 0 opacity.
+    // Slide 1's heading lines should reverse back toward 0 opacity.
     const reversedOpacity = parseFloat(
-      await firstHeading.evaluate((el) => getComputedStyle(el as HTMLElement).opacity),
+      await firstLine.evaluate((el) => getComputedStyle(el as HTMLElement).opacity),
     )
     expect(reversedOpacity).toBeLessThan(0.5)
 
-    // Slide 2's heading should now be near full opacity.
+    // Slide 2's heading lines should now be near full opacity.
     const secondOpacity = parseFloat(
-      await secondHeading.evaluate((el) => getComputedStyle(el as HTMLElement).opacity),
+      await secondLine.evaluate((el) => getComputedStyle(el as HTMLElement).opacity),
     )
     expect(secondOpacity).toBeGreaterThan(0.85)
   })

@@ -1,0 +1,120 @@
+---
+title: rotate
+description: Rotational entrance. Element rotates in from a small offset (default 5°) while fading in. Pick a corner pivot, swap direction, or combine with an upward translate.
+---
+
+import Demo from '../../../../components/Demo.astro'
+
+`rotate` fades the element in from opacity 0 while tilting it from a 5° offset back to its natural rotation. Add a corner suffix (`-tl`, `-tr`, `-bl`, `-br`) to pivot from that corner, `-ccw` to flip the direction, and use `rotate-up` to combine the rotation with the same upward translate as `fade-up`.
+
+The animation is built with `gsap.from()`, so any rotation, opacity, or transform you set in CSS becomes the destination — a card with a permanent `rotate(8deg)` will land back on `8deg`, not `0`.
+
+## Variants
+
+| `aa-animate`         | What it does                                                         |
+| -------------------- | -------------------------------------------------------------------- |
+| `rotate`             | rotates clockwise into place + opacity 0 → natural                   |
+| `rotate-ccw`         | rotates counter-clockwise into place                                  |
+| `rotate-tl` · `-tr` · `-bl` · `-br` | pivots from the named corner instead of center      |
+| `rotate-up`          | combines rotation with `fade-up`'s translate (3rem × distance)        |
+| `rotate-up-bl-ccw`   | every modifier composes — pick a corner, a direction, optionally up   |
+
+## Attributes
+
+| Attribute     | Default      | Notes                                                                  |
+| ------------- | ------------ | ---------------------------------------------------------------------- |
+| `aa-animate`  | (required)   | one of the variants above                                              |
+| `aa-distance` | `1`          | multiplier on the 5° angle (and on the 3rem y-offset for `rotate-up`)  |
+| `aa-duration` | `0.6`        | seconds                                                                |
+| `aa-delay`    | `0`          | seconds                                                                |
+| `aa-ease`     | `power4.out` | any GSAP ease                                                          |
+| `aa-stagger`  | (off)        | when set on a parent with children, staggers the children              |
+| `aa-scrub`    | (off)        | `true` or seconds — bind progress to scroll                            |
+
+## Required GSAP plugins
+
+`gsap`, `ScrollTrigger`.
+
+## Corners and directions
+
+<Demo>
+  <div data-demo-stage>
+    <div data-spacer></div>
+    <div class="demo-grid">
+      <div class="demo-card" aa-animate="rotate" aa-duration="1">rotate</div>
+      <div class="demo-card" aa-animate="rotate-ccw" aa-duration="1">rotate-ccw</div>
+      <div class="demo-card" aa-animate="rotate-bl" aa-duration="1">rotate-bl</div>
+      <div class="demo-card" aa-animate="rotate-br-ccw" aa-duration="1">rotate-br-ccw</div>
+      <div class="demo-card" aa-animate="rotate-tl" aa-duration="1">rotate-tl</div>
+      <div class="demo-card" aa-animate="rotate-tr-ccw" aa-duration="1">rotate-tr-ccw</div>
+    </div>
+    <div data-spacer></div>
+  </div>
+</Demo>
+
+## With upward translate
+
+`rotate-up` adds the same `3rem × distance` upward translate that `fade-up` uses. Combine it with corner and direction modifiers freely.
+
+<Demo>
+  <div data-demo-stage>
+    <div data-spacer></div>
+    <div class="demo-grid">
+      <div class="demo-card" aa-animate="rotate-up" aa-duration="1">rotate-up</div>
+      <div class="demo-card" aa-animate="rotate-up-bl-ccw" aa-duration="1">rotate-up-bl-ccw</div>
+    </div>
+    <div data-spacer></div>
+  </div>
+</Demo>
+
+## Distance multiplier
+
+`aa-distance` scales the 5° angle (and the y-offset for `rotate-up`).
+
+<Demo>
+  <div data-demo-stage>
+    <div data-spacer></div>
+    <div class="demo-grid demo-grid-3" data-distance-anchor>
+      <div class="demo-card" aa-animate="rotate-bl" aa-duration="1" aa-distance="1" aa-anchor="[data-distance-anchor]">distance 1 (5°)</div>
+      <div class="demo-card" aa-animate="rotate-bl" aa-duration="1" aa-distance="3" aa-anchor="[data-distance-anchor]">distance 3 (15°)</div>
+      <div class="demo-card" aa-animate="rotate-bl" aa-duration="1" aa-distance="6" aa-anchor="[data-distance-anchor]">distance 6 (30°)</div>
+    </div>
+    <div data-spacer></div>
+  </div>
+</Demo>
+
+## Stagger children
+
+<Demo>
+  <div data-demo-stage>
+    <div data-spacer></div>
+    <div class="demo-grid demo-grid-3" aa-animate="rotate-bl-ccw" aa-duration="1" aa-stagger="0.08" aa-distance="2">
+      <div class="demo-card">child 1</div>
+      <div class="demo-card">child 2</div>
+      <div class="demo-card">child 3</div>
+      <div class="demo-card">child 4</div>
+      <div class="demo-card">child 5</div>
+      <div class="demo-card">child 6</div>
+    </div>
+    <div data-spacer></div>
+  </div>
+</Demo>
+
+<style>{`
+  .demo-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+  .demo-grid-3 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  /* Square cards on the rotate page so the corner pivots are easy to read. */
+  .demo-frame .demo-card {
+    aspect-ratio: 1 / 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem;
+  }
+`}</style>

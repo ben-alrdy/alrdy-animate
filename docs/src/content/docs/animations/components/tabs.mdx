@@ -1,0 +1,665 @@
+---
+title: tabs
+description: Attribute-driven accordion + tab component. One toggle list, optional inline expanding content per tab, optional cross-fade visual panels, autoplay, scroll-driven mode, automatic ARIA, and per-tab animation triggers.
+---
+
+import Demo from '../../../../components/Demo.astro'
+
+`aa-tabs` is one feature with two visual patterns. Pair toggles with `aa-tabs-content` for an expanding accordion. Pair them with `aa-tabs-visual` for a tab interface. Mix both, or stack autoplay and scroll modes on top — the same primitives drive everything. Modes are space-separated tokens inside the attribute value.
+
+## Modes
+
+| Token            | Effect                                                                                                                                |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| (empty)          | Default. One tab open at a time. Clicking the active toggle closes it.                                                                |
+| `single`         | One open at a time, but the active toggle can't be closed by clicking it. First toggle (or `aa-tabs-initial`) opens at init.          |
+| `multi`          | Multiple tabs open simultaneously. Each toggle is independent.                                                                        |
+| `autoplay`       | Auto-advances every `aa-delay` seconds. Per-toggle progress bars fill during the dwell. Viewport-gated (pauses when scrolled away).   |
+| `autoplay-hover` | Same as `autoplay` *plus* pause on `mouseenter` (non-touch only), resume on `mouseleave`.                                             |
+| `scroll`         | Pinned section; scrolling scrubs through tabs sequentially. Touch devices fall back to `single`. Optional click-to-jump on toggles.   |
+| `none`           | Don't init at this breakpoint. Combine with the `\|` shorthand or `-sm` / `-md` / `-lg` / `-xl` suffix attributes for responsive on/off. |
+
+```html
+<!-- Accordion (FAQ): default mode -->
+<div aa-tabs>…</div>
+
+<!-- Tab interface: visual-only children, single mode -->
+<div aa-tabs="single">…</div>
+
+<!-- Autoplay carousel-style with hover pause -->
+<div aa-tabs="autoplay-hover" aa-delay="4">…</div>
+
+<!-- Scroll-driven on desktop, plain accordion below md -->
+<div aa-tabs="scroll|"></div>
+```
+
+## Structural attributes
+
+| Attribute             | What it marks                                                                                                                   |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| `aa-tabs`             | Tabs root.                                                                                                                       |
+| `aa-tabs-toggle`      | Clickable header / tab. ID is auto-assigned if you omit a value. Gets `tabindex="0"` and ARIA roles automatically.                |
+| `aa-tabs-content`     | Inline expanding panel — height tweens between 0 and natural on open / close. Pair with a toggle by matching the toggle's ID.    |
+| `aa-tabs-visual`      | Cross-fade panel — `autoAlpha` tweens between 0 and 1. Stacked layout (e.g. `position: absolute; inset: 0`) is the author's job. |
+| `aa-tabs-wrapper`     | Optional wrapper around toggle + content. When present, receives `aa-tabs-status="active"` for shared CSS targeting.             |
+| `aa-tabs-initial`     | Mark a toggle (or wrapper) to open at init. For `single` / `autoplay` / `scroll` modes, the first toggle is used if you omit it.  |
+| `aa-tabs-progress`    | Inside an `aa-tabs-toggle`. Value is `width` (default), `height`, or `circle`. Used in `autoplay` and `scroll` modes.             |
+| `aa-tabs-status`      | Set by the lib on the wrapper (or toggle, when no wrapper). Values: `active` / `inactive`. Style off it for hover and active states.|
+
+## Config attributes
+
+| Attribute        | Default     | Notes                                                                                          |
+| ---------------- | ----------- | ---------------------------------------------------------------------------------------------- |
+| `aa-duration`    | (init)      | Seconds for the height + visual cross-fade. Override per toggle / per content / per visual.    |
+| `aa-delay`       | `5`         | (autoplay) Per-tab dwell. Override per toggle to vary cadence.                                 |
+| `aa-ease`        | (init)      | Any GSAP ease — height tween, visual fade, and progress bar.                                   |
+| `aa-distance`    | `30`        | (scroll) vh per tab. Total pin range = N × distance.                                           |
+| `aa-scroll-start`| `top 20%`   | (scroll) ScrollTrigger start position for the pin.                                             |
+| `aa-scrub`       | `true`      | (scroll) ScrollTrigger scrub. Pass a number for scrub smoothing (in seconds).                  |
+
+## Required GSAP plugins
+
+`gsap` always; `ScrollTrigger` for `autoplay` (viewport gate) and `scroll` (pin) modes; `ScrollToPlugin` is optional in scroll mode for the click-to-jump animation (falls back to `window.scrollTo({ behavior: 'smooth' })` if not loaded).
+
+## ARIA — automatic
+
+The lib applies the right roles based on which children each toggle has:
+
+- **Toggle + content** → `role="button"` + `aria-expanded` on the toggle, `role="region"` + `aria-labelledby` on the content. (Visual, if also present, is treated as decorative — `aria-hidden` flips with active state.)
+- **Toggle + visual only** → `role="tab"` + `aria-selected` on the toggle, `role="tabpanel"` + `aria-labelledby` on the visual. The toggles' parent gets `role="tablist"` when every toggle in the set is visual-only.
+
+Toggles get `tabindex="0"`, IDs, and `aria-controls` linkage automatically.
+
+## Animations triggered by tab activation
+
+`aa-animate` elements inside an `[aa-tabs-content]` or `[aa-tabs-visual]` are **automatically driven by tab activation**: they play when the tab becomes active and reverse when it becomes inactive. No `aa-trigger` attribute needed — the lib emits `tab-active` / `tab-inactive` events on the toggle, content, and visual.
+
+```html
+<div aa-tabs>
+  <div aa-tabs-toggle="1">Tab one</div>
+  <div aa-tabs-content="1">
+    <p aa-animate="fade-up">Body copy fades up on open and reverses on close.</p>
+  </div>
+</div>
+```
+
+Set `aa-trigger="scroll"` to opt out of inference for a specific element.
+
+## Keyboard
+
+Toggles get `tabindex="0"` so they're reachable via Tab. With focus on a toggle:
+
+- **Enter / Space** — toggles the active state (or, in `single` / `autoplay` / `scroll` modes, opens if not already active).
+- **Arrow Down / Right** — move focus to the next toggle (wraps).
+- **Arrow Up / Left** — move focus to the previous toggle (wraps).
+- **Home / End** — jump focus to the first / last toggle.
+
+## Live demo — FAQ accordion (default mode)
+
+`aa-tabs` (no value = default mode), `aa-duration="0.5"` for the height tween. Each `<p>` runs `aa-animate="text-slide-up"` with `aa-split="words mask"`, `aa-stagger="0.04"`, `aa-duration="0.6"` — words slide up on `tab-active` via trigger inference, reverse on `tab-inactive`.
+
+<Demo>
+  <div data-demo-stage>
+    <div data-spacer></div>
+    <div class="aa-tabs-faq" aa-tabs aa-duration="0.5">
+      <div class="aa-tabs-row">
+        <button class="aa-tabs-head" aa-tabs-toggle="1">What is alrdy-animate?</button>
+        <div class="aa-tabs-body" aa-tabs-content="1">
+          <p aa-animate="text-slide-up" aa-split="words mask" aa-stagger="0.04" aa-duration="0.6">An attribute-driven scroll-animation library used in Webflow and Next.js projects. v8 is rebuilt on Vite + TypeScript with a tiny core and lazy-loaded features.</p>
+        </div>
+      </div>
+      <div class="aa-tabs-row">
+        <button class="aa-tabs-head" aa-tabs-toggle="2">Does it bundle GSAP?</button>
+        <div class="aa-tabs-body" aa-tabs-content="2">
+          <p aa-animate="text-slide-up" aa-split="words mask" aa-stagger="0.04" aa-duration="0.6">No. GSAP is a peer dependency — load it externally via a script tag (Webflow) or npm install (Next.js). The lib detects window.gsap and warns clearly if a required plugin is missing.</p>
+        </div>
+      </div>
+      <div class="aa-tabs-row">
+        <button class="aa-tabs-head" aa-tabs-toggle="3">Can I use it without animations?</button>
+        <div class="aa-tabs-body" aa-tabs-content="3">
+          <p aa-animate="text-slide-up" aa-split="words mask" aa-stagger="0.04" aa-duration="0.6">Yes — features like aa-tabs and aa-slider are interactive components with sensible defaults. You only need GSAP plugins for the modes that actually require them.</p>
+        </div>
+      </div>
+    </div>
+    <div data-spacer></div>
+  </div>
+</Demo>
+
+## Live demo — single-mode (one always open)
+
+`aa-tabs="single"` with `aa-duration="0.4"`. The first row's toggle has `aa-tabs-initial` so it opens at init; clicking the active toggle is a no-op (single mode forbids closing the only open one).
+
+<Demo>
+  <div data-demo-stage>
+    <div data-spacer></div>
+    <div class="aa-tabs-faq" aa-tabs="single" aa-duration="0.4">
+      <div class="aa-tabs-row">
+        <button class="aa-tabs-head" aa-tabs-toggle="a" aa-tabs-initial>Always one open</button>
+        <div class="aa-tabs-body" aa-tabs-content="a">
+          <p>Single mode auto-opens the first toggle (or the one marked aa-tabs-initial) and refuses to close the active one — clicking it is a no-op.</p>
+        </div>
+      </div>
+      <div class="aa-tabs-row">
+        <button class="aa-tabs-head" aa-tabs-toggle="b">Click another to switch</button>
+        <div class="aa-tabs-body" aa-tabs-content="b">
+          <p>Opening a different toggle closes the previously active one, so exactly one panel is always visible.</p>
+        </div>
+      </div>
+      <div class="aa-tabs-row">
+        <button class="aa-tabs-head" aa-tabs-toggle="c">Useful for navigation menus</button>
+        <div class="aa-tabs-body" aa-tabs-content="c">
+          <p>Or any UI where the user should always see one section's content. The state never disappears entirely.</p>
+        </div>
+      </div>
+    </div>
+    <div data-spacer></div>
+  </div>
+</Demo>
+
+## Live demo — tab interface (visual-only, cross-fade)
+
+When toggles only have visuals (no content), the lib applies `role="tab"` + `role="tabpanel"`. Visuals are stacked in a relatively-positioned container — only the active one is fully opaque.
+
+`aa-tabs="single"` with `aa-duration="0.5"`. Each toggle pairs with an `aa-tabs-visual` (no `aa-tabs-content`) — that's what flips the lib into tab semantics: tablist on the parent, tab/tabpanel on the children. Headlines inside each panel use `aa-animate="text-fade-up"` + `aa-split="lines mask"`.
+
+<Demo>
+  <div data-demo-stage>
+    <div data-spacer></div>
+    <div class="aa-tabs-tabset" aa-tabs="single" aa-duration="0.5">
+      <div class="aa-tabs-tablist">
+        <button class="aa-tabs-tab" aa-tabs-toggle="design" aa-tabs-initial>Design</button>
+        <button class="aa-tabs-tab" aa-tabs-toggle="dev">Develop</button>
+        <button class="aa-tabs-tab" aa-tabs-toggle="ship">Ship</button>
+      </div>
+      <div class="aa-tabs-stage">
+        <div class="aa-tabs-panel" aa-tabs-visual="design">
+          <h3 aa-animate="text-fade-up" aa-split="lines mask">Design without compromise</h3>
+          <p aa-animate="text-fade-up" aa-split="lines mask" aa-delay="0.1">Pixel-perfect mockups, motion specs, and component libraries that translate directly into production code.</p>
+        </div>
+        <div class="aa-tabs-panel" aa-tabs-visual="dev">
+          <h3 aa-animate="text-fade-up" aa-split="lines mask">Develop on solid primitives</h3>
+          <p aa-animate="text-fade-up" aa-split="lines mask" aa-delay="0.1">Strict TypeScript, idiomatic GSAP, and a tiny core. Every animation is testable and reversible.</p>
+        </div>
+        <div class="aa-tabs-panel" aa-tabs-visual="ship">
+          <h3 aa-animate="text-fade-up" aa-split="lines mask">Ship to production with confidence</h3>
+          <p aa-animate="text-fade-up" aa-split="lines mask" aa-delay="0.1">Playwright MCP visual verification, bundle-size CI gates, and migration-friendly lifecycle hooks for page transitions.</p>
+        </div>
+      </div>
+    </div>
+    <div data-spacer></div>
+  </div>
+</Demo>
+
+## Live demo — accordion + side-panel visual
+
+Combine content with a side-panel visual: the toggle expands its inline content *and* swaps the cross-fade panel. The lib detects content + visual and uses accordion ARIA semantics (button + region); the visual gets `aria-hidden` toggled.
+
+`aa-tabs="single"` with `aa-duration="0.45"`. Each row pairs an `aa-tabs-content` with an `aa-tabs-visual` sharing the same toggle id. The whole visual card runs `aa-animate="fade-left"` (fades + slides in from the left when the tab activates). Inside, the heading runs `aa-animate="text-fade"` with `aa-split="chars"` and `aa-stagger="0.02"` so characters fade in cascade once the card lands. Text stays black — lime accents the active border, never the body text.
+
+<Demo>
+  <div data-demo-stage>
+    <div data-spacer></div>
+    <div class="aa-tabs-combo" aa-tabs="single" aa-duration="0.45">
+      <div class="aa-tabs-combo-list">
+        <div class="aa-tabs-row">
+          <button class="aa-tabs-head" aa-tabs-toggle="x" aa-tabs-initial>One — discover</button>
+          <div class="aa-tabs-body" aa-tabs-content="x">
+            <p>Inline detail copy expands beneath the toggle while the side panel cross-fades to the matching visual.</p>
+          </div>
+        </div>
+        <div class="aa-tabs-row">
+          <button class="aa-tabs-head" aa-tabs-toggle="y">Two — iterate</button>
+          <div class="aa-tabs-body" aa-tabs-content="y">
+            <p>Each row's content runs aa-trigger inference automatically — inner aa-animate elements play on tab-active.</p>
+          </div>
+        </div>
+        <div class="aa-tabs-row">
+          <button class="aa-tabs-head" aa-tabs-toggle="z">Three — ship</button>
+          <div class="aa-tabs-body" aa-tabs-content="z">
+            <p>The visual on the right reverses smoothly when you switch tabs — no flash, no late layout reflow.</p>
+          </div>
+        </div>
+      </div>
+      <div class="aa-tabs-combo-stage">
+        <div class="aa-tabs-combo-card" aa-tabs-visual="x" aa-animate="fade-left">
+          <h4 aa-animate="text-fade" aa-split="chars" aa-stagger="0.02">Discover the brief</h4>
+        </div>
+        <div class="aa-tabs-combo-card" aa-tabs-visual="y" aa-animate="fade-left">
+          <h4 aa-animate="text-fade" aa-split="chars" aa-stagger="0.02">Iterate on the shape</h4>
+        </div>
+        <div class="aa-tabs-combo-card" aa-tabs-visual="z" aa-animate="fade-left">
+          <h4 aa-animate="text-fade" aa-split="chars" aa-stagger="0.02">Ship to production</h4>
+        </div>
+      </div>
+    </div>
+    <div data-spacer></div>
+  </div>
+</Demo>
+
+## Live demo — autoplay-hover (pause-on-interaction)
+
+`aa-tabs="autoplay-hover"` cycles every `aa-delay` seconds, fills the per-toggle width progress during the dwell, and pauses on mouse hover.
+
+`aa-delay="3"` (per-tab dwell), `aa-duration="0.4"`. Each toggle holds an `aa-tabs-progress="width"` element with `aa-ease="none"` for a linear fill. Hover pause is guarded by `(hover: hover)` so it stays out of the way on touch devices. Click while hovering jumps to that tab and *stays paused* — mouseleave then starts a fresh cycle from there.
+
+<Demo>
+  <div data-demo-stage>
+    <div data-spacer></div>
+    <div class="aa-tabs-tabset" aa-tabs="autoplay-hover" aa-delay="3" aa-duration="0.4">
+      <div class="aa-tabs-tablist">
+        <button class="aa-tabs-tab" aa-tabs-toggle="auto-1">
+          <span class="aa-tabs-tab-label">Step one</span>
+          <span class="aa-tabs-progress" aa-tabs-progress="width" aa-ease="none"></span>
+        </button>
+        <button class="aa-tabs-tab" aa-tabs-toggle="auto-2">
+          <span class="aa-tabs-tab-label">Step two</span>
+          <span class="aa-tabs-progress" aa-tabs-progress="width" aa-ease="none"></span>
+        </button>
+        <button class="aa-tabs-tab" aa-tabs-toggle="auto-3">
+          <span class="aa-tabs-tab-label">Step three</span>
+          <span class="aa-tabs-progress" aa-tabs-progress="width" aa-ease="none"></span>
+        </button>
+      </div>
+      <div class="aa-tabs-stage">
+        <div class="aa-tabs-panel" aa-tabs-visual="auto-1">
+          <h3>Capture</h3>
+          <p>Discover the moments worth animating.</p>
+        </div>
+        <div class="aa-tabs-panel" aa-tabs-visual="auto-2">
+          <h3>Compose</h3>
+          <p>Wire triggers to behaviours; let the lib pick the right primitive.</p>
+        </div>
+        <div class="aa-tabs-panel" aa-tabs-visual="auto-3">
+          <h3>Curate</h3>
+          <p>Tune duration, ease, and stagger across responsive breakpoints.</p>
+        </div>
+      </div>
+    </div>
+    <div data-spacer></div>
+  </div>
+</Demo>
+
+## Live demo — autoplay (no hover, click-to-restart)
+
+Same shape as the previous demo, but without the `autoplay-hover` flag. Cycling never pauses on hover. Clicking a tab restarts the cycle from that index — useful when you want a continuously-cycling carousel that responds to nudges instead of stopping on interaction.
+
+`aa-tabs="autoplay"` with `aa-delay="3"`, `aa-duration="0.4"`. Same `aa-tabs-progress="width"` element per toggle.
+
+<Demo>
+  <div data-demo-stage>
+    <div data-spacer></div>
+    <div class="aa-tabs-tabset" aa-tabs="autoplay" aa-delay="3" aa-duration="0.4">
+      <div class="aa-tabs-tablist">
+        <button class="aa-tabs-tab" aa-tabs-toggle="auto-c-1">
+          <span class="aa-tabs-tab-label">Capture</span>
+          <span class="aa-tabs-progress" aa-tabs-progress="width" aa-ease="none"></span>
+        </button>
+        <button class="aa-tabs-tab" aa-tabs-toggle="auto-c-2">
+          <span class="aa-tabs-tab-label">Compose</span>
+          <span class="aa-tabs-progress" aa-tabs-progress="width" aa-ease="none"></span>
+        </button>
+        <button class="aa-tabs-tab" aa-tabs-toggle="auto-c-3">
+          <span class="aa-tabs-tab-label">Curate</span>
+          <span class="aa-tabs-progress" aa-tabs-progress="width" aa-ease="none"></span>
+        </button>
+      </div>
+      <div class="aa-tabs-stage">
+        <div class="aa-tabs-panel" aa-tabs-visual="auto-c-1">
+          <h3>Capture</h3>
+          <p>Discover the moments worth animating.</p>
+        </div>
+        <div class="aa-tabs-panel" aa-tabs-visual="auto-c-2">
+          <h3>Compose</h3>
+          <p>Wire triggers to behaviours; let the lib pick the right primitive.</p>
+        </div>
+        <div class="aa-tabs-panel" aa-tabs-visual="auto-c-3">
+          <h3>Curate</h3>
+          <p>Tune duration, ease, and stagger across responsive breakpoints.</p>
+        </div>
+      </div>
+    </div>
+    <div data-spacer></div>
+  </div>
+</Demo>
+
+## Live demo — scroll-driven tabs with pinned section + segment progress
+
+`aa-tabs="scroll"` pins the section, then scrolling scrubs through the tabs. Each toggle has a width-style progress bar that fills during its segment of the pin range.
+
+`aa-distance="50"` (vh per tab — three tabs = 150vh total pin range), `aa-scroll-start="center center"`, `aa-duration="0.5"` for the visual cross-fade. Per-step `aa-tabs-progress="width"` bars fill proportionally within their segment. Clicking a step jumps to that section's scroll position. On touch devices, the mode automatically falls back to `single` since pin-scrubbing is brittle there.
+
+<Demo>
+  <div data-demo-stage>
+    <div data-spacer></div>
+    <div class="aa-tabs-scroll" aa-tabs="scroll" aa-duration="0.5" aa-distance="50" aa-scroll-start="center center">
+      <div class="aa-tabs-scroll-list">
+        <button class="aa-tabs-scroll-step" aa-tabs-toggle="s1" aa-tabs-initial>
+          <span class="aa-tabs-step-num">01</span>
+          <span class="aa-tabs-step-label">Discover</span>
+          <span class="aa-tabs-step-bar" aa-tabs-progress="width" aa-ease="none"></span>
+        </button>
+        <button class="aa-tabs-scroll-step" aa-tabs-toggle="s2">
+          <span class="aa-tabs-step-num">02</span>
+          <span class="aa-tabs-step-label">Define</span>
+          <span class="aa-tabs-step-bar" aa-tabs-progress="width" aa-ease="none"></span>
+        </button>
+        <button class="aa-tabs-scroll-step" aa-tabs-toggle="s3">
+          <span class="aa-tabs-step-num">03</span>
+          <span class="aa-tabs-step-label">Deliver</span>
+          <span class="aa-tabs-step-bar" aa-tabs-progress="width" aa-ease="none"></span>
+        </button>
+      </div>
+      <div class="aa-tabs-scroll-stage">
+        <div class="aa-tabs-scroll-panel" aa-tabs-visual="s1">
+          <h3 aa-animate="text-fade-up" aa-split="lines mask">Discover the problem</h3>
+          <p>Workshops, audits, ride-alongs — establish the constraints before sketching solutions.</p>
+        </div>
+        <div class="aa-tabs-scroll-panel" aa-tabs-visual="s2">
+          <h3 aa-animate="text-fade-up" aa-split="lines mask">Define the target</h3>
+          <p>One paragraph of intent, one diagram of architecture. Everything else is a detail.</p>
+        </div>
+        <div class="aa-tabs-scroll-panel" aa-tabs-visual="s3">
+          <h3 aa-animate="text-fade-up" aa-split="lines mask">Deliver in slices</h3>
+          <p>Ship the first slice in week one. Iterate against real usage instead of imagined requirements.</p>
+        </div>
+      </div>
+    </div>
+    <div data-spacer></div>
+  </div>
+</Demo>
+
+## Live demo — accordion with image + animated text inside content
+
+The expanding content carries an image *and* a paragraph; both pick up the trigger inference automatically. The image runs `aa-animate="rotate-up-bl-ccw"` (rotate counter-clockwise around the bottom-left corner with an upward offset). The paragraph runs `aa-animate="text-fade"` with `aa-split="lines-chars"` and `aa-stagger="0.01 0.1"` — characters fade in at 0.01s each within each line, lines stagger by 0.1s.
+
+`aa-tabs` (default mode), `aa-duration="0.5"`. Closing a tab fully resets the inner timelines so the next open starts afresh from the FROM state.
+
+<Demo>
+  <div data-demo-stage>
+    <div data-spacer></div>
+    <div class="aa-tabs-faq aa-tabs-image" aa-tabs aa-duration="0.5">
+      <div class="aa-tabs-row">
+        <button class="aa-tabs-head" aa-tabs-toggle="img-1">Mountain calm</button>
+        <div class="aa-tabs-body" aa-tabs-content="img-1">
+          <div class="aa-tabs-image-grid">
+            <img class="aa-tabs-image-card" aa-animate="rotate-up-bl-ccw" src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&q=80&auto=format" alt="" />
+            <p aa-animate="text-fade" aa-split="lines-chars" aa-stagger="0.01 0.1">Sustained landscape compositions reward patience — the longer you sit with the frame, the more the subtle differences between shadow and light become legible to the lens.</p>
+          </div>
+        </div>
+      </div>
+      <div class="aa-tabs-row">
+        <button class="aa-tabs-head" aa-tabs-toggle="img-2">Forest geometry</button>
+        <div class="aa-tabs-body" aa-tabs-content="img-2">
+          <div class="aa-tabs-image-grid">
+            <img class="aa-tabs-image-card" aa-animate="rotate-up-bl-ccw" src="https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=600&q=80&auto=format" alt="" />
+            <p aa-animate="text-fade" aa-split="lines-chars" aa-stagger="0.01 0.1">Vertical lines repeat at irregular intervals, which the eye reads as rhythm rather than pattern. The right exposure preserves both the highlights at the canopy and the texture of the bark.</p>
+          </div>
+        </div>
+      </div>
+      <div class="aa-tabs-row">
+        <button class="aa-tabs-head" aa-tabs-toggle="img-3">Coast in fog</button>
+        <div class="aa-tabs-body" aa-tabs-content="img-3">
+          <div class="aa-tabs-image-grid">
+            <img class="aa-tabs-image-card" aa-animate="rotate-up-bl-ccw" src="https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=600&q=80&auto=format" alt="" />
+            <p aa-animate="text-fade" aa-split="lines-chars" aa-stagger="0.01 0.1">Fog flattens the tonal range, so the strongest images lean on graphic shape rather than detail. Wait for a moment when one element separates clearly from the grey, and let everything else recede.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div data-spacer></div>
+  </div>
+</Demo>
+
+<style>{`
+  /* Shared accordion row styling — used by FAQ, single, and combo demos. */
+  .aa-tabs-faq {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin: 0;
+  }
+  .aa-tabs-row {
+    border: 1px solid var(--sl-color-gray-5);
+    border-radius: 6px;
+    background: var(--sl-color-bg);
+    overflow: hidden;
+  }
+  .aa-tabs-row[aa-tabs-status="active"],
+  .aa-tabs-row:has([aa-tabs-status="active"]) {
+    border-color: var(--sl-color-accent);
+  }
+  .aa-tabs-head {
+    width: 100%;
+    text-align: left;
+    background: transparent;
+    border: 0;
+    padding: 0.85rem 1rem;
+    font: inherit;
+    color: var(--sl-color-text);
+    cursor: pointer;
+  }
+  .aa-tabs-head:focus-visible {
+    outline: 2px solid var(--sl-color-accent);
+    outline-offset: -2px;
+    border-radius: 6px;
+  }
+  .aa-tabs-body {
+    padding: 0 1rem;
+  }
+  .aa-tabs-body p {
+    margin: 0 0 1rem;
+    color: var(--sl-color-text-accent);
+  }
+
+  /* Image + text accordion: 2-column grid inside the body. */
+  .aa-tabs-image-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    padding: 0.5rem 0 1rem;
+  }
+  @media (min-width: 600px) {
+    .aa-tabs-image-grid {
+      grid-template-columns: minmax(140px, 200px) 1fr;
+      align-items: start;
+    }
+  }
+  .aa-tabs-image-card {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: 6px;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    /* The rotate FROM state pivots around the bottom-left corner; without
+       this hint, transform-box keeps origin at center. */
+    transform-origin: left bottom;
+  }
+  .aa-tabs-image-grid p {
+    margin: 0;
+    color: var(--sl-color-text-accent);
+  }
+
+  /* Tab-strip + stage (used by visual-only and autoplay demos). */
+  .aa-tabs-tabset {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  .aa-tabs-tablist {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+  .aa-tabs-tab {
+    position: relative;
+    background: var(--sl-color-bg-nav);
+    color: var(--sl-color-text);
+    border: 1px solid var(--sl-color-gray-5);
+    border-radius: 4px;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    font: inherit;
+    overflow: hidden;
+  }
+  .aa-tabs-tab[aa-tabs-status="active"] {
+    background: var(--sl-color-accent);
+    color: var(--sl-color-text-invert, var(--sl-color-white));
+    border-color: var(--sl-color-accent);
+  }
+  .aa-tabs-tab-label {
+    position: relative;
+    z-index: 1;
+  }
+  .aa-tabs-progress {
+    position: absolute;
+    inset: auto 0 0 0;
+    height: 3px;
+    width: 0%;
+    background: var(--sl-color-text-invert, var(--sl-color-white));
+    pointer-events: none;
+  }
+  .aa-tabs-stage {
+    position: relative;
+    min-height: 9rem;
+    padding: 1.5rem;
+    border: 1px solid var(--sl-color-gray-5);
+    border-radius: 6px;
+    background: var(--sl-color-bg);
+  }
+  .aa-tabs-panel {
+    position: absolute;
+    inset: 0;
+    padding: 1.5rem;
+  }
+  .aa-tabs-panel h3 {
+    margin: 0 0 0.5rem;
+    font-size: 1.25rem;
+  }
+  .aa-tabs-panel p {
+    margin: 0;
+    color: var(--sl-color-text-accent);
+  }
+
+  /* Combo: list on the left, visual stage on the right. */
+  .aa-tabs-combo {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: 1fr;
+  }
+  @media (min-width: 600px) {
+    .aa-tabs-combo {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+  .aa-tabs-combo-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .aa-tabs-combo-stage {
+    position: relative;
+    min-height: 8rem;
+    overflow: hidden;
+  }
+  /* Each card carries its own border + background so fade-left animates the
+     whole visible block (not just the text). The stage stays a transparent
+     positioning container; overflow: hidden on the stage clips the card as
+     it slides in. */
+  .aa-tabs-combo-card {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    padding: 1rem;
+    color: var(--sl-color-text);
+    background: var(--sl-color-bg);
+    border: 1px solid var(--sl-color-gray-5);
+    border-radius: 6px;
+  }
+  .aa-tabs-combo-card h4 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 500;
+    color: var(--sl-color-text);
+    text-align: center;
+  }
+
+  /* Scroll-driven layout: sticky nav row on the left, panels on the right. */
+  .aa-tabs-scroll {
+    display: grid;
+    gap: 1.25rem;
+    grid-template-columns: 1fr;
+    align-items: start;
+    padding: 1rem;
+    background: var(--sl-color-bg);
+  }
+  @media (min-width: 700px) {
+    .aa-tabs-scroll {
+      grid-template-columns: minmax(160px, 240px) 1fr;
+      gap: 2rem;
+    }
+  }
+  .aa-tabs-scroll-list {
+    display: flex;
+    gap: 0.75rem;
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+  @media (min-width: 700px) {
+    .aa-tabs-scroll-list {
+      flex-direction: column;
+    }
+  }
+  .aa-tabs-scroll-step {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.75rem 1rem;
+    background: var(--sl-color-bg-nav);
+    border: 1px solid var(--sl-color-gray-5);
+    border-radius: 6px;
+    cursor: pointer;
+    color: var(--sl-color-text);
+    font: inherit;
+  }
+  /* Active step keeps text black (lime on light bg has poor contrast) — only
+     the border picks up the accent so the active state still reads. */
+  .aa-tabs-scroll-step[aa-tabs-status="active"] {
+    border-color: var(--sl-color-accent);
+  }
+  .aa-tabs-step-num {
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+  }
+  .aa-tabs-step-bar {
+    position: absolute;
+    inset: auto 0 0 0;
+    height: 3px;
+    width: 0%;
+    background: var(--sl-color-accent);
+    pointer-events: none;
+  }
+  .aa-tabs-scroll-stage {
+    position: relative;
+    min-height: 12rem;
+    border: 1px solid var(--sl-color-gray-5);
+    border-radius: 6px;
+    background: var(--sl-color-bg);
+    overflow: hidden;
+  }
+  .aa-tabs-scroll-panel {
+    position: absolute;
+    inset: 0;
+    padding: 1.5rem;
+  }
+  .aa-tabs-scroll-panel h3 {
+    margin: 0 0 0.5rem;
+    font-size: 1.4rem;
+  }
+  .aa-tabs-scroll-panel p {
+    margin: 0;
+    color: var(--sl-color-text-accent);
+  }
+`}</style>
