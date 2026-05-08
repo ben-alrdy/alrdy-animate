@@ -5,12 +5,18 @@ export interface Breakpoints {
   xl: number
 }
 
+/**
+ * Lenis options. Common ones are typed for autocomplete; any other Lenis
+ * option (orientation, infinite, easing, autoRaf, etc.) can be passed through.
+ * See https://github.com/darkroomengineering/lenis#instance-options
+ */
 export interface SmoothScrollOptions {
   lerp?: number
   wheelMultiplier?: number
   touchMultiplier?: number
   smoothWheel?: boolean
   syncTouch?: boolean
+  [key: string]: unknown
 }
 
 export interface ReducedMotionOptions {
