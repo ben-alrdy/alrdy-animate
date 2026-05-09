@@ -50,24 +50,20 @@ If you want hover-driven changes to anything else on the element (text colour, b
 
 Direction modes side by side. Hover from the corner you want to see the panel come in from.
 
-<Demo caption={{ "aa-hover": "block (+ direction flag)", "aa-color": "var(--aa-lime)" }}>
+<Demo caption={{ "aa-hover": "block (+ direction flag)", "aa-color": "var(--aa-lime)", "aa-duration": "0.4" }}>
   <div data-demo-stage>
     <div data-spacer></div>
     <div class="hover-row">
-      <a href="#" class="hover-tile" aa-hover="block" aa-color="var(--aa-lime)">
-        <span class="hover-tile-eyebrow">block</span>
+      <a href="#" class="hover-tile" aa-hover="block" aa-color="var(--aa-lime)" aa-duration="0.4">
         <span class="hover-tile-label">all</span>
       </a>
-      <a href="#" class="hover-tile" aa-hover="block vertical" aa-color="var(--aa-lime)">
-        <span class="hover-tile-eyebrow">block</span>
+      <a href="#" class="hover-tile" aa-hover="block vertical" aa-color="var(--aa-lime)" aa-duration="0.4">
         <span class="hover-tile-label">vertical</span>
       </a>
-      <a href="#" class="hover-tile" aa-hover="block horizontal" aa-color="var(--aa-lime)">
-        <span class="hover-tile-eyebrow">block</span>
+      <a href="#" class="hover-tile" aa-hover="block horizontal" aa-color="var(--aa-lime)" aa-duration="0.4">
         <span class="hover-tile-label">horizontal</span>
       </a>
-      <a href="#" class="hover-tile" aa-hover="block top" aa-color="var(--aa-lime)">
-        <span class="hover-tile-eyebrow">block</span>
+      <a href="#" class="hover-tile" aa-hover="block top" aa-color="var(--aa-lime)" aa-duration="0.4">
         <span class="hover-tile-label">top (forced)</span>
       </a>
     </div>
@@ -79,24 +75,20 @@ Direction modes side by side. Hover from the corner you want to see the panel co
 
 Same direction modes, swapped for `curve`. The leading edge bows slightly past the host before settling.
 
-<Demo caption={{ "aa-hover": "curve (+ direction flag)", "aa-color": "#1f5d4f" }}>
+<Demo caption={{ "aa-hover": "curve (+ direction flag)", "aa-color": "#1f5d4f", "aa-duration": "0.4" }}>
   <div data-demo-stage>
     <div data-spacer></div>
     <div class="hover-row">
-      <a href="#" class="hover-tile" aa-hover="curve" aa-color="#1f5d4f">
-        <span class="hover-tile-eyebrow">curve</span>
+      <a href="#" class="hover-tile" aa-hover="curve" aa-color="#1f5d4f" aa-duration="0.4">
         <span class="hover-tile-label">all</span>
       </a>
-      <a href="#" class="hover-tile" aa-hover="curve vertical" aa-color="#1f5d4f">
-        <span class="hover-tile-eyebrow">curve</span>
+      <a href="#" class="hover-tile" aa-hover="curve vertical" aa-color="#1f5d4f" aa-duration="0.4">
         <span class="hover-tile-label">vertical</span>
       </a>
-      <a href="#" class="hover-tile" aa-hover="curve horizontal" aa-color="#1f5d4f">
-        <span class="hover-tile-eyebrow">curve</span>
+      <a href="#" class="hover-tile" aa-hover="curve horizontal" aa-color="#1f5d4f" aa-duration="0.4">
         <span class="hover-tile-label">horizontal</span>
       </a>
-      <a href="#" class="hover-tile" aa-hover="curve bottom" aa-color="#1f5d4f">
-        <span class="hover-tile-eyebrow">curve</span>
+      <a href="#" class="hover-tile" aa-hover="curve bottom" aa-color="#1f5d4f" aa-duration="0.4">
         <span class="hover-tile-label">bottom (forced)</span>
       </a>
     </div>
@@ -108,14 +100,14 @@ Same direction modes, swapped for `curve`. The leading edge bows slightly past t
 
 A row layout where the panel comes in from whichever edge the cursor crossed. Pair with `:hover` styles in CSS for text-colour swaps.
 
-<Demo caption={{ "aa-hover": "block vertical", "aa-color": "var(--aa-lime)" }}>
+<Demo caption={{ "aa-hover": "block vertical", "aa-color": "var(--aa-lime)", "aa-duration": "0.4" }}>
   <div data-demo-stage>
     <div data-spacer></div>
     <ul class="hover-list">
-      <li><a href="#" class="hover-list-item" aa-hover="block vertical" aa-color="var(--aa-lime)"><span>Site of the Day</span><span>FlowFest</span><span>2025</span></a></li>
-      <li><a href="#" class="hover-list-item" aa-hover="block vertical" aa-color="var(--aa-lime)"><span>Product Honors</span><span>Osmo</span><span>2025</span></a></li>
-      <li><a href="#" class="hover-list-item" aa-hover="block vertical" aa-color="var(--aa-lime)"><span>Site of the Day</span><span>Docusign Brand</span><span>2024</span></a></li>
-      <li><a href="#" class="hover-list-item" aa-hover="block vertical" aa-color="var(--aa-lime)"><span>Site of the Day</span><span>Aanstekelijk</span><span>2023</span></a></li>
+      <li><a href="#" class="hover-list-item" aa-hover="block vertical" aa-color="var(--aa-lime)" aa-duration="0.4"><span>Site of the Day</span><span>FlowFest</span><span>2025</span></a></li>
+      <li><a href="#" class="hover-list-item" aa-hover="block vertical" aa-color="var(--aa-lime)" aa-duration="0.4"><span>Product Honors</span><span>Osmo</span><span>2025</span></a></li>
+      <li><a href="#" class="hover-list-item" aa-hover="block vertical" aa-color="var(--aa-lime)" aa-duration="0.4"><span>Site of the Day</span><span>Docusign Brand</span><span>2024</span></a></li>
+      <li><a href="#" class="hover-list-item" aa-hover="block vertical" aa-color="var(--aa-lime)" aa-duration="0.4"><span>Site of the Day</span><span>Aanstekelijk</span><span>2023</span></a></li>
     </ul>
     <div data-spacer></div>
   </div>
@@ -125,14 +117,14 @@ A row layout where the panel comes in from whichever edge the cursor crossed. Pa
 
 Same list, but each row hovers with a curved wave instead of a flat panel.
 
-<Demo caption={{ "aa-hover": "curve vertical", "aa-color": "#1f5d4f" }}>
+<Demo caption={{ "aa-hover": "curve vertical", "aa-color": "#1f5d4f", "aa-duration": "0.4" }}>
   <div data-demo-stage>
     <div data-spacer></div>
     <ul class="hover-list">
-      <li><a href="#" class="hover-list-item" aa-hover="curve vertical" aa-color="#1f5d4f"><span>Site of the Day</span><span>FlowFest</span><span>2025</span></a></li>
-      <li><a href="#" class="hover-list-item" aa-hover="curve vertical" aa-color="#1f5d4f"><span>Product Honors</span><span>Osmo</span><span>2025</span></a></li>
-      <li><a href="#" class="hover-list-item" aa-hover="curve vertical" aa-color="#1f5d4f"><span>Site of the Day</span><span>Docusign Brand</span><span>2024</span></a></li>
-      <li><a href="#" class="hover-list-item" aa-hover="curve vertical" aa-color="#1f5d4f"><span>Site of the Day</span><span>Aanstekelijk</span><span>2023</span></a></li>
+      <li><a href="#" class="hover-list-item" aa-hover="curve vertical" aa-color="#1f5d4f" aa-duration="0.4"><span>Site of the Day</span><span>FlowFest</span><span>2025</span></a></li>
+      <li><a href="#" class="hover-list-item" aa-hover="curve vertical" aa-color="#1f5d4f" aa-duration="0.4"><span>Product Honors</span><span>Osmo</span><span>2025</span></a></li>
+      <li><a href="#" class="hover-list-item" aa-hover="curve vertical" aa-color="#1f5d4f" aa-duration="0.4"><span>Site of the Day</span><span>Docusign Brand</span><span>2024</span></a></li>
+      <li><a href="#" class="hover-list-item" aa-hover="curve vertical" aa-color="#1f5d4f" aa-duration="0.4"><span>Site of the Day</span><span>Aanstekelijk</span><span>2023</span></a></li>
     </ul>
     <div data-spacer></div>
   </div>
@@ -155,27 +147,18 @@ Same list, but each row hovers with a curved wave instead of a flat panel.
     color: #131313;
     background: #efeeec;
     border: 1px solid #c8c7c4;
-    border-radius: 12px;
-    padding: 1.25rem 1rem;
+    border-radius: 10px;
+    padding: 0.65rem 1rem;
     text-decoration: none;
     display: flex;
-    flex-direction: column;
-    gap: 0.4rem;
-    min-height: 8rem;
-  }
-  .hover-tile-eyebrow {
-    position: relative;
-    z-index: 1;
-    font-size: 0.7rem;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    opacity: 0.7;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
   }
   .hover-tile-label {
     position: relative;
     z-index: 1;
-    font-size: 1.1rem;
-    margin-top: auto;
+    font-size: 1rem;
   }
 
   .hover-list {

@@ -1,0 +1,380 @@
+---
+title: Webflow + Barba.js page transitions
+description: Wire alrdy-animate's lifecycle into Barba.js so ScrollTriggers don't leak across page swaps. Includes the Osmo Supply stacked-cards transition and a no-pause pattern for content-reveal animations on the new page.
+---
+
+Page transitions are deliberately out of scope for the lib. v8 exposes
+`init()` (with a `root` option), `destroy()` (with a `keepGlobals` option),
+and `refresh()` so you can wire them into whatever transition library suits
+your stack. This recipe shows the Webflow flavour: [Barba.js](https://barba.js.org/)
+intercepts link clicks, runs an animated transition, and we hook the lib
+into Barba's `beforeEnter` so the new page's `aa-*` elements get scanned
+during the transition instead of after it.
+
+A runnable copy lives at `examples/barba-transition/` in the repo —
+`npm install && npm run dev`, then open `http://localhost:5174/`.
+
+## What this recipe gets right
+
+- **No pause between transition and content reveal.** `init` runs in
+  `beforeEnter` scoped to the new container, parallel to the leave timeline.
+  By the time the wrapper drops away, from-states are applied.
+- **No flicker on click.** The new container is pinned to `zIndex: 1` in
+  `beforeEnter` so it can't paint above the in-flow old container in the
+  one-frame gap before `prepareForTransition` runs.
+- **Lenis persists across page swaps.** `destroy({ keepGlobals: true })`
+  leaves Lenis, the body scroll-state observer, and the scroll-target
+  observer alive. Only the per-page matchMedia / feature state is torn down.
+- **Content animations are event-triggered, not viewport-triggered.** Boxes
+  use `aa-trigger="event:enter"`, dispatched from a `tl.call` inside the
+  leave timeline at the right beat. Without this, the boxes auto-fire while
+  still hidden behind the wrapper.
+
+## Page markup
+
+Each page wraps its content in `data-barba="container"` inside
+`data-barba="wrapper"`. The transition overlay lives outside the container
+(persistent across pages); the nav lives inside (it's animated by the
+leave timeline so it slides in from above on every navigation, matching
+Osmo's design).
+
+```html
+<body data-barba="wrapper">
+  <!-- Persists. Outside the container. -->
+  <div data-transition-wrap class="transition">
+    <div data-transition-middle class="transition__middle"></div>
+  </div>
+
+  <!-- Swapped on every navigation. Includes the nav. -->
+  <main data-barba="container" data-barba-namespace="home">
+    <nav class="demo-nav">
+      <a href="/" aria-current="page">Home</a>
+      <a href="/about.html">About</a>
+    </nav>
+
+    <section class="page">
+      <h1 class="page__hero">Headline</h1>
+      <p class="page__lede">Subline copy</p>
+
+      <div
+        class="card-grid"
+        aa-animate="fade-up"
+        aa-stagger="0.1"
+        aa-trigger="event:enter"
+      >
+        <article class="card">…</article>
+        <article class="card">…</article>
+        <article class="card">…</article>
+      </div>
+    </section>
+  </main>
+</body>
+```
+
+A few attribute notes:
+
+- `aa-animate="fade-up" aa-stagger="0.1"` on the grid — the lib auto-targets
+  direct children when `aa-stagger` is set, so each card animates with a
+  100ms offset. No `aa-children` needed.
+- `aa-trigger="event:enter"` — the animation is paused until an
+  `aa:trigger` event with `detail.name === 'enter'` is dispatched on the
+  grid. Keeps the cards from auto-firing while they sit invisibly behind
+  the leave-timeline wrapper.
+
+The container needs an explicit `background-color` so the stacked-cards
+transition reads as solid surfaces against the orange middle layer:
+
+```css
+body { background: #000; }                                /* the void */
+main[data-barba="container"] { background: #f4ecd8; }     /* the card */
+```
+
+## The lib's CSS
+
+`dist/alrdy-animate.css` carries the FOUC guard
+`[aa-animate]:not([aa-ready]) { visibility: hidden }`. Without it, every
+Barba-swapped page flashes its content in its final state for one frame
+before init applies the from-states.
+
+In a Vite or Next.js project:
+
+```js
+import 'alrdy-animate/style'
+```
+
+In Webflow / `<script>` tag setups:
+
+```html
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alrdy-animate@8/dist/alrdy-animate.css">
+```
+
+## Script tags (Webflow)
+
+```html
+<link rel="stylesheet" href="https://unpkg.com/lenis@1/dist/lenis.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alrdy-animate@8/dist/alrdy-animate.css">
+
+<script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/SplitText.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/CustomEase.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/Flip.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lenis@1/dist/lenis.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@barba/core@2.10.3/dist/barba.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/alrdy-animate@8/dist/alrdy-animate.umd.cjs"></script>
+```
+
+Add only the GSAP plugins your features use — `init({ debug: true })`
+prints what's missing.
+
+## The Barba init
+
+```js
+gsap.registerPlugin(CustomEase)
+history.scrollRestoration = 'manual'
+
+// `osmo` is registered by the lib too, but we register it here for the
+// leave timeline which uses it before init() finishes.
+CustomEase.create('osmo', '0.625, 0.05, 0, 1')
+gsap.defaults({ ease: 'osmo', duration: 0.6 })
+
+const rmMQ = window.matchMedia('(prefers-reduced-motion: reduce)')
+let reducedMotion = rmMQ.matches
+rmMQ.addEventListener('change', (e) => (reducedMotion = e.matches))
+
+let alrdyReady = false
+let initPromise = Promise.resolve()
+
+function alrdyInit(rootEl) {
+  // root scopes the scan to the new container — the leaving container is
+  // still in DOM in sync mode and we don't want its elements re-processed.
+  initPromise = AlrdyAnimate.init({
+    debug: true,
+    duration: 0.6,
+    ease: 'osmo',
+    distance: 1.5,
+    smoothScroll: true,
+    root: rootEl,
+  }).then(() => { alrdyReady = true })
+  return initPromise
+}
+
+function alrdyDestroy() {
+  if (!alrdyReady) return
+  // keepGlobals: true leaves Lenis, the body scroll-state observer, and
+  // the scroll-target observer alive. They re-attach to the same
+  // documentElement / body on the new page; churning them every nav resets
+  // Lenis's scroll velocity mid-transition.
+  AlrdyAnimate.destroy({ keepGlobals: true })
+  alrdyReady = false
+}
+
+// Stagger is owned by the lib via `aa-stagger="0.1"` on the parent grid.
+// We dispatch a single aa:trigger event per trigger element; the lib plays
+// the staggered tween for all children from that.
+function fireEnterAnimations(rootEl) {
+  rootEl.querySelectorAll('[aa-trigger="event:enter"]').forEach((el) => {
+    el.dispatchEvent(
+      new CustomEvent('aa:trigger', { detail: { name: 'enter' }, bubbles: true }),
+    )
+  })
+}
+
+barba.hooks.beforeEnter((data) => {
+  // Position new container on top while leave runs. zIndex: 1 closes the
+  // one-frame flicker between this hook and prepareForTransition setting up
+  // its own zIndex layout.
+  gsap.set(data.next.container, {
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 1,
+  })
+
+  if (window.lenis?.stop) window.lenis.stop()
+
+  // Tear down per-page state from the leaving page, then re-init scoped to
+  // the new container. Don't await — leave should start immediately so the
+  // transition layout takes effect on the next frame. Init runs in parallel
+  // with the ~3s leave timeline; the dispatch inside the leave timeline
+  // gates on initPromise to make sure listeners are attached.
+  alrdyDestroy()
+  alrdyInit(data.next.container)
+})
+
+barba.hooks.afterEnter(() => {
+  if (window.ScrollTrigger) ScrollTrigger.refresh()
+})
+
+barba.init({
+  debug: true,
+  preventRunning: true,
+  transitions: [{
+    name: 'default',
+    sync: true,
+    async once(data) {
+      // beforeEnter fires for `once` too and already kicked off init —
+      // wait on the same initPromise instead of starting a second init.
+      await initPromise
+      fireEnterAnimations(data.next.container)
+      return runPageOnceAnimation(data.next.container)
+    },
+    async leave(data) {
+      return runPageLeaveAnimation(data.current.container, data.next.container)
+    },
+    async enter(data) {
+      return runPageEnterAnimation(data.next.container)
+    },
+  }],
+})
+```
+
+## The Osmo stacked-cards transition
+
+The animation is [Osmo Supply's stacked-cards page transition](https://www.osmo.supply/),
+unchanged except for **one added line** — the `tl.call` that dispatches the
+content-reveal events from inside the leave timeline.
+
+```js
+function runPageLeaveAnimation(current, next) {
+  const parent = current.parentElement || document.body
+  const { wrapper } = prepareForTransition(parent, current, next)
+
+  const transitionWrap = document.querySelector('[data-transition-wrap]')
+  const transitionMiddle = transitionWrap.querySelector('[data-transition-middle]')
+
+  const tl = gsap.timeline({
+    onComplete: () => {
+      wrapper.remove()
+      gsap.set(parent, { clearProps: 'perspective,transformStyle,overflow' })
+      gsap.set(next, { clearProps: 'position,inset,width,height,zIndex,transformStyle,willChange,backfaceVisibility,transform' })
+    },
+  })
+
+  if (reducedMotion) return tl.set(current, { autoAlpha: 0 })
+
+  tl.to([wrapper, transitionMiddle, next],
+    { clipPath: 'rect(0% 100% 100% 0% round 1em)', duration: 0.8 }, 0)
+  tl.to(wrapper,          { scale: 0.95,  yPercent: 20, duration: 1.2, ease: 'expo.inOut', overwrite: 'auto' }, '<')
+  tl.to(transitionMiddle, { scale: 0.875, yPercent: 10, duration: 1.2, ease: 'expo.inOut', overwrite: 'auto' }, '<')
+  tl.to(next,             { scale: 0.8,   yPercent: 0,  duration: 1.2, ease: 'expo.inOut', overwrite: 'auto' }, '<')
+  tl.to(wrapper,          { yPercent: 130, duration: 1.2, ease: 'osmo' }, '< 0.9')
+  tl.to(transitionMiddle, { yPercent: 120, duration: 1.2, ease: 'osmo' }, '< 0.15')
+  tl.to(next,             { scale: 1, yPercent: 0, duration: 1.2, ease: 'expo.inOut', overwrite: 'auto' }, '< 0.15')
+  tl.to([wrapper, transitionMiddle, next],
+    { clipPath: 'rect(0% 100% 100% 0% round 0em)', duration: 0.8, ease: 'osmo' }, '> -0.8')
+
+  // Slide the new page's nav down from above as the wrapper drops away.
+  const navigation = next.querySelector('.demo-nav')
+  if (navigation) {
+    tl.from(navigation, { yPercent: -100, duration: 1.2, ease: 'osmo' }, '< -0.1')
+  }
+
+  // Dispatch the content-reveal events as the page is visually settling.
+  // Gated on initPromise in case init hadn't finished by this point.
+  tl.call(() => {
+    initPromise.then(() => fireEnterAnimations(next))
+  }, null, '< 0.6')
+
+  return tl
+}
+
+function runPageEnterAnimation(next) {
+  const tl = gsap.timeline()
+  if (reducedMotion) {
+    tl.set(next, { autoAlpha: 1 })
+    tl.add('pageReady')
+    tl.call(resetPage, [next], 'pageReady')
+    return new Promise((resolve) => tl.call(resolve, null, 'pageReady'))
+  }
+  tl.add('pageReady')
+  tl.call(resetPage, [next], 'pageReady')
+  return new Promise((resolve) => tl.call(resolve, null, 'pageReady'))
+}
+
+function runPageOnceAnimation(next) {
+  const tl = gsap.timeline()
+  tl.call(() => resetPage(next), null, 0)
+  return tl
+}
+```
+
+`prepareForTransition` and `resetPage` are unchanged from the Osmo source —
+see `examples/barba-transition/src/transition.js` in the repo for the full
+file.
+
+## Why dispatch from inside the leave timeline?
+
+The leave timeline runs ~2.85s. Visually it ends earlier — the wrapper
+drops below viewport around t≈2.1s, and the trailing 0.8s is a subtle
+clipPath round-off finishing on the new page. If you dispatch from
+`afterEnter` (the natural Barba hook), you wait for that whole tail. The
+content-reveal animation feels disconnected — page lands, quiet, then
+boxes appear.
+
+By inserting the dispatch at `'< 0.6'` (≈t=2.05s in the leave timeline,
+right when the new page is becoming visually dominant), the box stagger
+animates in parallel with the final clipPath outro and the user reads
+"page lands → cards rise" as one cohesive moment.
+
+The exact offset is specific to this transition. The durable lesson is
+**`aa-trigger="event:enter"` + a manual `aa:trigger` dispatch** at whatever
+point in *your* transition reads as the visual peak.
+
+## Companion CSS
+
+```css
+.transition {
+  z-index: 2;
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  overflow: clip;
+}
+
+.transition__middle {
+  opacity: 0;
+  background-color: #ef6322;
+  position: fixed;
+  inset: 0;
+}
+```
+
+The middle layer can be any colour, image, or video — it's the visual
+breathing room between the outgoing and incoming pages.
+
+## Lib API surface used by this recipe
+
+| API                                  | Purpose                                                    |
+| ------------------------------------ | ---------------------------------------------------------- |
+| `init({ root, smoothScroll })`       | Scope the scan to a subtree; create / reuse Lenis.         |
+| `destroy({ keepGlobals: true })`     | Tear down per-page state; keep Lenis, scroll-state alive.  |
+| `aa-trigger="event:enter"`           | Pause an animation until an `aa:trigger` event fires.      |
+| `dispatchEvent(new CustomEvent(...))` | Manual dispatch — couples animation timing to your scene. |
+| `aa-stagger="<seconds>"`             | Auto-stagger across direct children.                       |
+
+## Differences from a stock Osmo boilerplate
+
+If you're porting from the Osmo boilerplate, four things change:
+
+- **Drop `initLenis()`.** `init({ smoothScroll: true })` creates Lenis and
+  syncs it to `gsap.ticker`. The instance is at `window.lenis` so the
+  Osmo helpers (`lenis.stop()`, `lenis.resize()`, `lenis.start()`) keep
+  working unchanged.
+- **Drop the `afterLeave` ScrollTrigger kill.** `destroy({ keepGlobals: true })`
+  in `beforeEnter` reverts every `gsap.matchMedia()` context the lib
+  created, which kills its own ScrollTriggers and restores any inline
+  styles. The global Lenis/scroll-state observers stay alive.
+- **Pin the new container's `zIndex: 1` in `beforeEnter`.** Osmo's source
+  sets `position: fixed` without a z-index. With our parallel `init` that
+  brief gap between hook and `prepareForTransition` is enough for the
+  fixed-positioned new container to paint above the still-in-flow old
+  container — a one-frame flicker. Pinning `zIndex: 1` matches what
+  `prepareForTransition` will assign anyway and closes the gap.
+- **Add the `tl.call` content-reveal dispatch inside the leave timeline.**
+  Replaces the natural `afterEnter` dispatch and gives a perfectly-synced
+  reveal. See "Why dispatch from inside the leave timeline?" above.
+
+`prepareForTransition`, theming via `data-page-theme`, and any other
+helpers you've layered on top are yours to carry over verbatim.

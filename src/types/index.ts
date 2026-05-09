@@ -64,6 +64,17 @@ export interface InitOptions {
    * `[aa-toggle-playstate]` IntersectionObserver. Pass `false` to opt out.
    */
   scrollState?: boolean
+  /**
+   * Subtree to scan for `aa-*` elements. Defaults to `document`. Pass a
+   * specific element to scope a re-init to that subtree — useful for page
+   * transition libraries (Barba, View Transitions) that swap a container in
+   * while leaving the rest of the page intact.
+   *
+   * Element-scoped inits skip the global once-per-app setup (smoothScroll,
+   * scrollState, scrollTarget) — those stay tied to the original full-page
+   * init.
+   */
+  root?: ParentNode
   debug?: boolean
 }
 
@@ -91,9 +102,19 @@ export interface OnResizeOptions {
 export type ResizeCallback = () => void
 export type ResizeUnsubscribe = () => void
 
+export interface DestroyApiOptions {
+  /**
+   * Skip teardown of app-global handles (Lenis smooth scroll, body
+   * scroll-state observer, scroll-target observer). They're bound to
+   * elements that survive route changes, so page-transition libraries can
+   * destroy + re-init per page without re-creating them.
+   */
+  keepGlobals?: boolean
+}
+
 export interface PublicApi {
   init: (options?: InitOptions) => void
-  destroy: () => void
+  destroy: (options?: DestroyApiOptions) => void
   refresh: () => void
   onResize: (fn: ResizeCallback, opts?: OnResizeOptions) => ResizeUnsubscribe
 }

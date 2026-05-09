@@ -1,0 +1,178 @@
+/* ----------- Reset / base ----------- */
+*,
+*::before,
+*::after { box-sizing: border-box; }
+
+html, body { margin: 0; padding: 0; }
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  /* True-void backdrop. Visible briefly behind the cards as they scale down. */
+  background: #000;
+  color: #1c1917;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* The Barba container is the "card" being moved by the stacked-cards
+   transition. Cream against the black void and orange middle reads as a
+   crisp three-layer stack. */
+main[data-barba="container"] {
+  display: block;
+  min-height: 100vh;
+  background: #f4ecd8;
+  color: #1c1917;
+}
+
+a { color: inherit; text-decoration: none; }
+
+code {
+  font-family: 'JetBrains Mono', SFMono-Regular, Menlo, monospace;
+  font-size: 0.9em;
+  padding: 0.1em 0.4em;
+  border-radius: 4px;
+  background: rgba(28, 25, 23, 0.08);
+}
+
+/* ----------- Transition overlay (Osmo) ----------- */
+.transition {
+  z-index: 2;
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  overflow: clip;
+}
+
+.transition__middle {
+  opacity: 0;
+  background-color: #ef6322;
+  position: fixed;
+  inset: 0;
+}
+
+/* ----------- Demo nav -----------
+   Inside [data-barba="container"], so it leaves with the old page and
+   slides down on the new page (animated by the leave timeline). */
+.demo-nav {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  padding: 1.5rem 2.5rem;
+  letter-spacing: -0.005em;
+}
+
+.demo-nav__brand {
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  font-size: 1.05rem;
+}
+
+.demo-nav__links {
+  display: flex;
+  gap: 1.5rem;
+  margin-left: auto;
+  font-size: 0.95rem;
+}
+
+.demo-nav__link {
+  position: relative;
+  padding: 0.25rem 0;
+  color: #57534e;
+  transition: color 0.2s;
+}
+
+.demo-nav__link:hover {
+  color: #1c1917;
+}
+
+.demo-nav__link[aria-current="page"] {
+  color: #1c1917;
+}
+
+.demo-nav__link[aria-current="page"]::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -2px;
+  height: 1.5px;
+  background: #ef6322;
+}
+
+/* ----------- Page content ----------- */
+.page {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 6rem 2.5rem 8rem;
+}
+
+.page__hero {
+  font-size: clamp(2.75rem, 6.5vw, 5.5rem);
+  font-weight: 600;
+  letter-spacing: -0.035em;
+  line-height: 1;
+  margin: 0 0 1.5rem;
+  max-width: 14ch;
+}
+
+.page__lede {
+  font-size: clamp(1.05rem, 1.4vw, 1.25rem);
+  color: #57534e;
+  max-width: 56ch;
+  margin: 0 0 5rem;
+  line-height: 1.55;
+}
+
+/* ----------- Cards ----------- */
+.card-grid {
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: repeat(3, 1fr);
+}
+
+@media (max-width: 760px) {
+  .card-grid { grid-template-columns: 1fr; }
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  padding: 2rem;
+  border-radius: 1.25rem;
+  background: #fffbf0;
+  border: 1px solid rgba(28, 25, 23, 0.08);
+  min-height: 14rem;
+  /* `translate` is the standalone CSS property for translation, independent
+     of `transform`. Using it (and never `transform`) for the hover lift keeps
+     GSAP's inline `transform` for the fade-up animation conflict-free. */
+  transition: translate 0.4s var(--aa-ease-osmo, ease), box-shadow 0.4s ease;
+}
+
+.card:hover {
+  translate: 0 -4px;
+  box-shadow: 0 20px 40px -20px rgba(28, 25, 23, 0.18);
+}
+
+.card__num {
+  display: inline-block;
+  font-family: 'JetBrains Mono', SFMono-Regular, Menlo, monospace;
+  font-size: 0.85rem;
+  letter-spacing: 0.02em;
+  color: #ef6322;
+  margin-bottom: 1.5rem;
+}
+
+.card__title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  margin: 0 0 0.75rem;
+  line-height: 1.2;
+}
+
+.card__body {
+  margin: 0;
+  color: #57534e;
+  font-size: 0.95rem;
+  line-height: 1.55;
+}

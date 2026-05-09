@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Work — Barba Transition Demo</title>
+    <link rel="stylesheet" href="/src/styles.css" />
+    <link rel="stylesheet" href="https://unpkg.com/lenis@1.3.17/dist/lenis.css" />
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/ScrollTrigger.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/SplitText.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/CustomEase.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/Flip.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lenis@1.3.17/dist/lenis.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@barba/core@2.10.3/dist/barba.umd.min.js"></script>
+  </head>
+  <body data-barba="wrapper">
+    <div data-transition-wrap class="transition">
+      <div data-transition-middle class="transition__middle"></div>
+    </div>
+
+    <main data-barba="container" data-barba-namespace="work">
+      <nav class="demo-nav">
+        <span class="demo-nav__brand">alrdy/example</span>
+        <div class="demo-nav__links">
+          <a href="/" class="demo-nav__link">Home</a>
+          <a href="/about.html" class="demo-nav__link">About</a>
+          <a href="/work.html" class="demo-nav__link" aria-current="page">Work</a>
+        </div>
+      </nav>
+
+      <section class="page">
+        <h1 class="page__hero">Selected works.</h1>
+        <p class="page__lede">
+          A small reel of recent projects — kept short to keep the focus on the
+          transition itself.
+        </p>
+
+        <div
+          class="card-grid"
+          aa-animate="fade-up"
+          aa-stagger="0.1"
+          aa-trigger="event:enter"
+        >
+          <article class="card">
+            <span class="card__num">01</span>
+            <h2 class="card__title">Brand site, 2024</h2>
+            <p class="card__body">
+              Editorial layout with type-led storytelling. Built in Webflow with
+              Barba transitions.
+            </p>
+          </article>
+          <article class="card">
+            <span class="card__num">02</span>
+            <h2 class="card__title">SaaS dashboard, 2025</h2>
+            <p class="card__body">
+              Data-dense UI with stable scroll-anchored animations across long
+              pages.
+            </p>
+          </article>
+          <article class="card">
+            <span class="card__num">03</span>
+            <h2 class="card__title">Conference site, 2026</h2>
+            <p class="card__body">
+              Programmable reveal sequences for the keynote sections. Driven by
+              the same lib.
+            </p>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <script type="module" src="/src/transition.js"></script>
+  </body>
+</html>

@@ -60,7 +60,8 @@ export async function init(options: InitOptions = {}): Promise<void> {
   state.initialized = true
 
   const debug = options.debug ?? false
-  const { elements, features } = scan(document)
+  const root = options.root ?? document
+  const { elements, features } = scan(root)
   if (elements.length === 0) return
 
   const requiredPlugins = new Set<string>()
@@ -93,14 +94,23 @@ export async function init(options: InitOptions = {}): Promise<void> {
     // ignore
   }
 
+  // Globals (Lenis, scroll-state, scroll-target) persist across re-inits when
+  // the consumer calls `destroy({ keepGlobals: true })` — typical for
+  // page-transition libraries (Barba, Next.js View Transitions). They're
+  // bound to elements that don't change on route changes
+  // (`document.documentElement`, `<body>`), so re-creating them every nav
+  // costs scroll-position state and CPU.
   const smoothScrollOpt = state.options.smoothScroll
-  if (smoothScrollOpt) {
-    const smooth = initSmoothScroll(gsapHandle, smoothScrollOpt, debug)
-    if (smooth) addDisposer(smooth.dispose)
+  if (smoothScrollOpt && !state.smoothScroll) {
+    state.smoothScroll = initSmoothScroll(gsapHandle, smoothScrollOpt, debug)
   }
 
-  if (state.options.scrollState) addDisposer(initScrollState())
-  addDisposer(initScrollTarget())
+  if (state.options.scrollState && !state.scrollStateDispose) {
+    state.scrollStateDispose = initScrollState()
+  }
+  if (!state.scrollTargetDispose) {
+    state.scrollTargetDispose = initScrollTarget()
+  }
 
   const responsive = createResponsiveController(gsapHandle, state.breakpoints)
   activeHandles = { gsap: gsapHandle, responsive }
@@ -143,7 +153,20 @@ export async function init(options: InitOptions = {}): Promise<void> {
   }
 }
 
-export function destroy(): void {
+export interface DestroyOptions {
+  /**
+   * When true, leave Lenis, scroll-state, and scroll-target observers alive.
+   * The next `init()` call will reuse the same instances instead of creating
+   * fresh ones. Use this from page-transition hooks (Barba `beforeEnter`,
+   * Next.js route-change effects) — anywhere you re-init on every navigation
+   * but the document body and html still belong to the same app session.
+   *
+   * Default `false` — full teardown for app-level unmount.
+   */
+  keepGlobals?: boolean
+}
+
+export function destroy(options: DestroyOptions = {}): void {
   if (activeHandles?.responsive) {
     try {
       activeHandles.responsive.revertAll()
@@ -155,6 +178,16 @@ export function destroy(): void {
   clearResize()
   activeHandles = null
   state.initialized = false
+
+  if (!options.keepGlobals) {
+    state.smoothScroll?.dispose()
+    state.smoothScroll = null
+    state.scrollStateDispose?.()
+    state.scrollStateDispose = null
+    state.scrollTargetDispose?.()
+    state.scrollTargetDispose = null
+  }
+
   state.options = { ...DEFAULT_OPTIONS }
 }
 

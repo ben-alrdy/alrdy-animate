@@ -1,11 +1,13 @@
 # Dependencies
 /node_modules
 /docs/node_modules
+/examples/*/node_modules
 
 # Build
 /dist
 /docs/dist
 /docs/.astro
+/examples/*/dist
 
 # IDE
 .idea

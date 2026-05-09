@@ -5,6 +5,7 @@ import type {
   ResolvedOptions,
   StaggerOptions,
 } from '../types/index'
+import type { SmoothScrollHandle } from '../smooth-scroll/index'
 
 export const DEFAULT_BREAKPOINTS: Breakpoints = {
   sm: 480,
@@ -57,7 +58,22 @@ export interface InternalState {
   initialized: boolean
   options: ResolvedOptions
   breakpoints: Breakpoints
+  /**
+   * Per-init feature disposers — torn down on every destroy() call. Anything
+   * scoped to the current page's content (matchMedia revert, ScrollTrigger
+   * cleanup, individual feature inits) goes here.
+   */
   disposers: Array<() => void>
+  /**
+   * App-global handles that can survive `destroy({ keepGlobals: true })`.
+   * Lenis, scroll-state, and scroll-target are all bound to elements that
+   * persist across page transitions (`document.documentElement`, `<body>`),
+   * so re-creating them on every Barba/Next.js route change is wasteful and
+   * costs scroll-position state.
+   */
+  smoothScroll: SmoothScrollHandle | null
+  scrollStateDispose: (() => void) | null
+  scrollTargetDispose: (() => void) | null
 }
 
 const initial = (): InternalState => ({
@@ -65,6 +81,9 @@ const initial = (): InternalState => ({
   options: { ...DEFAULT_OPTIONS },
   breakpoints: { ...DEFAULT_BREAKPOINTS },
   disposers: [],
+  smoothScroll: null,
+  scrollStateDispose: null,
+  scrollTargetDispose: null,
 })
 
 export const state: InternalState = initial()

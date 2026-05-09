@@ -22,6 +22,7 @@ export default defineConfig({
         { label: 'Hover animations', autogenerate: { directory: 'animations/hover' } },
         { label: 'Components', autogenerate: { directory: 'animations/components' } },
         { label: 'Utilities', autogenerate: { directory: 'animations/utilities' } },
+        { label: 'Recipes', autogenerate: { directory: 'recipes' } },
       ],
     }),
   ],
