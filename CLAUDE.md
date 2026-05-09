@@ -8,7 +8,7 @@ The canonical design doc lives outside the repo at **`/Users/ben/.claude/plans/h
 
 ## Branches
 
-- **`master`** — v8 line. v8.0.0-alpha.0 development.
+- **`main`** — v8 line. v8.0.0-alpha.0 development.
 - **`v7-maintenance`** — preserves the 7.3.5 tip for any v7 patches. Do not delete.
 
 ## Stack and constraints
