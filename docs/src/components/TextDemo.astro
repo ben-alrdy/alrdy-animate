@@ -14,7 +14,7 @@ const blockClass = ['td-block', large && 'td-block--large', centered && 'td-bloc
 ---
 
 <div class={blockClass}>
-  <div class="td-label"><code>{animate}</code></div>
+  <div class="aa-demo-row-label"><code>{animate}</code></div>
 
   <h1 class="td-h1" aa-animate={animate} aa-duration={duration} aa-stagger={stagger}>A short hero line</h1>
 
@@ -47,16 +47,6 @@ const blockClass = ['td-block', large && 'td-block--large', centered && 'td-bloc
   .td-block:first-child {
     border-top: 0;
     padding-top: 0;
-  }
-  .td-label {
-    font-family: var(--sl-font-system-mono, monospace);
-    font-size: 0.85rem;
-    color: var(--sl-color-gray-3);
-  }
-  .td-label code {
-    background: var(--sl-color-bg-inline-code, var(--sl-color-bg-nav));
-    padding: 0.1em 0.4em;
-    border-radius: 3px;
   }
   .td-h1 {
     font-size: clamp(2rem, 4vw, 3rem);

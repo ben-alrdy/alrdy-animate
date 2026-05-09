@@ -7,24 +7,39 @@ import Demo from '../../../../components/Demo.astro'
 
 `aa-split` splits an element into `.aa-word`, `.aa-char`, or `.aa-line` parts and stops there. Use it when you want a CSS-only stagger, a hover effect, or you're driving the animation yourself. Powered by GSAP's [SplitText](https://gsap.com/docs/v3/Plugins/SplitText/) plugin.
 
-## Attributes
+## Modes
 
-| Attribute    | Values                                                       | Notes                                                  |
-| ------------ | ------------------------------------------------------------ | ------------------------------------------------------ |
-| `aa-split`   | `words`, `chars`, `lines`, `lines-words`, `lines-chars`      | Optional `mask` flag wraps each unit for clip reveals. |
-| `aa-stagger` | seconds, or `"<unit> <line>"`                                | One value = unit stagger only. Two = unit then line.   |
+`aa-split` is a single attribute with one mode token plus an optional `mask` flag.
 
-Add `mask` after the mode (space-separated) to wrap each split unit in an `overflow: clip` element — useful for slide-up reveals on lines. Example: `aa-split="lines mask"`. The mask wrapper carries SplitText's `aa-line-mask` (or `aa-word-mask` / `aa-char-mask`) class for CSS hooks.
+| Token          | Effect                                                              |
+| -------------- | ------------------------------------------------------------------- |
+| `words`        | Split into `.aa-word` parts.                                        |
+| `chars`        | Split into `.aa-char` parts.                                        |
+| `lines`        | Split into `.aa-line` parts.                                        |
+| `lines-words`  | Split into chars+words, group by line for cascading line waves.     |
+| `lines-chars`  | Split into chars, group by line for cascading line waves.           |
+| `mask` (flag)  | Wrap each split unit in `overflow: clip` for slide-up reveals.      |
 
-`lines-chars` and `lines-words` keep the chars/words split but group the animation by line: chars within a line stagger by the first value of `aa-stagger`, while each line's tween starts the second value later than the previous one — e.g. `aa-stagger="0.02 0.2"` spaces chars 0.02s apart and lines 0.2s apart. A single value reuses itself for both. The result is a "line wave" entrance where lines cascade and their inner chars overlap. With `mask`, the mask is applied at the line level (`aa-line-mask`).
+## Config attributes
+
+| Attribute    | Default | Notes                                                                  |
+| ------------ | ------- | ---------------------------------------------------------------------- |
+| `aa-split`   | (required) | One mode token + optional `mask` flag. Example: `"lines mask"`.     |
+| `aa-stagger` | (off)   | Seconds, or `"<unit> <line>"`. One value = unit stagger only. Two = unit then line. |
+
+`lines-chars` and `lines-words` keep the chars/words split but group the animation by line: chars within a line stagger by the first value of `aa-stagger`, while each line's tween starts the second value later than the previous one — e.g. `aa-stagger="0.02 0.2"` spaces chars 0.02s apart and lines 0.2s apart. A single value reuses itself for both. With `mask`, the mask is applied at the line level (`aa-line-mask`).
 
 `|` shorthand and `-sm` / `-md` / `-lg` / `-xl` suffixes work like elsewhere — e.g. `aa-split="words|lines"` splits to words on mobile and lines from `md` up.
 
-## Words demo
+## Required GSAP plugins
+
+`gsap`, `SplitText` (chars fall back to a regex splitter when SplitText is missing).
+
+## Live demo — words
 
 The headline below is split into words. Hover any word — pure CSS picks up the `.aa-word` class to apply a per-word transform.
 
-<Demo>
+<Demo caption={{ "aa-split": "words" }}>
   <div data-demo-stage>
     <h2 class="split-demo" aa-split="words">
       Hover any word in this headline.
@@ -32,11 +47,11 @@ The headline below is split into words. Hover any word — pure CSS picks up the
   </div>
 </Demo>
 
-## Lines + mask demo
+## Live demo — lines + mask
 
 `aa-split="lines mask"` wraps each line in a clipped wrapper. On hover, CSS slides each line up out of the mask.
 
-<Demo>
+<Demo caption={{ "aa-split": "lines mask" }}>
   <div data-demo-stage>
     <h2 class="split-mask-demo" aa-split="lines mask">
       Hover this headline. Each line slides upward, clipped by its mask wrapper.
@@ -44,44 +59,44 @@ The headline below is split into words. Hover any word — pure CSS picks up the
   </div>
 </Demo>
 
-## Combining with `text-fade-up`
+## Live demo — combining with `text-fade-up`
 
 Override the animation's default split granularity by adding `aa-split` to a text animation. Each block below uses the same `text-fade-up` animation on a three-line heading and only differs by `aa-split`.
 
-<Demo>
+<Demo caption='aa-animate="text-fade-up" + aa-split="…"'>
   <div data-demo-stage>
     <div class="td-block">
-      <div class="td-label"><code>aa-split="lines"</code></div>
+      <div class="aa-demo-row-label"><code>aa-split="lines"</code></div>
       <h2 class="split-fade-h" aa-animate="text-fade-up" aa-split="lines" aa-stagger="0.2">
         A three-line headline that fades up one line at a time, staggered top to bottom across the heading.
       </h2>
     </div>
     <div class="td-block">
-      <div class="td-label"><code>aa-split="words"</code></div>
+      <div class="aa-demo-row-label"><code>aa-split="words"</code></div>
       <h2 class="split-fade-h" aa-animate="text-fade-up" aa-split="words" aa-stagger="0.1">
         A three-line headline that fades up one word at a time, staggered through the whole heading.
       </h2>
     </div>
     <div class="td-block">
-      <div class="td-label"><code>aa-split="chars"</code></div>
+      <div class="aa-demo-row-label"><code>aa-split="chars"</code></div>
       <h2 class="split-fade-h" aa-animate="text-fade-up" aa-split="chars" aa-stagger="0.02" aa-duration="0.4">
         A three-line headline that fades up one character at a time, staggered through the whole heading.
       </h2>
     </div>
     <div class="td-block">
-      <div class="td-label"><code>aa-split="lines mask"</code></div>
+      <div class="aa-demo-row-label"><code>aa-split="lines mask"</code></div>
       <h2 class="split-fade-h" aa-animate="text-fade-up" aa-split="lines mask" aa-stagger="0.2">
         A three-line headline that fades up one line at a time, each line clipped by its mask wrapper.
       </h2>
     </div>
     <div class="td-block">
-      <div class="td-label"><code>aa-split="lines-chars" aa-stagger="0.02 0.2"</code></div>
+      <div class="aa-demo-row-label"><code>aa-split="lines-chars" aa-stagger="0.02 0.2"</code></div>
       <h2 class="split-fade-h" aa-animate="text-fade-up" aa-split="lines-chars" aa-stagger="0.02 0.2" aa-duration="0.4">
         A three-line headline where chars within each line burst in together while the lines themselves cascade.
       </h2>
     </div>
     <div class="td-block">
-      <div class="td-label"><code>aa-split="lines-words mask" aa-stagger="0.05 0.25"</code></div>
+      <div class="aa-demo-row-label"><code>aa-split="lines-words mask" aa-stagger="0.05 0.25"</code></div>
       <h2 class="split-fade-h" aa-animate="text-fade-up" aa-split="lines-words mask" aa-stagger="0.05 0.25">
         A three-line headline. Words stagger inside each line and lines slide in clipped by their mask wrapper.
       </h2>
@@ -128,16 +143,6 @@ Override the animation's default split granularity by adding `aa-split` to a tex
     .td-block:first-child {
       border-top: 0;
       padding-top: 0;
-    }
-    .td-label {
-      font-family: var(--sl-font-mono, monospace);
-      font-size: 0.85rem;
-      color: var(--sl-color-gray-3);
-    }
-    .td-label code {
-      background: var(--sl-color-bg-inline-code, var(--sl-color-bg-nav));
-      padding: 0.1em 0.4em;
-      border-radius: 3px;
     }
     .split-fade-h {
       font-size: clamp(1.25rem, 2.4vw, 1.75rem);

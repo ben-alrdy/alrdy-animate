@@ -10,6 +10,17 @@ import BlockDemo from '../../../../components/BlockDemo.astro'
 
 The default color is `currentColor` so the bars match the element's text color out of the box. Override with `aa-color` for a contrasting highlight.
 
+## Variants
+
+The suffix names the edge the bar collapses toward — like a highlighter pulled in that direction.
+
+| Variant             | Bar collapses toward |
+| ------------------- | -------------------- |
+| `text-marker-up`    | top                  |
+| `text-marker-down`  | bottom               |
+| `text-marker-left`  | left                 |
+| `text-marker-right` | right                |
+
 ## Attributes
 
 | Attribute     | Default          | Notes                                                                                  |
@@ -28,7 +39,7 @@ The default color is `currentColor` so the bars match the element's text color o
 
 ## Live demo
 
-<Demo>
+<Demo caption='aa-animate="text-marker-*" (+ optional aa-color)'>
   <div data-demo-stage>
     <BlockDemo animate="text-marker-right" />
     <BlockDemo animate="text-marker-left" />

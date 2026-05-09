@@ -94,6 +94,21 @@ declare namespace JSX {
     'aa-modal-target'?: string
     'aa-modal-close'?: string | boolean
     'aa-modal-backdrop'?: string | boolean
+
+    'aa-hover'?: string
+    'aa-hover-sm'?: string
+    'aa-hover-md'?: string
+    'aa-hover-lg'?: string
+    'aa-hover-xl'?: string
+    'aa-color'?: string
+    'aa-color-sm'?: string
+    'aa-color-md'?: string
+    'aa-color-lg'?: string
+    'aa-color-xl'?: string
+
+    'aa-cursor'?: string | boolean
+    'aa-cursor-trigger'?: string | boolean
+    [key: `aa-cursor-${string}`]: string | boolean | undefined
   }
 
   interface IntrinsicAttributes extends AlrdyAnimateAttributes {}

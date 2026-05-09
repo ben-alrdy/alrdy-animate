@@ -10,6 +10,13 @@ import TextDemo from '../../../../components/TextDemo.astro'
 
 This is purely CSS clip-path — no opacity fade — so the silhouette of the type is visible during the reveal.
 
+## Variants
+
+| Variant           | Ellipse anchor | Effect                                            |
+| ----------------- | -------------- | ------------------------------------------------- |
+| `text-oval-up`    | bottom edge    | Lines emerge upward over a horizon                |
+| `text-oval-down`  | top edge       | Lines emerge downward from above                  |
+
 ## Attributes
 
 | Attribute     | Default     | Notes                                              |
@@ -27,7 +34,7 @@ This is purely CSS clip-path — no opacity fade — so the silhouette of the ty
 
 ## Live demo
 
-<Demo>
+<Demo caption='aa-animate="text-oval-up | text-oval-down"'>
   <div data-demo-stage>
     <TextDemo animate="text-oval-up" />
     <TextDemo animate="text-oval-down" />

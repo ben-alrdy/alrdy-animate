@@ -7,7 +7,7 @@ const { animate, color } = Astro.props
 ---
 
 <div class="bd-block">
-  <div class="bd-label">
+  <div class="aa-demo-row-label">
     <code>{animate}</code>
     {color && <span class="bd-color"> · <code>aa-color="{color}"</code></span>}
   </div>
@@ -41,16 +41,6 @@ const { animate, color } = Astro.props
   .bd-block:first-child {
     border-top: 0;
     padding-top: 0;
-  }
-  .bd-label {
-    font-family: var(--sl-font-system-mono, monospace);
-    font-size: 0.85rem;
-    color: var(--sl-color-gray-3);
-  }
-  .bd-label code {
-    background: var(--sl-color-bg-inline-code, var(--sl-color-bg-nav));
-    padding: 0.1em 0.4em;
-    border-radius: 3px;
   }
   .bd-color {
     color: var(--sl-color-gray-3);

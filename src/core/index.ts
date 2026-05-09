@@ -65,11 +65,18 @@ export async function init(options: InitOptions = {}): Promise<void> {
 
   const requiredPlugins = new Set<string>()
   for (const f of features) {
-    if (f === 'scroll' || f === 'text' || f === 'reveal' || f === 'parallax' || f === 'nav') {
+    if (
+      f === 'scroll' ||
+      f === 'text' ||
+      f === 'reveal' ||
+      f === 'parallax' ||
+      f === 'nav' ||
+      f === 'marquee'
+    ) {
       requiredPlugins.add('ScrollTrigger')
     }
     if (f === 'text' || f === 'split') requiredPlugins.add('SplitText')
-    if (f === 'slider') {
+    if (f === 'slider' || f === 'marquee') {
       requiredPlugins.add('Draggable')
       requiredPlugins.add('InertiaPlugin')
     }

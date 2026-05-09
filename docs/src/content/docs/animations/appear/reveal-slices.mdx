@@ -13,7 +13,7 @@ Set the wrapper's `color` (CSS) to control the slice colour — it should match 
 
 The mode and slice count are packed into the `aa-animate` value: `reveal-slices[-mode][-N]`. Both segments are optional and order-independent.
 
-| Value                       | Mode    | Rows | Notes                                          |
+| Variant                     | Mode    | Rows | Notes                                          |
 | --------------------------- | ------- | ---- | ---------------------------------------------- |
 | `reveal-slices`             | reveal  | 6    | Default — slices vanish upward to expose content.|
 | `reveal-slices-12`          | reveal  | 12   | More rows = finer reveal.                      |
@@ -39,14 +39,22 @@ The element is given `position: relative` and `overflow: hidden` if it wasn't al
 
 `gsap`, `ScrollTrigger`.
 
-## Live demo
+## Live demo — default (6 rows, scrub off)
 
-<Demo>
+<Demo caption={{ "aa-animate": "reveal-slices" }}>
   <div data-demo-stage>
     <div data-spacer></div>
     <div class="demo-image-card" aa-animate="reveal-slices">
       <span>reveal-slices · 6 rows · scrub off</span>
     </div>
+    <div data-spacer></div>
+  </div>
+</Demo>
+
+## Live demo — 12 rows with scrub
+
+<Demo caption={{ "aa-animate": "reveal-slices-12", "aa-scrub": "0.3" }}>
+  <div data-demo-stage>
     <div data-spacer></div>
     <div class="demo-image-card" aa-animate="reveal-slices-12" aa-scrub="0.3">
       <span>reveal-slices-12 · scrub 0.3</span>

@@ -30,6 +30,8 @@ const loaders: Record<FeatureName, Loader> = {
   nav: () => import('../features/nav/index'),
   slider: () => import('../features/slider/index'),
   modal: () => import('../features/modal/index'),
+  hover: () => import('../features/hover/index'),
+  cursor: () => import('../features/cursor/index'),
   split: () => import('../split/index'),
 }
 

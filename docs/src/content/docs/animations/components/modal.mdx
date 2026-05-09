@@ -34,6 +34,10 @@ import Demo from '../../../../components/Demo.astro'
 - **Restore focus** to the original trigger button when the modal closes.
 - **Inner animations** — anything inside the card with `aa-animate` plays on `modal-active` and reverses on `modal-inactive` automatically. Reverse runs at 2× forward speed (`REVERSE_TIME_SCALE`).
 
+## Required GSAP plugins
+
+`gsap`. Inner `aa-animate` elements bring their own plugin requirements (e.g. `SplitText` for `text-*`).
+
 ## Inner-content scrolling with Lenis
 
 Lenis hijacks page wheel events. When your modal card is taller than the viewport, wrap the scrollable inner section in `data-lenis-prevent` so wheel events scroll natively inside the card. No JavaScript needed — Lenis honors that attribute itself.
@@ -50,7 +54,7 @@ Lenis hijacks page wheel events. When your modal card is taller than the viewpor
 
 `aa-modal-group` wraps the dialog. The card has `aa-animate="fade-up"` with `aa-duration="0.5"`. Inner heading runs `text-blur` on chars; paragraphs run `text-slide-up` with `aa-split="lines mask"`. Click the close icon, the dim backdrop, or press Escape.
 
-<Demo>
+<Demo caption={[{ label: "trigger", attrs: { "aa-modal-target": "modal-center" } }, { label: "card", attrs: { "aa-modal-name": "modal-center", "aa-animate": "fade-up", "aa-duration": "0.5" } }]}>
   <div data-demo-stage>
     <div data-spacer></div>
     <button class="modal-trigger" aa-modal-target="modal-center">Open centered modal</button>
@@ -81,7 +85,7 @@ Lenis hijacks page wheel events. When your modal card is taller than the viewpor
 
 Same primitives, different layout. The card uses `aa-animate="slide-left"` (slides in from the right edge) and is positioned full-height on the right side of the viewport. The inner `.modal-scroll` is still `data-lenis-prevent` so wheel events scroll the panel natively while the body stays locked.
 
-<Demo>
+<Demo caption={[{ label: "trigger", attrs: { "aa-modal-target": "modal-side" } }, { label: "card", attrs: { "aa-modal-name": "modal-side", "aa-animate": "slide-left", "aa-distance": "1.4", "aa-duration": "0.5" } }]}>
   <div data-demo-stage>
     <div data-spacer></div>
     <button class="modal-trigger" aa-modal-target="modal-side">Open side panel</button>
@@ -117,7 +121,7 @@ Same primitives, different layout. The card uses `aa-animate="slide-left"` (slid
 
 Same primitives, but with a small form inside. After the open animation finishes, the modal feature focuses the first focusable element — here the email input — so users can start typing immediately. Tab/Shift+Tab cycles between the form fields and the close button without leaving the modal.
 
-<Demo>
+<Demo caption={[{ label: "trigger", attrs: { "aa-modal-target": "modal-form" } }, { label: "card", attrs: { "aa-modal-name": "modal-form", "aa-animate": "fade-up", "aa-duration": "0.5" } }]}>
   <div data-demo-stage>
     <div data-spacer></div>
     <button class="modal-trigger" aa-modal-target="modal-form">Open form modal</button>

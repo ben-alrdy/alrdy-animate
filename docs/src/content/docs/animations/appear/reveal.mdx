@@ -7,6 +7,18 @@ import Demo from '../../../../components/Demo.astro'
 
 `reveal-up` / `reveal-down` / `reveal-left` / `reveal-right` slide a `clip-path: inset(...)` open from the corresponding edge. `reveal-center` expands a circle from the middle (it also fades opacity 0→1). `reveal-oval-up` and `reveal-oval-down` use an ellipse anchored to a corner — ideal for image reveals.
 
+## Variants
+
+| Variant            | Clip-path     | Reveal direction                          |
+| ------------------ | ------------- | ----------------------------------------- |
+| `reveal-up`        | inset         | opens upward from the bottom edge         |
+| `reveal-down`      | inset         | opens downward from the top edge          |
+| `reveal-left`      | inset         | opens leftward from the right edge        |
+| `reveal-right`     | inset         | opens rightward from the left edge        |
+| `reveal-center`    | circle        | expands from the centre (also fades 0→1)  |
+| `reveal-oval-up`   | ellipse       | grows upward from a bottom-anchored oval  |
+| `reveal-oval-down` | ellipse       | grows downward from a top-anchored oval   |
+
 ## Attributes
 
 | Attribute     | Default     | Notes                                            |
@@ -23,7 +35,7 @@ import Demo from '../../../../components/Demo.astro'
 
 ## Live demo
 
-<Demo>
+<Demo caption='aa-animate="reveal-*"'>
   <div data-demo-stage>
     <div data-spacer></div>
     <div class="demo-grid">

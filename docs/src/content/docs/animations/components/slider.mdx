@@ -86,7 +86,7 @@ When the slider has focus, **Arrow Left** / **Arrow Right** step backwards / for
 
 ## Live demo — basic prev / next
 
-<Demo>
+<Demo caption={{ "aa-slider": "" }}>
   <div data-demo-stage>
     <div data-spacer></div>
     <div class="aa-slider-demo" aa-slider>
@@ -111,7 +111,7 @@ When the slider has focus, **Arrow Left** / **Arrow Right** step backwards / for
 
 A slider with `aa-slider="draggable center"` and `aa-autoplay="3 hover-pause"` shows multiple slides at once with the active one centered. Hover pauses the autoplay; mouseleave resumes. Each thumb has an inner `[aa-slider-progress]` that fills during the dwell.
 
-<Demo>
+<Demo caption={[{ label: "root", attrs: { "aa-slider": "draggable center", "aa-duration": "0.6", "aa-autoplay": "3 hover-pause" } }, { label: "thumb", attrs: { "aa-slider-progress": "width", "aa-ease": "none" } }]}>
   <div data-demo-stage>
     <div data-spacer></div>
     <div id="aa-slider-centered" class="aa-slider-demo aa-slider-demo-wide" aa-slider="draggable center" aa-duration="0.6" aa-autoplay="3 hover-pause">
@@ -142,7 +142,7 @@ A slider with `aa-slider="draggable center"` and `aa-autoplay="3 hover-pause"` s
 
 `aa-slider-progress="circle"` on an SVG (or a wrapper containing one) animates the inner `<circle>`'s `stroke-dashoffset` to draw the ring during the dwell. The user controls the visual — viewBox, radius, stroke colour and width — entirely via the SVG markup and CSS.
 
-<Demo>
+<Demo caption={[{ label: "root", attrs: { "aa-slider": "", "aa-duration": "0.5", "aa-autoplay": "3 hover-pause" } }, { label: "thumb svg", attrs: { "aa-slider-progress": "circle", "aa-ease": "none" } }]}>
   <div data-demo-stage>
     <div data-spacer></div>
     <div id="aa-slider-circle" class="aa-slider-demo" aa-slider aa-duration="0.5" aa-autoplay="3 hover-pause">
@@ -187,7 +187,7 @@ A slider with `aa-slider="draggable center"` and `aa-autoplay="3 hover-pause"` s
 
 Each slide contains a heading and paragraph with plain `aa-animate="fade-up"` — no `aa-trigger` attribute. Because they live inside `[aa-slider-item]`, they're inferred to use `event:slide-active`: they fade up on activation and reverse on deactivation.
 
-<Demo>
+<Demo caption={[{ label: "root", attrs: { "aa-slider": "center", "aa-duration": "0.5", "aa-autoplay": "3" } }, { label: "inner", attrs: { "aa-animate": "text-fade-up", "aa-split": "lines mask" } }]}>
   <div data-demo-stage>
     <div data-spacer></div>
     <div class="aa-slider-demo aa-slider-demo-wide" aa-slider="center" aa-duration="0.5" aa-autoplay="3">

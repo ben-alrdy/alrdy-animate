@@ -28,7 +28,7 @@ const FROM_FOR: Record<string, (distance: number) => FromState> = {
   'slide-down': (d) => ({ yPercent: -100 * d }),
   'slide-left': (d) => ({ xPercent: 100 * d }),
   'slide-right': (d) => ({ xPercent: -100 * d }),
-  'blur-in': () => ({ opacity: 0, filter: 'blur(20px)' }),
+  blur: () => ({ opacity: 0, filter: 'blur(20px)' }),
 }
 
 const STATIC_SUPPORTED = new Set(Object.keys(FROM_FOR))

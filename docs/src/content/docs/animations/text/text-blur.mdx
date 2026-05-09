@@ -10,6 +10,16 @@ The blur family splits the element into characters and fades each one in while a
 
 `text-blur-up` / `text-blur-down` are line-masked — characters slide vertically by 110% of their own height and are clipped by their parent line. `text-blur-left` / `text-blur-right` slide horizontally by `30 × distance` pixels.
 
+## Variants
+
+| Variant            | Blur amount | Offset                                           |
+| ------------------ | ----------- | ------------------------------------------------ |
+| `text-blur`        | 20px        | none                                             |
+| `text-blur-up`     | 10px        | translateY 110% from below (line-masked)         |
+| `text-blur-down`   | 10px        | translateY 110% from above (line-masked)         |
+| `text-blur-left`   | 10px        | translateX `30 × distance` from the right        |
+| `text-blur-right`  | 10px        | translateX `30 × distance` from the left         |
+
 ## Attributes
 
 | Attribute     | Default     | Notes                                              |
@@ -29,7 +39,7 @@ The blur family splits the element into characters and fades each one in while a
 
 ## Live demo
 
-<Demo>
+<Demo caption='aa-animate="text-blur*"'>
   <div data-demo-stage>
     <TextDemo animate="text-blur" />
     <TextDemo animate="text-blur-up" />

@@ -8,6 +8,13 @@ import TextDemo from '../../../../components/TextDemo.astro'
 
 `text-slide-up` and `text-slide-down` split the element into lines, mask each line, and slide the inner text into place. The mask clips the offscreen portion so adjacent lines stay clean during animation.
 
+## Variants
+
+| Variant            | Lines slide in from |
+| ------------------ | ------------------- |
+| `text-slide-up`    | below the line      |
+| `text-slide-down`  | above the line      |
+
 ## Attributes
 
 | Attribute     | Default     | Notes                                              |
@@ -25,7 +32,7 @@ import TextDemo from '../../../../components/TextDemo.astro'
 
 ## Live demo
 
-<Demo>
+<Demo caption='aa-animate="text-slide-up | text-slide-down"'>
   <div data-demo-stage>
     <TextDemo animate="text-slide-up" />
     <TextDemo animate="text-slide-down" />

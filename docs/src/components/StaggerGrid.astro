@@ -17,7 +17,7 @@ const items = Array.from({ length: count })
 ---
 
 <div class="sg-block">
-  <div class="sg-label">
+  <div class="aa-demo-row-label">
     <code>aa-stagger="{stagger}"</code>
     {description && <span class="sg-desc"> — {description}</span>}
   </div>
@@ -42,16 +42,6 @@ const items = Array.from({ length: count })
   .sg-block:first-child {
     border-top: 0;
     padding-top: 0;
-  }
-  .sg-label {
-    font-family: var(--sl-font-system-mono, monospace);
-    font-size: 0.85rem;
-    color: var(--sl-color-gray-3);
-  }
-  .sg-label code {
-    background: var(--sl-color-bg-inline-code, var(--sl-color-bg-nav));
-    padding: 0.1em 0.4em;
-    border-radius: 3px;
   }
   .sg-desc {
     color: var(--sl-color-gray-3);

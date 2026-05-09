@@ -28,6 +28,13 @@
   will-change: transform, opacity;
 }
 
+/*
+ * Pre-warm a compositor layer for blur animations — `filter: blur()` is a
+ * Gaussian per-frame, so promoting the layer up front avoids first-frame jank.
+ * Substring match covers both `aa-animate="blur"` (appear) and
+ * `aa-animate="text-blur-*"` (text). The .aa-word/.aa-char rule below carries
+ * the same hint on the split units that actually animate per-character.
+ */
 [aa-animate*="blur"] {
   will-change: transform, opacity, filter;
 }

@@ -11,11 +11,11 @@ The animation is built with `gsap.from()`, so any rotation, opacity, or transfor
 
 ## Variants
 
-| `aa-animate`         | What it does                                                         |
-| -------------------- | -------------------------------------------------------------------- |
-| `rotate`             | rotates clockwise into place + opacity 0 → natural                   |
+| Variant              | What it does                                                          |
+| -------------------- | --------------------------------------------------------------------- |
+| `rotate`             | rotates clockwise into place + opacity 0 → natural                    |
 | `rotate-ccw`         | rotates counter-clockwise into place                                  |
-| `rotate-tl` · `-tr` · `-bl` · `-br` | pivots from the named corner instead of center      |
+| `rotate-tl` · `-tr` · `-bl` · `-br` | pivots from the named corner instead of center        |
 | `rotate-up`          | combines rotation with `fade-up`'s translate (3rem × distance)        |
 | `rotate-up-bl-ccw`   | every modifier composes — pick a corner, a direction, optionally up   |
 
@@ -35,9 +35,9 @@ The animation is built with `gsap.from()`, so any rotation, opacity, or transfor
 
 `gsap`, `ScrollTrigger`.
 
-## Corners and directions
+## Live demo — corners and directions
 
-<Demo>
+<Demo caption='aa-animate="rotate-*"'>
   <div data-demo-stage>
     <div data-spacer></div>
     <div class="demo-grid">
@@ -52,11 +52,11 @@ The animation is built with `gsap.from()`, so any rotation, opacity, or transfor
   </div>
 </Demo>
 
-## With upward translate
+## Live demo — with upward translate
 
 `rotate-up` adds the same `3rem × distance` upward translate that `fade-up` uses. Combine it with corner and direction modifiers freely.
 
-<Demo>
+<Demo caption='aa-animate="rotate-up | rotate-up-bl-ccw"'>
   <div data-demo-stage>
     <div data-spacer></div>
     <div class="demo-grid">
@@ -67,11 +67,11 @@ The animation is built with `gsap.from()`, so any rotation, opacity, or transfor
   </div>
 </Demo>
 
-## Distance multiplier
+## Live demo — distance multiplier
 
 `aa-distance` scales the 5° angle (and the y-offset for `rotate-up`).
 
-<Demo>
+<Demo caption={{ "aa-animate": "rotate-bl", "aa-distance": "1 → 6" }}>
   <div data-demo-stage>
     <div data-spacer></div>
     <div class="demo-grid demo-grid-3" data-distance-anchor>
@@ -83,9 +83,9 @@ The animation is built with `gsap.from()`, so any rotation, opacity, or transfor
   </div>
 </Demo>
 
-## Stagger children
+## Live demo — stagger children
 
-<Demo>
+<Demo caption={{ "aa-animate": "rotate-bl-ccw", "aa-stagger": "0.08", "aa-distance": "2" }}>
   <div data-demo-stage>
     <div data-spacer></div>
     <div class="demo-grid demo-grid-3" aa-animate="rotate-bl-ccw" aa-duration="1" aa-stagger="0.08" aa-distance="2">

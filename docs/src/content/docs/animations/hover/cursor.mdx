@@ -1,0 +1,206 @@
+---
+title: cursor
+description: A custom cursor that follows the mouse and swaps content per-trigger. Pair [aa-cursor] elements with [aa-cursor-trigger] elements by name; each trigger sets its cursor's slots via aa-cursor-{part} attributes.
+---
+
+import Demo from '../../../../components/Demo.astro'
+
+A floating element that follows the mouse with `gsap.quickTo`, hidden until the cursor enters a registered trigger. Each trigger declares the content it wants the cursor to display — text, title, image, anything matching `aa-cursor-{part}` — and the library swaps it in on `mouseenter`, then plays a small fall-and-rotate exit on `mouseleave`.
+
+You can have **as many cursors on a page as you want**. `aa-cursor="<name>"` pairs with `aa-cursor-trigger="<name>"` — same name, same cursor. Both empty (`aa-cursor` and `aa-cursor-trigger` with no value) is the default unnamed pair.
+
+Skipped on touch-only devices via `(hover: hover)` so the cursor element stays hidden and no listeners are attached on iOS / Android.
+
+## Setup
+
+```html
+<!-- Default unnamed cursor; pairs with `aa-cursor-trigger` (no value). -->
+<div aa-cursor>
+  <div>
+    <span aa-cursor-title></span>
+    <span aa-cursor-text></span>
+  </div>
+</div>
+
+<!-- A second, named cursor (e.g. for image previews); pairs with `aa-cursor-trigger="preview"`. -->
+<div aa-cursor="preview">
+  <div>
+    <img aa-cursor-image alt="" />
+  </div>
+</div>
+
+<!-- Triggers select their cursor by name. -->
+<a href="#" aa-cursor-trigger aa-cursor-title="External" aa-cursor-text="Visit site">Link</a>
+<a href="#" aa-cursor-trigger="preview" aa-cursor-image="/portrait.jpg">Profile</a>
+```
+
+The first nested `<div>` of each cursor element is the show/hide subject — the script tweens its `opacity`, `y`, and `rotation`. The outer `[aa-cursor]` element only handles position + opacity, so a Webflow-style `display: none` on the outer element is fine while authoring.
+
+## Structural attributes
+
+| Attribute              | What it marks                                                                          |
+| ---------------------- | -------------------------------------------------------------------------------------- |
+| `aa-cursor`            | Cursor wrapper. Optional value names the cursor so triggers can target it; multiple cursors with the same name are tolerated but only the first wins (warns in `debug`). |
+| `aa-cursor-trigger`    | Trigger element. The value selects which `[aa-cursor]` to use; matched by name (both empty = default pair). Triggers whose name has no matching cursor are silently ignored. |
+| `aa-cursor-{part}` (inside cursor)   | Slot. Holds the element whose content gets replaced.                  |
+| `aa-cursor-{part}` (on each trigger) | Value to inject into the matching slot on hover.                       |
+
+`{part}` is open-ended: any name works. `image` (or any `<img>` slot) is treated as `src` instead of `textContent`. Everything else gets `textContent`.
+
+## Required GSAP plugins
+
+`gsap`.
+
+## What the script does
+
+- Pins the cursor element to `position: fixed; left: 0; top: 0` and follows the mouse via `gsap.quickTo`.
+- Adjusts cursor offset near the right edge (flips to `xPercent: -100`) and bottom edge (`yPercent: -120`) so the cursor never clips off-screen.
+- Show: `opacity 0 → 1` on the wrapper, `opacity 0 → 1` on the inner.
+- Hide: `opacity → 0` on both, plus a small downward fall + random rotation on the inner so it feels physical.
+- If the cursor is mid-hide when a new trigger is hovered, the new trigger is queued and shown after the hide tween finishes (only if the cursor is still over it).
+
+## Live demo
+
+Hover any tile to swap the cursor's title and text. Move out — it falls away.
+
+<Demo caption={[{ label: "cursor", attrs: { "aa-cursor": "" } }, { label: "trigger", attrs: { "aa-cursor-trigger": "", "aa-cursor-title": "…", "aa-cursor-text": "…" } }]}>
+  <div data-demo-stage>
+    <div data-spacer></div>
+    <div class="cursor-row">
+      <a href="#" class="cursor-tile" aa-cursor-trigger="" aa-cursor-title="Read" aa-cursor-text="Long-form article">
+        <span class="cursor-tile-eyebrow">essay</span>
+        <span class="cursor-tile-label">On infinite jest</span>
+      </a>
+      <a href="#" class="cursor-tile" aa-cursor-trigger="" aa-cursor-title="Watch" aa-cursor-text="3 min film">
+        <span class="cursor-tile-eyebrow">video</span>
+        <span class="cursor-tile-label">Field study, vol. 4</span>
+      </a>
+      <a href="#" class="cursor-tile" aa-cursor-trigger="" aa-cursor-title="Listen" aa-cursor-text="Podcast episode">
+        <span class="cursor-tile-eyebrow">audio</span>
+        <span class="cursor-tile-label">Notes from the studio</span>
+      </a>
+    </div>
+    <div data-spacer></div>
+  </div>
+  <div aa-cursor="" class="aa-cursor-demo">
+    <div class="aa-cursor-demo-inner">
+      <span aa-cursor-title="" class="aa-cursor-demo-title"></span>
+      <span aa-cursor-text="" class="aa-cursor-demo-text"></span>
+    </div>
+  </div>
+</Demo>
+
+## Live demo — second, named cursor
+
+A separate `[aa-cursor="preview"]` element with just an image slot. Triggers below set `aa-cursor-trigger="preview"` (matching the cursor's name) and `aa-cursor-image=...`. Both cursors coexist on the same page — they share one `mousemove` listener and update independently.
+
+<Demo>
+  <div data-demo-stage>
+    <div data-spacer></div>
+    <div class="cursor-row">
+      <a href="#" class="cursor-tile cursor-tile--image" aa-cursor-trigger="preview" aa-cursor-image="https://picsum.photos/seed/aa-forest/240/180">
+        <span class="cursor-tile-eyebrow">photo</span>
+        <span class="cursor-tile-label">Forest, dawn</span>
+      </a>
+      <a href="#" class="cursor-tile cursor-tile--image" aa-cursor-trigger="preview" aa-cursor-image="https://picsum.photos/seed/aa-cliff/240/180">
+        <span class="cursor-tile-eyebrow">photo</span>
+        <span class="cursor-tile-label">Cliffside switchback</span>
+      </a>
+      <a href="#" class="cursor-tile cursor-tile--image" aa-cursor-trigger="preview" aa-cursor-image="https://picsum.photos/seed/aa-lake/240/180">
+        <span class="cursor-tile-eyebrow">photo</span>
+        <span class="cursor-tile-label">Lake, late season</span>
+      </a>
+    </div>
+    <div data-spacer></div>
+  </div>
+  <div aa-cursor="preview" class="aa-cursor-preview">
+    <div class="aa-cursor-preview-inner">
+      <img aa-cursor-image="" alt="" class="aa-cursor-preview-image" />
+    </div>
+  </div>
+</Demo>
+
+<style>{`
+  .cursor-row {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  @media (min-width: 720px) {
+    .cursor-row {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  .cursor-tile {
+    position: relative;
+    color: #131313;
+    background: #efeeec;
+    border: 1px solid #c8c7c4;
+    border-radius: 12px;
+    padding: 1.25rem 1rem;
+    text-decoration: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    min-height: 8rem;
+  }
+  .cursor-tile-eyebrow {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    opacity: 0.7;
+  }
+  .cursor-tile-label {
+    font-size: 1.1rem;
+    margin-top: auto;
+  }
+
+  .aa-cursor-demo {
+    width: 14rem;
+    z-index: 9999;
+  }
+  .aa-cursor-demo-inner {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    background: #131313;
+    color: #fafaf7;
+    border-radius: 12px;
+    padding: 0.85rem 1rem;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18);
+  }
+  .aa-cursor-demo-title {
+    margin: 0 !important;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    opacity: 0.7;
+  }
+  .aa-cursor-demo-text {
+    margin: 0 !important;
+    font-size: 1rem;
+  }
+
+  .aa-cursor-preview {
+    width: 14rem;
+    z-index: 9999;
+  }
+  .aa-cursor-preview-inner {
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18);
+  }
+  .aa-cursor-preview-image {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  /* No image yet → don't render the empty pill. */
+  .aa-cursor-preview-image:not([src]) {
+    display: none;
+  }
+  .aa-cursor-preview-inner:not(:has(.aa-cursor-preview-image[src])) {
+    box-shadow: none;
+  }
+`}</style>

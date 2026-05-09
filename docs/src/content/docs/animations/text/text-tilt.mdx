@@ -8,6 +8,13 @@ import TextDemo from '../../../../components/TextDemo.astro'
 
 `text-tilt-up` and `text-tilt-down` are the same shape as `text-slide-*` but add a 10° rotation pivoting from the bottom-left (up) or top-left (down) corner of each line. The result has more weight than a flat slide-up — useful when you want type to feel like it lands rather than glides.
 
+## Variants
+
+| Variant           | Lines slide in from | Rotation pivot         |
+| ----------------- | ------------------- | ---------------------- |
+| `text-tilt-up`    | below the line      | bottom-left corner     |
+| `text-tilt-down`  | above the line      | top-left corner        |
+
 ## Attributes
 
 | Attribute     | Default     | Notes                                              |
@@ -25,7 +32,7 @@ import TextDemo from '../../../../components/TextDemo.astro'
 
 ## Live demo
 
-<Demo>
+<Demo caption='aa-animate="text-tilt-up | text-tilt-down"'>
   <div data-demo-stage>
     <TextDemo animate="text-tilt-up" />
     <TextDemo animate="text-tilt-down" />

@@ -8,6 +8,18 @@ import TextDemo from '../../../../components/TextDemo.astro'
 
 The fade family splits the element into characters and animates the opacity of each one. `text-fade` is plain. `text-fade-up`, `-down`, `-left`, `-right` add a directional offset. `text-fade-30` / `text-fade-10` start at 30% / 10% opacity instead of 0 — pair them with `aa-scrub` to dim a paragraph as it enters view.
 
+## Variants
+
+| Variant            | Starts at        | Offset                                |
+| ------------------ | ---------------- | ------------------------------------- |
+| `text-fade`        | opacity 0        | none                                  |
+| `text-fade-up`     | opacity 0        | translateY from below                 |
+| `text-fade-down`   | opacity 0        | translateY from above                 |
+| `text-fade-left`   | opacity 0        | translateX from the right             |
+| `text-fade-right`  | opacity 0        | translateX from the left              |
+| `text-fade-30`     | opacity 0.3      | none — pair with `aa-scrub` for a dim |
+| `text-fade-10`     | opacity 0.1      | none — pair with `aa-scrub` for a dim |
+
 ## Attributes
 
 | Attribute     | Default     | Notes                                              |
@@ -27,7 +39,7 @@ The fade family splits the element into characters and animates the opacity of e
 
 ## Live demo
 
-<Demo>
+<Demo caption='aa-animate="text-fade*"'>
   <div data-demo-stage>
     <TextDemo animate="text-fade" />
     <TextDemo animate="text-fade-up" />

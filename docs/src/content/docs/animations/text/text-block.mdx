@@ -10,6 +10,17 @@ import BlockDemo from '../../../../components/BlockDemo.astro'
 
 The animation is transform-only — the bar uses `scaleX` / `scaleY` with `transformOrigin` flipped at the half-way point — so it stays GPU-cheap even on long paragraphs.
 
+## Variants
+
+The suffix names the edge the bar **exits toward** — i.e. the direction the bar leaves once the text is revealed.
+
+| Variant            | Bar enters from | Bar exits toward |
+| ------------------ | --------------- | ---------------- |
+| `text-block-up`    | bottom          | top              |
+| `text-block-down`  | top             | bottom           |
+| `text-block-left`  | right           | left             |
+| `text-block-right` | left            | right            |
+
 ## Attributes
 
 | Attribute     | Default          | Notes                                                                                  |
@@ -30,7 +41,7 @@ The duration is split internally as `0.4 × duration` for the bar enter and `0.6
 
 ## Live demo
 
-<Demo>
+<Demo caption='aa-animate="text-block-*" (+ optional aa-color)'>
   <div data-demo-stage>
     <BlockDemo animate="text-block-right" />
     <BlockDemo animate="text-block-left" />

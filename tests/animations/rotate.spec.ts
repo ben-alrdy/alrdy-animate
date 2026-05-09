@@ -29,12 +29,29 @@ test.describe('rotate demo page', () => {
 
     const card = page.locator('[aa-animate="rotate-up-bl-ccw"]').first()
     await card.scrollIntoViewIfNeeded()
-    await page.waitForTimeout(900)
+    // 1.2s = duration (1s) + a comfortable margin so we're past settle, not
+    // sampling at the tail end where GSAP can leave floating-point dust.
+    await page.waitForTimeout(1200)
     const opacity = await card.evaluate((el) => getComputedStyle(el).opacity)
     expect(parseFloat(opacity)).toBeGreaterThan(0.95)
     const transform = await card.evaluate((el) => getComputedStyle(el).transform)
-    // After settle: rotation should be 0 (matrix(1, 0, 0, 1, ...) or 'none')
-    expect(transform === 'none' || /matrix\(1,\s*0,\s*0,\s*1,/.test(transform)).toBeTruthy()
+    // After settle: rotation should be 0 and translate ≈ 0. GSAP can leave
+    // sub-pixel residuals in the matrix (e.g. matrix(1, 3e-4, -3e-4, 1, 0, 0.17)),
+    // so parse the 6 components and assert each is within ε of the identity
+    // matrix instead of requiring literal zeros.
+    if (transform !== 'none') {
+      const m = transform.match(/matrix\(([-\d.e,\s]+)\)/)
+      expect(m).not.toBeNull()
+      const parts = (m as RegExpMatchArray)[1].split(',').map((s) => parseFloat(s.trim()))
+      const [a, b, c, d, tx, ty] = parts
+      const eps = 0.01
+      expect(Math.abs(a - 1)).toBeLessThan(eps)
+      expect(Math.abs(b)).toBeLessThan(eps)
+      expect(Math.abs(c)).toBeLessThan(eps)
+      expect(Math.abs(d - 1)).toBeLessThan(eps)
+      expect(Math.abs(tx)).toBeLessThan(1)
+      expect(Math.abs(ty)).toBeLessThan(1)
+    }
   })
 
   test('rotate-up applies a y offset before scroll triggers', async ({ page }) => {

@@ -1,8 +1,48 @@
 ---
-interface Props {}
+type AttrMap = Record<string, string>
+type CaptionGroup = { label: string; attrs: AttrMap }
+export type DemoCaption = string | AttrMap | CaptionGroup[]
+
+interface Props {
+  caption?: DemoCaption
+}
+
+const { caption } = Astro.props
+
+function isStringCaption(c: DemoCaption | undefined): c is string {
+  return typeof c === 'string'
+}
+function isGroupedCaption(c: DemoCaption | undefined): c is CaptionGroup[] {
+  return Array.isArray(c)
+}
+
+const captionRows: { label?: string; attrs?: [string, string][]; raw?: string }[] = []
+if (isStringCaption(caption)) {
+  captionRows.push({ raw: caption })
+} else if (isGroupedCaption(caption)) {
+  for (const g of caption) captionRows.push({ label: g.label, attrs: Object.entries(g.attrs) })
+} else if (caption) {
+  captionRows.push({ attrs: Object.entries(caption) })
+}
 ---
 
 <div class="demo-frame" data-demo-frame>
+  {captionRows.length > 0 && (
+    <div class="demo-caption" aria-hidden="true">
+      {captionRows.map((row) => (
+        <div class="demo-caption-row">
+          {row.label && <span class="demo-caption-label">{row.label}</span>}
+          {row.raw && <code>{row.raw}</code>}
+          {row.attrs && row.attrs.map(([k, v], i) => (
+            <>
+              {i > 0 && <span class="demo-caption-sep">·</span>}
+              <code>{k}{v !== '' && <>={`"${v}"`}</>}</code>
+            </>
+          ))}
+        </div>
+      ))}
+    </div>
+  )}
   <slot />
 </div>
 
@@ -25,7 +65,7 @@ interface Props {}
   function ready(): void {
     init({
       debug: true,
-      duration: 0.8,
+      duration: 0.6,
       ease: 'osmo',
       scrollStart: 'top 70%',
       scrubStart: 'top 90%',
@@ -41,6 +81,7 @@ interface Props {}
 
 <style>
   .demo-frame {
+    position: relative;
     border: 1px solid var(--sl-color-gray-5);
     border-radius: 8px;
     padding: 1rem;
@@ -85,5 +126,66 @@ interface Props {}
     hyphens: none;
     overflow-wrap: normal;
     word-break: normal;
+  }
+
+  /* Floating recipe pill in the top-right of the demo frame. Shows the
+     focal-element attributes so users can recreate the demo without
+     inspecting the DOM. Descriptive only — actual attributes still live
+     on the live element. */
+  .demo-caption {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    z-index: 2;
+    pointer-events: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    max-width: calc(100% - 1rem);
+    padding: 0.35rem 0.6rem;
+    background: color-mix(in srgb, var(--sl-color-bg, #000) 88%, transparent);
+    border: 1px solid var(--sl-color-gray-5);
+    border-radius: 6px;
+    backdrop-filter: blur(6px);
+    font-family: var(--sl-font-system-mono, monospace);
+    font-size: 0.72rem;
+    line-height: 1.3;
+    color: var(--sl-color-gray-2);
+  }
+  .demo-caption-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.25rem;
+  }
+  .demo-caption-label {
+    color: var(--sl-color-gray-3);
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-right: 0.15rem;
+  }
+  .demo-caption code {
+    background: transparent;
+    padding: 0;
+    font-size: inherit;
+    color: var(--sl-color-text);
+  }
+  .demo-caption-sep {
+    opacity: 0.5;
+  }
+
+  /* Shared per-row label used by TextDemo / BlockDemo / StaggerGrid and any
+     inline label inside a Demo (aa-stagger.mdx, aa-split.mdx). Kept as a
+     :global rule so MDX-authored markup can use the class directly. */
+  .demo-frame :global(.aa-demo-row-label) {
+    font-family: var(--sl-font-system-mono, monospace);
+    font-size: 0.85rem;
+    color: var(--sl-color-gray-3);
+  }
+  .demo-frame :global(.aa-demo-row-label code) {
+    background: var(--sl-color-bg-inline-code, var(--sl-color-bg-nav));
+    padding: 0.1em 0.4em;
+    border-radius: 3px;
   }
 </style>

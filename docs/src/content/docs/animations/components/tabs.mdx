@@ -109,7 +109,7 @@ Toggles get `tabindex="0"` so they're reachable via Tab. With focus on a toggle:
 
 `aa-tabs` (no value = default mode), `aa-duration="0.5"` for the height tween. Each `<p>` runs `aa-animate="text-slide-up"` with `aa-split="words mask"`, `aa-stagger="0.04"`, `aa-duration="0.6"` — words slide up on `tab-active` via trigger inference, reverse on `tab-inactive`.
 
-<Demo>
+<Demo caption={{ "aa-tabs": "", "aa-duration": "0.5" }}>
   <div data-demo-stage>
     <div data-spacer></div>
     <div class="aa-tabs-faq" aa-tabs aa-duration="0.5">
@@ -140,7 +140,7 @@ Toggles get `tabindex="0"` so they're reachable via Tab. With focus on a toggle:
 
 `aa-tabs="single"` with `aa-duration="0.4"`. The first row's toggle has `aa-tabs-initial` so it opens at init; clicking the active toggle is a no-op (single mode forbids closing the only open one).
 
-<Demo>
+<Demo caption={{ "aa-tabs": "single", "aa-duration": "0.4" }}>
   <div data-demo-stage>
     <div data-spacer></div>
     <div class="aa-tabs-faq" aa-tabs="single" aa-duration="0.4">
@@ -173,7 +173,7 @@ When toggles only have visuals (no content), the lib applies `role="tab"` + `rol
 
 `aa-tabs="single"` with `aa-duration="0.5"`. Each toggle pairs with an `aa-tabs-visual` (no `aa-tabs-content`) — that's what flips the lib into tab semantics: tablist on the parent, tab/tabpanel on the children. Headlines inside each panel use `aa-animate="text-fade-up"` + `aa-split="lines mask"`.
 
-<Demo>
+<Demo caption={{ "aa-tabs": "single", "aa-duration": "0.5" }}>
   <div data-demo-stage>
     <div data-spacer></div>
     <div class="aa-tabs-tabset" aa-tabs="single" aa-duration="0.5">
@@ -207,7 +207,7 @@ Combine content with a side-panel visual: the toggle expands its inline content 
 
 `aa-tabs="single"` with `aa-duration="0.45"`. Each row pairs an `aa-tabs-content` with an `aa-tabs-visual` sharing the same toggle id. The whole visual card runs `aa-animate="fade-left"` (fades + slides in from the left when the tab activates). Inside, the heading runs `aa-animate="text-fade"` with `aa-split="chars"` and `aa-stagger="0.02"` so characters fade in cascade once the card lands. Text stays black — lime accents the active border, never the body text.
 
-<Demo>
+<Demo caption={{ "aa-tabs": "single", "aa-duration": "0.45" }}>
   <div data-demo-stage>
     <div data-spacer></div>
     <div class="aa-tabs-combo" aa-tabs="single" aa-duration="0.45">
@@ -253,7 +253,7 @@ Combine content with a side-panel visual: the toggle expands its inline content 
 
 `aa-autoplay="3 hover-pause"` (per-tab dwell + hover behaviour), `aa-duration="0.4"` (height + cross-fade). Each toggle holds an `aa-tabs-progress="width"` element with `aa-ease="none"` for a linear fill. Hover pause is guarded by `(hover: hover)` so it stays out of the way on touch devices. Click while hovering jumps to that tab and *stays paused* — mouseleave then starts a fresh cycle from there.
 
-<Demo>
+<Demo caption={[{ label: "root", attrs: { "aa-tabs": "", "aa-autoplay": "3 hover-pause", "aa-duration": "0.4" } }, { label: "progress", attrs: { "aa-tabs-progress": "width", "aa-ease": "none" } }]}>
   <div data-demo-stage>
     <div data-spacer></div>
     <div class="aa-tabs-tabset" aa-tabs aa-autoplay="3 hover-pause" aa-duration="0.4">
@@ -296,7 +296,7 @@ Same shape as the previous demo, but without the `hover-pause` flag. Cycling nev
 
 `aa-autoplay="3"` (no hover-pause flag), `aa-duration="0.4"`. Same `aa-tabs-progress="width"` element per toggle.
 
-<Demo>
+<Demo caption={[{ label: "root", attrs: { "aa-tabs": "", "aa-autoplay": "3", "aa-duration": "0.4" } }, { label: "progress", attrs: { "aa-tabs-progress": "width", "aa-ease": "none" } }]}>
   <div data-demo-stage>
     <div data-spacer></div>
     <div class="aa-tabs-tabset" aa-tabs aa-autoplay="3" aa-duration="0.4">
@@ -339,7 +339,7 @@ Same shape as the previous demo, but without the `hover-pause` flag. Cycling nev
 
 `aa-distance="50"` (vh per tab — three tabs = 150vh total pin range), `aa-scroll-start="center center"`, `aa-duration="0.5"` for the visual cross-fade. Per-step `aa-tabs-progress="width"` bars fill proportionally within their segment. Clicking a step jumps to that section's scroll position. On touch devices, the mode automatically falls back to `single` since pin-scrubbing is brittle there.
 
-<Demo>
+<Demo caption={[{ label: "root", attrs: { "aa-tabs": "scroll", "aa-duration": "0.5", "aa-distance": "50", "aa-scroll-start": "center center" } }, { label: "progress", attrs: { "aa-tabs-progress": "width", "aa-ease": "none" } }]}>
   <div data-demo-stage>
     <div data-spacer></div>
     <div class="aa-tabs-scroll" aa-tabs="scroll" aa-duration="0.5" aa-distance="50" aa-scroll-start="center center">
@@ -385,7 +385,7 @@ The expanding content carries an image *and* a paragraph; both pick up the trigg
 
 `aa-tabs` (default mode), `aa-duration="0.5"`. Closing a tab fully resets the inner timelines so the next open starts afresh from the FROM state.
 
-<Demo>
+<Demo caption={{ "aa-tabs": "", "aa-duration": "0.5" }}>
   <div data-demo-stage>
     <div data-spacer></div>
     <div class="aa-tabs-faq aa-tabs-image" aa-tabs aa-duration="0.5">

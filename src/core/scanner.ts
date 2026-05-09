@@ -9,6 +9,8 @@ const FEATURE_ANCHOR_ATTRS = [
   'aa-modal-name',
   'aa-modal-target',
   'aa-split',
+  'aa-hover',
+  'aa-cursor',
 ] as const
 
 export type FeatureName =
@@ -22,6 +24,8 @@ export type FeatureName =
   | 'slider'
   | 'modal'
   | 'split'
+  | 'hover'
+  | 'cursor'
 
 export interface ScanResult {
   elements: Element[]
@@ -64,6 +68,8 @@ export function scan(root: ParentNode = document): ScanResult {
       else if (attr === 'aa-modal-group' || attr === 'aa-modal-name' || attr === 'aa-modal-target')
         features.add('modal')
       else if (attr === 'aa-split') features.add('split')
+      else if (attr === 'aa-hover') features.add('hover')
+      else if (attr === 'aa-cursor') features.add('cursor')
     }
   }
 

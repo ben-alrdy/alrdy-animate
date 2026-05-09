@@ -26,13 +26,13 @@ The `aa-scroll-start` / `aa-scroll-end` values are wrapped in `clamp(...)` autom
 
 `gsap`, `ScrollTrigger`.
 
-## Background image — "the image moves slower than the page"
+## Live demo — background image ("the image moves slower than the page")
 
 The classic hero parallax: a full-bleed background image drifts down as the user scrolls, so the image lags behind the page motion. The trick is to make the image element **taller than its container** (we use `height: 120%`) and clip the overflow on the parent, so the parallax translate never reveals empty space.
 
 `aa-scroll-start="top top"` lines up the animation's progress=0 with the moment the top of the hero hits the top of the viewport — i.e. immediately on page load — and the implicit `clamp()` keeps that behavior even if the user is mid-scroll on first paint.
 
-<Demo>
+<Demo caption={{ "aa-animate": "parallax", "aa-parallax-start": "0", "aa-parallax-end": "40", "aa-scroll-start": "top top" }}>
   <div data-demo-stage>
     <div class="hero-frame">
       <div class="hero-bg" aa-animate="parallax" aa-scroll-start="top top" aa-parallax-start="0" aa-parallax-end="40">
@@ -40,14 +40,13 @@ The classic hero parallax: a full-bleed background image drifts down as the user
       </div>
       <div class="hero-content">
         <h2>Hero parallax</h2>
-        <code>aa-parallax-start="0"<br />aa-parallax-end="40"<br />aa-scroll-start="top top"</code>
       </div>
     </div>
     <div data-spacer></div>
   </div>
 </Demo>
 
-## Drifting cards (with scrub smoothing)
+## Live demo — drifting cards (with scrub smoothing)
 
 Different `aa-parallax-start/end` values per card produce a depth-of-field effect on a row of items. `aa-scrub="2"` smooths each card's progress with a 2-second lag, so they feel weighty rather than locked to scroll.
 
@@ -57,7 +56,7 @@ Different `aa-parallax-start/end` values per card produce a depth-of-field effec
 
 Below: `height: 140%` with `top: -20%` covers any sweep up to ±15% with no whitespace, even mid-scrub. Push beyond that and you'd want to scale up the buffer accordingly.
 
-<Demo>
+<Demo caption={{ "aa-animate": "parallax", "aa-scrub": "2", "aa-parallax-start": "±5 → ±15", "aa-parallax-end": "(inverse)" }}>
   <div data-demo-stage>
     <div data-spacer></div>
     <div class="card-row">
@@ -84,11 +83,11 @@ Below: `height: 140%` with `top: -20%` covers any sweep up to ±15% with no whit
   </div>
 </Demo>
 
-## Horizontal parallax text
+## Live demo — horizontal parallax text
 
 `parallax-horizontal` swaps `yPercent` for `xPercent`. Apply per-character with rising distances for a typographic ribbon effect.
 
-<Demo>
+<Demo caption={{ "aa-animate": "parallax-horizontal", "aa-scrub": "2", "aa-parallax-end": "100 → 660" }}>
   <div data-demo-stage>
     <div data-spacer></div>
     <h2 class="parallax-text">

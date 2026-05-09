@@ -95,7 +95,7 @@ A persistent (non-hiding) sticky nav. The current-link indicator (lime) sits beh
 
 `aa-nav` (no token — no hide, no `is-scrolled`). Indicators carry `aa-duration="0.45"` + `aa-ease="power3.out"` (current) and `aa-duration="0.35"` + `aa-ease="power2.out"` (hover). Both pills get `border-radius: 999px` via CSS so Flip morphs between rounded shapes.
 
-<Demo>
+<Demo caption={[{ label: "nav", attrs: { "aa-nav": "" } }, { label: "current pill", attrs: { "aa-nav-current-indicator": "", "aa-duration": "0.45", "aa-ease": "power3.out" } }, { label: "hover pill", attrs: { "aa-nav-hover-indicator": "", "aa-duration": "0.35", "aa-ease": "power2.out" } }]}>
   <div data-demo-stage>
     <nav class="aa-nav-demo" aa-nav>
       <a class="aa-nav-demo-brand" href="#">brand</a>
@@ -133,7 +133,7 @@ Identical pill styling, only the current indicator (no hover indicator) and an `
 
 `aa-nav="hide change"` — default `aa-distance="1.5"` clears any drop-shadow. The current indicator carries `aa-duration="0.45"` + `aa-ease="power3.out"`.
 
-<Demo>
+<Demo caption={[{ label: "nav", attrs: { "aa-nav": "hide change", "aa-ease": "osmo" } }, { label: "current pill", attrs: { "aa-nav-current-indicator": "", "aa-duration": "0.45", "aa-ease": "power3.out" } }]}>
   <div data-demo-stage>
     <nav class="aa-nav-demo" aa-nav="hide change" aa-ease="osmo">
       <a class="aa-nav-demo-brand" href="#">brand</a>

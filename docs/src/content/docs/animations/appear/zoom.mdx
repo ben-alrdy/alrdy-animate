@@ -9,7 +9,7 @@ import Demo from '../../../../components/Demo.astro'
 
 ## Variants
 
-| `aa-animate` | What it does                              |
+| Variant      | What it does                              |
 | ------------ | ----------------------------------------- |
 | `zoom-in`    | opacity 0 → 1 + scale 0.85 → 1            |
 | `zoom-out`   | opacity 0 → 1 + scale 1.15 → 1            |
@@ -29,15 +29,23 @@ import Demo from '../../../../components/Demo.astro'
 
 `gsap`, `ScrollTrigger`.
 
-## Live demo
+## Live demo — directions
 
-<Demo>
+<Demo caption='aa-animate="zoom-in | zoom-out"'>
   <div data-demo-stage>
     <div data-spacer></div>
     <div class="demo-grid">
       <div class="demo-card" aa-animate="zoom-in">zoom-in</div>
       <div class="demo-card" aa-animate="zoom-out">zoom-out</div>
     </div>
+    <div data-spacer></div>
+  </div>
+</Demo>
+
+## Live demo — stagger children
+
+<Demo caption={{ "aa-animate": "zoom-in", "aa-stagger": "0.08" }}>
+  <div data-demo-stage>
     <div data-spacer></div>
     <div class="demo-grid demo-grid-3" aa-animate="zoom-in" aa-stagger="0.08">
       <div class="demo-card">staggered</div>

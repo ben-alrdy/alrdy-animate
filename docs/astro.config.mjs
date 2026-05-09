@@ -19,6 +19,7 @@ export default defineConfig({
         { label: 'Getting started', autogenerate: { directory: 'getting-started' } },
         { label: 'Appear animations', autogenerate: { directory: 'animations/appear' } },
         { label: 'Text animations', autogenerate: { directory: 'animations/text' } },
+        { label: 'Hover animations', autogenerate: { directory: 'animations/hover' } },
         { label: 'Components', autogenerate: { directory: 'animations/components' } },
         { label: 'Utilities', autogenerate: { directory: 'animations/utilities' } },
       ],

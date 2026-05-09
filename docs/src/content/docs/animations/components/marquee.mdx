@@ -1,0 +1,232 @@
+---
+title: marquee
+description: Seamless looping marquee with optional hover-pause, scroll-direction switch, and pointer-driven drag interaction.
+---
+
+import Demo from '../../../../components/Demo.astro'
+
+`aa-marquee` turns a list of items into a seamlessly looping horizontal marquee. The library measures the list, clones it as many times as needed to fill the viewport, then drives an infinite GSAP tween with a wrap modifier — no jump, no reset frame.
+
+## Modes
+
+`aa-marquee` modes (space-separated tokens, order-independent):
+
+| Token         | Effect                                                                                                |
+| ------------- | ----------------------------------------------------------------------------------------------------- |
+| (empty)       | Loop leftward at the configured `aa-duration`.                                                        |
+| `right`       | Loop rightward (timeScale = -1 on the same tween).                                                    |
+| `paused`      | Start paused. Resume by toggling tokens at runtime, or driving via JS.                                |
+| `hover-pause` | Pause on `mouseenter`, resume on `mouseleave`. Skipped on touch devices and when `draggable` is set.   |
+| `switch`      | Reverse direction while the page is scrolling **up** (driven by `body[aa-scroll-direction]`).          |
+| `draggable`   | Pointer + touch drag modulates the loop speed; release settles to a steady cruise in the flick direction. |
+| `none`        | Don't init at this breakpoint. Combine with `\|` (splits at `md`) or `-sm` / `-md` / `-lg` / `-xl`.   |
+
+Add the `aa-scrub` attribute (separately) to layer a scroll-driven sweep on top of the loop — the row drifts left↔right as you scroll, while still cycling. See [scrub](#live-demo--scroll-driven-sweep) below.
+
+```html
+<div aa-marquee="right hover-pause" aa-duration="30">…</div>
+
+<!-- Static row on desktop, scrolling on mobile -->
+<div aa-marquee="none|" aa-duration="none|18">…</div>
+```
+
+## Structural attributes
+
+| Attribute            | What it marks                                                                                       |
+| -------------------- | --------------------------------------------------------------------------------------------------- |
+| `aa-marquee`         | Marquee root. Must have `overflow: hidden` (or `clip`) on its CSS.                                  |
+| `aa-marquee-track`   | The element that gets translated. Container of one (or more after init) `[aa-marquee-list]`.       |
+| `aa-marquee-list`    | The repeating unit. The lib clones this into the track until the viewport is filled.                |
+
+The lib also sets `aa-marquee-direction="left" \| "right"` on the root while running — useful for CSS state hooks (e.g. flipping inner item rotation per direction).
+
+## Spacing strategy
+
+Use **`margin`** on each item to space items out. `margin-right` alone, or `margin-left` + `margin-right` — both work and produce uniform spacing across the wrap point. The lib measures `[aa-marquee-list].scrollWidth` (which folds margins into the cycle distance), so the seam between cloned lists matches the gap inside a list automatically. No JS configuration needed.
+
+```css
+.marquee-item {
+  margin-right: 1rem;     /* OK */
+  /* or */
+  margin: 0 0.5rem;       /* also OK — left + right give equivalent spacing */
+}
+```
+
+CSS `gap` / `column-gap` on the track is intentionally **not** supported — gap sits between siblings only and never contributes to the list's own width, so cloned lists would end up tighter at the seam than items are within a list. Stick to margin.
+
+## Config attributes
+
+| Attribute     | Default | Notes                                                                                          |
+| ------------- | ------- | ---------------------------------------------------------------------------------------------- |
+| `aa-duration` | `20`    | Seconds for the track to translate one full list-width. Lower = faster.                       |
+| `aa-scrub`    | (off)   | Presence enables the scroll-driven sweep. Value sets the ScrollTrigger scrub: `true` for an instant lock, or seconds for smoothing lag. |
+| `aa-distance` | `10`    | (`aa-scrub` only) Sweep magnitude as a percentage of viewport width per side. `10` = ±10vw (20vw total sweep). Independent of cycle distance, so the effect feels consistent at every screen size. |
+
+## Required GSAP plugins
+
+`gsap`, `ScrollTrigger`. **`Draggable` + `InertiaPlugin`** are additionally required when `draggable` is used (the same pair the slider needs, so most projects already load them).
+
+## Composition rules
+
+- **`aa-scrub`** layers on top of the loop — the track keeps cycling, plus a scroll-driven horizontal drift. Combine freely with `right` (flips drift direction) and `paused` (pure scroll-driven, no autoplay). Internally the lib inserts a thin wrapper element so the scrub translate sits on its own transform layer; cleanup removes it.
+- **`draggable`** disables `hover-pause` and `switch` for the same element — all three would fight for control of the loop's progress / direction. Pick one interaction model per loop.
+- **`paused`** wins for the loop: a paused marquee never auto-cycles, regardless of viewport entry, hover, or scroll direction. Scrub still works on top of it.
+- The whole loop pauses automatically when the marquee scrolls out of the viewport (top-bottom / bottom-top trigger), matching the slider/tabs pattern.
+
+## Live demo — basic loop
+
+<Demo caption={{ "aa-marquee": "", "aa-duration": "18" }}>
+  <div data-demo-stage>
+    <div data-spacer></div>
+    <div class="aa-marquee-demo" aa-marquee aa-duration="18">
+      <div class="aa-marquee-track" aa-marquee-track>
+        <div class="aa-marquee-list" aa-marquee-list>
+          <div class="aa-marquee-item">Continuous</div>
+          <div class="aa-marquee-item">Loop</div>
+          <div class="aa-marquee-item">No</div>
+          <div class="aa-marquee-item">Reset</div>
+          <div class="aa-marquee-item">Frame</div>
+          <div class="aa-marquee-item">Ever</div>
+        </div>
+      </div>
+    </div>
+    <div data-spacer></div>
+  </div>
+</Demo>
+
+## Live demo — right-direction with hover-pause
+
+`aa-marquee="right hover-pause"` reverses the loop and stops it under the cursor. Mouseleave resumes.
+
+<Demo caption={{ "aa-marquee": "right hover-pause", "aa-duration": "22" }}>
+  <div data-demo-stage>
+    <div data-spacer></div>
+    <div class="aa-marquee-demo" aa-marquee="right hover-pause" aa-duration="22">
+      <div class="aa-marquee-track" aa-marquee-track>
+        <div class="aa-marquee-list" aa-marquee-list>
+          <div class="aa-marquee-item">Hover</div>
+          <div class="aa-marquee-item">Me</div>
+          <div class="aa-marquee-item">To</div>
+          <div class="aa-marquee-item">Pause</div>
+          <div class="aa-marquee-item">Then</div>
+          <div class="aa-marquee-item">Release</div>
+        </div>
+      </div>
+    </div>
+    <div data-spacer></div>
+  </div>
+</Demo>
+
+## Live demo — direction switch on scroll
+
+`aa-marquee="switch"` flips direction whenever the page is scrolling up. Scroll the page back and forth to see it react.
+
+<Demo caption={{ "aa-marquee": "switch", "aa-duration": "20" }}>
+  <div data-demo-stage>
+    <div data-spacer></div>
+    <div class="aa-marquee-demo" aa-marquee="switch" aa-duration="20">
+      <div class="aa-marquee-track" aa-marquee-track>
+        <div class="aa-marquee-list" aa-marquee-list>
+          <div class="aa-marquee-item">Scroll</div>
+          <div class="aa-marquee-item">Down</div>
+          <div class="aa-marquee-item">→</div>
+          <div class="aa-marquee-item">Then</div>
+          <div class="aa-marquee-item">Scroll</div>
+          <div class="aa-marquee-item">Up</div>
+          <div class="aa-marquee-item">←</div>
+        </div>
+      </div>
+    </div>
+    <div data-spacer></div>
+  </div>
+</Demo>
+
+## Live demo — scroll-driven sweep
+
+Add the `aa-scrub` attribute to layer a scroll-driven left↔right drift on top of the continuous loop. As the marquee enters the bottom of the viewport (`top bottom`) and exits the top (`bottom top`), the row drifts by `aa-distance × 2 vw` total — `aa-distance="10"` is ±10vw per side (20vw total). Pass a number to `aa-scrub` for smoothing lag. The loop keeps cycling underneath, so the row stays alive even when you stop scrolling. Add `right` to flip the drift direction; add `paused` to drop the loop and get pure scroll-driven motion.
+
+Scroll up and down past this demo to see both motions compose.
+
+<Demo caption={{ "aa-marquee": "switch", "aa-scrub": "0.5", "aa-distance": "20" }}>
+  <div data-demo-stage>
+    <div data-spacer></div>
+    <div class="aa-marquee-demo" aa-marquee="switch" aa-scrub="0.5" aa-distance="20">
+      <div class="aa-marquee-track" aa-marquee-track>
+        <div class="aa-marquee-list" aa-marquee-list>
+          <div class="aa-marquee-item">Sweep</div>
+          <div class="aa-marquee-item">With</div>
+          <div class="aa-marquee-item">Scroll</div>
+          <div class="aa-marquee-item">Position</div>
+          <div class="aa-marquee-item">Not</div>
+          <div class="aa-marquee-item">Time</div>
+        </div>
+      </div>
+    </div>
+    <div data-spacer></div>
+  </div>
+</Demo>
+
+## Live demo — draggable
+
+`aa-marquee="draggable"` adds pointer + touch drag. Flick to push the loop faster in either direction; release and the loop settles back to a steady cruise in the direction of your last flick.
+
+<Demo caption={{ "aa-marquee": "draggable", "aa-duration": "24" }}>
+  <div data-demo-stage>
+    <div data-spacer></div>
+    <div class="aa-marquee-demo aa-marquee-demo-draggable" aa-marquee="draggable" aa-duration="24">
+      <div class="aa-marquee-track" aa-marquee-track>
+        <div class="aa-marquee-list" aa-marquee-list>
+          <div class="aa-marquee-item is-round">Drag</div>
+          <div class="aa-marquee-item">Me</div>
+          <div class="aa-marquee-item is-round">←</div>
+          <div class="aa-marquee-item">Or</div>
+          <div class="aa-marquee-item is-round">→</div>
+          <div class="aa-marquee-item">Flick</div>
+          <div class="aa-marquee-item is-round">Hard</div>
+        </div>
+      </div>
+    </div>
+    <div data-spacer></div>
+  </div>
+</Demo>
+
+<style>{`
+  .aa-marquee-demo {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    overflow: hidden;
+  }
+  .aa-marquee-track {
+    display: flex;
+    align-items: center;
+    flex: none;
+    will-change: transform;
+  }
+  .aa-marquee-list {
+    display: flex;
+    align-items: center;
+    flex: none;
+  }
+  .aa-marquee-item {
+    flex: none;
+    padding: 0.85rem 1.25rem;
+    margin-right: 0.75rem;
+    background: var(--sl-color-accent);
+    color: var(--sl-color-text-invert, var(--sl-color-white));
+    border-radius: 6px;
+    font-weight: 500;
+  }
+  .aa-marquee-demo-draggable {
+    cursor: grab;
+    user-select: none;
+  }
+  .aa-marquee-demo-draggable:active {
+    cursor: grabbing;
+  }
+  .aa-marquee-demo-draggable .aa-marquee-item.is-round {
+    border-radius: 999px;
+    background: var(--sl-color-text);
+    color: var(--sl-color-bg);
+  }
+`}</style>

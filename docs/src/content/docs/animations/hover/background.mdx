@@ -1,0 +1,205 @@
+---
+title: background
+description: Direction-aware hover backgrounds. A solid block or a curved wave slides in from the cursor's edge — JS injects the layer and animates it. Markup stays clean.
+---
+
+import Demo from '../../../../components/Demo.astro'
+
+`aa-hover="block"` and `aa-hover="curve"` add a colour layer that slides in from whichever edge of the host the cursor crossed. The library injects the moving panel — a `<span>` for `block`, an `<svg>` with a morphing path for `curve` — and removes it on dispose.
+
+Hover effects are skipped on touch-only devices via `(hover: hover)` so iOS / Android don't fire stuck animations on tap.
+
+## Variants
+
+| Variant  | What it does                                            |
+| -------- | ------------------------------------------------------- |
+| `block`  | Solid colour panel slides in from the cursor's edge     |
+| `curve`  | Same idea, but the leading edge is a soft curved wave   |
+
+## Flags
+
+Add a space-separated flag to constrain which edge the panel enters from. With no flag (`all`), the closest of the four edges to the cursor is used.
+
+| Flag         | What it does                                           |
+| ------------ | ------------------------------------------------------ |
+| (none)       | `all` — closest of top / bottom / left / right         |
+| `vertical`   | only `top` or `bottom`, picked by cursor Y             |
+| `horizontal` | only `left` or `right`, picked by cursor X             |
+| `top` / `bottom` / `left` / `right` | always that edge, regardless of cursor |
+
+Examples: `aa-hover="block"`, `aa-hover="curve vertical"`, `aa-hover="block top"`.
+
+## Config attributes
+
+| Attribute     | Default        | Notes                                                                  |
+| ------------- | -------------- | ---------------------------------------------------------------------- |
+| `aa-hover`    | (required)     | `block` or `curve`, plus optional direction flag                       |
+| `aa-color`    | `currentColor` | Fill colour of the injected panel                                      |
+| `aa-duration` | global default | Seconds. Falls back to the `duration` passed to `init()` (default `0.6`).            |
+| `aa-delay`    | `0`            | Seconds before the enter animation starts                              |
+| `aa-ease`     | global default | Any GSAP-compatible ease. Falls back to the `ease` passed to `init()` (default `osmo`). |
+
+## What gets injected
+
+- **block** — a `<span aa-hover-bg="block">` absolutely positioned to fill the host. The host gets `position: relative` + `overflow: hidden` if it doesn't already have them.
+- **curve** — an `<svg aa-hover-bg="curve" viewBox="0 0 100 100" preserveAspectRatio="none">` containing a single `<path>` that morphs between a degenerate edge-pinned shape and full coverage. Same host treatment as block.
+
+If you want hover-driven changes to anything else on the element (text colour, border, scale), do that in CSS using `:hover` — the lib intentionally keeps its scope to the injected layer.
+
+## Live demo — block
+
+Direction modes side by side. Hover from the corner you want to see the panel come in from.
+
+<Demo caption={{ "aa-hover": "block (+ direction flag)", "aa-color": "var(--aa-lime)" }}>
+  <div data-demo-stage>
+    <div data-spacer></div>
+    <div class="hover-row">
+      <a href="#" class="hover-tile" aa-hover="block" aa-color="var(--aa-lime)">
+        <span class="hover-tile-eyebrow">block</span>
+        <span class="hover-tile-label">all</span>
+      </a>
+      <a href="#" class="hover-tile" aa-hover="block vertical" aa-color="var(--aa-lime)">
+        <span class="hover-tile-eyebrow">block</span>
+        <span class="hover-tile-label">vertical</span>
+      </a>
+      <a href="#" class="hover-tile" aa-hover="block horizontal" aa-color="var(--aa-lime)">
+        <span class="hover-tile-eyebrow">block</span>
+        <span class="hover-tile-label">horizontal</span>
+      </a>
+      <a href="#" class="hover-tile" aa-hover="block top" aa-color="var(--aa-lime)">
+        <span class="hover-tile-eyebrow">block</span>
+        <span class="hover-tile-label">top (forced)</span>
+      </a>
+    </div>
+    <div data-spacer></div>
+  </div>
+</Demo>
+
+## Live demo — curve
+
+Same direction modes, swapped for `curve`. The leading edge bows slightly past the host before settling.
+
+<Demo caption={{ "aa-hover": "curve (+ direction flag)", "aa-color": "#1f5d4f" }}>
+  <div data-demo-stage>
+    <div data-spacer></div>
+    <div class="hover-row">
+      <a href="#" class="hover-tile" aa-hover="curve" aa-color="#1f5d4f">
+        <span class="hover-tile-eyebrow">curve</span>
+        <span class="hover-tile-label">all</span>
+      </a>
+      <a href="#" class="hover-tile" aa-hover="curve vertical" aa-color="#1f5d4f">
+        <span class="hover-tile-eyebrow">curve</span>
+        <span class="hover-tile-label">vertical</span>
+      </a>
+      <a href="#" class="hover-tile" aa-hover="curve horizontal" aa-color="#1f5d4f">
+        <span class="hover-tile-eyebrow">curve</span>
+        <span class="hover-tile-label">horizontal</span>
+      </a>
+      <a href="#" class="hover-tile" aa-hover="curve bottom" aa-color="#1f5d4f">
+        <span class="hover-tile-eyebrow">curve</span>
+        <span class="hover-tile-label">bottom (forced)</span>
+      </a>
+    </div>
+    <div data-spacer></div>
+  </div>
+</Demo>
+
+## Live demo — directional list (block)
+
+A row layout where the panel comes in from whichever edge the cursor crossed. Pair with `:hover` styles in CSS for text-colour swaps.
+
+<Demo caption={{ "aa-hover": "block vertical", "aa-color": "var(--aa-lime)" }}>
+  <div data-demo-stage>
+    <div data-spacer></div>
+    <ul class="hover-list">
+      <li><a href="#" class="hover-list-item" aa-hover="block vertical" aa-color="var(--aa-lime)"><span>Site of the Day</span><span>FlowFest</span><span>2025</span></a></li>
+      <li><a href="#" class="hover-list-item" aa-hover="block vertical" aa-color="var(--aa-lime)"><span>Product Honors</span><span>Osmo</span><span>2025</span></a></li>
+      <li><a href="#" class="hover-list-item" aa-hover="block vertical" aa-color="var(--aa-lime)"><span>Site of the Day</span><span>Docusign Brand</span><span>2024</span></a></li>
+      <li><a href="#" class="hover-list-item" aa-hover="block vertical" aa-color="var(--aa-lime)"><span>Site of the Day</span><span>Aanstekelijk</span><span>2023</span></a></li>
+    </ul>
+    <div data-spacer></div>
+  </div>
+</Demo>
+
+## Live demo — directional list (curve)
+
+Same list, but each row hovers with a curved wave instead of a flat panel.
+
+<Demo caption={{ "aa-hover": "curve vertical", "aa-color": "#1f5d4f" }}>
+  <div data-demo-stage>
+    <div data-spacer></div>
+    <ul class="hover-list">
+      <li><a href="#" class="hover-list-item" aa-hover="curve vertical" aa-color="#1f5d4f"><span>Site of the Day</span><span>FlowFest</span><span>2025</span></a></li>
+      <li><a href="#" class="hover-list-item" aa-hover="curve vertical" aa-color="#1f5d4f"><span>Product Honors</span><span>Osmo</span><span>2025</span></a></li>
+      <li><a href="#" class="hover-list-item" aa-hover="curve vertical" aa-color="#1f5d4f"><span>Site of the Day</span><span>Docusign Brand</span><span>2024</span></a></li>
+      <li><a href="#" class="hover-list-item" aa-hover="curve vertical" aa-color="#1f5d4f"><span>Site of the Day</span><span>Aanstekelijk</span><span>2023</span></a></li>
+    </ul>
+    <div data-spacer></div>
+  </div>
+</Demo>
+
+<style>{`
+  .hover-row {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+  @media (min-width: 720px) {
+    .hover-row {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+
+  .hover-tile {
+    position: relative;
+    color: #131313;
+    background: #efeeec;
+    border: 1px solid #c8c7c4;
+    border-radius: 12px;
+    padding: 1.25rem 1rem;
+    text-decoration: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    min-height: 8rem;
+  }
+  .hover-tile-eyebrow {
+    position: relative;
+    z-index: 1;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    opacity: 0.7;
+  }
+  .hover-tile-label {
+    position: relative;
+    z-index: 1;
+    font-size: 1.1rem;
+    margin-top: auto;
+  }
+
+  .hover-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border-top: 1px solid #c8c7c4;
+  }
+  .hover-list li {
+    border-bottom: 1px solid #c8c7c4;
+    margin: 0;
+    padding: 0;
+  }
+  .hover-list-item {
+    display: grid;
+    grid-template-columns: 30% 1fr 4em;
+    gap: 1em;
+    align-items: center;
+    padding: 1.25rem 1.25rem;
+    color: #131313;
+    text-decoration: none;
+  }
+  .hover-list-item span {
+    position: relative;
+    z-index: 1;
+  }
+`}</style>

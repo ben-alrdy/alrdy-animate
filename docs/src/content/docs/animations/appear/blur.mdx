@@ -1,11 +1,11 @@
 ---
 title: blur
-description: Blur-in entrance. Element fades in while a 20px blur dissipates to zero. Soft, atmospheric.
+description: Blur entrance. Element fades in while a 20px blur dissipates to zero. Soft, atmospheric.
 ---
 
 import Demo from '../../../../components/Demo.astro'
 
-`blur-in` fades opacity 0 → 1 while the CSS blur filter shrinks from 20px to 0. The result is a soft, hazy entrance — useful for hero imagery and editorial layouts.
+`blur` fades opacity 0 → 1 while the CSS blur filter shrinks from 20px to 0. The result is a soft, hazy entrance — useful for hero imagery and editorial layouts.
 
 For per-character blur on text, see [text-blur](/animations/text/text-blur/) instead.
 
@@ -13,7 +13,7 @@ For per-character blur on text, see [text-blur](/animations/text/text-blur/) ins
 
 | Attribute     | Default      | Notes                                                     |
 | ------------- | ------------ | --------------------------------------------------------- |
-| `aa-animate`  | (required)   | `blur-in`                                                 |
+| `aa-animate`  | (required)   | `blur`                                                 |
 | `aa-duration` | `0.6`        | seconds                                                   |
 | `aa-delay`    | `0`          | seconds                                                   |
 | `aa-ease`     | `power4.out` | any GSAP ease                                             |
@@ -24,16 +24,24 @@ For per-character blur on text, see [text-blur](/animations/text/text-blur/) ins
 
 `gsap`, `ScrollTrigger`.
 
-## Live demo
+## Live demo — solo
 
-<Demo>
+<Demo caption={{ "aa-animate": "blur", "aa-duration": "1.2" }}>
   <div data-demo-stage>
     <div data-spacer></div>
-    <div class="demo-card demo-card-tall" aa-animate="blur-in" aa-duration="1.2">
-      blur-in
+    <div class="demo-card demo-card-tall" aa-animate="blur" aa-duration="1.2">
+      blur
     </div>
     <div data-spacer></div>
-    <div class="demo-grid demo-grid-3" aa-animate="blur-in" aa-stagger="0.08">
+  </div>
+</Demo>
+
+## Live demo — staggered
+
+<Demo caption={{ "aa-animate": "blur", "aa-stagger": "0.08" }}>
+  <div data-demo-stage>
+    <div data-spacer></div>
+    <div class="demo-grid demo-grid-3" aa-animate="blur" aa-stagger="0.08">
       <div class="demo-card">stagger</div>
       <div class="demo-card">blur</div>
       <div class="demo-card">across</div>

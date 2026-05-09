@@ -143,16 +143,22 @@
  * label in ink/cream and use lime as the underline (and as the hover
  * highlight bg).
  */
-.sl-markdown-content a:not(.not-content a) {
+/*
+ * `:not([data-demo-frame] a)` opts out of the prose-link styling for any
+ * anchor inside a <Demo> frame. Demo widgets — hover hosts, slider items,
+ * modal triggers — bring their own colour, background, and hover effects;
+ * the prose link colour and lime hover bg would clobber those.
+ */
+.sl-markdown-content a:not(.not-content a):not([data-demo-frame] a) {
   color: var(--aa-cream-50);
   text-decoration-color: var(--aa-lime);
   text-decoration-thickness: 2px;
   text-underline-offset: 2px;
 }
-:root[data-theme='light'] .sl-markdown-content a:not(.not-content a) {
+:root[data-theme='light'] .sl-markdown-content a:not(.not-content a):not([data-demo-frame] a) {
   color: var(--aa-ink-900);
 }
-.sl-markdown-content a:not(.not-content a):hover {
+.sl-markdown-content a:not(.not-content a):not([data-demo-frame] a):hover {
   color: var(--aa-lime-ink);
   background: var(--aa-lime);
   text-decoration: none;

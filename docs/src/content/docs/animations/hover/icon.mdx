@@ -1,0 +1,137 @@
+---
+title: icon
+description: Hover swap for icons. The first descendant SVG slides out, a clone slides in from the opposite side. Eight directions, optional reverse on leave.
+---
+
+import Demo from '../../../../components/Demo.astro'
+
+`aa-hover="icon-<direction>"` swaps an icon for a duplicate that slides in from the opposite side. The library finds the first descendant `<svg>`, wraps it in a clip box, clones it, and animates both with one timeline. No markup changes required.
+
+Hover effects are skipped on touch-only devices via `(hover: hover)` so iOS / Android don't fire stuck animations on tap.
+
+## Variants
+
+`<direction>` is one of: `up`, `down`, `left`, `right`, `up-right`, `up-left`, `down-right`, `down-left`. The original slides off in that direction; the clone enters from the opposite side and lands where the original was.
+
+| Variant                | Effect                                                   |
+| ---------------------- | -------------------------------------------------------- |
+| `icon-right`           | Original slides right, clone enters from the left        |
+| `icon-up-right`        | Diagonal slide — original up-right, clone from down-left |
+| `icon-down-left`       | Diagonal slide — original down-left, clone from up-right |
+| …and the other five    | Same pattern, mirrored                                   |
+
+## Flags
+
+Both flags are space-separated and combinable.
+
+| Flag      | What it does                                                                                                  |
+| --------- | ------------------------------------------------------------------------------------------------------------- |
+| `reverse` | Mouseleave reverses the timeline instead of restarting on every enter. Better fit for toggling buttons / CTAs |
+| `triple`  | Adds a second clone two "from" steps offscreen and doubles the slide distance — the first clone passes through centre at the midpoint, the second clone lands at centre |
+
+```html
+<a aa-hover="icon-up-right">…</a>                  <!-- restart on enter -->
+<a aa-hover="icon-up-right reverse">…</a>          <!-- reverse on leave -->
+<a aa-hover="icon-up-right triple">…</a>           <!-- chain of three -->
+<a aa-hover="icon-up-right triple reverse">…</a>   <!-- both -->
+```
+
+## Config attributes
+
+| Attribute     | Default | Notes                                                                  |
+| ------------- | ------- | ---------------------------------------------------------------------- |
+| `aa-hover`    | (required) | `icon-<direction>` plus optional `reverse` / `triple` flags         |
+| `aa-duration` | `0.4`   | Seconds                                                                |
+| `aa-delay`    | `0`     | Seconds before the enter animation starts                              |
+| `aa-ease`     | `osmo`  | Any GSAP-compatible ease, including the named eases bundled with the lib |
+| `aa-distance` | `1`     | Multiplier on the base 50 ms lag between each successive icon starting its slide. `2` doubles the gap (slower trail); `0.5` halves it (tighter chain). |
+
+## What gets injected
+
+The first descendant `<svg>` is wrapped in a `<span aa-hover-icon-clip>` (`inline-flex; position: relative; overflow: hidden`); a cloned SVG is appended next to it, absolutely positioned at the appropriate offset for the chosen direction. With the `triple` flag, two clones are appended (one at the standard "from" offset, the second one at double that distance). The wrapper and clones unwrap cleanly on dispose.
+
+Because the wrapper sets `inline-flex`, the icon stays aligned with adjacent text. If your icon is `display: block` and you need the wrapper to behave the same way, override `[aa-hover-icon-clip]` in your own CSS.
+
+## Live demo — directions
+
+<Demo caption='aa-hover="icon-* (with optional reverse)"'>
+  <div data-demo-stage>
+    <div data-spacer></div>
+    <div class="hover-row hover-row--icons">
+      <a href="#" class="hover-cta" aa-hover="icon-up-right">
+        <span>Up-right</span>
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7"/><path d="M8 7h9v9"/></svg>
+      </a>
+      <a href="#" class="hover-cta" aa-hover="icon-right reverse">
+        <span>Right (reverse)</span>
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
+      </a>
+      <a href="#" class="hover-cta" aa-hover="icon-up reverse">
+        <span>Up (reverse)</span>
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5"/><path d="m6 11 6-6 6 6"/></svg>
+      </a>
+      <a href="#" class="hover-cta" aa-hover="icon-down">
+        <span>Down</span>
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14"/><path d="m6 13 6 6 6-6"/></svg>
+      </a>
+    </div>
+    <div data-spacer></div>
+  </div>
+</Demo>
+
+## Live demo — triple
+
+Same directions, but with `triple` so a chain of three icons slides through. The middle clone is briefly visible at centre on the way through; the second clone is the one that lands.
+
+<Demo caption={{ "aa-hover": "icon-* triple", "aa-distance": "0.5" }}>
+  <div data-demo-stage>
+    <div data-spacer></div>
+    <div class="hover-row">
+      <a href="#" class="hover-cta" aa-hover="icon-up-right triple" aa-distance="0.5">
+        <span>Up-right (triple)</span>
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7"/><path d="M8 7h9v9"/></svg>
+      </a>
+      <a href="#" class="hover-cta" aa-hover="icon-right triple reverse" aa-distance="0.5">
+        <span>Right (triple, reverse)</span>
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
+      </a>
+    </div>
+    <div data-spacer></div>
+  </div>
+</Demo>
+
+<style>{`
+  .hover-row {
+    display: grid;
+    grid-template-columns: repeat(2, max-content);
+    gap: 1rem;
+    justify-content: center;
+  }
+
+  /*
+   * 3-column grid: 1fr | text (auto) | 1fr. The two 1fr columns expand
+   * equally, so the text in the auto-sized middle column ends up optically
+   * centred in the button even though the icon (justify-self: end in col 3)
+   * sits at the right edge.
+   */
+  .hover-cta {
+    display: inline-grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    min-width: 14rem;
+    background: #131313;
+    color: #ffffff;
+    border-radius: 999em;
+    padding: 0.7rem 2.2rem;
+    text-decoration: none;
+    font-weight: 400;
+    white-space: nowrap;
+  }
+  .hover-cta > span:first-child {
+    grid-column: 2;
+  }
+  .hover-cta > [aa-hover-icon-clip] {
+    grid-column: 3;
+    justify-self: end;
+  }
+`}</style>

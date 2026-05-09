@@ -9,9 +9,9 @@ import Demo from '../../../../components/Demo.astro'
 
 ## Variants
 
-| `aa-animate` | What it does                          |
-| ------------ | ------------------------------------- |
-| `fade`       | opacity 0 → 1, no transform           |
+| Variant      | What it does                           |
+| ------------ | -------------------------------------- |
+| `fade`       | opacity 0 → 1, no transform            |
 | `fade-up`    | opacity + translateY from below (50px) |
 | `fade-down`  | opacity + translateY from above        |
 | `fade-left`  | opacity + translateX from the right    |
@@ -33,9 +33,9 @@ import Demo from '../../../../components/Demo.astro'
 
 `gsap`, `ScrollTrigger`.
 
-## Directions
+## Live demo — directions
 
-<Demo>
+<Demo caption='aa-animate="fade-*"'>
   <div data-demo-stage>
     <div data-spacer></div>
     <div class="demo-grid">
@@ -48,11 +48,11 @@ import Demo from '../../../../components/Demo.astro'
   </div>
 </Demo>
 
-## Distance
+## Live demo — distance
 
 `aa-distance` scales the 50px translate offset.
 
-<Demo>
+<Demo caption={{ "aa-animate": "fade-up", "aa-distance": "1 → 6" }}>
   <div data-demo-stage>
     <div data-spacer></div>
     <div class="demo-grid demo-grid-3" data-distance-anchor>
@@ -64,11 +64,11 @@ import Demo from '../../../../components/Demo.astro'
   </div>
 </Demo>
 
-## Stagger children
+## Live demo — stagger children
 
 Add `aa-stagger` to a wrapper to animate its direct children in sequence. Each child runs the same animation with the stagger value (in seconds) between starts.
 
-<Demo>
+<Demo caption={{ "aa-animate": "fade-up", "aa-stagger": "0.1" }}>
   <div data-demo-stage>
     <div data-spacer></div>
     <div class="demo-grid demo-grid-3" aa-animate="fade-up" aa-stagger="0.1">
@@ -83,15 +83,15 @@ Add `aa-stagger` to a wrapper to animate its direct children in sequence. Each c
   </div>
 </Demo>
 
-## Scrub-driven
+## Live demo — scrub-driven
 
 Add `aa-scrub` to bind animation progress to scroll position. The element starts hidden and reveals progressively as you scroll. Pass `true` for an instant lock, or a number of seconds for smoothing lag.
 
-<Demo>
+<Demo caption={{ "aa-animate": "fade-up", "aa-scrub": "1", "aa-distance": "3" }}>
   <div data-demo-stage>
     <div data-spacer></div>
     <div class="demo-card demo-card-tall" aa-animate="fade-up" aa-scrub="1" aa-distance="3">
-      aa-scrub="1" — 1s smoothing
+      1s smoothing
     </div>
     <div data-spacer></div>
   </div>
