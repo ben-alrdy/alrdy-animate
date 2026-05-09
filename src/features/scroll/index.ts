@@ -24,10 +24,10 @@ const FROM_FOR: Record<string, (distance: number) => FromState> = {
   'fade-right': (d) => ({ x: `${-3 * d}rem`, opacity: 0 }),
   'zoom-in': () => ({ scale: 0.85, opacity: 0 }),
   'zoom-out': () => ({ scale: 1.15, opacity: 0 }),
-  'slide-up': (d) => ({ y: `${6 * d}rem` }),
-  'slide-down': (d) => ({ y: `${-6 * d}rem` }),
-  'slide-left': (d) => ({ x: `${6 * d}rem` }),
-  'slide-right': (d) => ({ x: `${-6 * d}rem` }),
+  'slide-up': (d) => ({ yPercent: 100 * d }),
+  'slide-down': (d) => ({ yPercent: -100 * d }),
+  'slide-left': (d) => ({ xPercent: 100 * d }),
+  'slide-right': (d) => ({ xPercent: -100 * d }),
   'blur-in': () => ({ opacity: 0, filter: 'blur(20px)' }),
 }
 

@@ -5,6 +5,7 @@ const FEATURE_ANCHOR_ATTRS = [
   'aa-marquee',
   'aa-nav',
   'aa-slider',
+  'aa-modal-group',
   'aa-modal-name',
   'aa-modal-target',
   'aa-split',
@@ -60,7 +61,8 @@ export function scan(root: ParentNode = document): ScanResult {
       else if (attr === 'aa-marquee') features.add('marquee')
       else if (attr === 'aa-nav') features.add('nav')
       else if (attr === 'aa-slider') features.add('slider')
-      else if (attr === 'aa-modal-name' || attr === 'aa-modal-target') features.add('modal')
+      else if (attr === 'aa-modal-group' || attr === 'aa-modal-name' || attr === 'aa-modal-target')
+        features.add('modal')
       else if (attr === 'aa-split') features.add('split')
     }
   }

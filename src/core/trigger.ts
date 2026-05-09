@@ -43,7 +43,7 @@ export function parseTrigger(value: string | undefined): ParsedTrigger {
  * because it's closer to the animated element).
  */
 const INFERENCE_CONTAINERS: ReadonlyArray<{ selector: string; eventName: string }> = [
-  { selector: '[aa-modal-target]', eventName: 'modal-open' },
+  { selector: '[aa-modal-name]', eventName: 'modal-active' },
   { selector: '[aa-tabs-content]', eventName: 'tab-active' },
   { selector: '[aa-tabs-visual]', eventName: 'tab-active' },
   { selector: '[aa-slider-item]', eventName: 'slide-active' },

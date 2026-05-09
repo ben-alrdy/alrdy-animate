@@ -1,0 +1,349 @@
+---
+title: modal
+description: Attribute-driven modal dialog. Trigger buttons, backdrop, scroll lock, focus trap, ESC. Inner aa-animate elements play on open and reverse on close — automatic.
+---
+
+import Demo from '../../../../components/Demo.astro'
+
+`aa-modal-group` is a fixed-position dialog container. Its descendants — `[aa-modal-name]` cards — open when a button with the matching `aa-modal-target` is clicked anywhere in the page. The card's own `aa-animate` (e.g. `fade-up`, `slide-left`) handles its enter; everything inside the card with `aa-animate` plays automatically too via trigger inference, and reverses when the modal closes.
+
+## Structural attributes
+
+| Attribute               | Where it goes                              | Notes                                                                                        |
+| ----------------------- | ------------------------------------------ | -------------------------------------------------------------------------------------------- |
+| `aa-modal-group`        | Outer fixed-position container             | Bounds the feature; one group can contain multiple modals.                                   |
+| `aa-modal-group-status` | Set by the lib on the group                | `"active"` while any modal in the group is open, otherwise `"not-active"`.                   |
+| `aa-modal-name="<id>"`  | Each modal card                            | Unique within a group. Carries the card's own `aa-animate` for the enter animation.          |
+| `aa-modal-status`       | Set by the lib on the card                 | `"active"` / `"not-active"`. Use for CSS variants per-card.                                  |
+| `aa-modal-target="<id>"`| Trigger button                             | Click opens the matching modal. Multiple triggers per modal are fine.                        |
+| `aa-modal-close`        | Any descendant of the group                | Click closes the active modal. Backdrop typically gets both `aa-modal-backdrop` and `aa-modal-close`. |
+| `aa-modal-backdrop`     | Optional dim element                       | Fades 0 → 1 on open, 1 → 0 on close, independent of the card's own animation.                |
+
+## Config attributes
+
+| Attribute     | Default | Notes                                                                                            |
+| ------------- | ------- | ------------------------------------------------------------------------------------------------ |
+| `aa-duration` | (init)  | Open duration in seconds. Read from the group, then overridden per card. Close runs at 2×.       |
+
+## What you get for free
+
+- **Scroll lock** while any modal is open — `lenis.stop()` if Lenis is on the page, else `body.aa-modal-locked { overflow: hidden }`.
+- **ESC key** closes the active modal.
+- **Focus trap** — Tab/Shift+Tab cycles within the card.
+- **Auto-focus** the first focusable element after the open animation finishes.
+- **Restore focus** to the original trigger button when the modal closes.
+- **Inner animations** — anything inside the card with `aa-animate` plays on `modal-active` and reverses on `modal-inactive` automatically. Reverse runs at 2× forward speed (`REVERSE_TIME_SCALE`).
+
+## Inner-content scrolling with Lenis
+
+Lenis hijacks page wheel events. When your modal card is taller than the viewport, wrap the scrollable inner section in `data-lenis-prevent` so wheel events scroll natively inside the card. No JavaScript needed — Lenis honors that attribute itself.
+
+```html
+<div class="modal-card" aa-modal-name="x">
+  <div class="modal-scroll" data-lenis-prevent>
+    <!-- tall content -->
+  </div>
+</div>
+```
+
+## Live demo — Centered modal
+
+`aa-modal-group` wraps the dialog. The card has `aa-animate="fade-up"` with `aa-duration="0.5"`. Inner heading runs `text-blur` on chars; paragraphs run `text-slide-up` with `aa-split="lines mask"`. Click the close icon, the dim backdrop, or press Escape.
+
+<Demo>
+  <div data-demo-stage>
+    <div data-spacer></div>
+    <button class="modal-trigger" aa-modal-target="modal-center">Open centered modal</button>
+    <div data-spacer></div>
+    <div class="modal" aa-modal-group>
+      <div class="modal-backdrop" aa-modal-backdrop aa-modal-close></div>
+      <div class="modal-card modal-card--center" aa-modal-name="modal-center" aa-animate="fade-up" aa-duration="0.5">
+        <div class="modal-scroll" data-lenis-prevent>
+          <div class="modal-content">
+            <h2 aa-animate="text-blur" aa-split="chars" aa-stagger="0.02" aa-duration="0.6">Centered modal</h2>
+            <p aa-animate="text-slide-up" aa-split="lines mask" aa-delay="0.1" aa-stagger="0.04" aa-duration="0.5">Card animates up and fades in. Inner heading and paragraph play on the same modal-active event via trigger inference.</p>
+            <p aa-animate="text-slide-up" aa-split="lines mask" aa-delay="0.2" aa-stagger="0.04" aa-duration="0.5">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+            <p aa-animate="text-slide-up" aa-split="lines mask" aa-delay="0.3" aa-stagger="0.04" aa-duration="0.5">Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+            <p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.</p>
+            <p>Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt.</p>
+            <p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem.</p>
+            <p>Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur. Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur.</p>
+            <p>At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti quos dolores et quas molestias excepturi sint occaecati cupiditate non provident.</p>
+          </div>
+        </div>
+        <button class="modal-close" aa-modal-close aria-label="Close"><span class="modal-close-bar"></span><span class="modal-close-bar is-second"></span></button>
+      </div>
+    </div>
+  </div>
+</Demo>
+
+## Live demo — Side panel from the right (full height)
+
+Same primitives, different layout. The card uses `aa-animate="slide-left"` (slides in from the right edge) and is positioned full-height on the right side of the viewport. The inner `.modal-scroll` is still `data-lenis-prevent` so wheel events scroll the panel natively while the body stays locked.
+
+<Demo>
+  <div data-demo-stage>
+    <div data-spacer></div>
+    <button class="modal-trigger" aa-modal-target="modal-side">Open side panel</button>
+    <div data-spacer></div>
+    <div class="modal" aa-modal-group>
+      <div class="modal-backdrop" aa-modal-backdrop aa-modal-close></div>
+      <div class="modal-card modal-card--side" aa-modal-name="modal-side" aa-animate="slide-left" aa-distance="1.4" aa-duration="0.5">
+        <div class="modal-scroll" data-lenis-prevent>
+          <div class="modal-content">
+            <h2 aa-animate="text-blur" aa-split="chars" aa-stagger="0.02" aa-duration="0.6">Side panel</h2>
+            <p aa-animate="text-fade-up" aa-split="lines mask" aa-delay="0.1" aa-stagger="0.04" aa-duration="0.5">Slides in from the right edge. The whole panel is full height; only the inner scroll container scrolls.</p>
+            <p aa-animate="text-fade-up" aa-split="lines mask" aa-delay="0.2" aa-stagger="0.04" aa-duration="0.5">Inner aa-animate elements fire on the same modal-active event the card listens to. They reverse at 2× forward speed when you close, so the exit feels snappier than the entrance.</p>
+            <h3>Section</h3>
+            <p>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+            <p>Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+            <h3>Another section</h3>
+            <p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.</p>
+            <p>Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt.</p>
+            <p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem.</p>
+            <h3>One more</h3>
+            <p>Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur.</p>
+            <p>Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur.</p>
+            <p>At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti quos dolores et quas molestias excepturi sint occaecati cupiditate non provident.</p>
+          </div>
+        </div>
+        <button class="modal-close" aa-modal-close aria-label="Close"><span class="modal-close-bar"></span><span class="modal-close-bar is-second"></span></button>
+      </div>
+    </div>
+  </div>
+</Demo>
+
+## Live demo — Form modal (auto-focus first input)
+
+Same primitives, but with a small form inside. After the open animation finishes, the modal feature focuses the first focusable element — here the email input — so users can start typing immediately. Tab/Shift+Tab cycles between the form fields and the close button without leaving the modal.
+
+<Demo>
+  <div data-demo-stage>
+    <div data-spacer></div>
+    <button class="modal-trigger" aa-modal-target="modal-form">Open form modal</button>
+    <div data-spacer></div>
+    <div class="modal" aa-modal-group>
+      <div class="modal-backdrop" aa-modal-backdrop aa-modal-close></div>
+      <div class="modal-card modal-card--center" aa-modal-name="modal-form" aa-animate="fade-up" aa-duration="0.5">
+        <div class="modal-scroll" data-lenis-prevent>
+          <div class="modal-content">
+            <h2 aa-animate="text-blur" aa-split="chars" aa-stagger="0.02" aa-duration="0.6">Get in touch</h2>
+            <p aa-animate="text-slide-up" aa-split="lines mask" aa-delay="0.1" aa-stagger="0.04" aa-duration="0.5">Drop a line. The first input is focused automatically when the modal finishes opening.</p>
+            <form class="modal-form" onsubmit="event.preventDefault()">
+              <label class="modal-form-row">
+                <span>Email</span>
+                <input type="email" name="email" placeholder="you@example.com" autocomplete="email" />
+              </label>
+              <label class="modal-form-row">
+                <span>Subject</span>
+                <input type="text" name="subject" placeholder="What's it about?" />
+              </label>
+              <label class="modal-form-row">
+                <span>Message</span>
+                <textarea name="message" rows="4" placeholder="Tell us more…"></textarea>
+              </label>
+              <button type="submit" class="modal-form-submit">Send message</button>
+            </form>
+          </div>
+        </div>
+        <button class="modal-close" aa-modal-close aria-label="Close"><span class="modal-close-bar"></span><span class="modal-close-bar is-second"></span></button>
+      </div>
+    </div>
+  </div>
+</Demo>
+
+<style>{`
+  .modal-trigger {
+    align-self: flex-start;
+    background: #131313;
+    color: #ffffff;
+    border: 0;
+    border-radius: 50em;
+    padding: 0.65em 1.25em;
+    font: inherit;
+    cursor: pointer;
+  }
+  .modal-trigger:focus-visible {
+    outline: 2px solid var(--sl-color-accent);
+    outline-offset: 2px;
+  }
+
+  /* Use visibility — not display:none — to keep child layout intact while
+     the modal is closed. SplitText's autoSplit fires on size changes
+     (display:none → block triggers a 0×0 → laid-out resize), which would
+     orphan inner aa-animate tweens by re-creating the .aa-char/.aa-line spans
+     on first open. */
+  .modal {
+    position: fixed;
+    inset: 0;
+    z-index: 99999;
+    padding: 2em 1em;
+    overflow: hidden;
+    visibility: hidden;
+  }
+  .modal[aa-modal-group-status="active"] {
+    visibility: visible;
+  }
+
+  /* rgba on background-color (not the opacity property) so GSAP's autoAlpha
+     tween — which controls inline opacity from 0 → 1 on open and back down
+     on close — doesn't fight the dim level. The 0.6 here is the resting dim
+     shown while the modal is fully open. */
+  .modal-backdrop {
+    position: absolute;
+    inset: 0;
+    background-color: rgba(19, 19, 19, 0.6);
+    cursor: pointer;
+  }
+
+  .modal-card {
+    position: absolute;
+    background-color: #efeeec;
+    color: #131313;
+    padding: 0.75em;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Fixed 60vh height so the inner .modal-scroll always overflows and
+     scrolls. max-height caps the card on very short viewports so it never
+     exceeds the available space (group's 2em vertical padding × 2). */
+  .modal-card--center {
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: min(54em, calc(100vw - 2em));
+    height: 60vh;
+    max-height: calc(100vh - 4em);
+    border-radius: 2em;
+  }
+
+  /* Side panel sits 4rem from the right/top/bottom of the viewport. The
+     absolute insets are computed against the group's padding box (which
+     equals the viewport because the group is fixed inset:0); the negative
+     adjustments compensate for the group's own 2em/1em padding so the
+     final viewport offset is exactly 4rem on every side. */
+  .modal-card--side {
+    top: calc(4rem - 2em);
+    right: calc(4rem - 1em);
+    bottom: calc(4rem - 2em);
+    width: min(34em, calc(100vw - 8rem));
+    border-radius: 2em;
+  }
+
+  .modal-scroll {
+    flex: 1 1 auto;
+    background-color: #e2e1df;
+    border-radius: 1.25em;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .modal-content {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5em;
+    padding: 2em;
+  }
+  .modal-content > * {
+    margin: 0;
+  }
+  .modal-content h2 {
+    font-size: 2.5em;
+    font-weight: 500;
+    line-height: 1.175;
+  }
+  .modal-content h3 {
+    font-size: 1.25em;
+    font-weight: 500;
+    margin-top: 0.5em;
+  }
+  .modal-content p {
+    font-size: 1em;
+    line-height: 1.5;
+  }
+
+  .modal-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
+  }
+  .modal-form-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35em;
+    font-size: 0.95em;
+    color: #131313;
+  }
+  .modal-form-row span {
+    font-weight: 500;
+  }
+  .modal-form-row input,
+  .modal-form-row textarea {
+    background-color: #efeeec;
+    border: 1px solid #c8c7c4;
+    border-radius: 0.75em;
+    padding: 0.65em 0.85em;
+    font: inherit;
+    color: #131313;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  .modal-form-row input:focus,
+  .modal-form-row textarea:focus {
+    outline: 2px solid #131313;
+    outline-offset: 1px;
+    border-color: transparent;
+  }
+  .modal-form-row textarea {
+    resize: vertical;
+    min-height: 5em;
+    font-family: inherit;
+  }
+  .modal-form-submit {
+    align-self: flex-start;
+    background: #131313;
+    color: #ffffff;
+    border: 0;
+    border-radius: 50em;
+    padding: 0.65em 1.5em;
+    font: inherit;
+    cursor: pointer;
+    margin-top: 0.5em;
+  }
+  .modal-form-submit:focus-visible {
+    outline: 2px solid var(--sl-color-accent);
+    outline-offset: 2px;
+  }
+
+  .modal-close {
+    position: absolute;
+    top: 2.5em;
+    right: 2.5em;
+    width: 3.5em;
+    height: 3.5em;
+    border: 0;
+    border-radius: 50%;
+    background-color: #efeeec;
+    color: #131313;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0;
+  }
+  .modal-close:focus-visible {
+    outline: 2px solid var(--sl-color-accent);
+    outline-offset: 2px;
+  }
+  .modal-close-bar {
+    position: absolute;
+    width: 0.125em;
+    height: 40%;
+    background-color: currentColor;
+    transform: rotate(45deg);
+  }
+  .modal-close-bar.is-second {
+    transform: rotate(-45deg);
+  }
+`}</style>

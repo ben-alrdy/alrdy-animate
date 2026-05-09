@@ -11,19 +11,21 @@ For an entrance that *also* fades, use [fade-up/down/left/right](/animations/app
 
 ## Variants
 
-| `aa-animate` | Starts at                |
-| ------------ | ------------------------ |
-| `slide-up`   | translateY(100px × distance) |
-| `slide-down` | translateY(-100px × distance) |
-| `slide-left` | translateX(100px × distance) |
-| `slide-right`| translateX(-100px × distance) |
+| `aa-animate` | Starts at                            |
+| ------------ | ------------------------------------ |
+| `slide-up`   | yPercent(100 × distance)             |
+| `slide-down` | yPercent(-100 × distance)            |
+| `slide-left` | xPercent(100 × distance)             |
+| `slide-right`| xPercent(-100 × distance)            |
+
+The offset is a percentage of the element's own size, so `aa-distance="1"` slides exactly one element-width/height — perfect for fully clipping reveals when the parent has `overflow: hidden`.
 
 ## Attributes
 
 | Attribute     | Default      | Notes                                                     |
 | ------------- | ------------ | --------------------------------------------------------- |
 | `aa-animate`  | (required)   | one of the variants above                                 |
-| `aa-distance` | `1`          | multiplier on the 100px offset                            |
+| `aa-distance` | `1`          | multiplier on the 100% (own-size) offset                  |
 | `aa-duration` | `0.6`        | seconds                                                   |
 | `aa-delay`    | `0`          | seconds                                                   |
 | `aa-ease`     | `power4.out` | any GSAP ease                                             |

@@ -39,3 +39,7 @@ yarn-error.log*
 /*.png
 /*.jpg
 /*.jpeg
+
+# Agent skills tooling (local to Claude Code workflow, not project)
+/.agents
+/skills-lock.json

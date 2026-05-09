@@ -136,12 +136,12 @@ const TEXT_ANIMS: Record<string, TextAnim> = {
   },
   'text-blur-left': {
     defaultSplit: 'chars',
-    buildFrom: (d) => ({ opacity: 0, filter: 'blur(10px)', x: 30 * d }),
+    buildFrom: (d) => ({ opacity: 0, filter: 'blur(10px)', x: `${1.875 * d}rem` }),
     to: { opacity: 1, filter: 'blur(0px)', x: 0 },
   },
   'text-blur-right': {
     defaultSplit: 'chars',
-    buildFrom: (d) => ({ opacity: 0, filter: 'blur(10px)', x: -30 * d }),
+    buildFrom: (d) => ({ opacity: 0, filter: 'blur(10px)', x: `${-1.875 * d}rem` }),
     to: { opacity: 1, filter: 'blur(0px)', x: 0 },
   },
 
