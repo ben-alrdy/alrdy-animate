@@ -1,0 +1,129 @@
+---
+title: aa-trigger
+description: Override the default scroll trigger on any animated element. Supported values are `scroll`, `click`, `event:<name>`, and `load`. Combine values with a space (e.g. `load event:enter`) to play on first page load AND on subsequent page-transition events.
+---
+
+import Demo from '../../../../components/Demo.astro'
+
+`aa-trigger` controls *when* an animation fires. By default every animation is `scroll`-driven (ScrollTrigger), but for hero content above the fold — where the element is already in view at page load — you usually want it to play immediately.
+
+## Values
+
+| Value           | Behaviour                                                                                              |
+| --------------- | ------------------------------------------------------------------------------------------------------ |
+| `scroll`        | Default. Plays when the element scrolls into view (or scrubbed if `aa-scrub` is set).                  |
+| `load`          | Plays on the **first** `init()` call in the page session — never on subsequent inits. Honours `aa-delay` so siblings can be sequenced. |
+| `event:<name>`  | Stays paused until an `aa:trigger` CustomEvent with `detail.name === <name>` is dispatched on it.      |
+| `click`         | Plays on click of the element.                                                                         |
+
+Inside known containers (`[aa-modal-name]`, `[aa-tabs-content]`, `[aa-tabs-visual]`, `[aa-slider-item]`) the trigger is *inferred* — e.g. animations inside a slide automatically use `event:slide-active`. Setting `aa-trigger` explicitly always wins.
+
+## Why `load` is first-init-only
+
+If `load` fired on every `init()` call, every Barba (or View Transition) navigation would replay the animation **while the new container is still hidden behind the transition wrapper** — the user never sees it, and by the time the wrapper drops away the element is already in its final state. So `load` is intentionally one-shot: it fires on the *very first* init in the page lifetime (until the next hard reload), then stays out of the way.
+
+On subsequent inits, a load-only element gets **no animation** — no scroll-trigger fallthrough, no from-state applied. The `aa-ready` flip at the end of `init()` makes it visible in its natural CSS state. This is exactly what you want for hero text under a page-transition wrapper: animate beautifully on first load, then just be present on every navigation back.
+
+Combine with another trigger to handle subsequent navigations explicitly — see below.
+
+## Combining triggers
+
+Space-separated values run as a list. The `load` trigger always owns the first init cycle (and short-circuits any other triggers on that element so they can't double-fire). Non-load triggers wire up normally on **subsequent** inits. This is the canonical pattern for hero content in a page-transition setup:
+
+```html
+<h1
+  aa-animate="text-slide-up"
+  aa-split="lines mask"
+  aa-trigger="load event:enter"
+>
+  Hero headline
+</h1>
+```
+
+On first page load: `load` fires immediately (or the [CSS fallback](/recipes/load-fallback/) plays if the bundle is slow). On every subsequent Barba navigation: the recipe's leave timeline dispatches `aa:trigger { name: 'enter' }` at the visual peak, and the headline animates then. No double-fire, no replay-while-hidden.
+
+See the [Webflow + Barba recipe](/recipes/webflow-barba/) for the full pattern.
+
+## Hero composition with `load`
+
+A typical hero: headline reveals first, paragraph follows, CTA fades in last. No scrolling involved — every element fires on `init()` with a per-element `aa-delay` for the staircase.
+
+<Demo>
+  <div class="hero-demo">
+    <h1 class="hero-demo__h1" aa-animate="text-slide-up" aa-split="lines mask" aa-trigger="load">Headline that slides up by line under a mask</h1>
+    <p class="hero-demo__p" aa-animate="text-slide-up" aa-split="lines mask" aa-trigger="load" aa-delay="0.2">Subline that follows 200ms behind the headline. Wraps to two lines so the per-line stagger reads clearly.</p>
+    <a href="#" class="hero-demo__btn" aa-animate="fade" aa-trigger="load" aa-delay="0.4">Call to action</a>
+  </div>
+</Demo>
+
+```html
+<h1
+  aa-animate="text-slide-up"
+  aa-split="lines mask"
+  aa-trigger="load"
+>
+  Headline
+</h1>
+
+<p
+  aa-animate="text-slide-up"
+  aa-split="lines mask"
+  aa-trigger="load"
+  aa-delay="0.2"
+>
+  Subline 200ms behind.
+</p>
+
+<a
+  href="#"
+  aa-animate="fade"
+  aa-trigger="load"
+  aa-delay="0.4"
+>
+  CTA 400ms behind.
+</a>
+```
+
+## Slow-network fallback
+
+`aa-trigger="load"` only fires once `init()` runs, which means once the JS bundle has downloaded, parsed, and called the lib. On a slow connection that delay is user-visible — and the lib's FOUC guard (`visibility: hidden` on `[aa-animate]`) keeps the hero invisible the whole time.
+
+For Webflow / `<script>`-tag projects loading from a CDN, drop the [load-fallback recipe](/recipes/load-fallback/) into `<head>`. After a tunable timeout, hero elements fade up via CSS — preserving the same staircase you defined with `aa-delay` and `aa-stagger`. When the bundle eventually arrives the lib detects the fallback and skips its own animation, so nothing flashes or replays. (Requires `defer` on your CDN scripts so the body parses before the timer fires — see the recipe.)
+
+## Page transitions (Barba, View Transitions)
+
+`aa-trigger="load"` fires *only* on the very first `init()` call in the page session — on subsequent inits (Barba navigations, programmatic `destroy()` + `init()`) it's a no-op and the element renders in its natural state. That's almost always what you want for hero text under a transition wrapper: animate beautifully on first load, then just be present on every navigation back.
+
+If you need an animation on every navigation too, combine `load` with `event:enter` (`aa-trigger="load event:enter"`) — `load` handles first init, `event:enter` handles every subsequent nav. See the [Webflow + Barba recipe](/recipes/webflow-barba/) for the full pattern.
+
+The slow-network fallback only matters for the first page load — subsequent navigations have the bundle cached, so init runs immediately.
+
+<style>{`
+  .hero-demo {
+    padding: 2rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+  .hero-demo__h1 {
+    font-size: clamp(1.75rem, 3.6vw, 2.6rem);
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    margin: 0;
+  }
+  .hero-demo__p {
+    font-size: 1rem;
+    line-height: 1.5;
+    max-width: 50ch;
+    margin: 0;
+  }
+  .hero-demo__btn {
+    align-self: flex-start;
+    padding: 0.65rem 1.1rem;
+    background: var(--sl-color-accent);
+    color: var(--sl-color-text-invert, var(--sl-color-white));
+    border-radius: 6px;
+    font-size: 0.95rem;
+    text-decoration: none;
+  }
+`}</style>

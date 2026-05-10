@@ -2,7 +2,7 @@ import type { FeatureContext, FeatureModule } from '../../core/registry'
 import { bindAgainTrigger } from '../../core/scroll-trigger'
 import { readAttrs, type Config } from '../../core/settings'
 import { defaultStaggerFor } from '../../core/stagger'
-import { onCustomTrigger, parseTrigger } from '../../core/trigger'
+import { onCustomTrigger, parseTriggers } from '../../core/trigger'
 
 interface RevealClip {
   from: string
@@ -119,7 +119,20 @@ function setupClip(
     ? { clipPath: reveal.to, opacity: 1 }
     : { clipPath: reveal.to }
 
-  const trigger = parseTrigger(config['aa-trigger'])
+  const triggers = parseTriggers(config['aa-trigger'])
+  const hasLoad = triggers.some((t) => t.kind === 'load')
+
+  if (hasLoad && ctx.firstInit) {
+    // aa-fallback signals the inline-snippet timeout already faded the element
+    // in via CSS; skip the JS animation to avoid a re-flash through from-state.
+    if (document.documentElement.hasAttribute('aa-fallback')) return undefined
+    ctx.gsap.gsap.fromTo(element, fromState, { ...toState, duration, ease, delay })
+    return undefined
+  }
+
+  // Load-only on subsequent init: skip entirely (no scroll fallthrough).
+  const trigger = triggers.find((t) => t.kind !== 'load')
+  if (!trigger) return undefined
 
   if (trigger.kind === 'event' && trigger.eventName) {
     ctx.gsap.gsap.set(element, fromState)
@@ -248,7 +261,25 @@ function setupSlices(
     if (setup.prevOverflow === 'visible') el.style.removeProperty('overflow')
   }
 
-  const trigger = parseTrigger(config['aa-trigger'])
+  const triggers = parseTriggers(config['aa-trigger'])
+  const hasLoad = triggers.some((t) => t.kind === 'load')
+
+  if (hasLoad && ctx.firstInit) {
+    // aa-fallback signals the inline-snippet timeout already faded the element
+    // in via CSS; skip the JS animation. Slice panel cleanup still runs on destroy.
+    if (document.documentElement.hasAttribute('aa-fallback')) return cleanup
+    ctx.gsap.gsap.to(setup.slices, {
+      scaleY: toScale,
+      duration,
+      ease,
+      stagger: { each: stagger, from: 'end' },
+    })
+    return cleanup
+  }
+
+  // Load-only on subsequent init: skip entirely (no scroll fallthrough).
+  const trigger = triggers.find((t) => t.kind !== 'load')
+  if (!trigger) return cleanup
 
   if (trigger.kind === 'event' && trigger.eventName) {
     const eventName = trigger.eventName

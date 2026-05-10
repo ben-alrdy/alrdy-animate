@@ -11,7 +11,7 @@ import {
 import {
   REVERSE_EASE,
   REVERSE_TIME_SCALE,
-  resolveTrigger,
+  resolveTriggers,
   subscribeWithPair,
 } from '../../core/trigger'
 import { applySplit, parseSplit, type SplitMode, type SplitResult } from '../../split/runtime'
@@ -467,7 +467,21 @@ function setupBarReveal(
     split.revert()
   }
 
-  const trigger = resolveTrigger(element, config['aa-trigger'])
+  const triggers = resolveTriggers(element, config['aa-trigger'])
+  const hasLoad = triggers.some((t) => t.kind === 'load')
+
+  if (hasLoad && ctx.firstInit) {
+    // aa-fallback signals the inline-snippet timeout already faded the element
+    // in via CSS; skip the JS animation to avoid a re-flash through from-state.
+    if (document.documentElement.hasAttribute('aa-fallback')) return cleanup
+    buildTl({ delay })
+    return cleanup
+  }
+
+  // Load-only on subsequent init: skip entirely (no scroll fallthrough). The
+  // end-of-init aa-ready flip makes the element visible in its natural state.
+  const trigger = triggers.find((t) => t.kind !== 'load')
+  if (!trigger) return cleanup
 
   if (trigger.kind === 'event' && trigger.eventName) {
     const tl = buildTl({ paused: true, delay, defaults: { easeReverse: REVERSE_EASE } })
@@ -616,7 +630,22 @@ function setupOne(
     }
   }
 
-  const trigger = resolveTrigger(element, config['aa-trigger'])
+  const triggers = resolveTriggers(element, config['aa-trigger'])
+  const hasLoad = triggers.some((t) => t.kind === 'load')
+
+  if (hasLoad && ctx.firstInit) {
+    // aa-fallback signals the inline-snippet timeout already faded the element
+    // in via CSS; skip the JS animation to avoid a re-flash through from-state.
+    if (document.documentElement.hasAttribute('aa-fallback')) return cleanup
+    const loadTl = ctx.gsap.gsap.timeline({ delay })
+    addTweens(loadTl)
+    return cleanup
+  }
+
+  // Load-only on subsequent init: skip entirely (no scroll fallthrough). The
+  // end-of-init aa-ready flip makes the element visible in its natural state.
+  const trigger = triggers.find((t) => t.kind !== 'load')
+  if (!trigger) return cleanup
 
   if (trigger.kind === 'event' && trigger.eventName) {
     const tl = ctx.gsap.gsap.timeline({

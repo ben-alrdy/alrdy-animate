@@ -74,6 +74,14 @@ export interface InternalState {
   smoothScroll: SmoothScrollHandle | null
   scrollStateDispose: (() => void) | null
   scrollTargetDispose: (() => void) | null
+  /**
+   * Set true at the END of the very first successful init() call in this
+   * page session. Survives `destroy()` (any flavour) and subsequent inits.
+   * Drives `aa-trigger="load"` semantics: load fires only on the first init
+   * cycle so subsequent Barba navigations don't replay the load animation
+   * while the new container is hidden behind the transition wrapper.
+   */
+  firstInitComplete: boolean
 }
 
 const initial = (): InternalState => ({
@@ -84,6 +92,7 @@ const initial = (): InternalState => ({
   smoothScroll: null,
   scrollStateDispose: null,
   scrollTargetDispose: null,
+  firstInitComplete: false,
 })
 
 export const state: InternalState = initial()

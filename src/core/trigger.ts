@@ -1,4 +1,4 @@
-export type TriggerKind = 'scroll' | 'event' | 'click'
+export type TriggerKind = 'scroll' | 'event' | 'click' | 'load'
 
 export interface ParsedTrigger {
   kind: TriggerKind
@@ -22,15 +22,39 @@ export const REVERSE_TIME_SCALE = 2
  */
 export const REVERSE_EASE = 'power2.inOut'
 
-export function parseTrigger(value: string | undefined): ParsedTrigger {
-  if (!value) return { kind: 'scroll' }
-  const trimmed = value.trim()
-  if (trimmed === 'scroll') return { kind: 'scroll' }
-  if (trimmed === 'click') return { kind: 'click' }
-  if (trimmed.startsWith('event:')) {
-    return { kind: 'event', eventName: trimmed.slice('event:'.length) }
+function parseOne(token: string): ParsedTrigger | null {
+  if (token === 'scroll') return { kind: 'scroll' }
+  if (token === 'click') return { kind: 'click' }
+  if (token === 'load') return { kind: 'load' }
+  if (token.startsWith('event:')) {
+    return { kind: 'event', eventName: token.slice('event:'.length) }
   }
-  return { kind: 'scroll' }
+  return null
+}
+
+/**
+ * Parse `aa-trigger` into one or more ParsedTriggers. Multiple values are
+ * space-separated, e.g. `aa-trigger="load event:enter"` means "fire on the
+ * very first init via load, then on every subsequent `aa:trigger` event with
+ * `detail.name === 'enter'` thereafter." See feature implementations for how
+ * the combination is resolved (load owns the first init cycle; non-load
+ * triggers wire on subsequent inits).
+ */
+export function parseTriggers(value: string | undefined): ParsedTrigger[] {
+  if (!value) return [{ kind: 'scroll' }]
+  const trimmed = value.trim()
+  if (trimmed === '') return [{ kind: 'scroll' }]
+  const parts = trimmed.split(/\s+/)
+  const triggers: ParsedTrigger[] = []
+  for (const part of parts) {
+    const parsed = parseOne(part)
+    if (parsed) triggers.push(parsed)
+  }
+  return triggers.length > 0 ? triggers : [{ kind: 'scroll' }]
+}
+
+export function parseTrigger(value: string | undefined): ParsedTrigger {
+  return parseTriggers(value)[0]
 }
 
 /**
@@ -50,15 +74,19 @@ const INFERENCE_CONTAINERS: ReadonlyArray<{ selector: string; eventName: string 
 ]
 
 /**
- * Resolve the trigger for an animated element.
+ * Resolve the trigger(s) for an animated element.
  *
  * If the user set `aa-trigger` explicitly, that wins (this is the escape
  * hatch — `aa-trigger="scroll"` forces scroll behavior even inside a
- * container). Otherwise, walk up the DOM looking for a known container
- * ancestor and return the matching event trigger. Default is scroll.
+ * container, and explicit values may be a space-separated list). Otherwise,
+ * walk up the DOM looking for a known container ancestor and return the
+ * matching event trigger. Default is scroll.
  */
-export function resolveTrigger(element: Element, explicit: string | undefined): ParsedTrigger {
-  if (explicit !== undefined && explicit.trim() !== '') return parseTrigger(explicit)
+export function resolveTriggers(
+  element: Element,
+  explicit: string | undefined,
+): ParsedTrigger[] {
+  if (explicit !== undefined && explicit.trim() !== '') return parseTriggers(explicit)
 
   // Find the closest container ancestor across all known patterns. We compute
   // the matched element for each, then pick the deepest (the one that doesn't
@@ -72,8 +100,12 @@ export function resolveTrigger(element: Element, explicit: string | undefined): 
     }
   }
 
-  if (best) return { kind: 'event', eventName: best.eventName }
-  return { kind: 'scroll' }
+  if (best) return [{ kind: 'event', eventName: best.eventName }]
+  return [{ kind: 'scroll' }]
+}
+
+export function resolveTrigger(element: Element, explicit: string | undefined): ParsedTrigger {
+  return resolveTriggers(element, explicit)[0]
 }
 
 type Listener = (element: Element, eventName: string) => void

@@ -23,31 +23,38 @@ In dev mode (`init({ debug: true })`) the console logs the active feature set, t
 
 ## Webflow
 
-Add the following to your site's custom code, before `</body>`. Order matters — every dependency must be available before alrdy-animate calls `init()`.
+Add the following to your site's custom code. Put the `<link>` and `<script defer>` tags in the **head**; put the `init()` call before `</body>`. Every dependency loads in parallel and executes in document order before the body finishes parsing.
 
 ```html
+<!-- In <head> -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alrdy-animate@8/dist/alrdy-animate.css">
 
 <!-- GSAP core + plugins (always load these) -->
-<script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/gsap.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/ScrollTrigger.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/CustomEase.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/gsap@3/dist/gsap.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/gsap@3/dist/ScrollTrigger.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/gsap@3/dist/CustomEase.min.js"></script>
 
 <!-- Add only the plugins your page actually uses -->
-<script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/SplitText.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/Flip.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/Draggable.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/InertiaPlugin.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/gsap@3/dist/SplitText.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/gsap@3/dist/Flip.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/gsap@3/dist/Draggable.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/gsap@3/dist/InertiaPlugin.min.js"></script>
 
 <!-- Smooth scroll (omit to disable, or set smoothScroll: false in init) -->
-<script src="https://cdn.jsdelivr.net/npm/lenis@1/dist/lenis.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/lenis@1/dist/lenis.min.js"></script>
 
 <!-- alrdy-animate last -->
-<script src="https://cdn.jsdelivr.net/npm/alrdy-animate@8/dist/alrdy-animate.umd.cjs"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/alrdy-animate@8/dist/alrdy-animate.umd.cjs"></script>
+
+<!-- Before </body>: wait for DOMContentLoaded so all defer scripts have executed -->
 <script>
-  AlrdyAnimate.init({ debug: false })
+  document.addEventListener('DOMContentLoaded', () => {
+    AlrdyAnimate.init({ debug: false })
+  })
 </script>
 ```
+
+**Why `defer`** — without it, every `<script>` blocks HTML parsing, which makes the whole page wait for each download in series. With `defer`, all scripts download in parallel while the parser sails through the body; they then execute in document order at the end of parsing. This is faster on every connection, and it's a hard requirement for the [load-fallback recipe](/recipes/load-fallback/) to work on slow networks. The init call is wrapped in `DOMContentLoaded` because inline `<script>` tags in body run *during* parsing, before deferred head scripts have executed — without the wrapper, `AlrdyAnimate` would be undefined.
 
 ## Next.js
 

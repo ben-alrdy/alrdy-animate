@@ -25,10 +25,19 @@ A runnable copy lives at `examples/barba-transition/` in the repo —
 - **Lenis persists across page swaps.** `destroy({ keepGlobals: true })`
   leaves Lenis, the body scroll-state observer, and the scroll-target
   observer alive. Only the per-page matchMedia / feature state is torn down.
-- **Content animations are event-triggered, not viewport-triggered.** Boxes
-  use `aa-trigger="event:enter"`, dispatched from a `tl.call` inside the
-  leave timeline at the right beat. Without this, the boxes auto-fire while
-  still hidden behind the wrapper.
+- **Hero text animates on first load, just renders on subsequent navs.**
+  Above-the-fold static elements use `aa-trigger="load"`. On first page load
+  it animates (or the [CSS fallback](/recipes/load-fallback/) plays if the
+  bundle is slow). On Barba navigations the `load` trigger is a no-op —
+  the element renders in its natural state once `init()` flips its
+  `aa-ready` attribute. No invisible animation behind the wrapper; the
+  hero is just *there* when the page lands, which reads cleaner with this
+  transition style.
+- **Cards animate on every navigation via `event:enter`.** Combined
+  `aa-trigger="load event:enter"` on the grid means: first load fires via
+  `load` (immediate), every subsequent Barba nav fires via the `aa:trigger`
+  event dispatched from the leave timeline, perfectly in sync with the
+  visual peak. No double-fire, no replay-while-hidden.
 
 ## Page markup
 
@@ -53,14 +62,26 @@ Osmo's design).
     </nav>
 
     <section class="page">
-      <h1 class="page__hero">Headline</h1>
-      <p class="page__lede">Subline copy</p>
+      <h1
+        class="page__hero"
+        aa-animate="text-slide-up"
+        aa-split="lines mask"
+        aa-trigger="load"
+      >Headline</h1>
+
+      <p
+        class="page__lede"
+        aa-animate="text-slide-up"
+        aa-split="lines mask"
+        aa-trigger="load"
+        aa-delay="0.2"
+      >Subline copy</p>
 
       <div
         class="card-grid"
         aa-animate="fade-up"
         aa-stagger="0.1"
-        aa-trigger="event:enter"
+        aa-trigger="load event:enter"
       >
         <article class="card">…</article>
         <article class="card">…</article>
@@ -76,10 +97,19 @@ A few attribute notes:
 - `aa-animate="fade-up" aa-stagger="0.1"` on the grid — the lib auto-targets
   direct children when `aa-stagger` is set, so each card animates with a
   100ms offset. No `aa-children` needed.
-- `aa-trigger="event:enter"` — the animation is paused until an
-  `aa:trigger` event with `detail.name === 'enter'` is dispatched on the
-  grid. Keeps the cards from auto-firing while they sit invisibly behind
-  the leave-timeline wrapper.
+- `aa-trigger="load event:enter"` on the cards — combined trigger. On the
+  first page load in this session, `load` fires immediately (or the
+  [CSS fallback](/recipes/load-fallback/) plays if the bundle is slow). On
+  every subsequent Barba navigation, `load` is a no-op (first-init-only)
+  and `event:enter` waits for an `aa:trigger` event with
+  `detail.name === 'enter'`, dispatched from inside the leave timeline at
+  the right beat. Keeps the cards from auto-firing while they sit
+  invisibly behind the leave-timeline wrapper.
+- `aa-trigger="load"` (alone) on the headline + paragraph — animates on
+  first load, then **just renders** in place on every subsequent nav. No
+  invisible re-fire behind the wrapper, no double animation. The hero is
+  simply present when the new page lands, which suits this transition
+  better than re-animating the headline every time.
 
 The container needs an explicit `background-color` so the stacked-cards
 transition reads as solid surfaces against the orange middle layer:
@@ -114,18 +144,17 @@ In Webflow / `<script>` tag setups:
 <link rel="stylesheet" href="https://unpkg.com/lenis@1/dist/lenis.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alrdy-animate@8/dist/alrdy-animate.css">
 
-<script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/gsap.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/ScrollTrigger.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/SplitText.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/CustomEase.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/Flip.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/lenis@1/dist/lenis.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@barba/core@2.10.3/dist/barba.umd.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/alrdy-animate@8/dist/alrdy-animate.umd.cjs"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/gsap@3/dist/gsap.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/gsap@3/dist/ScrollTrigger.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/gsap@3/dist/SplitText.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/gsap@3/dist/CustomEase.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/gsap@3/dist/Flip.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/lenis@1/dist/lenis.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/@barba/core@2.10.3/dist/barba.umd.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/alrdy-animate@8/dist/alrdy-animate.umd.cjs"></script>
 ```
 
-Add only the GSAP plugins your features use — `init({ debug: true })`
-prints what's missing.
+`defer` lets the parser sail through the body in parallel with the script downloads, so the load-fallback recipe (if used) finds the elements by the time its timer fires. Add only the GSAP plugins your features use — `init({ debug: true })` prints what's missing.
 
 ## The Barba init
 
@@ -172,8 +201,14 @@ function alrdyDestroy() {
 // Stagger is owned by the lib via `aa-stagger="0.1"` on the parent grid.
 // We dispatch a single aa:trigger event per trigger element; the lib plays
 // the staggered tween for all children from that.
+//
+// `~="event:enter"` matches whitespace-separated lists, so it picks up both
+// the standalone `aa-trigger="event:enter"` form AND the combined
+// `aa-trigger="load event:enter"` form. On first init, combined-form
+// elements skip event subscription (load already fired), so this dispatch
+// safely no-ops against them — only standalone-event elements respond.
 function fireEnterAnimations(rootEl) {
-  rootEl.querySelectorAll('[aa-trigger="event:enter"]').forEach((el) => {
+  rootEl.querySelectorAll('[aa-trigger~="event:enter"]').forEach((el) => {
     el.dispatchEvent(
       new CustomEvent('aa:trigger', { detail: { name: 'enter' }, bubbles: true }),
     )
@@ -350,7 +385,7 @@ breathing room between the outgoing and incoming pages.
 | ------------------------------------ | ---------------------------------------------------------- |
 | `init({ root, smoothScroll })`       | Scope the scan to a subtree; create / reuse Lenis.         |
 | `destroy({ keepGlobals: true })`     | Tear down per-page state; keep Lenis, scroll-state alive.  |
-| `aa-trigger="event:enter"`           | Pause an animation until an `aa:trigger` event fires.      |
+| `aa-trigger="load event:enter"`      | Fire on first page load; on subsequent inits wait for `aa:trigger` event. |
 | `dispatchEvent(new CustomEvent(...))` | Manual dispatch — couples animation timing to your scene. |
 | `aa-stagger="<seconds>"`             | Auto-stagger across direct children.                       |
 

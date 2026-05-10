@@ -4,15 +4,54 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Work — Barba Transition Demo</title>
+    <!-- See index.html head for what this snippet does. -->
+    <script>
+      const applyFallback = () => {
+        if (document.documentElement.hasAttribute('aa-loaded')) return;
+        document.documentElement.setAttribute('aa-fallback', '');
+        document.querySelectorAll('[aa-trigger~="load"][aa-animate]').forEach((el) => {
+          const stagger = parseFloat(el.getAttribute('aa-stagger'));
+          const baseDelay = parseFloat(el.getAttribute('aa-delay')) || 0;
+          if (Number.isFinite(stagger) && el.children.length > 0) {
+            el.style.animation = 'none';
+            el.style.visibility = 'visible';
+            Array.from(el.children).forEach((child, i) => {
+              child.style.animation = 'aa-fallback-appear 0.5s ease both';
+              child.style.animationDelay = (baseDelay + i * stagger) + 's';
+            });
+          } else if (baseDelay > 0) {
+            el.style.animationDelay = baseDelay + 's';
+          }
+        });
+      };
+      setTimeout(() => {
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', applyFallback, { once: true });
+        } else {
+          applyFallback();
+        }
+      }, 1000);
+    </script>
+    <style>
+      [aa-animate]:not([aa-ready]) { visibility: hidden; }
+      @keyframes aa-fallback-appear {
+        from { opacity: 0; transform: translateY(1.5rem); }
+        to   { opacity: 1; transform: translateY(0); }
+      }
+      html[aa-fallback] [aa-trigger~="load"][aa-animate]:not([aa-ready]) {
+        visibility: visible;
+        animation: aa-fallback-appear 0.5s ease both;
+      }
+    </style>
     <link rel="stylesheet" href="/src/styles.css" />
     <link rel="stylesheet" href="https://unpkg.com/lenis@1.3.17/dist/lenis.css" />
-    <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/gsap.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/ScrollTrigger.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/SplitText.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/CustomEase.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/Flip.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/lenis@1.3.17/dist/lenis.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@barba/core@2.10.3/dist/barba.umd.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/gsap@3/dist/gsap.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/gsap@3/dist/ScrollTrigger.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/gsap@3/dist/SplitText.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/gsap@3/dist/CustomEase.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/gsap@3/dist/Flip.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/lenis@1.3.17/dist/lenis.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/@barba/core@2.10.3/dist/barba.umd.min.js"></script>
   </head>
   <body data-barba="wrapper">
     <div data-transition-wrap class="transition">
@@ -30,17 +69,14 @@
       </nav>
 
       <section class="page">
-        <h1 class="page__hero">Selected works.</h1>
-        <p class="page__lede">
-          A small reel of recent projects — kept short to keep the focus on the
-          transition itself.
-        </p>
+        <h1 class="page__hero" aa-animate="text-slide-up" aa-split="lines mask" aa-trigger="load">Selected works.</h1>
+        <p class="page__lede" aa-animate="text-slide-up" aa-split="lines mask" aa-trigger="load" aa-delay="0.2">A small reel of recent projects — kept short to keep the focus on the transition itself.</p>
 
         <div
           class="card-grid"
           aa-animate="fade-up"
           aa-stagger="0.1"
-          aa-trigger="event:enter"
+          aa-trigger="load event:enter"
         >
           <article class="card">
             <span class="card__num">01</span>

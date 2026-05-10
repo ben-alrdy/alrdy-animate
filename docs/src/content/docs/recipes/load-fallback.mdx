@@ -1,0 +1,126 @@
+---
+title: Slow-network fallback for hero content
+description: Optional inline <head> snippet that fades hero content in if the JS bundle hasn't initialised within a configurable threshold. First-load only — Barba / View Transitions navigations are not at risk because the bundle is already cached.
+---
+
+If your hero uses [`aa-trigger="load"`](/animations/utilities/aa-trigger/) and the alrdy-animate bundle is loaded from a CDN, a slow connection can leave the hero invisible for several seconds (the lib hides every `[aa-animate]` element with `visibility: hidden` until init runs). Drop this snippet into `<head>` *above* the alrdy-animate `<script>` and `<link>` tags:
+
+```html
+<script>
+  const applyFallback = () => {
+    if (document.documentElement.hasAttribute('aa-loaded')) return;
+    document.documentElement.setAttribute('aa-fallback', '');
+    document.querySelectorAll('[aa-trigger~="load"][aa-animate]').forEach((el) => {
+      const stagger = parseFloat(el.getAttribute('aa-stagger'));
+      const baseDelay = parseFloat(el.getAttribute('aa-delay')) || 0;
+      if (Number.isFinite(stagger) && el.children.length > 0) {
+        // Parent is a container (e.g. card grid) — show it without fading,
+        // animate each direct child with the same stagger the JS init applies.
+        el.style.animation = 'none';
+        el.style.visibility = 'visible';
+        Array.from(el.children).forEach((child, i) => {
+          child.style.animation = 'aa-fallback-appear 0.5s ease both';
+          child.style.animationDelay = (baseDelay + i * stagger) + 's';
+        });
+      } else if (baseDelay > 0) {
+        el.style.animationDelay = baseDelay + 's';
+      }
+    });
+  };
+  setTimeout(() => {
+    // If the body hasn't been parsed yet (slow connection blocking on
+    // render-blocking <script> tags), defer to DOMContentLoaded so the
+    // elements actually exist when we querySelectorAll them.
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', applyFallback, { once: true });
+    } else {
+      applyFallback();
+    }
+  }, 1000);
+</script>
+<style>
+  [aa-animate]:not([aa-ready]) { visibility: hidden; }
+  @keyframes aa-fallback-appear {
+    from { opacity: 0; transform: translateY(1.5rem); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  html[aa-fallback] [aa-trigger~="load"][aa-animate]:not([aa-ready]) {
+    visibility: visible;
+    /* `both` so the from-state holds during any pre-start delay too. With
+       `forwards`, a delayed element renders at its natural opacity during
+       the delay, then jumps to opacity 0 at start — visible flicker. */
+    animation: aa-fallback-appear 0.5s ease both;
+  }
+</style>
+```
+
+Tune `1000` to whatever buffer makes sense for your audience. Lower = faster fallback, higher = more time for JS to win the race and play the proper animation.
+
+**Why the inline `<style>`** — the same FOUC + fallback rules ship in `dist/alrdy-animate.css`, but on a slow connection that file lands *after* the HTML renders. Without inlining, every animated element flashes briefly visible, then disappears when the lib's CSS arrives, then fades back in when the timeout fires. Inlining the critical CSS in `<head>` closes that window — the FOUC guard is active from the very first paint.
+
+## How the staircase works
+
+The script mirrors the two timing attributes the JS init already understands, so the fallback reveal looks like a quieter version of the real animation:
+
+- **`aa-delay="<seconds>"`** — applies a delay to the element's own fade-up. E.g. a paragraph with `aa-delay="0.2"` appears 200ms after the headline.
+- **`aa-stagger="<seconds>"` on a parent (with children)** — the parent itself shows immediately (no fade), and each direct child fades up at `i * stagger`, just like the JS path animates the children with stagger when they're inside an `aa-stagger` parent. If the parent also has `aa-delay`, that's added as a base offset to every child.
+
+CSS alone can't read `aa-delay` or expand `aa-stagger` across non-sibling children — `:nth-child` only works among siblings, CSS counters can't drive `animation-delay`, and typed `attr()` isn't widely supported yet. The 18-line script handles both rules in one pass.
+
+## What it does
+
+`init()` sets `aa-loaded` on `<html>` as its first synchronous step. If that hasn't happened by the threshold, the snippet sets `aa-fallback`. The CSS rule (matching `[aa-trigger~="load"]`, so it covers both `aa-trigger="load"` and combined forms like `aa-trigger="load event:enter"`) then fades those elements up.
+
+When the bundle eventually arrives, the lib's load-trigger branches detect `aa-fallback` and skip their JS animation entirely — the elements stay where the fallback put them, no replay or flash. `init()` also clears `aa-fallback` at the end, so subsequent Barba navigations don't re-trigger the keyframe.
+
+Scoped to `[aa-trigger~="load"]` on purpose: scroll-triggered elements below the fold stay hidden until the lib actually arrives. Only elements the author has explicitly marked as "needs to be visible immediately" are eligible for the fallback fade.
+
+## Customising the motion
+
+The default keyframe is a small upward translate (`translateY(1.5rem) → 0`) plus opacity. To use a different fallback motion (slide-down, pure fade, scale-in), override the keyframe in your own CSS *after* the inline snippet:
+
+```css
+@keyframes aa-fallback-appear {
+  from { opacity: 0; transform: scale(0.95); }
+  to   { opacity: 1; transform: scale(1); }
+}
+```
+
+The duration, easing, and selector stay the same — just the keyframe content changes.
+
+## Use `defer` on your CDN scripts
+
+For the per-element delays to actually fire on slow networks, the body needs to be parsed by the time the timer fires. Add `defer` to every `<script src="…">` in `<head>`:
+
+```html
+<script defer src="https://cdn.jsdelivr.net/npm/gsap@3/dist/gsap.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/gsap@3/dist/ScrollTrigger.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/lenis@1/dist/lenis.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/alrdy-animate@8/dist/alrdy-animate.umd.cjs"></script>
+```
+
+Without `defer`, every `<script>` blocks HTML parsing — on slow 4G the body hasn't been parsed by the time the 1s timer fires, so `querySelectorAll` returns no elements and the per-element delays never get applied. The snippet's built-in `DOMContentLoaded` guard catches this case as a safety net (it defers the apply step until the DOM is ready), but by then the lib bundle has usually finished loading too and `init()` runs first — meaning the fallback never fires at all on slow networks.
+
+`defer` flips this: the parser sails through the body without waiting for downloads. The `[aa-trigger~="load"]` elements exist by the time the timer fires, the snippet applies their delays inline, and the CSS keyframe plays out the staircase before the lib bundle even finishes downloading.
+
+## When you don't need this
+
+You can skip the snippet if any of these are true:
+
+- The bundle ships in your own JS bundle (Vite / Next.js / Webpack), not from a CDN. In that case bundle availability is bound to page render, not network latency.
+- Your hero doesn't use `aa-trigger="load"` — only fade-in fallback affects load-triggered elements.
+- You're shipping behind aggressive caching where most visitors hit a warm bundle.
+
+## Page transitions (Barba)
+
+This snippet only protects the *first* page load. On subsequent navigations the bundle is cached and `init()` runs in `beforeEnter` parallel to the leave timeline (see the [Webflow + Barba recipe](/recipes/webflow-barba/)). `aa-loaded` persists across navigations, so the fallback timer's check passes immediately and nothing fires.
+
+## Verifying it locally
+
+1. Confirm your CDN `<script>` tags use `defer` (see above) — without it the body isn't parsed when the timer fires and the per-element delays can't apply.
+2. Open DevTools → Network → check "Disable cache" → throttle to "Slow 3G" (or "Slow 4G").
+3. Reload. You should see:
+   - Hero elements stay invisible for ~1s (the timer interval).
+   - At the timer mark, they fade up — respecting any `aa-delay` and `aa-stagger` you set, so the staircase plays out before the bundle finishes downloading.
+   - When the bundle eventually lands, no second animation plays — the elements stay where the fallback put them.
+4. Open the Elements panel and inspect a load-trigger element while the fallback is in flight. You should see `style="animation-delay: 0.2s"` (or `style="animation: aa-fallback-appear 0.5s ease 0.1s 1 normal both running"` on a stagger child). If those inline styles are missing, the body wasn't parsed when the timer fired — check your `defer` attributes.

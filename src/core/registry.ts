@@ -9,6 +9,13 @@ export interface FeatureContext {
   elements: Element[]
   options: ResolvedOptions
   debug: boolean
+  /**
+   * True iff this is the *first* init() call in the page session. Reset only
+   * by a hard reload — survives every destroy() / re-init cycle. Features use
+   * it to decide whether `aa-trigger="load"` should fire (first init only) or
+   * fall through to the element's other triggers.
+   */
+  firstInit: boolean
   onResize: (fn: ResizeCallback, debounce?: number) => ResizeUnsubscribe
 }
 

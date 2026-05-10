@@ -55,6 +55,13 @@ function registerCustomEases(handle: GsapHandle, debug: boolean): void {
 
 export async function init(options: InitOptions = {}): Promise<void> {
   if (state.initialized) return
+  // Marker for the optional slow-network fallback recipe (docs/recipes/load-fallback).
+  // The inline <head> snippet checks for this attribute after a tunable timeout;
+  // setting it as the very first synchronous step in init means the snippet only
+  // fires its CSS fallback if init hasn't even *started* by the deadline.
+  if (typeof document !== 'undefined') {
+    document.documentElement.setAttribute('aa-loaded', '')
+  }
   state.options = resolveOptions(options)
   state.breakpoints = resolveBreakpoints(options.breakpoints)
   state.initialized = true
@@ -122,6 +129,7 @@ export async function init(options: InitOptions = {}): Promise<void> {
     elements,
     options: state.options,
     debug,
+    firstInit: !state.firstInitComplete,
     onResize: (fn, debounce = 150) => subscribeResize(fn, debounce),
   }
   for (const mod of featureModules) {
@@ -140,6 +148,20 @@ export async function init(options: InitOptions = {}): Promise<void> {
   // breakpoint still get revealed so the page isn't stuck blank.
   for (const el of elements) {
     if (el.hasAttribute('aa-animate')) el.setAttribute('aa-ready', '')
+  }
+
+  // Mark first-init done. Survives every destroy() so subsequent inits (e.g.
+  // Barba navigations) know `aa-trigger="load"` already played. Reset only by
+  // a hard page reload, which reloads this module too.
+  state.firstInitComplete = true
+
+  // Clear the slow-network fallback marker now that init has run. If the
+  // inline-snippet timeout fired (set aa-fallback on first load), we no
+  // longer need it — the bundle is here. Leaving it set would re-trigger the
+  // CSS keyframe on every Barba navigation, since each new container renders
+  // its [aa-trigger="load"] elements without aa-ready until init catches up.
+  if (typeof document !== 'undefined') {
+    document.documentElement.removeAttribute('aa-fallback')
   }
 
   if (debug) {
