@@ -1,0 +1,145 @@
+---
+title: Next.js
+description: Add alrdy-animate to a Next.js project with a client-side AlrdyInit component. App Router and Pages Router both supported.
+sidebar:
+  order: 4
+---
+
+In Next.js, GSAP and Lenis are installed as npm packages and dynamically imported on the client. The lib is initialised once from a small client component mounted in your root layout.
+
+## Install
+
+```bash
+npm install alrdy-animate gsap lenis
+```
+
+`gsap` and `lenis` are declared as peer dependencies — they live in your project's `node_modules`, not bundled into `alrdy-animate`. This keeps the GSAP version under your control (e.g. for licence compliance with Club plugins, though Webflow's GSAP acquisition has made all Club plugins free).
+
+## The AlrdyInit component
+
+Create a client component (e.g. `app/_components/AlrdyInit.tsx` for App Router or `components/AlrdyInit.tsx` for Pages Router):
+
+```tsx
+'use client'
+import { useEffect } from 'react'
+import 'alrdy-animate/style'
+
+export function AlrdyInit() {
+  useEffect(() => {
+    let cancelled = false
+    Promise.all([
+      import('gsap').then(m => { (window as any).gsap = m.gsap }),
+      import('gsap/ScrollTrigger').then(m => { (window as any).ScrollTrigger = m.ScrollTrigger }),
+      import('gsap/CustomEase').then(m => { (window as any).CustomEase = m.CustomEase }),
+      // Add only the plugins your app actually uses:
+      // import('gsap/SplitText').then(m => { (window as any).SplitText = m.SplitText }),
+      // import('gsap/Flip').then(m => { (window as any).Flip = m.Flip }),
+      // import('gsap/Draggable').then(m => { (window as any).Draggable = m.Draggable }),
+      // import('gsap/InertiaPlugin').then(m => { (window as any).InertiaPlugin = m.InertiaPlugin }),
+      import('lenis').then(m => { (window as any).Lenis = m.default }),
+    ]).then(async () => {
+      if (cancelled) return
+      const { init, destroy } = await import('alrdy-animate')
+      await init({ debug: process.env.NODE_ENV !== 'production' })
+      ;(window as any).__alrdyDestroy = destroy
+    })
+    return () => {
+      cancelled = true
+      ;(window as any).__alrdyDestroy?.()
+    }
+  }, [])
+  return null
+}
+```
+
+The `import 'alrdy-animate/style'` line is what carries the FOUC guard (`[aa-animate]:not([aa-ready]) { visibility: hidden }`) — without it, every animated element flashes briefly in its final state before init applies the from-states.
+
+## Mount it in the root layout
+
+### App Router
+
+```tsx
+// app/layout.tsx
+import { AlrdyInit } from './_components/AlrdyInit'
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="en">
+      <body>
+        <AlrdyInit />
+        {children}
+      </body>
+    </html>
+  )
+}
+```
+
+### Pages Router
+
+```tsx
+// pages/_app.tsx
+import type { AppProps } from 'next/app'
+import { AlrdyInit } from '@/components/AlrdyInit'
+
+export default function App({ Component, pageProps }: AppProps) {
+  return (
+    <>
+      <AlrdyInit />
+      <Component {...pageProps} />
+    </>
+  )
+}
+```
+
+## JSX autocomplete for `aa-*` attributes
+
+`alrdy-animate/jsx` provides ambient TypeScript types so your editor autocompletes `aa-animate`, `aa-trigger`, etc. on every JSX intrinsic element. Add this anywhere that's compiled — typically at the top of your root layout or a dedicated `types/global.d.ts`:
+
+```ts
+// types/global.d.ts
+import 'alrdy-animate/jsx'
+```
+
+Then in your components:
+
+```tsx
+<h1 aa-animate="text-slide-up" aa-split="lines mask" aa-trigger="load">
+  Headline
+</h1>
+```
+
+## Custom GSAP code
+
+For per-component custom GSAP, use a `useGSAP` hook (from `@gsap/react`) or a `useEffect` with manual cleanup. The lib's `init()` is mounted once at the app root and doesn't interfere with component-level GSAP — they run on separate sets of elements (`aa-*` for the lib; whatever selectors you target for your own).
+
+```tsx
+'use client'
+import { useEffect, useRef } from 'react'
+
+export function HeroParallax() {
+  const ref = useRef<HTMLImageElement>(null)
+  useEffect(() => {
+    const gsap = (window as any).gsap
+    const ScrollTrigger = (window as any).ScrollTrigger
+    if (!gsap || !ScrollTrigger || !ref.current) return
+    const tween = gsap.to(ref.current, {
+      scale: 1.15,
+      ease: 'none',
+      scrollTrigger: { trigger: ref.current, scrub: 0.5 },
+    })
+    return () => {
+      tween.scrollTrigger?.kill()
+      tween.kill()
+    }
+  }, [])
+  return <img ref={ref} src="/hero.jpg" alt="" />
+}
+```
+
+For better ergonomics, install `@gsap/react` and use the `useGSAP` hook — it auto-cleans tweens and ScrollTriggers when the component unmounts. Same lib, just nicer.
+
+## Page transitions
+
+Page-transition wiring (Next.js View Transitions, `next/dynamic` route guards, framer-motion `<AnimatePresence>`) is **deferred** until we ship a Next.js demo project to base the recipe on. The lib already exposes the right hooks — `init({ root })`, `destroy({ keepGlobals: true, keepFromStates: true })`, `refresh()` — so the wiring will look very similar to the [Webflow + Barba recipe](/recipes/webflow-barba/), just with router events instead of Barba hooks. Watch this page (or the GitHub repo) for the full guide.
+
+In the meantime: if you're building a Next.js project that needs SPA transitions today, the Barba recipe's lifecycle wiring (`alrdyInit` / `alrdyDestroy` / dispatching `aa:trigger` from inside a leave timeline) translates one-to-one — replace the Barba hooks with whatever your transition library exposes (`onRouteChangeStart`, `onExitComplete`, etc.).

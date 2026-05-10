@@ -1,0 +1,201 @@
+---
+title: Webflow + Barba
+description: Wire alrdy-animate's lifecycle into Barba.js page transitions on a Webflow site. Copy/paste blocks for site-wide and per-namespace custom code, plus a pointer to the Osmo stacked-cards transition recipe.
+sidebar:
+  order: 3
+---
+
+This guide is for Webflow sites that use [Barba.js](https://barba.js.org/) for SPA-style page transitions. The script setup is the same as the [simple Webflow guide](/getting-started/webflow/) plus the Barba script — what changes is the init wiring: `init()` runs in `beforeEnter` scoped to the new container, and `destroy()` tears down per-page state without disturbing Lenis.
+
+For the **content** of the transition itself (the visual timeline that plays between pages), see the [Webflow + Barba recipe](/recipes/webflow-barba/) — it documents the Osmo stacked-cards transition with no-pause content-reveal dispatch.
+
+## Markup
+
+Wrap each page in a `data-barba="container"` inside `data-barba="wrapper"`. The wrapper goes on `<body>` (Webflow lets you add attributes to the Body element via the right-hand inspector). The container goes on the top-level `Section` or wrapper div on each page.
+
+```html
+<body data-barba="wrapper">
+  <main data-barba="container" data-barba-namespace="home">
+    <!-- page content -->
+  </main>
+</body>
+```
+
+`data-barba-namespace` is required on every page (use `home`, `about`, `work`, etc.). It's how Barba lets you target per-page transitions and per-page hooks.
+
+## 1. Site-wide head code
+
+Same as the [simple Webflow guide](/getting-started/webflow/#1-site-wide-head-code), with one extra script — `@barba/core` — added at the end:
+
+```html
+<!-- (paste the full head block from the simple guide here, including the
+     slow-network fallback, lib CSS, GSAP/Lenis/alrdy-animate scripts) -->
+
+<!-- Barba (after alrdy-animate so the init script below sees both globals) -->
+<script defer src="https://cdn.jsdelivr.net/npm/@barba/core@2.10.3/dist/barba.umd.min.js"></script>
+```
+
+The order matters: `defer` scripts execute in document order, so listing Barba *after* alrdy-animate means the footer script (next section) sees both `window.AlrdyAnimate` and `window.barba` defined.
+
+## 2. Site-wide footer code
+
+Paste this into **Project Settings → Custom Code → Footer Code**. It's the alrdy-animate ↔ Barba bridge — wires `init` / `destroy` into Barba's `beforeEnter` hook, then starts Barba.
+
+```html
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    history.scrollRestoration = 'manual'
+    gsap.defaults({ ease: 'smooth', duration: 0.6 })
+
+    let alrdyReady = false
+    window.alrdyReady = Promise.resolve()
+
+    function alrdyInit(rootEl) {
+      // root scopes the scan to the new container — the leaving container is
+      // still in the DOM during sync transitions and we don't want its
+      // elements re-processed.
+      window.alrdyReady = AlrdyAnimate.init({
+        debug: false,
+        duration: 0.6,
+        ease: 'smooth',
+        smoothScroll: true,
+        root: rootEl,
+      }).then(() => { alrdyReady = true })
+      return window.alrdyReady
+    }
+
+    function alrdyDestroy() {
+      if (!alrdyReady) return
+      // keepGlobals: leaves Lenis + scroll-state observers alive across the
+      // page swap (they're bound to documentElement / body, which don't change).
+      // keepFromStates: skips clearProps so un-fired scroll animations on the
+      // leaving page stay hidden until the wrapper is removed — no flash.
+      AlrdyAnimate.destroy({ keepGlobals: true, keepFromStates: true })
+      alrdyReady = false
+    }
+
+    // Optional: dispatch aa:trigger events for any elements using
+    // aa-trigger="event:enter" (lets you couple animation start to a specific
+    // beat in your transition timeline — see the recipe for the why).
+    function fireEnterAnimations(rootEl) {
+      rootEl.querySelectorAll('[aa-trigger~="event:enter"]').forEach((el) => {
+        el.dispatchEvent(
+          new CustomEvent('aa:trigger', { detail: { name: 'enter' }, bubbles: true }),
+        )
+      })
+    }
+
+    barba.hooks.beforeEnter((data) => {
+      if (window.lenis?.stop) window.lenis.stop()
+      alrdyDestroy()
+      alrdyInit(data.next.container)
+    })
+
+    barba.hooks.afterEnter(() => {
+      if (window.ScrollTrigger) ScrollTrigger.refresh()
+      if (window.lenis?.start) window.lenis.start()
+    })
+
+    barba.init({
+      debug: false,
+      preventRunning: true,
+      transitions: [{
+        name: 'default',
+        async once(data) {
+          // beforeEnter has already kicked off init — wait on the same promise
+          // here instead of starting a second init.
+          await window.alrdyReady
+          fireEnterAnimations(data.next.container)
+        },
+        async leave(data) {
+          // Replace with your leave timeline. See the recipe for an example.
+          return gsap.to(data.current.container, { autoAlpha: 0, duration: 0.4 })
+        },
+        async enter(data) {
+          return gsap.from(data.next.container, { autoAlpha: 0, duration: 0.4 })
+        },
+      }],
+    })
+  })
+</script>
+```
+
+A few things to highlight:
+
+- **`AlrdyAnimate.init({ root: rootEl })`** scopes the scan to the new container. Without `root`, the lib would re-scan `document` and process the leaving container's elements again.
+- **`AlrdyAnimate.destroy({ keepGlobals: true, keepFromStates: true })`** is the safe default for page transitions. Lenis stays alive (don't reset scroll velocity mid-transition); `keepFromStates` prevents un-fired scroll animations from flashing visible while the leave timeline runs.
+- **`window.alrdyReady`** is the same name used in the simple Webflow guide, so per-page custom code uses the same `window.alrdyReady.then(...)` pattern in both setups.
+
+## 3. Page-specific code
+
+For animations that only apply on one page, you have two options:
+
+### Option A: Page Settings → Custom Code
+
+The Webflow-native approach. Goes into **Page Settings → Custom Code → Before `</body>` tag** on that one page.
+
+```html
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    window.alrdyReady.then(() => {
+      gsap.to('.hero__photo', {
+        scale: 1.15,
+        ease: 'none',
+        scrollTrigger: { trigger: '.hero', scrub: 0.5 },
+      })
+    })
+  })
+</script>
+```
+
+**Caveat:** in Barba's SPA mode, page-specific custom code only runs on the **first load** of that page. Subsequent navigations swap the container without reloading the document, so the `<script>` tag doesn't re-execute. For animations that need to fire on every visit, use Option B.
+
+### Option B: Per-namespace hook in the global init
+
+Add a `barba.hooks.beforeEnter` block keyed on `data.next.namespace`. This runs on every navigation to that page, including the first load.
+
+```html
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    // ... (the alrdyInit / alrdyDestroy / barba.init from above) ...
+
+    barba.hooks.beforeEnter((data) => {
+      window.alrdyReady.then(() => {
+        if (data.next.namespace === 'home') {
+          gsap.to('.hero__photo', {
+            scale: 1.15,
+            ease: 'none',
+            scrollTrigger: { trigger: '.hero', scrub: 0.5 },
+          })
+        }
+        if (data.next.namespace === 'work') {
+          // work-page-specific GSAP
+        }
+      })
+    })
+  })
+</script>
+```
+
+Don't forget to **kill these tweens / ScrollTriggers in `barba.hooks.beforeLeave`** so they don't leak across navigations:
+
+```js
+barba.hooks.beforeLeave((data) => {
+  ScrollTrigger.getAll().forEach((st) => {
+    if (data.current.container.contains(st.trigger)) st.kill()
+  })
+})
+```
+
+The lib's own ScrollTriggers are killed by `AlrdyAnimate.destroy()` automatically — this hook only handles your hand-written tweens that target the leaving container.
+
+## The Osmo stacked-cards transition
+
+For a polished, drop-in transition timeline (current page + middle layer + next page scaling down and dropping one after another), see the [Webflow + Barba recipe](/recipes/webflow-barba/). It documents:
+
+- The full Osmo timeline, verbatim from Osmo Supply.
+- The one-line `tl.call` that dispatches `aa:trigger` events at the visual peak of the transition, so content-reveal animations on the new page start mid-transition instead of after a jarring pause.
+- The `aa-trigger="load event:enter"` combined trigger for cards that should animate on first load *and* on every Barba navigation.
+- Why `keepFromStates: true` is essential for transitions that scale the leaving container (without it, scroll-triggered elements below the fold flash visible mid-leave).
+
+The recipe ships as a runnable example at `examples/barba-transition/` in the repo.

@@ -1,13 +1,23 @@
 ---
 title: Installation
-description: Add alrdy-animate to a Webflow site or a Next.js project.
+description: Add alrdy-animate to a Webflow site or a Next.js project. Pick a platform-specific guide below.
+sidebar:
+  order: 1
 ---
 
 alrdy-animate ships GSAP and Lenis as **external dependencies** — they are never bundled. You add them via script tags (Webflow) or `npm install` (Next.js). The library detects `window.gsap` / `window.Lenis` at init and warns clearly in dev mode if anything required is missing.
 
+## Pick your platform
+
+| Guide | When to use it |
+| --- | --- |
+| [Webflow](/getting-started/webflow/) | A Webflow site with no page-transition library. Copy/paste blocks for site-wide and page-specific custom code. |
+| [Webflow + Barba](/getting-started/webflow-barba/) | A Webflow site that uses [Barba.js](https://barba.js.org/) for page transitions. Wires `init` / `destroy` into Barba's hooks. |
+| [Next.js](/getting-started/nextjs/) | A Next.js project (App Router or Pages Router). Includes a client `AlrdyInit` component to mount in your root layout. |
+
 ## Required scripts
 
-Every alrdy-animate project loads these in order, before `<script>` calling `init()`:
+Every alrdy-animate project loads these in order, before the `init()` call:
 
 | Script | When it's needed | Notes |
 | --- | --- | --- |
@@ -21,79 +31,18 @@ Every alrdy-animate project loads these in order, before `<script>` calling `ini
 
 In dev mode (`init({ debug: true })`) the console logs the active feature set, the plugins it found, and whether Lenis is active. Any "Missing GSAP plugins" warning lists the exact `<script>` tags you still need to add.
 
-## Webflow
+## Public API
 
-Add the following to your site's custom code. Put the `<link>` and `<script defer>` tags in the **head**; put the `init()` call before `</body>`. Every dependency loads in parallel and executes in document order before the body finishes parsing.
+The library exposes four functions on `window.AlrdyAnimate` (UMD) or as named exports from `'alrdy-animate'` (ESM):
 
-```html
-<!-- In <head> -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alrdy-animate@8/dist/alrdy-animate.css">
+| API | Purpose |
+| --- | --- |
+| `init(options)` | Scan the DOM (or a `root` subtree), apply from-states, wire ScrollTriggers and event listeners. Returns a Promise that resolves once feature modules have initialised. |
+| `destroy(options)` | Tear down. `keepGlobals: true` leaves Lenis / scroll-state observers alive across page swaps. `keepFromStates: true` skips `clearProps` so un-fired scroll animations stay hidden until the leaving DOM is removed. |
+| `refresh()` | Shorthand for `destroy()` then `init()` with the previous options. |
+| `onResize(fn, { debounce })` | Subscribe to a shared debounced resize bus. Returns an unsubscribe function. |
 
-<!-- GSAP core + plugins (always load these) -->
-<script defer src="https://cdn.jsdelivr.net/npm/gsap@3/dist/gsap.min.js"></script>
-<script defer src="https://cdn.jsdelivr.net/npm/gsap@3/dist/ScrollTrigger.min.js"></script>
-<script defer src="https://cdn.jsdelivr.net/npm/gsap@3/dist/CustomEase.min.js"></script>
-
-<!-- Add only the plugins your page actually uses -->
-<script defer src="https://cdn.jsdelivr.net/npm/gsap@3/dist/SplitText.min.js"></script>
-<script defer src="https://cdn.jsdelivr.net/npm/gsap@3/dist/Flip.min.js"></script>
-<script defer src="https://cdn.jsdelivr.net/npm/gsap@3/dist/Draggable.min.js"></script>
-<script defer src="https://cdn.jsdelivr.net/npm/gsap@3/dist/InertiaPlugin.min.js"></script>
-
-<!-- Smooth scroll (omit to disable, or set smoothScroll: false in init) -->
-<script defer src="https://cdn.jsdelivr.net/npm/lenis@1/dist/lenis.min.js"></script>
-
-<!-- alrdy-animate last -->
-<script defer src="https://cdn.jsdelivr.net/npm/alrdy-animate@8/dist/alrdy-animate.umd.cjs"></script>
-
-<!-- Before </body>: wait for DOMContentLoaded so all defer scripts have executed -->
-<script>
-  document.addEventListener('DOMContentLoaded', () => {
-    AlrdyAnimate.init({ debug: false })
-  })
-</script>
-```
-
-**Why `defer`** — without it, every `<script>` blocks HTML parsing, which makes the whole page wait for each download in series. With `defer`, all scripts download in parallel while the parser sails through the body; they then execute in document order at the end of parsing. This is faster on every connection, and it's a hard requirement for the [load-fallback recipe](/recipes/load-fallback/) to work on slow networks. The init call is wrapped in `DOMContentLoaded` because inline `<script>` tags in body run *during* parsing, before deferred head scripts have executed — without the wrapper, `AlrdyAnimate` would be undefined.
-
-## Next.js
-
-```bash
-npm install alrdy-animate gsap lenis
-```
-
-```tsx
-'use client'
-import { useEffect } from 'react'
-import 'alrdy-animate/style'
-
-export function AlrdyInit() {
-  useEffect(() => {
-    let cancelled = false
-    Promise.all([
-      import('gsap').then(m => { (window as any).gsap = m.gsap }),
-      import('gsap/ScrollTrigger').then(m => { (window as any).ScrollTrigger = m.ScrollTrigger }),
-      import('gsap/CustomEase').then(m => { (window as any).CustomEase = m.CustomEase }),
-      // Add only what this page needs:
-      // import('gsap/SplitText').then(m => { (window as any).SplitText = m.SplitText }),
-      // import('gsap/Flip').then(m => { (window as any).Flip = m.Flip }),
-      // import('gsap/Draggable').then(m => { (window as any).Draggable = m.Draggable }),
-      // import('gsap/InertiaPlugin').then(m => { (window as any).InertiaPlugin = m.InertiaPlugin }),
-      import('lenis').then(m => { (window as any).Lenis = m.default }),
-    ]).then(async () => {
-      if (cancelled) return
-      const { init, destroy } = await import('alrdy-animate')
-      init({ debug: false })
-      ;(window as any).__alrdyDestroy = destroy
-    })
-    return () => {
-      cancelled = true
-      ;(window as any).__alrdyDestroy?.()
-    }
-  }, [])
-  return null
-}
-```
+These are the only hooks you need to wire alrdy-animate into Barba, View Transitions, or any other page-transition library — see the [Webflow + Barba recipe](/recipes/webflow-barba/) for a full example.
 
 ## Smooth scroll
 

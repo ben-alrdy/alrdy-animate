@@ -1,0 +1,188 @@
+---
+title: Webflow
+description: Drop alrdy-animate into a Webflow site with copy/paste blocks for site-wide and page-specific custom code. Covers FOUC, slow-network fallback, and the global / page-specific GSAP pattern.
+sidebar:
+  order: 2
+---
+
+This guide is for Webflow sites with **no page-transition library**. If you use Barba, follow the [Webflow + Barba](/getting-started/webflow-barba/) guide instead — the script setup is the same, but the init wiring is different.
+
+There are three pieces, mapped to three places in Webflow:
+
+| Webflow location | What goes here |
+| --- | --- |
+| **Project Settings → Custom Code → Head Code** | Slow-network fallback, lib CSS, GSAP/Lenis/alrdy-animate scripts. |
+| **Project Settings → Custom Code → Footer Code** | The `init()` call. Optional: global GSAP timelines that should run on every page. |
+| **Page Settings → Custom Code → Before `</body>` tag** | Page-specific custom GSAP timelines. |
+
+## 1. Site-wide head code
+
+Paste this into **Project Settings → Custom Code → Head Code**. It loads everything in parallel via `defer`, with an inline FOUC + slow-network fallback that fires before any external script lands.
+
+```html
+<!-- Slow-network fallback (optional but recommended for hero copy).
+     Sets aa-fallback if init() hasn't run within 1s, fading aa-trigger="load"
+     elements via CSS. See /recipes/load-fallback/ for the full explanation. -->
+<script>
+  const applyFallback = () => {
+    if (document.documentElement.hasAttribute('aa-loaded')) return;
+    document.documentElement.setAttribute('aa-fallback', '');
+    document.querySelectorAll('[aa-trigger~="load"][aa-animate]').forEach((el) => {
+      const stagger = parseFloat(el.getAttribute('aa-stagger'));
+      const baseDelay = parseFloat(el.getAttribute('aa-delay')) || 0;
+      if (Number.isFinite(stagger) && el.children.length > 0) {
+        el.style.animation = 'none';
+        el.style.visibility = 'visible';
+        Array.from(el.children).forEach((child, i) => {
+          child.style.animation = 'aa-fallback-appear 0.5s ease both';
+          child.style.animationDelay = (baseDelay + i * stagger) + 's';
+        });
+      } else if (baseDelay > 0) {
+        el.style.animationDelay = baseDelay + 's';
+      }
+    });
+  };
+  setTimeout(() => {
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', applyFallback, { once: true });
+    } else {
+      applyFallback();
+    }
+  }, 1000);
+</script>
+<style>
+  [aa-animate]:not([aa-ready]) { visibility: hidden; }
+  @keyframes aa-fallback-appear {
+    from { opacity: 0; transform: translateY(1.5rem); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  html[aa-fallback] [aa-trigger~="load"][aa-animate]:not([aa-ready]) {
+    visibility: visible;
+    animation: aa-fallback-appear 0.5s ease both;
+  }
+</style>
+
+<!-- alrdy-animate stylesheet (FOUC guard + helper classes) -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alrdy-animate@8/dist/alrdy-animate.css">
+
+<!-- GSAP core + plugins (always load these) -->
+<script defer src="https://cdn.jsdelivr.net/npm/gsap@3/dist/gsap.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/gsap@3/dist/ScrollTrigger.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/gsap@3/dist/CustomEase.min.js"></script>
+
+<!-- Add only the plugins your site actually uses -->
+<script defer src="https://cdn.jsdelivr.net/npm/gsap@3/dist/SplitText.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/gsap@3/dist/Flip.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/gsap@3/dist/Draggable.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/gsap@3/dist/InertiaPlugin.min.js"></script>
+
+<!-- Smooth scroll (omit to disable, or set smoothScroll: false in init) -->
+<script defer src="https://cdn.jsdelivr.net/npm/lenis@1/dist/lenis.min.js"></script>
+
+<!-- alrdy-animate last -->
+<script defer src="https://cdn.jsdelivr.net/npm/alrdy-animate@8/dist/alrdy-animate.umd.cjs"></script>
+```
+
+**Why `defer`** — without it, every `<script>` blocks HTML parsing, which makes the whole page wait for each download in series. With `defer`, all scripts download in parallel while the parser sails through the body; they then execute in document order at the end of parsing. This is faster on every connection, and it's a hard requirement for the [load-fallback recipe](/recipes/load-fallback/) to work on slow networks.
+
+**Trim the plugin list.** `init({ debug: true })` prints any "Missing GSAP plugins" warnings with the exact `<script>` tag you need to add. Drop the lines you don't use to keep the page lighter.
+
+## 2. Site-wide footer code
+
+Paste this into **Project Settings → Custom Code → Footer Code**. The `DOMContentLoaded` wrapper is required because inline `<script>` tags in `<body>` execute *during* parsing, before deferred head scripts have run — without the wrapper, `AlrdyAnimate` would be `undefined`.
+
+```html
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    // Stash the init promise so page-specific scripts can wait on it.
+    window.alrdyReady = AlrdyAnimate.init({
+      debug: false,           // flip to true while building to see plugin warnings
+      duration: 0.6,          // global default; per-element aa-duration overrides
+      ease: 'smooth',         // named ease; CustomEase plugin required
+      smoothScroll: true,     // creates Lenis if window.Lenis is loaded
+    })
+  })
+</script>
+```
+
+### Global GSAP code (runs on every page)
+
+If you have a custom GSAP timeline that should run on every page (a navigation scroll-effect, a custom cursor, a marquee not handled by `aa-marquee`), append it to the same block. Chain off `window.alrdyReady` so it runs after `init()` finishes — important when your code depends on Lenis being mounted, named eases (`osmo`, `bounce`, `snappy`) being registered, or feature elements being scanned.
+
+```html
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    window.alrdyReady = AlrdyAnimate.init({ /* ... */ })
+
+    window.alrdyReady.then(() => {
+      // Example: hide the nav on scroll-down, show on scroll-up.
+      const nav = document.querySelector('.site-nav')
+      if (!nav) return
+      let lastY = window.scrollY
+      ScrollTrigger.create({
+        start: 0,
+        end: 'max',
+        onUpdate: (self) => {
+          const y = self.scroll()
+          gsap.to(nav, { yPercent: y > lastY && y > 80 ? -100 : 0, duration: 0.3 })
+          lastY = y
+        },
+      })
+    })
+  })
+</script>
+```
+
+If your global code doesn't depend on alrdy-animate at all (a pure GSAP scene that targets your own classes), you don't need the `.then()` — you can put the GSAP calls directly inside the `DOMContentLoaded` callback. Both `gsap` and `ScrollTrigger` are already loaded by that point.
+
+## 3. Page-specific code
+
+For animations that only run on a single page (a hero parallax, a custom scroll-driven scene), use **Page Settings → Custom Code → Before `</body>` tag**. Same pattern — wait for `DOMContentLoaded`, then optionally chain off `window.alrdyReady`.
+
+```html
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    window.alrdyReady.then(() => {
+      // Example: a scroll-driven hero scene specific to this page.
+      gsap.to('.hero__photo', {
+        scale: 1.15,
+        ease: 'none',
+        scrollTrigger: {
+          trigger: '.hero',
+          start: 'top top',
+          end: 'bottom top',
+          scrub: 0.5,
+        },
+      })
+    })
+  })
+</script>
+```
+
+If `window.alrdyReady` is undefined on this page (e.g. you forgot to add the site-wide footer block, or this is a one-off page that doesn't run init), the `.then()` will throw. To be defensive, fall back to a resolved promise:
+
+```js
+;(window.alrdyReady || Promise.resolve()).then(() => { /* ... */ })
+```
+
+## What about FOUC?
+
+The lib's CSS file ships a single rule:
+
+```css
+[aa-animate]:not([aa-ready]) { visibility: hidden; }
+```
+
+`init()` flips `aa-ready` on every animated element once their from-states are applied. Without this rule, every animated element would briefly render in its final state before `init()` runs, then snap to its from-state — visible flicker. The same rule is duplicated inline in the head snippet above so it's active on the very first paint, before the lib's CSS file has finished downloading on slow networks.
+
+## Verifying
+
+1. Publish the site to a `webflow.io` staging URL.
+2. Open DevTools → Console. With `debug: true` you should see one log line:
+   `[alrdy-animate] initialized. Features: scroll, text; Plugins: ScrollTrigger, SplitText; Elements: 12; SmoothScroll: lenis`
+3. If you see a "Missing GSAP plugins" warning, copy the suggested `<script>` tag into the head and republish.
+4. To check the slow-network fallback: DevTools → Network → throttle to "Slow 4G" → reload. Hero elements should fade up via the inline keyframe within ~1s, even before the lib bundle finishes loading.
+
+## Page transitions
+
+This guide assumes no page-transition library. Webflow's default click-navigation behaviour means each page is a fresh document load, and `init()` runs once per page. If you want SPA-style transitions, use [Barba.js](https://barba.js.org/) and follow the [Webflow + Barba guide](/getting-started/webflow-barba/) — `init` / `destroy` / `keepGlobals` are designed for it.
