@@ -189,6 +189,44 @@ barba.hooks.beforeLeave((data) => {
 
 The lib's own ScrollTriggers are killed by `AlrdyAnimate.destroy()` automatically — this hook only handles your hand-written tweens that target the leaving container.
 
+## Analytics
+
+Barba navigates without reloading the document, so any analytics script that auto-fires a pageview on first load (Google Tag Manager, GA4, Plausible, Umami, Fathom) will only see the initial landing — every Barba nav after that goes untracked unless you wire it up.
+
+The `<script>` tags themselves still go in **Project Settings → Custom Code → Head Code** as normal. They load once on the first document and stay loaded across every navigation — Barba only swaps the container, not `<head>`.
+
+What you add is a `barba.hooks.after` block that fires a pageview on every navigation. Append it to the same site-wide footer block that holds your `barba.init`:
+
+```js
+barba.hooks.after((data) => {
+  // GTM / GA4 — push a pageview into dataLayer. Configure your GTM tag to
+  // fire on a "Custom Event" trigger named "pageview".
+  window.dataLayer = window.dataLayer || []
+  window.dataLayer.push({
+    event: 'pageview',
+    page_path: data.next.url.path,
+    page_location: window.location.href,
+    page_title: document.title,
+  })
+
+  // Umami — auto-tracks history.pushState by default, so this is usually
+  // unnecessary. Only uncomment if Barba navs aren't showing up in Umami.
+  // window.umami?.track((props) => ({ ...props, url: data.next.url.path }))
+})
+```
+
+Why `after` and not `afterEnter`:
+
+- `afterEnter` fires the moment the new container mounts in the DOM — the leave timeline may still be playing.
+- `after` fires once the whole transition has finished and `document.title` has been updated by Barba (it parses the response HTML automatically). That's the right "the new page is now visible to the user" moment for analytics.
+
+A few practical notes:
+
+- **Umami specifically:** the default Umami script auto-tracks `history.pushState`, which Barba uses internally — so for most Umami installs you don't need any code at all. Verify on a test deploy by clicking through Barba navs and checking the Umami dashboard. Add the hook block above only if pageviews aren't being recorded.
+- **GTM with the built-in History Change trigger:** GTM has a "History Change" trigger type that listens to pushState directly. If you configure your pageview tag against that trigger inside GTM, you don't need the `dataLayer.push` above. Pick one approach — both fire double events.
+- **Don't put the analytics `<script>` tag in page-specific Custom Code.** It belongs in site-wide head only. Page-specific custom code doesn't re-execute on Barba navs (Barba swaps containers, not `<head>`), so a per-page tracking script would only ever run on the first load of that page.
+- **Cookie banners and consent managers** (CookieYes, Cookiebot, etc.) follow the same rule: site-wide head custom code, never per-page. The consent state persists across Barba navs because the document never reloads — there's no re-prompt to worry about.
+
 ## The Osmo stacked-cards transition
 
 For a polished, drop-in transition timeline (current page + middle layer + next page scaling down and dropping one after another), see the [Webflow + Barba recipe](/recipes/webflow-barba/). It documents:
