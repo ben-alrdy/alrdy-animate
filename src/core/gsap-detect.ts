@@ -33,6 +33,12 @@ export interface GsapContext {
 export interface GsapMatchMedia {
   add: (query: string | Record<string, string>, handler: (ctx: GsapContext) => void | (() => void)) => GsapMatchMedia
   revert: () => void
+  // GSAP source: matchMedia.kill(revert) calls Context.kill(revert, true) on
+  // each registered context. With no truthy `revert` arg, Context.kill skips
+  // clearProps and just removes tweens/triggers — preserving inline GSAP
+  // styles. The `true` second arg ensures the matchMedia listener bookkeeping
+  // is cleaned up either way (no leaked media-query listeners).
+  kill: () => void
 }
 
 export interface GsapTween {

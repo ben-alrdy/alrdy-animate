@@ -176,3 +176,188 @@ code {
   font-size: 0.95rem;
   line-height: 1.55;
 }
+
+/* ----------- Showcase section ----------- */
+.showcase {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 4rem 2.5rem 8rem;
+}
+
+.showcase__head {
+  max-width: 56ch;
+  margin: 0 0 4rem;
+}
+
+.showcase__eyebrow,
+.scrub__eyebrow {
+  display: inline-block;
+  font-family: 'JetBrains Mono', SFMono-Regular, Menlo, monospace;
+  font-size: 0.8rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #ef6322;
+  margin-bottom: 1.25rem;
+}
+
+.showcase__title {
+  font-size: clamp(2rem, 4.5vw, 3.5rem);
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+  margin: 0 0 1.25rem;
+}
+
+.showcase__lede {
+  font-size: 1.05rem;
+  color: #57534e;
+  margin: 0;
+  line-height: 1.55;
+}
+
+.tiles {
+  display: grid;
+  gap: 1.25rem;
+  grid-template-columns: repeat(3, 1fr);
+}
+
+@media (max-width: 760px) {
+  .tiles { grid-template-columns: repeat(2, 1fr); }
+}
+
+.tile {
+  position: relative;
+  aspect-ratio: 5 / 4;
+  border-radius: 1.25rem;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow: hidden;
+  border: 1px solid rgba(28, 25, 23, 0.08);
+  background: #fffbf0;
+}
+
+.tile__tag {
+  font-family: 'JetBrains Mono', SFMono-Regular, Menlo, monospace;
+  font-size: 0.78rem;
+  letter-spacing: 0.02em;
+  color: #1c1917;
+  background: rgba(28, 25, 23, 0.06);
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  align-self: flex-start;
+}
+
+.tile__glyph {
+  font-size: clamp(2.5rem, 5vw, 3.75rem);
+  line-height: 1;
+  align-self: flex-end;
+  color: #1c1917;
+}
+
+.tile--a { background: #fffbf0; }
+.tile--b { background: #ef6322; color: #fffbf0; }
+.tile--b .tile__tag { background: rgba(255, 251, 240, 0.18); color: #fffbf0; }
+.tile--b .tile__glyph { color: #fffbf0; }
+.tile--c { background: #1c1917; color: #f4ecd8; }
+.tile--c .tile__tag { background: rgba(244, 236, 216, 0.12); color: #f4ecd8; }
+.tile--c .tile__glyph { color: #f4ecd8; }
+.tile--d { background: #fffbf0; }
+.tile--e { background: #f4ecd8; }
+.tile--f { background: #1c1917; color: #ef6322; }
+.tile--f .tile__tag { background: rgba(239, 99, 34, 0.16); color: #ef6322; }
+.tile--f .tile__glyph { color: #ef6322; }
+
+/* ----------- Scrubbed timeline section ----------- */
+.scrub {
+  background: #1c1917;
+  color: #f4ecd8;
+  /* Tall on purpose so the scrub has room to play out. */
+  min-height: 140vh;
+  display: flex;
+  align-items: center;
+  padding: 8rem 2.5rem;
+}
+
+.scrub__inner {
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.scrub .scrub__eyebrow {
+  color: #ef6322;
+}
+
+.scrub__title {
+  font-size: clamp(2.5rem, 7vw, 6rem);
+  font-weight: 600;
+  letter-spacing: -0.04em;
+  line-height: 0.98;
+  margin: 0 0 4rem;
+  max-width: 14ch;
+}
+
+.bars {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 4rem;
+}
+
+.bar {
+  position: relative;
+  height: 3.25rem;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #ef6322 0%, #f4ecd8 100%);
+  display: flex;
+  align-items: center;
+  padding: 0 1.5rem;
+  /* slide-right starts off-screen left → travels in. The width steps make
+     each row feel like a different lane completing at a different moment. */
+  width: 95%;
+}
+
+.bar:nth-child(2) { width: 80%; }
+.bar:nth-child(3) { width: 65%; }
+.bar:nth-child(4) { width: 50%; }
+.bar:nth-child(5) { width: 35%; }
+
+.bar__label {
+  font-family: 'JetBrains Mono', SFMono-Regular, Menlo, monospace;
+  font-size: 0.85rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #1c1917;
+  font-weight: 600;
+}
+
+.digits {
+  display: flex;
+  align-items: baseline;
+  gap: 0.25rem;
+  margin-bottom: 2rem;
+  font-family: 'JetBrains Mono', SFMono-Regular, Menlo, monospace;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  color: #ef6322;
+  font-size: clamp(4rem, 12vw, 9rem);
+  line-height: 1;
+}
+
+.digits__num,
+.digits__dot {
+  display: inline-block;
+}
+
+.digits__dot {
+  color: #f4ecd8;
+}
+
+.scrub__caption {
+  font-size: 1.05rem;
+  color: rgba(244, 236, 216, 0.7);
+  margin: 0;
+  max-width: 50ch;
+}

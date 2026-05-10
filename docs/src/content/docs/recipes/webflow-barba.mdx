@@ -4,12 +4,13 @@ description: Wire alrdy-animate's lifecycle into Barba.js so ScrollTriggers don'
 ---
 
 Page transitions are deliberately out of scope for the lib. v8 exposes
-`init()` (with a `root` option), `destroy()` (with a `keepGlobals` option),
-and `refresh()` so you can wire them into whatever transition library suits
-your stack. This recipe shows the Webflow flavour: [Barba.js](https://barba.js.org/)
-intercepts link clicks, runs an animated transition, and we hook the lib
-into Barba's `beforeEnter` so the new page's `aa-*` elements get scanned
-during the transition instead of after it.
+`init()` (with a `root` option), `destroy()` (with `keepGlobals` and
+`keepFromStates` options), and `refresh()` so you can wire them into
+whatever transition library suits your stack. This recipe shows the Webflow
+flavour: [Barba.js](https://barba.js.org/) intercepts link clicks, runs an
+animated transition, and we hook the lib into Barba's `beforeEnter` so the
+new page's `aa-*` elements get scanned during the transition instead of
+after it.
 
 A runnable copy lives at `examples/barba-transition/` in the repo —
 `npm install && npm run dev`, then open `http://localhost:5174/`.
@@ -25,6 +26,13 @@ A runnable copy lives at `examples/barba-transition/` in the repo —
 - **Lenis persists across page swaps.** `destroy({ keepGlobals: true })`
   leaves Lenis, the body scroll-state observer, and the scroll-target
   observer alive. Only the per-page matchMedia / feature state is torn down.
+- **No flash of un-fired scroll animations.** `destroy({ keepFromStates: true })`
+  kills tweens and ScrollTriggers without `clearProps`, so any element on
+  the leaving page that hadn't yet crossed its scroll trigger threshold
+  stays in its `opacity: 0` / `transform` from-state until the wrapper drops
+  off-screen. Without this, those elements would snap visible mid-leave —
+  most noticeable for elements *inside* the viewport but below the default
+  `top 80%` start line.
 - **Hero text animates on first load, just renders on subsequent navs.**
   Above-the-fold static elements use `aa-trigger="load"`. On first page load
   it animates (or the [CSS fallback](/recipes/load-fallback/) plays if the
@@ -194,7 +202,15 @@ function alrdyDestroy() {
   // the scroll-target observer alive. They re-attach to the same
   // documentElement / body on the new page; churning them every nav resets
   // Lenis's scroll velocity mid-transition.
-  AlrdyAnimate.destroy({ keepGlobals: true })
+  //
+  // keepFromStates: true skips clearProps on the leaving DOM. Scroll
+  // animations whose triggers haven't fired yet (in viewport but below the
+  // default `top 80%` line, or further below the fold) stay in their
+  // `opacity: 0` / `transform` from-state. Without it, they'd snap visible
+  // and flash mid-leave. Safe here because the leaving wrapper is removed
+  // by the leave timeline's onComplete; only use this when the bound DOM
+  // is going away.
+  AlrdyAnimate.destroy({ keepGlobals: true, keepFromStates: true })
   alrdyReady = false
 }
 
@@ -383,11 +399,11 @@ breathing room between the outgoing and incoming pages.
 
 | API                                  | Purpose                                                    |
 | ------------------------------------ | ---------------------------------------------------------- |
-| `init({ root, smoothScroll })`       | Scope the scan to a subtree; create / reuse Lenis.         |
-| `destroy({ keepGlobals: true })`     | Tear down per-page state; keep Lenis, scroll-state alive.  |
-| `aa-trigger="load event:enter"`      | Fire on first page load; on subsequent inits wait for `aa:trigger` event. |
-| `dispatchEvent(new CustomEvent(...))` | Manual dispatch — couples animation timing to your scene. |
-| `aa-stagger="<seconds>"`             | Auto-stagger across direct children.                       |
+| `init({ root, smoothScroll })`                            | Scope the scan to a subtree; create / reuse Lenis.                               |
+| `destroy({ keepGlobals: true, keepFromStates: true })`    | Tear down per-page state; keep Lenis alive; freeze leaving from-states until DOM removal. |
+| `aa-trigger="load event:enter"`                           | Fire on first page load; on subsequent inits wait for `aa:trigger` event.        |
+| `dispatchEvent(new CustomEvent(...))`                     | Manual dispatch — couples animation timing to your scene.                        |
+| `aa-stagger="<seconds>"`                                  | Auto-stagger across direct children.                                              |
 
 ## Differences from a stock Osmo boilerplate
 
@@ -397,10 +413,11 @@ If you're porting from the Osmo boilerplate, four things change:
   syncs it to `gsap.ticker`. The instance is at `window.lenis` so the
   Osmo helpers (`lenis.stop()`, `lenis.resize()`, `lenis.start()`) keep
   working unchanged.
-- **Drop the `afterLeave` ScrollTrigger kill.** `destroy({ keepGlobals: true })`
-  in `beforeEnter` reverts every `gsap.matchMedia()` context the lib
-  created, which kills its own ScrollTriggers and restores any inline
-  styles. The global Lenis/scroll-state observers stay alive.
+- **Drop the `afterLeave` ScrollTrigger kill.** `destroy({ keepGlobals: true, keepFromStates: true })`
+  in `beforeEnter` kills every `gsap.matchMedia()` context the lib created
+  along with its ScrollTriggers, but skips `clearProps` on the leaving DOM
+  so un-fired scroll animations don't flash in. The global Lenis/scroll-state
+  observers stay alive.
 - **Pin the new container's `zIndex: 1` in `beforeEnter`.** Osmo's source
   sets `position: fixed` without a z-index. With our parallel `init` that
   brief gap between hook and `prepareForTransition` is enough for the

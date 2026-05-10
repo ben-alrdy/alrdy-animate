@@ -254,7 +254,14 @@ function alrdyDestroy() {
   // same `document.documentElement` / `<body>` on the new page, so churning
   // them every nav is wasted work (and would also reset Lenis's scroll
   // velocity / momentum mid-transition).
-  destroy({ keepGlobals: true })
+  //
+  // keepFromStates: true keeps the inline GSAP from-states on the leaving
+  // container instead of clearing them via mm.revert(). Otherwise, scroll
+  // animations that hadn't fired yet (in viewport but below the trigger
+  // threshold, or further below the fold) would snap visible mid-leave and
+  // flash. The wrapper is removed at the end of the leave timeline, so the
+  // lingering inline styles vanish with the DOM.
+  destroy({ keepGlobals: true, keepFromStates: true })
   alrdyReady = false
 }
 
@@ -280,6 +287,7 @@ function fireEnterAnimations(rootEl) {
 // -----------------------------------------
 // BARBA HOOKS + INIT
 // -----------------------------------------
+
 
 barba.hooks.beforeEnter((data) => {
   // Position new container on top while the leave animation runs. zIndex: 1 is

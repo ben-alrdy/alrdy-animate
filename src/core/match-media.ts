@@ -13,6 +13,15 @@ export type ResponsiveBinding = (args: ResponsiveBindingArgs) => void | (() => v
 export interface ResponsiveController {
   bind: (element: Element, attrs: ResolvedAttrs, run: ResponsiveBinding) => void
   revertAll: () => void
+  /**
+   * Kill all tweens and ScrollTriggers in the matchMedia *without* reverting
+   * inline GSAP styles. Use only when the bound DOM is about to be removed —
+   * e.g. a Barba page-transition leave hook — so leftover `opacity:0`,
+   * `transform:translateY(...)` etc. linger briefly until the wrapper is
+   * discarded. Calling this on a long-lived container would freeze elements
+   * mid-animation indefinitely.
+   */
+  killAll: () => void
 }
 
 export function createResponsiveController(
@@ -35,5 +44,9 @@ export function createResponsiveController(
     mm.revert()
   }
 
-  return { bind, revertAll }
+  const killAll = (): void => {
+    mm.kill()
+  }
+
+  return { bind, revertAll, killAll }
 }
