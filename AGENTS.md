@@ -17,7 +17,7 @@ If you're an AI assistant writing code that uses this library, this file is the 
 
 ## Quick start
 
-**Webflow** — load GSAP + ScrollTrigger + (optionally CustomEase, SplitText, Flip, Draggable, InertiaPlugin, Lenis) via `<script defer>` tags, then the lib's UMD build. Call `AlrdyAnimate.init({...})` from a `DOMContentLoaded` listener. See the [Webflow guide](https://alrdy-animate.com/getting-started/webflow/) for the full head/footer snippets.
+**Webflow** — load GSAP + ScrollTrigger + (optionally CustomEase, SplitText, Flip, Draggable, InertiaPlugin, Lenis) via `<script defer>` tags, then the lib's UMD build. Call `AlrdyAnimate.init({...})` from a `DOMContentLoaded` listener. See the [Webflow guide](https://animate.alrdy.de/getting-started/webflow/) for the full head/footer snippets.
 
 **Next.js**:
 
@@ -325,6 +325,6 @@ Don't suggest these — they aren't shipped in v8:
 
 ## Further reading
 
-- Live docs with prose + interactive demos: https://alrdy-animate.com (or run `npm run docs:dev` locally on port 4321).
+- Live docs with prose + interactive demos: https://animate.alrdy.de (or run `npm run docs:dev` locally on port 4321).
 - One MDX page per animation lives under `docs/src/content/docs/animations/` (appear, components, text, hover, utilities).
 - Per-attribute JSDoc lives in `alrdy-animate/jsx` (i.e. `src/types/jsx.d.ts`) — hover any `aa-*` attribute in your editor for the same content surfaced inline.
