@@ -1,5 +1,21 @@
 import { defineConfig } from 'astro/config'
 import starlight from '@astrojs/starlight'
+import { readFileSync } from 'node:fs'
+import { visit } from 'unist-util-visit'
+
+const { version } = JSON.parse(
+  readFileSync(new URL('../package.json', import.meta.url), 'utf-8'),
+)
+
+function remarkInterpolateVersion({ version }) {
+  return (tree) => {
+    visit(tree, ['code', 'inlineCode'], (node) => {
+      if (typeof node.value === 'string' && node.value.includes('{{version}}')) {
+        node.value = node.value.replaceAll('{{version}}', version)
+      }
+    })
+  }
+}
 
 const cdnScripts = [
   'https://cdn.jsdelivr.net/npm/gsap@3/dist/gsap.min.js',
@@ -14,10 +30,13 @@ const cdnScripts = [
 
 export default defineConfig({
   site: 'https://animate.alrdy.de',
+  markdown: {
+    remarkPlugins: [[remarkInterpolateVersion, { version }]],
+  },
   integrations: [
     starlight({
-      title: 'alrdy-animate',
-      description: 'Attribute-driven scroll-animation and interactive-component library.',
+      title: `alrdy-animate v${version}`,
+      description: `Attribute-driven scroll-animation and interactive-component library — v${version}.`,
       customCss: ['./src/styles/custom.css'],
       head: cdnScripts.map((src) => ({
         tag: 'script',
