@@ -1,5 +1,6 @@
 import '../css/alrdy-animate.css'
 import type {
+  DestroyApiOptions,
   InitOptions,
   OnResizeOptions,
   PublicApi,
@@ -175,36 +176,7 @@ export async function init(options: InitOptions = {}): Promise<void> {
   }
 }
 
-export interface DestroyOptions {
-  /**
-   * When true, leave Lenis, scroll-state, and scroll-target observers alive.
-   * The next `init()` call will reuse the same instances instead of creating
-   * fresh ones. Use this from page-transition hooks (Barba `beforeEnter`,
-   * Next.js route-change effects) — anywhere you re-init on every navigation
-   * but the document body and html still belong to the same app session.
-   *
-   * Default `false` — full teardown for app-level unmount.
-   */
-  keepGlobals?: boolean
-  /**
-   * When true, skip clearing the inline GSAP from-states (`opacity:0`,
-   * `transform: translateY(...)`, `filter: blur(...)`) that scroll-triggered
-   * animations write to elements until their trigger fires. Default `false`
-   * reverts via `gsap.matchMedia.revert()`, which calls `clearProps` and
-   * snaps un-fired animations to their natural visible state — visible as a
-   * flash of content if the leaving DOM is still on screen during a page
-   * transition. With `keepFromStates: true` we kill tweens and ScrollTriggers
-   * without reverting, so elements stay where GSAP left them until the host
-   * removes the container.
-   *
-   * Pair with a page-transition leave hook that removes the leaving wrapper
-   * shortly after — using this on long-lived DOM would freeze elements
-   * indefinitely. Default `false`.
-   */
-  keepFromStates?: boolean
-}
-
-export function destroy(options: DestroyOptions = {}): void {
+export function destroy(options: DestroyApiOptions = {}): void {
   if (activeHandles?.responsive) {
     try {
       if (options.keepFromStates) activeHandles.responsive.killAll()

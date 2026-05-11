@@ -36,16 +36,17 @@ src/
 │   ├── gsap-detect.ts      # window.gsap detection + dev-mode warnings
 │   └── state.ts            # internal singleton state (initialized, options, breakpoints)
 ├── features/
-│   ├── scroll/index.ts     # fade/zoom/slide/blur via fromTo + ScrollTrigger; supports aa-children + aa-scrub
-│   ├── text/index.ts       # text-fade / text-blur / text-slide-* (uses split runtime)
+│   ├── scroll/index.ts     # fade/zoom/slide/blur/rotate via fromTo + ScrollTrigger; supports aa-children + aa-scrub
+│   ├── text/index.ts       # text-fade / text-blur / text-slide-* / text-tilt / text-marker / text-oval / text-rotate / text-block (uses split runtime)
 │   ├── reveal/index.ts     # reveal-* (clip-path inset / circle / oval entrances)
 │   ├── parallax/index.ts   # parallax / parallax-horizontal — aa-parallax-start/end overrides
-│   ├── hover/index.ts      # hover-bg-block (direction-aware bg slide)
-│   ├── accordion/index.ts  # stub
-│   ├── marquee/index.ts    # stub
-│   ├── nav/index.ts        # stub
-│   ├── slider/index.ts     # stub
-│   └── modal/index.ts      # stub
+│   ├── hover/index.ts      # hover-bg-block + aa-color colorize-on-hover
+│   ├── cursor/index.ts     # custom pointer tracking (aa-cursor + aa-cursor-trigger)
+│   ├── tabs/index.ts       # tab switching with optional aa-autoplay + progress indicator
+│   ├── slider/index.ts     # draggable carousel (Draggable + InertiaPlugin) with optional autoplay
+│   ├── marquee/index.ts    # infinite-loop scroller (ScrollTrigger + Draggable + InertiaPlugin)
+│   ├── nav/index.ts        # scroll-spy nav with current/hover indicators (ScrollTrigger + Flip)
+│   └── modal/index.ts      # fixed-position dialogs with aa-modal-name/target/close/backdrop
 ├── split/index.ts          # standalone aa-split utility (SplitText + regex fallback)
 ├── css/alrdy-animate.css   # companion stylesheet: split helper classes + reduced-motion
 └── types/
@@ -107,7 +108,7 @@ After implementing a feature, drive its docs demo through Playwright MCP (the `m
   - **Pipes `|`** are reserved for responsive breakpoint variants (see below).
 - **Responsive variants**: `|` shorthand splits at `md` (768px). Suffixes (`-sm`, `-md`, `-lg`, `-xl`) follow Tailwind semantics ("at this breakpoint and up"). Both compile to exclusive width ranges in `resolveRanges()`. Only one variant ever runs at once.
 - **`none` as a value** opts out at that breakpoint (e.g. `aa-slider="snap|none"`).
-- **No JSDoc, no Storybook.** Docs live in `docs/src/content/docs/`. Each animation gets one MDX page with prose + attribute table + live `<Demo>`.
+- **JSDoc only on public types, never on implementation. No Storybook.** `src/types/jsx.d.ts` and `src/types/index.ts` carry per-attribute / per-option JSDoc — that's our AI-affordance surface (IDE hovers, Claude/Cursor autocomplete) and is mirrored in the shipped `AGENTS.md`. Internal modules stay comment-free; prose lives in `docs/src/content/docs/` (one MDX page per animation with attribute table + live `<Demo>`).
 - **Bundle size budget**: core ≤ 5KB gzip; each feature ≤ 5KB gzip; whole UMD ≤ 30KB gzip. Currently 3.82 KB UMD gzip.
 
 ## What's deferred
@@ -118,6 +119,32 @@ After implementing a feature, drive its docs demo through Playwright MCP (the `m
 - **Lazy-load image handler** (delegate to native `loading="lazy"`)
 - **CSS-only animations / `.in-view` IntersectionObserver** — dropped. All animations are GSAP-driven; the shipped CSS file only carries split-utility classes and a reduced-motion safety net.
 - **Page transitions** are out of scope; `init/destroy/refresh` lifecycle hooks let users wire Barba (Webflow) or View Transitions (Next.js) themselves. Recipes will live in `docs/src/content/docs/recipes/` in Phase 5.
+
+## Keep AI affordances in sync
+
+Four artifacts mirror the public API surface and must stay in sync with the code:
+
+- `src/types/jsx.d.ts` — JSDoc per `aa-*` attribute, surfaces in IDE hovers and AI autocomplete on every JSX element.
+- `src/types/index.ts` — JSDoc on `InitOptions`, `DestroyApiOptions`, `PublicApi`, `ResolvedOptions`, and the supporting types.
+- `AGENTS.md` (repo root, shipped via `package.json` `files`) — single-file reference loaded by Claude Code / Cursor / Aider when downstream projects depend on `alrdy-animate`.
+- `docs/src/content/docs/animations/**` — prose + live demos.
+
+**Trigger to update:** any commit that adds, removes, or changes the meaning of:
+
+- a public `aa-*` attribute (new attribute, new accepted value, renamed value, removed alias);
+- a field on `InitOptions` or `DestroyApiOptions` (incl. its default value);
+- a feature module's `requiredPlugins` set;
+- an entry in `src/core/trigger.ts` (new `TriggerKind`, new container in `INFERENCE_CONTAINERS`, new `-active`/`-inactive` semantics);
+- the `DEFAULT_OPTIONS` or `DEFAULT_BREAKPOINTS` in `src/core/state.ts`.
+
+**Workflow** — don't update on every WIP commit; wait until a feature lands on `main` (or its branch is merge-ready), then in **one focused commit**:
+
+1. Update JSDoc in `src/types/jsx.d.ts` and `src/types/index.ts`.
+2. Update the relevant section of `AGENTS.md` (feature reference table row, attribute list, recipe if recipe-worthy). Bump the `<!-- Last synced … -->` stamp at the top so consumers can tell whether their installed version's reference is fresh.
+3. Update or add the matching `docs/src/content/docs/animations/<name>.mdx`.
+4. If the change introduces a new accepted attribute value (e.g. a new `aa-animate` preset), add or update the matching entry in the JSDoc's listed values — agents otherwise won't suggest the new value.
+
+If a session adds a public-API change without touching these artifacts, flag it in the PR description (or before committing) rather than landing the drift.
 
 ## When in doubt
 

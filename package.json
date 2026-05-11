@@ -5,11 +5,11 @@
   "type": "module",
   "main": "./dist/alrdy-animate.umd.cjs",
   "module": "./dist/alrdy-animate.js",
-  "types": "./dist/types/index.d.ts",
+  "types": "./dist/types/core/index.d.ts",
   "style": "./dist/alrdy-animate.css",
   "exports": {
     ".": {
-      "types": "./dist/types/index.d.ts",
+      "types": "./dist/types/core/index.d.ts",
       "import": "./dist/alrdy-animate.js",
       "require": "./dist/alrdy-animate.umd.cjs"
     },
@@ -23,10 +23,11 @@
     "./style": "./dist/alrdy-animate.css"
   },
   "files": [
-    "dist"
+    "dist",
+    "AGENTS.md"
   ],
   "scripts": {
-    "build": "vite build && tsc -p tsconfig.build.json",
+    "build": "vite build && tsc -p tsconfig.build.json && node -e \"require('fs').copyFileSync('src/types/jsx.d.ts','dist/types/jsx.d.ts')\"",
     "dev": "vite build --watch",
     "test": "playwright test",
     "test:update": "playwright test --update-snapshots",

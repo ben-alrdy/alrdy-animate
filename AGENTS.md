@@ -1,0 +1,269 @@
+<!--
+  Last synced with src/ at v8.0.0-alpha.0 (2026-05-11).
+  This file mirrors the public API surface for AI coding agents. When any
+  public aa-* attribute, InitOptions field, feature module, or trigger kind
+  changes in src/, update this file in the same commit. See CLAUDE.md
+  "Keep AI affordances in sync" for the full update workflow.
+-->
+
+# alrdy-animate — agent reference
+
+Attribute-driven scroll-animation and interactive-component library for Webflow and Next.js. GSAP (peer dependency) drives every animation; alrdy-animate is the orchestrator that turns `aa-*` HTML attributes into `gsap.fromTo` calls, ScrollTriggers, event listeners, and matchMedia bindings.
+
+If you're an AI assistant writing code that uses this library, this file is the authoritative quick reference. Per-attribute autocomplete also lives in the TypeScript types at `alrdy-animate/jsx`.
+
+---
+
+## Quick start
+
+**Webflow** — load GSAP + ScrollTrigger + (optionally CustomEase, SplitText, Flip, Draggable, InertiaPlugin, Lenis) via `<script defer>` tags, then the lib's UMD build. Call `AlrdyAnimate.init({...})` from a `DOMContentLoaded` listener. See the [Webflow guide](https://alrdy-animate.com/getting-started/webflow/) for the full head/footer snippets.
+
+**Next.js**:
+
+```bash
+npm install alrdy-animate gsap lenis
+```
+
+```tsx
+// app/_components/AlrdyInit.tsx
+'use client'
+import { useEffect } from 'react'
+import 'alrdy-animate/style'
+
+export function AlrdyInit() {
+  useEffect(() => {
+    let cancelled = false
+    Promise.all([
+      import('gsap').then(m => { (window as any).gsap = m.gsap }),
+      import('gsap/ScrollTrigger').then(m => { (window as any).ScrollTrigger = m.ScrollTrigger }),
+      import('gsap/CustomEase').then(m => { (window as any).CustomEase = m.CustomEase }),
+      // import only the plugins you use (SplitText, Flip, Draggable, InertiaPlugin)
+      import('lenis').then(m => { (window as any).Lenis = m.default }),
+    ]).then(async () => {
+      if (cancelled) return
+      const { init } = await import('alrdy-animate')
+      await init({ debug: process.env.NODE_ENV !== 'production' })
+    })
+    return () => { cancelled = true; (window as any).AlrdyAnimate?.destroy() }
+  }, [])
+  return null
+}
+```
+
+Add `import 'alrdy-animate/jsx'` once in `types/global.d.ts` so JSX intrinsic elements accept `aa-*` attributes with autocomplete.
+
+---
+
+## Attribute syntax conventions
+
+Every value-bearing attribute follows the same grammar.
+
+| Notation | Meaning | Example |
+|---|---|---|
+| `dash-joined-words` | One compound concept. | `fade-up`, `text-blur-up`, `hover-bg-block` |
+| `space separated flags` | Independent modifiers on the same attribute, order-independent. | `aa-split="lines mask"`, `aa-trigger="load event:enter"` |
+| `DESKTOP \| MOBILE` | Two-bucket responsive shorthand. **Left of pipe applies at `>= breakpoints.md` (default 768px), right applies below.** | `aa-animate="fade-up \| fade"` |
+| `aa-foo-sm` / `-md` / `-lg` / `-xl` | Per-breakpoint override; activates at the named breakpoint and up (Tailwind semantics). | `aa-animate-md="text-slide-up"` |
+| `none` | Opt out at that breakpoint. | `aa-slider="snap \| none"` (disables slider on mobile) |
+
+**Default breakpoints** (override via `init({ breakpoints })`): `{ sm: 480, md: 768, lg: 992, xl: 1280 }`.
+
+The `|` shorthand and the `-sm/-md/-lg/-xl` suffixes both compile to exclusive width-based matchMedia ranges — exactly one variant is active at a time, and breakpoint exits auto-revert tweens.
+
+---
+
+## Trigger system (`aa-trigger`)
+
+The four trigger kinds:
+
+| Value | Behaviour |
+|---|---|
+| (omitted) or `scroll` | ScrollTrigger between `aa-scroll-start` and `aa-scroll-end`. Replays on re-enter unless `init({ again: false })`. |
+| `click` | Element animates when clicked. |
+| `load` | Fires on the **first** `init()` cycle of the page session. Subsequent `init()`s (e.g. after a Barba navigation) skip it. |
+| `event:<name>` | Listens for `aa:trigger` CustomEvents with `detail.name === '<name>'` on the element or any ancestor. |
+
+**Multiple kinds** are space-separated and additive: `aa-trigger="load event:enter"`.
+
+**Container inference** — if `aa-trigger` is omitted and the element is inside one of these containers, it inherits the matching event trigger:
+
+| Container attribute | Inferred trigger |
+|---|---|
+| `[aa-modal-name]` | `event:modal-active` |
+| `[aa-tabs-content]` | `event:tab-active` |
+| `[aa-tabs-visual]` | `event:tab-active` |
+| `[aa-slider-item]` | `event:slide-active` |
+
+Set `aa-trigger="scroll"` explicitly to opt out.
+
+**Reverse pairing** — events named `<x>-active` automatically pair with `<x>-inactive` for the reverse animation. So `event:tab-active` on the active animation auto-listens for `event:tab-inactive` and reverses.
+
+**Dispatching from your own code:**
+
+```js
+element.dispatchEvent(new CustomEvent('aa:trigger', {
+  detail: { name: 'enter' },
+  bubbles: true,
+}))
+```
+
+---
+
+## Animation presets (`aa-animate`)
+
+Presence of `aa-animate` makes an element animate; the FOUC guard hides it until `init()` flips `aa-ready` on it.
+
+**Scroll/load/event presets** (feature: `scroll`, plugin: `ScrollTrigger`):
+`fade`, `fade-up`, `fade-down`, `fade-left`, `fade-right`, `zoom-in`, `zoom-out`, `slide-up`, `slide-down`, `slide-left`, `slide-right`, `blur`, `rotate`, `rotate-up`, `rotate-up-tl` / `-tr` / `-bl` / `-br`, `rotate-*-ccw` variants.
+
+**Text presets** (feature: `text`, plugins: `ScrollTrigger` + `SplitText`):
+`text-fade`, `text-fade-up`, `text-fade-down`, `text-slide-up`, `text-slide-down`, `text-blur`, `text-blur-up`, `text-tilt`, `text-rotate`, `text-marker`, `text-oval`, `text-block`. Pair with `aa-split="chars"` / `"words"` / `"lines"` (+ optional `mask`) to control granularity.
+
+**Reveal presets** (feature: `reveal`, plugin: `ScrollTrigger`):
+`reveal`, `reveal-slices`. Clip-path entrances controlled by `aa-scroll-start/end` or `aa-scrub`.
+
+Tune any preset with `aa-duration`, `aa-delay`, `aa-ease`, `aa-distance`, `aa-stagger`. Use `none` at a breakpoint to skip.
+
+---
+
+## Feature reference
+
+Eleven features ship; the scanner detects which ones are needed by which attributes are present and lazy-loads the modules.
+
+| Feature | Triggering attributes | Required GSAP plugins | Purpose |
+|---|---|---|---|
+| `scroll` | `aa-animate` (non-text, non-reveal value) | `ScrollTrigger` | Scroll/load/event-triggered fades, slides, zooms, blur, rotate. |
+| `text` | `aa-animate="text-*"` | `ScrollTrigger`, `SplitText` | Text-character / word / line animations via `aa-split`. |
+| `reveal` | `aa-animate="reveal"` / `"reveal-slices"` | `ScrollTrigger` | Clip-path entrances. |
+| `parallax` | `aa-parallax-start` / `aa-parallax-end` | `ScrollTrigger` | Depth-based scroll parallax (multiplier on scroll speed). |
+| `slider` | `aa-slider` | `ScrollTrigger`, `Draggable`, `InertiaPlugin` | Draggable carousel with optional autoplay. |
+| `marquee` | `aa-marquee` | `ScrollTrigger`, `Draggable`, `InertiaPlugin` | Infinite-loop scroller. |
+| `tabs` | `aa-tabs` | `ScrollTrigger` | Tab switching with progress indicator + autoplay. |
+| `nav` | `aa-nav` | `ScrollTrigger`, `Flip` | Scroll-spy nav with animated current/hover indicator. |
+| `modal` | `aa-modal-name` | (none) | Fixed-position dialogs with backdrop + close handling. |
+| `hover` | `aa-hover` | (none) | `hover-bg-block` direction-aware bg slide. |
+| `cursor` | `aa-cursor` | (none) | Custom pointer tracking with state-driven styling. |
+
+For each feature, animations inside the relevant container default to the inferred event trigger (see container inference table above) — you usually don't write `aa-trigger` yourself for tabs/sliders/modals.
+
+---
+
+## Public API
+
+Exposed on `window.AlrdyAnimate` (UMD) and as named exports from `'alrdy-animate'` (ESM).
+
+```ts
+init(options?: InitOptions): Promise<void>
+destroy(options?: DestroyApiOptions): void
+refresh(): Promise<void>
+onResize(fn: () => void, opts?: { debounce?: number }): () => void
+```
+
+### `InitOptions` defaults
+
+| Option | Default | Notes |
+|---|---|---|
+| `duration` | `0.6` | Seconds. |
+| `ease` | `'power4.out'` | Any GSAP ease or named (`smooth`, `snappy`, `bounce`, `expressive`, `sharp`) — named eases need `CustomEase`. |
+| `distance` | `1` | Multiplier for fade-up/down/left/right + slide-* translate distance. |
+| `scrollStart` | `'top 92%'` | Default ScrollTrigger `start`. |
+| `scrollEnd` | `'bottom 70%'` | Default ScrollTrigger `end`. |
+| `again` | `true` | Replay scroll-triggered animations on re-enter. |
+| `stagger` | `{ chars: 0.02, words: 0.05, lines: 0.1, default: 0.1 }` | Per-split-mode stagger defaults (seconds). |
+| `autoplay` | `{ interval: 4, hoverPause: false }` | Slider/tabs autoplay defaults. |
+| `breakpoints` | `{ sm: 480, md: 768, lg: 992, xl: 1280 }` | Pixel widths for responsive variants. |
+| `smoothScroll` | `true` | Boolean or Lenis options object. Silently skipped if `window.Lenis` is absent. |
+| `scrollState` | `true` | Writes `aa-scroll-direction` + `aa-scroll-started` on `<body>`; runs the `[aa-toggle-playstate]` IntersectionObserver. |
+| `root` | `document` | Scope the scan to a subtree. Element-scoped inits skip global setup (smoothScroll, scrollState). |
+| `debug` | `false` | Verbose console logging. |
+
+### `DestroyApiOptions`
+
+| Option | Default | Notes |
+|---|---|---|
+| `keepGlobals` | `false` | When `true`, leaves Lenis + scroll-state + scroll-target observers alive across the destroy/init cycle. Use from page-transition hooks. |
+| `keepFromStates` | `false` | When `true`, kills tweens without reverting inline GSAP from-states. Use when the leaving DOM is still on screen during a page transition — pair with a leave hook that removes the wrapper shortly after. |
+
+---
+
+## Common recipes
+
+### Fade-up on scroll with staggered children
+
+```html
+<div aa-animate="fade-up" aa-stagger="0.1">
+  <div>One</div>
+  <div>Two</div>
+  <div>Three</div>
+</div>
+```
+
+`aa-stagger` on a parent + direct children → children are individually staggered.
+
+### Text characters fading in on load, desktop only
+
+```html
+<h1 aa-animate-md="text-fade-up" aa-split="chars" aa-stagger="0.03" aa-trigger="load">
+  Headline
+</h1>
+```
+
+`aa-animate-md` activates at `>= 768px`; below, no animation. `aa-trigger="load"` fires on the first init cycle (won't replay on subsequent SPA navigations).
+
+### Slider draggable on mobile, scroll-snap on desktop
+
+```html
+<div aa-slider="draggable | snap">
+  <div aa-slider-item>...</div>
+  <div aa-slider-item>...</div>
+</div>
+```
+
+Pipe shorthand: `snap` on desktop, `draggable` on mobile.
+
+### Page transition (Barba) leave hook
+
+```js
+// Inside Barba's leave hook, before the new container fades in:
+AlrdyAnimate.destroy({ keepGlobals: true, keepFromStates: true })
+
+// Inside Barba's enter hook, after the new container is in the DOM:
+await AlrdyAnimate.init({ root: container, debug: false })
+```
+
+`keepGlobals: true` preserves Lenis and scroll observers across the navigation. `keepFromStates: true` keeps the leaving DOM frozen mid-animation instead of flashing to the visible state during the transition. See `docs/recipes/webflow-barba/` for the full lifecycle.
+
+### Custom event trigger
+
+```html
+<div aa-animate="fade-up" aa-trigger="event:reveal-me">…</div>
+```
+
+```js
+document.querySelector('.trigger-button').addEventListener('click', () => {
+  document.querySelector('[aa-trigger="event:reveal-me"]').dispatchEvent(
+    new CustomEvent('aa:trigger', { detail: { name: 'reveal-me' }, bubbles: true })
+  )
+})
+```
+
+---
+
+## What's deferred / not supported
+
+Don't suggest these — they aren't shipped in v8:
+
+- **Accordion** — there is no dedicated `aa-accordion` feature. Use `aa-tabs` for the show-one-panel-at-a-time pattern (it handles the toggle/content pairing, ARIA state, and active-event triggering).
+- **Pin** animations — to be rebuilt in v8.x.
+- **Form-submit** feature — dropped, no production use.
+- **Lazy-load image handler** — use native `loading="lazy"` instead.
+- **CSS-only animations / `.in-view` IntersectionObserver** — every animation is GSAP-driven. The shipped CSS file only carries split-utility classes and a reduced-motion safety net.
+- **Page transitions** are out of scope — `init/destroy/refresh` lifecycle hooks let users wire Barba (Webflow) or View Transitions (Next.js) themselves. See the recipes referenced above.
+
+---
+
+## Further reading
+
+- Live docs with prose + interactive demos: https://alrdy-animate.com (or run `npm run docs:dev` locally on port 4321).
+- One MDX page per animation lives under `docs/src/content/docs/animations/` (appear, components, text, hover, utilities).
+- Per-attribute JSDoc lives in `alrdy-animate/jsx` (i.e. `src/types/jsx.d.ts`) — hover any `aa-*` attribute in your editor for the same content surfaced inline.

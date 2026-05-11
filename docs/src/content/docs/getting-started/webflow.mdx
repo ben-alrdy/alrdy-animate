@@ -183,6 +183,12 @@ The lib's CSS file ships a single rule:
 3. If you see a "Missing GSAP plugins" warning, copy the suggested `<script>` tag into the head and republish.
 4. To check the slow-network fallback: DevTools → Network → throttle to "Slow 4G" → reload. Hero elements should fade up via the inline keyframe within ~1s, even before the lib bundle finishes loading.
 
+## Using with AI assistants (Claude Code, Cursor, etc.)
+
+If you author Webflow custom code with an AI assistant — generating embedded blocks, writing component-level GSAP, or reasoning about `aa-*` attribute combinations — point the assistant at the agent reference shipped inside the npm package.
+
+The simplest path is to clone the alrdy-animate repo locally and reference its `AGENTS.md` from your project (or any AI-instruction file the tool reads). For Webflow workflows where you don't have a local npm project, copy the contents of [`AGENTS.md` from the GitHub repo](https://github.com/ben-alrdy/alrdy-animate/blob/main/AGENTS.md) into your assistant's context once at the start of a session. It covers the attribute syntax conventions, the trigger system (including container inference and reverse pairing), every feature's required GSAP plugins, and the init/destroy lifecycle — everything an assistant needs to suggest correct attribute combinations without guessing.
+
 ## Page transitions
 
 This guide assumes no page-transition library. Webflow's default click-navigation behaviour means each page is a fresh document load, and `init()` runs once per page. If you want SPA-style transitions, use [Barba.js](https://barba.js.org/) and follow the [Webflow + Barba guide](/getting-started/webflow-barba/) — `init` / `destroy` / `keepGlobals` are designed for it.

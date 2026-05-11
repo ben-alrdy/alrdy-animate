@@ -108,6 +108,17 @@ Then in your components:
 </h1>
 ```
 
+## Using with AI assistants (Claude Code, Cursor, etc.)
+
+alrdy-animate ships an `AGENTS.md` at the package root so AI coding assistants can learn the attribute syntax, trigger system, and feature plugins without web-fetching the docs. After `npm install alrdy-animate`, reference it from your project's own AI-instruction file:
+
+```md
+<!-- AGENTS.md or CLAUDE.md at your repo root -->
+@node_modules/alrdy-animate/AGENTS.md
+```
+
+The JSDoc on `alrdy-animate/jsx` (covered above) handles per-attribute hover docs in your editor; `AGENTS.md` is the broader reference — feature table with plugin requirements, lifecycle API, common recipes (including the Barba/page-transition wiring). Both stay version-pinned to the installed package, so upgrades automatically refresh the agent's knowledge.
+
 ## Custom GSAP code
 
 For per-component custom GSAP, use a `useGSAP` hook (from `@gsap/react`) or a `useEffect` with manual cleanup. The lib's `init()` is mounted once at the app root and doesn't interfere with component-level GSAP — they run on separate sets of elements (`aa-*` for the lib; whatever selectors you target for your own).
