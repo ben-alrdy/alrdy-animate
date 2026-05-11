@@ -52,13 +52,24 @@ code {
 
 /* ----------- Demo nav -----------
    Inside [data-barba="container"], so it leaves with the old page and
-   slides down on the new page (animated by the leave timeline). */
+   slides down on the new page (animated by the leave timeline). Sticky
+   pins it to the top while scrolling — during a transition the container
+   is briefly position:fixed, where sticky acts like static so the
+   yPercent slide-down still reads correctly; after `clearProps` it
+   activates normally. */
 .demo-nav {
+  position: sticky;
+  top: 0;
+  z-index: 5;
   display: flex;
   align-items: center;
   gap: 2rem;
-  padding: 1.5rem 2.5rem;
+  padding: 1.25rem 2.5rem;
   letter-spacing: -0.005em;
+  background: rgba(244, 236, 216, 0.78);
+  backdrop-filter: saturate(140%) blur(10px);
+  -webkit-backdrop-filter: saturate(140%) blur(10px);
+  border-bottom: 1px solid rgba(28, 25, 23, 0.06);
 }
 
 .demo-nav__brand {
@@ -268,6 +279,244 @@ code {
 .tile--f { background: #1c1917; color: #ef6322; }
 .tile--f .tile__tag { background: rgba(239, 99, 34, 0.16); color: #ef6322; }
 .tile--f .tile__glyph { color: #ef6322; }
+
+/* ----------- Ribbon (about page marquee) -----------
+   Edge-to-edge marquee row. The track must be flex + overflow:hidden on
+   the root so the cloned lists stay invisible past the viewport edge.
+   Items use `margin-right` for spacing — the lib reads scrollWidth which
+   folds margins in, so cloned-list seams match in-list spacing. */
+.ribbon {
+  padding: 4rem 0 8rem;
+  background: #1c1917;
+  color: #f4ecd8;
+  border-top: 1px solid rgba(244, 236, 216, 0.08);
+}
+
+.ribbon__eyebrow {
+  display: inline-block;
+  font-family: 'JetBrains Mono', SFMono-Regular, Menlo, monospace;
+  font-size: 0.8rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #ef6322;
+  margin: 0 0 1.25rem 2.5rem;
+}
+
+.ribbon__title {
+  font-size: clamp(2rem, 4.5vw, 3.5rem);
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+  margin: 0 2.5rem 3rem;
+  max-width: 22ch;
+}
+
+.ribbon-marquee {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  overflow: hidden;
+}
+
+.ribbon-marquee__track {
+  display: flex;
+  align-items: center;
+  flex: none;
+  will-change: transform;
+}
+
+.ribbon-marquee__list {
+  display: flex;
+  align-items: center;
+  flex: none;
+}
+
+.ribbon-marquee__item {
+  flex: none;
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  margin-right: 2rem;
+  color: #f4ecd8;
+}
+
+.ribbon-marquee__sep {
+  flex: none;
+  color: #ef6322;
+  font-size: 1rem;
+  margin-right: 2rem;
+}
+
+/* ----------- Reel (work page slider) -----------
+   The track allows overflow so the off-center slides peek in from either
+   side — `aa-slider="center"` parks the active slide in the middle. Each
+   slide is a thin flex wrapper (no padding/border on the slide-item
+   itself) per the slider docs, so the lib's transform math sees a clean
+   rect. All visual treatment lives on `.reel-slide__inner`. */
+/* Edge-to-edge: the slider track spans the full viewport while the head
+   and controls stay within the page content rhythm. The `center` token on
+   aa-slider parks the active slide at the viewport center, so off-center
+   slides peek in from both edges. */
+.reel {
+  padding: 4rem 0 8rem;
+}
+
+.reel__head {
+  max-width: 1100px;
+  margin: 0 auto 3rem;
+  padding: 0 2.5rem;
+}
+
+.reel__eyebrow {
+  display: inline-block;
+  font-family: 'JetBrains Mono', SFMono-Regular, Menlo, monospace;
+  font-size: 0.8rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #ef6322;
+  margin-bottom: 1.25rem;
+}
+
+.reel__title {
+  font-size: clamp(2rem, 4.5vw, 3.5rem);
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+  margin: 0;
+}
+
+.reel-slider {
+  outline: none;
+  cursor: grab;
+}
+
+.reel-slider:active {
+  cursor: grabbing;
+}
+
+.reel-slider:focus-visible {
+  box-shadow: 0 0 0 2px #ef6322;
+  border-radius: 12px;
+}
+
+.reel-slider__track {
+  display: flex;
+  gap: 1.5rem;
+  overflow: visible;
+  width: 100%;
+}
+
+.reel-slide {
+  /* Fixed slide width with a viewport-relative middle: narrow screens get
+     a slide that nearly fills the viewport, wider screens cap the slide
+     so the row fits more cards on either side of the centered active. */
+  flex: 0 0 clamp(280px, 28vw, 420px);
+  user-select: none;
+}
+
+.reel-slide__inner {
+  position: relative;
+  background: #fffbf0;
+  border: 1px solid rgba(28, 25, 23, 0.08);
+  border-radius: 1.25rem;
+  padding: 3rem 2rem;
+  min-height: 18rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  opacity: 0.5;
+  transition: opacity 0.4s ease, border-color 0.4s ease, translate 0.4s ease;
+}
+
+.reel-slide.is-active .reel-slide__inner {
+  opacity: 1;
+  border-color: rgba(28, 25, 23, 0.25);
+  translate: 0 -4px;
+}
+
+.reel-slide__num {
+  position: absolute;
+  top: 1.5rem;
+  left: 2rem;
+  font-family: 'JetBrains Mono', SFMono-Regular, Menlo, monospace;
+  font-size: 0.85rem;
+  letter-spacing: 0.02em;
+  color: #ef6322;
+}
+
+.reel-slide__title {
+  font-size: clamp(1.5rem, 2.5vw, 2.25rem);
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  line-height: 1.1;
+  margin: 0 0 0.75rem;
+}
+
+.reel-slide__meta {
+  margin: 0;
+  font-family: 'JetBrains Mono', SFMono-Regular, Menlo, monospace;
+  font-size: 0.85rem;
+  color: #57534e;
+}
+
+.reel-slider__controls {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  justify-content: center;
+  margin-top: 2rem;
+  font-family: 'JetBrains Mono', SFMono-Regular, Menlo, monospace;
+  font-size: 0.9rem;
+  color: #57534e;
+}
+
+.reel-slider__btn {
+  font: inherit;
+  background: #fffbf0;
+  color: #1c1917;
+  border: 1px solid rgba(28, 25, 23, 0.12);
+  border-radius: 999px;
+  padding: 0.4rem 0.95rem;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.reel-slider__btn:hover {
+  background: #1c1917;
+  color: #f4ecd8;
+}
+
+.reel-slider__count {
+  min-width: 4ch;
+  text-align: center;
+}
+
+.reel-slider__thumbs {
+  display: flex;
+  gap: 0.4rem;
+  justify-content: center;
+  margin-top: 1rem;
+}
+
+.reel-slider__thumbs button {
+  width: 2.5rem;
+  height: 4px;
+  background: rgba(28, 25, 23, 0.12);
+  border: none;
+  border-radius: 2px;
+  cursor: pointer;
+  padding: 0;
+  overflow: hidden;
+  position: relative;
+}
+
+.reel-slider__thumbs button[aa-slider-progress] span,
+.reel-slider__thumbs button > span {
+  display: block;
+  width: 0%;
+  height: 100%;
+  background: #ef6322;
+}
 
 /* ----------- Scrubbed timeline section ----------- */
 .scrub {
