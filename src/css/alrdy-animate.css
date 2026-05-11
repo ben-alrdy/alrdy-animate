@@ -70,6 +70,21 @@ html[aa-fallback] [aa-trigger~="load"][aa-animate]:not([aa-ready]) {
   animation: aa-fallback-appear 0.5s ease both;
 }
 
+/*
+ * Universal init-timeout safety. Set by the same inline <head> snippet at a
+ * longer deadline than `aa-fallback` (default 4s). Reveals every animated
+ * element — load-triggered *or* scroll-triggered — at its natural rendered
+ * state, with no entrance animation. Where `aa-fallback` is a graceful
+ * staircase for hero copy, `aa-timeout` is the deep-fail safety net: at this
+ * point the bundle has lost the race so badly that we're prioritising page
+ * usability over animation correctness. When init() eventually arrives, it
+ * detects `aa-timeout` and skips its appearance-feature work to avoid
+ * rewinding the now-visible elements through their from-states.
+ */
+html[aa-timeout] [aa-animate]:not([aa-ready]) {
+  visibility: visible;
+}
+
 .aa-word,
 .aa-char {
   display: inline-block;

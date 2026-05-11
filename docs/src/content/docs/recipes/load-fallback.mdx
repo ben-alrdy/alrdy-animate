@@ -1,12 +1,23 @@
 ---
-title: Slow-network fallback for hero content
-description: Optional inline <head> snippet that fades hero content in if the JS bundle hasn't initialised within a configurable threshold. First-load only — Barba / View Transitions navigations are not at risk because the bundle is already cached.
+title: Slow-network + init-timeout fallback
+description: Optional inline <head> snippet with two safety layers — a graceful hero fade if the JS bundle is late, and a universal reveal if init never arrives at all. First-load only — Barba / View Transitions navigations are not at risk because the bundle is already cached.
 ---
 
-If your hero uses [`aa-trigger="load"`](/animations/utilities/aa-trigger/) and the alrdy-animate bundle is loaded from a CDN, a slow connection can leave the hero invisible for several seconds (the lib hides every `[aa-animate]` element with `visibility: hidden` until init runs). Drop this snippet into `<head>` *above* the alrdy-animate `<script>` and `<link>` tags:
+The lib hides every `[aa-animate]` element with `visibility: hidden` until `init()` runs. On a slow connection (or if the bundle is blocked, errors, or is misconfigured), that leaves animated content invisible. This snippet adds two layers of safety:
+
+| Layer | Default | What it does |
+| --- | --- | --- |
+| **`aa-fallback`** | 1s | Fades `aa-trigger="load"` elements (hero copy) via a CSS keyframe — graceful staircase, respecting `aa-delay` and `aa-stagger`. |
+| **`aa-timeout`** | 4s | Reveals **every** `[aa-animate]` element at its natural state with no animation — universal safety net if init never runs. |
+
+Drop this snippet into `<head>` *above* the alrdy-animate `<script>` and `<link>` tags:
 
 ```html
 <script>
+  // Tune these two numbers without reading the rest of the snippet.
+  const FALLBACK_DELAY = 1000;  // ms — hero copy fades in via CSS keyframe
+  const TIMEOUT_DELAY  = 4000;  // ms — universal reveal if init never runs
+
   const applyFallback = () => {
     if (document.documentElement.hasAttribute('aa-loaded')) return;
     document.documentElement.setAttribute('aa-fallback', '');
@@ -36,7 +47,12 @@ If your hero uses [`aa-trigger="load"`](/animations/utilities/aa-trigger/) and t
     } else {
       applyFallback();
     }
-  }, 1000);
+  }, FALLBACK_DELAY);
+
+  setTimeout(() => {
+    if (document.documentElement.hasAttribute('aa-loaded')) return;
+    document.documentElement.setAttribute('aa-timeout', '');
+  }, TIMEOUT_DELAY);
 </script>
 <style>
   [aa-animate]:not([aa-ready]) { visibility: hidden; }
@@ -51,10 +67,11 @@ If your hero uses [`aa-trigger="load"`](/animations/utilities/aa-trigger/) and t
        the delay, then jumps to opacity 0 at start — visible flicker. */
     animation: aa-fallback-appear 0.5s ease both;
   }
+  html[aa-timeout] [aa-animate]:not([aa-ready]) { visibility: visible; }
 </style>
 ```
 
-Tune `1000` to whatever buffer makes sense for your audience. Lower = faster fallback, higher = more time for JS to win the race and play the proper animation.
+Tune the two constants at the top to taste. Keep `TIMEOUT_DELAY` well above `FALLBACK_DELAY` — the first is "let JS win the race for the hero", the second is "give up, show the page".
 
 **Why the inline `<style>`** — the same FOUC + fallback rules ship in `dist/alrdy-animate.css`, but on a slow connection that file lands *after* the HTML renders. Without inlining, every animated element flashes briefly visible, then disappears when the lib's CSS arrives, then fades back in when the timeout fires. Inlining the critical CSS in `<head>` closes that window — the FOUC guard is active from the very first paint.
 
@@ -67,13 +84,32 @@ The script mirrors the two timing attributes the JS init already understands, so
 
 CSS alone can't read `aa-delay` or expand `aa-stagger` across non-sibling children — `:nth-child` only works among siblings, CSS counters can't drive `animation-delay`, and typed `attr()` isn't widely supported yet. The 18-line script handles both rules in one pass.
 
-## What it does
+## What each layer does
 
-`init()` sets `aa-loaded` on `<html>` as its first synchronous step. If that hasn't happened by the threshold, the snippet sets `aa-fallback`. The CSS rule (matching `[aa-trigger~="load"]`, so it covers both `aa-trigger="load"` and combined forms like `aa-trigger="load event:enter"`) then fades those elements up.
+`init()` sets `aa-loaded` on `<html>` as its first synchronous step. The two timers check for that attribute and bail out if it's already set.
 
-When the bundle eventually arrives, the lib's load-trigger branches detect `aa-fallback` and skip their JS animation entirely — the elements stay where the fallback put them, no replay or flash. `init()` also clears `aa-fallback` at the end, so subsequent Barba navigations don't re-trigger the keyframe.
+### Layer 1 — `aa-fallback` (1s default)
+
+Sets `html[aa-fallback]`. The CSS rule (matching `[aa-trigger~="load"]`, so it covers both `aa-trigger="load"` and combined forms like `aa-trigger="load event:enter"`) fades those elements up via a keyframe animation, respecting `aa-delay` and `aa-stagger` so the staircase still plays.
+
+When the bundle eventually arrives, the lib's load-trigger branches detect `aa-fallback` and skip their JS animation entirely — the elements stay where the fallback put them, no replay or flash. `init()` clears `aa-fallback` at the end, so subsequent Barba navigations don't re-trigger the keyframe.
 
 Scoped to `[aa-trigger~="load"]` on purpose: scroll-triggered elements below the fold stay hidden until the lib actually arrives. Only elements the author has explicitly marked as "needs to be visible immediately" are eligible for the fallback fade.
+
+### Layer 2 — `aa-timeout` (4s default)
+
+Sets `html[aa-timeout]`. The CSS rule reveals **every** `[aa-animate]` element at its natural rendered state — no animation, no from-state. This is the deep-fail safety net: if JS errored, the bundle is blocked, or the network is so slow that even the hero staircase isn't enough, the page still ends up usable.
+
+When `init()` eventually arrives, it detects `aa-timeout` and switches to bypass mode:
+
+- Drops `scroll`, `text`, `reveal`, `parallax` from the feature load set — no from-states applied, no entrance ScrollTriggers, no flash from rewinding the now-visible elements.
+- Skips the reduced-motion fade pass.
+- Still wires up interactive features (tabs, slider, marquee, modal, nav, hover, cursor, split) so components remain functional.
+- Still mounts smooth-scroll, scroll-state, and scroll-target globals.
+- Flips `aa-ready` on every `[aa-animate]` element so the DOM ends in a consistent state.
+- Clears `aa-timeout`, so the next Barba navigation runs animations normally.
+
+The tradeoff: appearance animations don't play on this load (the user already saw the content for 4+ seconds), and event-triggered scroll/text/reveal entries don't fire on this page. At that point, page consistency outweighs animation correctness.
 
 ## Customising the motion
 
@@ -107,9 +143,10 @@ Without `defer`, every `<script>` blocks HTML parsing — on slow 4G the body ha
 
 You can skip the snippet if any of these are true:
 
-- The bundle ships in your own JS bundle (Vite / Next.js / Webpack), not from a CDN. In that case bundle availability is bound to page render, not network latency.
-- Your hero doesn't use `aa-trigger="load"` — only fade-in fallback affects load-triggered elements.
-- You're shipping behind aggressive caching where most visitors hit a warm bundle.
+- The bundle ships in your own JS bundle (Vite / Next.js / Webpack), not from a CDN. In that case bundle availability is bound to page render, not network latency, and a JS error would prevent the React tree itself from mounting — there's no `aa-animate` flash to protect against.
+- You're shipping behind aggressive caching where most visitors hit a warm bundle *and* you're comfortable with elements staying invisible on the rare error case.
+
+If you only want one of the two layers, delete the other `setTimeout` block and its corresponding CSS rule.
 
 ## Page transitions (Barba)
 
@@ -117,10 +154,21 @@ This snippet only protects the *first* page load. On subsequent navigations the 
 
 ## Verifying it locally
 
+### Layer 1 — `aa-fallback` (slow network)
+
 1. Confirm your CDN `<script>` tags use `defer` (see above) — without it the body isn't parsed when the timer fires and the per-element delays can't apply.
 2. Open DevTools → Network → check "Disable cache" → throttle to "Slow 3G" (or "Slow 4G").
 3. Reload. You should see:
-   - Hero elements stay invisible for ~1s (the timer interval).
+   - Hero elements stay invisible for ~1s (the `FALLBACK_DELAY` interval).
    - At the timer mark, they fade up — respecting any `aa-delay` and `aa-stagger` you set, so the staircase plays out before the bundle finishes downloading.
    - When the bundle eventually lands, no second animation plays — the elements stay where the fallback put them.
 4. Open the Elements panel and inspect a load-trigger element while the fallback is in flight. You should see `style="animation-delay: 0.2s"` (or `style="animation: aa-fallback-appear 0.5s ease 0.1s 1 normal both running"` on a stagger child). If those inline styles are missing, the body wasn't parsed when the timer fired — check your `defer` attributes.
+
+### Layer 2 — `aa-timeout` (bundle never arrives)
+
+1. In DevTools → Network, **block** the alrdy-animate `<script>` URL (right-click the request → Block request URL).
+2. Reload. You should see:
+   - All `[aa-animate]` elements stay hidden for ~4s (the `TIMEOUT_DELAY` interval).
+   - At the timer mark, every animated element on the page becomes visible at its natural rendered state — no fades, no entrance motion.
+   - The Elements panel shows `<html aa-timeout>`.
+3. Unblock the request and reload. Hero fades in via Layer 1 if it gets stuck under 4s, otherwise normal init runs and the snippet does nothing.

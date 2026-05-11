@@ -6,6 +6,9 @@
     <title>About — Barba Transition Demo</title>
     <!-- See index.html head for what this snippet does. -->
     <script>
+      const FALLBACK_DELAY = 1000;  // ms — hero copy fades in via CSS keyframe
+      const TIMEOUT_DELAY  = 4000;  // ms — universal reveal if init never runs
+
       const applyFallback = () => {
         if (document.documentElement.hasAttribute('aa-loaded')) return;
         document.documentElement.setAttribute('aa-fallback', '');
@@ -30,7 +33,12 @@
         } else {
           applyFallback();
         }
-      }, 1000);
+      }, FALLBACK_DELAY);
+
+      setTimeout(() => {
+        if (document.documentElement.hasAttribute('aa-loaded')) return;
+        document.documentElement.setAttribute('aa-timeout', '');
+      }, TIMEOUT_DELAY);
     </script>
     <style>
       [aa-animate]:not([aa-ready]) { visibility: hidden; }
@@ -42,6 +50,7 @@
         visibility: visible;
         animation: aa-fallback-appear 0.5s ease both;
       }
+      html[aa-timeout] [aa-animate]:not([aa-ready]) { visibility: visible; }
     </style>
     <link rel="stylesheet" href="/src/styles.css" />
     <link rel="stylesheet" href="https://unpkg.com/lenis@1.3.17/dist/lenis.css" />
