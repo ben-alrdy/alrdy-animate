@@ -24,7 +24,13 @@ import Demo from '../../../../components/Demo.astro'
 Add the `aa-scrub` attribute (separately) to layer a scroll-driven sweep on top of the loop — the row drifts left↔right as you scroll, while still cycling. See [scrub](#live-demo--scroll-driven-sweep) below.
 
 ```html
-<div aa-marquee="right hover-pause" aa-duration="30">…</div>
+<div aa-marquee="right hover-pause" aa-duration="30">
+  <div aa-marquee-scroller>
+    <div aa-marquee-track>
+      <div aa-marquee-list>…</div>
+    </div>
+  </div>
+</div>
 
 <!-- Static row on desktop, scrolling on mobile -->
 <div aa-marquee="none|" aa-duration="none|18">…</div>
@@ -32,13 +38,21 @@ Add the `aa-scrub` attribute (separately) to layer a scroll-driven sweep on top 
 
 ## Structural attributes
 
-| Attribute            | What it marks                                                                                       |
-| -------------------- | --------------------------------------------------------------------------------------------------- |
-| `aa-marquee`         | Marquee root. Must have `overflow: hidden` (or `clip`) on its CSS.                                  |
-| `aa-marquee-track`   | The element that gets translated. Container of one (or more after init) `[aa-marquee-list]`.       |
-| `aa-marquee-list`    | The repeating unit. The lib clones this into the track until the viewport is filled.                |
+Three authored wrappers, each with one role. Required nesting:
+`[aa-marquee]` > `[aa-marquee-scroller]` > `[aa-marquee-track]` > `[aa-marquee-list]`.
+
+| Attribute              | Role                                                                                                                                                       |
+| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `aa-marquee`           | The viewport. The lib's CSS applies `overflow: hidden` automatically; the attribute is also the ScrollTrigger target that gates the loop to on-screen visibility. |
+| `aa-marquee-scroller`  | The scroll-driven sweep layer. With `aa-scrub`, this element drifts horizontally with scroll position. Without `aa-scrub`, it sits idle — no transform.    |
+| `aa-marquee-track`     | The infinite-loop layer. The lib applies the looping translate here, and clones of `[aa-marquee-list]` (marked `aa-marquee-clone`) land here at runtime.    |
+| `aa-marquee-list`      | The authored repeating unit. Items inside carry the spacing via `margin`. The lib measures `scrollWidth` here to compute the cycle distance.               |
 
 The lib also sets `aa-marquee-direction="left" \| "right"` on the root while running — useful for CSS state hooks (e.g. flipping inner item rotation per direction).
+
+The two transforms (scroller's scroll-driven sweep + track's infinite loop) sit on independent DOM layers, so the browser composes them additively — neither tween clobbers the other. With or without scrub, the markup shape stays the same; the scroller just becomes a no-op when scrub is absent.
+
+**Structural CSS ships in `alrdy-animate.css`**: every wrapper gets `display: flex; align-items: center`, the inner three get `flex: none`, the viewport gets `overflow: hidden`, and the animated layers get `will-change: transform`. Authors only need to set width/height/spacing cosmetics — no flex-layout boilerplate required.
 
 ## Spacing strategy
 
@@ -68,7 +82,7 @@ CSS `gap` / `column-gap` on the track is intentionally **not** supported — gap
 
 ## Composition rules
 
-- **`aa-scrub`** layers on top of the loop — the track keeps cycling, plus a scroll-driven horizontal drift. Combine freely with `right` (flips drift direction) and `paused` (pure scroll-driven, no autoplay). Internally the lib inserts a thin wrapper element so the scrub translate sits on its own transform layer; cleanup removes it.
+- **`aa-scrub`** layers on top of the loop — the track keeps cycling, plus a scroll-driven horizontal drift on the scroller layer. Combine freely with `right` (flips drift direction) and `paused` (pure scroll-driven, no autoplay). The scroller and track sit on separate transform layers in markup so the two motions compose without one overriding the other.
 - **`draggable`** disables `hover-pause` and `switch` for the same element — all three would fight for control of the loop's progress / direction. Pick one interaction model per loop.
 - **`paused`** wins for the loop: a paused marquee never auto-cycles, regardless of viewport entry, hover, or scroll direction. Scrub still works on top of it.
 - The whole loop pauses automatically when the marquee scrolls out of the viewport (top-bottom / bottom-top trigger), matching the slider/tabs pattern.
@@ -79,14 +93,16 @@ CSS `gap` / `column-gap` on the track is intentionally **not** supported — gap
   <div data-demo-stage>
     <div data-spacer></div>
     <div class="aa-marquee-demo" aa-marquee aa-duration="18">
-      <div class="aa-marquee-track" aa-marquee-track>
-        <div class="aa-marquee-list" aa-marquee-list>
-          <div class="aa-marquee-item">Continuous</div>
-          <div class="aa-marquee-item">Loop</div>
-          <div class="aa-marquee-item">No</div>
-          <div class="aa-marquee-item">Reset</div>
-          <div class="aa-marquee-item">Frame</div>
-          <div class="aa-marquee-item">Ever</div>
+      <div class="aa-marquee-scroller" aa-marquee-scroller>
+        <div class="aa-marquee-track" aa-marquee-track>
+          <div class="aa-marquee-list" aa-marquee-list>
+            <div class="aa-marquee-item">Continuous</div>
+            <div class="aa-marquee-item">Loop</div>
+            <div class="aa-marquee-item">No</div>
+            <div class="aa-marquee-item">Reset</div>
+            <div class="aa-marquee-item">Frame</div>
+            <div class="aa-marquee-item">Ever</div>
+          </div>
         </div>
       </div>
     </div>
@@ -102,14 +118,16 @@ CSS `gap` / `column-gap` on the track is intentionally **not** supported — gap
   <div data-demo-stage>
     <div data-spacer></div>
     <div class="aa-marquee-demo" aa-marquee="right hover-pause" aa-duration="22">
-      <div class="aa-marquee-track" aa-marquee-track>
-        <div class="aa-marquee-list" aa-marquee-list>
-          <div class="aa-marquee-item">Hover</div>
-          <div class="aa-marquee-item">Me</div>
-          <div class="aa-marquee-item">To</div>
-          <div class="aa-marquee-item">Pause</div>
-          <div class="aa-marquee-item">Then</div>
-          <div class="aa-marquee-item">Release</div>
+      <div class="aa-marquee-scroller" aa-marquee-scroller>
+        <div class="aa-marquee-track" aa-marquee-track>
+          <div class="aa-marquee-list" aa-marquee-list>
+            <div class="aa-marquee-item">Hover</div>
+            <div class="aa-marquee-item">Me</div>
+            <div class="aa-marquee-item">To</div>
+            <div class="aa-marquee-item">Pause</div>
+            <div class="aa-marquee-item">Then</div>
+            <div class="aa-marquee-item">Release</div>
+          </div>
         </div>
       </div>
     </div>
@@ -125,15 +143,17 @@ CSS `gap` / `column-gap` on the track is intentionally **not** supported — gap
   <div data-demo-stage>
     <div data-spacer></div>
     <div class="aa-marquee-demo" aa-marquee="switch" aa-duration="20">
-      <div class="aa-marquee-track" aa-marquee-track>
-        <div class="aa-marquee-list" aa-marquee-list>
-          <div class="aa-marquee-item">Scroll</div>
-          <div class="aa-marquee-item">Down</div>
-          <div class="aa-marquee-item">→</div>
-          <div class="aa-marquee-item">Then</div>
-          <div class="aa-marquee-item">Scroll</div>
-          <div class="aa-marquee-item">Up</div>
-          <div class="aa-marquee-item">←</div>
+      <div class="aa-marquee-scroller" aa-marquee-scroller>
+        <div class="aa-marquee-track" aa-marquee-track>
+          <div class="aa-marquee-list" aa-marquee-list>
+            <div class="aa-marquee-item">Scroll</div>
+            <div class="aa-marquee-item">Down</div>
+            <div class="aa-marquee-item">→</div>
+            <div class="aa-marquee-item">Then</div>
+            <div class="aa-marquee-item">Scroll</div>
+            <div class="aa-marquee-item">Up</div>
+            <div class="aa-marquee-item">←</div>
+          </div>
         </div>
       </div>
     </div>
@@ -151,14 +171,16 @@ Scroll up and down past this demo to see both motions compose.
   <div data-demo-stage>
     <div data-spacer></div>
     <div class="aa-marquee-demo" aa-marquee="switch" aa-scrub="0.5" aa-distance="20">
-      <div class="aa-marquee-track" aa-marquee-track>
-        <div class="aa-marquee-list" aa-marquee-list>
-          <div class="aa-marquee-item">Sweep</div>
-          <div class="aa-marquee-item">With</div>
-          <div class="aa-marquee-item">Scroll</div>
-          <div class="aa-marquee-item">Position</div>
-          <div class="aa-marquee-item">Not</div>
-          <div class="aa-marquee-item">Time</div>
+      <div class="aa-marquee-scroller" aa-marquee-scroller>
+        <div class="aa-marquee-track" aa-marquee-track>
+          <div class="aa-marquee-list" aa-marquee-list>
+            <div class="aa-marquee-item">Sweep</div>
+            <div class="aa-marquee-item">With</div>
+            <div class="aa-marquee-item">Scroll</div>
+            <div class="aa-marquee-item">Position</div>
+            <div class="aa-marquee-item">Not</div>
+            <div class="aa-marquee-item">Time</div>
+          </div>
         </div>
       </div>
     </div>
@@ -174,15 +196,17 @@ Scroll up and down past this demo to see both motions compose.
   <div data-demo-stage>
     <div data-spacer></div>
     <div class="aa-marquee-demo aa-marquee-demo-draggable" aa-marquee="draggable" aa-duration="24">
-      <div class="aa-marquee-track" aa-marquee-track>
-        <div class="aa-marquee-list" aa-marquee-list>
-          <div class="aa-marquee-item is-round">Drag</div>
-          <div class="aa-marquee-item">Me</div>
-          <div class="aa-marquee-item is-round">←</div>
-          <div class="aa-marquee-item">Or</div>
-          <div class="aa-marquee-item is-round">→</div>
-          <div class="aa-marquee-item">Flick</div>
-          <div class="aa-marquee-item is-round">Hard</div>
+      <div class="aa-marquee-scroller" aa-marquee-scroller>
+        <div class="aa-marquee-track" aa-marquee-track>
+          <div class="aa-marquee-list" aa-marquee-list>
+            <div class="aa-marquee-item is-round">Drag</div>
+            <div class="aa-marquee-item">Me</div>
+            <div class="aa-marquee-item is-round">←</div>
+            <div class="aa-marquee-item">Or</div>
+            <div class="aa-marquee-item is-round">→</div>
+            <div class="aa-marquee-item">Flick</div>
+            <div class="aa-marquee-item is-round">Hard</div>
+          </div>
         </div>
       </div>
     </div>
@@ -191,22 +215,12 @@ Scroll up and down past this demo to see both motions compose.
 </Demo>
 
 <style>{`
+  /* Structural defaults (display:flex on every wrapper, overflow:hidden + flex:none
+     on the inner three, will-change on the animated layers) ship in
+     alrdy-animate.css via [aa-marquee], [aa-marquee-scroller],
+     [aa-marquee-track], [aa-marquee-list]. The demo only sets cosmetics. */
   .aa-marquee-demo {
-    display: flex;
-    align-items: center;
     width: 100%;
-    overflow: hidden;
-  }
-  .aa-marquee-track {
-    display: flex;
-    align-items: center;
-    flex: none;
-    will-change: transform;
-  }
-  .aa-marquee-list {
-    display: flex;
-    align-items: center;
-    flex: none;
   }
   .aa-marquee-item {
     flex: none;

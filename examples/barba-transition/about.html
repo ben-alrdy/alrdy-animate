@@ -118,8 +118,10 @@
 
       <!-- Looping marquee from v8's aa-marquee feature. `hover-pause` pauses
            on cursor; `right` would reverse direction; `aa-duration` tunes the
-           cycle length. The lib clones the [aa-marquee-list] until the row
-           fills the viewport, then drives an infinite tween. -->
+           cycle length. Three authored wrappers, each with one role:
+           scroller (scroll-driven sweep when aa-scrub is set; idle here),
+           track (the infinite-loop layer — clones of the list land here),
+           list (the authored unit; the lib clones it to fill the viewport). -->
       <section class="ribbon">
         <span class="ribbon__eyebrow" aa-animate="fade-up" aa-trigger="load event:enter">Stack</span>
         <h2 class="ribbon__title" aa-animate="text-slide-up" aa-split="lines mask" aa-trigger="load event:enter">
@@ -127,8 +129,9 @@
         </h2>
 
         <div class="ribbon-marquee" aa-marquee="hover-pause" aa-duration="28">
-          <div class="ribbon-marquee__track" aa-marquee-track>
-            <div class="ribbon-marquee__list" aa-marquee-list>
+          <div class="ribbon-marquee__scroller" aa-marquee-scroller>
+            <div class="ribbon-marquee__track" aa-marquee-track>
+              <div class="ribbon-marquee__list" aa-marquee-list>
               <span class="ribbon-marquee__item">GSAP</span>
               <span class="ribbon-marquee__sep">●</span>
               <span class="ribbon-marquee__item">ScrollTrigger</span>
@@ -145,6 +148,7 @@
               <span class="ribbon-marquee__sep">●</span>
               <span class="ribbon-marquee__item">alrdy-animate</span>
               <span class="ribbon-marquee__sep">●</span>
+              </div>
             </div>
           </div>
         </div>

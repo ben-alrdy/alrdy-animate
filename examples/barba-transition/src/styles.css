@@ -281,10 +281,11 @@ code {
 .tile--f .tile__glyph { color: #ef6322; }
 
 /* ----------- Ribbon (about page marquee) -----------
-   Edge-to-edge marquee row. The track must be flex + overflow:hidden on
-   the root so the cloned lists stay invisible past the viewport edge.
-   Items use `margin-right` for spacing — the lib reads scrollWidth which
-   folds margins in, so cloned-list seams match in-list spacing. */
+   Edge-to-edge marquee row. The lib ships structural CSS for [aa-marquee*]
+   (display:flex, flex:none, overflow:hidden, will-change), so we only set
+   the project's cosmetics here. Items use `margin-right` for spacing — the
+   lib reads scrollWidth which folds margins in, so cloned-list seams match
+   in-list spacing. */
 .ribbon {
   padding: 4rem 0 8rem;
   background: #1c1917;
@@ -312,27 +313,10 @@ code {
 }
 
 .ribbon-marquee {
-  display: flex;
-  align-items: center;
   width: 100%;
-  overflow: hidden;
-}
-
-.ribbon-marquee__track {
-  display: flex;
-  align-items: center;
-  flex: none;
-  will-change: transform;
-}
-
-.ribbon-marquee__list {
-  display: flex;
-  align-items: center;
-  flex: none;
 }
 
 .ribbon-marquee__item {
-  flex: none;
   font-size: clamp(2rem, 5vw, 3.5rem);
   font-weight: 600;
   letter-spacing: -0.025em;
@@ -341,7 +325,6 @@ code {
 }
 
 .ribbon-marquee__sep {
-  flex: none;
   color: #ef6322;
   font-size: 1rem;
   margin-right: 2rem;

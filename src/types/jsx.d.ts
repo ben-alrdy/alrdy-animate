@@ -306,17 +306,40 @@ declare namespace JSX {
     'aa-tabs-initial'?: string | boolean
 
     /**
-     * Marker for marquee containers. Value can carry a speed override:
-     * `aa-marquee="speed:60"` (px/sec). Feature: `marquee`. Plugins:
-     * `ScrollTrigger`, `Draggable`, `InertiaPlugin`. Pair with
-     * `aa-marquee-scroller` (the moving track) and `aa-marquee-items`
-     * (how many duplicates to render for seamless looping).
+     * Marker on the marquee viewport (apply `overflow: hidden`). Value tokens
+     * are space-separated and order-independent: `right` (reverse direction),
+     * `paused` (start paused), `hover-pause`, `switch` (flip direction while
+     * scrolling up), `draggable`, `none` (skip init at this breakpoint).
+     * Pair with `aa-duration` (cycle seconds), `aa-scrub` (layer a
+     * scroll-driven horizontal sweep on top of the loop), and `aa-distance`
+     * (scrub sweep magnitude as a percentage of viewport width per side).
+     * Three child wrappers are required, each with a single role:
+     * `[aa-marquee-scroller]` > `[aa-marquee-track]` > `[aa-marquee-list]`.
+     * Feature: `marquee`. Plugins: `ScrollTrigger`, plus `Draggable` +
+     * `InertiaPlugin` when `draggable` is set.
      */
     'aa-marquee'?: string | boolean
-    /** Marker on the inner scrolling track within an `[aa-marquee]` container. */
+    /**
+     * Marker on the scroll-driven sweep layer (direct child of `[aa-marquee]`).
+     * When `aa-scrub` is set on the root, this element gets a horizontal sweep
+     * tied to scroll position — composes with the infinite loop on the track
+     * below it. Stays static when `aa-scrub` is absent.
+     */
     'aa-marquee-scroller'?: string | boolean
-    /** Number of duplicates the marquee should render for seamless looping. Higher = wider span before wrap, lower = tighter loop. */
-    'aa-marquee-items'?: string | number
+    /**
+     * Marker on the infinite-loop layer (child of `[aa-marquee-scroller]`).
+     * The lib clones `[aa-marquee-list]` into this element until the row fills
+     * the viewport, then drives the looping translate on it. Author one list
+     * inside this element; the clones (`aa-marquee-clone`) appear at runtime.
+     */
+    'aa-marquee-track'?: string | boolean
+    /**
+     * Marker on the authored cluster of items (child of `[aa-marquee-track]`).
+     * This is the repeating unit — items inside it carry the spacing (use
+     * `margin`, not `gap`), and the lib clones the whole list to fill the
+     * viewport. The lib measures `scrollWidth` here to compute the seam.
+     */
+    'aa-marquee-list'?: string | boolean
 
     /**
      * Marker for scroll-spy navigation containers. Feature: `nav`.

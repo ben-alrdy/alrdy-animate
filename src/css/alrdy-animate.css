@@ -194,6 +194,46 @@ body[aa-scroll-direction="up"] [aa-nav-hide] {
 }
 
 /*
+ * Marquee feature: structural defaults for the three authored wrappers.
+ *
+ *   [aa-marquee]            ← viewport (clips anything past the right edge)
+ *     [aa-marquee-scroller] ← scroll-driven sweep layer (no-op without aa-scrub)
+ *       [aa-marquee-track]  ← infinite-loop layer; the lib clones [aa-marquee-list] into here
+ *         [aa-marquee-list] ← the authored cluster of items
+ *
+ * The infinite-loop tween only produces the marquee effect if every wrapper
+ * lays its children out in a single horizontal row that can extend past the
+ * viewport. Each wrapper needs `display: flex` (children flow horizontally),
+ * the inner three need `flex: none` (no shrinking to fit the parent), and the
+ * outer viewport needs `overflow: hidden` (clip the run-off). `align-items:
+ * center` keeps mixed-height items vertically aligned. `will-change` on the
+ * two animated layers pre-warms the compositor.
+ *
+ * Attribute selectors are low-specificity (0,1,0), so any author class on the
+ * same element overrides cleanly. Authors only need to set width / height /
+ * spacing — the structural plumbing comes for free.
+ */
+[aa-marquee],
+[aa-marquee-scroller],
+[aa-marquee-track],
+[aa-marquee-list] {
+  display: flex;
+  align-items: center;
+}
+[aa-marquee-scroller],
+[aa-marquee-track],
+[aa-marquee-list] {
+  flex: none;
+}
+[aa-marquee] {
+  overflow: hidden;
+}
+[aa-marquee-scroller],
+[aa-marquee-track] {
+  will-change: transform;
+}
+
+/*
  * Modal feature: scroll lock + pointer-event gating. The body class is set
  * by JS while any modal is open (Lenis is preferred, this is the fallback
  * for non-Lenis pages). Inactive groups are pointer-event-transparent so

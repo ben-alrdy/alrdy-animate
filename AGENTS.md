@@ -1,5 +1,6 @@
 <!--
-  Last synced with src/ at v8.0.0-alpha.0 (2026-05-11) — interop surface added.
+  Last synced with src/ at v8.0.0-alpha.0 (2026-05-11) — marquee restructured to
+  three authored wrappers (scroller / track / list).
   This file mirrors the public API surface for AI coding agents. When any
   public aa-* attribute, InitOptions field, feature module, or trigger kind
   changes in src/, update this file in the same commit. See CLAUDE.md

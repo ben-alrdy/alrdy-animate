@@ -72,7 +72,7 @@ function fillTrack(
 ): HTMLElement[] {
   const clones: HTMLElement[] = []
   // Loop wrap needs `viewport + cycleDistance` worth of content so the seam
-  // is invisible. Scrub mode shifts the wrapper by ±scrubOvershoot on top of
+  // is invisible. Scrub mode shifts the scroller by ±scrubOvershoot on top of
   // that, so we add 2× the overshoot to keep the visible window populated at
   // both extremes of the sweep. +2px slop tolerates sub-pixel rounding.
   const minRequiredWidth = rootWidth + cycleDistance + scrubOvershootPx * 2 + 2
@@ -96,20 +96,23 @@ function setupOne(
   const tokens = parseMarqueeValue(config['aa-marquee'])
   if (tokens.isNone) return undefined
 
+  // Three authored wrappers, each with a single role. Scroller is the
+  // scroll-driven sweep layer (no-op without aa-scrub). Track is the infinite
+  // loop layer — duplicates of [aa-marquee-list] land here. List is the
+  // authored cluster of items; cloned by the lib to fill the track width.
+  const scroller = root.querySelector<HTMLElement>('[aa-marquee-scroller]')
   const track = root.querySelector<HTMLElement>('[aa-marquee-track]')
   const list = root.querySelector<HTMLElement>('[aa-marquee-list]')
-  if (!track || !list) {
+  if (!scroller || !track || !list) {
     if (ctx.debug) {
       console.warn(
-        '[alrdy-animate] aa-marquee requires [aa-marquee-track] and [aa-marquee-list] descendants.',
+        '[alrdy-animate] aa-marquee requires [aa-marquee-scroller], [aa-marquee-track], and [aa-marquee-list] descendants.',
         root,
       )
     }
     return undefined
   }
 
-  const opts = ctx.options
-  void opts
   const duration = parseNum(config['aa-duration'], 20)
   // Scrub mode is enabled by the presence of the `aa-scrub` attribute on the
   // marquee root (mirrors how every other animation feature treats `aa-scrub`).
@@ -134,27 +137,22 @@ function setupOne(
   if (!rootWidth || !cycleDistance) return undefined
 
   // Compute scrub overshoot up front so fillTrack provisions enough clones
-  // to cover both the loop wrap AND the wrapper sweep at its extremes.
+  // to cover both the loop wrap AND the scroller sweep at its extremes.
   // distance is in vw, so half-sweep px = innerWidth * distance / 100.
   const halfSweepPx = isScrub ? (window.innerWidth * distance) / 100 : 0
 
   const clones = fillTrack(list, track, rootWidth, cycleDistance, halfSweepPx)
 
-  // Optional scrub wrapper. Layered between root and track so the scroll-driven
-  // x sits on a separate transform layer from the loop's track.x — they
-  // compose additively (matches v7's scrollContainer + items.xPercent split).
-  // The wrapper is shifted left by halfSweepPx via marginLeft so its content
-  // span covers root.left at every sweep position, even at +halfSweepPx (max
-  // right shift) — without this offset the visible window would expose the
-  // gap between root.left and the shifted track.
-  let scrubWrapper: HTMLElement | null = null
+  // Scrub composes with the loop by sitting on a different transform layer:
+  // the scroller takes the scroll-driven x sweep, the track takes the infinite
+  // loop x — both translate independently, the browser composes them. Without
+  // the marginLeft offset, the scroller's content span would not cover root's
+  // left edge at the +halfSweepPx extreme (max right shift), exposing the gap
+  // between root.left and the shifted scroller. We restore the original inline
+  // margin-left on cleanup so authored CSS keeps owning the static state.
+  const originalScrollerMarginLeft = scroller.style.marginLeft
   if (isScrub) {
-    scrubWrapper = document.createElement('div')
-    scrubWrapper.setAttribute('aa-marquee-scrub-wrapper', '')
-    scrubWrapper.style.cssText =
-      `display:flex;align-items:center;flex:none;will-change:transform;margin-left:${-halfSweepPx}px;`
-    track.parentElement?.insertBefore(scrubWrapper, track)
-    scrubWrapper.appendChild(track)
+    scroller.style.marginLeft = `${-halfSweepPx}px`
   }
 
   // Build the infinite tween. modifiers.x wraps x ∈ [-cycleDistance, 0) so the
@@ -212,7 +210,7 @@ function setupOne(
   // accepts raw numbers as pixels and silently drops the "vw" suffix; passing
   // a string like "100vw" gets read as the integer 100 (px). On resize we
   // recompute and rebuild the tween so the sweep stays viewport-relative.
-  if (isScrub && scrubWrapper && ScrollTrigger) {
+  if (isScrub && ScrollTrigger) {
     let scrubTween: ReturnType<typeof gsap.to> | null = null
 
     const buildScrubTween = (): void => {
@@ -222,7 +220,7 @@ function setupOne(
       const startX = baseDirection > 0 ? sweepPx : -sweepPx
       const endX = -startX
       scrubTween = gsap.fromTo(
-        scrubWrapper,
+        scroller,
         { x: startX },
         {
           x: endX,
@@ -246,6 +244,9 @@ function setupOne(
           ;(scrubTween as { scrollTrigger?: { kill: () => void } }).scrollTrigger?.kill()
           scrubTween.kill()
         }
+        // Recompute the marginLeft offset to match the new viewport — sweep
+        // magnitude is viewport-relative, so the offset must follow.
+        scroller.style.marginLeft = `${-(window.innerWidth * distance) / 100}px`
         buildScrubTween()
       }, 200),
     )
@@ -437,11 +438,12 @@ function setupOne(
     loop.kill()
     for (const c of clones) c.remove()
     gsap.set(track, { clearProps: 'transform,x' })
-    // Unwrap scrub wrapper if present.
-    if (scrubWrapper && scrubWrapper.parentElement) {
-      const parent = scrubWrapper.parentElement
-      parent.insertBefore(track, scrubWrapper)
-      scrubWrapper.remove()
+    if (isScrub) {
+      gsap.set(scroller, { clearProps: 'transform,x' })
+      // Restore whatever inline margin-left the author had (usually empty).
+      // We never touch external CSS, so styles applied via classes are
+      // unaffected — only our own inline override is reverted.
+      scroller.style.marginLeft = originalScrollerMarginLeft
     }
     root.removeAttribute('aa-marquee-direction')
   }
