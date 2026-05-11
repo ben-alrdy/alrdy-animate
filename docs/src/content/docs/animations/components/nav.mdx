@@ -28,7 +28,7 @@ The hide threshold is shared, not per-nav: the body picks up `aa-scroll-started=
 | --------------- | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `aa-distance`   | `1.5`                    | Multiplier on the `-100%` translate. `1` = the full nav height; `1.5` (default) clears most drop-shadows; `2` slides further still.                                          |
 | `aa-duration`   | (init `duration`)        | CSS transition duration in seconds.                                                                                                                                          |
-| `aa-ease`       | `osmo` (the lib default) | Any v8 named ease (osmo, energy, smooth, punch, relaxed, jump, pop, anticipate, fade), a `cubic-bezier(...)`, or a CSS keyword (`linear`, `ease`, `ease-in-out`, …).         |
+| `aa-ease`       | `osmo`                   | Nav-specific default — the hide animation runs via CSS keyframes, so the ease must be CSS-expressible. The `init({ ease })` default (`power4.out`) is GSAP-only and doesn't apply here. Accepts any v8 named ease (osmo, energy, smooth, punch, relaxed, jump, pop, anticipate, fade), a `cubic-bezier(...)`, or a CSS keyword (`linear`, `ease`, `ease-in-out`, …). |
 
 `elastic` and `bounce` aren't expressible as a single cubic-bezier; if you pass one of those, the nav falls back to `osmo` and a debug warning is logged. Use a GSAP-driven approach if you really need them — but they're rarely the right call for a sticky nav anyway.
 

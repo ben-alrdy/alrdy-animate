@@ -1,4 +1,9 @@
-import type { ResizeCallback, ResizeUnsubscribe, ResolvedOptions } from '../types/index'
+import type {
+  ReducedMotionOptions,
+  ResizeCallback,
+  ResizeUnsubscribe,
+  ResolvedOptions,
+} from '../types/index'
 import type { GsapHandle } from './gsap-detect'
 import type { ResponsiveController } from './match-media'
 import type { FeatureName } from './scanner'
@@ -16,6 +21,14 @@ export interface FeatureContext {
    * fall through to the element's other triggers.
    */
   firstInit: boolean
+  /**
+   * Snapshot of `(prefers-reduced-motion: reduce)` taken at init time, gated by
+   * `options.reducedMotion`. `null` means "no reduced-motion fallback applies"
+   * (either the user opted out via `reducedMotion: false` or the OS preference
+   * is off). When non-null, appear/text/reveal features collapse to a simple
+   * opacity fade with these timing values; hover and parallax skip entirely.
+   */
+  reducedMotion: ReducedMotionOptions | null
   onResize: (fn: ResizeCallback, debounce?: number) => ResizeUnsubscribe
 }
 

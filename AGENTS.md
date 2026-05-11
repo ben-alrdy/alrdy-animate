@@ -172,6 +172,8 @@ onResize(fn: () => void, opts?: { debounce?: number }): () => void
 | `stagger` | `{ chars: 0.02, words: 0.05, lines: 0.1, default: 0.1 }` | Per-split-mode stagger defaults (seconds). |
 | `autoplay` | `{ interval: 4, hoverPause: false }` | Slider/tabs autoplay defaults. |
 | `breakpoints` | `{ sm: 480, md: 768, lg: 992, xl: 1280 }` | Pixel widths for responsive variants. |
+| `reducedMotion` | `true` | Behaviour under `(prefers-reduced-motion: reduce)`. `true` → appear/text/reveal collapse to opacity fade (0.4s, `power1.out`); hover + parallax skip; components stay functional. `false` → ignore. Object `{ duration, ease }` to customize fade timing. Snapshot at init. |
+| `optimizeMobile` | `false` | When `true` and viewport < `breakpoints.md`, drop `text` + `parallax` + standalone `aa-split`. Text elements fade simply (SplitText is not loaded); parallax stays still. Appear/reveal/components run normally. Snapshot at init. `reducedMotion` overrides if both fire. |
 | `smoothScroll` | `true` | Boolean or Lenis options object. Silently skipped if `window.Lenis` is absent. |
 | `scrollState` | `true` | Writes `aa-scroll-direction` + `aa-scroll-started` on `<body>`; runs the `[aa-toggle-playstate]` IntersectionObserver. |
 | `root` | `document` | Scope the scan to a subtree. Element-scoped inits skip global setup (smoothScroll, scrollState). |

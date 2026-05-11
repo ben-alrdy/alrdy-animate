@@ -27,11 +27,11 @@ The mode and slice count are packed into the `aa-animate` value: `reveal-slices[
 | Attribute     | Default     | Notes                                                           |
 | ------------- | ----------- | --------------------------------------------------------------- |
 | `aa-animate`  | (required)  | See variants table above.                                       |
-| `aa-stagger`  | `0.04`      | Seconds between rows.                                           |
-| `aa-duration` | `0.6`       | Seconds per row.                                                |
-| `aa-ease`     | `power3.out`| Any GSAP ease.                                                  |
+| `aa-stagger`  | (init)      | Seconds between rows. Falls back to `init({ stagger: { default } })` (default `0.1`). |
+| `aa-duration` | (init)      | Seconds per row. Falls back to `init({ duration })` (default `0.6`). |
+| `aa-ease`     | (init)      | Any GSAP ease. Falls back to `init({ ease })` (default `power4.out`). |
 | `aa-scrub`    | (off)       | `true` or seconds — drive the reveal from scroll position.      |
-| `aa-scroll-start` / `aa-scroll-end` | `top 92%` / `bottom 70%` | ScrollTrigger range. |
+| `aa-scroll-start` / `aa-scroll-end` | (init) | Falls back to `init({ scrollStart, scrollEnd })` (defaults `top 92%` / `bottom 70%`). |
 
 The element is given `position: relative` and `overflow: hidden` if it wasn't already. The slice panel is appended as the last child with `z-index: 2`.
 

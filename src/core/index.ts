@@ -10,13 +10,21 @@ import type {
 import { detectGsap, type GsapHandle } from './gsap-detect'
 import { createResponsiveController, type ResponsiveController } from './match-media'
 import { NAMED_EASES } from './named-eases'
+import {
+  OPTIMIZE_MOBILE_FADE_FEATURES,
+  OPTIMIZE_MOBILE_REPLACED_FEATURES,
+  REDUCED_MOTION_FADE_FEATURES,
+  REDUCED_MOTION_REPLACED_FEATURES,
+  runFadeFallbackPass,
+} from './reduced-motion'
 import { loadFeatures, type FeatureContext } from './registry'
 import { clearAll as clearResize, subscribe as subscribeResize } from './resize'
-import { scan } from './scanner'
+import { scan, type FeatureName } from './scanner'
 import { initScrollState } from './scroll-state'
 import { initScrollTarget } from './scroll-target'
 import {
   DEFAULT_OPTIONS,
+  DEFAULT_REDUCED_MOTION,
   addDisposer,
   resolveBreakpoints,
   resolveOptions,
@@ -24,8 +32,40 @@ import {
   state,
 } from './state'
 import { initSmoothScroll } from '../smooth-scroll/index'
+import type { ReducedMotionOptions } from '../types/index'
 
 let activeHandles: { gsap: GsapHandle; responsive: ResponsiveController } | null = null
+
+function detectReducedMotion(
+  setting: boolean | ReducedMotionOptions,
+): ReducedMotionOptions | null {
+  if (setting === false) return null
+  if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return null
+  if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) return null
+  return setting === true ? DEFAULT_REDUCED_MOTION : setting
+}
+
+function detectOptimizeMobile(setting: boolean, mdBreakpoint: number): boolean {
+  if (setting !== true) return false
+  if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return false
+  // Match the same exclusive width arithmetic the responsive system uses
+  // (see core/settings.ts `buildRangeQuery`) so the cutoff is consistent
+  // with `aa-foo-md`/the `|` shorthand split point.
+  return window.matchMedia(`(max-width: ${mdBreakpoint - 0.02}px)`).matches
+}
+
+/**
+ * Touch-only devices can't fire hover events, so loading the hover module just
+ * to have its init() return a no-op is pure waste (~3KB gzipped + parse).
+ * Gate on pointer capability, not viewport — a hybrid laptop with a narrow
+ * window still has a mouse, and we want hover to keep working there.
+ *
+ * Independent of `optimizeMobile`: this is correctness, not a perf knob.
+ */
+function deviceHasHover(): boolean {
+  if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return true
+  return window.matchMedia('(hover: hover)').matches
+}
 
 function registerCustomEases(handle: GsapHandle, debug: boolean): void {
   const w = window as unknown as Record<string, unknown>
@@ -72,8 +112,47 @@ export async function init(options: InitOptions = {}): Promise<void> {
   const { elements, features } = scan(root)
   if (elements.length === 0) return
 
+  // Detect reduced motion + mobile-optimization BEFORE feature dispatch so we
+  // can drop decorative feature modules from the load set entirely. Both
+  // conditions route the same fade-fallback pass:
+  //   reducedMotion = OS-level preference (broad set, includes appear)
+  //   optimizeMobile = small-viewport perf gate (heavy features only)
+  // When both fire, reduced motion's superset wins.
+  const reducedMotion = detectReducedMotion(state.options.reducedMotion)
+  const optimizeMobile = !reducedMotion && detectOptimizeMobile(
+    state.options.optimizeMobile,
+    state.breakpoints.md,
+  )
+
+  let replacedFeatures: ReadonlySet<FeatureName>
+  let fadeFeatures: ReadonlySet<FeatureName>
+  if (reducedMotion) {
+    replacedFeatures = REDUCED_MOTION_REPLACED_FEATURES
+    fadeFeatures = REDUCED_MOTION_FADE_FEATURES
+  } else if (optimizeMobile) {
+    replacedFeatures = OPTIMIZE_MOBILE_REPLACED_FEATURES
+    fadeFeatures = OPTIMIZE_MOBILE_FADE_FEATURES
+  } else {
+    replacedFeatures = new Set()
+    fadeFeatures = new Set()
+  }
+
+  const effectiveFeatures = new Set(features)
+  let needsFadePass = false
+  for (const f of replacedFeatures) {
+    if (!effectiveFeatures.has(f)) continue
+    effectiveFeatures.delete(f)
+    if (fadeFeatures.has(f)) needsFadePass = true
+  }
+
+  // Drop hover on touch-only devices — the module's own init() also self-skips
+  // there (belt-and-braces), but gating here saves the dynamic import.
+  if (effectiveFeatures.has('hover') && !deviceHasHover()) {
+    effectiveFeatures.delete('hover')
+  }
+
   const requiredPlugins = new Set<string>()
-  for (const f of features) {
+  for (const f of effectiveFeatures) {
     if (
       f === 'scroll' ||
       f === 'text' ||
@@ -91,6 +170,7 @@ export async function init(options: InitOptions = {}): Promise<void> {
     }
     if (f === 'nav') requiredPlugins.add('Flip')
   }
+  if (needsFadePass) requiredPlugins.add('ScrollTrigger')
 
   const gsapHandle = detectGsap([...requiredPlugins], debug)
   if (!gsapHandle) return
@@ -123,7 +203,25 @@ export async function init(options: InitOptions = {}): Promise<void> {
   const responsive = createResponsiveController(gsapHandle, state.breakpoints)
   activeHandles = { gsap: gsapHandle, responsive }
 
-  const featureModules = await loadFeatures(features)
+  // Run the unified fade-fallback pass BEFORE feature inits so its
+  // ScrollTriggers register first. Component features that run after still
+  // see their elements at the correct positions (no transform conflicts).
+  if (needsFadePass) {
+    // Mobile-optimization mode reuses reducedMotion's fade timing for
+    // consistency. Override here if you ever want a separate `optimizeMobile`
+    // fade-timing knob (e.g. snappier 0.3s fade for perf-focused mobile).
+    const fadeTiming = reducedMotion ?? DEFAULT_REDUCED_MOTION
+    const disposeFade = runFadeFallbackPass(elements, {
+      gsap: gsapHandle,
+      options: state.options,
+      reducedMotion: fadeTiming,
+      firstInit: !state.firstInitComplete,
+      fadeFor: fadeFeatures,
+    })
+    addDisposer(disposeFade)
+  }
+
+  const featureModules = await loadFeatures(effectiveFeatures)
   const featureCtx: FeatureContext = {
     gsap: gsapHandle,
     responsive,
@@ -131,6 +229,7 @@ export async function init(options: InitOptions = {}): Promise<void> {
     options: state.options,
     debug,
     firstInit: !state.firstInitComplete,
+    reducedMotion,
     onResize: (fn, debounce = 150) => subscribeResize(fn, debounce),
   }
   for (const mod of featureModules) {
@@ -167,11 +266,20 @@ export async function init(options: InitOptions = {}): Promise<void> {
 
   if (debug) {
     const lenisActive = typeof window !== 'undefined' && !!window.lenis
+    const loadedFeatures = [...effectiveFeatures]
+    const droppedFeatures = [...features].filter((f) => !effectiveFeatures.has(f))
+    const replacedBy = reducedMotion ? 'reduced-motion' : optimizeMobile ? 'optimize-mobile' : null
+    const featuresLabel =
+      replacedBy && droppedFeatures.length
+        ? `${loadedFeatures.join(', ') || '(none)'} (${replacedBy} replaced: ${droppedFeatures.join(', ')})`
+        : loadedFeatures.join(', ') || '(none)'
     console.log(
-      `[alrdy-animate] initialized. Features: ${[...features].join(', ') || '(none)'}; ` +
+      `[alrdy-animate] initialized. Features: ${featuresLabel}; ` +
         `Plugins: ${[...requiredPlugins].join(', ') || '(none)'}; ` +
         `Elements: ${elements.length}; ` +
-        `SmoothScroll: ${lenisActive ? 'lenis' : 'off'}`,
+        `SmoothScroll: ${lenisActive ? 'lenis' : 'off'}; ` +
+        `ReducedMotion: ${reducedMotion ? 'active' : 'off'}; ` +
+        `OptimizeMobile: ${optimizeMobile ? 'active' : 'off'}`,
     )
   }
 }

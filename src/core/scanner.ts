@@ -38,7 +38,7 @@ const ANIMATE_TO_FEATURE: Array<[RegExp, FeatureName]> = [
   [/^reveal/, 'reveal'],
 ]
 
-function classifyAnimateValue(value: string | null): FeatureName {
+export function classifyAnimateValue(value: string | null): FeatureName {
   if (!value) return 'scroll'
   const head = value.split('|')[0].trim()
   for (const [pattern, feature] of ANIMATE_TO_FEATURE) {

@@ -20,7 +20,7 @@ import TextDemo from '../../../../components/TextDemo.astro'
 | Attribute     | Default     | Notes                                              |
 | ------------- | ----------- | -------------------------------------------------- |
 | `aa-animate`  | (required)  | `text-tilt-up` or `text-tilt-down`.                |
-| `aa-stagger`  | `0.2`       | Seconds between lines.                             |
+| `aa-stagger`  | `0.1` (init)| Seconds between lines. Falls back to `init({ stagger: { lines } })` (default `0.1`). |
 | `aa-duration` | (init)      | Seconds.                                           |
 | `aa-delay`    | `0`         | Seconds.                                           |
 | `aa-ease`     | (init)      | Any GSAP ease.                                     |

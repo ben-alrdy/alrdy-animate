@@ -29,8 +29,11 @@ export interface SmoothScrollOptions {
 
 /**
  * Reduced-motion fallback applied under `(prefers-reduced-motion: reduce)`.
- * Replaces every animation's duration + ease so motion-sensitive users get a
- * short, flat fade instead of the choreographed entrance.
+ * When active, every appear/text/reveal animation collapses to a simple
+ * opacity fade with these timing values; hover and parallax features skip
+ * entirely; tabs/slider/marquee/nav/modal stay functional.
+ *
+ * Defaults: `{ duration: 0.4, ease: 'power1.out' }`.
  */
 export interface ReducedMotionOptions {
   duration: number
@@ -114,11 +117,35 @@ export interface InitOptions {
    */
   breakpoints?: Partial<Breakpoints>
   /**
-   * Animation overrides applied under `(prefers-reduced-motion: reduce)`.
-   * Typically `{ duration: 0.2, ease: 'power1.out' }` so motion-sensitive users
-   * still see content reveal but without choreography.
+   * Behaviour under `(prefers-reduced-motion: reduce)`. Default `true`.
+   *
+   * - `true` — appear/text/reveal animations collapse to a simple opacity fade
+   *   (`{ duration: 0.4, ease: 'power1.out' }`); hover and parallax features
+   *   skip entirely; tabs/slider/marquee/nav/modal stay functional.
+   * - `false` — ignore the user's preference; every animation runs normally.
+   * - object — `true` behaviour with custom fade timing,
+   *   e.g. `{ duration: 0.3, ease: 'linear' }`.
+   *
+   * Snapshot at init time. Toggle the OS preference and the next `init()` /
+   * `refresh()` picks it up.
    */
-  reducedMotion?: ReducedMotionOptions
+  reducedMotion?: boolean | ReducedMotionOptions
+  /**
+   * Drop the heaviest decorative features on small viewports for a faster
+   * mobile experience. Default `false`. When `true` and the viewport is below
+   * `breakpoints.md` (default 768px):
+   *
+   * - `text-*` animations collapse to a simple opacity fade (SplitText is not
+   *   loaded; per-char/word/line spans are not created).
+   * - `parallax` / `parallax-horizontal` are skipped entirely — elements
+   *   render at their natural position.
+   * - The standalone `aa-split` utility is a no-op (text stays un-split).
+   *
+   * Everything else (fade-up, zoom-in, slide-*, rotate, blur, reveal, hover,
+   * tabs, slider, marquee, nav, modal, cursor) runs normally. Snapshotted at
+   * init — resize past the breakpoint and call `refresh()` to re-evaluate.
+   */
+  optimizeMobile?: boolean
   /**
    * Smooth scroll via Lenis. `true` (default) creates a Lenis instance with
    * library defaults; pass an options object to forward Lenis options
@@ -170,6 +197,8 @@ export interface ResolvedOptions extends InitOptions {
   autoplay: AutoplayOptions
   smoothScroll: boolean | SmoothScrollOptions
   scrollState: boolean
+  reducedMotion: boolean | ReducedMotionOptions
+  optimizeMobile: boolean
 }
 
 /**

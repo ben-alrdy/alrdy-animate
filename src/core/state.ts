@@ -2,6 +2,7 @@ import type {
   AutoplayOptions,
   Breakpoints,
   InitOptions,
+  ReducedMotionOptions,
   ResolvedOptions,
   StaggerOptions,
 } from '../types/index'
@@ -26,6 +27,11 @@ const DEFAULT_AUTOPLAY: AutoplayOptions = {
   hoverPause: false,
 }
 
+export const DEFAULT_REDUCED_MOTION: ReducedMotionOptions = {
+  duration: 0.4,
+  ease: 'power1.out',
+}
+
 /**
  * Single source of truth for init-time defaults. Features must NOT carry
  * their own per-animation duration / ease / stagger fallbacks — they always
@@ -43,6 +49,16 @@ export const DEFAULT_OPTIONS: ResolvedOptions = {
   autoplay: DEFAULT_AUTOPLAY,
   smoothScroll: true,
   scrollState: true,
+  reducedMotion: true,
+  optimizeMobile: false,
+}
+
+function resolveReducedMotion(
+  input: InitOptions['reducedMotion'],
+): boolean | ReducedMotionOptions {
+  if (input === false) return false
+  if (input === undefined || input === true) return true
+  return { ...DEFAULT_REDUCED_MOTION, ...input }
 }
 
 export function resolveOptions(opts: InitOptions): ResolvedOptions {
@@ -51,6 +67,7 @@ export function resolveOptions(opts: InitOptions): ResolvedOptions {
     ...opts,
     stagger: { ...DEFAULT_STAGGER, ...opts.stagger },
     autoplay: { ...DEFAULT_AUTOPLAY, ...opts.autoplay },
+    reducedMotion: resolveReducedMotion(opts.reducedMotion),
   }
 }
 

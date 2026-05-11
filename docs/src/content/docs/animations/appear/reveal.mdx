@@ -24,9 +24,9 @@ import Demo from '../../../../components/Demo.astro'
 | Attribute     | Default     | Notes                                            |
 | ------------- | ----------- | ------------------------------------------------ |
 | `aa-animate`  | (required)  | `reveal-up/down/left/right/center/oval-up/down`  |
-| `aa-duration` | `0.9`       | seconds                                          |
+| `aa-duration` | (init)      | seconds — falls back to `init({ duration })` (default `0.6`) |
 | `aa-delay`    | `0`         | seconds                                          |
-| `aa-ease`     | `power3.out`| any GSAP ease                                    |
+| `aa-ease`     | (init)      | any GSAP ease — falls back to `init({ ease })` (default `power4.out`) |
 | `aa-scrub`    | (off)       | `true` or seconds — drive reveal from scroll     |
 
 ## Required GSAP plugins

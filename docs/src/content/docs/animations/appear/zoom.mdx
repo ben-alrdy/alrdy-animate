@@ -19,9 +19,9 @@ import Demo from '../../../../components/Demo.astro'
 | Attribute     | Default      | Notes                                                     |
 | ------------- | ------------ | --------------------------------------------------------- |
 | `aa-animate`  | (required)   | `zoom-in` or `zoom-out`                                   |
-| `aa-duration` | `0.6`        | seconds                                                   |
+| `aa-duration` | (init)       | seconds — falls back to `init({ duration })` (default `0.6`) |
 | `aa-delay`    | `0`          | seconds                                                   |
-| `aa-ease`     | `power4.out` | any GSAP ease                                             |
+| `aa-ease`     | (init)       | any GSAP ease — falls back to `init({ ease })` (default `power4.out`) |
 | `aa-stagger`  | (off)        | when set on a parent with children, staggers the children |
 | `aa-scrub`    | (off)        | `true` or seconds — bind progress to scroll               |
 

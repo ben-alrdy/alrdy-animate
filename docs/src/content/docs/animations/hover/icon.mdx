@@ -41,9 +41,9 @@ Both flags are space-separated and combinable.
 | Attribute     | Default | Notes                                                                  |
 | ------------- | ------- | ---------------------------------------------------------------------- |
 | `aa-hover`    | (required) | `icon-<direction>` plus optional `reverse` / `triple` flags         |
-| `aa-duration` | `0.4`   | Seconds                                                                |
+| `aa-duration` | (init)  | Seconds. Falls back to `init({ duration })` (default `0.6`).           |
 | `aa-delay`    | `0`     | Seconds before the enter animation starts                              |
-| `aa-ease`     | `osmo`  | Any GSAP-compatible ease, including the named eases bundled with the lib |
+| `aa-ease`     | (init)  | Any GSAP-compatible ease, including the named eases bundled with the lib. Falls back to `init({ ease })` (default `power4.out`). |
 | `aa-distance` | `1`     | Multiplier on the base 50 ms lag between each successive icon starting its slide. `2` doubles the gap (slower trail); `0.5` halves it (tighter chain). |
 
 ## What gets injected
