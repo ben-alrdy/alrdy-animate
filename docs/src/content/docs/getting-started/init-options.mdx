@@ -14,7 +14,7 @@ The values listed under **Default** are the **single source of truth** for the w
 | Option | Default | Notes |
 | --- | --- | --- |
 | `duration` | `0.6` | Seconds. Per-element override: `aa-duration`. |
-| `ease` | `'power4.out'` | Any GSAP ease string (`'power2.out'`, `'expo.inOut'`, `'elastic.out(1, 0.3)'`) or a [named ease](/animations/utilities/aa-ease/) registered via `CustomEase` — `smooth`, `snappy`, `bounce`, `expressive`, `sharp`, `osmo`, `energy`, `punch`, `relaxed`, `jump`, `pop`, `fade`, `anticipate`. Named eases require `CustomEase` to be loaded. Per-element override: `aa-ease`. |
+| `ease` | `'power4.out'` | Any GSAP ease string (`'power2.out'`, `'expo.inOut'`, `'elastic.out(1, 0.3)'`) or one of the lib's named eases registered via `CustomEase`: `osmo`, `energy`, `smooth`, `punch`, `relaxed`, `jump`, `pop`, `elastic`, `anticipate`, `bounce`, `fade`. Named eases require `CustomEase` to be loaded. Per-element override: `aa-ease`. |
 | `delay` | _not an init option_ | Per-element only via `aa-delay` (default `0`). |
 | `distance` | `1` | Multiplier on the fade/slide translate distance (and `text-fade-*` / `text-blur-*` offsets). `1` = the design baseline (3rem for fade variants, 100% for slide variants). Per-element override: `aa-distance`. |
 | `scrollStart` | `'top 92%'` | Default ScrollTrigger `start` for non-scrubbed animations. Standard GSAP syntax (`'top 80%'`, `'center 50%'`). Per-element override: `aa-scroll-start`. |

@@ -48,20 +48,18 @@ Paste this into **Project Settings → Custom Code → Footer Code**. It's the a
     gsap.defaults({ ease: 'smooth', duration: 0.6 })
 
     let alrdyReady = false
-    window.alrdyReady = Promise.resolve()
 
     function alrdyInit(rootEl) {
       // root scopes the scan to the new container — the leaving container is
       // still in the DOM during sync transitions and we don't want its
       // elements re-processed.
-      window.alrdyReady = AlrdyAnimate.init({
+      return AlrdyAnimate.init({
         debug: false,
         duration: 0.6,
         ease: 'smooth',
         smoothScroll: true,
         root: rootEl,
       }).then(() => { alrdyReady = true })
-      return window.alrdyReady
     }
 
     function alrdyDestroy() {
@@ -104,7 +102,7 @@ Paste this into **Project Settings → Custom Code → Footer Code**. It's the a
         async once(data) {
           // beforeEnter has already kicked off init — wait on the same promise
           // here instead of starting a second init.
-          await window.alrdyReady
+          await AlrdyAnimate.ready()
           fireEnterAnimations(data.next.container)
         },
         async leave(data) {
@@ -124,7 +122,7 @@ A few things to highlight:
 
 - **`AlrdyAnimate.init({ root: rootEl })`** scopes the scan to the new container. Without `root`, the lib would re-scan `document` and process the leaving container's elements again.
 - **`AlrdyAnimate.destroy({ keepGlobals: true, keepFromStates: true })`** is the safe default for page transitions. Lenis stays alive (don't reset scroll velocity mid-transition); `keepFromStates` prevents un-fired scroll animations from flashing visible while the leave timeline runs.
-- **`window.alrdyReady`** is the same name used in the simple Webflow guide, so per-page custom code uses the same `window.alrdyReady.then(...)` pattern in both setups.
+- **`AlrdyAnimate.ready()`** returns the in-flight init promise — each new `init()` (one per Barba navigation) creates a fresh one. Per-page custom code can `await AlrdyAnimate.ready()` from anywhere; no shared global needed. Same pattern works in the simple Webflow guide.
 
 ## 3. Page-specific code
 
@@ -137,7 +135,7 @@ The Webflow-native approach. Goes into **Page Settings → Custom Code → Befor
 ```html
 <script>
   document.addEventListener('DOMContentLoaded', () => {
-    window.alrdyReady.then(() => {
+    AlrdyAnimate.ready().then(() => {
       gsap.to('.hero__photo', {
         scale: 1.15,
         ease: 'none',
@@ -160,7 +158,7 @@ Add a `barba.hooks.beforeEnter` block keyed on `data.next.namespace`. This runs 
     // ... (the alrdyInit / alrdyDestroy / barba.init from above) ...
 
     barba.hooks.beforeEnter((data) => {
-      window.alrdyReady.then(() => {
+      AlrdyAnimate.ready().then(() => {
         if (data.next.namespace === 'home') {
           gsap.to('.hero__photo', {
             scale: 1.15,

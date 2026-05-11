@@ -26,8 +26,11 @@ import {
   DEFAULT_OPTIONS,
   DEFAULT_REDUCED_MOTION,
   addDisposer,
+  getReadyPromise,
+  newReadyDeferred,
   resolveBreakpoints,
   resolveOptions,
+  resolveReady,
   runAllDisposers,
   state,
 } from './state'
@@ -96,6 +99,7 @@ function registerCustomEases(handle: GsapHandle, debug: boolean): void {
 
 export async function init(options: InitOptions = {}): Promise<void> {
   if (state.initialized) return
+  newReadyDeferred()
   // Marker for the optional slow-network fallback recipe (docs/recipes/load-fallback).
   // The inline <head> snippet checks for this attribute after a tunable timeout;
   // setting it as the very first synchronous step in init means the snippet only
@@ -109,12 +113,13 @@ export async function init(options: InitOptions = {}): Promise<void> {
 
   const debug = options.debug ?? false
   const root = options.root ?? document
-  const { elements, features } = scan(root)
-  if (elements.length === 0) return
 
-  // Detect reduced motion + mobile-optimization BEFORE feature dispatch so we
-  // can drop decorative feature modules from the load set entirely. Both
-  // conditions route the same fade-fallback pass:
+  // Detect reduced motion + mobile-optimization eagerly so that:
+  //  (1) we can drop decorative feature modules from the load set entirely,
+  //  (2) outside scripts reading `AlrdyAnimate.options.reducedMotion` /
+  //      `.optimizeMobile` after `await ready()` see the collapsed boolean
+  //      reflecting actual runtime state, not the user-passed setting shape.
+  // Both conditions route the same fade-fallback pass:
   //   reducedMotion = OS-level preference (broad set, includes appear)
   //   optimizeMobile = small-viewport perf gate (heavy features only)
   // When both fire, reduced motion's superset wins.
@@ -123,6 +128,17 @@ export async function init(options: InitOptions = {}): Promise<void> {
     state.options.optimizeMobile,
     state.breakpoints.md,
   )
+  // Collapse the public snapshot to plain booleans. The timing object (if
+  // user passed one) lives in the local `reducedMotion` variable and is
+  // threaded into `featureCtx.reducedMotion` / `runFadeFallbackPass` below.
+  state.options.reducedMotion = !!reducedMotion
+  state.options.optimizeMobile = optimizeMobile
+
+  const { elements, features } = scan(root)
+  if (elements.length === 0) {
+    resolveReady()
+    return
+  }
 
   let replacedFeatures: ReadonlySet<FeatureName>
   let fadeFeatures: ReadonlySet<FeatureName>
@@ -143,6 +159,23 @@ export async function init(options: InitOptions = {}): Promise<void> {
     if (!effectiveFeatures.has(f)) continue
     effectiveFeatures.delete(f)
     if (fadeFeatures.has(f)) needsFadePass = true
+  }
+
+  // Init-timeout bypass: the inline-snippet's universal safety net fired before
+  // we got here (`html[aa-timeout]` set after a tunable deadline, default 4s).
+  // Elements are already visible at their natural state; rewinding them through
+  // a from-state now would flash. Drop the appearance features that own those
+  // entrances — interactive components still run normally so the page is fully
+  // functional. The end-of-init aa-ready flip and aa-timeout clear still fire.
+  const timedOut =
+    typeof document !== 'undefined' &&
+    document.documentElement.hasAttribute('aa-timeout')
+  if (timedOut) {
+    effectiveFeatures.delete('scroll')
+    effectiveFeatures.delete('text')
+    effectiveFeatures.delete('reveal')
+    effectiveFeatures.delete('parallax')
+    needsFadePass = false
   }
 
   // Drop hover on touch-only devices — the module's own init() also self-skips
@@ -173,7 +206,10 @@ export async function init(options: InitOptions = {}): Promise<void> {
   if (needsFadePass) requiredPlugins.add('ScrollTrigger')
 
   const gsapHandle = detectGsap([...requiredPlugins], debug)
-  if (!gsapHandle) return
+  if (!gsapHandle) {
+    resolveReady()
+    return
+  }
 
   registerCustomEases(gsapHandle, debug)
   try {
@@ -255,23 +291,30 @@ export async function init(options: InitOptions = {}): Promise<void> {
   // a hard page reload, which reloads this module too.
   state.firstInitComplete = true
 
-  // Clear the slow-network fallback marker now that init has run. If the
-  // inline-snippet timeout fired (set aa-fallback on first load), we no
-  // longer need it — the bundle is here. Leaving it set would re-trigger the
-  // CSS keyframe on every Barba navigation, since each new container renders
-  // its [aa-trigger="load"] elements without aa-ready until init catches up.
+  // Clear the slow-network fallback markers now that init has run. If the
+  // inline-snippet timeouts fired (set aa-fallback / aa-timeout on first
+  // load), we no longer need them — the bundle is here. Leaving them set
+  // would re-trigger the CSS rules on every Barba navigation, since each new
+  // container renders its elements without aa-ready until init catches up.
   if (typeof document !== 'undefined') {
     document.documentElement.removeAttribute('aa-fallback')
+    document.documentElement.removeAttribute('aa-timeout')
   }
 
   if (debug) {
     const lenisActive = typeof window !== 'undefined' && !!window.lenis
     const loadedFeatures = [...effectiveFeatures]
     const droppedFeatures = [...features].filter((f) => !effectiveFeatures.has(f))
-    const replacedBy = reducedMotion ? 'reduced-motion' : optimizeMobile ? 'optimize-mobile' : null
+    const replacedBy = timedOut
+      ? 'aa-timeout bypass'
+      : reducedMotion
+        ? 'reduced-motion'
+        : optimizeMobile
+          ? 'optimize-mobile'
+          : null
     const featuresLabel =
       replacedBy && droppedFeatures.length
-        ? `${loadedFeatures.join(', ') || '(none)'} (${replacedBy} replaced: ${droppedFeatures.join(', ')})`
+        ? `${loadedFeatures.join(', ') || '(none)'} (${replacedBy} dropped: ${droppedFeatures.join(', ')})`
         : loadedFeatures.join(', ') || '(none)'
     console.log(
       `[alrdy-animate] initialized. Features: ${featuresLabel}; ` +
@@ -282,6 +325,8 @@ export async function init(options: InitOptions = {}): Promise<void> {
         `OptimizeMobile: ${optimizeMobile ? 'active' : 'off'}`,
     )
   }
+
+  resolveReady()
 }
 
 export function destroy(options: DestroyApiOptions = {}): void {
@@ -319,7 +364,20 @@ export function onResize(fn: ResizeCallback, opts: OnResizeOptions = {}): Resize
   return subscribeResize(fn, opts.debounce ?? 150)
 }
 
-const api: PublicApi = { init, destroy, refresh, onResize }
+export { getReadyPromise as ready } from './state'
+
+const api: PublicApi = {
+  init,
+  destroy,
+  refresh,
+  onResize,
+  ready: getReadyPromise,
+  // Live getter — always reflects the latest init() snapshot without
+  // consumers needing to re-grab the api object after refresh().
+  get options() {
+    return state.options
+  },
+}
 
 declare global {
   interface Window {

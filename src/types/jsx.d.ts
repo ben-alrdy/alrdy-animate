@@ -167,7 +167,8 @@ declare namespace JSX {
     /**
      * Ease curve. Accepts any GSAP ease string (`"power2.out"`, `"expo.inOut"`,
      * `"back.out(1.7)"`) or one of the named eases registered by the lib via
-     * `CustomEase`: `smooth` | `snappy` | `bounce` | `expressive` | `sharp`.
+     * `CustomEase`: `osmo` | `energy` | `smooth` | `punch` | `relaxed` |
+     * `jump` | `pop` | `elastic` | `anticipate` | `bounce` | `fade`.
      * Overrides `init({ ease })` (default `"power4.out"`).
      */
     'aa-ease'?: string

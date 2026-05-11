@@ -1,5 +1,5 @@
 <!--
-  Last synced with src/ at v8.0.0-alpha.0 (2026-05-11).
+  Last synced with src/ at v8.0.0-alpha.0 (2026-05-11) — interop surface added.
   This file mirrors the public API surface for AI coding agents. When any
   public aa-* attribute, InitOptions field, feature module, or trigger kind
   changes in src/, update this file in the same commit. See CLAUDE.md
@@ -157,6 +157,8 @@ init(options?: InitOptions): Promise<void>
 destroy(options?: DestroyApiOptions): void
 refresh(): Promise<void>
 onResize(fn: () => void, opts?: { debounce?: number }): () => void
+ready(): Promise<void>          // resolves after the most recent init() finishes
+options: ResolvedOptions         // live readonly snapshot — see "Custom GSAP scripts alongside v8"
 ```
 
 ### `InitOptions` defaults
@@ -164,7 +166,7 @@ onResize(fn: () => void, opts?: { debounce?: number }): () => void
 | Option | Default | Notes |
 |---|---|---|
 | `duration` | `0.6` | Seconds. |
-| `ease` | `'power4.out'` | Any GSAP ease or named (`smooth`, `snappy`, `bounce`, `expressive`, `sharp`) — named eases need `CustomEase`. |
+| `ease` | `'power4.out'` | Any GSAP ease or one of the lib's named eases (`osmo`, `energy`, `smooth`, `punch`, `relaxed`, `jump`, `pop`, `elastic`, `anticipate`, `bounce`, `fade`) — named eases need `CustomEase` loaded. |
 | `distance` | `1` | Multiplier for fade-up/down/left/right + slide-* translate distance. |
 | `scrollStart` | `'top 92%'` | Default ScrollTrigger `start`. |
 | `scrollEnd` | `'bottom 70%'` | Default ScrollTrigger `end`. |
@@ -247,6 +249,62 @@ document.querySelector('.trigger-button').addEventListener('click', () => {
     new CustomEvent('aa:trigger', { detail: { name: 'reveal-me' }, bubbles: true })
   )
 })
+```
+
+### Custom GSAP scripts alongside v8
+
+When a Webflow / Next.js project loads alrdy-animate AND adds its own GSAP code (Osmo recipes, bespoke sliders, scroll-spy widgets), that custom code should reuse v8's detection + bus instead of duplicating it. Four interop primitives:
+
+**1. Wait for ready, then run.** `init()` registers GSAP plugins, the named-ease CustomEase set, and detects motion / viewport state. Custom scripts that depend on any of those should await it:
+
+```js
+await AlrdyAnimate.ready()
+// gsap, ScrollTrigger, SplitText (if loaded), CustomEase + named eases all registered
+```
+
+`ready()` resolves immediately if init has already completed. Each new `init()` / `refresh()` creates a fresh promise so re-inits can be awaited too.
+
+**2. Read v8's detection state.** Don't re-call `window.matchMedia('(prefers-reduced-motion: reduce)')` or hardcode 768 as the mobile cutoff. Read `AlrdyAnimate.options` after ready:
+
+```js
+await AlrdyAnimate.ready()
+const { reducedMotion, optimizeMobile, breakpoints, duration, ease } = AlrdyAnimate.options
+const DURATION = reducedMotion ? 0.01 : duration
+gsap.to(el, { duration: DURATION, ease })
+```
+
+Useful fields on `AlrdyAnimate.options`: `reducedMotion` (boolean, reflects active state), `optimizeMobile` (boolean, true when viewport is below `breakpoints.md` and the option is enabled), `breakpoints` (resolved pixel widths), and the lib defaults `duration`, `ease`, `distance`, `scrollStart`, `scrollEnd`. The snapshot is updated on every `init()`/`refresh()`.
+
+**3. Share the resize bus.** Don't attach a second `window.resize` listener — the lib already debounces one and refreshes ScrollTrigger. Subscribe to it:
+
+```js
+const off = AlrdyAnimate.onResize(() => myThing.remeasure(), { debounce: 150 })
+// off() to unsubscribe
+```
+
+The bus runs in this order on every debounced resize: matchMedia re-evaluation → feature re-measure (marquee, slider, nav) → `ScrollTrigger.refresh()` → user-registered `onResize` callbacks.
+
+**4. Use named eases as plain ease strings.** After `await ready()`, every named ease is registered globally on `gsap` via CustomEase. Just reference by name in any tween:
+
+```js
+gsap.to(el, { ease: 'smooth' })
+```
+
+Available names: `osmo`, `energy`, `smooth`, `punch`, `relaxed`, `jump`, `pop`, `elastic`, `anticipate`, `bounce`, `fade`. Canonical list lives in `src/core/named-eases.ts`.
+
+**Worked example.** A "sticky features" pinned-scroll widget — written without v8-aware helpers vs. with them:
+
+```js
+// Without v8-aware helpers (duplicates detection, hardcodes ease + duration):
+const rm = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+const DURATION = rm ? 0.01 : 0.75
+const EASE = 'power4.inOut'
+gsap.to(el, { clipPath: 'inset(0%)', duration: DURATION, ease: EASE })
+
+// With v8-aware helpers (single source of truth):
+await AlrdyAnimate.ready()
+const { reducedMotion, duration } = AlrdyAnimate.options
+gsap.to(el, { clipPath: 'inset(0%)', duration: reducedMotion ? 0.01 : duration, ease: 'smooth' })
 ```
 
 ---

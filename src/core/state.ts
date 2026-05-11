@@ -47,6 +47,7 @@ export const DEFAULT_OPTIONS: ResolvedOptions = {
   again: true,
   stagger: DEFAULT_STAGGER,
   autoplay: DEFAULT_AUTOPLAY,
+  breakpoints: DEFAULT_BREAKPOINTS,
   smoothScroll: true,
   scrollState: true,
   reducedMotion: true,
@@ -67,6 +68,7 @@ export function resolveOptions(opts: InitOptions): ResolvedOptions {
     ...opts,
     stagger: { ...DEFAULT_STAGGER, ...opts.stagger },
     autoplay: { ...DEFAULT_AUTOPLAY, ...opts.autoplay },
+    breakpoints: { ...DEFAULT_BREAKPOINTS, ...opts.breakpoints },
     reducedMotion: resolveReducedMotion(opts.reducedMotion),
   }
 }
@@ -120,6 +122,24 @@ export function resolveBreakpoints(opts: InitOptions['breakpoints']): Breakpoint
 
 export function reset(): void {
   Object.assign(state, initial())
+}
+
+let readyDeferred: { promise: Promise<void>; resolve: () => void } | null = null
+
+export function newReadyDeferred(): void {
+  let resolve!: () => void
+  const promise = new Promise<void>((r) => {
+    resolve = r
+  })
+  readyDeferred = { promise, resolve }
+}
+
+export function getReadyPromise(): Promise<void> {
+  return readyDeferred ? readyDeferred.promise : Promise.resolve()
+}
+
+export function resolveReady(): void {
+  readyDeferred?.resolve()
 }
 
 export function addDisposer(fn: () => void): void {

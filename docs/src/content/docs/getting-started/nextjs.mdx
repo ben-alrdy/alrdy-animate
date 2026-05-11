@@ -149,6 +149,33 @@ export function HeroParallax() {
 
 For better ergonomics, install `@gsap/react` and use the `useGSAP` hook — it auto-cleans tweens and ScrollTriggers when the component unmounts. Same lib, just nicer.
 
+If your component-level GSAP needs the lib's named eases (`smooth`, `osmo`, ...) or wants to match its detected motion / viewport state, await `ready()` first and read from `options`:
+
+```tsx
+'use client'
+import { useEffect } from 'react'
+import { ready, options } from 'alrdy-animate'
+
+export function NavScrollEffect() {
+  useEffect(() => {
+    let cancelled = false
+    ready().then(() => {
+      if (cancelled) return
+      const { reducedMotion, duration } = options
+      const gsap = (window as any).gsap
+      gsap.to('.site-nav', {
+        ease: 'smooth',                           // CustomEase registered by init()
+        duration: reducedMotion ? 0.01 : duration,
+      })
+    })
+    return () => { cancelled = true }
+  }, [])
+  return null
+}
+```
+
+`ready()` resolves immediately if `init()` has already completed; `options` is a live readonly snapshot (`reducedMotion`, `optimizeMobile`, `breakpoints`, `duration`, `ease`, `distance`, ...). See [Custom GSAP scripts alongside v8](https://github.com/ben-alrdy/alrdy-animate/blob/main/AGENTS.md#custom-gsap-scripts-alongside-v8) in `AGENTS.md` for the full interop pattern.
+
 ## Page transitions
 
 Page-transition wiring (Next.js View Transitions, `next/dynamic` route guards, framer-motion `<AnimatePresence>`) is **deferred** until we ship a Next.js demo project to base the recipe on. The lib already exposes the right hooks — `init({ root })`, `destroy({ keepGlobals: true, keepFromStates: true })`, `refresh()` — so the wiring will look very similar to the [Webflow + Barba recipe](/recipes/webflow-barba/), just with router events instead of Barba hooks. Watch this page (or the GitHub repo) for the full guide.

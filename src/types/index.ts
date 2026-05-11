@@ -75,8 +75,11 @@ export interface InitOptions {
   duration?: number
   /**
    * Default ease curve for animations that don't set `aa-ease`. Accepts any
-   * GSAP ease string (`"power2.out"`, `"expo.inOut"`) or a named ease registered
-   * by the lib via CustomEase: `smooth` | `snappy` | `bounce` | `expressive` | `sharp`.
+   * GSAP ease string (`"power2.out"`, `"expo.inOut"`) or one of the named
+   * eases the lib registers via CustomEase on init:
+   * `osmo` | `energy` | `smooth` | `punch` | `relaxed` | `jump` | `pop` |
+   * `elastic` | `anticipate` | `bounce` | `fade`. Canonical list in
+   * `src/core/named-eases.ts`. Named eases require `CustomEase` loaded.
    * Default `"power4.out"`.
    */
   ease?: string
@@ -195,6 +198,7 @@ export interface ResolvedOptions extends InitOptions {
   again: boolean
   stagger: StaggerOptions
   autoplay: AutoplayOptions
+  breakpoints: Breakpoints
   smoothScroll: boolean | SmoothScrollOptions
   scrollState: boolean
   reducedMotion: boolean | ReducedMotionOptions
@@ -275,4 +279,36 @@ export interface PublicApi {
    * resize-aware components stays cheap.
    */
   onResize: (fn: ResizeCallback, opts?: OnResizeOptions) => ResizeUnsubscribe
+  /**
+   * Resolved options snapshot — every `InitOptions` field with defaults
+   * filled in. After `await ready()`, `reducedMotion` and `optimizeMobile`
+   * are collapsed to the plain booleans the lib actually uses internally
+   * (reflecting OS preference + viewport detection, not the user-passed
+   * setting shape).
+   *
+   * Use from project-specific GSAP scripts to stay in sync with the library
+   * instead of re-detecting:
+   *   const { reducedMotion, optimizeMobile, breakpoints, duration, ease } =
+   *     AlrdyAnimate.options
+   *   const DURATION = reducedMotion ? 0.01 : duration
+   *
+   * Reads always reflect the most recent `init()`. Treat as read-only —
+   * mutating fields here will not affect the running lib.
+   */
+  options: ResolvedOptions
+  /**
+   * Resolves after the most recent `init()` has finished mounting features
+   * and registering plugins/eases. Resolves immediately when called before
+   * any init, or after the previous init has already completed.
+   *
+   * Use from project-specific GSAP scripts that load alongside v8 and need
+   * to wait for plugin + named-ease registration before running:
+   *
+   *   await AlrdyAnimate.ready()
+   *   gsap.to(el, { ease: 'smooth' })  // 'smooth' registered by init()
+   *
+   * Each new `init()` (or `refresh()`) creates a fresh promise so re-inits
+   * can also be awaited.
+   */
+  ready: () => Promise<void>
 }

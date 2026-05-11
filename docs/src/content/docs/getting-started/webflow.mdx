@@ -20,10 +20,16 @@ There are three pieces, mapped to three places in Webflow:
 Paste this into **Project Settings → Custom Code → Head Code**. It loads everything in parallel via `defer`, with an inline FOUC + slow-network fallback that fires before any external script lands.
 
 ```html
-<!-- Slow-network fallback (optional but recommended for hero copy).
-     Sets aa-fallback if init() hasn't run within 1s, fading aa-trigger="load"
-     elements via CSS. See /recipes/load-fallback/ for the full explanation. -->
+<!-- Slow-network + init-timeout safety (optional but recommended).
+     Two layers: aa-fallback fades aa-trigger="load" elements at FALLBACK_DELAY
+     (graceful hero staircase). aa-timeout reveals every animated element at
+     TIMEOUT_DELAY (universal safety if init never arrives). See
+     /recipes/load-fallback/ for the full explanation. -->
 <script>
+  // Tune these two numbers without reading the rest of the snippet.
+  const FALLBACK_DELAY = 1000;  // ms — hero copy fades in via CSS keyframe
+  const TIMEOUT_DELAY  = 4000;  // ms — universal reveal if init never runs
+
   const applyFallback = () => {
     if (document.documentElement.hasAttribute('aa-loaded')) return;
     document.documentElement.setAttribute('aa-fallback', '');
@@ -48,7 +54,12 @@ Paste this into **Project Settings → Custom Code → Head Code**. It loads eve
     } else {
       applyFallback();
     }
-  }, 1000);
+  }, FALLBACK_DELAY);
+
+  setTimeout(() => {
+    if (document.documentElement.hasAttribute('aa-loaded')) return;
+    document.documentElement.setAttribute('aa-timeout', '');
+  }, TIMEOUT_DELAY);
 </script>
 <style>
   [aa-animate]:not([aa-ready]) { visibility: hidden; }
@@ -60,6 +71,7 @@ Paste this into **Project Settings → Custom Code → Head Code**. It loads eve
     visibility: visible;
     animation: aa-fallback-appear 0.5s ease both;
   }
+  html[aa-timeout] [aa-animate]:not([aa-ready]) { visibility: visible; }
 </style>
 
 <!-- alrdy-animate stylesheet (FOUC guard + helper classes) -->
@@ -85,6 +97,8 @@ Paste this into **Project Settings → Custom Code → Head Code**. It loads eve
 
 **Why `defer`** — without it, every `<script>` blocks HTML parsing, which makes the whole page wait for each download in series. With `defer`, all scripts download in parallel while the parser sails through the body; they then execute in document order at the end of parsing. This is faster on every connection, and it's a hard requirement for the [load-fallback recipe](/recipes/load-fallback/) to work on slow networks.
 
+**Tuning the two timeouts.** `FALLBACK_DELAY` (default 1s) controls the hero staircase fade for `aa-trigger="load"` elements; tune it to taste — lower = faster fallback, higher = more time for JS to win the race. `TIMEOUT_DELAY` (default 4s) is the universal safety net: if `init()` hasn't run by then, *all* `[aa-animate]` elements get revealed at their natural state with no entrance animation, so the page doesn't stay invisible if the bundle is blocked or errors. Keep it well above `FALLBACK_DELAY`. When init eventually arrives it detects `aa-timeout` and skips its appearance-feature work to avoid rewinding the now-visible elements through their from-states — interactive components (tabs, slider, modal, nav, hover, cursor) still wire up normally.
+
 **Trim the plugin list.** `init({ debug: true })` prints any "Missing GSAP plugins" warnings with the exact `<script>` tag you need to add. Drop the lines you don't use to keep the page lighter.
 
 ## 2. Site-wide footer code
@@ -94,8 +108,7 @@ Paste this into **Project Settings → Custom Code → Footer Code**. The `DOMCo
 ```html
 <script>
   document.addEventListener('DOMContentLoaded', () => {
-    // Stash the init promise so page-specific scripts can wait on it.
-    window.alrdyReady = AlrdyAnimate.init({
+    AlrdyAnimate.init({
       debug: false,           // flip to true while building to see plugin warnings
       duration: 0.6,          // global default; per-element aa-duration overrides
       ease: 'smooth',         // named ease; CustomEase plugin required
@@ -107,14 +120,14 @@ Paste this into **Project Settings → Custom Code → Footer Code**. The `DOMCo
 
 ### Global GSAP code (runs on every page)
 
-If you have a custom GSAP timeline that should run on every page (a navigation scroll-effect, a custom cursor, a marquee not handled by `aa-marquee`), append it to the same block. Chain off `window.alrdyReady` so it runs after `init()` finishes — important when your code depends on Lenis being mounted, named eases (`osmo`, `bounce`, `snappy`) being registered, or feature elements being scanned.
+If you have a custom GSAP timeline that should run on every page (a navigation scroll-effect, a custom cursor, a marquee not handled by `aa-marquee`), append it to the same block. Wrap it in `AlrdyAnimate.ready().then(...)` so it runs after `init()` finishes — important when your code depends on Lenis being mounted, named eases (`smooth`, `osmo`, `bounce`, ...) being registered, or feature elements being scanned.
 
 ```html
 <script>
   document.addEventListener('DOMContentLoaded', () => {
-    window.alrdyReady = AlrdyAnimate.init({ /* ... */ })
+    AlrdyAnimate.init({ /* ... */ })
 
-    window.alrdyReady.then(() => {
+    AlrdyAnimate.ready().then(() => {
       // Example: hide the nav on scroll-down, show on scroll-up.
       const nav = document.querySelector('.site-nav')
       if (!nav) return
@@ -133,16 +146,25 @@ If you have a custom GSAP timeline that should run on every page (a navigation s
 </script>
 ```
 
-If your global code doesn't depend on alrdy-animate at all (a pure GSAP scene that targets your own classes), you don't need the `.then()` — you can put the GSAP calls directly inside the `DOMContentLoaded` callback. Both `gsap` and `ScrollTrigger` are already loaded by that point.
+Reading the lib's resolved options (motion preference, viewport class, default duration/ease) is a one-liner after ready — no need to re-detect:
+
+```js
+AlrdyAnimate.ready().then(() => {
+  const { reducedMotion, optimizeMobile, breakpoints, duration, ease } = AlrdyAnimate.options
+  // use these to keep your custom GSAP timing in sync with the lib
+})
+```
+
+If your global code doesn't depend on alrdy-animate at all (a pure GSAP scene that targets your own classes), you don't need `ready()` — you can put the GSAP calls directly inside the `DOMContentLoaded` callback. Both `gsap` and `ScrollTrigger` are already loaded by that point.
 
 ## 3. Page-specific code
 
-For animations that only run on a single page (a hero parallax, a custom scroll-driven scene), use **Page Settings → Custom Code → Before `</body>` tag**. Same pattern — wait for `DOMContentLoaded`, then optionally chain off `window.alrdyReady`.
+For animations that only run on a single page (a hero parallax, a custom scroll-driven scene), use **Page Settings → Custom Code → Before `</body>` tag**. Same pattern — wait for `DOMContentLoaded`, then `AlrdyAnimate.ready()`.
 
 ```html
 <script>
   document.addEventListener('DOMContentLoaded', () => {
-    window.alrdyReady.then(() => {
+    AlrdyAnimate.ready().then(() => {
       // Example: a scroll-driven hero scene specific to this page.
       gsap.to('.hero__photo', {
         scale: 1.15,
@@ -159,11 +181,7 @@ For animations that only run on a single page (a hero parallax, a custom scroll-
 </script>
 ```
 
-If `window.alrdyReady` is undefined on this page (e.g. you forgot to add the site-wide footer block, or this is a one-off page that doesn't run init), the `.then()` will throw. To be defensive, fall back to a resolved promise:
-
-```js
-;(window.alrdyReady || Promise.resolve()).then(() => { /* ... */ })
-```
+`AlrdyAnimate.ready()` is safe to call from any page, even ones where you forgot to add the site-wide footer block — it resolves immediately if `init()` hasn't been called. No defensive fallback needed.
 
 ## What about FOUC?
 

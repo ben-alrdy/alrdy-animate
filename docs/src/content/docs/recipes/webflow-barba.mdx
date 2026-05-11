@@ -180,12 +180,11 @@ let reducedMotion = rmMQ.matches
 rmMQ.addEventListener('change', (e) => (reducedMotion = e.matches))
 
 let alrdyReady = false
-let initPromise = Promise.resolve()
 
 function alrdyInit(rootEl) {
   // root scopes the scan to the new container — the leaving container is
   // still in DOM in sync mode and we don't want its elements re-processed.
-  initPromise = AlrdyAnimate.init({
+  return AlrdyAnimate.init({
     debug: true,
     duration: 0.6,
     ease: 'osmo',
@@ -193,7 +192,6 @@ function alrdyInit(rootEl) {
     smoothScroll: true,
     root: rootEl,
   }).then(() => { alrdyReady = true })
-  return initPromise
 }
 
 function alrdyDestroy() {
@@ -249,7 +247,7 @@ barba.hooks.beforeEnter((data) => {
   // the new container. Don't await — leave should start immediately so the
   // transition layout takes effect on the next frame. Init runs in parallel
   // with the ~3s leave timeline; the dispatch inside the leave timeline
-  // gates on initPromise to make sure listeners are attached.
+  // gates on AlrdyAnimate.ready() to make sure listeners are attached.
   alrdyDestroy()
   alrdyInit(data.next.container)
 })
@@ -266,8 +264,8 @@ barba.init({
     sync: true,
     async once(data) {
       // beforeEnter fires for `once` too and already kicked off init —
-      // wait on the same initPromise instead of starting a second init.
-      await initPromise
+      // wait on the same in-flight promise instead of starting a second init.
+      await AlrdyAnimate.ready()
       fireEnterAnimations(data.next.container)
       return runPageOnceAnimation(data.next.container)
     },
@@ -323,9 +321,9 @@ function runPageLeaveAnimation(current, next) {
   }
 
   // Dispatch the content-reveal events as the page is visually settling.
-  // Gated on initPromise in case init hadn't finished by this point.
+  // Gated on AlrdyAnimate.ready() in case init hadn't finished by this point.
   tl.call(() => {
-    initPromise.then(() => fireEnterAnimations(next))
+    AlrdyAnimate.ready().then(() => fireEnterAnimations(next))
   }, null, '< 0.6')
 
   return tl

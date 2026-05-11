@@ -2,7 +2,7 @@
 // alrdy-animate × Barba × Osmo stacked-cards transition
 // -----------------------------------------
 
-import { init, destroy } from 'alrdy-animate'
+import { init, destroy, ready } from 'alrdy-animate'
 import 'alrdy-animate/style'
 
 const { gsap, barba } = window
@@ -108,11 +108,11 @@ function runPageLeaveAnimation(current, next) {
   // this the cards wait for the leave timeline's full duration (the wrapper
   // drops away around t≈2.1s but the clipPath final keeps the timeline alive
   // until ~2.85s, so a default `afterEnter` dispatch lands ~0.75s late).
-  // Gated on initPromise so the event listeners are guaranteed to be attached
+  // Gated on ready() so the event listeners are guaranteed to be attached
   // even if init hadn't finished yet.
   tl.call(
     () => {
-      initPromise.then(() => fireEnterAnimations(next))
+      ready().then(() => fireEnterAnimations(next))
     },
     null,
     '< 0.6',
@@ -231,10 +231,9 @@ function prepareForTransition(parent, current, next) {
 //     each box, with stagger applied via per-element delay.
 
 let alrdyReady = false
-let initPromise = Promise.resolve()
 
 function alrdyInit(rootEl) {
-  initPromise = init({
+  return init({
     debug: true,
     duration: 0.6,
     ease: 'osmo',
@@ -244,7 +243,6 @@ function alrdyInit(rootEl) {
   }).then(() => {
     alrdyReady = true
   })
-  return initPromise
 }
 
 function alrdyDestroy() {
@@ -310,7 +308,7 @@ barba.hooks.beforeEnter((data) => {
   // container. Don't await — leave should start immediately so the layout in
   // prepareForTransition takes effect on the very next frame. Init runs in
   // parallel with the ~3s leave timeline; the leave timeline's tl.call gates
-  // the box-trigger dispatch on `initPromise` resolving first.
+  // the box-trigger dispatch on `ready()` resolving first.
   alrdyDestroy()
   alrdyInit(data.next.container)
 })
@@ -329,11 +327,11 @@ barba.init({
       sync: true,
       async once(data) {
         // beforeEnter hook fires for `once` too and already kicked off
-        // alrdyInit — so we just wait on the same promise here. Calling
-        // alrdyInit again would either start a second init (race) or
+        // alrdyInit — so we just wait on the same in-flight promise here.
+        // Calling alrdyInit again would either start a second init (race) or
         // early-return because state.initialized is true (race in the other
         // direction: matchMedia listeners aren't attached yet).
-        await initPromise
+        await ready()
         fireEnterAnimations(data.next.container)
         return runPageOnceAnimation(data.next.container)
       },
