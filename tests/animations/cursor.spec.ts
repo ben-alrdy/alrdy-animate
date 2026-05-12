@@ -52,4 +52,52 @@ test.describe('hover cursor page', () => {
     const endOpacity = await cursor.evaluate((el) => parseFloat(getComputedStyle(el).opacity))
     expect(endOpacity).toBeLessThan(0.2)
   })
+
+  test('aa-cursor-offset overrides xPercent / yPercent', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 800 })
+    const initLog = page.waitForEvent('console', { predicate: initialized, timeout: 8000 })
+    await page.goto('/animations/hover/cursor/')
+    await initLog
+
+    // Override the default cursor's offset to "centered on mouse" (-50 -50) and re-init.
+    await page.evaluate(() => {
+      const cursor = document.querySelector<HTMLElement>('[aa-cursor=""]')!
+      cursor.setAttribute('aa-cursor-offset', '-50 -50')
+      // @ts-expect-error library is exposed on window via UMD
+      window.AlrdyAnimate.destroy()
+      // @ts-expect-error library is exposed on window via UMD
+      window.AlrdyAnimate.init({ debug: false })
+    })
+
+    const trigger = page.locator('[aa-cursor-trigger=""]').first()
+    await trigger.scrollIntoViewIfNeeded()
+    // Hover via real mouse so the cursor positions track the pointer.
+    const box = await trigger.boundingBox()
+    if (!box) throw new Error('trigger has no bounding box')
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
+    await page.waitForTimeout(700)
+
+    const transform = await page
+      .locator('[aa-cursor=""]')
+      .first()
+      .evaluate((el) => getComputedStyle(el).transform)
+    // matrix(a, b, c, d, tx, ty) — tx/ty include the xPercent/yPercent offset
+    // (negative half of the cursor's own width/height for "-50 -50").
+    expect(transform.startsWith('matrix(')).toBe(true)
+    const parts = transform
+      .slice(transform.indexOf('(') + 1, transform.lastIndexOf(')'))
+      .split(',')
+      .map((s) => parseFloat(s.trim()))
+    const cursorBox = await page.locator('[aa-cursor=""]').first().boundingBox()
+    if (!cursorBox) throw new Error('cursor has no bounding box')
+    const mouseX = box.x + box.width / 2
+    const mouseY = box.y + box.height / 2
+    // Cursor center should sit near the mouse pointer.
+    const centerX = cursorBox.x + cursorBox.width / 2
+    const centerY = cursorBox.y + cursorBox.height / 2
+    expect(Math.abs(centerX - mouseX)).toBeLessThan(20)
+    expect(Math.abs(centerY - mouseY)).toBeLessThan(20)
+    // Sanity-check we read a matrix value (silences unused-vars).
+    expect(parts.length).toBeGreaterThanOrEqual(6)
+  })
 })

@@ -5,9 +5,13 @@ type QuickTo = (value: number) => void
 type QuickToFactory = (target: Element, prop: string, vars?: Record<string, unknown>) => QuickTo
 type GsapWithQuickTo = GsapInstance & { quickTo: QuickToFactory }
 
-const X_OFFSET = 6
-const Y_OFFSET = -140
+const DEFAULT_X_OFFSET = 6
+const DEFAULT_Y_OFFSET = -140
+const X_EDGE_OFFSET = -100
+const Y_EDGE_OFFSET = -120
 const EDGE_BUFFER = 16
+
+const RESERVED_TRIGGER_PARTS = new Set(['offset'])
 
 const SHOW_DURATION = 0.3
 const HIDE_DURATION = 0.4
@@ -54,10 +58,32 @@ function getCursorAttributes(trigger: Element): Record<string, string> {
   for (const attr of Array.from(trigger.attributes)) {
     if (!attr.name.startsWith('aa-cursor-') || attr.name === 'aa-cursor-trigger') continue
     const part = attr.name.slice('aa-cursor-'.length)
-    if (!part) continue
+    if (!part || RESERVED_TRIGGER_PARTS.has(part)) continue
     result[part] = attr.value
   }
   return result
+}
+
+function parseCursorOffset(
+  value: string | null,
+  cursorName: string,
+  debug: boolean,
+): [number, number] {
+  if (!value) return [DEFAULT_X_OFFSET, DEFAULT_Y_OFFSET]
+  const parts = value.trim().split(/\s+/)
+  const warn = (reason: string): [number, number] => {
+    if (debug) {
+      console.warn(
+        `[alrdy-animate] aa-cursor-offset on [aa-cursor${cursorName ? `="${cursorName}"` : ''}] ${reason}. Got "${value}". Falling back to defaults.`,
+      )
+    }
+    return [DEFAULT_X_OFFSET, DEFAULT_Y_OFFSET]
+  }
+  if (parts.length !== 2) return warn('must be two space-separated numbers (xPercent yPercent)')
+  const x = Number(parts[0])
+  const y = Number(parts[1])
+  if (!Number.isFinite(x) || !Number.isFinite(y)) return warn('values must be finite numbers')
+  return [x, y]
 }
 
 interface CursorInstance {
@@ -84,6 +110,8 @@ function createCursorInstance(
   cursorEl: HTMLElement,
   cursorInner: HTMLElement,
   gsap: GsapWithQuickTo,
+  xOffset: number,
+  yOffset: number,
 ): CursorInstance {
   const cursorSnap = snapshot(cursorEl)
   const innerSnap = snapshot(cursorInner)
@@ -162,8 +190,8 @@ function createCursorInstance(
     position: 'fixed',
     left: 0,
     top: 0,
-    xPercent: X_OFFSET,
-    yPercent: Y_OFFSET,
+    xPercent: xOffset,
+    yPercent: yOffset,
     opacity: 0,
     pointerEvents: 'none',
   })
@@ -175,8 +203,8 @@ function createCursorInstance(
   inst.applyEdgeOffsets = (x: number, y: number): void => {
     if (inst.isHiding) return
     const cursorEdgeThreshold = cursorEl.offsetWidth + EDGE_BUFFER
-    const xPercent = x > window.innerWidth - cursorEdgeThreshold ? -100 : X_OFFSET
-    const yPercent = y > window.innerHeight * 0.9 ? -120 : Y_OFFSET
+    const xPercent = x > window.innerWidth - cursorEdgeThreshold ? X_EDGE_OFFSET : xOffset
+    const yPercent = y > window.innerHeight * 0.9 ? Y_EDGE_OFFSET : yOffset
     gsap.to(cursorEl, {
       xPercent,
       yPercent,
@@ -286,7 +314,12 @@ const cursorFeature: FeatureModule = {
         }
         continue
       }
-      cursors.set(name, createCursorInstance(el, inner, gsap))
+      const [xOffset, yOffset] = parseCursorOffset(
+        el.getAttribute('aa-cursor-offset'),
+        name,
+        ctx.debug,
+      )
+      cursors.set(name, createCursorInstance(el, inner, gsap, xOffset, yOffset))
     }
 
     if (cursors.size === 0) return () => {}

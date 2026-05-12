@@ -108,7 +108,7 @@ Hover any tile to swap the cursor's title and text. Move out — it falls away.
 
 A separate `[aa-cursor="preview"]` element with just an image slot. Triggers below set `aa-cursor-trigger="preview"` (matching the cursor's name) and `aa-cursor-image=...`. Both cursors coexist on the same page — they share one `mousemove` listener and update independently.
 
-<Demo>
+<Demo caption={[{ label: "cursor", attrs: { "aa-cursor": "preview" } }, { label: "trigger", attrs: { "aa-cursor-trigger": "preview", "aa-cursor-image": "…" } }]}>
   <div data-demo-stage>
     <div data-spacer></div>
     <div class="cursor-row">
