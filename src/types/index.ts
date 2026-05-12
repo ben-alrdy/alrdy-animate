@@ -90,18 +90,25 @@ export interface InitOptions {
    */
   distance?: number
   /**
-   * Default ScrollTrigger `start` for non-scrubbed animations. Standard GSAP
-   * syntax (`"top 80%"`, `"center 50%"`). Default `"top 92%"`.
+   * Default ScrollTrigger `start`. Standard GSAP syntax (`"top 80%"`,
+   * `"center 50%"`). Used by every scroll-triggered animation. Default `"top 85%"`.
    */
   scrollStart?: string
   /**
-   * Default ScrollTrigger `end` for non-scrubbed animations. Default `"bottom 70%"`.
-   * Used for animations that reverse on scroll-out (`again: true`).
+   * Default ScrollTrigger `end`. Only used when `aa-scrub` is set (scrubbed
+   * animations need a start AND end to map progress onto). Non-scrubbed
+   * animations ignore this — they fire on enter and, when `again: true`, reset
+   * once the element fully leaves the viewport (computed dynamically, not from
+   * `scrollEnd`). Default `"bottom 60%"`.
    */
   scrollEnd?: string
   /**
-   * Default ScrollTrigger `start` when `aa-scrub` is set. Pinning the scrub start
-   * higher than `scrollStart` prevents premature scrub of off-screen elements.
+   * Optional `start` override applied **only** when `aa-scrub` is set on the
+   * element. Lets you fire scrubbed animations earlier than the snappier
+   * non-scrubbed `scrollStart` — e.g. `scrollStart: 'top 85%'` for entrances,
+   * `scrubStart: 'top 100%'` to give scrubs the full viewport pass. Per-element
+   * `aa-scroll-start` still wins. Honoured by every scroll-position-reading
+   * feature (scroll / text / reveal / reduced-motion).
    */
   scrubStart?: string
   /**

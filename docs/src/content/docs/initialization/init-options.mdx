@@ -17,9 +17,9 @@ The values listed under **Default** are the **single source of truth** for the w
 | `ease` | `'power4.out'` | Any GSAP ease string (`'power2.out'`, `'expo.inOut'`, `'elastic.out(1, 0.3)'`) or one of the lib's named eases registered via `CustomEase`: `osmo`, `energy`, `smooth`, `punch`, `relaxed`, `jump`, `pop`, `elastic`, `anticipate`, `bounce`, `fade`. Named eases require `CustomEase` to be loaded. Per-element override: `aa-ease`. |
 | `delay` | _not an init option_ | Per-element only via `aa-delay` (default `0`). |
 | `distance` | `1` | Multiplier on the fade/slide translate distance (and `text-fade-*` / `text-blur-*` offsets). `1` = the design baseline (3rem for fade variants, 100% for slide variants). Per-element override: `aa-distance`. |
-| `scrollStart` | `'top 92%'` | Default ScrollTrigger `start` for non-scrubbed animations. Standard GSAP syntax (`'top 80%'`, `'center 50%'`). Per-element override: `aa-scroll-start`. |
-| `scrollEnd` | `'bottom 70%'` | Default ScrollTrigger `end` for non-scrubbed animations. Used when `again: true` to reverse on scroll-out. Per-element override: `aa-scroll-end`. |
-| `scrubStart` | unset | Optional override for the scroll-start position **only when `aa-scrub` is set**. Pinning the scrub-start higher than `scrollStart` prevents premature scrub of off-screen elements. |
+| `scrollStart` | `'top 85%'` | Default ScrollTrigger `start` for every scroll-triggered animation. Standard GSAP syntax (`'top 80%'`, `'center 50%'`). Per-element override: `aa-scroll-start`. |
+| `scrollEnd` | `'bottom 60%'` | Default ScrollTrigger `end`. Only used when `aa-scrub` is set — scrubbed animations need a start AND end to map progress onto. Non-scrubbed animations ignore this: they fire on enter and (with `again: true`, default) reset once the element fully leaves the viewport — that reset point is computed dynamically, not from `scrollEnd`. Per-element override: `aa-scroll-end`. |
+| `scrubStart` | unset | Optional `start` override that applies **only when `aa-scrub` is set on the element**. Use it to fire scrubbed animations earlier than the snappier non-scrubbed `scrollStart` — e.g. `scrollStart: 'top 85%'` (non-scrub fires close to viewport bottom) and `scrubStart: 'top 100%'` (scrub gets the full viewport pass). Per-element `aa-scroll-start` still wins over this. Same fallback order in all features that read scroll positions (scroll / text / reveal / reduced-motion). |
 | `again` | `true` | When `true`, scroll-triggered animations replay every time their trigger re-enters the viewport. When `false`, they play once and stay finished. No per-element override — set globally. |
 | `stagger` | `{ chars: 0.02, words: 0.05, lines: 0.1, default: 0.1 }` | Per-split-mode stagger defaults (seconds). The lib picks the value matching the resolved `aa-split`; `aa-children` without a split falls back to `default`. Per-element override: `aa-stagger`. |
 | `autoplay` | `{ interval: 4, hoverPause: false }` | Slider/tabs autoplay defaults. Per-element override: `aa-autoplay="<seconds> [hover-pause]"`. |
@@ -56,7 +56,7 @@ That's why all the per-animation reference tables list the defaults as **(init)*
 AlrdyAnimate.init({
   duration: 0.8,             // every animation 33% slower
   ease: 'smooth',            // named ease (needs CustomEase loaded)
-  scrollStart: 'top 80%',    // animations fire earlier on scroll
+  scrollStart: 'top 80%',    // animations fire a bit earlier on scroll
   again: false,              // play once, never replay
   stagger: { chars: 0.03 },  // slightly slower char cascade; words/lines unchanged
 })

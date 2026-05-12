@@ -199,7 +199,7 @@ declare namespace JSX {
 
     /**
      * ScrollTrigger `start`. Standard GSAP syntax — `"top 80%"`, `"center 50%"`,
-     * `"top top"`. Default `init({ scrollStart })` is `"top 92%"`.
+     * `"top top"`. Default `init({ scrollStart })` is `"top 85%"`.
      */
     'aa-scroll-start'?: string
     /** Breakpoint variant of `aa-scroll-start`. Activates at `>= breakpoints.sm`. */
@@ -212,9 +212,11 @@ declare namespace JSX {
     'aa-scroll-start-xl'?: string
 
     /**
-     * ScrollTrigger `end`. Default `init({ scrollEnd })` is `"bottom 70%"`.
-     * Used for animations that reverse on scroll-out (`init({ again: true })`,
-     * default), and as the scrub end-point when `aa-scrub` is set.
+     * ScrollTrigger `end`. Only used when `aa-scrub` is set — scrubbed
+     * animations need a start AND end to map progress onto. Non-scrubbed
+     * animations ignore this; they fire on enter and (with `init({ again })`)
+     * reset once the element fully leaves the viewport, computed dynamically.
+     * Default `init({ scrollEnd })` is `"bottom 60%"`.
      */
     'aa-scroll-end'?: string
     /** Breakpoint variant of `aa-scroll-end`. Activates at `>= breakpoints.sm`. */

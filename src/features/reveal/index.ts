@@ -1,5 +1,5 @@
 import type { FeatureContext, FeatureModule } from '../../core/registry'
-import { bindAgainTrigger } from '../../core/scroll-trigger'
+import { bindAgainTrigger, resolveScrollStart } from '../../core/scroll-trigger'
 import { matchAnimateValue, type ResolvedPreset } from '../../core/presets'
 import { readAttrs, type Config } from '../../core/settings'
 import { defaultStaggerFor } from '../../core/stagger'
@@ -98,9 +98,9 @@ function setupClip(
   const duration = parseNum(config['aa-duration'], opts.duration)
   const delay = parseNum(config['aa-delay'], 0)
   const ease = config['aa-ease'] ?? opts.ease
-  const scrollStart = config['aa-scroll-start'] ?? opts.scrollStart
   const scrollEnd = config['aa-scroll-end'] ?? opts.scrollEnd
   const scrub = parseScrub(config['aa-scrub'])
+  const scrollStart = resolveScrollStart(config['aa-scroll-start'], opts, scrub)
   const again = opts.again !== false
 
   const fromState: Record<string, number | string> = reveal.needsOpacity
@@ -228,9 +228,9 @@ function setupSlices(
   const stagger = parseNum(config['aa-stagger'], defaultStaggerFor(undefined, opts))
   const duration = parseNum(config['aa-duration'], opts.duration)
   const ease = config['aa-ease'] ?? opts.ease
-  const scrollStart = config['aa-scroll-start'] ?? opts.scrollStart
   const scrollEnd = config['aa-scroll-end'] ?? opts.scrollEnd
   const scrub = parseScrub(config['aa-scrub'])
+  const scrollStart = resolveScrollStart(config['aa-scroll-start'], opts, scrub)
   const again = opts.again !== false
 
   // Reveal: slices start covering (scaleY=1) and animate to scaleY=0,

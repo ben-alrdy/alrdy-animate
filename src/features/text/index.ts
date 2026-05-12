@@ -1,6 +1,6 @@
 import type { GsapTimeline } from '../../core/gsap-detect'
 import type { FeatureContext, FeatureModule } from '../../core/registry'
-import { bindAgainTrigger } from '../../core/scroll-trigger'
+import { bindAgainTrigger, resolveScrollStart } from '../../core/scroll-trigger'
 import { matchAnimateValue, type ResolvedPreset } from '../../core/presets'
 import { readAttrs, type Config } from '../../core/settings'
 import {
@@ -399,9 +399,9 @@ function setupBarReveal(
   const delay = parseNum(config['aa-delay'], 0)
   const ease = config['aa-ease'] ?? opts.ease
   const { unit: stagger } = parseStaggerSpec(config['aa-stagger'], defaultStaggerFor('lines', opts))
-  const scrollStart = config['aa-scroll-start'] ?? opts.scrollStart
   const scrollEnd = config['aa-scroll-end'] ?? opts.scrollEnd
   const scrub = parseScrub(config['aa-scrub'])
+  const scrollStart = resolveScrollStart(config['aa-scroll-start'], opts, scrub)
   const again = opts.again !== false
 
   const split = applySplit(element, 'lines', ctx.gsap)
@@ -558,9 +558,9 @@ function setupOne(
   const delay = parseNum(config['aa-delay'], 0)
   const ease = config['aa-ease'] ?? opts.ease
   const distance = parseNum(config['aa-distance'], opts.distance)
-  const scrollStart = config['aa-scroll-start'] ?? opts.scrollStart
   const scrollEnd = config['aa-scroll-end'] ?? opts.scrollEnd
   const scrub = parseScrub(config['aa-scrub'])
+  const scrollStart = resolveScrollStart(config['aa-scroll-start'], opts, scrub)
   const again = opts.again !== false
 
   const userSplit = parseSplit(config['aa-split'])

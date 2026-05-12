@@ -1,5 +1,5 @@
 import type { FeatureContext, FeatureModule } from '../../core/registry'
-import { bindAgainTrigger } from '../../core/scroll-trigger'
+import { bindAgainTrigger, resolveScrollStart } from '../../core/scroll-trigger'
 import { matchAnimateValue, type ResolvedPreset } from '../../core/presets'
 import { readAttrs, type Config } from '../../core/settings'
 import {
@@ -117,10 +117,7 @@ function setupOne(
 
   const scrollEnd = config['aa-scroll-end'] ?? opts.scrollEnd
   const scrub = parseScrub(config['aa-scrub'])
-  const scrollStart =
-    config['aa-scroll-start'] ??
-    (scrub !== undefined ? opts.scrubStart : undefined) ??
-    opts.scrollStart
+  const scrollStart = resolveScrollStart(config['aa-scroll-start'], opts, scrub)
   const again = opts.again !== false
 
   // aa-stagger present + element has children → stagger the children.

@@ -169,8 +169,9 @@ options: ResolvedOptions         // live readonly snapshot — see "Custom GSAP 
 | `duration` | `0.6` | Seconds. |
 | `ease` | `'power4.out'` | Any GSAP ease or one of the lib's named eases (`osmo`, `energy`, `smooth`, `punch`, `relaxed`, `jump`, `pop`, `elastic`, `anticipate`, `bounce`, `fade`) — named eases need `CustomEase` loaded. |
 | `distance` | `1` | Multiplier for fade-up/down/left/right + slide-* translate distance. |
-| `scrollStart` | `'top 92%'` | Default ScrollTrigger `start`. |
-| `scrollEnd` | `'bottom 70%'` | Default ScrollTrigger `end`. |
+| `scrollStart` | `'top 85%'` | Default ScrollTrigger `start`. Used by every scroll-triggered animation. |
+| `scrollEnd` | `'bottom 60%'` | Default ScrollTrigger `end`. Only used when `aa-scrub` is set. Non-scrubbed animations ignore this — the `again: true` reset point is computed dynamically (one viewport below the element), not from `scrollEnd`. |
+| `scrubStart` | unset | Optional `start` override applied **only** when `aa-scrub` is set on the element. Lets you fire scrubs earlier than the non-scrubbed `scrollStart` (e.g. `'top 100%'` to give scrubs the full viewport pass). Per-element `aa-scroll-start` still wins. Honoured by every scroll-position-reading feature. |
 | `again` | `true` | Replay scroll-triggered animations on re-enter. |
 | `stagger` | `{ chars: 0.02, words: 0.05, lines: 0.1, default: 0.1 }` | Per-split-mode stagger defaults (seconds). |
 | `autoplay` | `{ interval: 4, hoverPause: false }` | Slider/tabs autoplay defaults. |

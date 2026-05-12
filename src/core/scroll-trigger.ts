@@ -4,6 +4,33 @@ interface ScrollTriggerLike {
   create: (vars: Record<string, unknown>) => unknown
 }
 
+/**
+ * Resolve the effective ScrollTrigger `start` for an element.
+ *
+ * Precedence (highest first):
+ *   1. `aa-scroll-start` on the element
+ *   2. `init({ scrubStart })`, but only when `aa-scrub` is set on the element
+ *   3. `init({ scrollStart })`
+ *
+ * `scrubStart` exists so the docs/Webflow author can fire scrubbed animations
+ * earlier (e.g. `top 90%`) than the snappier non-scrubbed default (e.g.
+ * `top 85%`), without touching every element. Without this resolver, only the
+ * `scroll` feature consulted `scrubStart`; `text`, `reveal`, and the reduced-
+ * motion scrub fallback silently fell through to `scrollStart`.
+ */
+export function resolveScrollStart(
+  attrValue: string | undefined,
+  opts: { scrollStart: string; scrubStart?: string },
+  scrub: number | boolean | undefined,
+): string {
+  if (attrValue !== undefined) return attrValue
+  // `scrub === false` is an explicit opt-out (aa-scrub="false" → no scrub), so
+  // it should NOT promote scrubStart. Only truthy `scrub` activates the
+  // scrub-specific start.
+  if (scrub && opts.scrubStart !== undefined) return opts.scrubStart
+  return opts.scrollStart
+}
+
 export interface AgainTriggerOptions {
   gsap: GsapHandle
   trigger: Element

@@ -2,6 +2,7 @@ import type { ReducedMotionOptions, ResolvedOptions } from '../types/index'
 import type { GsapHandle } from './gsap-detect'
 import { resolveAnimateValue, type ResolvedPreset } from './presets'
 import { classifyAnimateValue, type FeatureName } from './scanner'
+import { resolveScrollStart } from './scroll-trigger'
 import { onCustomTrigger, resolveTriggers } from './trigger'
 
 /**
@@ -95,9 +96,13 @@ export function runFadeFallbackPass(
       if (!fadeFor.has(classified)) continue
 
       const delay = parseNum(getAttr(element, 'aa-delay'), 0)
-      const scrollStart = getAttr(element, 'aa-scroll-start') ?? options.scrollStart
       const scrollEnd = getAttr(element, 'aa-scroll-end') ?? options.scrollEnd
       const scrub = parseScrub(getAttr(element, 'aa-scrub'))
+      const scrollStart = resolveScrollStart(
+        getAttr(element, 'aa-scroll-start') ?? undefined,
+        options,
+        scrub,
+      )
       const triggers = resolveTriggers(element, getAttr(element, 'aa-trigger') ?? undefined)
       const hasLoad = triggers.some((t) => t.kind === 'load')
 
