@@ -29,15 +29,15 @@ Add a space-separated flag to constrain which edge the panel enters from. With n
 
 Examples: `aa-hover="block"`, `aa-hover="curve vertical"`, `aa-hover="block top"`.
 
-## Config attributes
+## Attributes
 
 | Attribute     | Default        | Notes                                                                  |
 | ------------- | -------------- | ---------------------------------------------------------------------- |
 | `aa-hover`    | (required)     | `block` or `curve`, plus optional direction flag                       |
 | `aa-color`    | `currentColor` | Fill colour of the injected panel                                      |
-| `aa-duration` | global default | Seconds. Falls back to the `duration` passed to `init()` (default `0.6`).            |
-| `aa-delay`    | `0`            | Seconds before the enter animation starts                              |
-| `aa-ease`     | global default | Any GSAP-compatible ease. Falls back to the `ease` passed to `init()` (default `power4.out`). |
+| `aa-duration` | (init)         | seconds — falls back to `init({ duration })` (default `0.6`)           |
+| `aa-delay`    | `0`            | seconds before the enter animation starts                              |
+| `aa-ease`     | (init)         | any GSAP ease — falls back to `init({ ease })` (default `power4.out`)  |
 
 ## What gets injected
 
@@ -45,6 +45,10 @@ Examples: `aa-hover="block"`, `aa-hover="curve vertical"`, `aa-hover="block top"
 - **curve** — an `<svg aa-hover-bg="curve" viewBox="0 0 100 100" preserveAspectRatio="none">` containing a single `<path>` that morphs between a degenerate edge-pinned shape and full coverage. Same host treatment as block.
 
 If you want hover-driven changes to anything else on the element (text colour, border, scale), do that in CSS using `:hover` — the lib intentionally keeps its scope to the injected layer.
+
+## Required GSAP plugins
+
+`gsap`.
 
 ## Live demo — block
 

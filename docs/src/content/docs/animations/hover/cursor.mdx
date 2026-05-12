@@ -36,16 +36,30 @@ Skipped on touch-only devices via `(hover: hover)` so the cursor element stays h
 
 The first nested `<div>` of each cursor element is the show/hide subject — the script tweens its `opacity`, `y`, and `rotation`. The outer `[aa-cursor]` element only handles position + opacity, so a Webflow-style `display: none` on the outer element is fine while authoring.
 
-## Structural attributes
+## Attributes
 
-| Attribute              | What it marks                                                                          |
-| ---------------------- | -------------------------------------------------------------------------------------- |
-| `aa-cursor`            | Cursor wrapper. Optional value names the cursor so triggers can target it; multiple cursors with the same name are tolerated but only the first wins (warns in `debug`). |
-| `aa-cursor-trigger`    | Trigger element. The value selects which `[aa-cursor]` to use; matched by name (both empty = default pair). Triggers whose name has no matching cursor are silently ignored. |
-| `aa-cursor-{part}` (inside cursor)   | Slot. Holds the element whose content gets replaced.                  |
-| `aa-cursor-{part}` (on each trigger) | Value to inject into the matching slot on hover.                       |
+| Attribute              | Default     | Notes                                                                  |
+| ---------------------- | ----------- | ---------------------------------------------------------------------- |
+| `aa-cursor`            | (empty)     | Cursor wrapper. Optional value names the cursor so triggers can target it; multiple cursors with the same name are tolerated but only the first wins (warns in `debug`). |
+| `aa-cursor-trigger`    | (empty)     | Trigger element. The value selects which `[aa-cursor]` to use; matched by name (both empty = default pair). Triggers whose name has no matching cursor are silently ignored. |
+| `aa-cursor-offset`     | `"6 -140"`  | Optional, on the cursor wrapper. Two space-separated numbers `"x y"` setting the cursor's offset from the mouse as a percentage of the cursor's own width/height. The default sits the cursor slightly right of the mouse with its bottom edge near the pointer. |
+| `aa-cursor-{part}` (inside cursor)   | —           | Slot. Holds the element whose content gets replaced.       |
+| `aa-cursor-{part}` (on each trigger) | —           | Value to inject into the matching slot on hover.           |
 
-`{part}` is open-ended: any name works. `image` (or any `<img>` slot) is treated as `src` instead of `textContent`. Everything else gets `textContent`.
+`{part}` is open-ended: any name works. `image` (or any `<img>` slot) is treated as `src` instead of `textContent`. Everything else gets `textContent`. `offset` is reserved on triggers and ignored as a slot.
+
+### Common offset values
+
+Values are percentages of the cursor element's own size, so they scale with the cursor regardless of pixel dimensions.
+
+| `aa-cursor-offset` | Where the cursor sits relative to the mouse |
+| ------------------ | ------------------------------------------- |
+| `"6 -140"` (default) | Slightly right of the mouse, bottom edge above the pointer |
+| `"-50 -50"`        | Centered on the mouse                       |
+| `"0 0"`            | Top-left corner at the mouse (cursor below-right) |
+| `"-100 0"`         | Top-right corner at the mouse (cursor below-left) |
+| `"-100 -100"`      | Bottom-right corner at the mouse (cursor above-left) |
+| `"0 -100"`         | Bottom-left corner at the mouse (cursor above-right) |
 
 ## Required GSAP plugins
 

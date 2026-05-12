@@ -36,21 +36,25 @@ Both flags are space-separated and combinable.
 <a aa-hover="icon-up-right triple reverse">…</a>   <!-- both -->
 ```
 
-## Config attributes
+## Attributes
 
-| Attribute     | Default | Notes                                                                  |
-| ------------- | ------- | ---------------------------------------------------------------------- |
-| `aa-hover`    | (required) | `icon-<direction>` plus optional `reverse` / `triple` flags         |
-| `aa-duration` | (init)  | Seconds. Falls back to `init({ duration })` (default `0.6`).           |
-| `aa-delay`    | `0`     | Seconds before the enter animation starts                              |
-| `aa-ease`     | (init)  | Any GSAP-compatible ease, including the named eases bundled with the lib. Falls back to `init({ ease })` (default `power4.out`). |
-| `aa-distance` | `1`     | Multiplier on the base 50 ms lag between each successive icon starting its slide. `2` doubles the gap (slower trail); `0.5` halves it (tighter chain). |
+| Attribute     | Default     | Notes                                                                  |
+| ------------- | ----------- | ---------------------------------------------------------------------- |
+| `aa-hover`    | (required)  | `icon-<direction>` plus optional `reverse` / `triple` flags            |
+| `aa-duration` | (init)      | seconds — falls back to `init({ duration })` (default `0.6`)           |
+| `aa-delay`    | `0`         | seconds before the enter animation starts                              |
+| `aa-ease`     | (init)      | any GSAP ease — falls back to `init({ ease })` (default `power4.out`)  |
+| `aa-distance` | `1`         | multiplier on the base 50 ms lag between each successive icon starting its slide — `2` doubles the gap (slower trail), `0.5` halves it (tighter chain) |
 
 ## What gets injected
 
 The first descendant `<svg>` is wrapped in a `<span aa-hover-icon-clip>` (`inline-flex; position: relative; overflow: hidden`); a cloned SVG is appended next to it, absolutely positioned at the appropriate offset for the chosen direction. With the `triple` flag, two clones are appended (one at the standard "from" offset, the second one at double that distance). The wrapper and clones unwrap cleanly on dispose.
 
 Because the wrapper sets `inline-flex`, the icon stays aligned with adjacent text. If your icon is `display: block` and you need the wrapper to behave the same way, override `[aa-hover-icon-clip]` in your own CSS.
+
+## Required GSAP plugins
+
+`gsap`.
 
 ## Live demo — directions
 
