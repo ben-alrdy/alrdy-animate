@@ -48,4 +48,12 @@ jobs:
           cat ~/.npmrc 2>/dev/null | sed 's/_authToken=.*/_authToken=***/' || echo "no ~/.npmrc"
 
       - name: Publish to npm with OIDC
-        run: npm publish --access public --provenance
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          if [[ "$VERSION" =~ -([a-zA-Z]+) ]]; then
+            DIST_TAG="${BASH_REMATCH[1]}"
+          else
+            DIST_TAG="latest"
+          fi
+          echo "Publishing $VERSION to npm with --tag $DIST_TAG"
+          npm publish --access public --provenance --tag "$DIST_TAG"
