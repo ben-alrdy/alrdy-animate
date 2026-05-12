@@ -118,7 +118,7 @@ Presence of `aa-animate` makes an element animate; the FOUC guard hides it until
 `fade`, `fade-up`, `fade-down`, `fade-left`, `fade-right`, `zoom-in`, `zoom-out`, `slide-up`, `slide-down`, `slide-left`, `slide-right`, `blur`, `rotate`, `rotate-up`, `rotate-up-tl` / `-tr` / `-bl` / `-br`, `rotate-*-ccw` variants.
 
 **Text presets** (feature: `text`, plugins: `ScrollTrigger` + `SplitText`):
-`text-fade`, `text-fade-up`, `text-fade-down`, `text-slide-up`, `text-slide-down`, `text-blur`, `text-blur-up`, `text-tilt`, `text-rotate`, `text-marker`, `text-oval`, `text-block`. Pair with `aa-split="chars"` / `"words"` / `"lines"` (+ optional `mask`) to control granularity.
+`text-fade`, `text-fade-up`, `text-fade-down`, `text-slide-up`, `text-slide-down`, `text-scale`, `text-scale-up`, `text-scale-down`, `text-blur`, `text-blur-up`, `text-tilt`, `text-rotate`, `text-marker`, `text-oval`, `text-block`. Pair with `aa-split="chars"` / `"words"` / `"lines"` (+ optional `mask`) to control granularity.
 
 **Reveal presets** (feature: `reveal`, plugin: `ScrollTrigger`):
 `reveal`, `reveal-slices`. Clip-path entrances controlled by `aa-scroll-start/end` or `aa-scrub`.

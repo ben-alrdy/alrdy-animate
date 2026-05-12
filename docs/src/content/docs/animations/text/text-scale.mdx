@@ -1,0 +1,55 @@
+---
+title: text-scale
+description: Per-character vertical scale entrances. Each character grows from a flat line at its origin to its full height. Three origins ship out of the box — center, bottom, and top.
+---
+
+import Demo from '../../../../components/Demo.astro'
+import TextDemo from '../../../../components/TextDemo.astro'
+
+The scale family splits the element into characters and tweens `scaleY` from `0` to `1`. The transform origin decides which edge stays put: `text-scale` opens from the vertical center outward, `text-scale-up` grows upward from the baseline, and `text-scale-down` grows downward from the cap line.
+
+## Variants
+
+| Variant            | Transform origin | Visual effect                                |
+| ------------------ | ---------------- | -------------------------------------------- |
+| `text-scale`       | `50% 50%`        | Each char opens from its vertical center.    |
+| `text-scale-up`    | `50% 100%`       | Each char grows upward from the bottom edge. |
+| `text-scale-down`  | `50% 0%`         | Each char grows downward from the top edge.  |
+
+## Attributes
+
+| Attribute     | Default     | Notes                                                                  |
+| ------------- | ----------- | ---------------------------------------------------------------------- |
+| `aa-animate`  | (required)  | One of the variants above.                                             |
+| `aa-split`    | `chars`     | Override split mode (`chars` / `words` / `lines`).                     |
+| `aa-stagger`  | `0.02`      | Seconds between parts. Append `center` / `edges` / `random` to reorder. |
+| `aa-duration` | (init)      | Seconds.                                                               |
+| `aa-delay`    | `0`         | Seconds.                                                               |
+| `aa-ease`     | (init)      | Any GSAP ease.                                                         |
+| `aa-scrub`    | (off)       | `true` or seconds — bind progress to scroll.                           |
+
+## Required GSAP plugins
+
+`gsap`, `ScrollTrigger`, `SplitText`.
+
+## Live demo
+
+Scale animations read well when they're snappy — these demos shorten the duration to `0.4s` and tighten the stagger to `0.015s`. The first row staggers from the center out; the up/down rows use the default stagger order.
+
+<Demo caption='aa-animate="text-scale" aa-duration="0.4" aa-stagger="0.015 center"'>
+  <div data-demo-stage>
+    <TextDemo animate="text-scale" duration="0.4" stagger="0.015 center" />
+  </div>
+</Demo>
+
+<Demo caption='aa-animate="text-scale-up" aa-duration="0.4" aa-stagger="0.015"'>
+  <div data-demo-stage>
+    <TextDemo animate="text-scale-up" duration="0.4" stagger="0.015" />
+  </div>
+</Demo>
+
+<Demo caption='aa-animate="text-scale-down" aa-duration="0.4" aa-stagger="0.015"'>
+  <div data-demo-stage>
+    <TextDemo animate="text-scale-down" duration="0.4" stagger="0.015" />
+  </div>
+</Demo>

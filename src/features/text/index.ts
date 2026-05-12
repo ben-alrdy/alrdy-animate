@@ -145,6 +145,23 @@ const TEXT_ANIMS: Record<string, TextAnim> = {
     to: { opacity: 1, filter: 'blur(0px)', x: 0 },
   },
 
+  // ---------- Scale ----------
+  'text-scale': {
+    defaultSplit: 'chars',
+    buildFrom: () => ({ scaleY: 0, transformOrigin: '50% 50%' }),
+    to: { scaleY: 1 },
+  },
+  'text-scale-up': {
+    defaultSplit: 'chars',
+    buildFrom: () => ({ scaleY: 0, transformOrigin: '50% 100%' }),
+    to: { scaleY: 1 },
+  },
+  'text-scale-down': {
+    defaultSplit: 'chars',
+    buildFrom: () => ({ scaleY: 0, transformOrigin: '50% 0%' }),
+    to: { scaleY: 1 },
+  },
+
   // ---------- Slide ----------
   'text-slide-up': {
     defaultSplit: 'lines',

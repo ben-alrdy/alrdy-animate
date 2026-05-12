@@ -40,9 +40,10 @@ declare namespace JSX {
      *
      * **Text presets** (feature: `text`, requires `SplitText`):
      * `text-fade` | `text-fade-up` | `text-fade-down` | `text-slide-up` |
-     * `text-slide-down` | `text-blur` | `text-blur-up` | `text-tilt` |
-     * `text-rotate` | `text-marker` | `text-oval` | `text-block`. Pair with
-     * `aa-split` to control granularity.
+     * `text-slide-down` | `text-scale` | `text-scale-up` | `text-scale-down` |
+     * `text-blur` | `text-blur-up` | `text-tilt` | `text-rotate` |
+     * `text-marker` | `text-oval` | `text-block`. Pair with `aa-split` to
+     * control granularity.
      *
      * **Reveal presets** (feature: `reveal`): `reveal` | `reveal-slices` —
      * clip-path entrances controlled by `aa-scroll-start/end` or `aa-scrub`.
