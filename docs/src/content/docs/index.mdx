@@ -1,17 +1,14 @@
 ---
-title: alrdy-animate
-description: Attribute-driven scroll-animation and interactive-component library.
+title: AlrdyAnimate
+description: Attribute-driven scroll animations and interactive components for Webflow and Next.js.
 template: splash
-hero:
-  tagline: Attribute-driven scroll animations and interactive components. GSAP-external. Webflow + Next.js friendly.
-  actions:
-    - text: Get started
-      link: /getting-started/installation/
-      icon: right-arrow
-    - text: View on GitHub
-      link: https://github.com/ben-alrdy/alrdy-animate
-      icon: external
-      variant: minimal
+pagefind: false
 ---
 
-A small, modern rebuild of the alrdy-animate library — every aa-* attribute documented, every animation drivable in a live demo, GSAP loaded externally so it cooperates with whatever your site already does.
+import HomeInit from '../../components/HomeInit.astro'
+import HomeHero from '../../components/HomeHero.astro'
+import HomeGrid from '../../components/HomeGrid.astro'
+
+<HomeInit />
+<HomeHero />
+<HomeGrid />

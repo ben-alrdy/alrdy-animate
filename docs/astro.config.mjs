@@ -35,9 +35,12 @@ export default defineConfig({
   },
   integrations: [
     starlight({
-      title: `alrdy-animate v${version}`,
+      title: 'AlrdyAnimate',
       description: `Attribute-driven scroll-animation and interactive-component library — v${version}.`,
       customCss: ['./src/styles/custom.css'],
+      components: {
+        SiteTitle: './src/components/SiteTitle.astro',
+      },
       head: cdnScripts.map((src) => ({
         tag: 'script',
         attrs: { src, defer: true },
@@ -50,13 +53,15 @@ export default defineConfig({
         },
       ],
       sidebar: [
-        { label: 'Getting started', autogenerate: { directory: 'getting-started' } },
-        { label: 'Appear animations', autogenerate: { directory: 'animations/appear' } },
-        { label: 'Text animations', autogenerate: { directory: 'animations/text' } },
-        { label: 'Hover animations', autogenerate: { directory: 'animations/hover' } },
-        { label: 'Components', autogenerate: { directory: 'animations/components' } },
-        { label: 'Utilities', autogenerate: { directory: 'animations/utilities' } },
-        { label: 'Recipes', autogenerate: { directory: 'recipes' } },
+        { label: 'Installation', autogenerate: { directory: 'installation' } },
+        { label: 'Initialization', collapsed: true, autogenerate: { directory: 'initialization' } },
+        { label: 'Appear animations', collapsed: true, autogenerate: { directory: 'animations/appear' } },
+        { label: 'Text animations', collapsed: true, autogenerate: { directory: 'animations/text' } },
+        { label: 'Hover animations', collapsed: true, autogenerate: { directory: 'animations/hover' } },
+        { label: 'Components', collapsed: true, autogenerate: { directory: 'animations/components' } },
+        { label: 'Utilities', collapsed: true, autogenerate: { directory: 'animations/utilities' } },
+        { label: 'Recipes', collapsed: true, autogenerate: { directory: 'recipes' } },
+        { label: 'AI reference', link: '/ai-reference/' },
       ],
     }),
   ],

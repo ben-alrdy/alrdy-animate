@@ -1,0 +1,44 @@
+---
+import { readFileSync } from 'node:fs'
+
+const { version } = JSON.parse(
+  readFileSync(new URL('../../../package.json', import.meta.url), 'utf-8'),
+)
+
+const { siteTitleHref } = Astro.locals.starlightRoute
+---
+
+<a href={siteTitleHref} class="site-title sl-flex" translate="no">
+  <span class="aa-wordmark">AlrdyAnimate</span>
+  <span class="aa-version-pill">v{version}</span>
+</a>
+
+<style>
+  .site-title {
+    align-items: center;
+    gap: 0.625rem;
+    font-size: var(--sl-text-h4);
+    font-weight: 500;
+    color: var(--sl-color-text);
+    text-decoration: none;
+    white-space: nowrap;
+    min-width: 0;
+    letter-spacing: -0.01em;
+  }
+  .aa-wordmark {
+    color: var(--sl-color-text);
+  }
+  .aa-version-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.1875rem 0.5rem;
+    background-color: var(--aa-lime);
+    color: var(--aa-lime-ink);
+    border-radius: 4px;
+    font-family: var(--sl-font-mono);
+    font-weight: 500;
+    font-size: 0.6875rem;
+    letter-spacing: 0;
+    line-height: 1.1;
+  }
+</style>

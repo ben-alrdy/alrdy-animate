@@ -1,0 +1,94 @@
+---
+const tiles: Array<{
+  href: string
+  label: string
+  title: string
+  desc: string
+  descHtml?: string
+  accent?: boolean
+}> = [
+  {
+    href: '/installation/',
+    label: '01 · Setup',
+    title: 'Installation',
+    desc: '',
+    descHtml: 'CDN tag for Webflow or <code>npm i</code> for Next.js. Both in ninety seconds.',
+  },
+  {
+    href: '/initialization/init-options/',
+    label: '02 · Setup',
+    title: 'Initialization',
+    desc: 'Init options, breakpoints, reduced-motion safety, and presets you can override.',
+  },
+  {
+    href: '/animations/appear/blur/',
+    label: '03 · Animate',
+    title: 'Appear',
+    desc: 'Fade, slide, blur, zoom, rotate — driven by scroll, scrub, or event triggers.',
+  },
+  {
+    href: '/animations/text/text-block/',
+    label: '04 · Animate',
+    title: 'Text',
+    desc: 'Per-line, per-word, per-char effects via SplitText. Blur, fade, slide, tilt, marker.',
+  },
+  {
+    href: '/animations/hover/background/',
+    label: '05 · Animate',
+    title: 'Hover',
+    desc: '',
+    descHtml: '<code>hover-bg-block</code> and <code>aa-color</code> — colorize buttons and cards on pointer-in.',
+  },
+  {
+    href: '/animations/components/marquee/',
+    label: '06 · Build',
+    title: 'Components',
+    desc: 'Tabs, sliders, marquees, nav, modals, cursors — pre-wired and attribute-driven.',
+  },
+  {
+    href: '/animations/utilities/aa-split/',
+    label: '07 · Build',
+    title: 'Utilities',
+    desc: '',
+    descHtml: '<code>aa-split</code>, parallax, reveal clip-paths, and reduced-motion safety nets.',
+  },
+  {
+    href: '/recipes/load-fallback/',
+    label: '08 · Patterns',
+    title: 'Recipes',
+    desc: "Barba page transitions, load-fallbacks, and other patterns you'll want from day one.",
+  },
+  {
+    href: '/ai-reference/',
+    label: '09 · Reference',
+    title: 'AGENTS.md',
+    desc: 'Single-file API reference for Claude, Cursor, and Aider — shipped in the package.',
+  },
+]
+---
+
+<section class="docs-grid-section not-content">
+  <div class="docs-grid-header" aa-animate="fade">
+    <span class="docs-grid-label">[ Docs ]</span>
+    <span class="docs-grid-caption">Dive right in</span>
+  </div>
+
+  <div class="docs-grid" aa-animate="fade" aa-stagger="0.1 grid" aa-duration="1">
+    {tiles.map((t) => (
+      <a class="docs-tile" href={t.href} aa-hover="icon-up-right">
+        <div class="docs-tile-head">
+          <div class="docs-tile-meta">
+            <span class="docs-tile-label">{t.label}</span>
+            <svg class="docs-tile-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7"/><path d="M8 7h9v9"/></svg>
+          </div>
+          <h3 class="docs-tile-title">{t.title}</h3>
+        </div>
+        {t.descHtml ? (
+          <p class="docs-tile-desc" set:html={t.descHtml} />
+        ) : (
+          <p class="docs-tile-desc">{t.desc}</p>
+        )}
+      </a>
+    ))}
+  </div>
+</section>

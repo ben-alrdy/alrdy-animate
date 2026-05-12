@@ -1,0 +1,18 @@
+<script>
+  import 'alrdy-animate/style'
+  import { init } from 'alrdy-animate'
+
+  function ready(): void {
+    init({
+      duration: 0.8,
+      ease: 'osmo',
+      scrollStart: 'top 85%',
+    })
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', ready)
+  } else {
+    ready()
+  }
+</script>

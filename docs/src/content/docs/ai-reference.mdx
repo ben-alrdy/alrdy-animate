@@ -1,0 +1,46 @@
+---
+title: AI reference (AGENTS.md)
+description: A single-file API reference shipped inside the npm package, optimised for Claude Code, Cursor, Aider, and other AI coding assistants.
+sidebar:
+  order: 100
+---
+
+alrdy-animate ships an **`AGENTS.md`** file inside the npm package. It is a single-file, agent-optimised mirror of this site's public API surface — every `aa-*` attribute, every `InitOptions` field, every feature module, every trigger kind — kept in sync with `src/` on every release.
+
+When you point Claude Code, Cursor, Aider, or Continue at your project, the assistant can read this file directly from `node_modules/alrdy-animate/AGENTS.md` and use the library accurately on the first try, without browsing the docs site.
+
+## What's inside
+
+- Quick-start snippets for Webflow and Next.js
+- Full attribute reference table (`aa-animate`, `aa-split`, `aa-stagger`, `aa-trigger`, `aa-scrub`, …)
+- Per-feature documentation: scroll, text, reveal, parallax, hover, tabs, slider, marquee, nav, modal, cursor
+- Init options reference with defaults
+- Lifecycle hooks for page-transition libraries (Barba, View Transitions)
+- Common patterns and pitfalls
+
+## Read the latest version
+
+The file lives in the repo root and is shipped via the `files` field in `package.json`. Two ways to view it:
+
+| Source | Use when |
+| --- | --- |
+| [GitHub: `AGENTS.md` on `main`](https://github.com/ben-alrdy/alrdy-animate/blob/main/AGENTS.md) | You want the latest reference (matches the `next` branch / unreleased work). |
+| `node_modules/alrdy-animate/AGENTS.md` | You want the reference that matches the exact version pinned in your project — what your AI assistant will actually see. |
+
+## Point your assistant at it
+
+Most AI coding tools support a project-level instruction file (`.cursorrules`, `.aider.conf.yml`, `CLAUDE.md`, `AGENTS.md`, `.continuerules`). Add a short pointer:
+
+```md
+When working with the `alrdy-animate` library, read
+`node_modules/alrdy-animate/AGENTS.md` for the authoritative attribute
+reference and follow its conventions.
+```
+
+That's it. The platform-specific guides include the same snippet for [Next.js](/installation/nextjs/#using-with-ai-assistants-claude-code-cursor-etc) and [Webflow](/installation/webflow/#using-with-ai-assistants-claude-code-cursor-etc).
+
+## Why a single file?
+
+LLMs work best with one well-structured reference they can fully hold in context, rather than crawling many small docs pages. AGENTS.md is intentionally dense, lists every accepted value, and never sends an agent on a multi-hop web fetch. The web docs you're reading now exist for humans (with live demos and progressive disclosure); AGENTS.md exists for agents.
+
+When a public-API change lands, both surfaces — this site **and** AGENTS.md — are updated in the same commit. See the [CLAUDE.md "Keep AI affordances in sync"](https://github.com/ben-alrdy/alrdy-animate/blob/main/CLAUDE.md#keep-ai-affordances-in-sync) section for the project-internal workflow.
