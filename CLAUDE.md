@@ -57,7 +57,7 @@ src/
 docs/                       # Astro 6 + Starlight 0.38 site (separate package)
 └── src/
     ├── content.config.ts   # Starlight docsLoader + docsSchema
-    ├── content/docs/       # MDX pages: index, 404, getting-started/, animations/
+    ├── content/docs/       # MDX pages: index, 404, installation/, initialization/, animations/
     └── components/Demo.astro  # iframe-style demo wrapper, loads alrdy-animate from file:..
 
 tests/

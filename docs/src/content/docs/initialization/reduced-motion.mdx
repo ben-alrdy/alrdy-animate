@@ -1,0 +1,68 @@
+---
+title: Reduced motion
+description: How alrdy-animate honours the OS-level prefers-reduced-motion preference. With the default reducedMotion true, appear / text / reveal animations collapse to a simple opacity fade and hover / parallax skip entirely. Customise fade timing or opt out.
+sidebar:
+  order: 3
+---
+
+When the OS reports `(prefers-reduced-motion: reduce)`, alrdy-animate honours it by default. Every decorative animation collapses to a single opacity tween; interactive components (tabs, slider, marquee, nav, modal) stay fully functional. The setting is read once at `init()` time.
+
+## What changes
+
+With the default `reducedMotion: true` and OS reduced-motion **on**:
+
+| Feature | Behaviour |
+| --- | --- |
+| `aa-animate` — fade / slide / zoom / blur / rotate | Collapse to opacity 0 → 1 with `duration: 0.4`, `ease: 'power1.out'`. `aa-trigger`, `aa-delay`, `aa-stagger`, and `aa-scrub` still work. |
+| `aa-animate` — text-* | Same simple fade on the host element. `aa-split` is skipped entirely, so screen readers and copy-paste see the natural text. |
+| `aa-animate` — reveal-* / reveal-slices-* | Same simple fade. The slice overlay panel is never built. |
+| `aa-hover` | Skipped entirely — hover-driven choreography is purely decorative. |
+| `aa-animate` — parallax / parallax-horizontal | Skipped entirely — elements render at their natural position. |
+| `aa-tabs`, `aa-slider`, `aa-marquee`, `aa-nav`, `aa-modal` | Unchanged — these are interactive components, not decorative motion. |
+
+Plugin cost drops too: under reduced motion the lib doesn't load `SplitText` (no per-char DOM mutation) or the parallax module.
+
+## Customizing the fade timing
+
+Pass an object to keep the reduced-motion fallback but tune the timing:
+
+```js
+AlrdyAnimate.init({
+  reducedMotion: { duration: 0.3, ease: 'linear' },
+})
+```
+
+`duration` is in seconds; `ease` is any GSAP ease string (`'linear'`, `'power1.out'`, etc.).
+
+## Opting out
+
+```js
+AlrdyAnimate.init({ reducedMotion: false })
+```
+
+Every animation runs normally regardless of the OS preference. Generally not recommended — users who set reduced-motion usually have a real reason (vestibular conditions, focus issues, etc.).
+
+## Snapshot semantics
+
+The OS preference is read **once at `init()` time** — `AlrdyAnimate.options.reducedMotion` reflects that snapshot for the rest of the session. If you want to react to a runtime change (the user toggles the setting while the page is open), wire a `matchMedia` listener and call `refresh()`:
+
+```js
+const mq = window.matchMedia('(prefers-reduced-motion: reduce)')
+mq.addEventListener('change', () => AlrdyAnimate.refresh())
+```
+
+## Custom GSAP scripts
+
+If your project loads its own GSAP code alongside alrdy-animate, read the lib's resolved snapshot instead of re-detecting:
+
+```js
+await AlrdyAnimate.ready()
+const { reducedMotion, duration } = AlrdyAnimate.options
+gsap.to(el, { duration: reducedMotion ? 0.01 : duration, ease: 'smooth' })
+```
+
+The snapshot is updated on every `init()` / `refresh()`, so a `refresh()` after a `matchMedia` change propagates to your custom code too.
+
+## Interaction with `optimizeMobile`
+
+If both fire on the same page (the OS reports reduced motion AND the viewport is below `breakpoints.md`), **`reducedMotion` wins**. Its drop set is a superset and its fade timing is the OS-preference-driven one. See [Mobile optimization](/initialization/mobile-optimization/) for the perf-only variant.

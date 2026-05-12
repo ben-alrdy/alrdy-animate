@@ -1,6 +1,6 @@
 <!--
-  Last synced with src/ at v8.0.0-alpha.0 (2026-05-11) — marquee restructured to
-  three authored wrappers (scroller / track / list).
+  Last synced with src/ at v8.0.0-alpha.0 (2026-05-11) — added `presets` init
+  option (class → animation map; virtual attributes, no DOM mutation).
   This file mirrors the public API surface for AI coding agents. When any
   public aa-* attribute, InitOptions field, feature module, or trigger kind
   changes in src/, update this file in the same commit. See CLAUDE.md
@@ -17,7 +17,7 @@ If you're an AI assistant writing code that uses this library, this file is the 
 
 ## Quick start
 
-**Webflow** — load GSAP + ScrollTrigger + (optionally CustomEase, SplitText, Flip, Draggable, InertiaPlugin, Lenis) via `<script defer>` tags, then the lib's UMD build. Call `AlrdyAnimate.init({...})` from a `DOMContentLoaded` listener. See the [Webflow guide](https://animate.alrdy.de/getting-started/webflow/) for the full head/footer snippets.
+**Webflow** — load GSAP + ScrollTrigger + (optionally CustomEase, SplitText, Flip, Draggable, InertiaPlugin, Lenis) via `<script defer>` tags, then the lib's UMD build. Call `AlrdyAnimate.init({...})` from a `DOMContentLoaded` listener. See the [Webflow guide](https://animate.alrdy.de/installation/webflow/) for the full head/footer snippets.
 
 **Next.js**:
 
@@ -180,7 +180,33 @@ options: ResolvedOptions         // live readonly snapshot — see "Custom GSAP 
 | `smoothScroll` | `true` | Boolean or Lenis options object. Silently skipped if `window.Lenis` is absent. |
 | `scrollState` | `true` | Writes `aa-scroll-direction` + `aa-scroll-started` on `<body>`; runs the `[aa-toggle-playstate]` IntersectionObserver. |
 | `root` | `document` | Scope the scan to a subtree. Element-scoped inits skip global setup (smoothScroll, scrollState). |
+| `presets` | _unset_ | Class → animation map. Resolved into a virtual `Map<Element, Config>` before scan; no DOM mutation. Per-element `aa-*` attributes always win. See [Class presets](#class-presets-init-presets-). |
 | `debug` | `false` | Verbose console logging. |
+
+### Class presets (`init({ presets })`)
+
+Map a CSS class to one or more `aa-*` attributes at init time so you don't have to add attributes to every matching element. Built for the Webflow workflow: every `.heading-style-h2` animates the same way without opening each symbol.
+
+```ts
+init({
+  presets: {
+    'heading-style-h2': 'text-fade-up',                                // string → aa-animate only
+    'heading-style-h3': { animate: 'text-blur-up', split: 'words' },   // object → bare keys prefixed with aa-
+    'cta-button': { animate: 'fade-up', duration: '0.4|0.3' },         // pipe + suffix syntax work as in HTML
+  },
+})
+```
+
+**Resolution mechanics:**
+
+- Resolved into an **in-memory `Map<Element, Config>`** before scan — never written as real DOM attributes. The browser inspector shows the elements unchanged.
+- Each preset must include an `animate` value (or per-breakpoint variant like `animate-md`). Presets without one are skipped.
+- **Per-element override rule**: if a matched element already has *any* `aa-*` attribute, the preset is skipped for that element. The explicit attribute always wins.
+- **Resolution order**: object insertion order. The first preset entry that matches an element wins; later entries don't merge.
+- **Reduced motion / `optimizeMobile`**: preset elements collapse to the same opacity-fade fallback as hand-authored attributes — no extra wiring.
+- **FOUC**: the `visibility: hidden` until `aa-ready` guard only catches elements with `aa-animate` in the initial HTML, so preset elements are NOT FOUC-protected. Use presets for **below-the-fold** content; hand-author `aa-animate` on anything above the fold.
+
+**Scope**: text (`text-*`) and appear (`fade-*`, `zoom-*`, `slide-*`, `blur-in`, `rotate-*`) animations. Feature-anchor attributes (`aa-tabs`, `aa-slider`, `aa-marquee`, `aa-nav`, `aa-modal-*`, `aa-cursor`, `aa-hover`) are out of the documented use case — those are single-element opt-ins.
 
 ### `DestroyApiOptions`
 

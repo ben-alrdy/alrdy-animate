@@ -36,7 +36,10 @@ export interface ResolvedAttrs {
   buckets: Map<BucketKey, Config>
 }
 
-export function readAttrs(el: Element): ResolvedAttrs {
+export function readAttrs(
+  el: Element,
+  presetEntry?: ReadonlyMap<string, string>,
+): ResolvedAttrs {
   const buckets = new Map<BucketKey, Config>()
   const bucket = (k: BucketKey): Config => {
     let b = buckets.get(k)
@@ -47,8 +50,15 @@ export function readAttrs(el: Element): ResolvedAttrs {
     return b
   }
 
+  // Real attribute on the element wins; preset entry fills holes.
+  const getValue = (name: string): string | null => {
+    const real = el.getAttribute(name)
+    if (real !== null) return real
+    return presetEntry?.get(name) ?? null
+  }
+
   for (const attr of VALUE_BEARING_ATTRS) {
-    const baseValue = el.getAttribute(attr)
+    const baseValue = getValue(attr)
     if (baseValue !== null) {
       const parts = baseValue.split('|')
       if (parts.length === 2) {
@@ -59,7 +69,7 @@ export function readAttrs(el: Element): ResolvedAttrs {
       }
     }
     for (const bp of SUFFIX_KEYS) {
-      const v = el.getAttribute(`${attr}-${bp}`)
+      const v = getValue(`${attr}-${bp}`)
       if (v !== null) bucket(bp)[attr] = v
     }
   }

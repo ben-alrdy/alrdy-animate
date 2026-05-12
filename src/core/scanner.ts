@@ -1,3 +1,4 @@
+import type { ResolvedPreset } from './presets'
 import { VALUE_BEARING_ATTRS } from './settings'
 
 const FEATURE_ANCHOR_ATTRS = [
@@ -47,7 +48,10 @@ export function classifyAnimateValue(value: string | null): FeatureName {
   return 'scroll'
 }
 
-export function scan(root: ParentNode = document): ScanResult {
+export function scan(
+  root: ParentNode = document,
+  presetMap: Map<Element, ResolvedPreset> = new Map(),
+): ScanResult {
   const features = new Set<FeatureName>()
   const elements = new Set<Element>()
 
@@ -71,6 +75,15 @@ export function scan(root: ParentNode = document): ScanResult {
       else if (attr === 'aa-hover') features.add('hover')
       else if (attr === 'aa-cursor') features.add('cursor')
     }
+  }
+
+  // Preset-resolved elements have no `aa-*` attributes (resolvePresets skips
+  // any element that already has one), so they won't be in the queries above.
+  // Fold them in and classify by their virtual aa-animate value.
+  for (const [el, resolved] of presetMap) {
+    elements.add(el)
+    const animateValue = resolved.get('aa-animate') ?? null
+    if (animateValue !== null) features.add(classifyAnimateValue(animateValue))
   }
 
   return { elements: Array.from(elements), features }

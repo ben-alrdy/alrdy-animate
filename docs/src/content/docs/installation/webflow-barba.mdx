@@ -5,7 +5,7 @@ sidebar:
   order: 3
 ---
 
-This guide is for Webflow sites that use [Barba.js](https://barba.js.org/) for SPA-style page transitions. The script setup is the same as the [simple Webflow guide](/getting-started/webflow/) plus the Barba script — what changes is the init wiring: `init()` runs in `beforeEnter` scoped to the new container, and `destroy()` tears down per-page state without disturbing Lenis.
+This guide is for Webflow sites that use [Barba.js](https://barba.js.org/) for SPA-style page transitions. The script setup is the same as the [simple Webflow guide](/installation/webflow/) plus the Barba script — what changes is the init wiring: `init()` runs in `beforeEnter` scoped to the new container, and `destroy()` tears down per-page state without disturbing Lenis.
 
 For the **content** of the transition itself (the visual timeline that plays between pages), see the [Webflow + Barba recipe](/recipes/webflow-barba/) — it documents the Osmo stacked-cards transition with no-pause content-reveal dispatch.
 
@@ -25,7 +25,7 @@ Wrap each page in a `data-barba="container"` inside `data-barba="wrapper"`. The 
 
 ## 1. Site-wide head code
 
-Same as the [simple Webflow guide](/getting-started/webflow/#1-site-wide-head-code), with one extra script — `@barba/core` — added at the end:
+Same as the [simple Webflow guide](/installation/webflow/#1-site-wide-head-code), with one extra script — `@barba/core` — added at the end:
 
 ```html
 <!-- (paste the full head block from the simple guide here, including the

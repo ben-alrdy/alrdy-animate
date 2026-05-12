@@ -1,0 +1,119 @@
+---
+title: Class presets
+description: Map CSS classes to aa-* animations at init time so you don't have to add attributes to every element in a Webflow project. Resolved into a virtual map — no DOM mutation, per-element aa-* always wins.
+sidebar:
+  order: 2
+---
+
+import PresetsDemo from '../../../components/PresetsDemo.astro'
+
+`init({ presets })` lets you set animations once globally. Every element matching a given class behaves as if it had the listed `aa-*` attributes — without touching the DOM.
+
+This is the Webflow shortcut: instead of opening every `.heading-style-h2` symbol and adding `aa-animate="text-fade-up"`, you set it once at init and the library applies it to every match on the page.
+
+## Shape
+
+```js
+AlrdyAnimate.init({
+  presets: {
+    // String shorthand — sets aa-animate only
+    'heading-style-h2': 'text-fade-up',
+
+    // Object — each bare key prefixed with aa- becomes a virtual attribute
+    'heading-style-h3': {
+      animate: 'text-blur-up',
+      split: 'words',
+      duration: '0.8|0.5',  // pipe variants work just like in HTML
+      stagger: '0.05',
+    },
+
+    'cta-button': { animate: 'fade-up', duration: '0.4|0.3' },
+  },
+})
+```
+
+| Value form | Maps to |
+| --- | --- |
+| `string` | `{ animate: <string> }` — sets `aa-animate` only |
+| object | each bare key prefixed with `aa-` (e.g. `split` → `aa-split`, `duration-md` → `aa-duration-md`) |
+
+Pipe variants (`'0.8|0.5'`) and Tailwind-style breakpoint suffix keys (`'animate-md'`) work because preset values flow through the same `readAttrs()` parser as real HTML attributes.
+
+## Rules
+
+| Rule | Behaviour |
+| --- | --- |
+| **Per-element override** | If an element already has *any* `aa-*` attribute, the preset is skipped for that element. The explicit attribute always wins. |
+| **Required `animate`** | Each preset must include `animate` (or a per-breakpoint variant). Presets without one are dropped — with `debug: true`, you get a console warning. |
+| **Resolution order** | Object insertion order. The first preset entry that matches an element wins; later entries don't merge. |
+| **Reduced motion / `optimizeMobile`** | Preset elements collapse to the same opacity-fade fallback as hand-authored attributes — no extra wiring. |
+| **No DOM mutation** | Presets resolve into an in-memory `Map<Element, Config>`. The browser inspector shows the element untouched. |
+| **No FOUC guard** | The `visibility: hidden` until `aa-ready` rule only catches elements that have `aa-animate` in the initial HTML. Use presets for **below-the-fold** content; hand-author `aa-animate` on anything above the fold. |
+
+## Live demo
+
+`PresetsDemo` initialises with this preset map:
+
+```js
+AlrdyAnimate.init({
+  presets: {
+    'heading-style-h2': { animate: 'text-fade-up', split: 'lines' },
+    'heading-style-h3': { animate: 'text-blur-up', split: 'words' },
+    'cta-card':         { animate: 'fade-up', duration: '0.4|0.3' },
+  },
+})
+```
+
+None of the elements below have `aa-*` attributes — they animate purely from the class match. Scroll down to bring them into view. (Open DevTools to confirm: no `aa-animate` on the markup.)
+
+<PresetsDemo caption="presets only — no aa-* attributes on these elements">
+  <div data-demo-stage>
+    <div data-spacer></div>
+    <h2 class="heading-style-h2">Heading h2 — text-fade-up, split lines</h2>
+    <div data-spacer></div>
+    <h3 class="heading-style-h3">Heading h3 — text-blur-up, split words</h3>
+    <div data-spacer></div>
+    <div class="cta-card">cta-card — fade-up</div>
+    <div data-spacer></div>
+  </div>
+</PresetsDemo>
+
+## Override demo
+
+This `h2` carries the same `heading-style-h2` class but adds an explicit `aa-animate="fade-right"`. The preset is skipped — the explicit attribute wins.
+
+<PresetsDemo caption="explicit aa-animate wins over preset">
+  <div data-demo-stage>
+    <div data-spacer></div>
+    <h2 class="heading-style-h2" aa-animate="fade-right">override: fade-right via explicit attribute</h2>
+    <div data-spacer></div>
+  </div>
+</PresetsDemo>
+
+## When to use presets vs hand-authored attributes
+
+**Reach for a preset when…**
+
+- the animation should be consistent for every instance of a class (`heading-style-h2`, `cta-button`, `card-h3`),
+- you have many elements of the same kind and don't want to touch each one in Webflow,
+- the element is below the fold (presets don't trigger the visibility-hidden FOUC rule).
+
+**Hand-author `aa-*` directly when…**
+
+- the element is one-of-a-kind (a hero headline, a single feature callout),
+- the element is above the fold and must be hidden by the FOUC guard until init flips `aa-ready`,
+- you need per-element variation that doesn't fit cleanly into a class.
+
+## Reduced motion + optimizeMobile
+
+Preset elements are indistinguishable from hand-authored ones during the reduced-motion / `optimizeMobile` fade-fallback pass. With either active:
+
+- `text-*` and appear (`fade-*`, `zoom-*`, `slide-*`, `blur-in`, `rotate-*`) presets collapse to a simple opacity fade.
+- `parallax` presets are skipped entirely (parallax is dropped under both modes).
+- Any preset element targeted by the fade pass uses the same timing as hand-authored elements.
+
+No extra wiring required — the preset map is consulted by the fade-fallback pass alongside real attribute lookups.
+
+## Scope
+
+Presets are intended for **text** (`text-*`) and **appear** (`fade-*`, `zoom-*`, `slide-*`, `blur-in`, `rotate-*`) animations. You can technically include other `aa-*` keys in a preset object (`trigger`, `scrub`, `stagger`, etc.), but feature-anchor attributes like `aa-tabs`, `aa-slider`, `aa-marquee`, `aa-nav`, `aa-modal-*`, `aa-cursor`, `aa-hover` are out of the documented use case — those are single-element opt-ins or interactive components, not class-driven animations.

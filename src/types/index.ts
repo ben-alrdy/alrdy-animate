@@ -176,6 +176,54 @@ export interface InitOptions {
    */
   root?: ParentNode
   /**
+   * Class-name → animation presets, applied at init time. Each entry maps a
+   * CSS class to one or more `aa-*` attributes that get virtually attached
+   * to matching elements during scan. Lets you set animations once globally
+   * instead of adding `aa-*` attributes to every heading in a Webflow project.
+   *
+   * Resolved into an in-memory `Map<Element, Config>` — no DOM mutation, no
+   * inspector pollution, no interaction with the FOUC CSS guard.
+   *
+   * Value forms:
+   * - **String** — shorthand for `{ animate: <value> }`. e.g. `'text-fade-up'`.
+   * - **Object** — bare keys are prefixed with `aa-`. e.g. `{ animate: 'text-fade-up', split: 'words', duration: '0.8|0.5' }`.
+   *   Pipe variants and Tailwind-style suffix keys work just like in HTML
+   *   (`'animate-md'` becomes virtual `aa-animate-md`).
+   *
+   * **Per-element override**: if a matched element already has any `aa-*`
+   * attribute, the preset is skipped for that element. The explicit attribute
+   * always wins. To opt a single element out of a preset, give it any `aa-*`
+   * attribute.
+   *
+   * **Resolution order**: object insertion order. The first preset entry that
+   * matches an element wins; later entries don't merge.
+   *
+   * **Scope**: each preset must include an `animate` value (or a per-breakpoint
+   * variant like `animate-md`). Presets without one are skipped. Intended for
+   * text (`text-*`) and appear (`fade-*`, `zoom-*`, `slide-*`, `blur-in`,
+   * `rotate-*`) animations.
+   *
+   * **Reduced motion + optimizeMobile**: preset elements route through the
+   * same fade-fallback pass as hand-authored attributes — no extra wiring.
+   *
+   * **FOUC**: the CSS hide-until-`aa-ready` guard does NOT cover preset
+   * elements (they have no `aa-animate` on first paint). Use presets for
+   * below-the-fold content; hand-author `aa-animate` on anything above the
+   * fold so the guard catches it.
+   *
+   * Example:
+   * ```ts
+   * init({
+   *   presets: {
+   *     'heading-style-h2': 'text-fade-up',
+   *     'heading-style-h3': { animate: 'text-blur-up', split: 'words' },
+   *     'cta-button': { animate: 'fade-up', duration: '0.4|0.3' }
+   *   }
+   * })
+   * ```
+   */
+  presets?: Record<string, string | Record<string, string>>
+  /**
    * Verbose dev-mode console logging. Logs the active feature set, detected
    * GSAP plugins, missing-plugin warnings, and the Lenis status line. Default
    * `false`.

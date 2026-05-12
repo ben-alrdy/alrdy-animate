@@ -1,0 +1,69 @@
+---
+title: Smooth scroll
+description: Lenis-driven smooth scroll, enabled by default. Forward any Lenis option, disable entirely, or omit the Lenis script tag to silently skip. The instance is exposed at window.lenis for custom scripts.
+sidebar:
+  order: 5
+---
+
+alrdy-animate wires [Lenis](https://github.com/darkroomengineering/lenis) into GSAP for you. When `smoothScroll: true` (the default) and `window.Lenis` is present, the lib creates a Lenis instance, attaches it to `gsap.ticker` with `lagSmoothing(0)`, and bridges `ScrollTrigger.update` to Lenis's `scroll` event — every scroll-driven animation follows the smoothed scroll position automatically.
+
+## Defaults
+
+```js
+AlrdyAnimate.init() // smoothScroll: true — Lenis with library defaults
+```
+
+Silently skipped (with a dev-mode warning if `debug: true`) when the Lenis `<script>` tag / npm package isn't loaded.
+
+## Forward Lenis options
+
+Pass an object to forward any [Lenis instance option](https://github.com/darkroomengineering/lenis#instance-options) — `lerp`, `wheelMultiplier`, `touchMultiplier`, `orientation`, `easing`, `infinite`, `autoRaf`, etc.
+
+```js
+AlrdyAnimate.init({
+  smoothScroll: {
+    lerp: 0.08,
+    wheelMultiplier: 1.2,
+    touchMultiplier: 2,
+  },
+})
+```
+
+The object is spread directly into `new Lenis(...)` — nothing alrdy-animate-specific is added or stripped. If a future Lenis release adds a new option, it works without a library update.
+
+## Disable entirely
+
+```js
+AlrdyAnimate.init({ smoothScroll: false })
+```
+
+Or just don't load the Lenis script — same outcome. Native scrolling is fine for most pages.
+
+## Custom-script access
+
+The Lenis instance is exposed at `window.lenis` once `init()` finishes. Use it from project-specific code for programmatic scrolling, scroll position queries, or pause/resume:
+
+```js
+await AlrdyAnimate.ready()
+
+// Programmatic scroll-to (Lenis 1.x API)
+window.lenis.scrollTo('#hero', { offset: -80, duration: 1.2 })
+
+// Pause for a modal, resume on close
+modal.addEventListener('open', () => window.lenis.stop())
+modal.addEventListener('close', () => window.lenis.start())
+```
+
+See the [Lenis API reference](https://github.com/darkroomengineering/lenis#instance-methods) for the full set of methods.
+
+## Page transitions
+
+Smooth scroll is a **global** concern — it lives on `document.documentElement` and survives re-inits when you pass `keepGlobals: true` to `destroy()`. Page-transition libraries (Barba, View Transitions) should preserve it across navigations to keep the scroll position and avoid re-instantiating Lenis on every page swap:
+
+```js
+AlrdyAnimate.destroy({ keepGlobals: true })
+// ...new DOM swapped in...
+await AlrdyAnimate.init({ root: newContainer })   // skips smoothScroll re-init
+```
+
+See the [Webflow + Barba recipe](/recipes/webflow-barba/) for the full lifecycle.

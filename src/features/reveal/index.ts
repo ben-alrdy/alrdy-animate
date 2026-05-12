@@ -1,5 +1,6 @@
 import type { FeatureContext, FeatureModule } from '../../core/registry'
 import { bindAgainTrigger } from '../../core/scroll-trigger'
+import { matchAnimateValue, type ResolvedPreset } from '../../core/presets'
 import { readAttrs, type Config } from '../../core/settings'
 import { defaultStaggerFor } from '../../core/stagger'
 import { onCustomTrigger, parseTriggers } from '../../core/trigger'
@@ -66,18 +67,8 @@ function isSupported(name: string): boolean {
   return CLIP_VARIANTS.has(name) || parseSlicesValue(name) !== null
 }
 
-function elementMatches(el: Element): boolean {
-  const value = el.getAttribute('aa-animate')
-  if (value) {
-    for (const part of value.split('|')) {
-      if (isSupported(part.trim())) return true
-    }
-  }
-  for (const bp of ['sm', 'md', 'lg', 'xl']) {
-    const v = el.getAttribute(`aa-animate-${bp}`)
-    if (v && isSupported(v.trim())) return true
-  }
-  return false
+function elementMatches(el: Element, presetMap: Map<Element, ResolvedPreset>): boolean {
+  return matchAnimateValue(el, presetMap, isSupported)
 }
 
 function parseNum(value: string | undefined, fallback: number): number {
@@ -352,9 +343,9 @@ const revealFeature: FeatureModule = {
   name: 'reveal',
   requiredPlugins: ['ScrollTrigger'],
   init(ctx: FeatureContext): () => void {
-    const subjects = ctx.elements.filter(elementMatches)
+    const subjects = ctx.elements.filter((el) => elementMatches(el, ctx.presetMap))
     for (const element of subjects) {
-      const attrs = readAttrs(element)
+      const attrs = readAttrs(element, ctx.presetMap.get(element))
       ctx.responsive.bind(element, attrs, ({ config }) => setupOne(ctx, element, config))
     }
     return () => {}

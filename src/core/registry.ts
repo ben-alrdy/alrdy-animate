@@ -6,6 +6,7 @@ import type {
 } from '../types/index'
 import type { GsapHandle } from './gsap-detect'
 import type { ResponsiveController } from './match-media'
+import type { ResolvedPreset } from './presets'
 import type { FeatureName } from './scanner'
 
 export interface FeatureContext {
@@ -29,6 +30,14 @@ export interface FeatureContext {
    * opacity fade with these timing values; hover and parallax skip entirely.
    */
   reducedMotion: ReducedMotionOptions | null
+  /**
+   * Class → animation preset resolution for this init. Elements only appear
+   * here when (a) their class matched an `init({ presets })` entry and (b)
+   * they have no `aa-*` attribute (the element's own attribute always wins).
+   * Features pass `presetMap.get(el)` into `readAttrs()` as a fallback
+   * attribute source and use `matchAnimateValue()` in their element matchers.
+   */
+  presetMap: Map<Element, ResolvedPreset>
   onResize: (fn: ResizeCallback, debounce?: number) => ResizeUnsubscribe
 }
 

@@ -10,6 +10,7 @@ import type {
 import { detectGsap, type GsapHandle } from './gsap-detect'
 import { createResponsiveController, type ResponsiveController } from './match-media'
 import { NAMED_EASES } from './named-eases'
+import { resolvePresets } from './presets'
 import {
   OPTIMIZE_MOBILE_FADE_FEATURES,
   OPTIMIZE_MOBILE_REPLACED_FEATURES,
@@ -114,6 +115,14 @@ export async function init(options: InitOptions = {}): Promise<void> {
   const debug = options.debug ?? false
   const root = options.root ?? document
 
+  // Resolve class → animation presets BEFORE scan so the scanner can fold in
+  // preset-only elements (those with no `aa-*` attrs) and classify them by
+  // their virtual `aa-animate` value. The map is in-memory only — we never
+  // mutate the DOM. Elements with any explicit `aa-*` attribute are skipped
+  // by `resolvePresets()`, honouring the "attribute wins over preset" rule.
+  const presetMap = resolvePresets(root, options.presets, debug)
+  state.presetMap = presetMap
+
   // Detect reduced motion + mobile-optimization eagerly so that:
   //  (1) we can drop decorative feature modules from the load set entirely,
   //  (2) outside scripts reading `AlrdyAnimate.options.reducedMotion` /
@@ -134,7 +143,7 @@ export async function init(options: InitOptions = {}): Promise<void> {
   state.options.reducedMotion = !!reducedMotion
   state.options.optimizeMobile = optimizeMobile
 
-  const { elements, features } = scan(root)
+  const { elements, features } = scan(root, presetMap)
   if (elements.length === 0) {
     resolveReady()
     return
@@ -253,6 +262,7 @@ export async function init(options: InitOptions = {}): Promise<void> {
       reducedMotion: fadeTiming,
       firstInit: !state.firstInitComplete,
       fadeFor: fadeFeatures,
+      presetMap,
     })
     addDisposer(disposeFade)
   }
@@ -266,6 +276,7 @@ export async function init(options: InitOptions = {}): Promise<void> {
     debug,
     firstInit: !state.firstInitComplete,
     reducedMotion,
+    presetMap,
     onResize: (fn, debounce = 150) => subscribeResize(fn, debounce),
   }
   for (const mod of featureModules) {
@@ -282,6 +293,8 @@ export async function init(options: InitOptions = {}): Promise<void> {
   // flipping aa-ready here only changes `visibility: hidden` → `visible`
   // without exposing pre-animation content. Elements that never matched any
   // breakpoint still get revealed so the page isn't stuck blank.
+  // Preset elements have no `aa-animate` attribute (the preset map fills
+  // that in virtually) and weren't FOUC-hidden in the first place — skip them.
   for (const el of elements) {
     if (el.hasAttribute('aa-animate')) el.setAttribute('aa-ready', '')
   }
@@ -342,6 +355,7 @@ export function destroy(options: DestroyApiOptions = {}): void {
   clearResize()
   activeHandles = null
   state.initialized = false
+  state.presetMap = new Map()
 
   if (!options.keepGlobals) {
     state.smoothScroll?.dispose()

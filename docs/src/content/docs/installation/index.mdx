@@ -11,9 +11,9 @@ alrdy-animate ships GSAP and Lenis as **external dependencies** — they are nev
 
 | Guide | When to use it |
 | --- | --- |
-| [Webflow](/getting-started/webflow/) | A Webflow site with no page-transition library. Copy/paste blocks for site-wide and page-specific custom code. |
-| [Webflow + Barba](/getting-started/webflow-barba/) | A Webflow site that uses [Barba.js](https://barba.js.org/) for page transitions. Wires `init` / `destroy` into Barba's hooks. |
-| [Next.js](/getting-started/nextjs/) | A Next.js project (App Router or Pages Router). Includes a client `AlrdyInit` component to mount in your root layout. |
+| [Webflow](/installation/webflow/) | A Webflow site with no page-transition library. Copy/paste blocks for site-wide and page-specific custom code. |
+| [Webflow + Barba](/installation/webflow-barba/) | A Webflow site that uses [Barba.js](https://barba.js.org/) for page transitions. Wires `init` / `destroy` into Barba's hooks. |
+| [Next.js](/installation/nextjs/) | A Next.js project (App Router or Pages Router). Includes a client `AlrdyInit` component to mount in your root layout. |
 
 ## Required scripts
 
@@ -44,30 +44,11 @@ The library exposes the following on `window.AlrdyAnimate` (UMD) and as named ex
 | `ready()` | Returns a Promise that resolves after the most recent `init()` finishes mounting features and registering plugins/eases. Resolves immediately when called before any init, or after the previous init has already completed. Each new `init()` / `refresh()` creates a fresh promise. |
 | `options` | Live readonly snapshot of the resolved options after `init()` — every `InitOptions` field with defaults filled in, plus `reducedMotion` / `optimizeMobile` collapsed to the booleans the lib actually uses internally. Reads always reflect the most recent init. |
 
-`init` / `destroy` / `refresh` are the lifecycle hooks for Barba, View Transitions, or any other page-transition library — see the [Webflow + Barba recipe](/recipes/webflow-barba/) for a full example. `ready` + `options` + `onResize` are the interop surface for project-specific GSAP scripts that load alongside the lib (custom navs, sliders, scroll-driven scenes) — see the [Webflow guide](/getting-started/webflow/#global-gsap-code-runs-on-every-page) for the recommended pattern.
+`init` / `destroy` / `refresh` are the lifecycle hooks for Barba, View Transitions, or any other page-transition library — see the [Webflow + Barba recipe](/recipes/webflow-barba/) for a full example. `ready` + `options` + `onResize` are the interop surface for project-specific GSAP scripts that load alongside the lib (custom navs, sliders, scroll-driven scenes) — see the [Webflow guide](/installation/webflow/#global-gsap-code-runs-on-every-page) for the recommended pattern.
 
-For the full list of options accepted by `init()` (and their defaults — `duration: 0.6`, `ease: 'power4.out'`, `scrollStart: 'top 92%'`, `again: true`, `smoothScroll: true`, …) see [Init options](/getting-started/init-options/).
+For the full list of options accepted by `init()` (and their defaults — `duration: 0.6`, `ease: 'power4.out'`, `scrollStart: 'top 92%'`, `again: true`, `smoothScroll: true`, …) see [Init options](/initialization/init-options/).
 
 ## AI assistants
 
-alrdy-animate ships an `AGENTS.md` reference inside the npm package so AI coding assistants (Claude Code, Cursor, Aider, Continue) can use the library accurately on the first try — no docs web-fetch required. The platform-specific guides include a copy-paste snippet for referencing it from your project's own AI-instruction file ([Next.js](/getting-started/nextjs/#using-with-ai-assistants-claude-code-cursor-etc), [Webflow](/getting-started/webflow/#using-with-ai-assistants-claude-code-cursor-etc)).
+alrdy-animate ships an `AGENTS.md` reference inside the npm package so AI coding assistants (Claude Code, Cursor, Aider, Continue) can use the library accurately on the first try — no docs web-fetch required. The platform-specific guides include a copy-paste snippet for referencing it from your project's own AI-instruction file ([Next.js](/installation/nextjs/#using-with-ai-assistants-claude-code-cursor-etc), [Webflow](/installation/webflow/#using-with-ai-assistants-claude-code-cursor-etc)).
 
-## Smooth scroll
-
-Lenis is enabled **by default**. The library detects `window.Lenis` at init and wires it to GSAP's ticker (`gsap.ticker.add` + `gsap.ticker.lagSmoothing(0)`) and to `ScrollTrigger.update`, so all scroll-driven animations follow the smoothed scroll position.
-
-```js
-// Disable entirely
-AlrdyAnimate.init({ smoothScroll: false })
-
-// Or pass any Lenis option (https://github.com/darkroomengineering/lenis#instance-options)
-AlrdyAnimate.init({
-  smoothScroll: {
-    lerp: 0.08,
-    wheelMultiplier: 1.2,
-    touchMultiplier: 2,
-  }
-})
-```
-
-If you simply omit the Lenis `<script>` tag, smooth scroll is silently skipped (with a dev-mode warning if `debug: true`). The Lenis instance is exposed at `window.lenis` for custom scripts (`window.lenis.scrollTo(...)`, `.start()`, `.stop()`).

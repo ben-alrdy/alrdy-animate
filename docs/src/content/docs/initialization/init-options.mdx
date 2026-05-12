@@ -2,7 +2,7 @@
 title: Init options
 description: All InitOptions accepted by AlrdyAnimate.init() with their defaults. These are the single source of truth — feature modules don't carry their own per-animation duration / ease / stagger fallbacks.
 sidebar:
-  order: 5
+  order: 1
 ---
 
 `AlrdyAnimate.init(options)` accepts a single options object. Every field is optional — anything you don't pass falls back to the defaults below.
@@ -24,63 +24,20 @@ The values listed under **Default** are the **single source of truth** for the w
 | `stagger` | `{ chars: 0.02, words: 0.05, lines: 0.1, default: 0.1 }` | Per-split-mode stagger defaults (seconds). The lib picks the value matching the resolved `aa-split`; `aa-children` without a split falls back to `default`. Per-element override: `aa-stagger`. |
 | `autoplay` | `{ interval: 4, hoverPause: false }` | Slider/tabs autoplay defaults. Per-element override: `aa-autoplay="<seconds> [hover-pause]"`. |
 | `breakpoints` | `{ sm: 480, md: 768, lg: 992, xl: 1280 }` | Pixel widths for the `aa-foo-md`/`aa-foo-lg` suffixes and the `\|` shorthand (which splits at `md`). Pass a partial object to override one breakpoint: `{ md: 900 }`. |
-| `reducedMotion` | `true` | Behaviour under `(prefers-reduced-motion: reduce)`. `true` collapses appear/text/reveal animations to a simple opacity fade (`{ duration: 0.4, ease: 'power1.out' }`) and skips hover + parallax entirely; tabs/slider/marquee/nav/modal stay functional. Pass `false` to ignore the OS preference, or an object `{ duration, ease }` to customize the fade timing. Snapshotted at init — toggle the OS preference and call `refresh()` to re-evaluate. |
-| `optimizeMobile` | `false` | Drop the heaviest decorative features on small viewports for a faster mobile experience. When `true` and the viewport is below `breakpoints.md`, `text-*` animations collapse to a simple opacity fade (SplitText is not loaded), `parallax` is skipped entirely, and the standalone `aa-split` utility is a no-op. Appear (fade/zoom/slide/rotate/blur), reveal, hover, and all components run normally. Snapshotted at init — call `refresh()` after a viewport-crossing resize to re-evaluate. |
-| `smoothScroll` | `true` | Smooth scroll via Lenis. `true` creates a Lenis instance with library defaults; an object forwards [Lenis options](https://github.com/darkroomengineering/lenis#instance-options) (`lerp`, `wheelMultiplier`, `orientation`, `easing`, …); `false` disables. If the Lenis script/package isn't loaded, the option is silently skipped (dev-mode warning if `debug: true`). |
+| `reducedMotion` | `true` | Collapse appear / text / reveal animations to a simple opacity fade under `(prefers-reduced-motion: reduce)`; skip hover + parallax. Pass `false` to ignore the OS preference, or an object `{ duration, ease }` to customize the fade timing. See [Reduced motion](/initialization/reduced-motion/) for the full feature-by-feature breakdown. |
+| `optimizeMobile` | `false` | Drop the heaviest decorative features (`text-*`, `parallax`, standalone `aa-split`) when the viewport is below `breakpoints.md`. Appear / reveal / components run unchanged. See [Mobile optimization](/initialization/mobile-optimization/) for what changes and why. |
+| `smoothScroll` | `true` | Lenis-driven smooth scroll. `true` creates a Lenis instance with library defaults; an object forwards any [Lenis option](https://github.com/darkroomengineering/lenis#instance-options); `false` disables. Silently skipped (dev-mode warning) when Lenis isn't loaded. See [Smooth scroll](/initialization/smooth-scroll/) for forwarded options, custom-script access (`window.lenis`), and page-transition behaviour. |
 | `scrollState` | `true` | Body scroll-state tracking: writes `aa-scroll-direction="up\|down"` and `aa-scroll-started="true\|false"` on `<body>`, and runs the `[aa-toggle-playstate]` IntersectionObserver. Pass `false` to opt out. |
 | `root` | `document` | Subtree to scan for `aa-*` elements. Pass a specific element to scope a re-init — useful for page-transition libs (Barba, View Transitions) that swap a container in while leaving the rest of the page intact. Element-scoped inits skip the global once-per-app setup (`smoothScroll`, `scrollState`, scroll-target). |
+| `presets` | _unset_ | Class → animation map. Each entry maps a CSS class to one or more `aa-*` attributes that get virtually attached to matching elements — no DOM mutation, no FOUC interaction. Per-element `aa-*` always wins over the preset. See [Class presets](/initialization/presets/) for the full reference + live demos. |
 | `debug` | `false` | Verbose dev-mode console logging: active feature set, detected GSAP plugins, missing-plugin warnings, Lenis status. |
 
-## Reduced motion in detail
+## Related pages
 
-With the default `reducedMotion: true`, when the OS reports `(prefers-reduced-motion: reduce)`:
-
-| Feature | Behaviour |
-| --- | --- |
-| `aa-animate` — fade / slide / zoom / blur / rotate | Collapse to opacity 0 → 1 with `duration: 0.4`, `ease: 'power1.out'`. `aa-trigger`, `aa-delay`, `aa-stagger`, and `aa-scrub` still work. |
-| `aa-animate` — text-* | Same simple fade on the host element. `aa-split` is skipped entirely, so screen readers and copy-paste see the natural text. |
-| `aa-animate` — reveal-* / reveal-slices-* | Same simple fade. The slice overlay panel is never built. |
-| `aa-hover` | Skipped entirely — hover-driven choreography is purely decorative. |
-| `aa-animate` — parallax / parallax-horizontal | Skipped entirely — elements render at their natural position. |
-| `aa-tabs`, `aa-slider`, `aa-marquee`, `aa-nav`, `aa-modal` | Unchanged — these are interactive components, not decorative motion. |
-
-Customize the fade timing:
-
-```js
-AlrdyAnimate.init({
-  reducedMotion: { duration: 0.3, ease: 'linear' },
-})
-```
-
-Or opt out completely:
-
-```js
-AlrdyAnimate.init({ reducedMotion: false })
-```
-
-The OS preference is read once at `init()` time. If you want to react to a runtime change (the user toggles their setting), call `refresh()` from a `matchMedia` change listener.
-
-## Mobile optimization
-
-`optimizeMobile: true` is a viewport-driven version of the same fade-fallback mechanism, tuned for performance rather than accessibility. When the viewport is below `breakpoints.md` (default 768px):
-
-| Feature | Behaviour |
-| --- | --- |
-| `aa-animate` — fade / zoom / slide / blur / rotate | **Unchanged.** Cheap GSAP tweens; they add real value for mobile hierarchy. |
-| `aa-animate` — text-* | Collapse to simple opacity fade. **SplitText is not loaded** — no per-char DOM, no layout-parsing cost. |
-| `aa-animate` — reveal / reveal-slices | **Unchanged.** Clip-path is GPU-friendly. |
-| `aa-animate` — parallax / parallax-horizontal | **Skipped entirely.** Continuous scroll-driven transforms are the classic mobile perf killer. |
-| `aa-split` (standalone utility) | No-op — text stays un-split. |
-| `aa-hover` | Already skipped on touch-only devices. |
-| `aa-tabs`, `aa-slider`, `aa-marquee`, `aa-nav`, `aa-modal`, `aa-cursor` | Unchanged. |
-
-The win is biggest for sites with heavy text animation: SplitText creates 50–200 spans per heading and registers a ScrollTrigger per char/word/line. On a mobile-heavy page that's the bulk of the JS cost.
-
-```js
-AlrdyAnimate.init({ optimizeMobile: true })
-```
-
-`reducedMotion` always wins over `optimizeMobile` when both fire — its drop set is a superset and its fade timing is the OS-preference-driven one.
+- [Class presets](/initialization/presets/) — map CSS classes to `aa-*` animations so you don't have to add attributes to every element.
+- [Reduced motion](/initialization/reduced-motion/) — what `reducedMotion: true` does to each feature, custom fade timing, opting out.
+- [Mobile optimization](/initialization/mobile-optimization/) — what `optimizeMobile: true` drops on small viewports and why.
+- [Smooth scroll](/initialization/smooth-scroll/) — Lenis configuration, `window.lenis` access, page-transition behaviour.
 
 ## How attribute fallbacks work
 
@@ -106,24 +63,6 @@ AlrdyAnimate.init({
 ```
 
 `stagger`, `autoplay`, and `breakpoints` are merged into their defaults — pass any subset.
-
-## Example — disabling smooth scroll
-
-```js
-AlrdyAnimate.init({ smoothScroll: false })
-```
-
-Or pass Lenis options through:
-
-```js
-AlrdyAnimate.init({
-  smoothScroll: {
-    lerp: 0.08,
-    wheelMultiplier: 1.2,
-    touchMultiplier: 2,
-  },
-})
-```
 
 ## Example — scoped re-init for page transitions
 

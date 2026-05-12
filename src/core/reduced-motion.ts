@@ -1,5 +1,6 @@
 import type { ReducedMotionOptions, ResolvedOptions } from '../types/index'
 import type { GsapHandle } from './gsap-detect'
+import { resolveAnimateValue, type ResolvedPreset } from './presets'
 import { classifyAnimateValue, type FeatureName } from './scanner'
 import { onCustomTrigger, resolveTriggers } from './trigger'
 
@@ -53,6 +54,12 @@ export interface FadeFallbackDeps {
    * array — they belong to features that are still loading normally.
    */
   fadeFor: ReadonlySet<FeatureName>
+  /**
+   * Class → preset resolution. Lets the fade pass look up `aa-animate` for
+   * preset elements that have no real attribute on them. Pass an empty map
+   * when no `presets` option was set.
+   */
+  presetMap: Map<Element, ResolvedPreset>
 }
 
 /**
@@ -63,27 +70,35 @@ export function runFadeFallbackPass(
   elements: Element[],
   deps: FadeFallbackDeps,
 ): () => void {
-  const { gsap: gsapHandle, options, reducedMotion, firstInit, fadeFor } = deps
+  const { gsap: gsapHandle, options, reducedMotion, firstInit, fadeFor, presetMap } = deps
   const { duration, ease } = reducedMotion
   const fromState = { opacity: 0 } as const
   const toState = { opacity: 1 } as const
   const listenerDisposers: Array<() => void> = []
+
+  // Same precedence as everywhere else: real attribute wins, preset map fills
+  // holes. Lets preset elements participate in the fade-fallback pass.
+  const getAttr = (element: Element, name: string): string | null => {
+    const real = element.getAttribute(name)
+    if (real !== null) return real
+    return presetMap.get(element)?.get(name) ?? null
+  }
 
   // gsap.context() captures every tween + ScrollTrigger created inside it,
   // so a single ctx.revert() at destroy time cleans up the whole pass.
   // Custom event listeners (aa-trigger="event:...") are tracked separately.
   const gsapCtx = gsapHandle.gsap.context(() => {
     for (const element of elements) {
-      const animateValue = element.getAttribute('aa-animate')
+      const animateValue = resolveAnimateValue(element, presetMap)
       if (!animateValue) continue
       const classified = classifyAnimateValue(animateValue)
       if (!fadeFor.has(classified)) continue
 
-      const delay = parseNum(element.getAttribute('aa-delay'), 0)
-      const scrollStart = element.getAttribute('aa-scroll-start') ?? options.scrollStart
-      const scrollEnd = element.getAttribute('aa-scroll-end') ?? options.scrollEnd
-      const scrub = parseScrub(element.getAttribute('aa-scrub'))
-      const triggers = resolveTriggers(element, element.getAttribute('aa-trigger') ?? undefined)
+      const delay = parseNum(getAttr(element, 'aa-delay'), 0)
+      const scrollStart = getAttr(element, 'aa-scroll-start') ?? options.scrollStart
+      const scrollEnd = getAttr(element, 'aa-scroll-end') ?? options.scrollEnd
+      const scrub = parseScrub(getAttr(element, 'aa-scrub'))
+      const triggers = resolveTriggers(element, getAttr(element, 'aa-trigger') ?? undefined)
       const hasLoad = triggers.some((t) => t.kind === 'load')
 
       if (hasLoad && firstInit) {

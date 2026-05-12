@@ -6,6 +6,7 @@ import type {
   ResolvedOptions,
   StaggerOptions,
 } from '../types/index'
+import type { ResolvedPreset } from './presets'
 import type { SmoothScrollHandle } from '../smooth-scroll/index'
 
 export const DEFAULT_BREAKPOINTS: Breakpoints = {
@@ -101,6 +102,14 @@ export interface InternalState {
    * while the new container is hidden behind the transition wrapper.
    */
   firstInitComplete: boolean
+  /**
+   * Class-name → animation preset resolution from the last `init()` call.
+   * Populated by `resolvePresets()` before scan; consumed by scanner +
+   * `readAttrs()` as a fallback attribute source. Empty when no `presets`
+   * option was passed. Reset on every destroy() so the next init starts
+   * fresh.
+   */
+  presetMap: Map<Element, ResolvedPreset>
 }
 
 const initial = (): InternalState => ({
@@ -112,6 +121,7 @@ const initial = (): InternalState => ({
   scrollStateDispose: null,
   scrollTargetDispose: null,
   firstInitComplete: false,
+  presetMap: new Map(),
 })
 
 export const state: InternalState = initial()

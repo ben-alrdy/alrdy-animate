@@ -1,0 +1,71 @@
+---
+title: Mobile optimization
+description: The optimizeMobile flag drops the heaviest decorative features (text splits, parallax, standalone aa-split) on viewports below the md breakpoint. Tuned for performance rather than accessibility — appear and component features run unchanged.
+sidebar:
+  order: 4
+---
+
+`optimizeMobile: true` is a viewport-driven variant of the reduced-motion fade fallback, tuned for performance rather than accessibility. When the viewport is below `breakpoints.md` (default 768px), the heaviest decorative features are dropped and their elements collapse to a simple opacity fade.
+
+```js
+AlrdyAnimate.init({ optimizeMobile: true })
+```
+
+Off by default. Enable per-project when mobile FCP / LCP matters more than the full set of text animations.
+
+## What changes
+
+With `optimizeMobile: true` and viewport `< breakpoints.md`:
+
+| Feature | Behaviour |
+| --- | --- |
+| `aa-animate` — fade / zoom / slide / blur / rotate | **Unchanged.** Cheap GSAP tweens; they add real value for mobile hierarchy. |
+| `aa-animate` — text-* | Collapse to simple opacity fade. **SplitText is not loaded** — no per-char DOM, no layout-parsing cost. |
+| `aa-animate` — reveal / reveal-slices | **Unchanged.** Clip-path is GPU-friendly. |
+| `aa-animate` — parallax / parallax-horizontal | **Skipped entirely.** Continuous scroll-driven transforms are the classic mobile perf killer. |
+| `aa-split` (standalone utility) | No-op — text stays un-split. |
+| `aa-hover` | Already skipped on touch-only devices. |
+| `aa-tabs`, `aa-slider`, `aa-marquee`, `aa-nav`, `aa-modal`, `aa-cursor` | Unchanged. |
+
+The win is biggest for sites with heavy text animation. SplitText creates 50–200 spans per heading and registers a ScrollTrigger per char/word/line; on a mobile-heavy page that's the bulk of the JS cost.
+
+## Snapshot semantics
+
+The viewport check fires **once at `init()` time** — `AlrdyAnimate.options.optimizeMobile` is `true` only if the option is set AND the viewport was below `breakpoints.md` when init ran. Resize past the breakpoint while the page is open and the lib does **not** auto-rewire. Call `refresh()` to re-evaluate if you need that:
+
+```js
+window.matchMedia(`(min-width: ${AlrdyAnimate.options.breakpoints.md}px)`).addEventListener(
+  'change',
+  () => AlrdyAnimate.refresh(),
+)
+```
+
+Most projects don't need this — mobile users don't resize past the md breakpoint without reloading. Add it only if you're testing across viewports during one session.
+
+## Custom GSAP scripts
+
+Custom code can read the same snapshot to mirror the lib's choices:
+
+```js
+await AlrdyAnimate.ready()
+const { optimizeMobile } = AlrdyAnimate.options
+if (!optimizeMobile) {
+  // run the heavy thing
+}
+```
+
+## Interaction with `reducedMotion`
+
+If both fire on the same page, **`reducedMotion` wins** — its drop set is a superset (also drops fade / zoom / slide / blur / rotate, hover) and its fade timing is the OS-preference-driven one. See [Reduced motion](/initialization/reduced-motion/) for the accessibility-driven variant.
+
+## How is this different from `reducedMotion`?
+
+| | `reducedMotion` | `optimizeMobile` |
+| --- | --- | --- |
+| Trigger | OS preference `(prefers-reduced-motion: reduce)` | Viewport `< breakpoints.md` |
+| Intent | Accessibility | Performance |
+| Default | `true` | `false` |
+| Drops | appear, text, reveal, hover, parallax | text, parallax, standalone split |
+| Fade timing | `{ duration: 0.4, ease: 'power1.out' }` (configurable) | Same as reduced-motion timing |
+
+Set `optimizeMobile: true` if you want the perf win on every small-viewport visit without needing the user to have OS reduced-motion enabled.

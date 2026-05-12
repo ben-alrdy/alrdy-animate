@@ -439,6 +439,17 @@ declare namespace JSX {
      */
     'aa-cursor-trigger'?: string | boolean
     /**
+     * Offset of the cursor element relative to the mouse, in percent of the
+     * cursor element's own width/height. Two space-separated numbers: `"x y"`.
+     * Place on the `[aa-cursor]` element. Default `"6 -140"` — cursor sits
+     * slightly to the right of the mouse and 140% above it (bottom edge at
+     * mouse). Examples: `"-50 -50"` (centered on mouse), `"0 0"` (top-left
+     * corner at mouse), `"-100 -100"` (bottom-right corner at mouse).
+     * Near the right/bottom viewport edge the cursor flips to fixed safe
+     * offsets so it never clips off-screen.
+     */
+    'aa-cursor-offset'?: string
+    /**
      * Catch-all for custom cursor state attributes. The cursor module reads
      * the suffix and toggles it on the cursor element when triggered.
      * Examples: `aa-cursor-link`, `aa-cursor-drag`, `aa-cursor-text`.
