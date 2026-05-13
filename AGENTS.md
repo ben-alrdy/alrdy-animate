@@ -1,6 +1,8 @@
 <!--
-  Last synced with src/ at v8.0.0-alpha.0 (2026-05-11) — added `presets` init
-  option (class → animation map; virtual attributes, no DOM mutation).
+  Last synced with src/ at v8.0.0-alpha.5 (2026-05-13) — added
+  `aa-trigger="page-enter"` for SPA route re-entry; documented the global
+  contract (window.gsap / Lenis / lenis / AlrdyAnimate); init() now safely
+  re-attaches scroll-state + scroll-target across `keepGlobals: true` cycles.
   This file mirrors the public API surface for AI coding agents. When any
   public aa-* attribute, InitOptions field, feature module, or trigger kind
   changes in src/, update this file in the same commit. See CLAUDE.md
@@ -55,6 +57,31 @@ Add `import 'alrdy-animate/jsx'` once in `types/global.d.ts` so JSX intrinsic el
 
 ---
 
+## Globals the lib reads and writes
+
+Four `window` globals are in play. The lib *reads* peer dependencies (gsap, Lenis) and *writes* its public API + the Lenis instance. Knowing who owns which lets you skip writing your own integration shim.
+
+| Global | Owner | Purpose |
+|---|---|---|
+| `window.gsap` | You (script tag UMD or `window.gsap = m.gsap`) | GSAP core. The lib detects it during `init()`. Never written by the lib. |
+| `window.Lenis` (capital L) | You (script tag UMD or `window.Lenis = m.default`) | Lenis **constructor**. The lib reads this when `smoothScroll: true` to instantiate Lenis. Never written by the lib. |
+| `window.lenis` (lowercase l) | The lib | Active Lenis **instance**, set once `smoothScroll` is initialised. Call `.scrollTo()`, `.stop()`, `.start()` directly. Persists across `destroy({ keepGlobals: true })`. Removed by plain `destroy()`. |
+| `window.AlrdyAnimate` | The lib | Public API (`init`, `destroy`, `refresh`, `onResize`, `ready`, `options`). |
+
+**Driving Lenis from app code** (mobile menu open/close, custom anchor scroll):
+
+```js
+// Pause Lenis while a menu is open
+window.lenis?.stop()
+// Restart and scroll smoothly to a section
+window.lenis?.start()
+window.lenis?.scrollTo('#features', { offset: -80, duration: 0.8 })
+```
+
+The lib's own scroll-target click handler (`[aa-scroll-target]`) uses `window.lenis` the same way — feel free to call it directly for anything outside that pattern.
+
+---
+
 ## Attribute syntax conventions
 
 Every value-bearing attribute follows the same grammar.
@@ -75,16 +102,19 @@ The `|` shorthand and the `-sm/-md/-lg/-xl` suffixes both compile to exclusive w
 
 ## Trigger system (`aa-trigger`)
 
-The four trigger kinds:
+The five trigger kinds:
 
 | Value | Behaviour |
 |---|---|
 | (omitted) or `scroll` | ScrollTrigger between `aa-scroll-start` and `aa-scroll-end`. Replays on re-enter unless `init({ again: false })`. |
 | `click` | Element animates when clicked. |
-| `load` | Fires on the **first** `init()` cycle of the page session. Subsequent `init()`s (e.g. after a Barba navigation) skip it. |
+| `load` | Fires on the **first** `init()` cycle of the page session. Subsequent `init()`s (e.g. after a Barba navigation) skip it. Use for transitions where the new container is hidden behind a transition wrapper and re-firing the entrance would waste work. |
+| `page-enter` | Fires on **every** `init()` cycle, including the first. Use for SPAs (Next.js App Router, etc.) where the same root `AlrdyInit` component re-calls `init()` on route changes — the user is visually arriving at a "fresh" page even though it's the second, third, Nth init. |
 | `event:<name>` | Listens for `aa:trigger` CustomEvents with `detail.name === '<name>'` on the element or any ancestor. |
 
-**Multiple kinds** are space-separated and additive: `aa-trigger="load event:enter"`.
+**Choosing between `load` and `page-enter`:** Barba / View Transitions / any flow where the leaving page is still on screen during the swap → `load` (avoids replaying behind the wrapper). Next.js App Router back/forward nav, or any SPA where each route is a clean visual arrival → `page-enter`.
+
+**Multiple kinds** are space-separated and additive: `aa-trigger="load event:enter"` or `aa-trigger="page-enter event:enter"`.
 
 **Container inference** — if `aa-trigger` is omitted and the element is inside one of these containers, it inherits the matching event trigger:
 
@@ -240,7 +270,16 @@ init({
 </h1>
 ```
 
-`aa-animate-md` activates at `>= 768px`; below, no animation. `aa-trigger="load"` fires on the first init cycle (won't replay on subsequent SPA navigations).
+`aa-animate-md` activates at `>= 768px`; below, no animation. `aa-trigger="load"` fires once per page session. For Next.js / SPAs where `init()` re-runs on every route change and you want the animation each time the user arrives, swap to `aa-trigger="page-enter"`.
+
+### Hero animation on every Next.js route entry (back/forward nav)
+
+```html
+<h1 aa-animate="text-tilt-up" aa-trigger="page-enter">Welcome</h1>
+<a aa-animate="fade-up" aa-trigger="page-enter">Get started</a>
+```
+
+In a Next.js App Router setup where `AlrdyInit` calls `destroy({ keepGlobals: true })` + `init()` on every `usePathname()` change, `page-enter` fires the animation on the first paint AND on every subsequent route entry (including browser back/forward).
 
 ### Slider draggable on mobile, scroll-snap on desktop
 

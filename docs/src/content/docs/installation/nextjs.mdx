@@ -103,10 +103,12 @@ import 'alrdy-animate/jsx'
 Then in your components:
 
 ```tsx
-<h1 aa-animate="text-slide-up" aa-split="lines mask" aa-trigger="load">
+<h1 aa-animate="text-slide-up" aa-split="lines mask" aa-trigger="page-enter">
   Headline
 </h1>
 ```
+
+**Why `page-enter` and not `load`?** In Next.js App Router, the `AlrdyInit` component lives in the root layout and persists across route changes. If you re-init on `usePathname()` change (see [SPA route changes](#spa-route-changes) below), the second/third/Nth call to `init()` is the user's first *visual* arrival on that page — but `load` treats it as a subsequent init and skips. `page-enter` fires on every `init()` cycle so back/forward nav and `<Link>` clicks all animate the hero. See [aa-trigger](/animations/utilities/aa-trigger/) for the full comparison.
 
 ## Using with AI assistants (Claude Code, Cursor, etc.)
 
@@ -176,8 +178,53 @@ export function NavScrollEffect() {
 
 `ready()` resolves immediately if `init()` has already completed; `options` is a live readonly snapshot (`reducedMotion`, `optimizeMobile`, `breakpoints`, `duration`, `ease`, `distance`, ...). See [Custom GSAP scripts alongside v8](https://github.com/ben-alrdy/alrdy-animate/blob/main/AGENTS.md#custom-gsap-scripts-alongside-v8) in `AGENTS.md` for the full interop pattern.
 
+## SPA route changes
+
+In App Router, the same `AlrdyInit` instance survives every navigation — only the route's content swaps in. New `aa-*` elements on the new route don't get scanned unless you re-run `init()`. The pattern: subscribe to `usePathname()` changes and `destroy({ keepGlobals: true })` + `init()` on each change.
+
+```tsx
+'use client'
+import { useEffect } from 'react'
+import { usePathname } from 'next/navigation'
+import 'alrdy-animate/style'
+
+export function AlrdyInit() {
+  const pathname = usePathname()
+
+  useEffect(() => {
+    let cancelled = false
+    const run = async () => {
+      // First-mount: load peer deps once. Subsequent navigations skip this.
+      if (!(window as any).gsap) {
+        await Promise.all([
+          import('gsap').then(m => { (window as any).gsap = m.gsap }),
+          import('gsap/ScrollTrigger').then(m => { (window as any).ScrollTrigger = m.ScrollTrigger }),
+          import('gsap/CustomEase').then(m => { (window as any).CustomEase = m.CustomEase }),
+          import('lenis').then(m => { (window as any).Lenis = m.default }),
+        ])
+      }
+      if (cancelled) return
+      const { init, destroy } = await import('alrdy-animate')
+      // Tear down per-route state (matchMedia contexts, ScrollTriggers,
+      // feature inits) but keep Lenis alive so scroll velocity survives
+      // the swap. Then re-init against the fresh DOM.
+      destroy({ keepGlobals: true })
+      await init({ debug: process.env.NODE_ENV !== 'production' })
+    }
+    run()
+    return () => { cancelled = true }
+  }, [pathname])
+
+  return null
+}
+```
+
+`keepGlobals: true` leaves Lenis, the body scroll-state observer, and the scroll-target click handler alive across the cycle. `init()` re-scans the DOM on every cycle and re-attaches scroll-target / scroll-state listeners to the new route's elements — clicks on `[aa-scroll-target]` links on the new route work without further wiring.
+
+For elements that should animate **every time** the user lands on the route (cold load, forward `<Link>` click, browser back/forward), use `aa-trigger="page-enter"` instead of `aa-trigger="load"`.
+
 ## Page transitions
 
-Page-transition wiring (Next.js View Transitions, `next/dynamic` route guards, framer-motion `<AnimatePresence>`) is **deferred** until we ship a Next.js demo project to base the recipe on. The lib already exposes the right hooks — `init({ root })`, `destroy({ keepGlobals: true, keepFromStates: true })`, `refresh()` — so the wiring will look very similar to the [Webflow + Barba recipe](/recipes/webflow-barba/), just with router events instead of Barba hooks. Watch this page (or the GitHub repo) for the full guide.
+Page-transition wiring (Next.js View Transitions, framer-motion `<AnimatePresence>`) is **deferred** until we ship a Next.js demo project to base the recipe on. The lib already exposes the right hooks — `init({ root })`, `destroy({ keepGlobals: true, keepFromStates: true })`, `refresh()` — so the wiring will look very similar to the [Webflow + Barba recipe](/recipes/webflow-barba/), just with router events instead of Barba hooks. Watch this page (or the GitHub repo) for the full guide.
 
 In the meantime: if you're building a Next.js project that needs SPA transitions today, the Barba recipe's lifecycle wiring (`alrdyInit` / `alrdyDestroy` / dispatching `aa:trigger` from inside a leave timeline) translates one-to-one — replace the Barba hooks with whatever your transition library exposes (`onRouteChangeStart`, `onExitComplete`, etc.).

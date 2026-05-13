@@ -1,6 +1,6 @@
 ---
 title: aa-trigger
-description: Override the default scroll trigger on any animated element. Supported values are `scroll`, `click`, `event:<name>`, and `load`. Combine values with a space (e.g. `load event:enter`) to play on first page load AND on subsequent page-transition events.
+description: Override the default scroll trigger on any animated element. Supported values are `scroll`, `click`, `event:<name>`, `load`, and `page-enter`. Combine values with a space (e.g. `load event:enter`) to play on first page load AND on subsequent page-transition events.
 ---
 
 import Demo from '../../../../components/Demo.astro'
@@ -13,6 +13,7 @@ import Demo from '../../../../components/Demo.astro'
 | --------------- | ------------------------------------------------------------------------------------------------------ |
 | `scroll`        | Default. Plays when the element scrolls into view (or scrubbed if `aa-scrub` is set).                  |
 | `load`          | Plays on the **first** `init()` call in the page session — never on subsequent inits. Honours `aa-delay` so siblings can be sequenced. |
+| `page-enter`    | Plays on **every** `init()` call, including the first. The SPA-friendly counterpart to `load` — use for Next.js App Router back/forward nav. Honours `aa-delay` like `load`. |
 | `event:<name>`  | Stays paused until an `aa:trigger` CustomEvent with `detail.name === <name>` is dispatched on it.      |
 | `click`         | Plays on click of the element.                                                                         |
 
@@ -97,6 +98,25 @@ For Webflow / `<script>`-tag projects loading from a CDN, drop the [load-fallbac
 If you need an animation on every navigation too, combine `load` with `event:enter` (`aa-trigger="load event:enter"`) — `load` handles first init, `event:enter` handles every subsequent nav. See the [Webflow + Barba recipe](/recipes/webflow-barba/) for the full pattern.
 
 The slow-network fallback only matters for the first page load — subsequent navigations have the bundle cached, so init runs immediately.
+
+## SPA route entry (Next.js App Router) — use `page-enter`
+
+In a Next.js App Router setup, a single `AlrdyInit` client component lives in the root layout and re-calls `init()` on every `usePathname()` change. There's no transition wrapper hiding the leaving DOM — the new route is rendered cold, and the user expects the entrance animation **every time** they arrive on a "new" page (including via browser back/forward nav).
+
+`aa-trigger="load"` is wrong here because it skips every init after the first; the headline lands at its final state with no animation. `aa-trigger="page-enter"` is the right primitive:
+
+```html
+<h1 aa-animate="text-tilt-up" aa-trigger="page-enter">Welcome to /cohort</h1>
+<a aa-animate="fade-up" aa-trigger="page-enter" aa-delay="0.2">Get started</a>
+```
+
+The animation fires on cold load, forward nav, and back/forward — wherever `init()` runs.
+
+| Scenario | Use |
+|---|---|
+| Webflow + Barba, View Transitions, any transition wrapper covers the swap | `load` (or `load event:enter` for both) |
+| Next.js App Router, plain SPA, no transition wrapper | `page-enter` |
+| Mixed: first paint *and* an in-page event later (modal open, etc.) | combine, e.g. `page-enter event:modal-active` |
 
 <style>{`
   .hero-demo {

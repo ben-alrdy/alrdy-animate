@@ -227,23 +227,30 @@ export async function init(options: InitOptions = {}): Promise<void> {
     // ignore
   }
 
-  // Globals (Lenis, scroll-state, scroll-target) persist across re-inits when
-  // the consumer calls `destroy({ keepGlobals: true })` — typical for
-  // page-transition libraries (Barba, Next.js View Transitions). They're
-  // bound to elements that don't change on route changes
-  // (`document.documentElement`, `<body>`), so re-creating them every nav
-  // costs scroll-position state and CPU.
+  // Lenis is genuinely global: it owns the page-level scroll behaviour and
+  // its instance is keyed to `document.documentElement`, which doesn't change
+  // across route swaps. Preserving it across `destroy({ keepGlobals: true })`
+  // keeps the scroll position smooth through a page transition and avoids
+  // re-instantiating the RAF/ticker every navigation.
   const smoothScrollOpt = state.options.smoothScroll
   if (smoothScrollOpt && !state.smoothScroll) {
     state.smoothScroll = initSmoothScroll(gsapHandle, smoothScrollOpt, debug)
   }
 
-  if (state.options.scrollState && !state.scrollStateDispose) {
+  // Scroll-state and scroll-target listeners are bound to elements that DO
+  // change across SPA navigations (Next.js App Router, Barba container swap):
+  // `[aa-toggle-playstate]` IntersectionObserver targets and
+  // `[aa-scroll-target]` click listeners. If we skipped re-attaching when
+  // dispose still exists (from `keepGlobals: true`), the new route's DOM
+  // would never get listeners. So always tear down and re-attach — the
+  // dispose calls remove listeners cleanly, and the re-init scans current
+  // DOM. One `querySelectorAll` per init, negligible cost.
+  if (state.options.scrollState) {
+    state.scrollStateDispose?.()
     state.scrollStateDispose = initScrollState()
   }
-  if (!state.scrollTargetDispose) {
-    state.scrollTargetDispose = initScrollTarget()
-  }
+  state.scrollTargetDispose?.()
+  state.scrollTargetDispose = initScrollTarget()
 
   const responsive = createResponsiveController(gsapHandle, state.breakpoints)
   activeHandles = { gsap: gsapHandle, responsive }

@@ -133,16 +133,17 @@ function setupOne(
 
   const triggers = resolveTriggers(element, config['aa-trigger'])
   const hasLoad = triggers.some((t) => t.kind === 'load')
+  const hasPageEnter = triggers.some((t) => t.kind === 'page-enter')
 
   // Use gsap.from() (not fromTo) so the natural CSS state of each target —
   // its existing rotation, opacity, transform — is the destination. Authors
   // can pre-style elements (e.g. a card with permanent rotate(8deg)) and the
   // entrance still resolves to that state instead of clobbering it to 0.
 
-  // Load owns the first init cycle: fire immediately and short-circuit any
-  // other triggers so they can't double-fire (e.g. a page-transition `once`
-  // hook dispatching `event:enter` after init resolves).
-  if (hasLoad && ctx.firstInit) {
+  // `load` owns the first init cycle only; `page-enter` fires on every init
+  // cycle (the SPA primitive). Either one short-circuits other triggers so
+  // they can't double-fire on the same cycle.
+  if ((hasLoad && ctx.firstInit) || hasPageEnter) {
     // aa-fallback signals the inline-snippet timeout already faded the element
     // in via CSS; running our tween now would rewind it to the from-state and
     // flash. The end-of-init aa-ready flip still happens, keeping DOM consistent.
@@ -151,13 +152,13 @@ function setupOne(
     return undefined
   }
 
-  // Subsequent inits with no non-load trigger: skip entirely so the element
+  // Subsequent inits with no other trigger: skip entirely so the element
   // renders in its natural CSS state once aa-ready is flipped at end of init.
   // This is the load-only semantic — "play once on first session init, then
   // just be there" — important for hero text under a page-transition wrapper:
   // re-firing the animation invisibly behind the wrapper would waste work and
   // leave the element in an unexpected mid-state if the user interrupts.
-  const trigger = triggers.find((t) => t.kind !== 'load')
+  const trigger = triggers.find((t) => t.kind !== 'load' && t.kind !== 'page-enter')
   if (!trigger) return undefined
 
   if (trigger.kind === 'event' && trigger.eventName) {

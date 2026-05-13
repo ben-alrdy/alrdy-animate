@@ -112,8 +112,9 @@ function setupClip(
 
   const triggers = parseTriggers(config['aa-trigger'])
   const hasLoad = triggers.some((t) => t.kind === 'load')
+  const hasPageEnter = triggers.some((t) => t.kind === 'page-enter')
 
-  if (hasLoad && ctx.firstInit) {
+  if ((hasLoad && ctx.firstInit) || hasPageEnter) {
     // aa-fallback signals the inline-snippet timeout already faded the element
     // in via CSS; skip the JS animation to avoid a re-flash through from-state.
     if (document.documentElement.hasAttribute('aa-fallback')) return undefined
@@ -121,8 +122,8 @@ function setupClip(
     return undefined
   }
 
-  // Load-only on subsequent init: skip entirely (no scroll fallthrough).
-  const trigger = triggers.find((t) => t.kind !== 'load')
+  // Load-only on subsequent init (no page-enter): skip entirely (no scroll fallthrough).
+  const trigger = triggers.find((t) => t.kind !== 'load' && t.kind !== 'page-enter')
   if (!trigger) return undefined
 
   if (trigger.kind === 'event' && trigger.eventName) {
@@ -254,8 +255,9 @@ function setupSlices(
 
   const triggers = parseTriggers(config['aa-trigger'])
   const hasLoad = triggers.some((t) => t.kind === 'load')
+  const hasPageEnter = triggers.some((t) => t.kind === 'page-enter')
 
-  if (hasLoad && ctx.firstInit) {
+  if ((hasLoad && ctx.firstInit) || hasPageEnter) {
     // aa-fallback signals the inline-snippet timeout already faded the element
     // in via CSS; skip the JS animation. Slice panel cleanup still runs on destroy.
     if (document.documentElement.hasAttribute('aa-fallback')) return cleanup
@@ -268,8 +270,8 @@ function setupSlices(
     return cleanup
   }
 
-  // Load-only on subsequent init: skip entirely (no scroll fallthrough).
-  const trigger = triggers.find((t) => t.kind !== 'load')
+  // Load-only on subsequent init (no page-enter): skip entirely (no scroll fallthrough).
+  const trigger = triggers.find((t) => t.kind !== 'load' && t.kind !== 'page-enter')
   if (!trigger) return cleanup
 
   if (trigger.kind === 'event' && trigger.eventName) {

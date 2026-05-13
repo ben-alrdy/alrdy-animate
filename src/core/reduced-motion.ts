@@ -105,8 +105,9 @@ export function runFadeFallbackPass(
       )
       const triggers = resolveTriggers(element, getAttr(element, 'aa-trigger') ?? undefined)
       const hasLoad = triggers.some((t) => t.kind === 'load')
+      const hasPageEnter = triggers.some((t) => t.kind === 'page-enter')
 
-      if (hasLoad && firstInit) {
+      if ((hasLoad && firstInit) || hasPageEnter) {
         // aa-fallback signals the inline-snippet timeout already faded the
         // element in via CSS; running our tween now would rewind it through
         // the from-state and flash. The end-of-init aa-ready flip still
@@ -116,7 +117,7 @@ export function runFadeFallbackPass(
         continue
       }
 
-      const trigger = triggers.find((t) => t.kind !== 'load')
+      const trigger = triggers.find((t) => t.kind !== 'load' && t.kind !== 'page-enter')
       if (!trigger) continue
 
       if (trigger.kind === 'event' && trigger.eventName) {
