@@ -307,7 +307,7 @@ export async function init(options: InitOptions = {}): Promise<void> {
   }
 
   // Mark first-init done. Survives every destroy() so subsequent inits (e.g.
-  // Barba navigations) know `aa-trigger="load"` already played. Reset only by
+  // Barba navigations) know `aa-trigger="load-once"` already played. Reset only by
   // a hard page reload, which reloads this module too.
   state.firstInitComplete = true
 

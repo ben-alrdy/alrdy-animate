@@ -97,9 +97,9 @@ export interface InternalState {
   /**
    * Set true at the END of the very first successful init() call in this
    * page session. Survives `destroy()` (any flavour) and subsequent inits.
-   * Drives `aa-trigger="load"` semantics: load fires only on the first init
-   * cycle so subsequent Barba navigations don't replay the load animation
-   * while the new container is hidden behind the transition wrapper.
+   * Drives `aa-trigger="load-once"` semantics: load-once fires only on the
+   * first init cycle so subsequent Barba navigations don't replay the
+   * animation while the new container is hidden behind the transition wrapper.
    */
   firstInitComplete: boolean
   /**

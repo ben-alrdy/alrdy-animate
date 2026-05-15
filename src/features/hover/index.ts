@@ -108,7 +108,6 @@ function setupOne(
 
 const hoverFeature: FeatureModule = {
   name: 'hover',
-  requiredPlugins: [],
   init(ctx: FeatureContext): () => void {
     // Skip touch-only devices entirely — hover events are unreliable there.
     if (typeof window !== 'undefined' && !window.matchMedia('(hover: hover)').matches) {

@@ -270,7 +270,6 @@ let currentPointerY = 0
 
 const cursorFeature: FeatureModule = {
   name: 'cursor',
-  requiredPlugins: [],
   init(ctx: FeatureContext): () => void {
     if (typeof window === 'undefined') return () => {}
 

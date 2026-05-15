@@ -1,8 +1,7 @@
-import type { FeatureContext, FeatureModule } from '../../core/registry'
-import { parseNum, parseScrub } from '../../core/parse'
-import { resolveScrollStart } from '../../core/scroll-trigger'
+import { bindFeature, type FeatureContext, type FeatureModule } from '../../core/registry'
+import { parseNum, readAnimationConfig } from '../../core/parse'
 import { matchAnimateValue, type ResolvedPreset } from '../../core/presets'
-import { readAttrs, type Config } from '../../core/settings'
+import type { Config } from '../../core/settings'
 import { defaultStaggerFor } from '../../core/stagger'
 import { setupTriggeredAnimation } from '../../core/triggered-animation'
 import { resolveTriggers } from '../../core/trigger'
@@ -84,13 +83,8 @@ function setupClip(
   if (!reveal) return undefined
 
   const opts = ctx.options
-  const duration = parseNum(config['aa-duration'], opts.duration)
-  const delay = parseNum(config['aa-delay'], 0)
-  const ease = config['aa-ease'] ?? opts.ease
-  const scrollEnd = config['aa-scroll-end'] ?? opts.scrollEnd
-  const scrub = parseScrub(config['aa-scrub'])
-  const scrollStart = resolveScrollStart(config['aa-scroll-start'], opts, scrub)
-  const again = opts.again !== false
+  const { duration, delay, ease, scrollStart, scrollEnd, scrub, again } =
+    readAnimationConfig(config, opts)
 
   const fromState: Record<string, number | string> = reveal.needsOpacity
     ? { clipPath: reveal.from, opacity: 0 }
@@ -176,13 +170,9 @@ function setupSlices(
 
   const opts = ctx.options
   const { mode, rows } = params
+  const { duration, ease, scrollStart, scrollEnd, scrub, again } =
+    readAnimationConfig(config, opts)
   const stagger = parseNum(config['aa-stagger'], defaultStaggerFor(undefined, opts))
-  const duration = parseNum(config['aa-duration'], opts.duration)
-  const ease = config['aa-ease'] ?? opts.ease
-  const scrollEnd = config['aa-scroll-end'] ?? opts.scrollEnd
-  const scrub = parseScrub(config['aa-scrub'])
-  const scrollStart = resolveScrollStart(config['aa-scroll-start'], opts, scrub)
-  const again = opts.again !== false
 
   // Reveal: slices start covering (scaleY=1) and animate to scaleY=0,
   // origin at top so they vanish upward.
@@ -241,13 +231,8 @@ function setupOne(
 
 const revealFeature: FeatureModule = {
   name: 'reveal',
-  requiredPlugins: ['ScrollTrigger'],
   init(ctx: FeatureContext): () => void {
-    const subjects = ctx.elements.filter((el) => elementMatches(el, ctx.presetMap))
-    for (const element of subjects) {
-      const attrs = readAttrs(element, ctx.presetMap.get(element))
-      ctx.responsive.bind(element, attrs, ({ config }) => setupOne(ctx, element, config))
-    }
+    bindFeature(ctx, elementMatches, setupOne)
     return () => {}
   },
 }

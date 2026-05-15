@@ -51,6 +51,24 @@ function setupOne(ctx: FeatureContext, root: HTMLElement, config: Config): (() =
 
   const gsap = ctx.gsap.gsap as unknown as Record<string, any>
 
+  // Wrap nav.onChange so its first invocation — the synchronous one fired by
+  // horizontalLoop during construction — is deferred by one tick. This lets
+  // appearance features inside slides (e.g. text-fade-up listening for
+  // event:slide-active) register their listeners before the initial event
+  // fires, regardless of feature init order. Subsequent calls (drag, autoplay,
+  // manual nav) run immediately so interaction stays snappy. Mirrors the
+  // pattern in tabs/index.ts where `openEntrySnap(initialEntry)` is wrapped
+  // in `gsap.delayedCall(0, ...)` for the same reason.
+  let initialOnChange = true
+  const handleChange = (item: Element, index: number): void => {
+    if (initialOnChange) {
+      initialOnChange = false
+      gsap.delayedCall(0, () => nav.onChange(item, index))
+      return
+    }
+    nav.onChange(item, index)
+  }
+
   // Forward declare so the drag callbacks (which run via horizontalLoop) can
   // reach the autoplay controller defined below.
   let autoplayCtl: AutoplayController | null = null
@@ -81,7 +99,7 @@ function setupOne(ctx: FeatureContext, root: HTMLElement, config: Config): (() =
     paddingRight: gap,
     center: tokens.isCenter,
     draggable: tokens.isDraggable,
-    onChange: nav.onChange,
+    onChange: handleChange,
     onDragStart: () => {
       autoplayCtl?.setDragInProgress(true)
       autoplayCtl?.stop()
@@ -173,7 +191,6 @@ function setupOne(ctx: FeatureContext, root: HTMLElement, config: Config): (() =
 
 const sliderFeature: FeatureModule = {
   name: 'slider',
-  requiredPlugins: ['ScrollTrigger', 'Draggable', 'InertiaPlugin'],
   init(ctx: FeatureContext): () => void {
     const subjects = ctx.elements.filter(
       (el): el is HTMLElement => el instanceof HTMLElement && el.hasAttribute('aa-slider'),

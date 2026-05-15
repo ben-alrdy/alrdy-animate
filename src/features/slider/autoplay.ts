@@ -5,6 +5,7 @@ import {
   progressToValues,
   type ProgressEntry,
 } from '../../core/progress-bar'
+import { attachHoverPauseListener, createViewportGate } from '../../core/viewport-gate'
 import type { SliderLoop } from './horizontal-loop'
 
 export interface AutoplayOptions {
@@ -32,10 +33,6 @@ export interface AutoplayController {
   destroy: () => void
 }
 
-interface ScrollTriggerLike {
-  create: (vars: Record<string, unknown>) => { kill: () => void }
-}
-
 export function setupAutoplay(
   gsapHandle: GsapHandle,
   root: HTMLElement,
@@ -43,7 +40,6 @@ export function setupAutoplay(
   options: AutoplayOptions,
 ): AutoplayController {
   const gsap = gsapHandle.gsap as unknown as Record<string, any>
-  const ScrollTrigger = gsapHandle.plugins.ScrollTrigger as ScrollTriggerLike | undefined
   const { interval, duration, ease, hoverPause } = options
 
   let autoplayCall:
@@ -146,39 +142,29 @@ export function setupAutoplay(
   const cleanups: Array<() => void> = []
 
   // Hover pause is opt-in (autoplay-hover token) and only on non-touch devices.
-  if (hoverPause && !window.matchMedia('(hover: none)').matches) {
-    const onEnter = (): void => {
-      if (autoplayCall && !autoplayCall.paused()) pauseByHover()
-    }
-    const onLeave = (): void => {
-      if (isPausedByHover) resumeFromHover()
-      else if (!autoplayCall && !dragInProgress) start()
-    }
-    root.addEventListener('mouseenter', onEnter)
-    root.addEventListener('mouseleave', onLeave)
-    cleanups.push(() => {
-      root.removeEventListener('mouseenter', onEnter)
-      root.removeEventListener('mouseleave', onLeave)
-    })
+  if (hoverPause) {
+    cleanups.push(
+      attachHoverPauseListener({
+        root,
+        onEnter: () => {
+          if (autoplayCall && !autoplayCall.paused()) pauseByHover()
+        },
+        onLeave: () => {
+          if (isPausedByHover) resumeFromHover()
+          else if (!autoplayCall && !dragInProgress) start()
+        },
+      }),
+    )
   }
 
   // Pause autoplay when slider scrolls out of viewport.
-  let st: { kill: () => void } | null = null
-  if (ScrollTrigger) {
-    st = ScrollTrigger.create({
-      trigger: root,
-      start: 'top bottom',
-      end: 'bottom top',
-      onEnter: start,
-      onLeave: stop,
-      onEnterBack: start,
-      onLeaveBack: stop,
-    })
-    cleanups.push(() => st?.kill())
-  } else {
-    // No ScrollTrigger plugin → just start immediately.
-    start()
-  }
+  const gateDispose = createViewportGate(gsapHandle, {
+    trigger: root,
+    onActive: start,
+    onIdle: stop,
+  })
+  if (gateDispose) cleanups.push(gateDispose)
+  else start() // No ScrollTrigger plugin → just start immediately.
 
   const destroy = (): void => {
     stop()

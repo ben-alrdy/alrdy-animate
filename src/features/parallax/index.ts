@@ -1,7 +1,7 @@
-import type { FeatureContext, FeatureModule } from '../../core/registry'
+import { bindFeature, type FeatureContext, type FeatureModule } from '../../core/registry'
 import { parseNum, parseScrub, resolveAnchor } from '../../core/parse'
 import { matchAnimateValue, type ResolvedPreset } from '../../core/presets'
-import { readAttrs, type Config } from '../../core/settings'
+import type { Config } from '../../core/settings'
 
 const SUPPORTED = new Set(['parallax', 'parallax-horizontal', 'parallax-vertical'])
 
@@ -48,13 +48,8 @@ function setupOne(ctx: FeatureContext, element: Element, config: Config): undefi
 
 const parallaxFeature: FeatureModule = {
   name: 'parallax',
-  requiredPlugins: ['ScrollTrigger'],
   init(ctx: FeatureContext): () => void {
-    const subjects = ctx.elements.filter((el) => elementMatches(el, ctx.presetMap))
-    for (const element of subjects) {
-      const attrs = readAttrs(element, ctx.presetMap.get(element))
-      ctx.responsive.bind(element, attrs, ({ config }) => setupOne(ctx, element, config))
-    }
+    bindFeature(ctx, elementMatches, setupOne)
     return () => {}
   },
 }

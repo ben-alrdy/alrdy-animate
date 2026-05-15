@@ -12,7 +12,7 @@
       const applyFallback = () => {
         if (document.documentElement.hasAttribute('aa-loaded')) return;
         document.documentElement.setAttribute('aa-fallback', '');
-        document.querySelectorAll('[aa-trigger~="load"][aa-animate]').forEach((el) => {
+        document.querySelectorAll('[aa-trigger~="load"][aa-animate], [aa-trigger~="load-once"][aa-animate]').forEach((el) => {
           const stagger = parseFloat(el.getAttribute('aa-stagger'));
           const baseDelay = parseFloat(el.getAttribute('aa-delay')) || 0;
           if (Number.isFinite(stagger) && el.children.length > 0) {
@@ -46,7 +46,8 @@
         from { opacity: 0; transform: translateY(1.5rem); }
         to   { opacity: 1; transform: translateY(0); }
       }
-      html[aa-fallback] [aa-trigger~="load"][aa-animate]:not([aa-ready]) {
+      html[aa-fallback] [aa-trigger~="load"][aa-animate]:not([aa-ready]),
+      html[aa-fallback] [aa-trigger~="load-once"][aa-animate]:not([aa-ready]) {
         visibility: visible;
         animation: aa-fallback-appear 0.5s ease both;
       }
@@ -80,14 +81,14 @@
       </nav>
 
       <section class="page">
-        <h1 class="page__hero" aa-animate="text-slide-up" aa-split="lines mask" aa-trigger="load">Selected works.</h1>
-        <p class="page__lede" aa-animate="text-slide-up" aa-split="lines mask" aa-trigger="load" aa-delay="0.2">A small reel of recent projects — kept short to keep the focus on the transition itself.</p>
+        <h1 class="page__hero" aa-animate="text-slide-up" aa-split="lines mask" aa-trigger="load-once">Selected works.</h1>
+        <p class="page__lede" aa-animate="text-slide-up" aa-split="lines mask" aa-trigger="load-once" aa-delay="0.2">A small reel of recent projects — kept short to keep the focus on the transition itself.</p>
 
         <div
           class="card-grid"
           aa-animate="fade-up"
           aa-stagger="0.1"
-          aa-trigger="load event:enter"
+          aa-trigger="load-once event:enter"
         >
           <article class="card">
             <span class="card__num">01</span>
@@ -124,8 +125,8 @@
            time their slide becomes active. -->
       <section class="reel">
         <header class="reel__head">
-          <span class="reel__eyebrow" aa-animate="fade-up" aa-trigger="load event:enter">Reel</span>
-          <h2 class="reel__title" aa-animate="text-slide-up" aa-split="lines mask" aa-trigger="load event:enter">
+          <span class="reel__eyebrow" aa-animate="fade-up" aa-trigger="load-once event:enter">Reel</span>
+          <h2 class="reel__title" aa-animate="text-slide-up" aa-split="lines mask" aa-trigger="load-once event:enter">
             Drag through the year.
           </h2>
         </header>

@@ -103,12 +103,12 @@ import 'alrdy-animate/jsx'
 Then in your components:
 
 ```tsx
-<h1 aa-animate="text-slide-up" aa-split="lines mask" aa-trigger="page-enter">
+<h1 aa-animate="text-slide-up" aa-split="lines mask" aa-trigger="load">
   Headline
 </h1>
 ```
 
-**Why `page-enter` and not `load`?** In Next.js App Router, the `AlrdyInit` component lives in the root layout and persists across route changes. If you re-init on `usePathname()` change (see [SPA route changes](#spa-route-changes) below), the second/third/Nth call to `init()` is the user's first *visual* arrival on that page — but `load` treats it as a subsequent init and skips. `page-enter` fires on every `init()` cycle so back/forward nav and `<Link>` clicks all animate the hero. See [aa-trigger](/animations/utilities/aa-trigger/) for the full comparison.
+**Why `load` and not `load-once`?** In Next.js App Router, the `AlrdyInit` component lives in the root layout and persists across route changes. If you re-init on `usePathname()` change (see [SPA route changes](#spa-route-changes) below), the second/third/Nth call to `init()` is the user's first *visual* arrival on that page — but `load-once` treats it as a subsequent init and skips. `load` fires on every `init()` cycle so back/forward nav and `<Link>` clicks all animate the hero. See [aa-trigger](/animations/utilities/aa-trigger/) for the full comparison.
 
 ## Using with AI assistants (Claude Code, Cursor, etc.)
 
@@ -221,7 +221,7 @@ export function AlrdyInit() {
 
 `keepGlobals: true` leaves Lenis, the body scroll-state observer, and the scroll-target click handler alive across the cycle. `init()` re-scans the DOM on every cycle and re-attaches scroll-target / scroll-state listeners to the new route's elements — clicks on `[aa-scroll-target]` links on the new route work without further wiring.
 
-For elements that should animate **every time** the user lands on the route (cold load, forward `<Link>` click, browser back/forward), use `aa-trigger="page-enter"` instead of `aa-trigger="load"`.
+For elements that should animate **every time** the user lands on the route (cold load, forward `<Link>` click, browser back/forward), use `aa-trigger="load"` (every init). Use `aa-trigger="load-once"` only when you want first-init-only behaviour — usually irrelevant in App Router setups.
 
 ## Page transitions
 

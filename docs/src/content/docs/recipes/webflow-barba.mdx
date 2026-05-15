@@ -34,18 +34,18 @@ A runnable copy lives at `examples/barba-transition/` in the repo —
   most noticeable for elements *inside* the viewport but below the default
   `top 80%` start line.
 - **Hero text animates on first load, just renders on subsequent navs.**
-  Above-the-fold static elements use `aa-trigger="load"`. On first page load
-  it animates (or the [CSS fallback](/recipes/load-fallback/) plays if the
-  bundle is slow). On Barba navigations the `load` trigger is a no-op —
-  the element renders in its natural state once `init()` flips its
+  Above-the-fold static elements use `aa-trigger="load-once"`. On first page
+  load it animates (or the [CSS fallback](/recipes/load-fallback/) plays if
+  the bundle is slow). On Barba navigations the `load-once` trigger is a
+  no-op — the element renders in its natural state once `init()` flips its
   `aa-ready` attribute. No invisible animation behind the wrapper; the
   hero is just *there* when the page lands, which reads cleaner with this
   transition style.
 - **Cards animate on every navigation via `event:enter`.** Combined
-  `aa-trigger="load event:enter"` on the grid means: first load fires via
-  `load` (immediate), every subsequent Barba nav fires via the `aa:trigger`
-  event dispatched from the leave timeline, perfectly in sync with the
-  visual peak. No double-fire, no replay-while-hidden.
+  `aa-trigger="load-once event:enter"` on the grid means: first load fires
+  via `load-once` (immediate), every subsequent Barba nav fires via the
+  `aa:trigger` event dispatched from the leave timeline, perfectly in sync
+  with the visual peak. No double-fire, no replay-while-hidden.
 
 ## Page markup
 
@@ -74,14 +74,14 @@ Osmo's design).
         class="page__hero"
         aa-animate="text-slide-up"
         aa-split="lines mask"
-        aa-trigger="load"
+        aa-trigger="load-once"
       >Headline</h1>
 
       <p
         class="page__lede"
         aa-animate="text-slide-up"
         aa-split="lines mask"
-        aa-trigger="load"
+        aa-trigger="load-once"
         aa-delay="0.2"
       >Subline copy</p>
 
@@ -89,7 +89,7 @@ Osmo's design).
         class="card-grid"
         aa-animate="fade-up"
         aa-stagger="0.1"
-        aa-trigger="load event:enter"
+        aa-trigger="load-once event:enter"
       >
         <article class="card">…</article>
         <article class="card">…</article>
@@ -105,15 +105,15 @@ A few attribute notes:
 - `aa-animate="fade-up" aa-stagger="0.1"` on the grid — the lib auto-targets
   direct children when `aa-stagger` is set, so each card animates with a
   100ms offset. No `aa-children` needed.
-- `aa-trigger="load event:enter"` on the cards — combined trigger. On the
-  first page load in this session, `load` fires immediately (or the
-  [CSS fallback](/recipes/load-fallback/) plays if the bundle is slow). On
-  every subsequent Barba navigation, `load` is a no-op (first-init-only)
-  and `event:enter` waits for an `aa:trigger` event with
+- `aa-trigger="load-once event:enter"` on the cards — combined trigger. On
+  the first page load in this session, `load-once` fires immediately (or
+  the [CSS fallback](/recipes/load-fallback/) plays if the bundle is slow).
+  On every subsequent Barba navigation, `load-once` is a no-op (first-init-
+  only) and `event:enter` waits for an `aa:trigger` event with
   `detail.name === 'enter'`, dispatched from inside the leave timeline at
   the right beat. Keeps the cards from auto-firing while they sit
   invisibly behind the leave-timeline wrapper.
-- `aa-trigger="load"` (alone) on the headline + paragraph — animates on
+- `aa-trigger="load-once"` (alone) on the headline + paragraph — animates on
   first load, then **just renders** in place on every subsequent nav. No
   invisible re-fire behind the wrapper, no double animation. The hero is
   simply present when the new page lands, which suits this transition

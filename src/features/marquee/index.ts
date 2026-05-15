@@ -1,6 +1,7 @@
 import type { FeatureContext, FeatureModule } from '../../core/registry'
 import { parseNum, parseScrub } from '../../core/parse'
 import { readAttrs, type Config } from '../../core/settings'
+import { attachHoverPauseListener, createViewportGate } from '../../core/viewport-gate'
 
 interface ParsedTokens {
   isRight: boolean
@@ -334,24 +335,23 @@ function setupOne(
   // and a hover-pause would freeze the loop mid-drag. Critical: use resume()
   // not play() — play() always plays forward and would flip the direction of
   // a right-direction marquee. resume() preserves the current play direction.
-  if (tokens.hoverPause && !tokens.isDraggable && !window.matchMedia('(hover: none)').matches) {
+  if (tokens.hoverPause && !tokens.isDraggable) {
     let pausedByHover = false
-    const onEnter = (): void => {
-      if (loop.paused()) return
-      loop.pause()
-      pausedByHover = true
-    }
-    const onLeave = (): void => {
-      if (!pausedByHover || tokens.isPaused) return
-      pausedByHover = false
-      loop.resume()
-    }
-    root.addEventListener('mouseenter', onEnter)
-    root.addEventListener('mouseleave', onLeave)
-    cleanups.push(() => {
-      root.removeEventListener('mouseenter', onEnter)
-      root.removeEventListener('mouseleave', onLeave)
-    })
+    cleanups.push(
+      attachHoverPauseListener({
+        root,
+        onEnter: () => {
+          if (loop.paused()) return
+          loop.pause()
+          pausedByHover = true
+        },
+        onLeave: () => {
+          if (!pausedByHover || tokens.isPaused) return
+          pausedByHover = false
+          loop.resume()
+        },
+      }),
+    )
   }
 
   // Optional switch: invert direction when body[aa-scroll-direction] flips.
@@ -393,32 +393,19 @@ function setupOne(
   // viewport gating slider/tabs autoplay use. Without this the loop keeps
   // ticking far below or above the fold for no visible benefit. Use resume()
   // here too so right-direction loops don't get flipped by the gating.
-  if (ScrollTrigger) {
-    const st = ScrollTrigger.create({
-      trigger: root,
-      start: 'top bottom',
-      end: 'bottom top',
-      onEnter: () => {
-        if (!tokens.isPaused) loop.resume()
-        applyTimeScale()
-        draggable?.enable()
-      },
-      onEnterBack: () => {
-        if (!tokens.isPaused) loop.resume()
-        applyTimeScale()
-        draggable?.enable()
-      },
-      onLeave: () => {
-        loop.pause()
-        draggable?.disable()
-      },
-      onLeaveBack: () => {
-        loop.pause()
-        draggable?.disable()
-      },
-    })
-    cleanups.push(() => st.kill())
-  }
+  const gateDispose = createViewportGate(ctx.gsap, {
+    trigger: root,
+    onActive: () => {
+      if (!tokens.isPaused) loop.resume()
+      applyTimeScale()
+      draggable?.enable()
+    },
+    onIdle: () => {
+      loop.pause()
+      draggable?.disable()
+    },
+  })
+  if (gateDispose) cleanups.push(gateDispose)
 
   return () => {
     for (const fn of cleanups) fn()
@@ -439,7 +426,6 @@ function setupOne(
 
 const marqueeFeature: FeatureModule = {
   name: 'marquee',
-  requiredPlugins: ['ScrollTrigger', 'Draggable', 'InertiaPlugin'],
   init(ctx: FeatureContext): () => void {
     const subjects = ctx.elements.filter(
       (el): el is HTMLElement => el instanceof HTMLElement && el.hasAttribute('aa-marquee'),

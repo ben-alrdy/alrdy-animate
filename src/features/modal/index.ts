@@ -158,7 +158,6 @@ function setupOne(
 
 const modalFeature: FeatureModule = {
   name: 'modal',
-  requiredPlugins: [],
   init(ctx: FeatureContext): () => void {
     const groups = ctx.elements.filter(
       (el): el is HTMLElement => el instanceof HTMLElement && el.hasAttribute('aa-modal-group'),

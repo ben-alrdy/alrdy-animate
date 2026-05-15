@@ -245,7 +245,6 @@ function setupOne(ctx: FeatureContext, root: HTMLElement, config: Config): (() =
 
 const tabsFeature: FeatureModule = {
   name: 'tabs',
-  requiredPlugins: ['ScrollTrigger'],
   init(ctx: FeatureContext): () => void {
     const subjects = ctx.elements.filter(
       (el): el is HTMLElement => el instanceof HTMLElement && el.hasAttribute('aa-tabs'),

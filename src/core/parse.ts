@@ -6,6 +6,10 @@
  * or 'true' counts as truthy" rule for scrub — identical across features.
  */
 
+import type { ResolvedOptions } from '../types/index'
+import { resolveScrollStart } from './scroll-trigger'
+import type { Config } from './settings'
+
 export function parseNum(value: string | null | undefined, fallback: number): number {
   if (value === undefined || value === null) return fallback
   const n = parseFloat(value)
@@ -43,4 +47,58 @@ export function resolveAnchor(element: Element, anchor: string | undefined): Ele
   if (root) return root
   const found = document.querySelector(anchor)
   return found ?? element
+}
+
+const ANIMATE_ATTRS = [
+  'aa-animate',
+  'aa-animate-sm',
+  'aa-animate-md',
+  'aa-animate-lg',
+  'aa-animate-xl',
+] as const
+
+/**
+ * True when the element carries any `aa-animate*` attribute. Used by tabs +
+ * modal to detect "author wrapped their own entrance animation on this
+ * panel/card" — when true, the feature steps out of the way (the author's
+ * animation owns visibility) instead of running its default cross-fade.
+ */
+export function hasAnimateAttribute(el: Element | null): boolean {
+  if (!el) return false
+  for (const attr of ANIMATE_ATTRS) {
+    if (el.hasAttribute(attr)) return true
+  }
+  return false
+}
+
+/**
+ * Common animation-timing fields read from a resolved per-element `Config`.
+ * Centralises the duration / delay / ease / distance / scroll-start / scroll-end
+ * / scrub / again parsing that scroll / text / reveal repeat verbatim. Parallax
+ * does its own thing (scrub defaults true, scrollStart/End get `clamp(...)`-
+ * wrapped) so it doesn't use this.
+ */
+export interface AnimationConfig {
+  duration: number
+  delay: number
+  ease: string
+  distance: number
+  scrollStart: string
+  scrollEnd: string
+  scrub: number | true | undefined
+  again: boolean
+}
+
+export function readAnimationConfig(config: Config, opts: ResolvedOptions): AnimationConfig {
+  const scrub = parseScrub(config['aa-scrub'])
+  return {
+    duration: parseNum(config['aa-duration'], opts.duration),
+    delay: parseNum(config['aa-delay'], 0),
+    ease: config['aa-ease'] ?? opts.ease,
+    distance: parseNum(config['aa-distance'], opts.distance),
+    scrollEnd: config['aa-scroll-end'] ?? opts.scrollEnd,
+    scrub,
+    scrollStart: resolveScrollStart(config['aa-scroll-start'], opts, scrub),
+    again: opts.again !== false,
+  }
 }

@@ -53,19 +53,20 @@
  * Slow-network fallback for above-the-fold content. Opt-in via the
  * docs/recipes/load-fallback inline <head> snippet, which sets
  * `html[aa-fallback]` if init hasn't fired by a tunable timeout. Scoped to
- * elements the author marked `aa-trigger="load"` so below-the-fold content
- * doesn't get prematurely revealed. The lib's load-trigger branches detect
- * `aa-fallback` and skip their JS animation, so this CSS owns the reveal
- * and there's no replay/flash when the bundle finally lands. `both` (vs
- * `forwards`) so the from-state holds during any per-element delay too —
- * without it, delayed elements would flash visible before their delay
- * elapses and animation begins.
+ * elements the author marked `aa-trigger="load"` or `aa-trigger="load-once"`
+ * so below-the-fold content doesn't get prematurely revealed. The lib's
+ * load-trigger branches detect `aa-fallback` and skip their JS animation,
+ * so this CSS owns the reveal and there's no replay/flash when the bundle
+ * finally lands. `both` (vs `forwards`) so the from-state holds during any
+ * per-element delay too — without it, delayed elements would flash visible
+ * before their delay elapses and animation begins.
  */
 @keyframes aa-fallback-appear {
   from { opacity: 0; transform: translateY(1.5rem); }
   to   { opacity: 1; transform: translateY(0); }
 }
-html[aa-fallback] [aa-trigger~="load"][aa-animate]:not([aa-ready]) {
+html[aa-fallback] [aa-trigger~="load"][aa-animate]:not([aa-ready]),
+html[aa-fallback] [aa-trigger~="load-once"][aa-animate]:not([aa-ready]) {
   visibility: visible;
   animation: aa-fallback-appear 0.5s ease both;
 }

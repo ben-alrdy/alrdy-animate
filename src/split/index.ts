@@ -17,7 +17,6 @@ function shouldSkip(el: Element): boolean {
 
 const splitFeature: FeatureModule = {
   name: 'split',
-  requiredPlugins: ['SplitText'],
   init(ctx: FeatureContext): () => void {
     const subjects = ctx.elements.filter(
       (el) => el.hasAttribute('aa-split') && !shouldSkip(el),

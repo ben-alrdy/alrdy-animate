@@ -21,10 +21,10 @@ Paste this into **Project Settings → Custom Code → Head Code**. It loads eve
 
 ```html
 <!-- Slow-network + init-timeout safety (optional but recommended).
-     Two layers: aa-fallback fades aa-trigger="load" elements at FALLBACK_DELAY
-     (graceful hero staircase). aa-timeout reveals every animated element at
-     TIMEOUT_DELAY (universal safety if init never arrives). See
-     /recipes/load-fallback/ for the full explanation. -->
+     Two layers: aa-fallback fades aa-trigger="load"/"load-once" elements at
+     FALLBACK_DELAY (graceful hero staircase). aa-timeout reveals every
+     animated element at TIMEOUT_DELAY (universal safety if init never
+     arrives). See /recipes/load-fallback/ for the full explanation. -->
 <script>
   // Tune these two numbers without reading the rest of the snippet.
   const FALLBACK_DELAY = 1000;  // ms — hero copy fades in via CSS keyframe
@@ -33,7 +33,7 @@ Paste this into **Project Settings → Custom Code → Head Code**. It loads eve
   const applyFallback = () => {
     if (document.documentElement.hasAttribute('aa-loaded')) return;
     document.documentElement.setAttribute('aa-fallback', '');
-    document.querySelectorAll('[aa-trigger~="load"][aa-animate]').forEach((el) => {
+    document.querySelectorAll('[aa-trigger~="load"][aa-animate], [aa-trigger~="load-once"][aa-animate]').forEach((el) => {
       const stagger = parseFloat(el.getAttribute('aa-stagger'));
       const baseDelay = parseFloat(el.getAttribute('aa-delay')) || 0;
       if (Number.isFinite(stagger) && el.children.length > 0) {
@@ -67,7 +67,8 @@ Paste this into **Project Settings → Custom Code → Head Code**. It loads eve
     from { opacity: 0; transform: translateY(1.5rem); }
     to   { opacity: 1; transform: translateY(0); }
   }
-  html[aa-fallback] [aa-trigger~="load"][aa-animate]:not([aa-ready]) {
+  html[aa-fallback] [aa-trigger~="load"][aa-animate]:not([aa-ready]),
+  html[aa-fallback] [aa-trigger~="load-once"][aa-animate]:not([aa-ready]) {
     visibility: visible;
     animation: aa-fallback-appear 0.5s ease both;
   }
@@ -97,7 +98,7 @@ Paste this into **Project Settings → Custom Code → Head Code**. It loads eve
 
 **Why `defer`** — without it, every `<script>` blocks HTML parsing, which makes the whole page wait for each download in series. With `defer`, all scripts download in parallel while the parser sails through the body; they then execute in document order at the end of parsing. This is faster on every connection, and it's a hard requirement for the [load-fallback recipe](/recipes/load-fallback/) to work on slow networks.
 
-**Tuning the two timeouts.** `FALLBACK_DELAY` (default 1s) controls the hero staircase fade for `aa-trigger="load"` elements; tune it to taste — lower = faster fallback, higher = more time for JS to win the race. `TIMEOUT_DELAY` (default 4s) is the universal safety net: if `init()` hasn't run by then, *all* `[aa-animate]` elements get revealed at their natural state with no entrance animation, so the page doesn't stay invisible if the bundle is blocked or errors. Keep it well above `FALLBACK_DELAY`. When init eventually arrives it detects `aa-timeout` and skips its appearance-feature work to avoid rewinding the now-visible elements through their from-states — interactive components (tabs, slider, modal, nav, hover, cursor) still wire up normally.
+**Tuning the two timeouts.** `FALLBACK_DELAY` (default 1s) controls the hero staircase fade for `aa-trigger="load"` / `"load-once"` elements; tune it to taste — lower = faster fallback, higher = more time for JS to win the race. `TIMEOUT_DELAY` (default 4s) is the universal safety net: if `init()` hasn't run by then, *all* `[aa-animate]` elements get revealed at their natural state with no entrance animation, so the page doesn't stay invisible if the bundle is blocked or errors. Keep it well above `FALLBACK_DELAY`. When init eventually arrives it detects `aa-timeout` and skips its appearance-feature work to avoid rewinding the now-visible elements through their from-states — interactive components (tabs, slider, modal, nav, hover, cursor) still wire up normally.
 
 **Trim the plugin list.** `init({ debug: true })` prints any "Missing GSAP plugins" warnings with the exact `<script>` tag you need to add. Drop the lines you don't use to keep the page lighter.
 

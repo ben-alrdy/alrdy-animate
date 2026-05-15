@@ -1,9 +1,9 @@
 import type { GsapHandle } from '../../core/gsap-detect'
+import { hasAnimateAttribute } from '../../core/parse'
 import { REVERSE_TIME_SCALE, emitTrigger } from '../../core/trigger'
 import type { ModalEntry } from './state'
 
 const BACKDROP_DURATION = 0.4
-const ANIMATE_ATTRS = ['aa-animate', 'aa-animate-sm', 'aa-animate-md', 'aa-animate-lg', 'aa-animate-xl']
 
 type GsapAny = Record<string, any>
 
@@ -26,10 +26,7 @@ export interface AnimationController {
 }
 
 function cardHasAnimate(card: HTMLElement): boolean {
-  for (const attr of ANIMATE_ATTRS) {
-    if (card.hasAttribute(attr)) return true
-  }
-  return false
+  return hasAnimateAttribute(card)
 }
 
 export function createAnimationController(gsapHandle: GsapHandle): AnimationController {

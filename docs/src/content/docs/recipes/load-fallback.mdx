@@ -7,7 +7,7 @@ The lib hides every `[aa-animate]` element with `visibility: hidden` until `init
 
 | Layer | Default | What it does |
 | --- | --- | --- |
-| **`aa-fallback`** | 1s | Fades `aa-trigger="load"` elements (hero copy) via a CSS keyframe — graceful staircase, respecting `aa-delay` and `aa-stagger`. |
+| **`aa-fallback`** | 1s | Fades `aa-trigger="load"` / `aa-trigger="load-once"` elements (hero copy) via a CSS keyframe — graceful staircase, respecting `aa-delay` and `aa-stagger`. |
 | **`aa-timeout`** | 4s | Reveals **every** `[aa-animate]` element at its natural state with no animation — universal safety net if init never runs. |
 
 Drop this snippet into `<head>` *above* the alrdy-animate `<script>` and `<link>` tags:
@@ -21,7 +21,7 @@ Drop this snippet into `<head>` *above* the alrdy-animate `<script>` and `<link>
   const applyFallback = () => {
     if (document.documentElement.hasAttribute('aa-loaded')) return;
     document.documentElement.setAttribute('aa-fallback', '');
-    document.querySelectorAll('[aa-trigger~="load"][aa-animate]').forEach((el) => {
+    document.querySelectorAll('[aa-trigger~="load"][aa-animate], [aa-trigger~="load-once"][aa-animate]').forEach((el) => {
       const stagger = parseFloat(el.getAttribute('aa-stagger'));
       const baseDelay = parseFloat(el.getAttribute('aa-delay')) || 0;
       if (Number.isFinite(stagger) && el.children.length > 0) {
@@ -60,7 +60,8 @@ Drop this snippet into `<head>` *above* the alrdy-animate `<script>` and `<link>
     from { opacity: 0; transform: translateY(1.5rem); }
     to   { opacity: 1; transform: translateY(0); }
   }
-  html[aa-fallback] [aa-trigger~="load"][aa-animate]:not([aa-ready]) {
+  html[aa-fallback] [aa-trigger~="load"][aa-animate]:not([aa-ready]),
+  html[aa-fallback] [aa-trigger~="load-once"][aa-animate]:not([aa-ready]) {
     visibility: visible;
     /* `both` so the from-state holds during any pre-start delay too. With
        `forwards`, a delayed element renders at its natural opacity during
@@ -90,11 +91,11 @@ CSS alone can't read `aa-delay` or expand `aa-stagger` across non-sibling childr
 
 ### Layer 1 — `aa-fallback` (1s default)
 
-Sets `html[aa-fallback]`. The CSS rule (matching `[aa-trigger~="load"]`, so it covers both `aa-trigger="load"` and combined forms like `aa-trigger="load event:enter"`) fades those elements up via a keyframe animation, respecting `aa-delay` and `aa-stagger` so the staircase still plays.
+Sets `html[aa-fallback]`. The CSS rule matches both `[aa-trigger~="load"]` and `[aa-trigger~="load-once"]`, so it covers every load-triggered element (including combined forms like `aa-trigger="load-once event:enter"`). The keyframe fades those elements up, respecting `aa-delay` and `aa-stagger` so the staircase still plays.
 
 When the bundle eventually arrives, the lib's load-trigger branches detect `aa-fallback` and skip their JS animation entirely — the elements stay where the fallback put them, no replay or flash. `init()` clears `aa-fallback` at the end, so subsequent Barba navigations don't re-trigger the keyframe.
 
-Scoped to `[aa-trigger~="load"]` on purpose: scroll-triggered elements below the fold stay hidden until the lib actually arrives. Only elements the author has explicitly marked as "needs to be visible immediately" are eligible for the fallback fade.
+Scoped to `[aa-trigger~="load"]` / `[aa-trigger~="load-once"]` on purpose: scroll-triggered elements below the fold stay hidden until the lib actually arrives. Only elements the author has explicitly marked as "needs to be visible immediately" are eligible for the fallback fade.
 
 ### Layer 2 — `aa-timeout` (4s default)
 
@@ -137,7 +138,7 @@ For the per-element delays to actually fire on slow networks, the body needs to 
 
 Without `defer`, every `<script>` blocks HTML parsing — on slow 4G the body hasn't been parsed by the time the 1s timer fires, so `querySelectorAll` returns no elements and the per-element delays never get applied. The snippet's built-in `DOMContentLoaded` guard catches this case as a safety net (it defers the apply step until the DOM is ready), but by then the lib bundle has usually finished loading too and `init()` runs first — meaning the fallback never fires at all on slow networks.
 
-`defer` flips this: the parser sails through the body without waiting for downloads. The `[aa-trigger~="load"]` elements exist by the time the timer fires, the snippet applies their delays inline, and the CSS keyframe plays out the staircase before the lib bundle even finishes downloading.
+`defer` flips this: the parser sails through the body without waiting for downloads. The `[aa-trigger~="load"]` / `[aa-trigger~="load-once"]` elements exist by the time the timer fires, the snippet applies their delays inline, and the CSS keyframe plays out the staircase before the lib bundle even finishes downloading.
 
 ## When you don't need this
 

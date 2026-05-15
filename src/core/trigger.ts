@@ -1,4 +1,4 @@
-export type TriggerKind = 'scroll' | 'event' | 'click' | 'load' | 'page-enter'
+export type TriggerKind = 'scroll' | 'event' | 'click' | 'load-once' | 'load'
 
 export interface ParsedTrigger {
   kind: TriggerKind
@@ -25,8 +25,8 @@ export const REVERSE_EASE = 'power2.inOut'
 function parseOne(token: string): ParsedTrigger | null {
   if (token === 'scroll') return { kind: 'scroll' }
   if (token === 'click') return { kind: 'click' }
+  if (token === 'load-once') return { kind: 'load-once' }
   if (token === 'load') return { kind: 'load' }
-  if (token === 'page-enter') return { kind: 'page-enter' }
   if (token.startsWith('event:')) {
     return { kind: 'event', eventName: token.slice('event:'.length) }
   }

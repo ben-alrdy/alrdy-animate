@@ -1,8 +1,10 @@
 <!--
-  Last synced with src/ at v8.0.0-alpha.5 (2026-05-13) — added
-  `aa-trigger="page-enter"` for SPA route re-entry; documented the global
-  contract (window.gsap / Lenis / lenis / AlrdyAnimate); init() now safely
-  re-attaches scroll-state + scroll-target across `keepGlobals: true` cycles.
+  Last synced with src/ at v8.0.0-alpha.6 (2026-05-15) — renamed
+  `aa-trigger="page-enter"` to `aa-trigger="load"` and renamed the old
+  first-init-only `aa-trigger="load"` to `aa-trigger="load-once"`; documented
+  the global contract (window.gsap / Lenis / lenis / AlrdyAnimate); init() now
+  safely re-attaches scroll-state + scroll-target across `keepGlobals: true`
+  cycles.
   This file mirrors the public API surface for AI coding agents. When any
   public aa-* attribute, InitOptions field, feature module, or trigger kind
   changes in src/, update this file in the same commit. See CLAUDE.md
@@ -108,13 +110,13 @@ The five trigger kinds:
 |---|---|
 | (omitted) or `scroll` | ScrollTrigger between `aa-scroll-start` and `aa-scroll-end`. Replays on re-enter unless `init({ again: false })`. |
 | `click` | Element animates when clicked. |
-| `load` | Fires on the **first** `init()` cycle of the page session. Subsequent `init()`s (e.g. after a Barba navigation) skip it. Use for transitions where the new container is hidden behind a transition wrapper and re-firing the entrance would waste work. |
-| `page-enter` | Fires on **every** `init()` cycle, including the first. Use for SPAs (Next.js App Router, etc.) where the same root `AlrdyInit` component re-calls `init()` on route changes — the user is visually arriving at a "fresh" page even though it's the second, third, Nth init. |
+| `load-once` | Fires on the **first** `init()` cycle of the page session. Subsequent `init()`s (e.g. after a Barba navigation) skip it. Use for transitions where the new container is hidden behind a transition wrapper and re-firing the entrance would waste work. |
+| `load` | Fires on **every** `init()` cycle, including the first. Use for SPAs (Next.js App Router, etc.) where the same root `AlrdyInit` component re-calls `init()` on route changes — the user is visually arriving at a "fresh" page even though it's the second, third, Nth init. |
 | `event:<name>` | Listens for `aa:trigger` CustomEvents with `detail.name === '<name>'` on the element or any ancestor. |
 
-**Choosing between `load` and `page-enter`:** Barba / View Transitions / any flow where the leaving page is still on screen during the swap → `load` (avoids replaying behind the wrapper). Next.js App Router back/forward nav, or any SPA where each route is a clean visual arrival → `page-enter`.
+**Choosing between `load-once` and `load`:** Barba / View Transitions / any flow where the leaving page is still on screen during the swap → `load-once` (avoids replaying behind the wrapper). Next.js App Router back/forward nav, or any SPA where each route is a clean visual arrival → `load`.
 
-**Multiple kinds** are space-separated and additive: `aa-trigger="load event:enter"` or `aa-trigger="page-enter event:enter"`.
+**Multiple kinds** are space-separated and additive: `aa-trigger="load-once event:enter"` or `aa-trigger="load event:enter"`.
 
 **Container inference** — if `aa-trigger` is omitted and the element is inside one of these containers, it inherits the matching event trigger:
 
@@ -265,21 +267,21 @@ init({
 ### Text characters fading in on load, desktop only
 
 ```html
-<h1 aa-animate-md="text-fade-up" aa-split="chars" aa-stagger="0.03" aa-trigger="load">
+<h1 aa-animate-md="text-fade-up" aa-split="chars" aa-stagger="0.03" aa-trigger="load-once">
   Headline
 </h1>
 ```
 
-`aa-animate-md` activates at `>= 768px`; below, no animation. `aa-trigger="load"` fires once per page session. For Next.js / SPAs where `init()` re-runs on every route change and you want the animation each time the user arrives, swap to `aa-trigger="page-enter"`.
+`aa-animate-md` activates at `>= 768px`; below, no animation. `aa-trigger="load-once"` fires once per page session. For Next.js / SPAs where `init()` re-runs on every route change and you want the animation each time the user arrives, swap to `aa-trigger="load"`.
 
 ### Hero animation on every Next.js route entry (back/forward nav)
 
 ```html
-<h1 aa-animate="text-tilt-up" aa-trigger="page-enter">Welcome</h1>
-<a aa-animate="fade-up" aa-trigger="page-enter">Get started</a>
+<h1 aa-animate="text-tilt-up" aa-trigger="load">Welcome</h1>
+<a aa-animate="fade-up" aa-trigger="load">Get started</a>
 ```
 
-In a Next.js App Router setup where `AlrdyInit` calls `destroy({ keepGlobals: true })` + `init()` on every `usePathname()` change, `page-enter` fires the animation on the first paint AND on every subsequent route entry (including browser back/forward).
+In a Next.js App Router setup where `AlrdyInit` calls `destroy({ keepGlobals: true })` + `init()` on every `usePathname()` change, `load` fires the animation on the first paint AND on every subsequent route entry (including browser back/forward).
 
 ### Slider draggable on mobile, scroll-snap on desktop
 

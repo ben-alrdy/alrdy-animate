@@ -6,8 +6,8 @@
     <title>Home — Barba Transition Demo</title>
     <!--
       Slow-network + init-timeout safety. Two layers:
-        - aa-fallback (FALLBACK_DELAY): fades aa-trigger="load" elements via
-          a CSS keyframe — graceful hero staircase.
+        - aa-fallback (FALLBACK_DELAY): fades aa-trigger="load" / "load-once"
+          elements via a CSS keyframe — graceful hero staircase.
         - aa-timeout  (TIMEOUT_DELAY): reveals every [aa-animate] element at
           its natural state — universal safety if init() never arrives.
       The CSS rules duplicate what's in dist/alrdy-animate.css so they're
@@ -21,7 +21,7 @@
       const applyFallback = () => {
         if (document.documentElement.hasAttribute('aa-loaded')) return;
         document.documentElement.setAttribute('aa-fallback', '');
-        document.querySelectorAll('[aa-trigger~="load"][aa-animate]').forEach((el) => {
+        document.querySelectorAll('[aa-trigger~="load"][aa-animate], [aa-trigger~="load-once"][aa-animate]').forEach((el) => {
           const stagger = parseFloat(el.getAttribute('aa-stagger'));
           const baseDelay = parseFloat(el.getAttribute('aa-delay')) || 0;
           if (Number.isFinite(stagger) && el.children.length > 0) {
@@ -58,7 +58,8 @@
         from { opacity: 0; transform: translateY(1.5rem); }
         to   { opacity: 1; transform: translateY(0); }
       }
-      html[aa-fallback] [aa-trigger~="load"][aa-animate]:not([aa-ready]) {
+      html[aa-fallback] [aa-trigger~="load"][aa-animate]:not([aa-ready]),
+      html[aa-fallback] [aa-trigger~="load-once"][aa-animate]:not([aa-ready]) {
         visibility: visible;
         animation: aa-fallback-appear 0.5s ease both;
       }
@@ -92,14 +93,14 @@
       </nav>
 
       <section class="page">
-        <h1 class="page__hero" aa-animate="text-slide-up" aa-split="lines mask" aa-trigger="load">A stacked-cards page transition.</h1>
-        <p class="page__lede" aa-animate="text-slide-up" aa-split="lines mask" aa-trigger="load" aa-delay="0.2">Click the nav to see the current page, an orange middle layer, and the next page scale down and drop one after another.</p>
+        <h1 class="page__hero" aa-animate="text-slide-up" aa-split="lines mask" aa-trigger="load-once">A stacked-cards page transition.</h1>
+        <p class="page__lede" aa-animate="text-slide-up" aa-split="lines mask" aa-trigger="load-once" aa-delay="0.2">Click the nav to see the current page, an orange middle layer, and the next page scale down and drop one after another.</p>
 
         <div
           class="card-grid"
           aa-animate="fade-up"
           aa-stagger="0.1"
-          aa-trigger="load event:enter"
+          aa-trigger="load-once event:enter"
         >
           <article class="card">
             <span class="card__num">01</span>

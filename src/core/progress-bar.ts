@@ -76,3 +76,25 @@ export function progressToValues(entry: ProgressEntry): Record<string, unknown> 
   if (entry.kind === 'circle') return { strokeDashoffset: 0 }
   return { [entry.property as string]: '100%' }
 }
+
+/**
+ * Set a progress indicator to a fractional fill (0..1). Used by scroll-driven
+ * progress where the value is interpolated from scroll position, not animated.
+ * The width/height fill uses an inline-style update for parity with the
+ * autoplay path; circle uses a strokeDashoffset write so it composes with the
+ * stroke-dasharray already set at `createProgressEntry` time.
+ */
+export function progressSetFill(
+  entry: ProgressEntry,
+  fraction: number,
+  set: GsapSet,
+): void {
+  const clamped = Math.max(0, Math.min(1, fraction))
+  if (entry.kind === 'circle') {
+    set(entry.target, {
+      strokeDashoffset: (entry.circumference ?? 0) * (1 - clamped),
+    })
+    return
+  }
+  set(entry.target, { [entry.property as string]: `${clamped * 100}%` })
+}

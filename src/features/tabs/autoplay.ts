@@ -5,6 +5,7 @@ import {
   progressToValues,
   type ProgressEntry,
 } from '../../core/progress-bar'
+import { attachHoverPauseListener, createViewportGate } from '../../core/viewport-gate'
 import type { TabsApi } from './index'
 
 export interface AutoplayOptions {
@@ -19,10 +20,6 @@ export interface AutoplayController {
   destroy: () => void
 }
 
-interface ScrollTriggerLike {
-  create: (vars: Record<string, unknown>) => { kill: () => void }
-}
-
 export function setupAutoplay(
   gsapHandle: GsapHandle,
   root: HTMLElement,
@@ -30,7 +27,6 @@ export function setupAutoplay(
   options: AutoplayOptions,
 ): AutoplayController {
   const gsap = gsapHandle.gsap as unknown as Record<string, any>
-  const ScrollTrigger = gsapHandle.plugins.ScrollTrigger as ScrollTriggerLike | undefined
   const { hoverPause } = options
   const entries = api.state.entries
 
@@ -155,63 +151,46 @@ export function setupAutoplay(
 
   const cleanups: Array<() => void> = []
 
-  if (hoverPause && !window.matchMedia('(hover: none)').matches) {
-    const onEnter = (): void => {
-      isHovering = true
-      if (autoplayCall && !autoplayCall.paused()) pauseByHover()
-    }
-    const onLeave = (): void => {
-      isHovering = false
-      if (!isPausedByHover) return
-      // If a paused tween is still alive, resume it where it left off. If
-      // the tween was killed (e.g. user clicked a tab while hovering), spin
-      // up a fresh cycle from currentIdx instead.
-      if (autoplayCall) {
-        resumeFromHover()
-      } else {
-        isPausedByHover = false
-        start()
-      }
-    }
-    root.addEventListener('mouseenter', onEnter)
-    root.addEventListener('mouseleave', onLeave)
-    cleanups.push(() => {
-      root.removeEventListener('mouseenter', onEnter)
-      root.removeEventListener('mouseleave', onLeave)
-    })
+  if (hoverPause) {
+    cleanups.push(
+      attachHoverPauseListener({
+        root,
+        onEnter: () => {
+          isHovering = true
+          if (autoplayCall && !autoplayCall.paused()) pauseByHover()
+        },
+        onLeave: () => {
+          isHovering = false
+          if (!isPausedByHover) return
+          // If a paused tween is still alive, resume it where it left off. If
+          // the tween was killed (e.g. user clicked a tab while hovering), spin
+          // up a fresh cycle from currentIdx instead.
+          if (autoplayCall) {
+            resumeFromHover()
+          } else {
+            isPausedByHover = false
+            start()
+          }
+        },
+      }),
+    )
   }
 
-  // Viewport gate: only autoplay when the tabs root is in view.
-  let st: { kill: () => void } | null = null
-  if (ScrollTrigger) {
-    st = ScrollTrigger.create({
-      trigger: root,
-      start: 'top bottom',
-      end: 'bottom top',
-      onEnter: () => {
-        // Defer one tick so initial-active openSnap settles first.
-        gsap.delayedCall(0.1, start)
-      },
-      onLeave: () => {
-        if (autoplayCall) {
-          autoplayCall.kill()
-          autoplayCall = null
-        }
-      },
-      onEnterBack: () => {
-        gsap.delayedCall(0.1, start)
-      },
-      onLeaveBack: () => {
-        if (autoplayCall) {
-          autoplayCall.kill()
-          autoplayCall = null
-        }
-      },
-    })
-    cleanups.push(() => st?.kill())
-  } else {
+  // Viewport gate: only autoplay when the tabs root is in view. `onActive`
+  // defers one tick so the initial-active openSnap settles first; `onIdle`
+  // kills the in-flight delayedCall.
+  const onIdle = (): void => {
+    if (autoplayCall) {
+      autoplayCall.kill()
+      autoplayCall = null
+    }
+  }
+  const onActive = (): void => {
     gsap.delayedCall(0.1, start)
   }
+  const gateDispose = createViewportGate(gsapHandle, { trigger: root, onActive, onIdle })
+  if (gateDispose) cleanups.push(gateDispose)
+  else onActive() // No ScrollTrigger plugin → just start (deferred).
 
   const destroy = (): void => {
     stop()

@@ -70,24 +70,24 @@ declare namespace JSX {
      *   `init({ again: false })`.
      * - `click` — element animates when clicked. The element itself becomes
      *   the click target.
-     * - `load` — fires on the very first `init()` cycle of the page session.
+     * - `load-once` — fires on the very first `init()` cycle of the page session.
      *   Subsequent `init()`s (e.g. after a Barba navigation) skip it. Use for
      *   page-transition flows where the leaving DOM is still on screen during
      *   the swap. Pair with the slow-network fallback recipe in
      *   `docs/recipes/load-fallback/`.
-     * - `page-enter` — fires on **every** `init()` cycle, including the first.
-     *   Use in SPAs (Next.js App Router, etc.) where the same `AlrdyInit`
-     *   component re-calls `init()` on route changes — `page-enter` replays
-     *   the entrance on each fresh route, including browser back/forward nav.
-     *   Contrast with `load`, which only fires once per page session.
+     * - `load` — fires on **every** `init()` cycle, including the first. Use
+     *   in SPAs (Next.js App Router, etc.) where the same `AlrdyInit` component
+     *   re-calls `init()` on route changes — `load` replays the entrance on
+     *   each fresh route, including browser back/forward nav. Contrast with
+     *   `load-once`, which only fires once per page session.
      * - `event:<name>` — listens for `aa:trigger` custom events with
      *   `detail.name === '<name>'` dispatched on the element or any ancestor.
      *   Names ending in `-active` auto-pair with `-inactive` for reverse.
      *
      * **Multiple triggers** are space-separated, e.g.
-     * `aa-trigger="load event:enter"` (load on first init, then re-fire on
-     * `event:enter` thereafter). Use `page-enter` alone for SPA route entry —
-     * no need to pair with `load`.
+     * `aa-trigger="load-once event:enter"` (load on first init, then re-fire on
+     * `event:enter` thereafter). Use `load` alone for SPA route entry —
+     * no need to pair with `load-once`.
      *
      * **Container inference** — if this attribute is omitted and the element is
      * inside `[aa-modal-name]`, `[aa-tabs-content]`, `[aa-tabs-visual]`, or

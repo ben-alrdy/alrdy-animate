@@ -11,7 +11,7 @@ const initialized = (msg: ConsoleMessage): boolean =>
  */
 async function sampleAfterRefresh(
   page: import('@playwright/test').Page,
-  trigger: 'page-enter' | 'load',
+  trigger: 'load' | 'load-once',
 ): Promise<number[]> {
   return page.evaluate(async (triggerValue) => {
     const existing = document.getElementById('trigger-fixture')
@@ -42,13 +42,13 @@ async function sampleAfterRefresh(
   }, trigger)
 }
 
-test.describe('aa-trigger="page-enter"', () => {
+test.describe('aa-trigger="load"', () => {
   test('animates on every init() cycle (refresh after cold load)', async ({ page }) => {
     const initLog = page.waitForEvent('console', { predicate: initialized, timeout: 8000 })
     await page.goto('/animations/appear/fade/')
     await initLog
 
-    const samples = await sampleAfterRefresh(page, 'page-enter')
+    const samples = await sampleAfterRefresh(page, 'load')
 
     // First sample at t=0: gsap.from() has set opacity to 0 and started tweening.
     // Last sample at t~810ms: well past the 0.6s duration.
@@ -56,29 +56,30 @@ test.describe('aa-trigger="page-enter"', () => {
     expect(samples[samples.length - 1]).toBeGreaterThan(0.9)
   })
 
-  test('regression: load still fires only on first init (does not replay on refresh)', async ({
+  test('regression: load-once still fires only on first init (does not replay on refresh)', async ({
     page,
   }) => {
     const initLog = page.waitForEvent('console', { predicate: initialized, timeout: 8000 })
     await page.goto('/animations/appear/fade/')
     await initLog
 
-    const samples = await sampleAfterRefresh(page, 'load')
+    const samples = await sampleAfterRefresh(page, 'load-once')
 
-    // load on a subsequent init is a no-op: element renders at natural opacity (1)
-    // with no tween. Every sample should already be at the to-state.
+    // load-once on a subsequent init is a no-op: element renders at natural
+    // opacity (1) with no tween. Every sample should already be at the
+    // to-state.
     for (const value of samples) {
       expect(value).toBeGreaterThan(0.95)
     }
   })
 
-  test('parser accepts page-enter alongside other triggers', async ({ page }) => {
+  test('parser accepts load alongside other triggers', async ({ page }) => {
     const initLog = page.waitForEvent('console', { predicate: initialized, timeout: 8000 })
     await page.goto('/animations/appear/fade/')
     await initLog
 
     // Build an element with combined triggers and confirm it animates on refresh
-    // (page-enter wins on the init cycle; event:foo would wire for later).
+    // (load wins on the init cycle; event:foo would wire for later).
     const samples = await page.evaluate(async () => {
       const existing = document.getElementById('trigger-fixture-combo')
       if (existing) existing.remove()
@@ -87,7 +88,7 @@ test.describe('aa-trigger="page-enter"', () => {
       el.style.cssText =
         'position:fixed;top:80px;left:0;width:60px;height:60px;background:#0f0;z-index:9999;'
       el.setAttribute('aa-animate', 'fade')
-      el.setAttribute('aa-trigger', 'page-enter event:revealed')
+      el.setAttribute('aa-trigger', 'load event:revealed')
       el.setAttribute('aa-duration', '0.6')
       document.body.appendChild(el)
 

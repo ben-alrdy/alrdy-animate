@@ -418,7 +418,6 @@ function setupHoverIndicator(ctx: FeatureContext, navElement: HTMLElement): () =
 
 const navFeature: FeatureModule = {
   name: 'nav',
-  requiredPlugins: ['ScrollTrigger', 'Flip'],
   init(ctx: FeatureContext): () => void {
     const navElements = ctx.elements.filter(
       (el): el is HTMLElement => el instanceof HTMLElement && el.hasAttribute('aa-nav'),

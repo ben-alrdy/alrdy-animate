@@ -1,6 +1,10 @@
 import type { GsapHandle } from '../../core/gsap-detect'
+import {
+  createProgressEntry,
+  progressSetFill,
+  type ProgressEntry,
+} from '../../core/progress-bar'
 import type { TabsApi } from './index'
-import type { TabEntry } from './state'
 
 export interface ScrollOptions {
   distanceVh: number
@@ -27,39 +31,6 @@ interface DummyTween {
   kill: () => void
 }
 
-function getCircle(el: HTMLElement): SVGCircleElement | null {
-  if (el.tagName.toLowerCase() === 'circle') return el as unknown as SVGCircleElement
-  return el.querySelector('circle')
-}
-
-function progressKind(el: HTMLElement): 'width' | 'height' | 'circle' {
-  const raw = el.getAttribute('aa-tabs-progress')?.toLowerCase()
-  if (raw === 'circle') return 'circle'
-  if (raw === 'height') return 'height'
-  return 'width'
-}
-
-function setProgressBar(
-  entry: TabEntry,
-  fill: number, // 0..1
-  gsap: Record<string, any>,
-): void {
-  const el = entry.progress
-  if (!el) return
-  const clamped = Math.max(0, Math.min(1, fill))
-  const kind = progressKind(el)
-  if (kind === 'circle') {
-    const circle = getCircle(el)
-    if (!circle) return
-    const r = parseFloat(circle.getAttribute('r') ?? '0') || 25
-    const c = 2 * Math.PI * r
-    circle.style.strokeDasharray = String(c)
-    circle.style.strokeDashoffset = String(c - clamped * c)
-    return
-  }
-  gsap.set(el, { [kind]: `${clamped * 100}%` })
-}
-
 export function setupScroll(
   gsapHandle: GsapHandle,
   root: HTMLElement,
@@ -77,6 +48,15 @@ export function setupScroll(
   const entries = api.state.entries
   const N = entries.length
   if (N === 0) return null
+
+  // Resolve each entry's progress indicator once. createProgressEntry handles
+  // both width/height/circle modes and pre-sets the dasharray on circles so
+  // subsequent progressSetFill writes only touch dashoffset.
+  const progressByIdx: Array<ProgressEntry | null> = entries.map((entry) =>
+    entry.progress
+      ? createProgressEntry(entry.progress, 'aa-tabs-progress', entry.ease, gsap.set)
+      : null,
+  )
 
   // Total scroll distance in pixels (vh × N).
   const totalDistance = (N * options.distanceVh * window.innerHeight) / 100
@@ -104,14 +84,10 @@ export function setupScroll(
 
       // Per-tab progress bars: active bar fills proportionally over its
       // segment of the pin range, others stay at 0.
-      entries.forEach((entry, i) => {
-        if (!entry.progress) return
-        if (i === newIdx) {
-          const local = p * N - i
-          setProgressBar(entry, local, gsap)
-        } else {
-          setProgressBar(entry, 0, gsap)
-        }
+      progressByIdx.forEach((entry, i) => {
+        if (!entry) return
+        const fill = i === newIdx ? p * N - i : 0
+        progressSetFill(entry, fill, gsap.set)
       })
     },
   })

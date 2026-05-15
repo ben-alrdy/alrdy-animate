@@ -1,4 +1,5 @@
 import type { GsapHandle } from '../../core/gsap-detect'
+import { hasAnimateAttribute } from '../../core/parse'
 import { emitTrigger } from '../../core/trigger'
 import type { TabEntry, TabState } from './state'
 
@@ -32,19 +33,13 @@ export interface AnimationController {
 
 type GsapAny = Record<string, any>
 
-const ANIMATE_ATTRS = ['aa-animate', 'aa-animate-sm', 'aa-animate-md', 'aa-animate-lg', 'aa-animate-xl']
-
 /**
  * When the author wraps their own `aa-animate` onto the visual element, we
  * step out of the way: their animation owns visibility (and any transform).
  * Auto-cross-fade only kicks in when the visual is decorative markup.
  */
 export function hasVisualAnimation(visual: HTMLElement | null): boolean {
-  if (!visual) return false
-  for (const attr of ANIMATE_ATTRS) {
-    if (visual.hasAttribute(attr)) return true
-  }
-  return false
+  return hasAnimateAttribute(visual)
 }
 
 function emitOnTargets(entry: TabEntry, name: string): void {

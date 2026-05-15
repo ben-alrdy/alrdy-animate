@@ -12,7 +12,7 @@
       const applyFallback = () => {
         if (document.documentElement.hasAttribute('aa-loaded')) return;
         document.documentElement.setAttribute('aa-fallback', '');
-        document.querySelectorAll('[aa-trigger~="load"][aa-animate]').forEach((el) => {
+        document.querySelectorAll('[aa-trigger~="load"][aa-animate], [aa-trigger~="load-once"][aa-animate]').forEach((el) => {
           const stagger = parseFloat(el.getAttribute('aa-stagger'));
           const baseDelay = parseFloat(el.getAttribute('aa-delay')) || 0;
           if (Number.isFinite(stagger) && el.children.length > 0) {
@@ -46,7 +46,8 @@
         from { opacity: 0; transform: translateY(1.5rem); }
         to   { opacity: 1; transform: translateY(0); }
       }
-      html[aa-fallback] [aa-trigger~="load"][aa-animate]:not([aa-ready]) {
+      html[aa-fallback] [aa-trigger~="load"][aa-animate]:not([aa-ready]),
+      html[aa-fallback] [aa-trigger~="load-once"][aa-animate]:not([aa-ready]) {
         visibility: visible;
         animation: aa-fallback-appear 0.5s ease both;
       }
@@ -80,14 +81,14 @@
       </nav>
 
       <section class="page">
-        <h1 class="page__hero" aa-animate="text-slide-up" aa-split="lines mask" aa-trigger="load">Built for v8 page transitions.</h1>
-        <p class="page__lede" aa-animate="text-slide-up" aa-split="lines mask" aa-trigger="load" aa-delay="0.2">The lib stays out of the transition itself and exposes the lifecycle hooks you need to integrate any page-change library.</p>
+        <h1 class="page__hero" aa-animate="text-slide-up" aa-split="lines mask" aa-trigger="load-once">Built for v8 page transitions.</h1>
+        <p class="page__lede" aa-animate="text-slide-up" aa-split="lines mask" aa-trigger="load-once" aa-delay="0.2">The lib stays out of the transition itself and exposes the lifecycle hooks you need to integrate any page-change library.</p>
 
         <div
           class="card-grid"
           aa-animate="fade-up"
           aa-stagger="0.1"
-          aa-trigger="load event:enter"
+          aa-trigger="load-once event:enter"
         >
           <article class="card">
             <span class="card__num">01</span>
@@ -123,8 +124,8 @@
            track (the infinite-loop layer — clones of the list land here),
            list (the authored unit; the lib clones it to fill the viewport). -->
       <section class="ribbon">
-        <span class="ribbon__eyebrow" aa-animate="fade-up" aa-trigger="load event:enter">Stack</span>
-        <h2 class="ribbon__title" aa-animate="text-slide-up" aa-split="lines mask" aa-trigger="load event:enter">
+        <span class="ribbon__eyebrow" aa-animate="fade-up" aa-trigger="load-once event:enter">Stack</span>
+        <h2 class="ribbon__title" aa-animate="text-slide-up" aa-split="lines mask" aa-trigger="load-once event:enter">
           Built on tools the lib doesn't bundle.
         </h2>
 

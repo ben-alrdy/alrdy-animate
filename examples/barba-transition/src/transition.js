@@ -269,10 +269,11 @@ function alrdyDestroy() {
 //
 // `~="event:enter"` matches whitespace-separated lists, so it picks up both
 // the standalone `aa-trigger="event:enter"` form AND the combined
-// `aa-trigger="load event:enter"` form (load on first init, event:enter on
-// every subsequent Barba navigation). On first init the combined-form
-// elements skip event subscription (load already fired), so this dispatch
-// safely no-ops against them — only standalone-event elements respond.
+// `aa-trigger="load-once event:enter"` form (load-once on first init,
+// event:enter on every subsequent Barba navigation). On first init the
+// combined-form elements skip event subscription (load-once already fired),
+// so this dispatch safely no-ops against them — only standalone-event
+// elements respond.
 function fireEnterAnimations(rootEl) {
   const targets = rootEl.querySelectorAll('[aa-trigger~="event:enter"]')
   targets.forEach((el) => {

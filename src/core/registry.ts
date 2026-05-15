@@ -8,6 +8,7 @@ import type { GsapHandle } from './gsap-detect'
 import type { ResponsiveController } from './match-media'
 import type { ResolvedPreset } from './presets'
 import type { FeatureName } from './scanner'
+import { readAttrs, type Config } from './settings'
 
 export interface FeatureContext {
   gsap: GsapHandle
@@ -18,8 +19,8 @@ export interface FeatureContext {
   /**
    * True iff this is the *first* init() call in the page session. Reset only
    * by a hard reload — survives every destroy() / re-init cycle. Features use
-   * it to decide whether `aa-trigger="load"` should fire (first init only) or
-   * fall through to the element's other triggers.
+   * it to decide whether `aa-trigger="load-once"` should fire (first init only)
+   * or fall through to the element's other triggers.
    */
   firstInit: boolean
   /**
@@ -43,7 +44,6 @@ export interface FeatureContext {
 
 export interface FeatureModule {
   name: FeatureName
-  requiredPlugins: string[]
   init: (ctx: FeatureContext) => () => void
 }
 
@@ -79,4 +79,26 @@ export async function loadFeature(name: FeatureName): Promise<FeatureModule | nu
 export async function loadFeatures(names: Iterable<FeatureName>): Promise<FeatureModule[]> {
   const modules = await Promise.all([...names].map(loadFeature))
   return modules.filter((m): m is FeatureModule => m !== null)
+}
+
+/**
+ * Standard feature init shape: filter `ctx.elements` to those this feature
+ * owns, then bind each through `ctx.responsive` so per-breakpoint configs are
+ * routed correctly and matchMedia teardown is automatic.
+ *
+ * Features that operate on whole roots (tabs, slider, marquee, modal, nav)
+ * have non-trivial per-root setup beyond this shape and should not use this
+ * helper. It exists for the per-element appearance features (scroll, text,
+ * reveal, parallax) whose init bodies were byte-for-byte identical.
+ */
+export function bindFeature(
+  ctx: FeatureContext,
+  matches: (el: Element, presetMap: Map<Element, ResolvedPreset>) => boolean,
+  setupOne: (ctx: FeatureContext, element: Element, config: Config) => (() => void) | undefined,
+): void {
+  const subjects = ctx.elements.filter((el) => matches(el, ctx.presetMap))
+  for (const element of subjects) {
+    const attrs = readAttrs(element, ctx.presetMap.get(element))
+    ctx.responsive.bind(element, attrs, ({ config }) => setupOne(ctx, element, config))
+  }
 }

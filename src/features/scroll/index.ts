@@ -1,8 +1,7 @@
-import type { FeatureContext, FeatureModule } from '../../core/registry'
-import { parseNum, parseScrub, resolveAnchor } from '../../core/parse'
-import { resolveScrollStart } from '../../core/scroll-trigger'
+import { bindFeature, type FeatureContext, type FeatureModule } from '../../core/registry'
+import { readAnimationConfig, resolveAnchor } from '../../core/parse'
 import { matchAnimateValue, type ResolvedPreset } from '../../core/presets'
-import { readAttrs, type Config } from '../../core/settings'
+import type { Config } from '../../core/settings'
 import {
   buildStagger,
   defaultStaggerFor,
@@ -83,18 +82,11 @@ function setupOne(
   if (!animate) return
 
   const opts = ctx.options
-  const duration = parseNum(config['aa-duration'], opts.duration)
-  const delay = parseNum(config['aa-delay'], 0)
-  const ease = config['aa-ease'] ?? opts.ease
-  const distance = parseNum(config['aa-distance'], opts.distance)
+  const { duration, delay, ease, distance, scrollStart, scrollEnd, scrub, again } =
+    readAnimationConfig(config, opts)
 
   const fromState = buildFromState(animate, distance)
   if (!fromState) return
-
-  const scrollEnd = config['aa-scroll-end'] ?? opts.scrollEnd
-  const scrub = parseScrub(config['aa-scrub'])
-  const scrollStart = resolveScrollStart(config['aa-scroll-start'], opts, scrub)
-  const again = opts.again !== false
 
   // aa-stagger present + element has children → stagger the children.
   // aa-stagger present but no children → silently fall through and animate the element itself.
@@ -138,13 +130,8 @@ function setupOne(
 
 const scrollFeature: FeatureModule = {
   name: 'scroll',
-  requiredPlugins: ['ScrollTrigger'],
   init(ctx: FeatureContext): () => void {
-    const subjects = ctx.elements.filter((el) => elementMatches(el, ctx.presetMap))
-    for (const element of subjects) {
-      const attrs = readAttrs(element, ctx.presetMap.get(element))
-      ctx.responsive.bind(element, attrs, ({ config }) => setupOne(ctx, element, config))
-    }
+    bindFeature(ctx, elementMatches, setupOne)
     return () => {}
   },
 }

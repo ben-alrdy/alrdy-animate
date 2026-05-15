@@ -14,7 +14,7 @@ import {
  * vars into its `gsap.from(...)` / `gsap.fromTo(...)` / `gsap.timeline(...)`
  * call and the right trigger semantics fall out.
  *
- *   load / page-enter            { delay }                         — plays immediately
+ *   load-once / load             { delay }                         — plays immediately
  *   event                        { paused: true, delay, defaults } — paused, controlled by event pair
  *   scrub                        { delay, scrollTrigger }          — bound to scroll position
  *   scroll-again (the default)   { paused: true, delay }           — paused, controlled by enter/reset triggers
@@ -69,7 +69,7 @@ export interface TriggeredAnimationHandle {
    * Recreate the animation against the current state. Trigger machinery
    * stays attached; rebuilt animations are wired up via closures.
    *
-   * No-op for load / page-enter after the first fire — their "play once on
+   * No-op for load-once / load after the first fire — their "play once on
    * this init cycle" semantic shouldn't re-fire on resize-driven rebuilds.
    *
    * When the trigger pair is currently in its played state (event forward
@@ -87,7 +87,7 @@ export interface TriggeredAnimationHandle {
  * declares what to animate (in `buildAnimation`); this helper decides when
  * and how to play it based on the parsed `aa-trigger`.
  *
- * Returns `null` when nothing should run (e.g. `aa-trigger="load"` on a
+ * Returns `null` when nothing should run (e.g. `aa-trigger="load-once"` on a
  * subsequent init cycle — load already fired). Returns a handle with
  * `rebuild()` for features that need to re-target their animation against
  * fresh DOM (SplitText auto-resplit on resize is the canonical case).
@@ -97,18 +97,18 @@ export function setupTriggeredAnimation(
   element: Element,
   opts: TriggeredAnimationOptions,
 ): TriggeredAnimationHandle | null {
+  const hasLoadOnce = opts.triggers.some((t) => t.kind === 'load-once')
   const hasLoad = opts.triggers.some((t) => t.kind === 'load')
-  const hasPageEnter = opts.triggers.some((t) => t.kind === 'page-enter')
-  const isLoadOneShot = (hasLoad && ctx.firstInit) || hasPageEnter
+  const isLoadOneShot = (hasLoadOnce && ctx.firstInit) || hasLoad
   let persistentTrigger: ParsedTrigger | undefined
   if (!isLoadOneShot) {
     persistentTrigger = opts.triggers.find(
-      (t) => t.kind !== 'load' && t.kind !== 'page-enter',
+      (t) => t.kind !== 'load-once' && t.kind !== 'load',
     )
   }
-  // No firing trigger at all (e.g. `aa-trigger="load"` on a subsequent init,
-  // after the load already played). The end-of-init aa-ready flip will reveal
-  // the element in its natural state.
+  // No firing trigger at all (e.g. `aa-trigger="load-once"` on a subsequent
+  // init, after the load already played). The end-of-init aa-ready flip will
+  // reveal the element in its natural state.
   if (!isLoadOneShot && !persistentTrigger) return null
 
   const triggerEl = opts.triggerEl ?? element

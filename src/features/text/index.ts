@@ -1,9 +1,8 @@
 import type { GsapTimeline } from '../../core/gsap-detect'
-import type { FeatureContext, FeatureModule } from '../../core/registry'
-import { parseNum, parseScrub } from '../../core/parse'
-import { resolveScrollStart } from '../../core/scroll-trigger'
+import { bindFeature, type FeatureContext, type FeatureModule } from '../../core/registry'
+import { readAnimationConfig } from '../../core/parse'
 import { matchAnimateValue, type ResolvedPreset } from '../../core/presets'
-import { readAttrs, type Config } from '../../core/settings'
+import type { Config } from '../../core/settings'
 import {
   buildStagger,
   defaultStaggerFor,
@@ -362,14 +361,9 @@ function setupBarReveal(
   const { mode, dir } = parsed
   const isBlock = mode === 'block'
   const opts = ctx.options
-  const duration = parseNum(config['aa-duration'], opts.duration)
-  const delay = parseNum(config['aa-delay'], 0)
-  const ease = config['aa-ease'] ?? opts.ease
+  const { duration, delay, ease, scrollStart, scrollEnd, scrub, again } =
+    readAnimationConfig(config, opts)
   const { unit: stagger } = parseStaggerSpec(config['aa-stagger'], defaultStaggerFor('lines', opts))
-  const scrollEnd = config['aa-scroll-end'] ?? opts.scrollEnd
-  const scrub = parseScrub(config['aa-scrub'])
-  const scrollStart = resolveScrollStart(config['aa-scroll-start'], opts, scrub)
-  const again = opts.again !== false
 
   const scaleProp = `scale${dir.axis}`
 
@@ -488,14 +482,8 @@ function setupOne(
   const anim = TEXT_ANIMS[animate]
 
   const opts = ctx.options
-  const duration = parseNum(config['aa-duration'], opts.duration)
-  const delay = parseNum(config['aa-delay'], 0)
-  const ease = config['aa-ease'] ?? opts.ease
-  const distance = parseNum(config['aa-distance'], opts.distance)
-  const scrollEnd = config['aa-scroll-end'] ?? opts.scrollEnd
-  const scrub = parseScrub(config['aa-scrub'])
-  const scrollStart = resolveScrollStart(config['aa-scroll-start'], opts, scrub)
-  const again = opts.again !== false
+  const { duration, delay, ease, distance, scrollStart, scrollEnd, scrub, again } =
+    readAnimationConfig(config, opts)
 
   const userSplit = parseSplit(config['aa-split'])
   const splitMode = userSplit?.mode ?? anim.defaultSplit
@@ -589,13 +577,8 @@ function setupOne(
 
 const textFeature: FeatureModule = {
   name: 'text',
-  requiredPlugins: ['ScrollTrigger', 'SplitText'],
   init(ctx: FeatureContext): () => void {
-    const subjects = ctx.elements.filter((el) => elementMatches(el, ctx.presetMap))
-    for (const element of subjects) {
-      const attrs = readAttrs(element, ctx.presetMap.get(element))
-      ctx.responsive.bind(element, attrs, ({ config }) => setupOne(ctx, element, config))
-    }
+    bindFeature(ctx, elementMatches, setupOne)
     return () => {}
   },
 }
