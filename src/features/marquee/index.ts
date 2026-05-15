@@ -1,4 +1,5 @@
 import type { FeatureContext, FeatureModule } from '../../core/registry'
+import { parseNum, parseScrub } from '../../core/parse'
 import { readAttrs, type Config } from '../../core/settings'
 
 interface ParsedTokens {
@@ -23,19 +24,6 @@ function parseMarqueeValue(raw: string | undefined): ParsedTokens {
     isDraggable: tokens.includes('draggable'),
     isNone: tokens.includes('none'),
   }
-}
-
-function parseNum(value: string | null | undefined, fallback: number): number {
-  if (value === undefined || value === null) return fallback
-  const n = parseFloat(value)
-  return Number.isFinite(n) ? n : fallback
-}
-
-function parseScrub(value: string | undefined): number | true | undefined {
-  if (value === undefined) return undefined
-  if (value === '' || value === 'true') return true
-  const n = parseFloat(value)
-  return Number.isFinite(n) ? n : true
 }
 
 interface DraggableInstance {

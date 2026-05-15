@@ -53,6 +53,25 @@ The offset is a percentage of the element's own size, so `aa-distance="1"` slide
   </div>
 </Demo>
 
+## Live demo — scrub-driven
+
+Pair `slide-*` with `aa-scrub` to bind translation progress directly to scroll position. `aa-scrub="true"` snaps to scroll exactly; a numeric value (e.g. `"1"`) smooths it with that many seconds of lag.
+
+<Demo caption={{ "aa-animate": "slide-up", "aa-scrub": "1" }}>
+  <div data-demo-stage>
+    <div data-spacer></div>
+    <div class="demo-grid">
+      <div class="slide-frame">
+        <div class="demo-card" aa-animate="slide-up" aa-scrub="1">scrubbed slide-up</div>
+      </div>
+      <div class="slide-frame">
+        <div class="demo-card" aa-animate="slide-left" aa-scrub="1">scrubbed slide-left</div>
+      </div>
+    </div>
+    <div data-spacer></div>
+  </div>
+</Demo>
+
 <style>{`
   .demo-grid {
     display: grid;

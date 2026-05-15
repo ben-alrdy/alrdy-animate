@@ -25,6 +25,7 @@ interface SplitTextOptions {
   charsClass?: string
   mask?: string
   aria?: 'auto' | 'hidden' | 'none'
+  onSplit?: (instance: SplitTextInstance) => void
 }
 
 // Tags where aria-label is permitted by the ARIA-in-HTML spec. Anything not in
@@ -76,6 +77,18 @@ interface ApplyOptions {
   mask?: SplitMode
   /** When 'lines', force SplitText to also produce lines (needed for line-grouping). */
   ensureLines?: boolean
+  /**
+   * Called when SplitText auto-re-splits (e.g. the viewport resizes within a
+   * breakpoint and line wrapping changes). The original `.aa-char`/`.aa-line`
+   * DOM nodes are replaced by fresh ones, so any GSAP tween still pointing at
+   * the old nodes silently animates orphaned elements. Callers should use
+   * this hook to tear down the previous tween/trigger and rebuild against
+   * the new SplitResult.
+   *
+   * NOT fired on the initial split — use the synchronous return value of
+   * `applySplit()` for first-time setup.
+   */
+  onResplit?: (split: SplitResult) => void
 }
 
 export function applySplit(
@@ -100,12 +113,46 @@ export function applySplit(
           : 'chars,words,lines'
   const splitOpts: SplitTextOptions = {
     type,
+    // autoSplit re-runs SplitText when line wrapping changes (typical case:
+    // user resizes the viewport within a breakpoint and the text re-wraps).
+    // Without this, lines stay frozen at their original measurements while
+    // the underlying text reflows — `text-slide-up`-style line masks would
+    // visibly clip or gap. The catch is that auto-resplit replaces the
+    // `.aa-char` / `.aa-line` DOM nodes, leaving previously-built GSAP tweens
+    // pointing at orphaned elements. The companion `onResplit` hook below
+    // wires a callback so the caller can rebuild its animation against the
+    // new nodes.
     autoSplit: true,
     linesClass: 'aa-line',
     wordsClass: 'aa-word',
     charsClass: 'aa-char',
   }
   if (opts.mask) splitOpts.mask = opts.mask
+
+  // SplitText's onSplit fires both for the initial split (synchronously inside
+  // the constructor) and for every resize-driven re-split. We skip the first
+  // call so the caller can keep its existing synchronous setup path using the
+  // return value of `applySplit()`. Subsequent calls deliver the new split to
+  // `onResplit` for rebuilds.
+  if (opts.onResplit) {
+    const onResplit = opts.onResplit
+    let initialFired = false
+    splitOpts.onSplit = (inst) => {
+      if (!initialFired) {
+        initialFired = true
+        return
+      }
+      onResplit({
+        mode,
+        words: inst.words ?? [],
+        chars: inst.chars ?? [],
+        lines: inst.lines ?? [],
+        // Re-splits replace the DOM via SplitText itself; the outer revert()
+        // captured below handles full teardown. Per-resplit revert is a no-op.
+        revert: () => {},
+      })
+    }
+  }
 
   const allowAriaLabel = tagAllowsAriaLabel(element)
   let srSpan: HTMLSpanElement | null = null

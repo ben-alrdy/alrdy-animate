@@ -1,9 +1,14 @@
+import { parseNum } from '../../core/parse'
 import type { FeatureContext, FeatureModule } from '../../core/registry'
 import { readAttrs, type Config } from '../../core/settings'
-import { setupBlockHover } from './block'
-import { setupCurveHover } from './curve'
 import { parseDirectionMode } from './direction'
-import { ICON_DIRECTIONS, setupIconHover, type IconDirection } from './icon'
+import {
+  ICON_DIRECTIONS,
+  setupBlockHover,
+  setupCurveHover,
+  setupIconHover,
+  type IconDirection,
+} from './effects'
 
 interface ParsedHover {
   type: 'block' | 'curve' | 'icon' | null
@@ -39,12 +44,6 @@ function elementMatches(el: Element): boolean {
     if (v && parseHoverValue(v.trim()).type) return true
   }
   return false
-}
-
-function parseNum(value: string | undefined, fallback: number): number {
-  if (value === undefined) return fallback
-  const n = parseFloat(value)
-  return Number.isFinite(n) ? n : fallback
 }
 
 const HOVER_DEFAULTS = {

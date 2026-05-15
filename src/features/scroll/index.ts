@@ -1,5 +1,6 @@
 import type { FeatureContext, FeatureModule } from '../../core/registry'
-import { bindAgainTrigger, resolveScrollStart } from '../../core/scroll-trigger'
+import { parseNum, parseScrub, resolveAnchor } from '../../core/parse'
+import { resolveScrollStart } from '../../core/scroll-trigger'
 import { matchAnimateValue, type ResolvedPreset } from '../../core/presets'
 import { readAttrs, type Config } from '../../core/settings'
 import {
@@ -8,12 +9,8 @@ import {
   parseStaggerSpec,
   type StaggerValue,
 } from '../../core/stagger'
-import {
-  REVERSE_EASE,
-  REVERSE_TIME_SCALE,
-  resolveTriggers,
-  subscribeWithPair,
-} from '../../core/trigger'
+import { setupTriggeredAnimation } from '../../core/triggered-animation'
+import { resolveTriggers } from '../../core/trigger'
 
 type FromState = Record<string, number | string>
 
@@ -77,27 +74,6 @@ function elementMatches(el: Element, presetMap: Map<Element, ResolvedPreset>): b
   return matchAnimateValue(el, presetMap, isSupportedValue)
 }
 
-function parseNum(value: string | undefined, fallback: number): number {
-  if (value === undefined) return fallback
-  const n = parseFloat(value)
-  return Number.isFinite(n) ? n : fallback
-}
-
-function parseScrub(value: string | undefined): number | boolean | undefined {
-  if (value === undefined) return undefined
-  if (value === '' || value === 'true') return true
-  const n = parseFloat(value)
-  return Number.isFinite(n) ? n : true
-}
-
-function resolveAnchor(element: Element, anchor: string | undefined): Element {
-  if (!anchor) return element
-  const root = element.closest(anchor)
-  if (root) return root
-  const found = document.querySelector(anchor)
-  return found ?? element
-}
-
 function setupOne(
   ctx: FeatureContext,
   element: Element,
@@ -131,92 +107,33 @@ function setupOne(
   const stagger: StaggerValue =
     children.length > 0 ? buildStagger(staggerSpec.unit, staggerSpec.flags) : 0
 
-  const triggers = resolveTriggers(element, config['aa-trigger'])
-  const hasLoad = triggers.some((t) => t.kind === 'load')
-  const hasPageEnter = triggers.some((t) => t.kind === 'page-enter')
+  const triggerEl = resolveAnchor(element, config['aa-anchor'])
 
-  // Use gsap.from() (not fromTo) so the natural CSS state of each target —
+  // We use gsap.from() (not fromTo) so the natural CSS state of each target —
   // its existing rotation, opacity, transform — is the destination. Authors
   // can pre-style elements (e.g. a card with permanent rotate(8deg)) and the
   // entrance still resolves to that state instead of clobbering it to 0.
-
-  // `load` owns the first init cycle only; `page-enter` fires on every init
-  // cycle (the SPA primitive). Either one short-circuits other triggers so
-  // they can't double-fire on the same cycle.
-  if ((hasLoad && ctx.firstInit) || hasPageEnter) {
-    // aa-fallback signals the inline-snippet timeout already faded the element
-    // in via CSS; running our tween now would rewind it to the from-state and
-    // flash. The end-of-init aa-ready flip still happens, keeping DOM consistent.
-    if (document.documentElement.hasAttribute('aa-fallback')) return undefined
-    ctx.gsap.gsap.from(targets, { ...fromState, duration, ease, delay, stagger })
-    return undefined
-  }
-
-  // Subsequent inits with no other trigger: skip entirely so the element
-  // renders in its natural CSS state once aa-ready is flipped at end of init.
-  // This is the load-only semantic — "play once on first session init, then
-  // just be there" — important for hero text under a page-transition wrapper:
-  // re-firing the animation invisibly behind the wrapper would waste work and
-  // leave the element in an unexpected mid-state if the user interrupts.
-  const trigger = triggers.find((t) => t.kind !== 'load' && t.kind !== 'page-enter')
-  if (!trigger) return undefined
-
-  if (trigger.kind === 'event' && trigger.eventName) {
-    const tween = ctx.gsap.gsap.from(targets, {
-      ...fromState,
-      duration,
-      ease,
-      easeReverse: REVERSE_EASE,
-      delay,
-      stagger,
-      paused: true,
-    })
-    const off = subscribeWithPair({
-      element,
-      forwardName: trigger.eventName,
-      // Always restart from time 0 so a reactivation lands on the FROM state
-      // even if the previous reverse hadn't finished. Reset timeScale to 1
-      // so a prior reverse doesn't leave the forward accelerated.
-      onForward: () => tween.timeScale(1).play(0),
-      onReverse: () => tween.timeScale(REVERSE_TIME_SCALE).reverse(),
-    })
-    return () => off()
-  }
-
-  const triggerEl = resolveAnchor(element, config['aa-anchor'])
-
-  if (scrub !== undefined) {
-    ctx.gsap.gsap.from(targets, {
-      ...fromState,
-      duration,
-      ease,
-      delay,
-      stagger,
-      scrollTrigger: {
-        trigger: triggerEl,
-        start: scrollStart,
-        end: scrollEnd,
-        scrub,
-      },
-    })
-    return undefined
-  }
-
-  const tl = ctx.gsap.gsap.timeline({ paused: true })
-  tl.from(targets, { ...fromState, duration, ease, delay, stagger })
-
-  bindAgainTrigger({
-    gsap: ctx.gsap,
-    trigger: triggerEl,
-    start: scrollStart,
+  const handle = setupTriggeredAnimation(ctx, element, {
+    triggers: resolveTriggers(element, config['aa-trigger']),
+    delay,
+    scrollStart,
+    scrollEnd,
+    scrub,
     again,
-    onPlay: () => tl.play(),
-    onReset: () => {
-      tl.progress(0).pause()
+    triggerEl,
+    buildAnimation: (vars) => {
+      const animation = ctx.gsap.gsap.from(targets, {
+        ...fromState,
+        duration,
+        ease,
+        stagger,
+        ...vars,
+      })
+      return { animation }
     },
   })
 
-  return undefined
+  return handle ? () => handle.dispose() : undefined
 }
 
 const scrollFeature: FeatureModule = {

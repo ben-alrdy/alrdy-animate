@@ -1,4 +1,10 @@
 import type { GsapHandle } from '../../core/gsap-detect'
+import {
+  createProgressEntry,
+  progressFromValues,
+  progressToValues,
+  type ProgressEntry,
+} from '../../core/progress-bar'
 import type { SliderLoop } from './horizontal-loop'
 
 export interface AutoplayOptions {
@@ -26,29 +32,6 @@ export interface AutoplayController {
   destroy: () => void
 }
 
-type ProgressKind = 'width' | 'height' | 'circle'
-
-interface ProgressEntry {
-  /** Element actually being tweened (the inner <circle> for circle, the marked element for width/height). */
-  target: Element
-  kind: ProgressKind
-  /** For 'width' / 'height' — the CSS property to tween. */
-  property?: 'width' | 'height'
-  /** For 'circle' — pre-computed 2πr so we know where to start the dashoffset. */
-  circumference?: number
-  ease: string
-}
-
-function progressFromValues(entry: ProgressEntry): Record<string, unknown> {
-  if (entry.kind === 'circle') return { strokeDashoffset: entry.circumference }
-  return { [entry.property as string]: '0%' }
-}
-
-function progressToValues(entry: ProgressEntry): Record<string, unknown> {
-  if (entry.kind === 'circle') return { strokeDashoffset: 0 }
-  return { [entry.property as string]: '100%' }
-}
-
 interface ScrollTriggerLike {
   create: (vars: Record<string, unknown>) => { kill: () => void }
 }
@@ -69,45 +52,10 @@ export function setupAutoplay(
   let isPausedByHover = false
   let dragInProgress = false
 
-  const progressEls = Array.from(root.querySelectorAll<Element>('[aa-slider-progress]'))
-
   const progress: ProgressEntry[] = []
-  for (const el of progressEls) {
-    const raw = el.getAttribute('aa-slider-progress')?.toLowerCase() ?? 'width'
-    const elementEase = el.getAttribute('aa-ease') ?? ease
-
-    if (raw === 'circle') {
-      // The marked element is expected to be (or contain) an SVG <circle>.
-      // We tween the <circle>'s stroke-dashoffset from its circumference
-      // (fully hidden) down to 0 (fully drawn). The user controls size,
-      // colour, stroke-width via CSS / SVG attributes.
-      const circle =
-        el.tagName.toLowerCase() === 'circle'
-          ? (el as unknown as SVGCircleElement)
-          : (el.querySelector('circle') as SVGCircleElement | null)
-      if (!circle) {
-        console.warn(
-          '[alrdy-animate] aa-slider-progress="circle" requires an SVG <circle> (the marked element or a descendant).',
-          el,
-        )
-        continue
-      }
-      const r =
-        typeof circle.r?.baseVal?.value === 'number'
-          ? circle.r.baseVal.value
-          : parseFloat(circle.getAttribute('r') ?? '0')
-      const circumference = 2 * Math.PI * r
-      gsap.set(circle, {
-        strokeDasharray: circumference,
-        strokeDashoffset: circumference,
-      })
-      progress.push({ target: circle, kind: 'circle', circumference, ease: elementEase })
-      continue
-    }
-
-    const property: 'width' | 'height' = raw === 'height' ? 'height' : 'width'
-    gsap.set(el, { [property]: '0%' })
-    progress.push({ target: el, kind: property, property, ease: elementEase })
+  for (const el of root.querySelectorAll<Element>('[aa-slider-progress]')) {
+    const entry = createProgressEntry(el, 'aa-slider-progress', ease, gsap.set)
+    if (entry) progress.push(entry)
   }
 
   const syncProgress = (activeIndex: number): void => {

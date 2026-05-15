@@ -1,6 +1,7 @@
 import type { GsapTimeline } from '../../core/gsap-detect'
 import type { FeatureContext, FeatureModule } from '../../core/registry'
-import { bindAgainTrigger, resolveScrollStart } from '../../core/scroll-trigger'
+import { parseNum, parseScrub } from '../../core/parse'
+import { resolveScrollStart } from '../../core/scroll-trigger'
 import { matchAnimateValue, type ResolvedPreset } from '../../core/presets'
 import { readAttrs, type Config } from '../../core/settings'
 import {
@@ -9,12 +10,8 @@ import {
   parseStaggerSpec,
   type StaggerValue,
 } from '../../core/stagger'
-import {
-  REVERSE_EASE,
-  REVERSE_TIME_SCALE,
-  resolveTriggers,
-  subscribeWithPair,
-} from '../../core/trigger'
+import { setupTriggeredAnimation, type TriggerVars } from '../../core/triggered-animation'
+import { resolveTriggers } from '../../core/trigger'
 import { applySplit, parseSplit, type SplitMode, type SplitResult } from '../../split/runtime'
 
 type GsapTarget = Element | Element[] | NodeList
@@ -75,157 +72,140 @@ function unwrapLines(wrappers: HTMLElement[]): void {
   }
 }
 
+// Direction → (axis, sign) lookup used by fade/blur/slide/tilt builders.
+// `Y` maps to `yPercent`, `X` maps to `xPercent`. `sign === 1` means the
+// element starts off-screen on the *opposite* axis (up → starts below).
+type Direction = 'up' | 'down' | 'left' | 'right'
+const DIR_AXIS: Record<Direction, { prop: 'yPercent' | 'xPercent'; sign: 1 | -1 }> = {
+  up: { prop: 'yPercent', sign: 1 },
+  down: { prop: 'yPercent', sign: -1 },
+  left: { prop: 'xPercent', sign: 1 },
+  right: { prop: 'xPercent', sign: -1 },
+}
+
+function fadeAnim(opacity: number, direction?: Direction): TextAnim {
+  if (!direction) {
+    return {
+      defaultSplit: 'chars',
+      buildFrom: () => ({ opacity }),
+      to: { opacity: 1 },
+    }
+  }
+  const { prop, sign } = DIR_AXIS[direction]
+  return {
+    defaultSplit: 'chars',
+    buildFrom: (d) => ({ opacity, [prop]: 60 * sign * d }),
+    to: { opacity: 1, [prop]: 0 },
+  }
+}
+
+function blurAnim(direction?: Direction): TextAnim {
+  if (!direction) {
+    return {
+      defaultSplit: 'chars',
+      buildFrom: () => ({ opacity: 0, filter: 'blur(20px)' }),
+      to: { opacity: 1, filter: 'blur(0px)' },
+    }
+  }
+  const { prop, sign } = DIR_AXIS[direction]
+  if (prop === 'yPercent') {
+    return {
+      defaultSplit: 'chars',
+      maskLines: true,
+      buildFrom: () => ({ opacity: 0, filter: 'blur(10px)', yPercent: 110 * sign }),
+      to: { opacity: 1, filter: 'blur(0px)', yPercent: 0 },
+    }
+  }
+  // Horizontal blur uses an absolute rem offset scaled by aa-distance instead
+  // of a yPercent mask shift — the visual is a soft drift, not a clip reveal.
+  return {
+    defaultSplit: 'chars',
+    buildFrom: (d) => ({ opacity: 0, filter: 'blur(10px)', x: `${1.875 * sign * d}rem` }),
+    to: { opacity: 1, filter: 'blur(0px)', x: 0 },
+  }
+}
+
+function scaleAnim(origin: '50% 50%' | '50% 100%' | '50% 0%'): TextAnim {
+  return {
+    defaultSplit: 'chars',
+    buildFrom: () => ({ scaleY: 0, transformOrigin: origin }),
+    to: { scaleY: 1 },
+  }
+}
+
+function slideAnim(direction: 'up' | 'down'): TextAnim {
+  const sign = direction === 'up' ? 1 : -1
+  return {
+    defaultSplit: 'lines',
+    maskLines: true,
+    buildFrom: () => ({ yPercent: 110 * sign }),
+    to: { yPercent: 0 },
+  }
+}
+
+function tiltAnim(direction: 'up' | 'down'): TextAnim {
+  const sign = direction === 'up' ? 1 : -1
+  return {
+    defaultSplit: 'lines',
+    maskLines: true,
+    buildFrom: () => ({
+      yPercent: 110 * sign,
+      opacity: 0,
+      rotation: 10 * sign,
+      transformOrigin: direction === 'up' ? 'bottom left' : 'top left',
+    }),
+    to: { yPercent: 0, opacity: 1, rotation: 0 },
+  }
+}
+
+function ovalAnim(origin: 'top' | 'bottom'): TextAnim {
+  const at = origin === 'bottom' ? '50% 100%' : '50% 0%'
+  return {
+    defaultSplit: 'lines',
+    setup: ({ split }) => {
+      const wrappers = wrapLines(split.lines, 'aa-oval-line', OVAL_LINE_STYLE)
+      return {
+        targets: wrappers,
+        fromState: { clipPath: `ellipse(20% 0% at ${at})` },
+        toState: { clipPath: `ellipse(100% 120% at ${at})` },
+        cleanup: () => unwrapLines(wrappers),
+      }
+    },
+  }
+}
+
 // Per-animation entries declare only structural defaults: which split mode the
 // animation expects and whether lines are masked. All timing — duration, ease,
 // stagger — flows from init({...}); stagger varies per split mode via
 // defaultStaggerFor().
 const TEXT_ANIMS: Record<string, TextAnim> = {
-  // ---------- Fade ----------
-  'text-fade': {
-    defaultSplit: 'chars',
-    buildFrom: () => ({ opacity: 0 }),
-    to: { opacity: 1 },
-  },
-  'text-fade-30': {
-    defaultSplit: 'chars',
-    buildFrom: () => ({ opacity: 0.3 }),
-    to: { opacity: 1 },
-  },
-  'text-fade-10': {
-    defaultSplit: 'chars',
-    buildFrom: () => ({ opacity: 0.1 }),
-    to: { opacity: 1 },
-  },
-  'text-fade-up': {
-    defaultSplit: 'chars',
-    buildFrom: (d) => ({ opacity: 0, yPercent: 60 * d }),
-    to: { opacity: 1, yPercent: 0 },
-  },
-  'text-fade-down': {
-    defaultSplit: 'chars',
-    buildFrom: (d) => ({ opacity: 0, yPercent: -60 * d }),
-    to: { opacity: 1, yPercent: 0 },
-  },
-  'text-fade-left': {
-    defaultSplit: 'chars',
-    buildFrom: (d) => ({ opacity: 0, xPercent: 60 * d }),
-    to: { opacity: 1, xPercent: 0 },
-  },
-  'text-fade-right': {
-    defaultSplit: 'chars',
-    buildFrom: (d) => ({ opacity: 0, xPercent: -60 * d }),
-    to: { opacity: 1, xPercent: 0 },
-  },
+  'text-fade': fadeAnim(0),
+  'text-fade-30': fadeAnim(0.3),
+  'text-fade-10': fadeAnim(0.1),
+  'text-fade-up': fadeAnim(0, 'up'),
+  'text-fade-down': fadeAnim(0, 'down'),
+  'text-fade-left': fadeAnim(0, 'left'),
+  'text-fade-right': fadeAnim(0, 'right'),
 
-  // ---------- Blur ----------
-  'text-blur': {
-    defaultSplit: 'chars',
-    buildFrom: () => ({ opacity: 0, filter: 'blur(20px)' }),
-    to: { opacity: 1, filter: 'blur(0px)' },
-  },
-  'text-blur-up': {
-    defaultSplit: 'chars',
-    maskLines: true,
-    buildFrom: () => ({ opacity: 0, filter: 'blur(10px)', yPercent: 110 }),
-    to: { opacity: 1, filter: 'blur(0px)', yPercent: 0 },
-  },
-  'text-blur-down': {
-    defaultSplit: 'chars',
-    maskLines: true,
-    buildFrom: () => ({ opacity: 0, filter: 'blur(10px)', yPercent: -110 }),
-    to: { opacity: 1, filter: 'blur(0px)', yPercent: 0 },
-  },
-  'text-blur-left': {
-    defaultSplit: 'chars',
-    buildFrom: (d) => ({ opacity: 0, filter: 'blur(10px)', x: `${1.875 * d}rem` }),
-    to: { opacity: 1, filter: 'blur(0px)', x: 0 },
-  },
-  'text-blur-right': {
-    defaultSplit: 'chars',
-    buildFrom: (d) => ({ opacity: 0, filter: 'blur(10px)', x: `${-1.875 * d}rem` }),
-    to: { opacity: 1, filter: 'blur(0px)', x: 0 },
-  },
+  'text-blur': blurAnim(),
+  'text-blur-up': blurAnim('up'),
+  'text-blur-down': blurAnim('down'),
+  'text-blur-left': blurAnim('left'),
+  'text-blur-right': blurAnim('right'),
 
-  // ---------- Scale ----------
-  'text-scale': {
-    defaultSplit: 'chars',
-    buildFrom: () => ({ scaleY: 0, transformOrigin: '50% 50%' }),
-    to: { scaleY: 1 },
-  },
-  'text-scale-up': {
-    defaultSplit: 'chars',
-    buildFrom: () => ({ scaleY: 0, transformOrigin: '50% 100%' }),
-    to: { scaleY: 1 },
-  },
-  'text-scale-down': {
-    defaultSplit: 'chars',
-    buildFrom: () => ({ scaleY: 0, transformOrigin: '50% 0%' }),
-    to: { scaleY: 1 },
-  },
+  'text-scale': scaleAnim('50% 50%'),
+  'text-scale-up': scaleAnim('50% 100%'),
+  'text-scale-down': scaleAnim('50% 0%'),
 
-  // ---------- Slide ----------
-  'text-slide-up': {
-    defaultSplit: 'lines',
-    maskLines: true,
-    buildFrom: () => ({ yPercent: 110 }),
-    to: { yPercent: 0 },
-  },
-  'text-slide-down': {
-    defaultSplit: 'lines',
-    maskLines: true,
-    buildFrom: () => ({ yPercent: -110 }),
-    to: { yPercent: 0 },
-  },
+  'text-slide-up': slideAnim('up'),
+  'text-slide-down': slideAnim('down'),
 
-  // ---------- Tilt ----------
-  'text-tilt-up': {
-    defaultSplit: 'lines',
-    maskLines: true,
-    buildFrom: () => ({
-      yPercent: 110,
-      opacity: 0,
-      rotation: 10,
-      transformOrigin: 'bottom left',
-    }),
-    to: { yPercent: 0, opacity: 1, rotation: 0 },
-  },
-  'text-tilt-down': {
-    defaultSplit: 'lines',
-    maskLines: true,
-    buildFrom: () => ({
-      yPercent: -110,
-      opacity: 0,
-      rotation: -10,
-      transformOrigin: 'top left',
-    }),
-    to: { yPercent: 0, opacity: 1, rotation: 0 },
-  },
+  'text-tilt-up': tiltAnim('up'),
+  'text-tilt-down': tiltAnim('down'),
 
-  // ---------- Per-line clip / perspective wrappers ----------
-  'text-oval-up': {
-    defaultSplit: 'lines',
-    setup: ({ split }) => {
-      const wrappers = wrapLines(split.lines, 'aa-oval-line', OVAL_LINE_STYLE)
-      return {
-        targets: wrappers,
-        fromState: { clipPath: 'ellipse(20% 0% at 50% 100%)' },
-        toState: { clipPath: 'ellipse(100% 120% at 50% 100%)' },
-        cleanup: () => unwrapLines(wrappers),
-      }
-    },
-  },
-  'text-oval-down': {
-    defaultSplit: 'lines',
-    setup: ({ split }) => {
-      const wrappers = wrapLines(split.lines, 'aa-oval-line', OVAL_LINE_STYLE)
-      return {
-        targets: wrappers,
-        fromState: { clipPath: 'ellipse(20% 0% at 50% 0%)' },
-        toState: { clipPath: 'ellipse(100% 120% at 50% 0%)' },
-        cleanup: () => unwrapLines(wrappers),
-      }
-    },
-  },
+  'text-oval-up': ovalAnim('bottom'),
+  'text-oval-down': ovalAnim('top'),
+
   'text-rotate': {
     defaultSplit: 'lines',
     setup: ({ element, split }) => {
@@ -364,19 +344,6 @@ function elementMatches(el: Element, presetMap: Map<Element, ResolvedPreset>): b
   return matchAnimateValue(el, presetMap, (v) => SUPPORTED.has(v))
 }
 
-function parseNum(value: string | undefined, fallback: number): number {
-  if (value === undefined) return fallback
-  const n = parseFloat(value)
-  return Number.isFinite(n) ? n : fallback
-}
-
-function parseScrub(value: string | undefined): number | true | undefined {
-  if (value === undefined) return undefined
-  if (value === '' || value === 'true') return true
-  const n = parseFloat(value)
-  return Number.isFinite(n) ? n : true
-}
-
 function pickSimpleTargets(
   parts: { words: HTMLElement[]; chars: HTMLElement[]; lines: HTMLElement[] },
   mode: SplitMode,
@@ -404,30 +371,15 @@ function setupBarReveal(
   const scrollStart = resolveScrollStart(config['aa-scroll-start'], opts, scrub)
   const again = opts.again !== false
 
-  const split = applySplit(element, 'lines', ctx.gsap)
-  if (split.lines.length === 0) {
-    split.revert()
-    return undefined
-  }
-
-  const color = resolveBarColor(element.getAttribute('aa-color') ?? undefined, element)
-  const setups = buildBarLines(split.lines, color, isBlock)
-
   const scaleProp = `scale${dir.axis}`
 
-  // Lock initial states explicitly so the element looks correct at time 0
-  // regardless of when each per-line tween starts in the staggered timeline.
-  for (const { bar, text } of setups) {
-    ctx.gsap.gsap.set(bar, {
-      [scaleProp]: isBlock ? 0 : 1,
-      transformOrigin: isBlock ? dir.growOrigin : dir.shrinkOrigin,
-    })
-    if (text) {
-      ctx.gsap.gsap.set(text, { opacity: 0, [dir.textAxis]: dir.textOffset })
-    }
-  }
-
-  const buildTl = (vars: Record<string, unknown>): GsapTimeline => {
+  // Build the per-line phased timeline from the current bar/text setups.
+  // Two-phase for block mode (grow-in, then shrink-out + text fade-in);
+  // single-phase for marker (shrink-out reveals text underneath).
+  const buildTimelineFromSetups = (
+    setups: BarLineSetup[],
+    vars: TriggerVars,
+  ): GsapTimeline => {
     const tl = ctx.gsap.gsap.timeline(vars)
     setups.forEach(({ bar, text }, i) => {
       const lineTl = ctx.gsap.gsap.timeline()
@@ -471,77 +423,57 @@ function setupBarReveal(
     return tl
   }
 
-  const cleanup = (): void => {
-    split.revert()
+  // Tracks the per-split bar/text wrappers so the buildAnimation callback
+  // (called once initially, then on every SplitText resplit) sees the
+  // latest DOM. Each rebuild also re-applies the initial state explicitly
+  // so the staggered timeline shows correct positions at time 0.
+  let setups: BarLineSetup[] = []
+
+  let split: SplitResult | undefined
+
+  const initialSplit = applySplit(element, 'lines', ctx.gsap, {
+    onResplit: (newSplit) => {
+      split = newSplit
+      handle?.rebuild()
+    },
+  })
+  if (initialSplit.lines.length === 0) {
+    initialSplit.revert()
+    return undefined
   }
+  split = initialSplit
 
-  const triggers = resolveTriggers(element, config['aa-trigger'])
-  const hasLoad = triggers.some((t) => t.kind === 'load')
-  const hasPageEnter = triggers.some((t) => t.kind === 'page-enter')
-
-  if ((hasLoad && ctx.firstInit) || hasPageEnter) {
-    // aa-fallback signals the inline-snippet timeout already faded the element
-    // in via CSS; skip the JS animation to avoid a re-flash through from-state.
-    if (document.documentElement.hasAttribute('aa-fallback')) return cleanup
-    buildTl({ delay })
-    return cleanup
-  }
-
-  // Load-only on subsequent init (no page-enter): skip entirely (no scroll
-  // fallthrough). The end-of-init aa-ready flip makes the element visible in
-  // its natural state.
-  const trigger = triggers.find((t) => t.kind !== 'load' && t.kind !== 'page-enter')
-  if (!trigger) return cleanup
-
-  if (trigger.kind === 'event' && trigger.eventName) {
-    const tl = buildTl({ paused: true, delay, defaults: { easeReverse: REVERSE_EASE } })
-    const off = subscribeWithPair({
-      element,
-      forwardName: trigger.eventName,
-      onForward: () => {
-        // Always restart from the FROM state so an interrupted reverse doesn't
-        // leak into the next play. Matches the user-facing "fresh start"
-        // expectation when reopening a tab / reactivating a slide. Reset
-        // timeScale to 1 in case a prior reverse left it accelerated.
-        tl.timeScale(1).play(0)
-      },
-      onReverse: () => {
-        tl.timeScale(REVERSE_TIME_SCALE).reverse()
-      },
-    })
-    return () => {
-      off()
-      cleanup()
-    }
-  }
-
-  if (scrub !== undefined) {
-    buildTl({
-      delay,
-      scrollTrigger: {
-        trigger: element,
-        start: scrollStart,
-        end: scrollEnd,
-        scrub,
-      },
-    })
-    return cleanup
-  }
-
-  const tl = buildTl({ paused: true, delay })
-
-  bindAgainTrigger({
-    gsap: ctx.gsap,
-    trigger: element,
-    start: scrollStart,
+  const handle = setupTriggeredAnimation(ctx, element, {
+    triggers: resolveTriggers(element, config['aa-trigger']),
+    delay,
+    scrollStart,
+    scrollEnd,
+    scrub,
     again,
-    onPlay: () => tl.play(),
-    onReset: () => {
-      tl.progress(0).pause()
+    buildAnimation: (vars) => {
+      if (!split || split.lines.length === 0) return null
+      const color = resolveBarColor(element.getAttribute('aa-color') ?? undefined, element)
+      setups = buildBarLines(split.lines, color, isBlock)
+      // Lock initial states explicitly so the element looks correct at
+      // time 0 regardless of when each per-line tween starts.
+      for (const { bar, text } of setups) {
+        ctx.gsap.gsap.set(bar, {
+          [scaleProp]: isBlock ? 0 : 1,
+          transformOrigin: isBlock ? dir.growOrigin : dir.shrinkOrigin,
+        })
+        if (text) {
+          ctx.gsap.gsap.set(text, { opacity: 0, [dir.textAxis]: dir.textOffset })
+        }
+      }
+      const animation = buildTimelineFromSetups(setups, vars)
+      return { animation }
     },
   })
 
-  return cleanup
+  return () => {
+    handle?.dispose()
+    initialSplit.revert()
+  }
 }
 
 function setupOne(
@@ -578,146 +510,81 @@ function setupOne(
     : anim.maskLines
       ? 'lines'
       : undefined
-  const split = applySplit(element, splitMode, ctx.gsap, {
+
+  // Tracks the current split — reassigned on each SplitText auto-resplit
+  // (resize within a breakpoint changes line wrapping) so the buildAnimation
+  // callback below always reads the live `.aa-char` / `.aa-line` DOM.
+  let split: SplitResult | undefined
+
+  const initialSplit = applySplit(element, splitMode, ctx.gsap, {
     ...(maskGranularity ? { mask: maskGranularity } : {}),
     ...(lineGrouped ? { ensureLines: true } : {}),
+    onResplit: (newSplit) => {
+      split = newSplit
+      handle?.rebuild()
+    },
   })
+  split = initialSplit
 
-  let targets: GsapTarget
-  let fromState: State
-  let toState: State
-  let extraCleanup: (() => void) | undefined
-  let lineGroups: HTMLElement[][] | undefined
-
-  if (anim.setup) {
-    const result = anim.setup({ element, split, distance })
-    targets = result.targets
-    fromState = result.fromState
-    toState = result.toState
-    extraCleanup = result.cleanup
-  } else {
-    if (!anim.buildFrom || !anim.to) {
-      split.revert()
-      return undefined
-    }
-    targets = pickSimpleTargets(split, splitMode)
-    if ((targets as HTMLElement[]).length === 0) {
-      return () => split.revert()
-    }
-    fromState = anim.buildFrom(distance)
-    toState = anim.to
-    if (lineGrouped) {
-      const inner = splitMode === 'words' ? split.words : split.chars
-      lineGroups = split.lines.map((line) => inner.filter((u) => line.contains(u)))
-    }
-  }
-
-  const cleanup = (): void => {
-    if (extraCleanup) {
-      try {
-        extraCleanup()
-      } catch {
-        // ignore
-      }
-    }
-    split.revert()
-  }
-
-  const addTweens = (timeline: GsapTimeline): void => {
-    if (lineGroups) {
-      for (let i = 0; i < lineGroups.length; i++) {
-        const group = lineGroups[i]
-        if (group.length === 0) continue
-        timeline.fromTo(
-          group,
-          fromState,
-          { ...toState, duration, ease, stagger },
-          i * lineStagger,
-        )
-      }
-    } else {
-      timeline.fromTo(targets, fromState, { ...toState, duration, ease, stagger })
-    }
-  }
-
-  const triggers = resolveTriggers(element, config['aa-trigger'])
-  const hasLoad = triggers.some((t) => t.kind === 'load')
-  const hasPageEnter = triggers.some((t) => t.kind === 'page-enter')
-
-  if ((hasLoad && ctx.firstInit) || hasPageEnter) {
-    // aa-fallback signals the inline-snippet timeout already faded the element
-    // in via CSS; skip the JS animation to avoid a re-flash through from-state.
-    if (document.documentElement.hasAttribute('aa-fallback')) return cleanup
-    const loadTl = ctx.gsap.gsap.timeline({ delay })
-    addTweens(loadTl)
-    return cleanup
-  }
-
-  // Load-only on subsequent init (no page-enter): skip entirely (no scroll
-  // fallthrough). The end-of-init aa-ready flip makes the element visible in
-  // its natural state.
-  const trigger = triggers.find((t) => t.kind !== 'load' && t.kind !== 'page-enter')
-  if (!trigger) return cleanup
-
-  if (trigger.kind === 'event' && trigger.eventName) {
-    const tl = ctx.gsap.gsap.timeline({
-      paused: true,
-      delay,
-      defaults: { easeReverse: REVERSE_EASE },
-    })
-    addTweens(tl)
-    // Lock the resting state explicitly so the paused-at-0 timeline shows the
-    // from-state visually, not whatever GSAP would compute from a stale layout.
-    ctx.gsap.gsap.set(targets, fromState)
-    const off = subscribeWithPair({
-      element,
-      forwardName: trigger.eventName,
-      onForward: () => {
-        // Always restart from the FROM state so an interrupted reverse doesn't
-        // leak into the next play. Matches the user-facing "fresh start"
-        // expectation when reopening a tab / reactivating a slide. Reset
-        // timeScale to 1 in case a prior reverse left it accelerated.
-        tl.timeScale(1).play(0)
-      },
-      onReverse: () => {
-        tl.timeScale(REVERSE_TIME_SCALE).reverse()
-      },
-    })
-    return () => {
-      off()
-      cleanup()
-    }
-  }
-
-  if (scrub !== undefined) {
-    const scrubTl = ctx.gsap.gsap.timeline({
-      delay,
-      scrollTrigger: {
-        trigger: element,
-        start: scrollStart,
-        end: scrollEnd,
-        scrub,
-      },
-    })
-    addTweens(scrubTl)
-    return cleanup
-  }
-
-  const tl = ctx.gsap.gsap.timeline({ paused: true, delay })
-  addTweens(tl)
-
-  bindAgainTrigger({
-    gsap: ctx.gsap,
-    trigger: element,
-    start: scrollStart,
+  const handle = setupTriggeredAnimation(ctx, element, {
+    triggers: resolveTriggers(element, config['aa-trigger']),
+    delay,
+    scrollStart,
+    scrollEnd,
+    scrub,
     again,
-    onPlay: () => tl.play(),
-    onReset: () => {
-      tl.progress(0).pause()
+    buildAnimation: (vars) => {
+      if (!split) return null
+      let targets: GsapTarget
+      let fromState: State
+      let toState: State
+      let extraCleanup: (() => void) | undefined
+      let lineGroups: HTMLElement[][] | undefined
+      if (anim.setup) {
+        // anim.setup paths (oval, rotate) wrap lines in extra DOM and
+        // return a cleanup that unwraps them. The orchestrator runs this
+        // cleanup before the next rebuild and on dispose.
+        const result = anim.setup({ element, split, distance })
+        targets = result.targets
+        fromState = result.fromState
+        toState = result.toState
+        if (result.cleanup) extraCleanup = result.cleanup
+      } else {
+        if (!anim.buildFrom || !anim.to) return null
+        const simple = pickSimpleTargets(split, splitMode)
+        if (simple.length === 0) return null
+        targets = simple
+        fromState = anim.buildFrom(distance)
+        toState = anim.to
+        if (lineGrouped) {
+          const inner = splitMode === 'words' ? split.words : split.chars
+          lineGroups = split.lines.map((line) => inner.filter((u) => line.contains(u)))
+        }
+      }
+      const tl = ctx.gsap.gsap.timeline(vars)
+      // Lock the resting state explicitly so a paused-at-0 timeline shows
+      // the from-state visually, not whatever GSAP computes from a stale
+      // layout. Redundant for unpaused load tweens but harmless.
+      ctx.gsap.gsap.set(targets, fromState)
+      if (lineGroups) {
+        for (let i = 0; i < lineGroups.length; i++) {
+          const group = lineGroups[i]
+          if (group.length === 0) continue
+          tl.fromTo(group, fromState, { ...toState, duration, ease, stagger }, i * lineStagger)
+        }
+      } else {
+        tl.fromTo(targets, fromState, { ...toState, duration, ease, stagger })
+      }
+      const built: { animation: GsapTimeline; cleanup?: () => void } = { animation: tl }
+      if (extraCleanup) built.cleanup = extraCleanup
+      return built
     },
   })
 
-  return cleanup
+  return () => {
+    handle?.dispose()
+    initialSplit.revert()
+  }
 }
 
 const textFeature: FeatureModule = {

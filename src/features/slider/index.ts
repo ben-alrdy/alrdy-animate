@@ -1,4 +1,5 @@
 import { parseAutoplay } from '../../core/autoplay'
+import { parseNum } from '../../core/parse'
 import type { FeatureContext, FeatureModule } from '../../core/registry'
 import { readAttrs, type Config } from '../../core/settings'
 import { setupAutoplay, type AutoplayController } from './autoplay'
@@ -22,12 +23,6 @@ function parseSliderValue(raw: string | undefined): ParsedTokens {
     isCenter: tokens.includes('center'),
     isNone: tokens.includes('none'),
   }
-}
-
-function parseNum(value: string | undefined, fallback: number): number {
-  if (value === undefined) return fallback
-  const n = parseFloat(value)
-  return Number.isFinite(n) ? n : fallback
 }
 
 function setupOne(ctx: FeatureContext, root: HTMLElement, config: Config): (() => void) | undefined {

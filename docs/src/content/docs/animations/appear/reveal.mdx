@@ -33,7 +33,7 @@ import Demo from '../../../../components/Demo.astro'
 
 `gsap`, `ScrollTrigger`.
 
-## Live demo
+## Live demo — solo
 
 <Demo caption='aa-animate="reveal-*"'>
   <div data-demo-stage>
@@ -49,6 +49,31 @@ import Demo from '../../../../components/Demo.astro'
         <span>reveal-center</span>
       </div>
       <div class="demo-image-card" aa-animate="reveal-oval-up">
+        <span>reveal-oval-up</span>
+      </div>
+    </div>
+    <div data-spacer></div>
+  </div>
+</Demo>
+
+## Live demo — scrub-driven
+
+Pair any reveal variant with `aa-scrub` to bind its progress directly to scroll position. `aa-scrub="true"` snaps the clip-path to the scroll exactly; a numeric value (e.g. `"1"`) smooths it with that many seconds of lag for a heavier feel. Scroll up and down to see the reveal scrub forward and back.
+
+<Demo caption={{ "aa-animate": "reveal-*", "aa-scrub": "1" }}>
+  <div data-demo-stage>
+    <div data-spacer></div>
+    <div class="demo-grid">
+      <div class="demo-image-card" aa-animate="reveal-up" aa-scrub="1">
+        <span>reveal-up</span>
+      </div>
+      <div class="demo-image-card" aa-animate="reveal-right" aa-scrub="1">
+        <span>reveal-right</span>
+      </div>
+      <div class="demo-image-card" aa-animate="reveal-center" aa-scrub="1">
+        <span>reveal-center</span>
+      </div>
+      <div class="demo-image-card" aa-animate="reveal-oval-up" aa-scrub="1">
         <span>reveal-oval-up</span>
       </div>
     </div>

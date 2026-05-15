@@ -59,6 +59,21 @@ import Demo from '../../../../components/Demo.astro'
   </div>
 </Demo>
 
+## Live demo — scrub-driven
+
+Pair `zoom-*` with `aa-scrub` to bind the scale and opacity progress directly to scroll position. `aa-scrub="true"` snaps to scroll exactly; a number (e.g. `"1"`) smooths with that many seconds of lag.
+
+<Demo caption={{ "aa-animate": "zoom-in", "aa-scrub": "1" }}>
+  <div data-demo-stage>
+    <div data-spacer></div>
+    <div class="demo-grid">
+      <div class="demo-card" aa-animate="zoom-in" aa-scrub="1">scrubbed zoom-in</div>
+      <div class="demo-card" aa-animate="zoom-out" aa-scrub="1">scrubbed zoom-out</div>
+    </div>
+    <div data-spacer></div>
+  </div>
+</Demo>
+
 <style>{`
   .demo-grid {
     display: grid;

@@ -100,6 +100,20 @@ The animation is built with `gsap.from()`, so any rotation, opacity, or transfor
   </div>
 </Demo>
 
+## Live demo — scrub-driven
+
+Pair `rotate` with `aa-scrub` to bind the tilt and opacity progress directly to scroll position. `aa-scrub="true"` snaps exactly to scroll; a number (e.g. `"1"`) smooths with that many seconds of lag.
+
+<Demo caption={{ "aa-animate": "rotate-up-bl", "aa-scrub": "1", "aa-distance": "3" }}>
+  <div data-demo-stage>
+    <div data-spacer></div>
+    <div class="demo-card" aa-animate="rotate-up-bl" aa-scrub="1" aa-distance="3">
+      scrubbed rotate-up-bl
+    </div>
+    <div data-spacer></div>
+  </div>
+</Demo>
+
 <style>{`
   .demo-grid {
     display: grid;

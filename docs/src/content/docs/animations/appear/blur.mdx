@@ -53,6 +53,20 @@ For per-character blur on text, see [text-blur](/animations/text/text-blur/) ins
   </div>
 </Demo>
 
+## Live demo — scrub-driven
+
+Pair `blur` with `aa-scrub` to bind its progress directly to scroll position. `aa-scrub="true"` snaps the blur and opacity to scroll exactly; a numeric value (e.g. `"1"`) smooths it with that many seconds of lag.
+
+<Demo caption={{ "aa-animate": "blur", "aa-scrub": "1" }}>
+  <div data-demo-stage>
+    <div data-spacer></div>
+    <div class="demo-card demo-card-tall" aa-animate="blur" aa-scrub="1">
+      scrubbed blur
+    </div>
+    <div data-spacer></div>
+  </div>
+</Demo>
+
 <style>{`
   .demo-grid {
     display: grid;

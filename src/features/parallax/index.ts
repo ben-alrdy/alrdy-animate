@@ -1,4 +1,5 @@
 import type { FeatureContext, FeatureModule } from '../../core/registry'
+import { parseNum, parseScrub, resolveAnchor } from '../../core/parse'
 import { matchAnimateValue, type ResolvedPreset } from '../../core/presets'
 import { readAttrs, type Config } from '../../core/settings'
 
@@ -6,26 +7,6 @@ const SUPPORTED = new Set(['parallax', 'parallax-horizontal', 'parallax-vertical
 
 function elementMatches(el: Element, presetMap: Map<Element, ResolvedPreset>): boolean {
   return matchAnimateValue(el, presetMap, (v) => SUPPORTED.has(v))
-}
-
-function parseNum(value: string | undefined, fallback: number): number {
-  if (value === undefined) return fallback
-  const n = parseFloat(value)
-  return Number.isFinite(n) ? n : fallback
-}
-
-function parseScrub(value: string | undefined): number | true {
-  if (value === undefined || value === '' || value === 'true') return true
-  const n = parseFloat(value)
-  return Number.isFinite(n) ? n : true
-}
-
-function resolveAnchor(element: Element, anchor: string | undefined): Element {
-  if (!anchor) return element
-  const root = element.closest(anchor)
-  if (root) return root
-  const found = document.querySelector(anchor)
-  return found ?? element
 }
 
 function setupOne(ctx: FeatureContext, element: Element, config: Config): undefined {
@@ -39,7 +20,8 @@ function setupOne(ctx: FeatureContext, element: Element, config: Config): undefi
   const distance = parseNum(config['aa-distance'], opts.distance)
   const startVal = parseNum(config['aa-parallax-start'], 10 * distance)
   const endVal = parseNum(config['aa-parallax-end'], -10 * distance)
-  const scrub = parseScrub(config['aa-scrub'])
+  // Parallax defaults to scrubbed when aa-scrub is absent.
+  const scrub = parseScrub(config['aa-scrub']) ?? true
   // Wrapping in clamp() makes the trigger behave correctly when the element
   // already overlaps the start position at page load (hero parallax).
   const scrollStart = `clamp(${config['aa-scroll-start'] ?? 'top bottom'})`

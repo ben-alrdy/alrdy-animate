@@ -1,5 +1,6 @@
 import type { FeatureContext, FeatureModule } from '../../core/registry'
 import { NAMED_EASES } from '../../core/named-eases'
+import { parseNum } from '../../core/parse'
 import { readAttrs } from '../../core/settings'
 
 interface ScrollTriggerLike {
@@ -76,12 +77,6 @@ function parseNavValue(value: string | undefined): ParsedNavValue {
     // per-nav hide threshold can't be expressed by the CSS-driven approach.
   }
   return result
-}
-
-function parseNum(value: string | undefined, fallback: number): number {
-  if (value === undefined) return fallback
-  const n = parseFloat(value)
-  return Number.isFinite(n) ? n : fallback
 }
 
 /**

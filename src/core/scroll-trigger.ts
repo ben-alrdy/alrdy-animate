@@ -1,7 +1,11 @@
 import type { GsapHandle } from './gsap-detect'
 
+interface ScrollTriggerInstance {
+  kill: () => void
+}
+
 interface ScrollTriggerLike {
-  create: (vars: Record<string, unknown>) => unknown
+  create: (vars: Record<string, unknown>) => ScrollTriggerInstance
 }
 
 /**
@@ -50,28 +54,42 @@ export interface AgainTriggerOptions {
  * behaviour that reverses as soon as the element re-crosses its original
  * start position, which feels too eager for entrance animations.
  *
+ * Returns a function that kills the created ScrollTriggers — useful when the
+ * caller needs to tear down + rebuild without waiting for a matchMedia revert
+ * (e.g. SplitText auto-resplit replaces the animated DOM nodes mid-breakpoint).
+ *
  * Must be called inside a `gsap.matchMedia()` scope so the created
  * ScrollTriggers are tracked and auto-cleaned on breakpoint exit / destroy().
  */
-export function bindAgainTrigger(opts: AgainTriggerOptions): void {
+export function bindAgainTrigger(opts: AgainTriggerOptions): () => void {
   const ScrollTrigger = opts.gsap.plugins.ScrollTrigger as ScrollTriggerLike | undefined
-  if (!ScrollTrigger) return
+  if (!ScrollTrigger) return () => {}
 
-  ScrollTrigger.create({
-    trigger: opts.trigger,
-    start: opts.start,
-    onEnter: () => opts.onPlay(),
-  })
+  const triggers: ScrollTriggerInstance[] = []
 
-  if (!opts.again) return
+  triggers.push(
+    ScrollTrigger.create({
+      trigger: opts.trigger,
+      start: opts.start,
+      onEnter: () => opts.onPlay(),
+    }),
+  )
 
-  ScrollTrigger.create({
-    trigger: opts.trigger,
-    start: () => {
-      const rect = opts.trigger.getBoundingClientRect()
-      const matrix = new DOMMatrix(getComputedStyle(opts.trigger).transform)
-      return rect.top + window.scrollY - matrix.f - window.innerHeight
-    },
-    onLeaveBack: () => opts.onReset(),
-  })
+  if (opts.again) {
+    triggers.push(
+      ScrollTrigger.create({
+        trigger: opts.trigger,
+        start: () => {
+          const rect = opts.trigger.getBoundingClientRect()
+          const matrix = new DOMMatrix(getComputedStyle(opts.trigger).transform)
+          return rect.top + window.scrollY - matrix.f - window.innerHeight
+        },
+        onLeaveBack: () => opts.onReset(),
+      }),
+    )
+  }
+
+  return () => {
+    for (const t of triggers) t.kill()
+  }
 }

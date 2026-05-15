@@ -1,9 +1,11 @@
 import type { FeatureContext, FeatureModule } from '../../core/registry'
-import { bindAgainTrigger, resolveScrollStart } from '../../core/scroll-trigger'
+import { parseNum, parseScrub } from '../../core/parse'
+import { resolveScrollStart } from '../../core/scroll-trigger'
 import { matchAnimateValue, type ResolvedPreset } from '../../core/presets'
 import { readAttrs, type Config } from '../../core/settings'
 import { defaultStaggerFor } from '../../core/stagger'
-import { onCustomTrigger, parseTriggers } from '../../core/trigger'
+import { setupTriggeredAnimation } from '../../core/triggered-animation'
+import { resolveTriggers } from '../../core/trigger'
 
 interface RevealClip {
   from: string
@@ -71,19 +73,6 @@ function elementMatches(el: Element, presetMap: Map<Element, ResolvedPreset>): b
   return matchAnimateValue(el, presetMap, isSupported)
 }
 
-function parseNum(value: string | undefined, fallback: number): number {
-  if (value === undefined) return fallback
-  const n = parseFloat(value)
-  return Number.isFinite(n) ? n : fallback
-}
-
-function parseScrub(value: string | undefined): number | true | undefined {
-  if (value === undefined) return undefined
-  if (value === '' || value === 'true') return true
-  const n = parseFloat(value)
-  return Number.isFinite(n) ? n : true
-}
-
 function setupClip(
   ctx: FeatureContext,
   element: Element,
@@ -110,64 +99,25 @@ function setupClip(
     ? { clipPath: reveal.to, opacity: 1 }
     : { clipPath: reveal.to }
 
-  const triggers = parseTriggers(config['aa-trigger'])
-  const hasLoad = triggers.some((t) => t.kind === 'load')
-  const hasPageEnter = triggers.some((t) => t.kind === 'page-enter')
-
-  if ((hasLoad && ctx.firstInit) || hasPageEnter) {
-    // aa-fallback signals the inline-snippet timeout already faded the element
-    // in via CSS; skip the JS animation to avoid a re-flash through from-state.
-    if (document.documentElement.hasAttribute('aa-fallback')) return undefined
-    ctx.gsap.gsap.fromTo(element, fromState, { ...toState, duration, ease, delay })
-    return undefined
-  }
-
-  // Load-only on subsequent init (no page-enter): skip entirely (no scroll fallthrough).
-  const trigger = triggers.find((t) => t.kind !== 'load' && t.kind !== 'page-enter')
-  if (!trigger) return undefined
-
-  if (trigger.kind === 'event' && trigger.eventName) {
-    ctx.gsap.gsap.set(element, fromState)
-    const eventName = trigger.eventName
-    const off = onCustomTrigger((target, name) => {
-      if (name !== eventName) return
-      if (target !== element && !target.contains(element)) return
-      ctx.gsap.gsap.to(element, { ...toState, duration, ease, delay })
-    })
-    return () => off()
-  }
-
-  if (scrub !== undefined) {
-    ctx.gsap.gsap.fromTo(element, fromState, {
-      ...toState,
-      duration,
-      ease,
-      delay,
-      scrollTrigger: {
-        trigger: element,
-        start: scrollStart,
-        end: scrollEnd,
-        scrub,
-      },
-    })
-    return undefined
-  }
-
-  const tl = ctx.gsap.gsap.timeline({ paused: true })
-  tl.fromTo(element, fromState, { ...toState, duration, ease, delay })
-
-  bindAgainTrigger({
-    gsap: ctx.gsap,
-    trigger: element,
-    start: scrollStart,
+  const handle = setupTriggeredAnimation(ctx, element, {
+    triggers: resolveTriggers(element, config['aa-trigger']),
+    delay,
+    scrollStart,
+    scrollEnd,
+    scrub,
     again,
-    onPlay: () => tl.play(),
-    onReset: () => {
-      tl.progress(0).pause()
+    buildAnimation: (vars) => {
+      const animation = ctx.gsap.gsap.fromTo(element, fromState, {
+        ...toState,
+        duration,
+        ease,
+        ...vars,
+      })
+      return { animation }
     },
   })
 
-  return undefined
+  return handle ? () => handle.dispose() : undefined
 }
 
 interface SlicesSetup {
@@ -253,81 +203,29 @@ function setupSlices(
     if (setup.prevOverflow === 'visible') el.style.removeProperty('overflow')
   }
 
-  const triggers = parseTriggers(config['aa-trigger'])
-  const hasLoad = triggers.some((t) => t.kind === 'load')
-  const hasPageEnter = triggers.some((t) => t.kind === 'page-enter')
-
-  if ((hasLoad && ctx.firstInit) || hasPageEnter) {
-    // aa-fallback signals the inline-snippet timeout already faded the element
-    // in via CSS; skip the JS animation. Slice panel cleanup still runs on destroy.
-    if (document.documentElement.hasAttribute('aa-fallback')) return cleanup
-    ctx.gsap.gsap.to(setup.slices, {
-      scaleY: toScale,
-      duration,
-      ease,
-      stagger: { each: stagger, from: 'end' },
-    })
-    return cleanup
-  }
-
-  // Load-only on subsequent init (no page-enter): skip entirely (no scroll fallthrough).
-  const trigger = triggers.find((t) => t.kind !== 'load' && t.kind !== 'page-enter')
-  if (!trigger) return cleanup
-
-  if (trigger.kind === 'event' && trigger.eventName) {
-    const eventName = trigger.eventName
-    const off = onCustomTrigger((target, name) => {
-      if (name !== eventName) return
-      if (target !== element && !target.contains(element)) return
-      ctx.gsap.gsap.to(setup.slices, {
+  const handle = setupTriggeredAnimation(ctx, element, {
+    triggers: resolveTriggers(element, config['aa-trigger']),
+    delay: 0,
+    scrollStart,
+    scrollEnd,
+    scrub,
+    again,
+    buildAnimation: (vars) => {
+      const animation = ctx.gsap.gsap.to(setup.slices, {
         scaleY: toScale,
         duration,
         ease,
         stagger: { each: stagger, from: 'end' },
+        ...vars,
       })
-    })
-    return () => {
-      off()
-      cleanup()
-    }
-  }
-
-  if (scrub !== undefined) {
-    ctx.gsap.gsap.to(setup.slices, {
-      scaleY: toScale,
-      duration,
-      ease,
-      stagger: { each: stagger, from: 'end' },
-      scrollTrigger: {
-        trigger: element,
-        start: scrollStart,
-        end: scrollEnd,
-        scrub,
-      },
-    })
-    return cleanup
-  }
-
-  const tl = ctx.gsap.gsap.timeline({ paused: true })
-  tl.to(setup.slices, {
-    scaleY: toScale,
-    duration,
-    ease,
-    stagger: { each: stagger, from: 'end' },
-  })
-
-  bindAgainTrigger({
-    gsap: ctx.gsap,
-    trigger: element,
-    start: scrollStart,
-    again,
-    onPlay: () => tl.play(),
-    onReset: () => {
-      tl.progress(0).pause()
+      return { animation }
     },
   })
 
-  return cleanup
+  return () => {
+    handle?.dispose()
+    cleanup()
+  }
 }
 
 function setupOne(

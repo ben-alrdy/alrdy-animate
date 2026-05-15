@@ -1,5 +1,6 @@
 import type { ReducedMotionOptions, ResolvedOptions } from '../types/index'
 import type { GsapHandle } from './gsap-detect'
+import { parseNum, parseScrub } from './parse'
 import { resolveAnimateValue, type ResolvedPreset } from './presets'
 import { classifyAnimateValue, type FeatureName } from './scanner'
 import { resolveScrollStart } from './scroll-trigger'
@@ -30,19 +31,6 @@ import { onCustomTrigger, resolveTriggers } from './trigger'
  *   normal           → N modules imported · M matchMedia contexts · split DOM mutations
  *   fade-fallback    → 0 replaced modules · M plain gsap tweens · 0 DOM mutations
  */
-
-function parseNum(value: string | null, fallback: number): number {
-  if (value === null) return fallback
-  const n = parseFloat(value)
-  return Number.isFinite(n) ? n : fallback
-}
-
-function parseScrub(value: string | null): number | true | undefined {
-  if (value === null) return undefined
-  if (value === '' || value === 'true') return true
-  const n = parseFloat(value)
-  return Number.isFinite(n) ? n : true
-}
 
 export interface FadeFallbackDeps {
   gsap: GsapHandle

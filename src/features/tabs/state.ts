@@ -1,3 +1,5 @@
+import { parseNum } from '../../core/parse'
+
 export type TabMode = 'default' | 'single' | 'multi' | 'autoplay' | 'scroll'
 
 export interface ParsedTabsConfig {
@@ -101,12 +103,6 @@ function autoAssignIds(root: HTMLElement): void {
   root.querySelectorAll<HTMLElement>('[aa-tabs-visual]').forEach((el, i) => {
     if (!el.getAttribute('aa-tabs-visual')) el.setAttribute('aa-tabs-visual', `aa-tabs-${i}`)
   })
-}
-
-function parseNum(value: string | null | undefined, fallback: number): number {
-  if (value === null || value === undefined || value === '') return fallback
-  const n = parseFloat(value)
-  return Number.isFinite(n) ? n : fallback
 }
 
 function readDuration(el: HTMLElement | null, fallback: number): number {

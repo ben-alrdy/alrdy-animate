@@ -12,16 +12,12 @@
  * anchor click cleanly and remove them all on destroy.
  */
 
+import { parseNum } from './parse'
+
 const QUART_EASE = (x: number): number =>
   x < 0.5 ? 8 * x * x * x * x : 1 - Math.pow(-2 * x + 2, 4) / 2
 
 const DEFAULT_DURATION = 1.2
-
-function parseNum(value: string | null, fallback: number): number {
-  if (value === null) return fallback
-  const n = parseFloat(value)
-  return Number.isFinite(n) ? n : fallback
-}
 
 export function initScrollTarget(): () => void {
   if (typeof window === 'undefined') return () => {}

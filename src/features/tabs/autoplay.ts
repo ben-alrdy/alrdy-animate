@@ -1,4 +1,10 @@
 import type { GsapHandle } from '../../core/gsap-detect'
+import {
+  createProgressEntry,
+  progressFromValues,
+  progressToValues,
+  type ProgressEntry,
+} from '../../core/progress-bar'
 import type { TabsApi } from './index'
 
 export interface AutoplayOptions {
@@ -13,27 +19,8 @@ export interface AutoplayController {
   destroy: () => void
 }
 
-type ProgressKind = 'width' | 'height' | 'circle'
-
-interface ProgressEntry {
-  target: Element
-  kind: ProgressKind
-  property?: 'width' | 'height'
-  circumference?: number
-  ease: string
-}
-
 interface ScrollTriggerLike {
   create: (vars: Record<string, unknown>) => { kill: () => void }
-}
-
-function progressFromValues(p: ProgressEntry): Record<string, unknown> {
-  if (p.kind === 'circle') return { strokeDashoffset: p.circumference }
-  return { [p.property as string]: '0%' }
-}
-function progressToValues(p: ProgressEntry): Record<string, unknown> {
-  if (p.kind === 'circle') return { strokeDashoffset: 0 }
-  return { [p.property as string]: '100%' }
 }
 
 export function setupAutoplay(
@@ -55,40 +42,11 @@ export function setupAutoplay(
   let currentIdx = Math.max(0, entries.findIndex((e) => api.state.isActive(e)))
 
   // Build progress entries for each toggle (null when no progress element).
-  const progressByIdx: Array<ProgressEntry | null> = entries.map((entry) => {
-    if (!entry.progress) return null
-    const el = entry.progress
-    const raw = el.getAttribute('aa-tabs-progress')?.toLowerCase() ?? 'width'
-    const elementEase = el.getAttribute('aa-ease') ?? entry.ease
-
-    if (raw === 'circle') {
-      const circle =
-        el.tagName.toLowerCase() === 'circle'
-          ? (el as unknown as SVGCircleElement)
-          : (el.querySelector('circle') as SVGCircleElement | null)
-      if (!circle) {
-        console.warn(
-          '[alrdy-animate] aa-tabs-progress="circle" requires an SVG <circle> on or inside the marked element.',
-          el,
-        )
-        return null
-      }
-      const r =
-        typeof circle.r?.baseVal?.value === 'number'
-          ? circle.r.baseVal.value
-          : parseFloat(circle.getAttribute('r') ?? '0')
-      const circumference = 2 * Math.PI * r
-      gsap.set(circle, {
-        strokeDasharray: circumference,
-        strokeDashoffset: circumference,
-      })
-      return { target: circle, kind: 'circle', circumference, ease: elementEase }
-    }
-
-    const property: 'width' | 'height' = raw === 'height' ? 'height' : 'width'
-    gsap.set(el, { [property]: '0%' })
-    return { target: el, kind: property, property, ease: elementEase }
-  })
+  const progressByIdx: Array<ProgressEntry | null> = entries.map((entry) =>
+    entry.progress
+      ? createProgressEntry(entry.progress, 'aa-tabs-progress', entry.ease, gsap.set)
+      : null,
+  )
 
   const setProgress = (idx: number, mode: 'play' | 'reset' | 'kill'): void => {
     progressByIdx.forEach((p, i) => {
