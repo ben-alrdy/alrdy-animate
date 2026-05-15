@@ -113,6 +113,13 @@ export function setupTriggeredAnimation(
 
   const triggerEl = opts.triggerEl ?? element
 
+  // Stagger load-triggered entrances after init() settles so the first frame
+  // isn't a hard jump from the from-state. Per-element `aa-delay` still
+  // composes on top — set both and they add. The `aa-fallback` skip above
+  // already short-circuits the load branch on slow-load revisits, so we don't
+  // need to gate the addition itself on that attribute.
+  const loadDelay = isLoadOneShot ? opts.delay + ctx.options.loadDelay : opts.delay
+
   let currentAnim: GsapTween | null = null
   let currentExtraCleanup: (() => void) | undefined
   let triggerPlayed = false
@@ -136,7 +143,7 @@ export function setupTriggeredAnimation(
   }
 
   const buildVars = (): TriggerVars => {
-    if (isLoadOneShot) return { delay: opts.delay }
+    if (isLoadOneShot) return { delay: loadDelay }
     if (persistentTrigger?.kind === 'event') {
       return {
         paused: true,

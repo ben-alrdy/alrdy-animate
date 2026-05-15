@@ -1,6 +1,9 @@
 <!--
-  Last synced with src/ at v8.0.0-alpha.6 (2026-05-15) — renamed
-  `aa-trigger="page-enter"` to `aa-trigger="load"` and renamed the old
+  Last synced with src/ at v8.0.0-alpha.7 (2026-05-15) — added `loadDelay`
+  init option (default `0.1s`) that pads every `aa-trigger="load"` /
+  `"load-once"` animation so the entrance plays a beat after init() settles.
+  Skipped on slow-load revisits (`html[aa-fallback]`). Earlier alpha.6:
+  renamed `aa-trigger="page-enter"` to `aa-trigger="load"` and renamed the old
   first-init-only `aa-trigger="load"` to `aa-trigger="load-once"`; documented
   the global contract (window.gsap / Lenis / lenis / AlrdyAnimate); init() now
   safely re-attaches scroll-state + scroll-target across `keepGlobals: true`
@@ -201,6 +204,7 @@ options: ResolvedOptions         // live readonly snapshot — see "Custom GSAP 
 | `duration` | `0.6` | Seconds. |
 | `ease` | `'power4.out'` | Any GSAP ease or one of the lib's named eases (`osmo`, `energy`, `smooth`, `punch`, `relaxed`, `jump`, `pop`, `elastic`, `anticipate`, `bounce`, `fade`) — named eases need `CustomEase` loaded. |
 | `distance` | `1` | Multiplier for fade-up/down/left/right + slide-* translate distance. |
+| `loadDelay` | `0.1` | Seconds added to every `aa-trigger="load"` / `"load-once"` animation's delay so the entrance plays a beat after `init()` settles. Composes additively with per-element `aa-delay` (`aa-delay="0.3"` + `loadDelay: 0.1` fires at `0.4s`). Scroll / event / click / scrub triggers are unaffected. Skipped on slow-load revisits (`html[aa-fallback]`), where the entrance is already replaced by the inline CSS fallback. Set to `0` to opt out globally. |
 | `scrollStart` | `'top 85%'` | Default ScrollTrigger `start`. Used by every scroll-triggered animation. |
 | `scrollEnd` | `'bottom 60%'` | Default ScrollTrigger `end`. Only used when `aa-scrub` is set. Non-scrubbed animations ignore this — the `again: true` reset point is computed dynamically (one viewport below the element), not from `scrollEnd`. |
 | `scrubStart` | unset | Optional `start` override applied **only** when `aa-scrub` is set on the element. Lets you fire scrubs earlier than the non-scrubbed `scrollStart` (e.g. `'top 100%'` to give scrubs the full viewport pass). Per-element `aa-scroll-start` still wins. Honoured by every scroll-position-reading feature. |

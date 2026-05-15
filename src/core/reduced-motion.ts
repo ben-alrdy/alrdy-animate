@@ -101,7 +101,12 @@ export function runFadeFallbackPass(
         // the from-state and flash. The end-of-init aa-ready flip still
         // happens, keeping DOM consistent.
         if (document.documentElement.hasAttribute('aa-fallback')) continue
-        gsapHandle.gsap.fromTo(element, fromState, { ...toState, duration, ease, delay })
+        gsapHandle.gsap.fromTo(element, fromState, {
+          ...toState,
+          duration,
+          ease,
+          delay: delay + options.loadDelay,
+        })
         continue
       }
 

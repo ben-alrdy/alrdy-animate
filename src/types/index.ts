@@ -90,6 +90,19 @@ export interface InitOptions {
    */
   distance?: number
   /**
+   * Seconds added to the delay of every `aa-trigger="load"` and
+   * `aa-trigger="load-once"` animation so the entrance plays a beat after
+   * `init()` settles. Added on top of any per-element `aa-delay` — set
+   * `aa-delay="0.3"` with `loadDelay: 0.1` and the load animation fires at
+   * `0.4s`. Set to `0` to opt out globally. Default `0.1`.
+   *
+   * Skipped when the slow-network fallback fired (`html[aa-fallback]`) —
+   * those load animations don't run anyway, and adding more delay on revisit
+   * inits would make a slow-load page feel slower. Scroll / event / click /
+   * scrub triggers are unaffected.
+   */
+  loadDelay?: number
+  /**
    * Default ScrollTrigger `start`. Standard GSAP syntax (`"top 80%"`,
    * `"center 50%"`). Used by every scroll-triggered animation. Default `"top 85%"`.
    */
@@ -248,6 +261,7 @@ export interface ResolvedOptions extends InitOptions {
   duration: number
   ease: string
   distance: number
+  loadDelay: number
   scrollStart: string
   scrollEnd: string
   again: boolean
