@@ -9,7 +9,11 @@ import {
   parseStaggerSpec,
   type StaggerValue,
 } from '../../core/stagger'
-import { setupTriggeredAnimation, type TriggerVars } from '../../core/triggered-animation'
+import {
+  setupTriggeredAnimation,
+  toTimelineVars,
+  type TriggerVars,
+} from '../../core/triggered-animation'
 import { resolveTriggers } from '../../core/trigger'
 import { applySplit, parseSplit, type SplitMode, type SplitResult } from '../../split/runtime'
 
@@ -374,7 +378,7 @@ function setupBarReveal(
     setups: BarLineSetup[],
     vars: TriggerVars,
   ): GsapTimeline => {
-    const tl = ctx.gsap.gsap.timeline(vars)
+    const tl = ctx.gsap.gsap.timeline(toTimelineVars(vars))
     setups.forEach(({ bar, text }, i) => {
       const lineTl = ctx.gsap.gsap.timeline()
       if (isBlock) {
@@ -549,7 +553,7 @@ function setupOne(
           lineGroups = split.lines.map((line) => inner.filter((u) => line.contains(u)))
         }
       }
-      const tl = ctx.gsap.gsap.timeline(vars)
+      const tl = ctx.gsap.gsap.timeline(toTimelineVars(vars))
       // Lock the resting state explicitly so a paused-at-0 timeline shows
       // the from-state visually, not whatever GSAP computes from a stale
       // layout. Redundant for unpaused load tweens but harmless.

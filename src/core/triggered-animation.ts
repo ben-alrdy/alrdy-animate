@@ -14,15 +14,19 @@ import {
  * vars into its `gsap.from(...)` / `gsap.fromTo(...)` / `gsap.timeline(...)`
  * call and the right trigger semantics fall out.
  *
- *   load-once / load             { delay }                         — plays immediately
- *   event                        { paused: true, delay, defaults } — paused, controlled by event pair
- *   scrub                        { delay, scrollTrigger }          — bound to scroll position
- *   scroll-again (the default)   { paused: true, delay }           — paused, controlled by enter/reset triggers
+ *   load-once / load             { delay }                            — plays immediately
+ *   event                        { paused: true, delay, easeReverse } — paused, controlled by event pair
+ *   scrub                        { delay, scrollTrigger }             — bound to scroll position
+ *   scroll-again (the default)   { paused: true, delay }              — paused, controlled by enter/reset triggers
+ *
+ * `easeReverse` is a tween-level GSAP prop — spreading it into `gsap.from/to/fromTo`
+ * works directly; timeline-based features must lift it into `defaults` so child
+ * tweens inherit it (a top-level `easeReverse` on a timeline does not cascade).
  */
 export interface TriggerVars {
   paused?: boolean
   delay: number
-  defaults?: { easeReverse: number | string }
+  easeReverse?: number | string
   scrollTrigger?: {
     trigger: Element
     start: string
@@ -35,6 +39,17 @@ export interface BuiltAnimation {
   animation: GsapTween
   /** Optional cleanup for feature-specific DOM mutations (line wrappers etc.) — runs before rebuild and on dispose. */
   cleanup?: () => void
+}
+
+/**
+ * Reshape TriggerVars for `gsap.timeline(...)`: lifts `easeReverse` into
+ * `defaults` so child fromTo tweens inherit it (a top-level `easeReverse` on a
+ * timeline does not cascade). Tween features can spread vars directly.
+ */
+export function toTimelineVars(vars: TriggerVars): Record<string, unknown> {
+  const { easeReverse, ...rest } = vars
+  if (easeReverse === undefined) return rest
+  return { ...rest, defaults: { easeReverse } }
 }
 
 export interface TriggeredAnimationOptions {
@@ -148,7 +163,7 @@ export function setupTriggeredAnimation(
       return {
         paused: true,
         delay: opts.delay,
-        defaults: { easeReverse: REVERSE_EASE },
+        easeReverse: REVERSE_EASE,
       }
     }
     if (opts.scrub !== undefined) {
