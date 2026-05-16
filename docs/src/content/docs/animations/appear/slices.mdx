@@ -1,0 +1,273 @@
+---
+title: slices
+description: Shutter-style reveal. A stack of N rows overlays the element and scales away in sequence to expose its content. Direction-aware, GPU-friendly — pure transforms, no clip-path.
+---
+
+import Demo from '../../../../components/Demo.astro'
+
+`slices` overlays the element with a stack of N rows (default 6) that match its `currentColor`. As you scroll past, each row scales to zero in sequence, sweeping the reveal *toward* the named direction. Pure transform animation — same trick as Osmo's shutter transition, GPU-rasterized, no clip-path.
+
+Set the wrapper's `color` (CSS) to control the slice colour — it should match the surrounding background so the reveal looks seamless. Pair it with `aa-scrub` and place it at the boundary between two sections to use it as a section-transition layer (see the [Webflow + Barba recipe](/recipes/webflow-barba/) for a worked example).
+
+## Usage
+
+You don't author the slice DOM — the library injects it. Add `aa-animate="slices…"` to **any** element and the lib appends a `.aa-slices-panel` child (absolutely positioned, `inset: 0`, `z-index: 2`) containing N `.aa-slice` divs. If the element's `position` is `static`, it's promoted to `relative`; if its `overflow` is `visible`, it's set to `hidden`. The slice colour comes from the host element's `color`.
+
+Two common patterns:
+
+### In-place — cover the element's own content
+
+Slap it on the element you want revealed. The slices sit on top of the existing content (whatever's inside the element), match `currentColor`, then peel away to expose it.
+
+```html
+<!-- The hero's text is hidden until the slices peel away.
+     `color: #f4ecd8` controls the slice colour. -->
+<section class="hero" style="color: #f4ecd8; background: #1c1917"
+         aa-animate="slices"
+         aa-scrub="true">
+  <h1>The headline you'll see after the reveal.</h1>
+</section>
+```
+
+### Overlay — section-transition layer
+
+For boundary transitions between two sections (light → dark, etc.) put an empty wrapper inside the *incoming* section, positioned absolutely at its top. The slices peel away to expose the section behind. This is the pattern used in the [Webflow + Barba example](/recipes/webflow-barba/).
+
+```html
+<section class="next-section" style="position: relative; background: #1c1917">
+  <!-- Empty veil at the top: slices are the cream of the previous section,
+       peeling away to reveal the dark backdrop of this one. -->
+  <div class="section-veil"
+       aa-animate="slices"
+       aa-scrub="true"
+       aa-scroll-start="top bottom"
+       aa-scroll-end="bottom top"
+       style="position: absolute; top: 0; left: 0; right: 0; height: 40vh;
+              color: #f4ecd8; pointer-events: none;"></div>
+
+  <div class="next-section__inner">…</div>
+</section>
+```
+
+Use the `cover` flag (slices grow inward to fill instead of peeling away) on the *outgoing* section's tail to chain a continuous swap between sections.
+
+## Variants
+
+The direction lives on the `aa-animate` value itself (suffix). Mode and row count are space-separated flags on the same attribute, order-independent.
+
+| Variant                          | Direction | Mode    | Rows | Notes                                        |
+| -------------------------------- | --------- | ------- | ---- | -------------------------------------------- |
+| `slices`                         | up        | reveal  | 6    | Default — slices sweep upward to expose.     |
+| `slices-up`                      | up        | reveal  | 6    | Explicit form of the default.                |
+| `slices-down`                    | down      | reveal  | 6    | Slices sweep downward (top exposed first).   |
+| `slices-left`                    | left      | reveal  | 6    | Slices stacked horizontally; sweep leftward. |
+| `slices-right`                   | right     | reveal  | 6    | Slices stacked horizontally; sweep rightward.|
+| `slices 12`                      | up        | reveal  | 12   | Numeric flag overrides the row count.        |
+| `slices cover`                   | up        | cover   | 6    | `cover` flag inverts: slices grow to fill.   |
+| `slices-right cover 12`          | right     | cover   | 12   | Flags compose, order-independent.            |
+
+`reveal` (default) starts with the slices fully covering the element and scales them away (origin pinned to the *opposite* edge from the direction) so they collapse toward that direction. `cover` is the inverse — slices start hidden and scale in to fill the element, growing *from* the opposite edge.
+
+## Attributes
+
+| Attribute     | Default     | Notes                                                           |
+| ------------- | ----------- | --------------------------------------------------------------- |
+| `aa-animate`  | (required)  | `slices[-up\|-down\|-left\|-right]` plus optional ` cover` and/or ` N` flags. |
+| `aa-stagger`  | (init)      | Seconds between rows. Falls back to `init({ stagger: { default } })` (default `0.1`). |
+| `aa-duration` | (init)      | Seconds per row. Falls back to `init({ duration })` (default `0.6`). |
+| `aa-ease`     | (init)      | Any GSAP ease. Falls back to `init({ ease })` (default `power4.out`). |
+| `aa-scrub`    | (off)       | `true` or seconds — drive the reveal from scroll position.      |
+| `aa-scroll-start` / `aa-scroll-end` | (init) | Falls back to `init({ scrollStart, scrollEnd })`.    |
+
+## Required GSAP plugins
+
+`gsap`, `ScrollTrigger`.
+
+## Live demo — default (slices, up direction)
+
+The veil's `color` is the cream you'd see in the section above; underneath sits a darker panel. As the slices peel away upward (bottom row first), the dark panel is exposed — exactly the pattern used as a section-transition layer.
+
+<Demo caption={{ "aa-animate": "slices" }}>
+  <div data-demo-stage>
+    <div data-spacer></div>
+    <div class="slices-stage">
+      <div class="slices-stage__panel">
+        <span class="slices-stage__eyebrow">After reveal</span>
+        <h3 class="slices-stage__title">Section behind.</h3>
+        <p class="slices-stage__lede">6 rows · sweeps upward</p>
+      </div>
+      <div class="slices-stage__veil" aa-animate="slices"></div>
+    </div>
+    <div data-spacer></div>
+  </div>
+</Demo>
+
+## Live demo — direction (slices-down)
+
+Suffix the direction. `slices-down` flips the stagger and origin so the reveal sweeps downward — top row clears first, bottom row last.
+
+<Demo caption={{ "aa-animate": "slices-down", "aa-scrub": "true" }}>
+  <div data-demo-stage>
+    <div data-spacer></div>
+    <div class="slices-stage">
+      <div class="slices-stage__panel">
+        <span class="slices-stage__eyebrow">After reveal</span>
+        <h3 class="slices-stage__title">Top exposed first.</h3>
+        <p class="slices-stage__lede">scrub · sweeps downward</p>
+      </div>
+      <div class="slices-stage__veil" aa-animate="slices-down" aa-scrub="true"></div>
+    </div>
+    <div data-spacer></div>
+  </div>
+</Demo>
+
+## Live demo — horizontal (slices-left)
+
+Horizontal direction swaps the slice stacking axis to row and tweens `scaleX`. `slices-left` clears right-first; `slices-right` clears left-first.
+
+<Demo caption={{ "aa-animate": "slices-left", "aa-scrub": "true" }}>
+  <div data-demo-stage>
+    <div data-spacer></div>
+    <div class="slices-stage">
+      <div class="slices-stage__panel">
+        <span class="slices-stage__eyebrow">After reveal</span>
+        <h3 class="slices-stage__title">Right cleared first.</h3>
+        <p class="slices-stage__lede">scrub · sweeps leftward</p>
+      </div>
+      <div class="slices-stage__veil" aa-animate="slices-left" aa-scrub="true"></div>
+    </div>
+    <div data-spacer></div>
+  </div>
+</Demo>
+
+## Live demo — row count via flag
+
+Add an integer flag to override the default 6 rows. `slices-right 16` is sixteen narrow vertical columns sweeping rightward; combine with a tighter `aa-stagger` for a curtain-pull feel.
+
+<Demo caption={{ "aa-animate": "slices-right 16", "aa-stagger": "0.04", "aa-scrub": "true" }}>
+  <div data-demo-stage>
+    <div data-spacer></div>
+    <div class="slices-stage">
+      <div class="slices-stage__panel">
+        <span class="slices-stage__eyebrow">After reveal</span>
+        <h3 class="slices-stage__title">Curtain pull.</h3>
+        <p class="slices-stage__lede">16 columns · stagger 0.04 · sweeps rightward</p>
+      </div>
+      <div class="slices-stage__veil" aa-animate="slices-right 16" aa-stagger="0.04" aa-scrub="true"></div>
+    </div>
+    <div data-spacer></div>
+  </div>
+</Demo>
+
+## Live demo — slower stagger
+
+`aa-stagger="0.25"` widens the gap between rows for a deliberate cascade. Same six rows, but each waits longer for its turn.
+
+<Demo caption={{ "aa-animate": "slices", "aa-stagger": "0.25" }}>
+  <div data-demo-stage>
+    <div data-spacer></div>
+    <div class="slices-stage">
+      <div class="slices-stage__panel">
+        <span class="slices-stage__eyebrow">After reveal</span>
+        <h3 class="slices-stage__title">Cascading peel.</h3>
+        <p class="slices-stage__lede">6 rows · stagger 0.25</p>
+      </div>
+      <div class="slices-stage__veil" aa-animate="slices" aa-stagger="0.25"></div>
+    </div>
+    <div data-spacer></div>
+  </div>
+</Demo>
+
+## Live demo — cover flag
+
+`cover` inverts the animation: slices start hidden and grow in to fill the element. Useful when you want the next section to "rise into" the current one — sandwich a `slices cover` after the outgoing section's last block and a matching `slices` at the top of the incoming section for a continuous swap.
+
+<Demo caption={{ "aa-animate": "slices cover", "aa-scrub": "true" }}>
+  <div data-demo-stage>
+    <div data-spacer></div>
+    <div class="slices-stage slices-stage--inverse">
+      <div class="slices-stage__panel">
+        <span class="slices-stage__eyebrow">Before cover</span>
+        <h3 class="slices-stage__title">Rising curtain.</h3>
+        <p class="slices-stage__lede">6 rows · scrub · grows upward</p>
+      </div>
+      <div class="slices-stage__veil" aa-animate="slices cover" aa-scrub="true"></div>
+    </div>
+    <div data-spacer></div>
+  </div>
+</Demo>
+
+<style>{`
+  /* Full-width section-transition stage. The veil sits on top of the dark
+     panel; its currentColor (cream) is the slice colour. As the slices peel
+     away (reveal) or fill in (cover), the darker panel beneath is exposed
+     or hidden — same trick used for boundary transitions between sections. */
+  .slices-stage {
+    position: relative;
+    width: 100%;
+    height: 280px;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #1c1917;
+    color: #f4ecd8;
+    isolation: isolate;
+  }
+  .slices-stage__panel {
+    position: absolute;
+    inset: 0;
+    padding: 2rem 2.25rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0.4rem;
+  }
+  .slices-stage__eyebrow {
+    display: inline-block;
+    font-family: var(--sl-font-system-mono, monospace);
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #ef6322;
+    margin: 0;
+  }
+  .slices-stage__title {
+    margin: 0 !important;
+    font-size: clamp(1.6rem, 3.5vw, 2.25rem);
+    font-weight: 600;
+    letter-spacing: -0.025em;
+    line-height: 1.05;
+    color: #f4ecd8;
+  }
+  .slices-stage__lede {
+    margin: 0 !important;
+    font-family: var(--sl-font-system-mono, monospace);
+    font-size: 0.78rem;
+    color: rgba(244, 236, 216, 0.55);
+  }
+  .slices-stage__veil {
+    position: absolute;
+    inset: 0;
+    /* currentColor drives the slice background. Cream matches the page above
+       so the veil reads as the previous section bleeding into this one. */
+    color: #f4ecd8;
+    pointer-events: none;
+  }
+
+  /* Cover mode demo: the panel beneath is the "incoming" cream surface, so
+     we invert the palette — slices are dark, the panel underneath is cream.
+     Flipped so the upward-growing cover looks like a dark section rising up
+     to swallow the cream one. */
+  .slices-stage--inverse {
+    background: #f4ecd8;
+    color: #1c1917;
+  }
+  .slices-stage--inverse .slices-stage__title {
+    color: #1c1917;
+  }
+  .slices-stage--inverse .slices-stage__lede {
+    color: rgba(28, 25, 23, 0.55);
+  }
+  .slices-stage--inverse .slices-stage__veil {
+    color: #1c1917;
+  }
+`}</style>

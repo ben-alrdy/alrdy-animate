@@ -5,6 +5,7 @@ export type FeatureName =
   | 'scroll'
   | 'text'
   | 'reveal'
+  | 'slices'
   | 'parallax'
   | 'tabs'
   | 'marquee'
@@ -24,6 +25,7 @@ const ANIMATE_TO_FEATURE: Array<[RegExp, FeatureName]> = [
   [/^text-/, 'text'],
   [/^parallax/, 'parallax'],
   [/^reveal/, 'reveal'],
+  [/^slices/, 'slices'],
 ]
 
 export function classifyAnimateValue(value: string | null): FeatureName {

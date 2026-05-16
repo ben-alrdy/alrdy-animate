@@ -199,6 +199,7 @@ export async function init(options: InitOptions = {}): Promise<void> {
       f === 'scroll' ||
       f === 'text' ||
       f === 'reveal' ||
+      f === 'slices' ||
       f === 'parallax' ||
       f === 'nav' ||
       f === 'marquee'

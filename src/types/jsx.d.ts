@@ -45,8 +45,15 @@ declare namespace JSX {
      * `text-marker` | `text-oval` | `text-block`. Pair with `aa-split` to
      * control granularity.
      *
-     * **Reveal presets** (feature: `reveal`): `reveal` | `reveal-slices` —
-     * clip-path entrances controlled by `aa-scroll-start/end` or `aa-scrub`.
+     * **Reveal presets** (feature: `reveal`): `reveal-up` | `reveal-down` |
+     * `reveal-left` | `reveal-right` | `reveal-center` | `reveal-oval-up` |
+     * `reveal-oval-down` — clip-path entrances.
+     *
+     * **Slices presets** (feature: `slices`): `slices` | `slices-up` |
+     * `slices-down` | `slices-left` | `slices-right`. Shutter-style reveal
+     * with N rows scaling away. The mode (`cover`) and row count (integer)
+     * are space-separated flags on the same value, e.g.
+     * `aa-animate="slices-right 12 cover"`.
      *
      * Combine with `aa-trigger`, `aa-duration`, `aa-delay`, `aa-ease`,
      * `aa-distance`, `aa-stagger` to tune the playback. Use `none` at a

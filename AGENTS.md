@@ -156,7 +156,10 @@ Presence of `aa-animate` makes an element animate; the FOUC guard hides it until
 `text-fade`, `text-fade-up`, `text-fade-down`, `text-slide-up`, `text-slide-down`, `text-scale`, `text-scale-up`, `text-scale-down`, `text-blur`, `text-blur-up`, `text-tilt`, `text-rotate`, `text-marker`, `text-oval`, `text-block`. Pair with `aa-split="chars"` / `"words"` / `"lines"` (+ optional `mask`) to control granularity.
 
 **Reveal presets** (feature: `reveal`, plugin: `ScrollTrigger`):
-`reveal`, `reveal-slices`. Clip-path entrances controlled by `aa-scroll-start/end` or `aa-scrub`.
+`reveal-up`, `reveal-down`, `reveal-left`, `reveal-right`, `reveal-center`, `reveal-oval-up`, `reveal-oval-down`. Clip-path entrances controlled by `aa-scroll-start/end` or `aa-scrub`.
+
+**Slices presets** (feature: `slices`, plugin: `ScrollTrigger`):
+`slices`, `slices-up`, `slices-down`, `slices-left`, `slices-right`. Shutter-style reveal with N rows that scale away. Add space-separated flags on the same `aa-animate` value: `cover` to invert (slices grow in to fill) and an integer to override the row count, e.g. `aa-animate="slices-right cover 12"`. Order-independent. Slice colour comes from the host's `currentColor`.
 
 Tune any preset with `aa-duration`, `aa-delay`, `aa-ease`, `aa-distance`, `aa-stagger`. Use `none` at a breakpoint to skip.
 
@@ -170,7 +173,8 @@ Eleven features ship; the scanner detects which ones are needed by which attribu
 |---|---|---|---|
 | `scroll` | `aa-animate` (non-text, non-reveal value) | `ScrollTrigger` | Scroll/load/event-triggered fades, slides, zooms, blur, rotate. |
 | `text` | `aa-animate="text-*"` | `ScrollTrigger`, `SplitText` | Text-character / word / line animations via `aa-split`. |
-| `reveal` | `aa-animate="reveal"` / `"reveal-slices"` | `ScrollTrigger` | Clip-path entrances. |
+| `reveal` | `aa-animate="reveal-*"` | `ScrollTrigger` | Clip-path entrances (inset / circle / oval). |
+| `slices` | `aa-animate="slices..."` | `ScrollTrigger` | Shutter-style reveal — N rows scale away. Direction in name, mode/count as space flags. |
 | `parallax` | `aa-parallax-start` / `aa-parallax-end` | `ScrollTrigger` | Depth-based scroll parallax (multiplier on scroll speed). |
 | `slider` | `aa-slider` | `ScrollTrigger`, `Draggable`, `InertiaPlugin` | Draggable carousel with optional autoplay. |
 | `marquee` | `aa-marquee` | `ScrollTrigger`, `Draggable`, `InertiaPlugin` | Infinite-loop scroller. |

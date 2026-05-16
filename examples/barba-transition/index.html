@@ -144,27 +144,27 @@
         </header>
 
         <div class="tiles">
-          <div class="tile tile--a" aa-animate="fade-up">
+          <div class="tile tile--a" aa-animate="fade-up" aa-anchor=".tiles" aa-scroll-start="top center">
             <span class="tile__tag">fade-up</span>
             <span class="tile__glyph">↥</span>
           </div>
-          <div class="tile tile--b" aa-animate="fade-left">
+          <div class="tile tile--b" aa-animate="fade-left" aa-anchor=".tiles" aa-scroll-start="top center">
             <span class="tile__tag">fade-left</span>
             <span class="tile__glyph">↤</span>
           </div>
-          <div class="tile tile--c" aa-animate="zoom-in">
+          <div class="tile tile--c" aa-animate="zoom-in" aa-anchor=".tiles" aa-scroll-start="top center">
             <span class="tile__tag">zoom-in</span>
             <span class="tile__glyph">◉</span>
           </div>
-          <div class="tile tile--d" aa-animate="blur">
+          <div class="tile tile--d" aa-animate="blur" aa-anchor=".tiles" aa-scroll-start="top center">
             <span class="tile__tag">blur</span>
             <span class="tile__glyph">◐</span>
           </div>
-          <div class="tile tile--e" aa-animate="rotate-up-tl">
+          <div class="tile tile--e" aa-animate="rotate-up-tl" aa-anchor=".tiles" aa-scroll-start="top center">
             <span class="tile__tag">rotate-up-tl</span>
             <span class="tile__glyph">↻</span>
           </div>
-          <div class="tile tile--f" aa-animate="slide-up">
+          <div class="tile tile--f" aa-animate="slide-up" aa-anchor=".tiles" aa-scroll-start="top center">
             <span class="tile__tag">slide-up</span>
             <span class="tile__glyph">▲</span>
           </div>
@@ -175,6 +175,7 @@
            firing once. The bars grow horizontally as the section scrolls
            through the viewport; the digits zoom in from below. -->
       <section class="scrub">
+        <div class="scrub__veil" aa-animate="slices" aa-scrub="true" aa-scroll-start="top bottom" aa-scroll-end="bottom top"></div>
         <div class="scrub__inner">
           <span class="scrub__eyebrow" aa-animate="fade-up">Scrubbed</span>
           <h2 class="scrub__title" aa-animate="fade-up" aa-scrub="0.5" aa-distance="0.3">
@@ -182,19 +183,19 @@
           </h2>
 
           <div class="bars">
-            <div class="bar" aa-animate="slide-right" aa-scrub="true">
+            <div class="bar" aa-animate="fade-right" aa-distance="3" aa-scrub="true">
               <span class="bar__label">init</span>
             </div>
-            <div class="bar" aa-animate="slide-right" aa-scrub="true">
+            <div class="bar" aa-animate="fade-right" aa-distance="3" aa-scrub="true">
               <span class="bar__label">scan</span>
             </div>
-            <div class="bar" aa-animate="slide-right" aa-scrub="true">
+            <div class="bar" aa-animate="fade-right" aa-distance="3" aa-scrub="true">
               <span class="bar__label">match&nbsp;media</span>
             </div>
-            <div class="bar" aa-animate="slide-right" aa-scrub="true">
+            <div class="bar" aa-animate="fade-right" aa-distance="3" aa-scrub="true">
               <span class="bar__label">trigger</span>
             </div>
-            <div class="bar" aa-animate="slide-right" aa-scrub="true">
+            <div class="bar" aa-animate="fade-right" aa-distance="3" aa-scrub="true">
               <span class="bar__label">play</span>
             </div>
           </div>

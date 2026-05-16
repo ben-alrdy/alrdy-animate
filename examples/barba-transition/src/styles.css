@@ -503,13 +503,31 @@ code {
 
 /* ----------- Scrubbed timeline section ----------- */
 .scrub {
+  position: relative;
   background: #1c1917;
   color: #f4ecd8;
   /* Tall on purpose so the scrub has room to play out. */
   min-height: 140vh;
   display: flex;
-  align-items: center;
-  padding: 8rem 2.5rem;
+  align-items: flex-start;
+  /* Bigger top padding pushes the title clear of the veil band so the
+     headline isn't sitting under slices while the reveal is mid-scrub. */
+  padding: 50vh 2.5rem 8rem;
+}
+
+/* Cream veil at the top of the black section. slices paints rows of
+   `currentColor` (cream) over this strip; as the strip passes through the
+   viewport the slices peel away upward, exposing the black .scrub behind.
+   Kept short of the title so headlines stay readable during the reveal. */
+.scrub__veil {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 35vh;
+  color: #f4ecd8;
+  pointer-events: none;
+  z-index: 1;
 }
 
 .scrub__inner {

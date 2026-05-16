@@ -21,7 +21,7 @@ With `optimizeMobile: true` and viewport `< breakpoints.md`:
 | --- | --- |
 | `aa-animate` — fade / zoom / slide / blur / rotate | **Unchanged.** Cheap GSAP tweens; they add real value for mobile hierarchy. |
 | `aa-animate` — text-* | Collapse to simple opacity fade. **SplitText is not loaded** — no per-char DOM, no layout-parsing cost. |
-| `aa-animate` — reveal / reveal-slices | **Unchanged.** Clip-path is GPU-friendly. |
+| `aa-animate` — reveal-* / slices | **Unchanged.** Clip-path / GPU transforms are cheap. |
 | `aa-animate` — parallax / parallax-horizontal | **Skipped entirely.** Continuous scroll-driven transforms are the classic mobile perf killer. |
 | `aa-split` (standalone utility) | No-op — text stays un-split. |
 | `aa-hover` | Already skipped on touch-only devices. |

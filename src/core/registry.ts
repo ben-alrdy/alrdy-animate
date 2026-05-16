@@ -53,6 +53,7 @@ const loaders: Record<FeatureName, Loader> = {
   scroll: () => import('../features/scroll/index'),
   text: () => import('../features/text/index'),
   reveal: () => import('../features/reveal/index'),
+  slices: () => import('../features/slices/index'),
   parallax: () => import('../features/parallax/index'),
   tabs: () => import('../features/tabs/index'),
   marquee: () => import('../features/marquee/index'),
