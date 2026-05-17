@@ -68,9 +68,25 @@ export default defineConfig({
           chunkFileNames: 'features/[name].js',
           manualChunks: featureChunk,
         },
+        // Dual UMD outputs (same bytes, different extensions):
+        //   .umd.cjs → Node `require()` callers. Node uses the `.cjs` suffix
+        //     as an unambiguous CommonJS marker, which is needed because
+        //     `package.json` sets `"type": "module"` (so a plain `.js` would
+        //     be treated as ESM and `require()` would throw ERR_REQUIRE_ESM).
+        //   .umd.js  → browsers via CDN. jsDelivr et al serve `.cjs` with
+        //     MIME `application/node`, which strict-MIME-checking browsers
+        //     refuse to execute. `.js` is served as `application/javascript`
+        //     and runs normally.
         {
           format: 'umd',
           entryFileNames: 'alrdy-animate.umd.cjs',
+          name: 'AlrdyAnimate',
+          inlineDynamicImports: true,
+          globals: { ...gsapGlobals, lenis: 'Lenis' },
+        },
+        {
+          format: 'umd',
+          entryFileNames: 'alrdy-animate.umd.js',
           name: 'AlrdyAnimate',
           inlineDynamicImports: true,
           globals: { ...gsapGlobals, lenis: 'Lenis' },

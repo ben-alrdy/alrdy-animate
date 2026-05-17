@@ -159,7 +159,7 @@ In Webflow / `<script>` tag setups:
 <script defer src="https://cdn.jsdelivr.net/npm/gsap@3/dist/Flip.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/lenis@1/dist/lenis.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/@barba/core@2.10.3/dist/barba.umd.min.js"></script>
-<script defer src="https://cdn.jsdelivr.net/npm/alrdy-animate@{{version}}/dist/alrdy-animate.umd.cjs"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/alrdy-animate@{{version}}/dist/alrdy-animate.umd.js"></script>
 ```
 
 `defer` lets the parser sail through the body in parallel with the script downloads, so the load-fallback recipe (if used) finds the elements by the time its timer fires. Add only the GSAP plugins your features use — `init({ debug: true })` prints what's missing.

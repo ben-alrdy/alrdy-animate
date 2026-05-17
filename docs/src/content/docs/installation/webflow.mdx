@@ -93,7 +93,7 @@ Paste this into **Project Settings → Custom Code → Head Code**. It loads eve
 <script defer src="https://cdn.jsdelivr.net/npm/lenis@1/dist/lenis.min.js"></script>
 
 <!-- alrdy-animate last -->
-<script defer src="https://cdn.jsdelivr.net/npm/alrdy-animate@{{version}}/dist/alrdy-animate.umd.cjs"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/alrdy-animate@{{version}}/dist/alrdy-animate.umd.js"></script>
 ```
 
 **Why `defer`** — without it, every `<script>` blocks HTML parsing, which makes the whole page wait for each download in series. With `defer`, all scripts download in parallel while the parser sails through the body; they then execute in document order at the end of parsing. This is faster on every connection, and it's a hard requirement for the [load-fallback recipe](/recipes/load-fallback/) to work on slow networks.
