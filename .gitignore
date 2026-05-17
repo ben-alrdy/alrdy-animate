@@ -8,6 +8,9 @@
 /docs/dist
 /docs/.astro
 /examples/*/dist
+/examples/*/.next
+/examples/*/next-env.d.ts
+/examples/*/tsconfig.tsbuildinfo
 
 # IDE
 .idea
