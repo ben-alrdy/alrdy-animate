@@ -1,5 +1,20 @@
 name: Publish to npm
 
+# Release flow (Option A — CI owns publishing):
+#   1. Locally:  npm version <prerelease|patch|minor|major> -m "chore: release v%s"
+#      This bumps package.json, commits, and creates a v* tag.
+#   2. Locally:  git push --follow-tags origin <branch>
+#      Pushing the tag triggers this workflow.
+#   3. CI runs build → publish with --provenance.
+#      The dist-tag is derived from the version suffix:
+#        -alpha.N / -beta.N / -rc.N → tag = "alpha" / "beta" / "rc"
+#        no suffix                  → tag = "latest"
+#
+# Never run `npm publish` from a laptop — that races with this workflow and
+# also produces an unsigned tarball (no provenance badge on npmjs.com).
+# The precheck step below makes the workflow tolerant if it does happen
+# (e.g. a manual republish), exiting clean instead of failing E403.
+
 on:
   push:
     tags:
@@ -47,9 +62,22 @@ jobs:
           echo "--- cat .npmrc (if present) ---"
           cat ~/.npmrc 2>/dev/null | sed 's/_authToken=.*/_authToken=***/' || echo "no ~/.npmrc"
 
-      - name: Publish to npm with OIDC
+      - name: Skip if version already published
+        id: precheck
         run: |
           VERSION=$(node -p "require('./package.json').version")
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          if npm view "alrdy-animate@$VERSION" version >/dev/null 2>&1; then
+            echo "alrdy-animate@$VERSION is already on the registry — skipping publish."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Publish to npm with OIDC
+        if: steps.precheck.outputs.skip != 'true'
+        run: |
+          VERSION="${{ steps.precheck.outputs.version }}"
           if [[ "$VERSION" =~ -([a-zA-Z]+) ]]; then
             DIST_TAG="${BASH_REMATCH[1]}"
           else

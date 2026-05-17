@@ -88,6 +88,26 @@ npm test            # Playwright runs against docs:dev (auto-starts via webServe
 npm run test:update # update Playwright snapshots
 ```
 
+## Releasing
+
+**CI owns publishing.** Never run `npm publish` from a laptop — `.github/workflows/publish.yml` does it on tag push, signed with GitHub Actions OIDC + npm provenance. A manual publish skips the provenance badge and races with the workflow (the workflow's precheck step now skips gracefully on duplicates, but the resulting unsigned tarball still loses the trust signal).
+
+Flow:
+
+```sh
+# 1. Bump + commit + tag in one shot.
+npm version prerelease --preid alpha -m "chore: release v%s"   # 8.0.0-alpha.N → alpha.N+1
+npm version prerelease --preid beta  -m "chore: release v%s"   # …-alpha.N    → …-beta.0
+npm version prerelease --preid rc    -m "chore: release v%s"   # …-beta.N     → …-rc.0
+npm version patch                    -m "chore: release v%s"   # 8.0.0        → 8.0.1
+# (npm version refuses if working tree is dirty — commit first.)
+
+# 2. Push commits + tag.
+git push --follow-tags origin <branch>
+```
+
+The workflow derives the dist-tag from the version suffix: `-alpha.N` → `alpha`, `-beta.N` → `beta`, `-rc.N` → `rc`, no suffix → `latest`. Flipping `latest` to a new major (e.g. 8.0.0) is therefore a deliberate act of bumping past all pre-release suffixes — not something to do casually.
+
 ## Visual verification (Phase 2 onwards)
 
 After implementing a feature, drive its docs demo through Playwright MCP (the `mcp__playwright__browser_*` tools) before reporting the task complete:
