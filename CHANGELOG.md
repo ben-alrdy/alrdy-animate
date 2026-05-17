@@ -11,7 +11,7 @@ The `latest` dist-tag currently points to **v7.3.5** (the v7 stable). The v8 lin
 If you're on v7 and considering the alpha:
 
 - **Full TypeScript rewrite** built with Vite 7. Strict-mode types ship in `dist/types/`; per-attribute JSDoc surfaces in IDE hovers and AI autocomplete via `import 'alrdy-animate/jsx'`.
-- **Attribute prefix is now `aa-`** (no `data-` wrapper). Spec-permissive, matches HTMX precedent.
+- **CSS-only animation path is gone.** Every animation is now GSAP-driven. The shipped CSS file only carries split-utility classes and a reduced-motion safety net. `aa-load` (CSS-only load trigger) is replaced by `aa-trigger="load"` / `"load-once"` on a GSAP-animated element.
 - **`gsap` and `lenis` are peer dependencies** — never bundled. Webflow users provide them via `<script>` tags; npm users install them alongside.
 - **New trigger orchestrator** with `aa-trigger="<kind>"` and combinable values: `load-once`, `load`, `event:<name>`, `click:<name>`, scroll (default). Custom events fire via `dispatchEvent(new CustomEvent('aa:trigger', { detail: { name: ... } }))`.
 - **Responsive variants via `|` shorthand and Tailwind-style breakpoint suffixes** (`-sm`, `-md`, `-lg`, `-xl`). Compiles to `gsap.matchMedia` ranges; only one variant runs at once.
@@ -26,10 +26,11 @@ What v8 doesn't have yet: **Pin** animations (rebuild planned in v8.x), form-sub
 
 ## [Unreleased]
 
+- [v7 → v8 migration guide](https://animate.alrdy.de/installation/v7-to-v8/) at `docs/src/content/docs/installation/v7-to-v8.mdx`. Find-and-replace level coverage: removed CSS-only animation engine, `aa-load` → `aa-trigger="load[-once]"`, hover model change, `init()` option renames (`templates` → `presets`, `gsapFeatures` auto-loaded, `smoothScroll` flattened), `aa-split` separator (`&` → space), `aa-delay-mobile` → responsive `|` shorthand, `accordion` → `tabs`, and a per-value list of which v7 animation names map to which v8 equivalent (and which are deferred / removed).
+
 Path to **v8.0.0** stable:
 
 1. **`8.0.0-beta.1`** — API freeze. Only bugfixes and doc polish until the beta cycle is clean. Includes:
-   - Migration guide (`docs/installation/v7-to-v8.mdx`).
    - Production validation in real Webflow + Next.js projects.
 2. **`8.0.0-rc.1`** — last-call release candidate.
 3. **`8.0.0`** promoted to `latest`.
@@ -110,7 +111,7 @@ Path to **v8.0.0** stable:
 ## [8.0.0-alpha.0] — 2026-05-11
 
 ### Added — Foundation
-- **Full TypeScript rewrite** of the library with Vite 7 build pipeline and strict-mode `tsc` declaration emit. Attribute prefix changed from `data-aa-*` to `aa-*`. (`3acb98e` and many)
+- **Full TypeScript rewrite** of the library with Vite 7 build pipeline and strict-mode `tsc` declaration emit. (`3acb98e` and many)
 - **Astro 6 + Starlight 0.38 documentation site** with per-animation pages, live `<Demo>` component, and Pagefind search. (`3f7216c`)
 - **`AGENTS.md` shipped in package root** so AI coding agents (Claude Code, Cursor, Aider) get a single-file reference covering attributes, lifecycle, plugin requirements, and recipes — version-pinned via `node_modules/alrdy-animate/AGENTS.md`. Per-attribute JSDoc on `src/types/jsx.d.ts` powers IDE hovers. (`8d75e2c`)
 - **`init({ root })` scoped scanning** so SPA route changes can re-init alrdy-animate against just the new subtree (Barba `data-barba="container"`, Next.js swapped `<main>`, etc.). (`9fc0257`)

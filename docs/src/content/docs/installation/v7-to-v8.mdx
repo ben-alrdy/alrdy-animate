@@ -1,0 +1,309 @@
+---
+title: Migrating from v7 to v8
+description: What changed between alrdy-animate v7 and v8 — CSS-only animations removed, trigger system rewritten, init options shape changed, several feature names renamed. Find-and-replace level guide for upgrading a Webflow or Next.js project.
+sidebar:
+  order: 5
+---
+
+v8 is a full TypeScript rewrite of the library. The attribute style stays — you still write `aa-animate="fade-up"`, `aa-stagger`, `aa-anchor`, `aa-scroll-start` — but the engine underneath is completely new, and a few v7 escape hatches no longer exist. This page is the find-and-replace list for upgrading a real project.
+
+If you're starting fresh in v8 you can skip this page. If you have a v7 site you want to bring forward, follow the order below — top changes have the biggest impact.
+
+The `latest` dist-tag still points to **v7.3.5** while v8 is in beta. Install v8 explicitly:
+
+```sh
+# Webflow CDN
+<script src="https://cdn.jsdelivr.net/npm/alrdy-animate@alpha/dist/alrdy-animate.umd.cjs"></script>
+
+# Next.js / npm projects
+npm install alrdy-animate@alpha gsap lenis
+```
+
+---
+
+## 1. CSS-only animations are gone
+
+**Biggest change.** v7 shipped two parallel engines: a CSS-keyframes path for lightweight scroll/load animations, and a GSAP path for everything else. v8 is GSAP-only. The shipped `alrdy-animate.css` now contains *only* split-text utility classes and a reduced-motion safety net.
+
+What that means concretely:
+
+- **GSAP and ScrollTrigger are required** for any `aa-animate` to do anything. They were optional in v7's CSS path; they're now mandatory.
+- **You provide GSAP yourself** — it's a peer dependency, never bundled. Webflow users add a `<script>` tag; npm users `npm install gsap`. See the [Webflow](/installation/webflow/) or [Next.js](/installation/nextjs/) install guides.
+
+### `aa-load` is gone
+
+v7's `aa-load` attribute triggered a CSS-keyframe animation on page load with no JS required. v8 replaces it with a **trigger value** on a normal `aa-animate` element:
+
+```html
+<!-- v7 -->
+<h1 aa-load="fade-up">Hero</h1>
+
+<!-- v8 -->
+<h1 aa-animate="fade-up" aa-trigger="load">Hero</h1>
+```
+
+Two flavours:
+
+| v8 trigger | Fires on |
+|---|---|
+| `aa-trigger="load"` | Every `init()` cycle — first load *and* every SPA re-init. Use for content that should re-animate on each route change. |
+| `aa-trigger="load-once"` | First-init only. Use for the hero on a marketing page where re-animating on every nav would feel repetitive. |
+
+There's an [optional CSS fallback recipe](/recipes/load-fallback/) for hiding the FOUC window if your bundle is slow — but it's a graceful safety net, not the main path like `aa-load` was.
+
+---
+
+## 2. The trigger system was rewritten
+
+v7 had separate attributes per trigger: `aa-animate` (scroll), `aa-load` (page load), `aa-hover` (hover). v8 consolidates this under `aa-trigger`:
+
+```html
+<!-- v7 -->
+<div aa-animate="fade-up">scroll-triggered (default behaviour)</div>
+<div aa-load="fade-up">load-triggered</div>
+<div aa-hover="slide-up">hover-triggered</div>
+
+<!-- v8 -->
+<div aa-animate="fade-up">scroll-triggered (still default — no aa-trigger needed)</div>
+<div aa-animate="fade-up" aa-trigger="load">load-triggered</div>
+<div aa-animate="hover-bg-block">hover (different mechanism — see below)</div>
+```
+
+You can also **combine** triggers, which v7 couldn't do:
+
+```html
+<!-- Hero text: animates on first cold load (load-once),
+     then re-animates on every page transition (event:enter
+     dispatched from your transition timeline). -->
+<h1 aa-animate="text-slide-up" aa-trigger="load-once event:enter">…</h1>
+```
+
+See [aa-trigger](/animations/utilities/aa-trigger/) for the full trigger reference, including `event:<name>` and `click:<name>`.
+
+---
+
+## 3. Hover animations — different attribute, different model
+
+v7 used `aa-hover="…"` to attach a hover effect to any element. v8's hover system is built around the **hover feature** with a `hover-` prefixed animation type and an explicit `aa-color` for the colour transition:
+
+```html
+<!-- v7 -->
+<button aa-hover="slide-up" aa-color="bg:#000 text:#fff">Hover me</button>
+
+<!-- v8 -->
+<button aa-animate="hover-bg-block" aa-color="bg:#000 text:#fff">Hover me</button>
+```
+
+See the [hover docs](/animations/hover/background/) for the full list of hover effects.
+
+---
+
+## 4. `init()` options shape changed
+
+The init API is similar but several keys were renamed or removed.
+
+### `templates` → `presets`
+
+The class-to-animation mapping system was renamed from `templates` to `presets` and lost the `theme` shorthand. Custom mappings work the same way; the option key is just different:
+
+```js
+// v7
+AlrdyAnimate.init({
+  templates: {
+    theme: 'blur',
+    custom: {
+      'heading-style-h2': { animationType: 'text-blur|text-fade', split: 'lines&words', stagger: 0.05 },
+      'heading-style-h3': { animationType: 'fade-up' },
+    },
+  },
+})
+
+// v8
+AlrdyAnimate.init({
+  presets: {
+    'heading-style-h2': { 'aa-animate': 'text-blur', 'aa-split': 'lines', 'aa-stagger': '0.05' },
+    'heading-style-h3': { 'aa-animate': 'fade-up' },
+  },
+})
+```
+
+Differences:
+
+- `theme` is gone — pre-built theme sets aren't shipped any more. Build the few you need as custom presets.
+- The preset value is a **flat map of `aa-*` attributes**, not a nested `animationType` / `split` / `stagger` object. This means presets compose with any other `aa-*` attribute you might add directly on the element — same as if you'd written the attributes yourself.
+
+### `gsapFeatures` is gone — features auto-load
+
+v7 required you to list which GSAP-powered features to enable:
+
+```js
+// v7
+AlrdyAnimate.init({
+  gsapFeatures: ['text', 'slider', 'nav', 'accordion', 'parallax'],
+})
+```
+
+v8 scans the DOM and lazy-loads only the features it actually needs. **Remove the `gsapFeatures` option entirely** — anything you used in v7 will still work, just without the explicit list. Run `init({ debug: true })` to see which features the scan loaded and which GSAP plugins they needed.
+
+### `smoothScroll` shape changed
+
+v7 wrapped Lenis options in a nested `options` key. v8 passes Lenis options through directly:
+
+```js
+// v7
+AlrdyAnimate.init({
+  smoothScroll: {
+    enabled: true,
+    options: { lerp: 0.12, wheelMultiplier: 1 },
+  },
+})
+
+// v8
+AlrdyAnimate.init({
+  smoothScroll: { lerp: 0.12, wheelMultiplier: 1 },
+  // …or just `smoothScroll: true` for library defaults
+})
+```
+
+### `AlrdyAnimate.initPageAnimations` is gone
+
+v7 exposed `initPageAnimations()` as a manual re-scan hook for SPA navigations. v8 replaces it with three explicit lifecycle calls:
+
+```js
+// v7 — single hook that re-scanned the whole page
+AlrdyAnimate.initPageAnimations(() => { /* … */ })
+
+// v8 — three hooks for the three things that hook actually did:
+await AlrdyAnimate.destroy({ keepGlobals: true }) // tear down per-route state
+await AlrdyAnimate.init({ root: newMain })        // re-scan and re-init scoped to the new container
+await AlrdyAnimate.ready()                        // wait for first-paint
+```
+
+See the [Webflow + Barba](/recipes/webflow-barba/) or [Next.js page transitions](/recipes/nextjs-transitions/) recipes for the full wiring.
+
+---
+
+## 5. Attribute syntax changes
+
+A few small but real syntax changes inside existing attributes.
+
+### `aa-split` flags: `&` → space
+
+v7 joined split flags with `&`. v8 uses space-separated flags (matching the trigger / animate syntax everywhere else):
+
+```html
+<!-- v7 -->
+<h1 aa-animate="text-slide-up" aa-split="lines&words">…</h1>
+
+<!-- v8 -->
+<h1 aa-animate="text-slide-up" aa-split="lines mask">…</h1>
+```
+
+The available flags also changed: v8 introduces `mask` (line/word masking via clip-path) instead of compound `lines&words` chains. See [aa-split](/animations/utilities/aa-split/).
+
+### `aa-delay-mobile` → responsive `|` shorthand
+
+v7 had per-attribute mobile overrides like `aa-delay-mobile`. v8 replaces all of them with a uniform two-bucket responsive shorthand using `|`:
+
+```html
+<!-- v7 -->
+<div aa-animate="fade-up" aa-delay="0.2" aa-delay-mobile="0.1">…</div>
+
+<!-- v8 — left of pipe = >= md breakpoint (768px default), right = below -->
+<div aa-animate="fade-up" aa-delay="0.2|0.1">…</div>
+```
+
+This works on **every** `aa-*` attribute (`aa-animate`, `aa-duration`, `aa-distance`, `aa-scroll-start`, etc.) and also via Tailwind-style breakpoint suffixes: `aa-animate-md="…"`, `aa-animate-lg="…"`, `aa-animate-xl="…"`. Use `none` at a breakpoint to opt out entirely:
+
+```html
+<div aa-animate="slide-up|none">…</div>            <!-- desktop only -->
+<div aa-animate-md="text-slide-up">…</div>         <!-- md breakpoint and up -->
+```
+
+### `aa-anchor`, `aa-stagger`, `aa-scroll-start`, `aa-distance`, `aa-duration`, `aa-delay`, `aa-scrub`, `aa-color`, `aa-children`, `aa-opacity`, `aa-ease`
+
+All unchanged in spirit, all still work. See the [animations docs](/animations/) for current per-attribute defaults.
+
+---
+
+## 6. Renamed / removed animation values
+
+### Kept (no change)
+
+`fade`, `fade-up`, `fade-down`, `fade-left`, `fade-right`, `slide-up`, `slide-down`, `slide-left`, `slide-right`, `zoom-in`, `zoom-out`, `blur`, all `text-*` variants, all `reveal-*` variants (clip-path entrances).
+
+### Renamed
+
+| v7 | v8 | Notes |
+|---|---|---|
+| `reveal-slices`, `reveal-slices-up-7` | `slices`, `slices-up 7` | The slices effect is now its own feature with a flag-based syntax. Direction goes inline; the row count is a separate space-separated flag. Add `cover` for the inverted variant: `aa-animate="slices-right cover 12"`. See [slices](/animations/utilities/aa-slices/). |
+| `reveal-oval-up/down/left/right` | `reveal-oval-up/down/left/right` | Same names — but the implementation is rewritten under the `reveal` feature. |
+
+### Removed (use a `fade-*` / `slide-*` / `zoom-*` substitute)
+
+| v7 value | v8 equivalent |
+|---|---|
+| `appear`, `appear-up/down/left/right` | `fade`, `fade-up/down/left/right` |
+| `float-up/down/left/right` | `fade-up/down/left/right` + `aa-ease="back.out"` for the bounce |
+| `zoom-in-up`, `zoom-out-down`, … (compound directions) | `zoom-in` / `zoom-out` + a separate `fade-up` / `fade-down` element if you need the slide |
+| `blur-in` | `blur` |
+| `pseudo-reveal-up/down/left/right#color` | `reveal-up/down/left/right` + a colored backing element |
+| `swing-fwd`, `swing-bwd`, `turn-3d-soft`, `turn-3d-elliptic`, `flip-up/down/left/right` | No direct replacement — these were CSS-only 3D effects. Author the equivalent in GSAP and dispatch via `aa-trigger="event:…"`. |
+
+### Removed entirely (no v8 replacement yet)
+
+These v7 features depended on the CSS engine or are still being rebuilt:
+
+| v7 feature | Status |
+|---|---|
+| `aa-animate="pin"` (sticky / pin-stack) | Deferred. Planned for a v8.x minor. Use GSAP `ScrollTrigger.pin` directly in your own code in the meantime. |
+| `aa-animate="counter"`, `aa-animate="counter-100"` | Removed. Author via a small GSAP tween — `gsap.to({ value: 0 }, { value: 100, onUpdate: ... })` is ~5 lines. |
+| `aa-animate="grow-horizontal"`, `aa-animate="grow-vertical"` | Removed. Use `slide-left` / `slide-up` with a `clip-path` mask, or `reveal-*`. |
+| `aa-animate="section-bg"`, `"section-clip"`, `"section-stack"` | Removed. These were single-purpose recipes — author the GSAP timeline directly for the section in question. |
+| `aa-animate="glide"` | Removed. Use `aa-animate="parallax"` for the typical use case. |
+
+### `accordion` → `tabs`
+
+v7's accordion feature is now `tabs`. The attribute names mirror the rename:
+
+| v7 | v8 |
+|---|---|
+| `aa-accordion="multi"` (parent) | `aa-tabs="multi"` |
+| `aa-accordion-toggle` | `aa-tabs-toggle` |
+| `aa-accordion-content` | `aa-tabs-content` |
+| `aa-accordion-visual` | `aa-tabs-visual` |
+
+The behaviour is the same (one or many open panels), plus a new optional `aa-autoplay="…"` for time-cycling between panels. See [tabs](/animations/components/tabs/).
+
+---
+
+## 7. JSX autocomplete (Next.js only)
+
+New in v8 — drop this in any TypeScript file and your editor (VS Code, Cursor, JetBrains) autocompletes `aa-*` attributes on every JSX element:
+
+```ts
+// types/global.d.ts
+import 'alrdy-animate/jsx'
+```
+
+Hover any `aa-*` attribute to see the JSDoc with accepted values and defaults. The package also ships an `AGENTS.md` at its root so AI coding agents (Claude Code, Cursor, Aider) can read the full attribute / trigger / feature reference straight out of `node_modules/alrdy-animate/AGENTS.md` without web-fetching docs.
+
+---
+
+## 8. Quick find-and-replace checklist
+
+If you have a v7 codebase, sweep these in order:
+
+- [ ] **Add `gsap` + `lenis` peer deps** (script tags or `npm install`). v8 will warn at runtime if anything's missing.
+- [ ] **Remove the v7 `<link rel="stylesheet" href="…AlrdyAnimate.css">`** — replace with `import 'alrdy-animate/style'` (npm) or `<link href="…@alpha/dist/alrdy-animate.css">` (CDN).
+- [ ] `aa-load="X"` → `aa-animate="X" aa-trigger="load"` (or `"load-once"` for once-only).
+- [ ] `aa-hover="X"` → `aa-animate="hover-X"` (consult the [hover docs](/animations/hover/background/) for the exact variant).
+- [ ] `aa-split="a&b"` → `aa-split="a b"`.
+- [ ] `aa-delay-mobile="X"` → fold into `aa-delay="DESKTOP|MOBILE"`. Same for any other `*-mobile` attribute.
+- [ ] `aa-accordion*` → `aa-tabs*`.
+- [ ] In `init()`: remove `gsapFeatures: [...]`, rename `templates` → `presets` (and flatten the value shape), unwrap `smoothScroll.options` to be the smoothScroll value directly.
+- [ ] If you call `AlrdyAnimate.initPageAnimations(...)`, replace with `destroy({ keepGlobals: true })` + `init({ root: newMainContainer })`. See [Webflow + Barba](/recipes/webflow-barba/) or [Next.js page transitions](/recipes/nextjs-transitions/).
+- [ ] If you use any of the removed values from [§6](#6-renamed--removed-animation-values), substitute or rewrite as a custom GSAP timeline.
+- [ ] Test in `init({ debug: true })` — the boot log lists every loaded feature, required plugin, and any missing GSAP plugins.
+
+If anything breaks that this page doesn't cover, drop it in the [GitHub issues](https://github.com/ben-alrdy/alrdy-animate/issues) and I'll fold it in.
