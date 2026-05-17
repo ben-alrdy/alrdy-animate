@@ -108,7 +108,14 @@ Then in your components:
 </h1>
 ```
 
-**Why `load` and not `load-once`?** In Next.js App Router, the `AlrdyInit` component lives in the root layout and persists across route changes. If you re-init on `usePathname()` change (see [SPA route changes](#spa-route-changes) below), the second/third/Nth call to `init()` is the user's first *visual* arrival on that page — but `load-once` treats it as a subsequent init and skips. `load` fires on every `init()` cycle so back/forward nav and `<Link>` clicks all animate the hero. See [aa-trigger](/animations/utilities/aa-trigger/) for the full comparison.
+**Which `aa-trigger` value to pick depends on whether you're running visual page transitions:**
+
+| Setup | Recommended trigger | Why |
+| --- | --- | --- |
+| No visual transition (simple [SPA route changes](#spa-route-changes)) | `aa-trigger="load"` | Fires on every `init()` cycle — every `<Link>` click and back/forward nav animates the hero. `load-once` would skip on subsequent inits. |
+| Visual page transition ([recipe](/recipes/nextjs-transitions/)) | `aa-trigger="load-once event:enter"` | First cold visit fires via `load-once`; subsequent navigations wait for an `aa:trigger event:enter` dispatched from inside the enter timeline — keeps the content reveal in sync with the transition's visual peak instead of firing the instant `init()` runs (which is mid-transition, behind the overlay). |
+
+See [aa-trigger](/animations/utilities/aa-trigger/) for the full comparison of triggers.
 
 ## Using with AI assistants (Claude Code, Cursor, etc.)
 
@@ -225,6 +232,14 @@ For elements that should animate **every time** the user lands on the route (col
 
 ## Page transitions
 
-Page-transition wiring (Next.js View Transitions, framer-motion `<AnimatePresence>`) is **deferred** until we ship a Next.js demo project to base the recipe on. The lib already exposes the right hooks — `init({ root })`, `destroy({ keepGlobals: true, keepFromStates: true })`, `refresh()` — so the wiring will look very similar to the [Webflow + Barba recipe](/recipes/webflow-barba/), just with router events instead of Barba hooks. Watch this page (or the GitHub repo) for the full guide.
+For visual page transitions where the leaving and incoming pages both animate (Osmo stacked-cards, curtain wipes, shared elements, anything GSAP-driven), see the dedicated **[Next.js page transitions recipe](/recipes/nextjs-transitions/)**. It covers:
 
-In the meantime: if you're building a Next.js project that needs SPA transitions today, the Barba recipe's lifecycle wiring (`alrdyInit` / `alrdyDestroy` / dispatching `aa:trigger` from inside a leave timeline) translates one-to-one — replace the Barba hooks with whatever your transition library exposes (`onRouteChangeStart`, `onExitComplete`, etc.).
+- The leave-before-push / enter-after-push state machine — Next's `router.push` is atomic (no Barba sync mode), so the timeline has to split at the "deck fully covering" boundary.
+- The snapshot + handoff pattern — clone the leaving `<main>` into an overlay slot for the leave (because the old DOM is about to unmount), then animate the **real new `<main>`** through the enter (because by then it's mounted).
+- Wiring `init({ root: newMain })` and `destroy({ keepGlobals: true })` into a pathname-driven `useEffect`.
+- Using `<Link>` for viewport-based RSC prefetch so the click→commit window is zero.
+- Dispatching `aa:trigger` events from inside the enter timeline for perfectly-timed content reveals.
+
+A runnable copy lives at `examples/nextjs-transition/` in the repo.
+
+If you don't need a visual transition — just want alrdy-animate to re-scan the new route after navigation — the simpler [SPA route changes](#spa-route-changes) pattern above is enough.

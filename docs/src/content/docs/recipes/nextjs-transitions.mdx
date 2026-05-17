@@ -1,0 +1,690 @@
+---
+title: Next.js App Router page transitions
+description: Run Osmo-style stacked-cards (or any GSAP-driven) page transitions in Next.js 15 App Router where the leaving AND incoming pages are both visible during the transition. Covers the leave-before-push / enter-after-push state machine, the snapshot-and-handoff pattern, and how to wire alrdy-animate's lifecycle into pathname changes.
+---
+
+Page transitions are deliberately out of scope for the lib. v8 exposes
+`init({ root })`, `destroy({ keepGlobals })`, and `ready()` so you can wire
+them into whatever transition pattern suits your stack. This recipe is the
+Next.js App Router counterpart to the [Webflow + Barba](/recipes/webflow-barba/)
+recipe — same Osmo stacked-cards visual, same alrdy-animate lifecycle, but
+the framework constraints force a different architectural shape.
+
+A runnable copy lives at `examples/nextjs-transition/` in the repo —
+`npm install && npm run dev`, then open `http://localhost:5175/`.
+
+## Why Next.js needs a different shape than Barba
+
+Barba.js runs in **sync mode**: the leaving container and the new container
+*coexist* in the DOM during the transition. The Osmo timeline can animate
+all three layers (`current`, `transitionMiddle`, `next`) as real elements
+because `next` IS the new page's DOM.
+
+Next.js App Router has no equivalent. `router.push()` schedules a route
+change wrapped in React's `startTransition`; React eventually commits the
+new route by unmounting the old `<main>` and mounting the new one *atomically*.
+There's no moment where both pages are mounted as siblings.
+
+This means a faithful Osmo port has to **split the timeline** at the
+boundary where the deck is fully formed:
+
+```
+LEAVE (before router.push)           ENTER (after pathname commits)
+─────────────────────────             ──────────────────────────────
+clone old <main> into overlay        real new <main> takes "next" slot
+animate clone + middle + placeholder animate snapshot + middle + real new
+form the deck                        drop deck, settle real new main
+                ↓
+          router.push(href)
+                ↓
+        React commits new route
+                ↓
+           usePathname() fires
+```
+
+The recipe below is the implementation.
+
+## What this recipe gets right
+
+- **Leaving page is genuinely visible** during the leave, scaled and rounded
+  in the deck — by cloning the live `<main>` into a fixed overlay slot at
+  click time.
+- **Incoming page is genuinely visible** during the enter, scaled and rounded
+  in the deck — by handing off the real new `<main>` into the "next" slot
+  the moment React commits, and animating *it* (not a placeholder) through
+  Osmo's settle + clipPath + nav-slide phases.
+- **No black flash at the route swap.** The deck is fully covering the
+  viewport when `router.push` fires. The old `<main>` can unmount and the
+  new `<main>` can mount entirely behind the overlay; the user never sees
+  the React reconciliation.
+- **alrdy-animate scoped to the new `<main>`.** `init({ root: newMain })`
+  scans the new subtree only; the cloned snapshot is left alone (its
+  inline styles came along with `cloneNode(true)`, so it stays visible).
+- **Lenis persists across the route swap.** `destroy({ keepGlobals: true })`
+  leaves Lenis alive — it's keyed to `documentElement` which doesn't change
+  across navigations, and churning it every nav resets scroll velocity
+  mid-transition.
+- **Re-entrant clicks ignored.** A `stage` flag (`idle | leaving | entering`)
+  rejects a second click while a transition is running.
+
+## The state machine
+
+The whole orchestration is a 3-stage machine kept at module scope:
+
+```ts
+type Stage = 'idle' | 'leaving' | 'entering'
+let stage: Stage = 'idle'
+```
+
+The transitions:
+
+| from → to              | triggered by                          |
+| ---------------------- | ------------------------------------- |
+| `idle → leaving`       | `<TransitionLink>` click handler      |
+| `leaving → entering`   | leave timeline `onComplete` (after which `router.push` fires) |
+| `entering → idle`      | pathname `useEffect` after enter timeline completes |
+
+Keeping `stage` at **module scope** (not React state) matters: re-renders
+during the transition (e.g. when `usePathname()` changes) must not reset
+it, and the click handler / pathname effect read from it synchronously.
+
+## The overlay markup
+
+The persistent overlay lives in the root layout — outside the swapped
+children so it survives every navigation. Four absolutely-positioned
+siblings, stacked by z-index:
+
+```tsx
+// app/layout.tsx
+export default function RootLayout({ children }) {
+  return (
+    <html lang="en">
+      <body>
+        <div data-transition-overlay className="transition">
+          <div className="transition__backdrop" />
+          <div data-transition-next className="transition__next" />
+          <div data-transition-middle className="transition__middle" />
+          <div data-transition-snapshot className="transition__snapshot" />
+        </div>
+        <AlrdyProvider>{children}</AlrdyProvider>
+      </body>
+    </html>
+  )
+}
+```
+
+Z-order bottom → top:
+- **`__backdrop`** (z:0) — opaque void color. Hides the body during leave
+  when the real new `<main>` doesn't yet exist.
+- **`__next`** (z:1) — cream placeholder. Fills the "next" slot during
+  leave; hidden the instant we hand off to the real new `<main>`.
+- **`__middle`** (z:2) — orange layer between snapshot and next.
+- **`__snapshot`** (z:3) — receives the cloned leaving `<main>` at click time.
+
+The container itself is `display: none` at idle. The JS flips it to `block`
+when a transition starts and back to `none` at cleanup.
+
+```css
+.transition {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  overflow: clip;
+  z-index: 9999;
+  display: none;
+}
+
+.transition__backdrop { position: absolute; inset: 0; background: #000; z-index: 0; }
+.transition__next     { position: absolute; inset: 0; background: #f4ecd8; z-index: 1; transform-origin: 50% 50%; }
+.transition__middle   { position: absolute; inset: 0; background: #ef6322; z-index: 2; transform-origin: 50% 50%; }
+.transition__snapshot { position: absolute; inset: 0; background: #f4ecd8; overflow: hidden; z-index: 3; transform-origin: 50% 50%; }
+```
+
+Each page's `<main data-transition-container>` should have an explicit
+background color matching `__snapshot` / `__next` so the swap from
+placeholder to real DOM is invisible:
+
+```css
+body { background: #000; }                              /* the void */
+main[data-transition-container] { background: #f4ecd8; } /* the card */
+```
+
+## The provider
+
+`AlrdyProvider` is the orchestrator. It:
+
+1. Exposes a `navigate(href)` function via context, consumed by `<TransitionLink>`.
+2. Loads GSAP peer deps on first mount.
+3. Runs the leave timeline on click, then calls `router.push`.
+4. Listens to `usePathname()` to run the enter timeline after the route commits.
+5. Wires `init` / `destroy` into the lifecycle.
+
+```tsx
+'use client'
+import { createContext, useCallback, useContext, useEffect, useRef } from 'react'
+import { usePathname, useRouter } from 'next/navigation'
+import 'alrdy-animate/style'
+
+type NavigateFn = (href: string) => void
+const TransitionContext = createContext<NavigateFn>(() => {})
+export const useTransitionNavigate = () => useContext(TransitionContext)
+
+let stage: 'idle' | 'leaving' | 'entering' = 'idle'
+let depsLoaded = false
+let alrdyReady = false
+
+async function loadPeerDeps() {
+  if (depsLoaded) return
+  await Promise.all([
+    import('gsap').then((m) => { (window as any).gsap = m.gsap }),
+    import('gsap/ScrollTrigger').then((m) => { (window as any).ScrollTrigger = m.ScrollTrigger }),
+    import('gsap/CustomEase').then((m) => { (window as any).CustomEase = m.CustomEase }),
+    // ...and any other GSAP plugins your alrdy-animate features need
+    import('lenis').then((m) => { (window as any).Lenis = m.default }),
+  ])
+  const gsap = (window as any).gsap
+  const CustomEase = (window as any).CustomEase
+  gsap.registerPlugin(CustomEase)
+  CustomEase.create('osmo', '0.625, 0.05, 0, 1')
+  gsap.defaults({ ease: 'osmo', duration: 0.6 })
+  depsLoaded = true
+}
+
+async function alrdyInit(rootEl: HTMLElement) {
+  const { init } = await import('alrdy-animate')
+  await init({
+    root: rootEl,
+    smoothScroll: true,
+    ease: 'osmo',
+    loadDelay: 0, // no delay on subsequent navigations
+  })
+  alrdyReady = true
+}
+
+async function alrdyDestroy() {
+  if (!alrdyReady) return
+  const { destroy } = await import('alrdy-animate')
+  // keepGlobals: Lenis + body scroll-state observer + scroll-target observer
+  // survive the page swap — they're keyed to documentElement.
+  // We don't need keepFromStates: the leaving DOM is a clone in the overlay,
+  // not the real <main>. React unmounts the real one; the clone is left
+  // alone until our cleanup empties the snapshot slot.
+  destroy({ keepGlobals: true })
+  alrdyReady = false
+}
+
+function fireEnterAnimations(rootEl: HTMLElement) {
+  rootEl.querySelectorAll('[aa-trigger~="event:enter"]').forEach((el) => {
+    el.dispatchEvent(new CustomEvent('aa:trigger', { detail: { name: 'enter' }, bubbles: true }))
+  })
+}
+```
+
+### The click handler
+
+The click handler runs synchronously: snapshot the live `<main>` into the
+overlay, set initial states, run the leave timeline, then call `router.push`.
+
+```tsx
+const navigate = useCallback((href: string) => {
+  if (stage !== 'idle') return // re-entrant guard
+  if (!(window as any).gsap) { router.push(href); return } // fallback if deps not ready
+
+  const currentMain = document.querySelector<HTMLElement>('main[data-transition-container]')
+  const overlay    = document.querySelector<HTMLElement>('[data-transition-overlay]')
+  const snapshot   = overlay?.querySelector<HTMLElement>('[data-transition-snapshot]')
+  const middle     = overlay?.querySelector<HTMLElement>('[data-transition-middle]')
+  const next       = overlay?.querySelector<HTMLElement>('[data-transition-next]')
+  if (!currentMain || !snapshot || !middle || !next) { router.push(href); return }
+
+  stage = 'leaving'
+  const scrollY = window.scrollY || 0
+  const gsap = (window as any).gsap
+
+  // Clone the live <main> into the snapshot slot. cloneNode(true) preserves
+  // alrdy-animate's inline styles (aa-ready visibility + GSAP transforms),
+  // so the snapshot looks frame-identical to what the user was seeing.
+  const clone = currentMain.cloneNode(true) as HTMLElement
+  snapshot.appendChild(clone)
+
+  // All three deck layers start full-cover. The leave timeline shrinks them
+  // to their staggered deck positions.
+  gsap.set(overlay, { display: 'block' })
+  gsap.set([snapshot, middle, next], {
+    autoAlpha: 1, scale: 1, yPercent: 0,
+    clipPath: 'inset(0% round 0em)',
+    transformOrigin: '50% 50%',
+    backfaceVisibility: 'hidden',
+  })
+  // Position the clone so the visible viewport slice matches what the user
+  // was looking at (matters when they're scrolled down).
+  gsap.set(clone, { position: 'absolute', top: -scrollY, left: 0, width: '100%' })
+
+  document.body.style.overflow = 'hidden'
+  ;(window.lenis as any)?.stop?.()
+
+  runLeaveTimeline(snapshot, middle, next).then(() => {
+    window.scrollTo(0, 0)
+    stage = 'entering'
+    router.push(href)
+  })
+}, [router])
+```
+
+### The pathname effect
+
+Two branches: if `stage === 'entering'`, run the full enter sequence; if
+not (back/forward, programmatic push, deep link), just refresh
+alrdy-animate without animation.
+
+```tsx
+useEffect(() => {
+  if (firstRenderRef.current) return
+
+  // Back/forward, programmatic push, deep link — no leave timeline ran.
+  if (stage !== 'entering') {
+    ;(async () => {
+      await loadPeerDeps()
+      await alrdyDestroy()
+      const main = document.querySelector<HTMLElement>('main[data-transition-container]')
+      if (main) {
+        await alrdyInit(main)
+        await (await import('alrdy-animate')).ready()
+        fireEnterAnimations(main)
+      }
+    })()
+    return
+  }
+
+  // Real transition: stage === 'entering', overlay is covering the viewport.
+  ;(async () => {
+    const overlay   = document.querySelector<HTMLElement>('[data-transition-overlay]')!
+    const snapshot  = overlay.querySelector<HTMLElement>('[data-transition-snapshot]')!
+    const middle    = overlay.querySelector<HTMLElement>('[data-transition-middle]')!
+    const next      = overlay.querySelector<HTMLElement>('[data-transition-next]')!
+    const backdrop  = overlay.querySelector<HTMLElement>('.transition__backdrop')!
+
+    await alrdyDestroy()
+    const newMain = await waitForNewMain(snapshot) // exclude the clone subtree
+    if (!newMain) { stage = 'idle'; return }
+
+    // Handoff: real new <main> takes the "next" slot.
+    handoffNextToRealMain(backdrop, next, newMain)
+
+    // Init alrdy-animate AFTER handoff — the new main is already in its
+    // scaled deck position, so from-states are applied to elements at the
+    // correct visual location.
+    await alrdyInit(newMain)
+
+    await runEnterTimeline(snapshot, middle, newMain)
+
+    // Cleanup: restore real new main to normal flow, hide overlay.
+    const gsap = (window as any).gsap
+    gsap.set(newMain, {
+      clearProps:
+        'position,top,left,right,width,height,overflow,zIndex,transformStyle,willChange,backfaceVisibility,transform,clipPath,opacity,visibility',
+    })
+    snapshot.innerHTML = ''
+    gsap.set([snapshot, middle, next, backdrop], { clearProps: 'all' })
+    gsap.set(overlay, { display: 'none' })
+    document.body.style.overflow = ''
+    ;(window.lenis as any)?.resize?.()
+    ;(window.lenis as any)?.start?.()
+    ;(window as any).ScrollTrigger?.refresh()
+    stage = 'idle'
+  })()
+}, [pathname])
+```
+
+`waitForNewMain` polls across animation frames for `main[data-transition-container]`
+that is **not inside** the cloned snapshot subtree. React 19 commits via
+`startTransition`, so the new `<main>` may not exist on the first frame
+after `usePathname()` fires.
+
+```ts
+function waitForNewMain(excludeNode: HTMLElement) {
+  return new Promise<HTMLElement | null>((resolve) => {
+    let attempts = 0
+    const check = () => {
+      for (const el of document.querySelectorAll<HTMLElement>('main[data-transition-container]')) {
+        if (!excludeNode.contains(el)) return resolve(el)
+      }
+      if (attempts++ < 60) requestAnimationFrame(check)
+      else resolve(null)
+    }
+    check()
+  })
+}
+```
+
+## The Osmo timeline (verbatim, split at the deck-formed boundary)
+
+### Leave — phases 1 + 2
+
+```ts
+function runLeaveTimeline(snapshot: HTMLElement, middle: HTMLElement, next: HTMLElement) {
+  const gsap = (window as any).gsap
+  return new Promise<void>((resolve) => {
+    const tl = gsap.timeline({ onComplete: () => resolve() })
+    tl.to([snapshot, middle, next], { clipPath: 'inset(0% round 1em)', duration: 0.8 }, 0)
+    tl.to(snapshot, { scale: 0.95,  yPercent: 20, duration: 1.2, ease: 'expo.inOut', overwrite: 'auto' }, '<')
+    tl.to(middle,   { scale: 0.875, yPercent: 10, duration: 1.2, ease: 'expo.inOut', overwrite: 'auto' }, '<')
+    tl.to(next,     { scale: 0.8,   yPercent: 0,  duration: 1.2, ease: 'expo.inOut', overwrite: 'auto' }, '<')
+  })
+}
+```
+
+Resolves at t≈1.2s when the deck is fully formed and the viewport is
+covered by the snapshot + middle + next-card stack against the black backdrop.
+This is where `router.push` fires.
+
+### Handoff — placeholder → real new `<main>`
+
+The moment React commits the new route, we apply Osmo's `prepareForTransition`
+styles to the real new `<main>` so it sits exactly where the placeholder was —
+`position: fixed`, full viewport, `scale: 0.8`, rounded clipPath. Then we
+hide the backdrop + placeholder.
+
+The placeholder and real new main have the same cream background and same
+position, so the swap is visually invisible. The nav inside the new main
+gets pinned to `yPercent: -100` first so it doesn't flash visible between
+the handoff and the slide-in tween starting.
+
+```ts
+function handoffNextToRealMain(backdrop: HTMLElement, nextCard: HTMLElement, newMain: HTMLElement) {
+  const gsap = (window as any).gsap
+  const nav = newMain.querySelector('.demo-nav')
+  if (nav) gsap.set(nav, { yPercent: -100 })
+
+  gsap.set(newMain, {
+    position: 'fixed',
+    top: 0, left: 0, right: 0,
+    width: '100%', height: '100vh',
+    overflow: 'clip', zIndex: 1,
+    transformStyle: 'preserve-3d',
+    willChange: 'transform, opacity',
+    backfaceVisibility: 'hidden',
+    autoAlpha: 1,
+    yPercent: 0, scale: 0.8,
+    clipPath: 'inset(0% round 1em)',
+    transformOrigin: '50% 50%',
+  })
+  gsap.set([backdrop, nextCard], { autoAlpha: 0 })
+}
+```
+
+### Enter — phases 3 + 4 + 5 + 6 (against the real new `<main>`)
+
+```ts
+function runEnterTimeline(snapshot: HTMLElement, middle: HTMLElement, newMain: HTMLElement) {
+  const gsap = (window as any).gsap
+  return new Promise<void>((resolve) => {
+    const tl = gsap.timeline({ onComplete: () => resolve() })
+    tl.to(snapshot, { yPercent: 130, duration: 1.2, ease: 'osmo' }, 0)
+    tl.to(middle,   { yPercent: 120, duration: 1.2, ease: 'osmo' }, '< 0.15')
+    tl.to(newMain,  { scale: 1, yPercent: 0, duration: 1.2, ease: 'expo.inOut', overwrite: 'auto' }, '< 0.15')
+    tl.to([snapshot, middle, newMain],
+      { clipPath: 'inset(0% round 0em)', duration: 0.8, ease: 'osmo' }, '> -0.8')
+
+    // Phase 6 — nav slide on the real new <main>. Runs concurrently with
+    // the deck dropping, exactly like Osmo Barba.
+    const nav = newMain.querySelector('.demo-nav')
+    if (nav) tl.to(nav, { yPercent: 0, duration: 1.2, ease: 'osmo' }, '< -0.1')
+
+    // Dispatch alrdy-animate's `event:enter` mid-transition so the new
+    // page's content-reveal animations start before the deck finishes.
+    tl.call(() => {
+      import('alrdy-animate').then(({ ready }) => {
+        ready().then(() => fireEnterAnimations(newMain))
+      })
+    }, undefined, 0.6)
+  })
+}
+```
+
+## The link component
+
+Built on Next's `<Link>` so the target route's RSC payload + chunks are
+prefetched automatically when the link enters the viewport. The click is
+intercepted to run the GSAP leave timeline first; `preventDefault` short-
+circuits Link's own `router.push` so we control when the navigation
+actually commits.
+
+```tsx
+'use client'
+import Link, { type LinkProps } from 'next/link'
+import type { AnchorHTMLAttributes, MouseEvent, ReactNode } from 'react'
+import { useTransitionNavigate } from './AlrdyProvider'
+
+type Props = Omit<LinkProps, 'href' | 'onClick'> &
+  Omit<AnchorHTMLAttributes<HTMLAnchorElement>, 'href' | 'onClick'> & {
+    href: string
+    children: ReactNode
+    onClick?: (e: MouseEvent<HTMLAnchorElement>) => void
+  }
+
+export function TransitionLink({ href, children, onClick, ...rest }: Props) {
+  const navigate = useTransitionNavigate()
+
+  const handleClick = (e: MouseEvent<HTMLAnchorElement>) => {
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return
+    if (e.currentTarget.pathname === window.location.pathname) { e.preventDefault(); return }
+    onClick?.(e)
+    if (e.defaultPrevented) return
+    e.preventDefault()
+    navigate(href)
+  }
+
+  return (
+    <Link href={href} onClick={handleClick} {...rest}>
+      {children}
+    </Link>
+  )
+}
+```
+
+## Prefetching — when the new route actually loads
+
+`<Link>` prefetches its target's **RSC payload + JS chunks** automatically
+when it enters the viewport (App Router default, production builds). The
+prefetched data lands in the client-side router cache. So by the time the
+user clicks and the leave timeline's `router.push()` fires, the route is
+usually already there and React can commit instantly.
+
+Without prefetch (e.g. you used a plain `<a onClick={navigate}>`), the
+sequence on a cold click is:
+
+```
+t=0    user clicks link
+t=0    navigate() snapshots <main>, starts leave timeline
+t=1.2s leave completes → router.push() fires → Next starts fetching RSC + chunks
+t=?    new route's RSC payload arrives, React commits the new <main>
+t=?    handoff → enter timeline runs against real new main
+```
+
+On localhost the network roundtrip in step 3 is `<50ms` — invisible behind
+the deck. On a slow production network it can stretch beyond the leave
+window. The deck stays opaque (no broken state), but the transition feels
+slightly longer than it has to.
+
+**With `<Link>` prefetch**, the sequence becomes:
+
+```
+t=-N   link scrolls into viewport → Next prefetches RSC + chunks → router cache populated
+t=0    user clicks
+t=0    leave timeline starts
+t=1.2s leave completes → router.push() finds route in cache → instant commit
+t=1.2s handoff → enter timeline runs immediately
+```
+
+### When to skip viewport prefetch and prefetch on hover instead
+
+`<Link>` prefetches **every** link in the viewport on first render. On a
+3-link nav, that's free. On a 50-link directory page, it's 50 RSC fetches
+at page load. If that's wasteful for your case, set `prefetch={false}` on
+`<Link>` and trigger prefetch yourself on hover / focus:
+
+```tsx
+'use client'
+import { useRouter } from 'next/navigation'
+import { useRef } from 'react'
+
+function HoverPrefetchLink({ href, children, ...rest }) {
+  const router = useRouter()
+  const navigate = useTransitionNavigate()
+  const done = useRef(false)
+  const prefetch = () => {
+    if (done.current) return
+    done.current = true
+    router.prefetch(href)
+  }
+  return (
+    <a
+      href={href}
+      onMouseEnter={prefetch}
+      onFocus={prefetch}
+      onClick={(e) => { e.preventDefault(); navigate(href) }}
+      {...rest}
+    >{children}</a>
+  )
+}
+```
+
+Trade-off: hover prefetch is leaner on the network and only fires for
+links the user actually looks at, but mobile users (no hover events)
+hit the cold-click path every time. Pick based on your audience:
+
+| Audience      | Recommendation                                                 |
+| ------------- | -------------------------------------------------------------- |
+| Mobile-heavy  | `<Link>` (this recipe) — viewport prefetch reaches mobile users |
+| Desktop-heavy with lots of links | `<a>` + `router.prefetch` on hover/focus    |
+| Mixed, link-heavy pages | `<Link prefetch={false}>` *plus* manual hover prefetch |
+
+### Prefetch in dev vs production
+
+Next.js suppresses viewport prefetching in `next dev` to save bandwidth
+during local development. So when you click a `<Link>` locally and the
+leave timeline starts before any prefetch has happened, you're testing
+the cold-click path. Production builds (`next build && next start`) flip
+it on; that's the path real users see.
+
+### What's NOT prefetched
+
+`<Link>` (and `router.prefetch`) fetch the **RSC payload** (serialized
+React Server Component tree) and the **JS chunks** for client components.
+They do **not** prefetch:
+
+- Data fetched via `fetch()` inside Server Components, unless that fetch
+  is already in Next's data cache from a previous request (it usually
+  isn't, on a first prefetch).
+- Images and other static assets referenced by the page — those are
+  fetched on render via the browser's normal asset pipeline. For
+  above-the-fold images on the next page, use `<Image priority>` or a
+  manual `<link rel="preload" as="image">` on hover.
+- Third-party scripts loaded via `next/script`.
+
+For most marketing-style sites this is fine — the RSC payload is the
+bulk of the cost. For data-heavy pages, layer a manual prefetch (e.g.
+`queryClient.prefetchQuery` for React Query, or a hover handler that
+hits your API) alongside the route prefetch.
+
+## Page markup
+
+Same `aa-*` conventions as the Barba recipe — only the wrapper attribute
+differs (`data-transition-container` instead of `data-barba="container"`):
+
+```tsx
+export default function HomePage() {
+  return (
+    <main data-transition-container data-page="home">
+      <nav className="demo-nav">
+        <TransitionLink href="/">Home</TransitionLink>
+        <TransitionLink href="/about">About</TransitionLink>
+      </nav>
+      <h1
+        aa-animate="text-slide-up"
+        aa-split="lines mask"
+        aa-trigger="load-once"
+      >Headline</h1>
+      <div
+        className="card-grid"
+        aa-animate="fade-up"
+        aa-stagger="0.1"
+        aa-trigger="load-once event:enter"
+      >
+        {/* cards */}
+      </div>
+    </main>
+  )
+}
+```
+
+`aa-trigger="load-once"` plays only on the very first visit; subsequent
+navigations leave the headline visible at its natural state. The grid uses
+`"load-once event:enter"` so it animates on every navigation via the
+`aa:trigger` dispatch from inside the enter timeline.
+
+## Lib API surface used by this recipe
+
+| API                                  | Purpose                                                            |
+| ------------------------------------ | ------------------------------------------------------------------ |
+| `init({ root, smoothScroll })`       | Scope the scan to the new `<main>`; create / reuse Lenis.          |
+| `destroy({ keepGlobals: true })`     | Tear down per-page state; keep Lenis alive across the swap.        |
+| `ready()`                            | Await alrdy-animate's first paint before firing manual events.     |
+| `aa-trigger="load-once event:enter"` | Fire once on first load; on subsequent inits wait for `aa:trigger`. |
+| `dispatchEvent(new CustomEvent('aa:trigger', { detail: { name: 'enter' } }))` | Manual content-reveal dispatch from inside the enter timeline. |
+
+## Gotchas
+
+- **`stage` must live at module scope**, not in React state. The pathname
+  effect re-runs on commit, the click handler reads it synchronously —
+  React state would lag a render behind.
+- **Clone the leaving `<main>` *before* calling `router.push`.** Once React
+  begins committing the new route, the old `<main>` is gone. The click
+  handler runs synchronously precisely so the snapshot is captured while
+  the old DOM is still live.
+- **Wait for the new `<main>` via `requestAnimationFrame` polling**, not
+  `setTimeout`. React 19 commits inside `startTransition`; the new DOM may
+  not appear on the first frame after `usePathname()` fires.
+- **Init alrdy-animate *after* the handoff**, not before. The new `<main>`
+  is `position: fixed` at `scale: 0.8` when alrdy-animate scans it — that's
+  fine, but if you init before the handoff the from-states are calculated
+  against the wrong layout and ScrollTriggers anchor to stale positions.
+- **`window.scrollTo(0, 0)` *before* `router.push`, not after.** Next.js
+  pushes scroll restoration to commit time; doing it before guarantees the
+  new page mounts at the top. The user only sees this once the deck drops
+  away.
+- **No `keepFromStates: true`.** Unlike the Barba recipe, we destroy the
+  leaving page's alrdy-animate state after the leave timeline has already
+  completed (deck is fully formed, snapshot is opaque). The clone in the
+  snapshot slot keeps its inline styles from `cloneNode(true)`, independent
+  of `destroy()`. The real leaving DOM is about to be unmounted by React
+  anyway.
+- **Browser back/forward bypasses `navigate()`.** The pathname effect's
+  fallback branch (`stage !== 'entering'`) handles this by running just
+  `destroy → init → fireEnterAnimations` without a visual transition. If
+  you want a transition for history navigations too, listen for
+  `popstate` and trigger `navigate(window.location.pathname)` from there.
+
+## Differences from the Webflow + Barba recipe
+
+If you're porting a Barba project to Next.js, the structural changes are:
+
+- **Split the timeline.** Barba's single `leave` timeline becomes two
+  separate GSAP timelines: leave (clipPath rounds + deck forms, ends at
+  the "viewport covered" beat), enter (deck drops + new main settles +
+  clipPath unrounds + nav slides).
+- **Clone the leaving `<main>` instead of relying on sync mode.** The
+  clone lives inside the snapshot slot; the real leaving DOM is allowed
+  to unmount.
+- **Add the handoff step.** The placeholder cream `__next` card fills the
+  "next" slot during leave (because the real new `<main>` doesn't exist
+  yet); the handoff function swaps it for the real new `<main>` at the
+  start of enter.
+- **Drive lifecycle from `usePathname()` instead of Barba hooks.** The
+  pathname effect replaces `beforeEnter` / `afterEnter`.
+- **Pre-set nav to `yPercent: -100` in the handoff**, not as a `from`
+  tween. In Barba's sync mode the `tl.from(navigation, ...)` works because
+  the new nav is already in DOM and visible. In our split model the nav
+  is on the real new `<main>` which becomes visible at handoff — without
+  the pre-set, it would flash visible for one frame.
