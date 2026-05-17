@@ -53,23 +53,29 @@ There's an [optional CSS fallback recipe](/recipes/load-fallback/) for hiding th
 
 ---
 
-## 2. The trigger system was rewritten
+## 2. `aa-load` is gone, `aa-trigger` is new
 
-v7 had separate attributes per trigger: `aa-animate` (scroll), `aa-load` (page load), `aa-hover` (hover). v8 consolidates this under `aa-trigger`:
+v7 used three separate attributes for the three trigger styles: `aa-animate` (scroll, the default), `aa-load` (page load), `aa-hover` (hover). v8 keeps `aa-animate` and `aa-hover` as separate attributes — `aa-hover` is its own interaction system (see [§3](#3-aa-hover-keeps-the-name-loses-the-bg--text--icon-prefixes)), and `aa-animate` is still the scroll/load/event-triggered appear-animation hook. **What changed is `aa-load`**: it's removed entirely. Load-triggered animations are now expressed as a value on `aa-trigger`, on a normal `aa-animate` element:
 
 ```html
-<!-- v7 -->
-<div aa-animate="fade-up">scroll-triggered (default behaviour)</div>
-<div aa-load="fade-up">load-triggered</div>
-<div aa-hover="slide-up">hover-triggered</div>
+<!-- v7 — separate aa-load attribute, ran a CSS-keyframe animation. -->
+<h1 aa-load="fade-up">Hero</h1>
 
-<!-- v8 -->
-<div aa-animate="fade-up">scroll-triggered (still default — no aa-trigger needed)</div>
-<div aa-animate="fade-up" aa-trigger="load">load-triggered</div>
-<div aa-animate="hover-bg-block">hover (different mechanism — see below)</div>
+<!-- v8 — load is a trigger value on aa-animate. -->
+<h1 aa-animate="fade-up" aa-trigger="load">Hero</h1>
 ```
 
-You can also **combine** triggers, which v7 couldn't do:
+**`aa-trigger` is the new attribute** that didn't exist in v7. It defaults to `scroll` (so any existing `aa-animate` without `aa-trigger` keeps working exactly as before — that's why most v7 markup doesn't need an `aa-trigger` added at all). Set it to opt out of scroll triggering or to combine triggers:
+
+| Value | Fires when |
+|---|---|
+| `scroll` (default) | Element enters viewport at `aa-scroll-start` |
+| `load` | On every `init()` cycle — first load *and* every SPA re-init |
+| `load-once` | First-init only — for marketing heroes that shouldn't re-fire on subsequent SPA navigations |
+| `event:<name>` | When a `aa:trigger` event with `detail.name === <name>` is dispatched |
+| `click:<name>` | When a sibling element with `aa-click="<name>"` is clicked |
+
+You can also **combine** triggers — v7 couldn't:
 
 ```html
 <!-- Hero text: animates on first cold load (load-once),
@@ -78,23 +84,38 @@ You can also **combine** triggers, which v7 couldn't do:
 <h1 aa-animate="text-slide-up" aa-trigger="load-once event:enter">…</h1>
 ```
 
-See [aa-trigger](/animations/utilities/aa-trigger/) for the full trigger reference, including `event:<name>` and `click:<name>`.
+See [aa-trigger](/animations/utilities/aa-trigger/) for the full trigger reference and container inference (e.g. children of `[aa-tabs-content]` infer `event:tab-active` automatically).
 
 ---
 
-## 3. Hover animations — different attribute, different model
+## 3. `aa-hover` keeps the name, loses the `bg-` / `text-` / `icon-` prefixes
 
-v7 used `aa-hover="…"` to attach a hover effect to any element. v8's hover system is built around the **hover feature** with a `hover-` prefixed animation type and an explicit `aa-color` for the colour transition:
+v8 keeps the `aa-hover` attribute, but the value vocabulary is smaller and structural rather than presentational. Direction modifiers are now **space-separated flags** instead of being baked into the value name; combined hovers (v7's `&` operator) are gone — one effect per element.
+
+| v7 value | v8 value | Notes |
+|---|---|---|
+| `aa-hover="bg-block"` | `aa-hover="block"` | Direction-aware background block. |
+| `aa-hover="bg-block-vertical"` | `aa-hover="block vertical"` | Flag goes as space-separated token. Other flags: `horizontal`, `top`, `bottom`, `left`, `right`. |
+| `aa-hover="bg-curve"` | `aa-hover="curve"` | SVG-path curve, same flag system. |
+| `aa-hover="icon-up-right"` | `aa-hover="icon-up-right"` | Unchanged. Optional flags: `reverse`, `triple`. |
+| `aa-hover="bg-circle"`, `bg-expand` | — | Removed. Closest substitute: `block` or `curve`. |
+| `aa-hover="text-slide-up"`, `text-fade-up`, etc. | — | Removed. v8's hover feature is structural-only; for text-on-hover effects, author with GSAP + `mouseenter`/`mouseleave`. |
+| Combined hovers via `&` (`bg-curve&text-fade-up&icon-right`) | — | Removed. Use one effect per element. |
+| Required child markers (`aa-hover-text`, `aa-hover-bg`, `aa-hover-content`) | — | Removed. The library injects the panel/clone elements itself. |
 
 ```html
 <!-- v7 -->
-<button aa-hover="slide-up" aa-color="bg:#000 text:#fff">Hover me</button>
+<a aa-hover="bg-block-vertical" aa-color="bg:#000 text:#fff">
+  <span aa-hover-content>Hover me</span>
+  <div aa-hover-bg></div>
+</a>
 
-<!-- v8 -->
-<button aa-animate="hover-bg-block" aa-color="bg:#000 text:#fff">Hover me</button>
+<!-- v8 — markup is leaner, attribute value drops the bg- prefix and uses
+     a separate token for the direction. -->
+<a aa-hover="block vertical" aa-color="#000">Hover me</a>
 ```
 
-See the [hover docs](/animations/hover/background/) for the full list of hover effects.
+The `aa-color` value shape also simplified: instead of `bg:#hex text:#hex`, you pass a single colour. The hover feature decides which property to animate based on the effect. See the [hover background](/animations/hover/background/) and [hover icon](/animations/hover/icon/) docs.
 
 ---
 
@@ -121,8 +142,10 @@ AlrdyAnimate.init({
 // v8
 AlrdyAnimate.init({
   presets: {
-    'heading-style-h2': { 'aa-animate': 'text-blur', 'aa-split': 'lines', 'aa-stagger': '0.05' },
-    'heading-style-h3': { 'aa-animate': 'fade-up' },
+    // Class name → bare-keyed map of aa-* attributes (no `aa-` prefix in the keys).
+    'heading-style-h2': { animate: 'text-blur', split: 'lines', stagger: '0.05' },
+    // Shorthand: a plain string is treated as `{ animate: <string> }`.
+    'heading-style-h3': 'fade-up',
   },
 })
 ```
@@ -130,7 +153,8 @@ AlrdyAnimate.init({
 Differences:
 
 - `theme` is gone — pre-built theme sets aren't shipped any more. Build the few you need as custom presets.
-- The preset value is a **flat map of `aa-*` attributes**, not a nested `animationType` / `split` / `stagger` object. This means presets compose with any other `aa-*` attribute you might add directly on the element — same as if you'd written the attributes yourself.
+- The preset value is either a **plain animation string** (shorthand for `{ animate: <string> }`) or a **bare-keyed map** like `{ animate, split, stagger, delay, duration, trigger, … }`. The library prefixes each key with `aa-` when applying.
+- Presets compose with any explicit `aa-*` attribute on the element — explicit always wins, so you can override per-instance without removing the class.
 
 ### `gsapFeatures` is gone — features auto-load
 
@@ -296,8 +320,11 @@ If you have a v7 codebase, sweep these in order:
 
 - [ ] **Add `gsap` + `lenis` peer deps** (script tags or `npm install`). v8 will warn at runtime if anything's missing.
 - [ ] **Remove the v7 `<link rel="stylesheet" href="…AlrdyAnimate.css">`** — replace with `import 'alrdy-animate/style'` (npm) or `<link href="…@alpha/dist/alrdy-animate.css">` (CDN).
-- [ ] `aa-load="X"` → `aa-animate="X" aa-trigger="load"` (or `"load-once"` for once-only).
-- [ ] `aa-hover="X"` → `aa-animate="hover-X"` (consult the [hover docs](/animations/hover/background/) for the exact variant).
+- [ ] `aa-load="X"` → `aa-animate="X" aa-trigger="load"` (or `"load-once"` for once-only). `aa-load` is removed; `aa-trigger` is the new attribute.
+- [ ] `aa-hover="bg-block-vertical"` → `aa-hover="block vertical"`. Drop the `bg-` prefix; move direction to a space-separated flag. Same for `bg-curve` → `curve`. `icon-*` values are unchanged.
+- [ ] Hover combinations via `&` (`bg-curve&text-fade-up&icon-right`) → one effect per element. Text-on-hover and `bg-circle` / `bg-expand` aren't in v8 — author with custom GSAP if you need them.
+- [ ] Remove `aa-hover-text`, `aa-hover-bg`, `aa-hover-content`, `aa-hover-icon` child markers. The v8 hover feature injects its own panels and clones.
+- [ ] `aa-color="bg:#hex text:#hex"` (with prefixed pairs) → `aa-color="#hex"` (single colour). v8's hover feature decides which property to animate based on the chosen effect.
 - [ ] `aa-split="a&b"` → `aa-split="a b"`.
 - [ ] `aa-delay-mobile="X"` → fold into `aa-delay="DESKTOP|MOBILE"`. Same for any other `*-mobile` attribute.
 - [ ] `aa-accordion*` → `aa-tabs*`.
