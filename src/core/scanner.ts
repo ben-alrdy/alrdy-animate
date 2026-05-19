@@ -15,6 +15,7 @@ export type FeatureName =
   | 'split'
   | 'hover'
   | 'cursor'
+  | 'stack'
 
 export interface ScanResult {
   elements: Element[]
@@ -50,6 +51,7 @@ const ANCHOR_TO_FEATURE: ReadonlyArray<[string, FeatureName]> = [
   ['aa-split', 'split'],
   ['aa-hover', 'hover'],
   ['aa-cursor', 'cursor'],
+  ['aa-stack', 'stack'],
 ]
 
 export function scan(

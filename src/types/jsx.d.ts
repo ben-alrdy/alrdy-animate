@@ -97,10 +97,11 @@ declare namespace JSX {
      * no need to pair with `load-once`.
      *
      * **Container inference** — if this attribute is omitted and the element is
-     * inside `[aa-modal-name]`, `[aa-tabs-content]`, `[aa-tabs-visual]`, or
-     * `[aa-slider-item]`, the trigger defaults to the matching event
-     * (`event:modal-active` / `event:tab-active` / `event:slide-active`).
-     * Set `aa-trigger="scroll"` explicitly to opt out of inference.
+     * inside `[aa-modal-name]`, `[aa-tabs-content]`, `[aa-tabs-visual]`,
+     * `[aa-slider-item]`, or `[aa-stack-card]`, the trigger defaults to the
+     * matching event (`event:modal-active` / `event:tab-active` /
+     * `event:slide-active` / `event:card-active`). Set `aa-trigger="scroll"`
+     * explicitly to opt out of inference.
      *
      * **Dispatching custom events** from your code:
      * `el.dispatchEvent(new CustomEvent('aa:trigger', { detail: { name: 'foo' }, bubbles: true }))`.
@@ -481,6 +482,130 @@ declare namespace JSX {
      * (the default).
      */
     'aa-toggle-playstate'?: string | boolean
+
+    /**
+     * Marker for stacking-card containers. Cards inside this element stick at
+     * the top of the viewport (via CSS `position: sticky`) and stack on top of
+     * each other as the page scrolls. Each card emits `card-active` /
+     * `card-inactive` events when it crosses `aa-scroll-start` / fully leaves
+     * the viewport, so `aa-animate` elements inside a card auto-fire on entry
+     * and reverse on full exit — same trigger inference as slider/tabs/modal.
+     *
+     * Use `aa-stack="none"` (typically inside a `\|` shorthand or `-sm` /
+     * `-md` / `-lg` / `-xl` suffix) to opt out at a breakpoint. Pair with
+     * `aa-stack-card` on each card, optional `aa-stack-in` / `aa-stack-lock` /
+     * `aa-stack-out` for the lifecycle animations, and `aa-distance` /
+     * `aa-scroll-start` to tune intensity and inner-content trigger. The
+     * visual in/out tweens are always direct scroll-locked — `aa-scrub` is
+     * not honoured (the card position is sticky-CSS, so smoothing only the
+     * transform layer would desync). Feature: `stack`. Plugins: `ScrollTrigger`.
+     */
+    'aa-stack'?: string | boolean
+    /** Breakpoint variant of `aa-stack`. Activates at `>= breakpoints.sm`. Use `none` to disable at this breakpoint. */
+    'aa-stack-sm'?: string
+    /** Breakpoint variant of `aa-stack`. Activates at `>= breakpoints.md`. Use `none` to disable at this breakpoint. */
+    'aa-stack-md'?: string
+    /** Breakpoint variant of `aa-stack`. Activates at `>= breakpoints.lg`. Use `none` to disable at this breakpoint. */
+    'aa-stack-lg'?: string
+    /** Breakpoint variant of `aa-stack`. Activates at `>= breakpoints.xl`. Use `none` to disable at this breakpoint. */
+    'aa-stack-xl'?: string
+
+    /**
+     * Marker on each card inside `[aa-stack]`. The shipped stylesheet applies
+     * `position: sticky; top: var(--aa-stack-top, 4rem)`; override the offset
+     * with regular CSS (`.my-card { top: 6rem }`) or the CSS variable
+     * (`style="--aa-stack-top: 6rem"`). Animations inside default to
+     * `aa-trigger="event:card-active"`.
+     */
+    'aa-stack-card'?: string | boolean
+
+    /**
+     * Scrubbed entry animation for stack cards, played as the card scrolls
+     * from `top bottom` (card top at viewport bottom) toward its sticky lock
+     * position. Flags are space-separated and compose:
+     *
+     * - `fade` — opacity 0 → 1
+     * - `scale` — scale `1 - 0.2 * aa-distance` → 1 (e.g. 0.8 → 1 at distance=1)
+     * - `rotate` — cards **arrive tilted** and **settle flat**: centred fan
+     *   `(0°, -5°, +5°, -5°, +5°, …)` × `aa-distance` → 0°. First card stays
+     *   flat; later cards alternate sides.
+     * - `rotate-cw` — incremental clockwise ramp as from-state, settles flat:
+     *   `(0°, +1°, +2°, +3°, …)` × `aa-distance` → 0°. First card flat; each
+     *   subsequent card arrives one more degree clockwise.
+     * - `rotate-ccw` — mirror of `rotate-cw`: `(0°, -1°, -2°, -3°, …)` ×
+     *   `aa-distance` → 0°.
+     * - `tilt` — inverse of `rotate`: cards **arrive flat** and **build up
+     *   rotation** by lock, settling into a centred fan
+     *   `(0°, -5°, +5°, -5°, +5°, …)` × `aa-distance`. First card stays flat.
+     * - `tilt-cw` — inverse of `rotate-cw`: arrives flat, locks into the
+     *   clockwise ramp `(0°, +1°, +2°, +3°, …)` × `aa-distance`.
+     * - `tilt-ccw` — mirror of `tilt-cw`: `(0°, -1°, -2°, -3°, …)` ×
+     *   `aa-distance`.
+     * - `none` — no entry animation
+     *
+     * The six rotation-touching flags all control the same property and are
+     * mutually exclusive. If multiple are listed, `tilt*` wins over `rotate*`
+     * (the lock-state value overrides the settle-flat reset), and within each
+     * family directional variants win over the default (`*-cw`/`*-ccw` over
+     * the plain flag).
+     *
+     * Example: `aa-stack-in="fade tilt-cw"`.
+     */
+    'aa-stack-in'?: string
+    /** Breakpoint variant of `aa-stack-in`. Activates at `>= breakpoints.sm`. */
+    'aa-stack-in-sm'?: string
+    /** Breakpoint variant of `aa-stack-in`. Activates at `>= breakpoints.md`. */
+    'aa-stack-in-md'?: string
+    /** Breakpoint variant of `aa-stack-in`. Activates at `>= breakpoints.lg`. */
+    'aa-stack-in-lg'?: string
+    /** Breakpoint variant of `aa-stack-in`. Activates at `>= breakpoints.xl`. */
+    'aa-stack-in-xl'?: string
+
+    /**
+     * Discrete one-shot animation played the moment a card reaches its sticky
+     * lock position. Flags are space-separated (typically one):
+     *
+     * - `bounce` — Osmo-style stretch + elastic settle (`scaleX/Y` pulse)
+     * - `pulse` — quick `scale: 1 → 1.03 → 1` with a back ease
+     * - `none` — no lock animation (the `card-active` event still fires)
+     *
+     * Skipped under `(prefers-reduced-motion: reduce)`.
+     */
+    'aa-stack-lock'?: string
+    /** Breakpoint variant of `aa-stack-lock`. Activates at `>= breakpoints.sm`. */
+    'aa-stack-lock-sm'?: string
+    /** Breakpoint variant of `aa-stack-lock`. Activates at `>= breakpoints.md`. */
+    'aa-stack-lock-md'?: string
+    /** Breakpoint variant of `aa-stack-lock`. Activates at `>= breakpoints.lg`. */
+    'aa-stack-lock-lg'?: string
+    /** Breakpoint variant of `aa-stack-lock`. Activates at `>= breakpoints.xl`. */
+    'aa-stack-lock-xl'?: string
+
+    /**
+     * Scrubbed exit animation for stack cards, played as the *next* card
+     * scrolls toward its lock position. Flags are space-separated and
+     * compose; composite flags (`perspective`, `blur`, `left`, `right`)
+     * override plain `fade` / `scale` where they share a property.
+     *
+     * - `fade` — opacity → 0
+     * - `scale` — scale → `1 - 0.15 * aa-distance` (e.g. 0.85 at distance=1)
+     * - `perspective` — 3D tilt-back (`rotationX`, scale, slight `y`)
+     * - `blur` — `filter: blur(8 * distance px)` + slight `y`
+     * - `left` / `right` — slide `±4 * distance rem` while fading out
+     * - `none` — cards hold their settled state and the next card overlays
+     *
+     * The last card has no out animation (nothing overlays it). Example:
+     * `aa-stack-out="perspective"`.
+     */
+    'aa-stack-out'?: string
+    /** Breakpoint variant of `aa-stack-out`. Activates at `>= breakpoints.sm`. */
+    'aa-stack-out-sm'?: string
+    /** Breakpoint variant of `aa-stack-out`. Activates at `>= breakpoints.md`. */
+    'aa-stack-out-md'?: string
+    /** Breakpoint variant of `aa-stack-out`. Activates at `>= breakpoints.lg`. */
+    'aa-stack-out-lg'?: string
+    /** Breakpoint variant of `aa-stack-out`. Activates at `>= breakpoints.xl`. */
+    'aa-stack-out-xl'?: string
   }
 
   interface IntrinsicAttributes extends AlrdyAnimateAttributes {}

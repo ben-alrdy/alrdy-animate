@@ -1,0 +1,275 @@
+---
+title: stack
+description: Stacking-card layout where each card locks at the top of the viewport via CSS sticky. Scrubbed in/out tweens, optional lock animation, and per-card events that drive content animations inside each card.
+---
+
+import Demo from '../../../../components/Demo.astro'
+
+`aa-stack` turns a list of `[aa-stack-card]` elements into a stacking-cards section: each card sticks at the top of the viewport while the page scrolls past, and the next card overlays the previous one. Cards stay locked using **CSS `position: sticky`** — GSAP only owns the entry / exit transforms and the per-card events that drive content animations inside.
+
+## DOM structure
+
+```html
+<section aa-stack aa-stack-in="fade" aa-stack-lock="bounce" aa-stack-out="perspective">
+  <article aa-stack-card>
+    <h2 aa-animate="fade-up">Card 1</h2>
+    <p aa-animate="fade-up" aa-delay="0.15">Body fades up when this card enters.</p>
+  </article>
+  <article aa-stack-card>…</article>
+  <article aa-stack-card>…</article>
+</section>
+```
+
+Required GSAP plugins: `gsap`, `ScrollTrigger`.
+
+## Sticky offset
+
+The shipped stylesheet applies `position: sticky; top: var(--aa-stack-top, 4rem)` to every `[aa-stack-card]`. Three ways to change the offset:
+
+- **Plain CSS** — `.my-card { top: 6rem }` wins by specificity.
+- **CSS variable, in CSS** — `.my-card { --aa-stack-top: 6rem }`.
+- **CSS variable, inline** — `<article aa-stack-card style="--aa-stack-top: 6rem">`.
+
+The JS reads `getComputedStyle(cards[0]).top` so all three paths line up with the in/out tween end positions.
+
+## Lifecycle animations
+
+Three space-separated attributes describe the full lifecycle of every card. Flags inside each attribute compose, so `aa-stack-in="fade scale"` does both.
+
+### `aa-stack-in` — scrubbed entry
+
+Runs from `aa-scroll-start` (default `top 85%`) until the card hits its sticky lock. Scrubbed against scroll progress.
+
+| Flag          | Effect                                                                              |
+| ------------- | ----------------------------------------------------------------------------------- |
+| `fade`        | `opacity: 0 → 1`                                                                    |
+| `scale`       | `scale: (1 - 0.2 × distance) → 1` (e.g. 0.8 → 1 at `aa-distance="1"`)              |
+| `rotate`      | Cards **arrive tilted** and **settle flat**: centred fan `(0°, -5°, +5°, -5°, +5°, …)` × distance → `0°`. First card stays flat; later cards alternate sides. |
+| `rotate-cw`   | Incremental clockwise from-state, settles flat: `(0°, +1°, +2°, +3°, …)` × distance → `0°`. |
+| `rotate-ccw`  | Mirror of `rotate-cw`: `(0°, -1°, -2°, -3°, …)` × distance → `0°`.                  |
+| `tilt`        | Inverse of `rotate` — arrives flat, locks into the centred fan `(0°, -5°, +5°, -5°, +5°, …)` × distance. |
+| `tilt-cw`     | Inverse of `rotate-cw` — arrives flat, locks into the clockwise ramp `(0°, +1°, +2°, +3°, …)` × distance. |
+| `tilt-ccw`    | Mirror of `tilt-cw`: `(0°, -1°, -2°, -3°, …)` × distance.                          |
+| `none`        | No entry animation; cards appear in their natural sticky position.                  |
+
+The six rotation-touching flags all control the same property and are mutually exclusive. If multiple are listed, `tilt*` wins over `rotate*` (the lock-state value overrides the settle-flat reset), and within each family `*-cw`/`*-ccw` wins over the plain flag.
+
+### `aa-stack-lock` — discrete lock animation
+
+Plays once when the card reaches its sticky lock position. Non-scrubbed. Skipped under `(prefers-reduced-motion: reduce)`.
+
+| Flag      | Effect                                                                              |
+| --------- | ----------------------------------------------------------------------------------- |
+| `bounce`  | Osmo-style stretch + elastic settle (`scaleX/Y` pulse).                             |
+| `pulse`   | Quick `scale: 1 → 1.03 → 1` with a back-out ease.                                   |
+| `none`    | No lock animation; the `card-active` event still fires.                             |
+
+### `aa-stack-out` — scrubbed exit
+
+Runs over the *next* card's entry window — i.e. as the next card scrolls toward its lock, the current card animates out. Scrubbed.
+
+| Flag           | Effect                                                                          |
+| -------------- | ------------------------------------------------------------------------------- |
+| `fade`         | `opacity → 0`                                                                   |
+| `scale`        | `scale → (1 - 0.15 × distance)` (e.g. 0.85)                                     |
+| `perspective`  | 3D tilt-back: `rotationX: 10 × distance`, slight scale-down, slight `y` lift.   |
+| `blur`         | `filter: blur(8 × distance px)` + slight `y` lift.                              |
+| `left`         | Slide `x: −4 × distance rem` while fading out.                                  |
+| `right`        | Slide `x: 4 × distance rem` while fading out.                                   |
+| `none`         | Cards hold their settled state; the next card overlays them naturally.          |
+
+The **last card** has no exit animation — nothing overlays it.
+
+## Tuning attributes
+
+| Attribute          | Default               | Notes                                                                  |
+| ------------------ | --------------------- | ---------------------------------------------------------------------- |
+| `aa-distance`      | (init `distance`, `1`) | Multiplies preset intensities (rotation angles, scale offsets, blur, translate distance). |
+| `aa-scroll-start`  | (init `scrollStart`)  | When `card-active` fires for each card (drives the inner `aa-animate` children only). Standard GSAP syntax (`top 85%`, `center 50%`). The in / out visual tweens always scrub the full entry-to-lock range regardless of this value. |
+
+`aa-scrub` is intentionally not honoured by the stack feature. The cards themselves move with the scroll instantly via CSS `position: sticky`, so smoothing only the transform layer (rotate / scale / blur) would desync from the (instant) card position. Stack tweens are always direct scroll-locked.
+
+## Animations triggered on card activation
+
+`aa-animate` elements inside an `[aa-stack-card]` are **automatically driven by card activation**. The stack feature emits `card-active` when a card crosses `aa-scroll-start` and `card-inactive` when it fully leaves the viewport (matching the `aa-again` reset point used by scroll-triggered animations elsewhere). The closest container ancestor is the inferred trigger, so you don't write `aa-trigger` yourself.
+
+```html
+<article aa-stack-card>
+  <h2 aa-animate="fade-up">Headline</h2>                  <!-- inferred: event:card-active -->
+  <p  aa-animate="fade-up" aa-delay="0.15">Body</p>
+</article>
+```
+
+This is important: the per-card content animations fire when each card **enters the viewport**, not when it locks. By the time the card visually locks at the top, its content has already animated in. Per-child `aa-delay` staggers compose as usual.
+
+Set `aa-trigger="scroll"` on an inner element to opt out of inference and use its own ScrollTrigger.
+
+## Responsive control
+
+Use the standard `|` shorthand or `-sm` / `-md` / `-lg` / `-xl` suffixes:
+
+```html
+<!-- Stacking on desktop, plain stacked flow on mobile -->
+<section aa-stack="enabled | none">…</section>
+
+<!-- Different lifecycle presets per breakpoint -->
+<section aa-stack aa-stack-in="fade scale" aa-stack-in-sm="fade">…</section>
+```
+
+When `aa-stack="none"` is active, the feature skips initialization at that breakpoint and `[aa-stack-card]` stays a plain sticky element with no scrub or events.
+
+## Live demo — rotate entrance + perspective exit
+
+`aa-stack-in="rotate"` on entry, `aa-stack-out="perspective"` on exit. Cards lock at `40vh` (vertically centered). The in/out tweens always scrub across the full entry-to-lock range; `aa-scroll-start` (default `top 85%`) governs only when the inner `aa-animate` children fire.
+
+<Demo caption={[{ label: "root", attrs: { "aa-stack": "", "aa-stack-in": "rotate", "aa-stack-out": "perspective" } }, { label: "card", attrs: { "aa-stack-card": "" } }]}>
+  <div data-demo-stage>
+    <div data-spacer></div>
+    <section class="aa-stack-demo" aa-stack aa-stack-in="rotate" aa-stack-out="perspective">
+      <article class="aa-stack-card aa-stack-card-1" aa-stack-card>
+        <h3 class="aa-stack-card__h" aa-animate="text-fade-up" aa-split="lines mask">First card</h3>
+        <p class="aa-stack-card__p" aa-animate="text-fade-up" aa-split="lines mask" aa-delay="0.15">Each card sticks at 40vh while the page keeps scrolling. The next card overlays this one as it enters.</p>
+      </article>
+      <article class="aa-stack-card aa-stack-card-2" aa-stack-card>
+        <h3 class="aa-stack-card__h" aa-animate="text-fade-up" aa-split="lines mask">Second card</h3>
+        <p class="aa-stack-card__p" aa-animate="text-fade-up" aa-split="lines mask" aa-delay="0.15">Same animations, scoped to this card. The fade-up replays on every entry and reverses on full exit.</p>
+      </article>
+      <article class="aa-stack-card aa-stack-card-3" aa-stack-card>
+        <h3 class="aa-stack-card__h" aa-animate="text-fade-up" aa-split="lines mask">Third card</h3>
+        <p class="aa-stack-card__p" aa-animate="text-fade-up" aa-split="lines mask" aa-delay="0.15">The last card has no exit animation — nothing overlays it.</p>
+      </article>
+    </section>
+    <h2 class="aa-stack-after" aa-animate="text-fade-up" aa-split="lines mask">Scroll-triggered heading below the sticky stack — verifies regular scroll triggers fire correctly once you scroll past the sticky section.</h2>
+    <div data-spacer></div>
+    <div data-spacer></div>
+  </div>
+</Demo>
+
+## Live demo — lock-only bounce
+
+No `aa-stack-in` / `aa-stack-out` — cards just sit naturally as sticky stack until they reach their lock point, where the Osmo-style bounce pulse fires. Inner content fades up on activation.
+
+<Demo caption={[{ label: "root", attrs: { "aa-stack": "", "aa-stack-lock": "bounce" } }, { label: "card", attrs: { "aa-stack-card": "" } }]}>
+  <div data-demo-stage>
+    <div data-spacer></div>
+    <section class="aa-stack-demo" aa-stack aa-stack-lock="bounce">
+      <article class="aa-stack-card aa-stack-card-1" aa-stack-card>
+        <h3 class="aa-stack-card__h" aa-animate="text-fade-up" aa-split="lines mask">Bounce on lock</h3>
+        <p class="aa-stack-card__p" aa-animate="text-fade-up" aa-split="lines mask" aa-delay="0.15">No entry tween. The card slides up to lock under its own weight.</p>
+      </article>
+      <article class="aa-stack-card aa-stack-card-2" aa-stack-card>
+        <h3 class="aa-stack-card__h" aa-animate="text-fade-up" aa-split="lines mask">Elastic settle</h3>
+        <p class="aa-stack-card__p" aa-animate="text-fade-up" aa-split="lines mask" aa-delay="0.15">A quick scaleX/Y stretch and an elastic snap back when the card hits its sticky lock position.</p>
+      </article>
+      <article class="aa-stack-card aa-stack-card-3" aa-stack-card>
+        <h3 class="aa-stack-card__h" aa-animate="text-fade-up" aa-split="lines mask">No exit transform</h3>
+        <p class="aa-stack-card__p" aa-animate="text-fade-up" aa-split="lines mask" aa-delay="0.15">The natural sticky overlay does all the work. The previous card simply sits behind, untouched.</p>
+      </article>
+    </section>
+    <div data-spacer></div>
+    <div data-spacer></div>
+  </div>
+</Demo>
+
+## Live demo — tilt-cw (Osmo splay-at-lock)
+
+`aa-stack-in="tilt-cw"` makes each card pick up a touch more clockwise rotation than the previous one as it approaches lock. The first card stays flat and the ramp grows by `1° × aa-distance` per card. Swap to `tilt-ccw` for the mirror, or `tilt` for a centred fan with bigger steps.
+
+<Demo caption={[{ label: "root", attrs: { "aa-stack": "", "aa-stack-in": "tilt-cw" } }, { label: "card", attrs: { "aa-stack-card": "" } }]}>
+  <div data-demo-stage>
+    <div data-spacer></div>
+    <section class="aa-stack-demo" aa-stack aa-stack-in="tilt-cw">
+      <article class="aa-stack-card aa-stack-card-1" aa-stack-card>
+        <h3 class="aa-stack-card__h" aa-animate="text-fade-up" aa-split="lines mask">0° at lock</h3>
+        <p class="aa-stack-card__p" aa-animate="text-fade-up" aa-split="lines mask" aa-delay="0.15">First card stays flat — the ramp starts at zero. Pattern: <code>0°, +1°, +2°, +3°, …</code></p>
+      </article>
+      <article class="aa-stack-card aa-stack-card-2" aa-stack-card>
+        <h3 class="aa-stack-card__h" aa-animate="text-fade-up" aa-split="lines mask">+1° at lock</h3>
+        <p class="aa-stack-card__p" aa-animate="text-fade-up" aa-split="lines mask" aa-delay="0.15">Second card picks up one degree of clockwise rotation as it scrubs toward lock.</p>
+      </article>
+      <article class="aa-stack-card aa-stack-card-3" aa-stack-card>
+        <h3 class="aa-stack-card__h" aa-animate="text-fade-up" aa-split="lines mask">+2° at lock</h3>
+        <p class="aa-stack-card__p" aa-animate="text-fade-up" aa-split="lines mask" aa-delay="0.15">Third card continues the ramp at +2°. Crank up <code>aa-distance</code> on the root to scale the whole splay.</p>
+      </article>
+    </section>
+    <div data-spacer></div>
+    <div data-spacer></div>
+  </div>
+</Demo>
+
+## Live demo — scale in, pulse on lock, blur + fade out
+
+All three lifecycle slots active. Cards scale up from `0.8` as they enter, fire a quick `scale: 1 → 1.03 → 1` pulse on lock, then blur and fade out as the next card overlays them.
+
+<Demo caption={[{ label: "root", attrs: { "aa-stack": "", "aa-stack-in": "scale", "aa-stack-lock": "pulse", "aa-stack-out": "blur fade" } }, { label: "card", attrs: { "aa-stack-card": "" } }]}>
+  <div data-demo-stage>
+    <div data-spacer></div>
+    <section class="aa-stack-demo" aa-stack aa-stack-in="scale" aa-stack-lock="pulse" aa-stack-out="blur fade">
+      <article class="aa-stack-card aa-stack-card-1" aa-stack-card>
+        <h3 class="aa-stack-card__h" aa-animate="text-fade-up" aa-split="lines mask">Scale on entry</h3>
+        <p class="aa-stack-card__p" aa-animate="text-fade-up" aa-split="lines mask" aa-delay="0.15">Card scrubs from <code>scale: 0.8</code> to <code>1</code> as it approaches lock.</p>
+      </article>
+      <article class="aa-stack-card aa-stack-card-2" aa-stack-card>
+        <h3 class="aa-stack-card__h" aa-animate="text-fade-up" aa-split="lines mask">Pulse on lock</h3>
+        <p class="aa-stack-card__p" aa-animate="text-fade-up" aa-split="lines mask" aa-delay="0.15">A discrete <code>scale: 1 → 1.03 → 1</code> back-out beat fires the moment the card locks.</p>
+      </article>
+      <article class="aa-stack-card aa-stack-card-3" aa-stack-card>
+        <h3 class="aa-stack-card__h" aa-animate="text-fade-up" aa-split="lines mask">Blur + fade out</h3>
+        <p class="aa-stack-card__p" aa-animate="text-fade-up" aa-split="lines mask" aa-delay="0.15">As the next card enters, each previous card scrubs to <code>filter: blur(8px)</code> and <code>opacity: 0</code>.</p>
+      </article>
+    </section>
+    <div data-spacer></div>
+    <div data-spacer></div>
+  </div>
+</Demo>
+
+<style>{`
+  .aa-stack-demo {
+    display: flex;
+    flex-direction: column;
+    /* 50vh of natural-flow space between cards gives each transition a full
+       half-viewport of scroll runway, so the rotate-in / perspective-out
+       tweens have time to play before the next card locks. */
+    gap: 50vh;
+    padding: 2rem 0 50vh;
+  }
+  .aa-stack-card {
+    background: var(--sl-color-accent);
+    color: var(--sl-color-text-invert, var(--sl-color-white));
+    border-radius: 12px;
+    padding: 2rem;
+    min-height: 14rem;
+    box-shadow: 0 14px 40px rgba(0, 0, 0, 0.18);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    /* Lock offset at 40vh so cards sit near the vertical center of the
+       viewport while the overlay between them is happening — easier to
+       watch the in/out transforms compose. */
+    --aa-stack-top: 40vh;
+  }
+  .aa-stack-card-2 {
+    background: color-mix(in srgb, var(--sl-color-accent) 70%, #000 30%);
+  }
+  .aa-stack-card-3 {
+    background: color-mix(in srgb, var(--sl-color-accent) 45%, #000 55%);
+  }
+  .aa-stack-card__h {
+    margin: 0;
+    font-size: 1.75rem;
+    line-height: 1.1;
+  }
+  .aa-stack-card__p {
+    margin: 0;
+    font-size: 1rem;
+    opacity: 0.92;
+    max-width: 32em;
+  }
+  .aa-stack-after {
+    margin: 4rem 0 0;
+    font-size: 2rem;
+    line-height: 1.15;
+    max-width: 30em;
+    color: var(--sl-color-text);
+  }
+`}</style>

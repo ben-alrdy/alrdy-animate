@@ -253,9 +253,31 @@ body.aa-modal-locked {
   will-change: transform, opacity;
 }
 
+/*
+ * Stack feature: cards stick at the top of the viewport via CSS sticky.
+ * GSAP only owns the entry / exit transforms and event firing. The author
+ * controls the lock offset by overriding `--aa-stack-top` (per-card via
+ * inline style or any selector) or by setting `top` directly. Low-specificity
+ * attribute selector so any author class on the card wins cleanly.
+ */
+[aa-stack-card] {
+  position: sticky;
+  top: var(--aa-stack-top, 4rem);
+  will-change: transform;
+}
+
 @media (prefers-reduced-motion: reduce) {
   [aa-animate] {
     transition-duration: 0ms !important;
     animation-duration: 0ms !important;
+  }
+  /*
+   * Stack cards keep their sticky layout — only the JS-driven transforms
+   * are suppressed so the reduced-motion experience is "cards stack
+   * without rotation/scale flourish". The feature's own reduced-motion
+   * check already prevents the tweens from being created.
+   */
+  [aa-stack-card] {
+    transform: none !important;
   }
 }

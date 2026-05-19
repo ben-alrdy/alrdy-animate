@@ -1,9 +1,23 @@
 <!--
-  Last synced with src/ at v8.0.0-alpha.7 (2026-05-15) — added `loadDelay`
-  init option (default `0.1s`) that pads every `aa-trigger="load"` /
-  `"load-once"` animation so the entrance plays a beat after init() settles.
-  Skipped on slow-load revisits (`html[aa-fallback]`). Earlier alpha.6:
-  renamed `aa-trigger="page-enter"` to `aa-trigger="load"` and renamed the old
+  Last synced with src/ at v8.0.0-alpha.11 (2026-05-19) — extended the stack
+  feature's rotation presets into two parallel families: `rotate*` (cards
+  arrive tilted, settle flat) and `tilt*` (cards arrive flat, build up
+  rotation by lock — Osmo splay-at-lock). Each family ships three variants:
+  default centred fan `(0°, -5°, +5°, -5°, +5°, …)`, `*-cw` incremental
+  clockwise ramp `(0°, +1°, +2°, +3°, …)`, `*-ccw` mirror. The `rotate`
+  default magnitude was lowered from 15° → 5° to match the tilt family. All
+  six rotation-touching flags are mutually exclusive (`tilt*` wins over
+  `rotate*`; within each family `*-cw`/`*-ccw` wins over the default).
+  Magnitudes scale with `aa-distance`. Alpha.10 introduced the `stack`
+  feature itself: `aa-stack` on the container + `aa-stack-card` on each
+  card; card-active / card-inactive events drive `aa-animate` children
+  inside via the existing container-inference system. CSS `position:
+  sticky` (not ScrollTrigger pin) does the actual locking; GSAP only owns
+  the in / lock / out transforms. Earlier alpha.7: added `loadDelay` init option
+  (default `0.1s`) that pads every `aa-trigger="load"` / `"load-once"`
+  animation so the entrance plays a beat after init() settles. Skipped on
+  slow-load revisits (`html[aa-fallback]`). Earlier alpha.6: renamed
+  `aa-trigger="page-enter"` to `aa-trigger="load"` and renamed the old
   first-init-only `aa-trigger="load"` to `aa-trigger="load-once"`; documented
   the global contract (window.gsap / Lenis / lenis / AlrdyAnimate); init() now
   safely re-attaches scroll-state + scroll-target across `keepGlobals: true`
@@ -129,6 +143,7 @@ The five trigger kinds:
 | `[aa-tabs-content]` | `event:tab-active` |
 | `[aa-tabs-visual]` | `event:tab-active` |
 | `[aa-slider-item]` | `event:slide-active` |
+| `[aa-stack-card]` | `event:card-active` |
 
 Set `aa-trigger="scroll"` explicitly to opt out.
 
@@ -167,7 +182,7 @@ Tune any preset with `aa-duration`, `aa-delay`, `aa-ease`, `aa-distance`, `aa-st
 
 ## Feature reference
 
-Eleven features ship; the scanner detects which ones are needed by which attributes are present and lazy-loads the modules.
+Twelve features ship; the scanner detects which ones are needed by which attributes are present and lazy-loads the modules.
 
 | Feature | Triggering attributes | Required GSAP plugins | Purpose |
 |---|---|---|---|
@@ -183,6 +198,7 @@ Eleven features ship; the scanner detects which ones are needed by which attribu
 | `modal` | `aa-modal-name` | (none) | Fixed-position dialogs with backdrop + close handling. |
 | `hover` | `aa-hover` | (none) | `hover-bg-block` direction-aware bg slide. |
 | `cursor` | `aa-cursor` | (none) | Custom pointer tracking with state-driven styling. |
+| `stack` | `aa-stack` | `ScrollTrigger` | Stacking-card layout: CSS `position: sticky` locks cards, scrubbed in/out tweens + optional lock pulse animate the lifecycle, `card-active` / `card-inactive` events drive `aa-animate` children inside each card. |
 
 For each feature, animations inside the relevant container default to the inferred event trigger (see container inference table above) — you usually don't write `aa-trigger` yourself for tabs/sliders/modals.
 
@@ -301,6 +317,39 @@ In a Next.js App Router setup where `AlrdyInit` calls `destroy({ keepGlobals: tr
 ```
 
 Pipe shorthand: `snap` on desktop, `draggable` on mobile.
+
+### Stacking cards with content that animates per-card
+
+```html
+<section
+  aa-stack
+  aa-stack-in="fade rotate"
+  aa-stack-lock="bounce"
+  aa-stack-out="perspective"
+>
+  <article aa-stack-card>
+    <h2 aa-animate="fade-up">First card</h2>
+    <p aa-animate="fade-up" aa-delay="0.15">Body copy fades up when the card enters.</p>
+  </article>
+  <article aa-stack-card>
+    <h2 aa-animate="fade-up">Second card</h2>
+    <p aa-animate="fade-up" aa-delay="0.15">Same animation, scoped to each card.</p>
+  </article>
+  <article aa-stack-card>
+    <h2 aa-animate="fade-up">Third card</h2>
+    <p aa-animate="fade-up" aa-delay="0.15">The last card has no exit animation — nothing overlays it.</p>
+  </article>
+</section>
+```
+
+Each card is locked at `top: var(--aa-stack-top, 4rem)` via CSS sticky. Override per card with regular CSS (`.my-card { top: 6rem }`) or the variable (`style="--aa-stack-top: 6rem"`). Children inside `[aa-stack-card]` inherit `event:card-active` automatically — they fade up at `aa-scroll-start` (default `top 85%`) and reverse on full exit (the same `again` reset as scroll-triggered animations elsewhere). Add `aa-stack="enabled|none"` to disable on small screens.
+
+**In-preset flags** (`aa-stack-in`): `fade`, `scale`, plus two parallel rotation families that share the same per-card curve but apply at different ends of the tween:
+
+- `rotate` / `rotate-cw` / `rotate-ccw` — cards **arrive tilted**, settle flat at lock. Default = centred fan `(0°, -5°, +5°, -5°, +5°, …)`; `-cw` = clockwise ramp `(0°, +1°, +2°, +3°, …)`; `-ccw` = mirror.
+- `tilt` / `tilt-cw` / `tilt-ccw` — cards **arrive flat**, build up to the same per-card curve by lock (Osmo splay-at-lock).
+
+`none` skips. All six rotation flags are mutually exclusive — `tilt*` wins over `rotate*`, and within a family `*-cw`/`*-ccw` wins over the plain flag. Magnitudes scale with `aa-distance`.
 
 ### Page transition (Barba) leave hook
 

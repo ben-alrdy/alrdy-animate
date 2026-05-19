@@ -62,6 +62,7 @@ const loaders: Record<FeatureName, Loader> = {
   modal: () => import('../features/modal/index'),
   hover: () => import('../features/hover/index'),
   cursor: () => import('../features/cursor/index'),
+  stack: () => import('../features/stack/index'),
   split: () => import('../split/index'),
 }
 

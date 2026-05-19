@@ -72,6 +72,7 @@ const INFERENCE_CONTAINERS: ReadonlyArray<{ selector: string; eventName: string 
   { selector: '[aa-tabs-content]', eventName: 'tab-active' },
   { selector: '[aa-tabs-visual]', eventName: 'tab-active' },
   { selector: '[aa-slider-item]', eventName: 'slide-active' },
+  { selector: '[aa-stack-card]', eventName: 'card-active' },
 ]
 
 /**
