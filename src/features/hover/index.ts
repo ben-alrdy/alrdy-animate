@@ -50,8 +50,8 @@ const HOVER_DEFAULTS = {
   delay: 0,
   /**
    * Base time lag between each successive hover-icon starting its slide.
-   * `aa-distance` is a multiplier on this value, so `aa-distance="2"` doubles
-   * the gap between icons (slower trail), `aa-distance="0.5"` halves it
+   * `aa-intensity` is a multiplier on this value, so `aa-intensity="2"` doubles
+   * the gap between icons (slower trail), `aa-intensity="0.5"` halves it
    * (tighter packing). Default multiplier = 1.
    */
   cloneLagBase: 0.05,
@@ -92,7 +92,7 @@ function setupOne(
     })
   }
   if (parsed.type === 'icon' && parsed.direction) {
-    const distanceMultiplier = parseNum(config['aa-distance'], 1)
+    const intensity = parseNum(config['aa-intensity'], 1)
     return setupIconHover(host, ctx.gsap, {
       direction: parsed.direction,
       reverse: parsed.flags.includes('reverse'),
@@ -100,7 +100,7 @@ function setupOne(
       duration,
       delay,
       ease,
-      cloneLag: HOVER_DEFAULTS.cloneLagBase * distanceMultiplier,
+      cloneLag: HOVER_DEFAULTS.cloneLagBase * intensity,
     })
   }
   return undefined

@@ -41,11 +41,11 @@ type RotationMode = 'default' | 'cw' | 'ccw'
 //   flat; each subsequent card adds one more degree of clockwise rotation.
 //   (CSS rotation is positive-clockwise.)
 // - `ccw`: mirror of `cw` — `(0°, -1°, -2°, -3°, …)`.
-function rotationForIndex(index: number, distance: number, mode: RotationMode): number {
-  if (mode === 'cw') return index * distance
-  if (mode === 'ccw') return -index * distance
+function rotationForIndex(index: number, intensity: number, mode: RotationMode): number {
+  if (mode === 'cw') return index * intensity
+  if (mode === 'ccw') return -index * intensity
   if (index === 0) return 0
-  return (index % 2 === 1 ? -1 : 1) * 5 * distance
+  return (index % 2 === 1 ? -1 : 1) * 5 * intensity
 }
 
 // Resolve the active mode for one of the two rotation families. Each family
@@ -69,21 +69,21 @@ function rotationPair(
   rotateMode: RotationMode | null,
   tiltMode: RotationMode | null,
   index: number,
-  distance: number,
+  intensity: number,
 ): { from?: number; to?: number } {
   if (tiltMode !== null) {
-    return { from: 0, to: rotationForIndex(index, distance, tiltMode) }
+    return { from: 0, to: rotationForIndex(index, intensity, tiltMode) }
   }
   if (rotateMode !== null) {
-    return { from: rotationForIndex(index, distance, rotateMode), to: 0 }
+    return { from: rotationForIndex(index, intensity, rotateMode), to: 0 }
   }
   return {}
 }
 
-function buildInFrom(flags: Set<string>, distance: number, rotation: number | undefined): Vars {
+function buildInFrom(flags: Set<string>, intensity: number, rotation: number | undefined): Vars {
   const v: Vars = {}
   if (flags.has('fade')) v.opacity = 0
-  if (flags.has('scale')) v.scale = Math.max(0, 1 - 0.2 * distance)
+  if (flags.has('scale')) v.scale = Math.max(0, 1 - 0.2 * intensity)
   if (rotation !== undefined) v.rotation = rotation
   return v
 }
@@ -96,28 +96,28 @@ function buildInTo(flags: Set<string>, rotation: number | undefined): Vars {
   return v
 }
 
-function buildOutTo(flags: Set<string>, distance: number): Vars {
+function buildOutTo(flags: Set<string>, intensity: number): Vars {
   const v: Vars = {}
   // Order matters where flags share a property — later writes win, so the
   // composite flags (`perspective`, `blur`, `left`, `right`) override plain
   // `fade` / `scale` when combined.
   if (flags.has('fade')) v.opacity = 0
-  if (flags.has('scale')) v.scale = Math.max(0, 1 - 0.15 * distance)
+  if (flags.has('scale')) v.scale = Math.max(0, 1 - 0.15 * intensity)
   if (flags.has('perspective')) {
-    v.rotationX = 10 * distance
+    v.rotationX = 10 * intensity
     v.scale = 0.92
     v.y = '-2rem'
   }
   if (flags.has('blur')) {
-    v.filter = `blur(${8 * distance}px)`
+    v.filter = `blur(${8 * intensity}px)`
     v.y = '-1rem'
   }
   if (flags.has('left')) {
-    v.x = `${-4 * distance}rem`
+    v.x = `${-4 * intensity}rem`
     v.opacity = 0
   }
   if (flags.has('right')) {
-    v.x = `${4 * distance}rem`
+    v.x = `${4 * intensity}rem`
     v.opacity = 0
   }
   return v
@@ -232,7 +232,7 @@ function setupOne(
   const lockFlags = parseFlags(config['aa-stack-lock'], LOCK_FLAGS)
   const outFlags = parseFlags(config['aa-stack-out'], OUT_FLAGS)
 
-  const distance = parseNum(config['aa-distance'], ctx.options.distance)
+  const intensity = parseNum(config['aa-intensity'], ctx.options.intensity)
   // Scrub is hardcoded true (direct, no smoothing). The cards themselves move
   // with scroll instantly via CSS `position: sticky` — only the JS-driven
   // transforms (rotate / scale / blur) are scrubbed. Adding smoothing would
@@ -347,10 +347,10 @@ function setupOne(
     if (reduceMotion) return
 
     if (inFlags.size > 0) {
-      const rot = rotationPair(rotateMode, tiltMode, index, distance)
+      const rot = rotationPair(rotateMode, tiltMode, index, intensity)
       const tween = gsap.fromTo(
         card,
-        buildInFrom(inFlags, distance, rot.from),
+        buildInFrom(inFlags, intensity, rot.from),
         {
           ...buildInTo(inFlags, rot.to),
           ease: 'power1.in',
@@ -391,7 +391,7 @@ function setupOne(
       const nextEntryStart = (): number => geometry.tops[index + 1] - window.innerHeight
       const nextLockPoint = (): number => geometry.tops[index + 1] - geometry.stickyTop
       const tween = gsap.to(card, {
-        ...buildOutTo(outFlags, distance),
+        ...buildOutTo(outFlags, intensity),
         ease: 'power1.in',
         scrollTrigger: {
           trigger: nextCard,

@@ -13,18 +13,18 @@ import { resolveTriggers } from '../../core/trigger'
 
 type FromState = Record<string, number | string>
 
-const FROM_FOR: Record<string, (distance: number) => FromState> = {
+const FROM_FOR: Record<string, (intensity: number) => FromState> = {
   fade: () => ({ opacity: 0 }),
-  'fade-up': (d) => ({ y: `${3 * d}rem`, opacity: 0 }),
-  'fade-down': (d) => ({ y: `${-3 * d}rem`, opacity: 0 }),
-  'fade-left': (d) => ({ x: `${3 * d}rem`, opacity: 0 }),
-  'fade-right': (d) => ({ x: `${-3 * d}rem`, opacity: 0 }),
+  'fade-up': (i) => ({ y: `${3 * i}rem`, opacity: 0 }),
+  'fade-down': (i) => ({ y: `${-3 * i}rem`, opacity: 0 }),
+  'fade-left': (i) => ({ x: `${3 * i}rem`, opacity: 0 }),
+  'fade-right': (i) => ({ x: `${-3 * i}rem`, opacity: 0 }),
   'zoom-in': () => ({ scale: 0.85, opacity: 0 }),
   'zoom-out': () => ({ scale: 1.15, opacity: 0 }),
-  'slide-up': (d) => ({ yPercent: 100 * d }),
-  'slide-down': (d) => ({ yPercent: -100 * d }),
-  'slide-left': (d) => ({ xPercent: 100 * d }),
-  'slide-right': (d) => ({ xPercent: -100 * d }),
+  'slide-up': (i) => ({ yPercent: 100 * i }),
+  'slide-down': (i) => ({ yPercent: -100 * i }),
+  'slide-left': (i) => ({ xPercent: 100 * i }),
+  'slide-right': (i) => ({ xPercent: -100 * i }),
   blur: () => ({ opacity: 0, filter: 'blur(20px)' }),
 }
 
@@ -43,7 +43,7 @@ function isRotateValue(value: string): boolean {
   return ROTATE_PATTERN.test(value)
 }
 
-function buildRotateFromState(value: string, distance: number): FromState {
+function buildRotateFromState(value: string, intensity: number): FromState {
   const ccw = value.endsWith('-ccw')
   const cornerMatch = value.match(/-(tl|tr|bl|br)(?:-|$)/)
   const corner = cornerMatch ? cornerMatch[1] : null
@@ -51,17 +51,17 @@ function buildRotateFromState(value: string, distance: number): FromState {
   // CSS rotation: positive = clockwise tilt. We start at the inverse of the
   // intended motion direction and animate back to 0, so a clockwise (default)
   // entrance starts from a negative tilt; -ccw starts positive.
-  const degrees = 5 * distance * (ccw ? 1 : -1)
+  const degrees = 5 * intensity * (ccw ? 1 : -1)
   const state: FromState = { rotation: degrees, opacity: 0 }
-  if (up) state.y = `${3 * distance}rem`
+  if (up) state.y = `${3 * intensity}rem`
   if (corner) state.transformOrigin = CORNER_TO_ORIGIN[corner]
   return state
 }
 
-function buildFromState(animate: string, distance: number): FromState | undefined {
+function buildFromState(animate: string, intensity: number): FromState | undefined {
   const builder = FROM_FOR[animate]
-  if (builder) return builder(distance)
-  if (isRotateValue(animate)) return buildRotateFromState(animate, distance)
+  if (builder) return builder(intensity)
+  if (isRotateValue(animate)) return buildRotateFromState(animate, intensity)
   return undefined
 }
 
@@ -82,10 +82,10 @@ function setupOne(
   if (!animate) return
 
   const opts = ctx.options
-  const { duration, delay, ease, distance, scrollStart, scrollEnd, scrub, again } =
+  const { duration, delay, ease, intensity, scrollStart, scrollEnd, scrub, again } =
     readAnimationConfig(config, opts)
 
-  const fromState = buildFromState(animate, distance)
+  const fromState = buildFromState(animate, intensity)
   if (!fromState) return
 
   // aa-stagger present + element has children → stagger the children.

@@ -17,9 +17,9 @@ function setupOne(ctx: FeatureContext, element: Element, config: Config): undefi
   const prop = isHorizontal ? 'xPercent' : 'yPercent'
 
   const opts = ctx.options
-  const distance = parseNum(config['aa-distance'], opts.distance)
-  const startVal = parseNum(config['aa-parallax-start'], 10 * distance)
-  const endVal = parseNum(config['aa-parallax-end'], -10 * distance)
+  const intensity = parseNum(config['aa-intensity'], opts.intensity)
+  const startVal = parseNum(config['aa-parallax-start'], 10 * intensity)
+  const endVal = parseNum(config['aa-parallax-end'], -10 * intensity)
   // Parallax defaults to scrubbed when aa-scrub is absent.
   const scrub = parseScrub(config['aa-scrub']) ?? true
   // Wrapping in clamp() makes the trigger behave correctly when the element

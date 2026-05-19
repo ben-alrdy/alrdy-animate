@@ -6,7 +6,7 @@
  * - If `window.lenis` exists at click time, scroll via Lenis with the v7
  *   quartic easing for parity with existing alrdy projects.
  * - Otherwise fall back to native `window.scrollTo({ behavior: 'smooth' })`,
- *   which still honours the `aa-distance` offset.
+ *   which still honours the `aa-scroll-offset` offset.
  *
  * Per-element listeners (not delegated) so we can `preventDefault()` the
  * anchor click cleanly and remove them all on destroy.
@@ -35,7 +35,7 @@ export function initScrollTarget(): () => void {
       if (!target) return
       e.preventDefault()
       const duration = parseNum(el.getAttribute('aa-duration'), DEFAULT_DURATION)
-      const offset = parseNum(el.getAttribute('aa-distance'), 0)
+      const offset = parseNum(el.getAttribute('aa-scroll-offset'), 0)
       const lenis = window.lenis
       if (lenis) {
         lenis.scrollTo(targetSelector, { offset, duration, easing: QUART_EASE })

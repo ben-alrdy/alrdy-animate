@@ -22,7 +22,7 @@ import Demo from '../../../../components/Demo.astro'
 | Attribute     | Default     | Notes                                                     |
 | ------------- | ----------- | --------------------------------------------------------- |
 | `aa-animate`  | (required)  | one of the variants above                                 |
-| `aa-distance` | `1`         | multiplier on the 50px translate                          |
+| `aa-intensity` | `1`        | multiplier on the 50px translate                          |
 | `aa-duration` | (init)      | seconds — falls back to `init({ duration })` (default `0.6`) |
 | `aa-delay`    | `0`         | seconds                                                   |
 | `aa-ease`     | (init)      | any GSAP ease — falls back to `init({ ease })` (default `power4.out`) |
@@ -48,17 +48,17 @@ import Demo from '../../../../components/Demo.astro'
   </div>
 </Demo>
 
-## Live demo — distance
+## Live demo — intensity
 
-`aa-distance` scales the 50px translate offset.
+`aa-intensity` scales the 50px translate offset.
 
-<Demo caption={{ "aa-animate": "fade-up", "aa-distance": "1 → 6" }}>
+<Demo caption={{ "aa-animate": "fade-up", "aa-intensity": "1 → 6" }}>
   <div data-demo-stage>
     <div data-spacer></div>
-    <div class="demo-grid demo-grid-3" data-distance-anchor>
-      <div class="demo-card" aa-animate="fade-up" aa-distance="1" aa-anchor="[data-distance-anchor]">distance 1</div>
-      <div class="demo-card" aa-animate="fade-up" aa-distance="3" aa-anchor="[data-distance-anchor]">distance 3</div>
-      <div class="demo-card" aa-animate="fade-up" aa-distance="6" aa-anchor="[data-distance-anchor]">distance 6</div>
+    <div class="demo-grid demo-grid-3" data-intensity-anchor>
+      <div class="demo-card" aa-animate="fade-up" aa-intensity="1" aa-anchor="[data-intensity-anchor]">intensity 1</div>
+      <div class="demo-card" aa-animate="fade-up" aa-intensity="3" aa-anchor="[data-intensity-anchor]">intensity 3</div>
+      <div class="demo-card" aa-animate="fade-up" aa-intensity="6" aa-anchor="[data-intensity-anchor]">intensity 6</div>
     </div>
     <div data-spacer></div>
   </div>
@@ -87,10 +87,10 @@ Add `aa-stagger` to a wrapper to animate its direct children in sequence. Each c
 
 Add `aa-scrub` to bind animation progress to scroll position. The element starts hidden and reveals progressively as you scroll. Pass `true` for an instant lock, or a number of seconds for smoothing lag.
 
-<Demo caption={{ "aa-animate": "fade-up", "aa-scrub": "1", "aa-distance": "3" }}>
+<Demo caption={{ "aa-animate": "fade-up", "aa-scrub": "1", "aa-intensity": "3" }}>
   <div data-demo-stage>
     <div data-spacer></div>
-    <div class="demo-card demo-card-tall" aa-animate="fade-up" aa-scrub="1" aa-distance="3">
+    <div class="demo-card demo-card-tall" aa-animate="fade-up" aa-scrub="1" aa-intensity="3">
       1s smoothing
     </div>
     <div data-spacer></div>

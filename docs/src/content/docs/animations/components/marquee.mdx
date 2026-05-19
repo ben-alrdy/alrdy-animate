@@ -74,7 +74,7 @@ CSS `gap` / `column-gap` on the track is intentionally **not** supported — gap
 | ------------- | ------- | ---------------------------------------------------------------------------------------------- |
 | `aa-duration` | `20`    | Seconds for the track to translate one full list-width. Lower = faster.                       |
 | `aa-scrub`    | (off)   | Presence enables the scroll-driven sweep. Value sets the ScrollTrigger scrub: `true` for an instant lock, or seconds for smoothing lag. |
-| `aa-distance` | `10`    | (`aa-scrub` only) Sweep magnitude as a percentage of viewport width per side. `10` = ±10vw (20vw total sweep). Independent of cycle distance, so the effect feels consistent at every screen size. |
+| `aa-intensity` | `1`    | (`aa-scrub` only) Multiplier on the ±10vw scrub sweep magnitude. `1` (default) = ±10vw (20vw total sweep), `2` = ±20vw, `0.5` = ±5vw. The 10vw baseline is viewport-relative, so the effect feels consistent at every screen size. |
 
 ## Required GSAP plugins
 
@@ -163,14 +163,14 @@ CSS `gap` / `column-gap` on the track is intentionally **not** supported — gap
 
 ## Live demo — scroll-driven sweep
 
-Add the `aa-scrub` attribute to layer a scroll-driven left↔right drift on top of the continuous loop. As the marquee enters the bottom of the viewport (`top bottom`) and exits the top (`bottom top`), the row drifts by `aa-distance × 2 vw` total — `aa-distance="10"` is ±10vw per side (20vw total). Pass a number to `aa-scrub` for smoothing lag. The loop keeps cycling underneath, so the row stays alive even when you stop scrolling. Add `right` to flip the drift direction; add `paused` to drop the loop and get pure scroll-driven motion.
+Add the `aa-scrub` attribute to layer a scroll-driven left↔right drift on top of the continuous loop. As the marquee enters the bottom of the viewport (`top bottom`) and exits the top (`bottom top`), the row drifts by `aa-intensity × 20vw` total — `aa-intensity="1"` (default) is ±10vw per side (20vw total), `aa-intensity="2"` doubles it. Pass a number to `aa-scrub` for smoothing lag. The loop keeps cycling underneath, so the row stays alive even when you stop scrolling. Add `right` to flip the drift direction; add `paused` to drop the loop and get pure scroll-driven motion.
 
 Scroll up and down past this demo to see both motions compose.
 
-<Demo caption={{ "aa-marquee": "switch", "aa-scrub": "0.5", "aa-distance": "20" }}>
+<Demo caption={{ "aa-marquee": "switch", "aa-scrub": "0.5", "aa-intensity": "2" }}>
   <div data-demo-stage>
     <div data-spacer></div>
-    <div class="aa-marquee-demo" aa-marquee="switch" aa-scrub="0.5" aa-distance="20">
+    <div class="aa-marquee-demo" aa-marquee="switch" aa-scrub="0.5" aa-intensity="2">
       <div class="aa-marquee-scroller" aa-marquee-scroller>
         <div class="aa-marquee-track" aa-marquee-track>
           <div class="aa-marquee-list" aa-marquee-list>

@@ -237,16 +237,33 @@ v7 had per-attribute mobile overrides like `aa-delay-mobile`. v8 replaces all of
 <div aa-animate="fade-up" aa-delay="0.2|0.1">…</div>
 ```
 
-This works on **every** `aa-*` attribute (`aa-animate`, `aa-duration`, `aa-distance`, `aa-scroll-start`, etc.) and also via Tailwind-style breakpoint suffixes: `aa-animate-md="…"`, `aa-animate-lg="…"`, `aa-animate-xl="…"`. Use `none` at a breakpoint to opt out entirely:
+This works on **every** `aa-*` attribute (`aa-animate`, `aa-duration`, `aa-intensity`, `aa-scroll-start`, etc.) and also via Tailwind-style breakpoint suffixes: `aa-animate-md="…"`, `aa-animate-lg="…"`, `aa-animate-xl="…"`. Use `none` at a breakpoint to opt out entirely:
 
 ```html
 <div aa-animate="slide-up|none">…</div>            <!-- desktop only -->
 <div aa-animate-md="text-slide-up">…</div>         <!-- md breakpoint and up -->
 ```
 
-### `aa-anchor`, `aa-stagger`, `aa-scroll-start`, `aa-distance`, `aa-duration`, `aa-delay`, `aa-scrub`, `aa-color`, `aa-children`, `aa-opacity`, `aa-ease`
+### `aa-anchor`, `aa-stagger`, `aa-scroll-start`, `aa-duration`, `aa-delay`, `aa-scrub`, `aa-color`, `aa-children`, `aa-opacity`, `aa-ease`
 
 All unchanged in spirit, all still work. See the [animations docs](/animations/) for current per-attribute defaults.
+
+### Renamed: `aa-distance` → `aa-intensity` (with `aa-scroll-offset` split)
+
+v7's `aa-distance` did three semantically different things across features — translate multiplier for fade/slide/rotate/parallax/stack/text/hover, raw vw/vh for marquee/tabs, and raw pixel offset for `[aa-scroll-target]` links. v8 unifies the multiplier uses under `aa-intensity` (default `1` everywhere; `0.5` halves the effect, `2` doubles it), rebases the marquee, tabs, and nav defaults so they all behave as multipliers on an internal baseline, and splits the raw-pixel scroll offset onto its own attribute that joins the `aa-scroll-*` family.
+
+| v7 / early-alpha | v8 |
+|---|---|
+| `aa-distance="2"` (fade / slide / rotate / parallax / stack / text-fade / text-blur / hover-icon) | `aa-intensity="2"` |
+| `aa-distance="1.5"` on nav (clears drop-shadow) | `aa-intensity="1"` (default; -150% bake-in moved into the feature) |
+| `aa-distance="10"` on marquee scrub | `aa-intensity="1"` (default; ±10vw bake-in moved into the feature) |
+| `aa-distance="20"` on marquee scrub | `aa-intensity="2"` |
+| `aa-distance="30"` on tabs scroll-pin | `aa-intensity="1"` (default; 30vh-per-tab bake-in moved into the feature) |
+| `aa-distance="50"` on tabs scroll-pin | `aa-intensity="1.67"` |
+| `aa-distance="-100"` on an `[aa-scroll-target]` link | `aa-scroll-offset="-100"` |
+| `init({ distance: 1.4 })` | `init({ intensity: 1.4 })` |
+
+Hard cutover — `aa-distance` is **not** kept as an alias.
 
 ---
 

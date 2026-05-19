@@ -42,7 +42,7 @@ export const DEFAULT_REDUCED_MOTION: ReducedMotionOptions = {
 export const DEFAULT_OPTIONS: ResolvedOptions = {
   duration: 0.6,
   ease: 'power4.out',
-  distance: 1,
+  intensity: 1,
   loadDelay: 0.1,
   scrollStart: 'top 85%',
   scrollEnd: 'bottom 60%',

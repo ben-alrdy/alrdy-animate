@@ -106,11 +106,12 @@ function setupOne(
   // Scrub mode is enabled by the presence of the `aa-scrub` attribute on the
   // marquee root (mirrors how every other animation feature treats `aa-scrub`).
   // The attribute's value also becomes the ScrollTrigger scrub delay — `true`
-  // for an instant lock, or seconds for smoothing. `aa-distance` is the sweep
-  // magnitude in viewport-percent: `10` = ±10vw on each side (20vw total).
+  // for an instant lock, or seconds for smoothing. `aa-intensity` multiplies the
+  // 10vw design-baseline sweep magnitude: `1` (default) = ±10vw per side
+  // (20vw total), `2` = ±20vw, `0.5` = ±5vw.
   const scrubValue = parseScrub(config['aa-scrub'])
   const isScrub = scrubValue !== undefined
-  const distance = parseNum(config['aa-distance'], 10)
+  const intensity = parseNum(config['aa-intensity'], 1)
 
   const gsap = ctx.gsap.gsap as unknown as Record<string, any>
   const ScrollTrigger = ctx.gsap.plugins.ScrollTrigger as ScrollTriggerLike | undefined
@@ -127,8 +128,9 @@ function setupOne(
 
   // Compute scrub overshoot up front so fillTrack provisions enough clones
   // to cover both the loop wrap AND the scroller sweep at its extremes.
-  // distance is in vw, so half-sweep px = innerWidth * distance / 100.
-  const halfSweepPx = isScrub ? (window.innerWidth * distance) / 100 : 0
+  // Effective sweep is `10 * intensity` vw per side, so half-sweep px =
+  // innerWidth * 10 * intensity / 100.
+  const halfSweepPx = isScrub ? (window.innerWidth * 10 * intensity) / 100 : 0
 
   const clones = fillTrack(list, track, rootWidth, cycleDistance, halfSweepPx)
 
@@ -193,7 +195,7 @@ function setupOne(
   const cleanups: Array<() => void> = []
 
   // Scrub layer: scroll progress drives the wrapper's x in viewport-relative
-  // units. aa-distance=10 → ±10vw per side (20vw total); aa-distance=20
+  // units. aa-intensity=1 → ±10vw per side (20vw total); aa-intensity=2
   // doubles it. baseDirection (left/right) flips which way the row drifts on
   // scroll-down. We resolve vw → px ourselves because GSAP's `x` shortcut
   // accepts raw numbers as pixels and silently drops the "vw" suffix; passing
@@ -203,7 +205,7 @@ function setupOne(
     let scrubTween: ReturnType<typeof gsap.to> | null = null
 
     const buildScrubTween = (): void => {
-      const sweepPx = (window.innerWidth * distance) / 100
+      const sweepPx = (window.innerWidth * 10 * intensity) / 100
       // Default direction (left) sweeps right→left as you scroll down so it
       // composes with the leftward loop. `right` token flips both ends.
       const startX = baseDirection > 0 ? sweepPx : -sweepPx
@@ -235,7 +237,7 @@ function setupOne(
         }
         // Recompute the marginLeft offset to match the new viewport — sweep
         // magnitude is viewport-relative, so the offset must follow.
-        scroller.style.marginLeft = `${-(window.innerWidth * distance) / 100}px`
+        scroller.style.marginLeft = `${-(window.innerWidth * 10 * intensity) / 100}px`
         buildScrubTween()
       }, 200),
     )

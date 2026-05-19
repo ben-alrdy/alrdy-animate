@@ -93,10 +93,12 @@ function setupHideAndChange(ctx: FeatureContext, navElement: HTMLElement): () =>
     const cleanups: Array<() => void> = []
 
     if (parsed.hide) {
-      // Nav-specific default; doesn't inherit options.distance because that
-      // controls fade/slide rem distance for entrance animations, which is a
-      // different concept from "how far should the nav slide off-screen".
-      const distance = parseNum(config['aa-distance'], 1.5)
+      // -150% is the design baseline: at intensity=1 the nav slides far enough
+      // off-screen to clear a typical drop-shadow. We bake the 150 in here
+      // (rather than inheriting options.intensity's default of 1 and asking
+      // authors to write aa-intensity="1.5") so aa-intensity=1 always reproduces
+      // the recommended look across every feature.
+      const intensity = parseNum(config['aa-intensity'], 1)
       const duration = parseNum(config['aa-duration'], ctx.options.duration)
       const ease = resolveCssEase(config['aa-ease'], ctx.debug)
       // Pre-compute the off-screen translateY as a single percentage. Using a
@@ -104,7 +106,7 @@ function setupHideAndChange(ctx: FeatureContext, navElement: HTMLElement): () =>
       // avoids a known fragility with var() resolution inside calc() inside
       // transform inside @keyframes, which doesn't substitute reliably across
       // all browsers when the custom property comes from inline style.
-      navElement.style.setProperty('--aa-nav-hide-y', `${-100 * distance}%`)
+      navElement.style.setProperty('--aa-nav-hide-y', `${-150 * intensity}%`)
       navElement.style.setProperty('--aa-nav-duration', `${duration}s`)
       navElement.style.setProperty('--aa-nav-ease', ease)
       navElement.setAttribute('aa-nav-hide', '')

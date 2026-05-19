@@ -109,24 +109,24 @@ export default function HomePage() {
           <span className="scrub__eyebrow" aa-animate="fade-up">
             Scrubbed
           </span>
-          <h2 className="scrub__title" aa-animate="fade-up" aa-scrub="0.5" aa-distance="0.3">
+          <h2 className="scrub__title" aa-animate="fade-up" aa-scrub="0.5" aa-intensity="0.3">
             Tied to the&nbsp;scroll.
           </h2>
 
           <div className="bars">
-            <div className="bar" aa-animate="fade-right" aa-distance="3" aa-scrub="true">
+            <div className="bar" aa-animate="fade-right" aa-intensity="3" aa-scrub="true">
               <span className="bar__label">init</span>
             </div>
-            <div className="bar" aa-animate="fade-right" aa-distance="3" aa-scrub="true">
+            <div className="bar" aa-animate="fade-right" aa-intensity="3" aa-scrub="true">
               <span className="bar__label">scan</span>
             </div>
-            <div className="bar" aa-animate="fade-right" aa-distance="3" aa-scrub="true">
+            <div className="bar" aa-animate="fade-right" aa-intensity="3" aa-scrub="true">
               <span className="bar__label">match&nbsp;media</span>
             </div>
-            <div className="bar" aa-animate="fade-right" aa-distance="3" aa-scrub="true">
+            <div className="bar" aa-animate="fade-right" aa-intensity="3" aa-scrub="true">
               <span className="bar__label">trigger</span>
             </div>
-            <div className="bar" aa-animate="fade-right" aa-distance="3" aa-scrub="true">
+            <div className="bar" aa-animate="fade-right" aa-intensity="3" aa-scrub="true">
               <span className="bar__label">play</span>
             </div>
           </div>

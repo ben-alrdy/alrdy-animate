@@ -1,14 +1,24 @@
 <!--
-  Last synced with src/ at v8.0.0-alpha.11 (2026-05-19) — extended the stack
-  feature's rotation presets into two parallel families: `rotate*` (cards
-  arrive tilted, settle flat) and `tilt*` (cards arrive flat, build up
-  rotation by lock — Osmo splay-at-lock). Each family ships three variants:
-  default centred fan `(0°, -5°, +5°, -5°, +5°, …)`, `*-cw` incremental
-  clockwise ramp `(0°, +1°, +2°, +3°, …)`, `*-ccw` mirror. The `rotate`
-  default magnitude was lowered from 15° → 5° to match the tilt family. All
-  six rotation-touching flags are mutually exclusive (`tilt*` wins over
-  `rotate*`; within each family `*-cw`/`*-ccw` wins over the default).
-  Magnitudes scale with `aa-distance`. Alpha.10 introduced the `stack`
+  Last synced with src/ at v8.0.0-alpha.12 (2026-05-19) — renamed `aa-distance`
+  to `aa-intensity` across every feature (and the `init({ distance })` option
+  to `init({ intensity })`). Hard cutover, no alias. `aa-intensity="1"` is the
+  default everywhere and reproduces today's design baseline; `0.5` halves the
+  effect, `2` doubles it. The three features whose old default wasn't 1 were
+  rebased so the baseline lives inside the feature: nav (-150% slide-off baked
+  in; old `aa-distance="1.5"` → new default `aa-intensity="1"`), marquee (10vw
+  scrub sweep baked in; old `aa-distance="10"` → new default), tabs (30vh per
+  tab baked in; old `aa-distance="30"` → new default). The raw-pixel scroll
+  offset that used to live on `aa-distance` for `[aa-scroll-target]` links
+  split off into `aa-scroll-offset` (joins the `aa-scroll-start` / `aa-scroll-end`
+  family). Earlier alpha.11 extended the stack feature's rotation presets into
+  two parallel families: `rotate*` (cards arrive tilted, settle flat) and
+  `tilt*` (cards arrive flat, build up rotation by lock — Osmo splay-at-lock).
+  Each family ships three variants: default centred fan `(0°, -5°, +5°, -5°,
+  +5°, …)`, `*-cw` incremental clockwise ramp `(0°, +1°, +2°, +3°, …)`,
+  `*-ccw` mirror. The `rotate` default magnitude was lowered from 15° → 5° to
+  match the tilt family. All six rotation-touching flags are mutually exclusive
+  (`tilt*` wins over `rotate*`; within each family `*-cw`/`*-ccw` wins over
+  the default). Magnitudes scale with `aa-intensity`. Alpha.10 introduced the `stack`
   feature itself: `aa-stack` on the container + `aa-stack-card` on each
   card; card-active / card-inactive events drive `aa-animate` children
   inside via the existing container-inference system. CSS `position:
@@ -176,7 +186,7 @@ Presence of `aa-animate` makes an element animate; the FOUC guard hides it until
 **Slices presets** (feature: `slices`, plugin: `ScrollTrigger`):
 `slices`, `slices-up`, `slices-down`, `slices-left`, `slices-right`. Shutter-style reveal with N rows that scale away. Add space-separated flags on the same `aa-animate` value: `cover` to invert (slices grow in to fill) and an integer to override the row count, e.g. `aa-animate="slices-right cover 12"`. Order-independent. Slice colour comes from the host's `currentColor`.
 
-Tune any preset with `aa-duration`, `aa-delay`, `aa-ease`, `aa-distance`, `aa-stagger`. Use `none` at a breakpoint to skip.
+Tune any preset with `aa-duration`, `aa-delay`, `aa-ease`, `aa-intensity`, `aa-stagger`. Use `none` at a breakpoint to skip.
 
 ---
 
@@ -223,7 +233,7 @@ options: ResolvedOptions         // live readonly snapshot — see "Custom GSAP 
 |---|---|---|
 | `duration` | `0.6` | Seconds. |
 | `ease` | `'power4.out'` | Any GSAP ease or one of the lib's named eases (`osmo`, `energy`, `smooth`, `punch`, `relaxed`, `jump`, `pop`, `elastic`, `anticipate`, `bounce`, `fade`) — named eases need `CustomEase` loaded. |
-| `distance` | `1` | Multiplier for fade-up/down/left/right + slide-* translate distance. |
+| `intensity` | `1` | Multiplier for every feature that reads `aa-intensity` (fade/rotate/slide translate, parallax depth, stack transforms, text-fade/blur offsets, hover-icon trail timing, marquee scrub sweep, nav hide-clearance, tabs scroll-pin range). `1` reproduces each feature's design baseline; `0.5` halves, `2` doubles. |
 | `loadDelay` | `0.1` | Seconds added to every `aa-trigger="load"` / `"load-once"` animation's delay so the entrance plays a beat after `init()` settles. Composes additively with per-element `aa-delay` (`aa-delay="0.3"` + `loadDelay: 0.1` fires at `0.4s`). Scroll / event / click / scrub triggers are unaffected. Skipped on slow-load revisits (`html[aa-fallback]`), where the entrance is already replaced by the inline CSS fallback. Set to `0` to opt out globally. |
 | `scrollStart` | `'top 85%'` | Default ScrollTrigger `start`. Used by every scroll-triggered animation. |
 | `scrollEnd` | `'bottom 60%'` | Default ScrollTrigger `end`. Only used when `aa-scrub` is set. Non-scrubbed animations ignore this — the `again: true` reset point is computed dynamically (one viewport below the element), not from `scrollEnd`. |
@@ -349,7 +359,7 @@ Each card is locked at `top: var(--aa-stack-top, 4rem)` via CSS sticky. Override
 - `rotate` / `rotate-cw` / `rotate-ccw` — cards **arrive tilted**, settle flat at lock. Default = centred fan `(0°, -5°, +5°, -5°, +5°, …)`; `-cw` = clockwise ramp `(0°, +1°, +2°, +3°, …)`; `-ccw` = mirror.
 - `tilt` / `tilt-cw` / `tilt-ccw` — cards **arrive flat**, build up to the same per-card curve by lock (Osmo splay-at-lock).
 
-`none` skips. All six rotation flags are mutually exclusive — `tilt*` wins over `rotate*`, and within a family `*-cw`/`*-ccw` wins over the plain flag. Magnitudes scale with `aa-distance`.
+`none` skips. All six rotation flags are mutually exclusive — `tilt*` wins over `rotate*`, and within a family `*-cw`/`*-ccw` wins over the plain flag. Magnitudes scale with `aa-intensity`.
 
 ### Page transition (Barba) leave hook
 
@@ -399,7 +409,7 @@ const DURATION = reducedMotion ? 0.01 : duration
 gsap.to(el, { duration: DURATION, ease })
 ```
 
-Useful fields on `AlrdyAnimate.options`: `reducedMotion` (boolean, reflects active state), `optimizeMobile` (boolean, true when viewport is below `breakpoints.md` and the option is enabled), `breakpoints` (resolved pixel widths), and the lib defaults `duration`, `ease`, `distance`, `scrollStart`, `scrollEnd`. The snapshot is updated on every `init()`/`refresh()`.
+Useful fields on `AlrdyAnimate.options`: `reducedMotion` (boolean, reflects active state), `optimizeMobile` (boolean, true when viewport is below `breakpoints.md` and the option is enabled), `breakpoints` (resolved pixel widths), and the lib defaults `duration`, `ease`, `intensity`, `scrollStart`, `scrollEnd`. The snapshot is updated on every `init()`/`refresh()`.
 
 **3. Share the resize bus.** Don't attach a second `window.resize` listener — the lib already debounces one and refreshes ScrollTrigger. Subscribe to it:
 

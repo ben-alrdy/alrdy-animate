@@ -23,7 +23,7 @@ type State = Record<string, number | string>
 interface SetupParams {
   element: Element
   split: SplitResult
-  distance: number
+  intensity: number
 }
 
 interface SetupResult {
@@ -37,7 +37,7 @@ interface TextAnim {
   defaultSplit: SplitMode
   maskLines?: boolean
   /** Simple path: just animate the split parts from `buildFrom` to `to`. */
-  buildFrom?: (distance: number) => State
+  buildFrom?: (intensity: number) => State
   to?: State
   /** Complex path: wrap lines, set up custom targets/states. */
   setup?: (params: SetupParams) => SetupResult
@@ -97,7 +97,7 @@ function fadeAnim(opacity: number, direction?: Direction): TextAnim {
   const { prop, sign } = DIR_AXIS[direction]
   return {
     defaultSplit: 'chars',
-    buildFrom: (d) => ({ opacity, [prop]: 60 * sign * d }),
+    buildFrom: (i) => ({ opacity, [prop]: 60 * sign * i }),
     to: { opacity: 1, [prop]: 0 },
   }
 }
@@ -119,11 +119,11 @@ function blurAnim(direction?: Direction): TextAnim {
       to: { opacity: 1, filter: 'blur(0px)', yPercent: 0 },
     }
   }
-  // Horizontal blur uses an absolute rem offset scaled by aa-distance instead
+  // Horizontal blur uses an absolute rem offset scaled by aa-intensity instead
   // of a yPercent mask shift — the visual is a soft drift, not a clip reveal.
   return {
     defaultSplit: 'chars',
-    buildFrom: (d) => ({ opacity: 0, filter: 'blur(10px)', x: `${1.875 * sign * d}rem` }),
+    buildFrom: (i) => ({ opacity: 0, filter: 'blur(10px)', x: `${1.875 * sign * i}rem` }),
     to: { opacity: 1, filter: 'blur(0px)', x: 0 },
   }
 }
@@ -486,7 +486,7 @@ function setupOne(
   const anim = TEXT_ANIMS[animate]
 
   const opts = ctx.options
-  const { duration, delay, ease, distance, scrollStart, scrollEnd, scrub, again } =
+  const { duration, delay, ease, intensity, scrollStart, scrollEnd, scrub, again } =
     readAnimationConfig(config, opts)
 
   const userSplit = parseSplit(config['aa-split'])
@@ -536,7 +536,7 @@ function setupOne(
         // anim.setup paths (oval, rotate) wrap lines in extra DOM and
         // return a cleanup that unwraps them. The orchestrator runs this
         // cleanup before the next rebuild and on dispose.
-        const result = anim.setup({ element, split, distance })
+        const result = anim.setup({ element, split, intensity })
         targets = result.targets
         fromState = result.fromState
         toState = result.toState
@@ -546,7 +546,7 @@ function setupOne(
         const simple = pickSimpleTargets(split, splitMode)
         if (simple.length === 0) return null
         targets = simple
-        fromState = anim.buildFrom(distance)
+        fromState = anim.buildFrom(intensity)
         toState = anim.to
         if (lineGrouped) {
           const inner = splitMode === 'words' ? split.words : split.chars

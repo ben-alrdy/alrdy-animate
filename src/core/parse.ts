@@ -73,7 +73,7 @@ export function hasAnimateAttribute(el: Element | null): boolean {
 
 /**
  * Common animation-timing fields read from a resolved per-element `Config`.
- * Centralises the duration / delay / ease / distance / scroll-start / scroll-end
+ * Centralises the duration / delay / ease / intensity / scroll-start / scroll-end
  * / scrub / again parsing that scroll / text / reveal repeat verbatim. Parallax
  * does its own thing (scrub defaults true, scrollStart/End get `clamp(...)`-
  * wrapped) so it doesn't use this.
@@ -82,7 +82,7 @@ export interface AnimationConfig {
   duration: number
   delay: number
   ease: string
-  distance: number
+  intensity: number
   scrollStart: string
   scrollEnd: string
   scrub: number | true | undefined
@@ -95,7 +95,7 @@ export function readAnimationConfig(config: Config, opts: ResolvedOptions): Anim
     duration: parseNum(config['aa-duration'], opts.duration),
     delay: parseNum(config['aa-delay'], 0),
     ease: config['aa-ease'] ?? opts.ease,
-    distance: parseNum(config['aa-distance'], opts.distance),
+    intensity: parseNum(config['aa-intensity'], opts.intensity),
     scrollEnd: config['aa-scroll-end'] ?? opts.scrollEnd,
     scrub,
     scrollStart: resolveScrollStart(config['aa-scroll-start'], opts, scrub),

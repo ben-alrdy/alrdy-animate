@@ -64,7 +64,7 @@ Per-toggle override: place `aa-autoplay="6"` on a single `aa-tabs-toggle` to var
 | `aa-duration`    | (init)      | Seconds for the height + visual cross-fade. Override per toggle / per content / per visual.    |
 | `aa-autoplay`    | (off; init `interval` when present) | See the autoplay table above. Per-toggle `aa-autoplay="6"` overrides that tab's dwell. |
 | `aa-ease`        | (init)      | Any GSAP ease — height tween, visual fade, and progress bar.                                   |
-| `aa-distance`    | `30`        | (scroll) vh per tab. Total pin range = N × distance.                                           |
+| `aa-intensity`   | `1`         | (scroll) Multiplier on the 30vh-per-tab baseline. `1` (default) = 30vh per tab; `2` = 60vh; `0.5` = 15vh. Total pin range = N × 30vh × intensity. |
 | `aa-scroll-start`| `top 20%`   | (scroll) ScrollTrigger start position for the pin.                                             |
 | `aa-scrub`       | `true`      | (scroll) ScrollTrigger scrub. Pass a number for scrub smoothing (in seconds).                  |
 
@@ -337,12 +337,12 @@ Same shape as the previous demo, but without the `hover-pause` flag. Cycling nev
 
 `aa-tabs="scroll"` pins the section, then scrolling scrubs through the tabs. Each toggle has a width-style progress bar that fills during its segment of the pin range.
 
-`aa-distance="50"` (vh per tab — three tabs = 150vh total pin range), `aa-scroll-start="center center"`, `aa-duration="0.5"` for the visual cross-fade. Per-step `aa-tabs-progress="width"` bars fill proportionally within their segment. Clicking a step jumps to that section's scroll position. On touch devices, the mode automatically falls back to `single` since pin-scrubbing is brittle there.
+`aa-intensity="1.67"` (multiplier on the 30vh-per-tab baseline → 50vh per tab; three tabs = 150vh total pin range), `aa-scroll-start="center center"`, `aa-duration="0.5"` for the visual cross-fade. Per-step `aa-tabs-progress="width"` bars fill proportionally within their segment. Clicking a step jumps to that section's scroll position. On touch devices, the mode automatically falls back to `single` since pin-scrubbing is brittle there.
 
-<Demo caption={[{ label: "root", attrs: { "aa-tabs": "scroll", "aa-duration": "0.5", "aa-distance": "50", "aa-scroll-start": "center center" } }, { label: "progress", attrs: { "aa-tabs-progress": "width", "aa-ease": "none" } }]}>
+<Demo caption={[{ label: "root", attrs: { "aa-tabs": "scroll", "aa-duration": "0.5", "aa-intensity": "1.67", "aa-scroll-start": "center center" } }, { label: "progress", attrs: { "aa-tabs-progress": "width", "aa-ease": "none" } }]}>
   <div data-demo-stage>
     <div data-spacer></div>
-    <div class="aa-tabs-scroll" aa-tabs="scroll" aa-duration="0.5" aa-distance="50" aa-scroll-start="center center">
+    <div class="aa-tabs-scroll" aa-tabs="scroll" aa-duration="0.5" aa-intensity="1.67" aa-scroll-start="center center">
       <div class="aa-tabs-scroll-list">
         <button class="aa-tabs-scroll-step" aa-tabs-toggle="s1" aa-tabs-initial>
           <span class="aa-tabs-step-num">01</span>

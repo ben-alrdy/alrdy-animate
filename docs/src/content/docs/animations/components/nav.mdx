@@ -18,7 +18,7 @@ import Demo from '../../../../components/Demo.astro'
 | `hide change`   | Both. Tokens are space-separated and order-independent.                                                      |
 | `none`          | Don't init at this breakpoint. Combine with `\|` or `-sm` / `-md` / `-lg` / `-xl` suffixes.                |
 
-The hide animation is **driven by CSS**, not GSAP. The library reads your `aa-distance` / `aa-duration` / `aa-ease` attributes and writes them onto the nav element as CSS variables — `--aa-nav-hide-y` (the precomputed off-screen translateY percentage), `--aa-nav-duration`, `--aa-nav-ease`. A single keyframe animation scoped on `body[aa-scroll-direction="down"][aa-scroll-started="true"]` then drives the nav. Cheap, no scroll-event listener, no GSAP cycle.
+The hide animation is **driven by CSS**, not GSAP. The library reads your `aa-intensity` / `aa-duration` / `aa-ease` attributes and writes them onto the nav element as CSS variables — `--aa-nav-hide-y` (the precomputed off-screen translateY percentage), `--aa-nav-duration`, `--aa-nav-ease`. A single keyframe animation scoped on `body[aa-scroll-direction="down"][aa-scroll-started="true"]` then drives the nav. Cheap, no scroll-event listener, no GSAP cycle.
 
 The hide uses CSS **animation** (not transition) on purpose: that way you can freely add `transition: padding 0.3s, background 0.3s` on `.is-scrolled` (or any other state class on the nav) without worrying about the `transition` shorthand clobbering the hide. Animation and transition are independent shorthands.
 
@@ -26,7 +26,7 @@ The hide threshold is shared, not per-nav: the body picks up `aa-scroll-started=
 
 | Attribute       | Default                  | Notes                                                                                                                                                                        |
 | --------------- | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `aa-distance`   | `1.5`                    | Multiplier on the `-100%` translate. `1` = the full nav height; `1.5` (default) clears most drop-shadows; `2` slides further still.                                          |
+| `aa-intensity`  | `1`                      | Multiplier on the internal `-150%` hide-translate baseline. `1` (default) slides the nav to `-150%` — far enough to clear typical drop-shadows. `0.67` brings it to `-100%` (just clears the nav itself); `2` doubles to `-300%`. |
 | `aa-duration`   | (init `duration`)        | CSS transition duration in seconds.                                                                                                                                          |
 | `aa-ease`       | `osmo`                   | Nav-specific default — the hide animation runs via CSS keyframes, so the ease must be CSS-expressible. The `init({ ease })` default (`power4.out`) is GSAP-only and doesn't apply here. Accepts any v8 named ease (osmo, energy, smooth, punch, relaxed, jump, pop, anticipate, fade), a `cubic-bezier(...)`, or a CSS keyword (`linear`, `ease`, `ease-in-out`, …). |
 
@@ -64,12 +64,12 @@ Add `aa-nav-section="my-class"` to a section anywhere on the page. While that se
 
 ## `aa-scroll-target` (click-to-scroll)
 
-A small global utility (not nav-specific): clicking any `[aa-scroll-target="#selector"]` element smooth-scrolls to that selector. If Lenis is loaded (the default), the scroll runs through `lenis.scrollTo` with a quartic ease and your `aa-duration`. If Lenis isn't active, the lib falls back to native `window.scrollTo({ behavior: 'smooth' })` — same `aa-distance` offset, no library configuration required.
+A small global utility (not nav-specific): clicking any `[aa-scroll-target="#selector"]` element smooth-scrolls to that selector. If Lenis is loaded (the default), the scroll runs through `lenis.scrollTo` with a quartic ease and your `aa-duration`. If Lenis isn't active, the lib falls back to native `window.scrollTo({ behavior: 'smooth' })` — same `aa-scroll-offset` offset, no library configuration required.
 
-| Attribute      | Default | Notes                                                                                            |
-| -------------- | ------- | ------------------------------------------------------------------------------------------------ |
-| `aa-duration`  | `1.2`   | Lenis scroll duration in seconds. Ignored on the native fallback (browser controls duration).    |
-| `aa-distance`  | `0`     | Pixel offset applied to the target's top — negative pulls the target above the viewport edge.    |
+| Attribute          | Default | Notes                                                                                            |
+| ------------------ | ------- | ------------------------------------------------------------------------------------------------ |
+| `aa-duration`      | `1.2`   | Lenis scroll duration in seconds. Ignored on the native fallback (browser controls duration).    |
+| `aa-scroll-offset` | `0`     | Pixel offset applied to the target's top — negative pulls the target above the viewport edge (useful when a fixed header would otherwise overlap the anchor). |
 
 ## Body scroll-state
 
@@ -131,7 +131,7 @@ A persistent (non-hiding) sticky nav. The current-link indicator (lime) sits beh
 
 Identical pill styling, only the current indicator (no hover indicator) and an `aa-nav="hide change"` modifier so it slides up off-screen when you scroll down and returns on scroll-up. Once you're past 100px the `is-scrolled` class kicks in too.
 
-`aa-nav="hide change"` — default `aa-distance="1.5"` clears any drop-shadow. The current indicator carries `aa-duration="0.45"` + `aa-ease="power3.out"`.
+`aa-nav="hide change"` — the default `aa-intensity="1"` already slides the nav to `-150%`, which clears any drop-shadow. The current indicator carries `aa-duration="0.45"` + `aa-ease="power3.out"`.
 
 <Demo caption={[{ label: "nav", attrs: { "aa-nav": "hide change", "aa-ease": "osmo" } }, { label: "current pill", attrs: { "aa-nav-current-indicator": "", "aa-duration": "0.45", "aa-ease": "power3.out" } }]}>
   <div data-demo-stage>

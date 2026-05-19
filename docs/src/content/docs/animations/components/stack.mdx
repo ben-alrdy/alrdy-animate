@@ -43,13 +43,13 @@ Runs from `aa-scroll-start` (default `top 85%`) until the card hits its sticky l
 | Flag          | Effect                                                                              |
 | ------------- | ----------------------------------------------------------------------------------- |
 | `fade`        | `opacity: 0 → 1`                                                                    |
-| `scale`       | `scale: (1 - 0.2 × distance) → 1` (e.g. 0.8 → 1 at `aa-distance="1"`)              |
-| `rotate`      | Cards **arrive tilted** and **settle flat**: centred fan `(0°, -5°, +5°, -5°, +5°, …)` × distance → `0°`. First card stays flat; later cards alternate sides. |
-| `rotate-cw`   | Incremental clockwise from-state, settles flat: `(0°, +1°, +2°, +3°, …)` × distance → `0°`. |
-| `rotate-ccw`  | Mirror of `rotate-cw`: `(0°, -1°, -2°, -3°, …)` × distance → `0°`.                  |
-| `tilt`        | Inverse of `rotate` — arrives flat, locks into the centred fan `(0°, -5°, +5°, -5°, +5°, …)` × distance. |
-| `tilt-cw`     | Inverse of `rotate-cw` — arrives flat, locks into the clockwise ramp `(0°, +1°, +2°, +3°, …)` × distance. |
-| `tilt-ccw`    | Mirror of `tilt-cw`: `(0°, -1°, -2°, -3°, …)` × distance.                          |
+| `scale`       | `scale: (1 - 0.2 × intensity) → 1` (e.g. 0.8 → 1 at `aa-intensity="1"`)             |
+| `rotate`      | Cards **arrive tilted** and **settle flat**: centred fan `(0°, -5°, +5°, -5°, +5°, …)` × intensity → `0°`. First card stays flat; later cards alternate sides. |
+| `rotate-cw`   | Incremental clockwise from-state, settles flat: `(0°, +1°, +2°, +3°, …)` × intensity → `0°`. |
+| `rotate-ccw`  | Mirror of `rotate-cw`: `(0°, -1°, -2°, -3°, …)` × intensity → `0°`.                  |
+| `tilt`        | Inverse of `rotate` — arrives flat, locks into the centred fan `(0°, -5°, +5°, -5°, +5°, …)` × intensity. |
+| `tilt-cw`     | Inverse of `rotate-cw` — arrives flat, locks into the clockwise ramp `(0°, +1°, +2°, +3°, …)` × intensity. |
+| `tilt-ccw`    | Mirror of `tilt-cw`: `(0°, -1°, -2°, -3°, …)` × intensity.                          |
 | `none`        | No entry animation; cards appear in their natural sticky position.                  |
 
 The six rotation-touching flags all control the same property and are mutually exclusive. If multiple are listed, `tilt*` wins over `rotate*` (the lock-state value overrides the settle-flat reset), and within each family `*-cw`/`*-ccw` wins over the plain flag.
@@ -71,11 +71,11 @@ Runs over the *next* card's entry window — i.e. as the next card scrolls towar
 | Flag           | Effect                                                                          |
 | -------------- | ------------------------------------------------------------------------------- |
 | `fade`         | `opacity → 0`                                                                   |
-| `scale`        | `scale → (1 - 0.15 × distance)` (e.g. 0.85)                                     |
-| `perspective`  | 3D tilt-back: `rotationX: 10 × distance`, slight scale-down, slight `y` lift.   |
-| `blur`         | `filter: blur(8 × distance px)` + slight `y` lift.                              |
-| `left`         | Slide `x: −4 × distance rem` while fading out.                                  |
-| `right`        | Slide `x: 4 × distance rem` while fading out.                                   |
+| `scale`        | `scale → (1 - 0.15 × intensity)` (e.g. 0.85)                                     |
+| `perspective`  | 3D tilt-back: `rotationX: 10 × intensity`, slight scale-down, slight `y` lift.   |
+| `blur`         | `filter: blur(8 × intensity px)` + slight `y` lift.                              |
+| `left`         | Slide `x: −4 × intensity rem` while fading out.                                  |
+| `right`        | Slide `x: 4 × intensity rem` while fading out.                                   |
 | `none`         | Cards hold their settled state; the next card overlays them naturally.          |
 
 The **last card** has no exit animation — nothing overlays it.
@@ -84,7 +84,7 @@ The **last card** has no exit animation — nothing overlays it.
 
 | Attribute          | Default               | Notes                                                                  |
 | ------------------ | --------------------- | ---------------------------------------------------------------------- |
-| `aa-distance`      | (init `distance`, `1`) | Multiplies preset intensities (rotation angles, scale offsets, blur, translate distance). |
+| `aa-intensity`     | (init `intensity`, `1`) | Multiplies preset intensities (rotation angles, scale offsets, blur, translate distance). |
 | `aa-scroll-start`  | (init `scrollStart`)  | When `card-active` fires for each card (drives the inner `aa-animate` children only). Standard GSAP syntax (`top 85%`, `center 50%`). The in / out visual tweens always scrub the full entry-to-lock range regardless of this value. |
 
 `aa-scrub` is intentionally not honoured by the stack feature. The cards themselves move with the scroll instantly via CSS `position: sticky`, so smoothing only the transform layer (rotate / scale / blur) would desync from the (instant) card position. Stack tweens are always direct scroll-locked.
@@ -173,7 +173,7 @@ No `aa-stack-in` / `aa-stack-out` — cards just sit naturally as sticky stack u
 
 ## Live demo — tilt-cw (Osmo splay-at-lock)
 
-`aa-stack-in="tilt-cw"` makes each card pick up a touch more clockwise rotation than the previous one as it approaches lock. The first card stays flat and the ramp grows by `1° × aa-distance` per card. Swap to `tilt-ccw` for the mirror, or `tilt` for a centred fan with bigger steps.
+`aa-stack-in="tilt-cw"` makes each card pick up a touch more clockwise rotation than the previous one as it approaches lock. The first card stays flat and the ramp grows by `1° × aa-intensity` per card. Swap to `tilt-ccw` for the mirror, or `tilt` for a centred fan with bigger steps.
 
 <Demo caption={[{ label: "root", attrs: { "aa-stack": "", "aa-stack-in": "tilt-cw" } }, { label: "card", attrs: { "aa-stack-card": "" } }]}>
   <div data-demo-stage>
@@ -189,7 +189,7 @@ No `aa-stack-in` / `aa-stack-out` — cards just sit naturally as sticky stack u
       </article>
       <article class="aa-stack-card aa-stack-card-3" aa-stack-card>
         <h3 class="aa-stack-card__h" aa-animate="text-fade-up" aa-split="lines mask">+2° at lock</h3>
-        <p class="aa-stack-card__p" aa-animate="text-fade-up" aa-split="lines mask" aa-delay="0.15">Third card continues the ramp at +2°. Crank up <code>aa-distance</code> on the root to scale the whole splay.</p>
+        <p class="aa-stack-card__p" aa-animate="text-fade-up" aa-split="lines mask" aa-delay="0.15">Third card continues the ramp at +2°. Crank up <code>aa-intensity</code> on the root to scale the whole splay.</p>
       </article>
     </section>
     <div data-spacer></div>

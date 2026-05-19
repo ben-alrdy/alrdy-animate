@@ -84,11 +84,14 @@ export interface InitOptions {
    */
   ease?: string
   /**
-   * Multiplier applied to the default translate distance for fade-up / fade-down /
-   * fade-left / fade-right and slide-* animations. `1` is the design baseline
-   * (3rem for fade variants, 100% for slide variants). Default `1`.
+   * Global intensity multiplier for every feature that scales by `aa-intensity`:
+   * fade / rotate / slide translate (and `text-fade-*` / `text-blur-*` offsets),
+   * parallax depth, stack-card transforms, hover-icon trail timing, marquee
+   * scrub sweep, nav hide-clearance, and tabs scroll-pin range. `1` reproduces
+   * each feature's design-baseline default; `0.5` halves, `2` doubles. Per-element
+   * override: `aa-intensity`. Default `1`.
    */
-  distance?: number
+  intensity?: number
   /**
    * Seconds added to the delay of every `aa-trigger="load"` and
    * `aa-trigger="load-once"` animation so the entrance plays a beat after
@@ -260,7 +263,7 @@ export interface InitOptions {
 export interface ResolvedOptions extends InitOptions {
   duration: number
   ease: string
-  distance: number
+  intensity: number
   loadDelay: number
   scrollStart: string
   scrollEnd: string

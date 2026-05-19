@@ -8,7 +8,7 @@ export const VALUE_BEARING_ATTRS = [
   'aa-duration',
   'aa-delay',
   'aa-ease',
-  'aa-distance',
+  'aa-intensity',
   'aa-scroll-start',
   'aa-scroll-end',
   'aa-scrub',

@@ -148,8 +148,8 @@ html[aa-timeout] [aa-animate]:not([aa-ready]) {
 /*
  * Nav hide-on-scroll-down. The nav feature flips the [aa-nav-hide] boolean
  * attribute on the [aa-nav] element when `aa-nav` includes `hide` for the
- * current breakpoint, and writes per-element CSS variables for distance,
- * duration, and ease (resolved from aa-distance / aa-duration / aa-ease).
+ * current breakpoint, and writes per-element CSS variables for hide-y,
+ * duration, and ease (resolved from aa-intensity / aa-duration / aa-ease).
  *
  * Driven by CSS animation, not transition. Authors very commonly add their
  * own `transition: …` for the `is-scrolled` state on the same nav element;
@@ -166,9 +166,10 @@ html[aa-timeout] [aa-animate]:not([aa-ready]) {
  */
 [aa-nav-hide] {
   /* Default off-screen Y. JS overrides this via inline style based on the
-     element's `aa-distance` attribute (defaulting to 1.5 → -150%). The full
-     percentage is precomputed by the JS rather than expressed as
-     `calc(-100% * var(--aa-nav-distance))` in the keyframe — var() inside
+     element's `aa-intensity` attribute. The internal -150% baseline is
+     multiplied by aa-intensity (default 1 → -150%, 2 → -300%, 0.67 → -100%).
+     The full percentage is precomputed by the JS rather than expressed as
+     `calc(-150% * var(--aa-nav-intensity))` in the keyframe — var() inside
      calc() inside transform inside @keyframes doesn't resolve reliably from
      inline styles across all browsers. */
   --aa-nav-hide-y: -150%;

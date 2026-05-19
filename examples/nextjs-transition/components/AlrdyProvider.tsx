@@ -89,7 +89,7 @@ async function alrdyInit(rootEl: HTMLElement) {
     debug: true,
     duration: 0.6,
     ease: 'osmo',
-    distance: 1.5,
+    intensity: 1.5,
     smoothScroll: true,
     root: rootEl,
     loadDelay: 0,

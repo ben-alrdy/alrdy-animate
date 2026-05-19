@@ -11,21 +11,21 @@ For an entrance that *also* fades, use [fade-up/down/left/right](/animations/app
 
 ## Variants
 
-| Variant       | Starts at                  |
-| ------------- | -------------------------- |
-| `slide-up`    | yPercent(100 × distance)   |
-| `slide-down`  | yPercent(-100 × distance)  |
-| `slide-left`  | xPercent(100 × distance)   |
-| `slide-right` | xPercent(-100 × distance)  |
+| Variant       | Starts at                   |
+| ------------- | --------------------------- |
+| `slide-up`    | yPercent(100 × intensity)   |
+| `slide-down`  | yPercent(-100 × intensity)  |
+| `slide-left`  | xPercent(100 × intensity)   |
+| `slide-right` | xPercent(-100 × intensity)  |
 
-The offset is a percentage of the element's own size, so `aa-distance="1"` slides exactly one element-width/height — perfect for fully clipping reveals when the parent has `overflow: hidden`.
+The offset is a percentage of the element's own size, so `aa-intensity="1"` slides exactly one element-width/height — perfect for fully clipping reveals when the parent has `overflow: hidden`.
 
 ## Attributes
 
 | Attribute     | Default      | Notes                                                     |
 | ------------- | ------------ | --------------------------------------------------------- |
 | `aa-animate`  | (required)   | one of the variants above                                 |
-| `aa-distance` | `1`          | multiplier on the 100% (own-size) offset                  |
+| `aa-intensity` | `1`         | multiplier on the 100% (own-size) offset                  |
 | `aa-duration` | (init)       | seconds — falls back to `init({ duration })` (default `0.6`) |
 | `aa-delay`    | `0`          | seconds                                                   |
 | `aa-ease`     | (init)       | any GSAP ease — falls back to `init({ ease })` (default `power4.out`) |

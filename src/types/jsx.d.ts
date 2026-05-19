@@ -56,7 +56,7 @@ declare namespace JSX {
      * `aa-animate="slices-right 12 cover"`.
      *
      * Combine with `aa-trigger`, `aa-duration`, `aa-delay`, `aa-ease`,
-     * `aa-distance`, `aa-stagger` to tune the playback. Use `none` at a
+     * `aa-intensity`, `aa-stagger` to tune the playback. Use `none` at a
      * breakpoint to skip animating there.
      */
     'aa-animate'?: string
@@ -199,19 +199,33 @@ declare namespace JSX {
     'aa-ease-xl'?: string
 
     /**
-     * Distance multiplier for translate-based presets (`fade-up/down/left/right`,
-     * `slide-up/down/left/right`). `1` = baseline (3rem for fades, 100% for
-     * slides); `2` = doubled, `0.5` = halved. Overrides `init({ distance })`.
+     * Intensity multiplier — `1` reproduces the design baseline for every
+     * feature that reads this attribute; `2` doubles the effect, `0.5` halves
+     * it. Applied to:
+     *
+     * - **fade / rotate / slide translate** — baseline 3rem (fades), 5° (rotate),
+     *   100% of element size (slides). `aa-intensity="2"` doubles the offset.
+     * - **parallax depth** — baseline ±10 yPercent range.
+     * - **stack** — scales rotation angles, scale offsets, blur radius, and
+     *   translate distance baked into each preset.
+     * - **text-fade / text-blur** — multiplies the per-character offset.
+     * - **hover-icon trail** — multiplies the 50ms gap between successive icons.
+     * - **nav** — multiplies the internal -150% hide-translate (default 1
+     *   already clears drop-shadows; raise to clear deeper ones).
+     * - **marquee scrub** — multiplies the internal ±10vw sweep.
+     * - **tabs scroll-pin** — multiplies the internal 30vh per-tab range.
+     *
+     * Overrides `init({ intensity })`. Default `1`.
      */
-    'aa-distance'?: string | number
-    /** Breakpoint variant of `aa-distance`. Activates at `>= breakpoints.sm`. */
-    'aa-distance-sm'?: string | number
-    /** Breakpoint variant of `aa-distance`. Activates at `>= breakpoints.md`. */
-    'aa-distance-md'?: string | number
-    /** Breakpoint variant of `aa-distance`. Activates at `>= breakpoints.lg`. */
-    'aa-distance-lg'?: string | number
-    /** Breakpoint variant of `aa-distance`. Activates at `>= breakpoints.xl`. */
-    'aa-distance-xl'?: string | number
+    'aa-intensity'?: string | number
+    /** Breakpoint variant of `aa-intensity`. Activates at `>= breakpoints.sm`. */
+    'aa-intensity-sm'?: string | number
+    /** Breakpoint variant of `aa-intensity`. Activates at `>= breakpoints.md`. */
+    'aa-intensity-md'?: string | number
+    /** Breakpoint variant of `aa-intensity`. Activates at `>= breakpoints.lg`. */
+    'aa-intensity-lg'?: string | number
+    /** Breakpoint variant of `aa-intensity`. Activates at `>= breakpoints.xl`. */
+    'aa-intensity-xl'?: string | number
 
     /**
      * ScrollTrigger `start`. Standard GSAP syntax — `"top 80%"`, `"center 50%"`,
@@ -330,8 +344,8 @@ declare namespace JSX {
      * `paused` (start paused), `hover-pause`, `switch` (flip direction while
      * scrolling up), `draggable`, `none` (skip init at this breakpoint).
      * Pair with `aa-duration` (cycle seconds), `aa-scrub` (layer a
-     * scroll-driven horizontal sweep on top of the loop), and `aa-distance`
-     * (scrub sweep magnitude as a percentage of viewport width per side).
+     * scroll-driven horizontal sweep on top of the loop), and `aa-intensity`
+     * (multiplier on the ±10vw scrub sweep; default `1` = ±10vw, `2` = ±20vw).
      * Three child wrappers are required, each with a single role:
      * `[aa-marquee-scroller]` > `[aa-marquee-track]` > `[aa-marquee-list]`.
      * Feature: `marquee`. Plugins: `ScrollTrigger`, plus `Draggable` +
@@ -379,6 +393,13 @@ declare namespace JSX {
      * to scroll to. Wires Lenis (when active) for smoothed scroll-to-anchor.
      */
     'aa-scroll-target'?: string
+    /**
+     * Pixel offset applied to an `[aa-scroll-target]` link's target position.
+     * Negative pulls the target above the viewport edge (useful when a fixed
+     * header would otherwise overlap the anchor). Honoured by both Lenis and
+     * the native `scrollTo` fallback. Default `0`.
+     */
+    'aa-scroll-offset'?: string | number
 
     /**
      * Marker for slider containers. Value carries optional flags:
@@ -494,7 +515,7 @@ declare namespace JSX {
      * Use `aa-stack="none"` (typically inside a `\|` shorthand or `-sm` /
      * `-md` / `-lg` / `-xl` suffix) to opt out at a breakpoint. Pair with
      * `aa-stack-card` on each card, optional `aa-stack-in` / `aa-stack-lock` /
-     * `aa-stack-out` for the lifecycle animations, and `aa-distance` /
+     * `aa-stack-out` for the lifecycle animations, and `aa-intensity` /
      * `aa-scroll-start` to tune intensity and inner-content trigger. The
      * visual in/out tweens are always direct scroll-locked — `aa-scrub` is
      * not honoured (the card position is sticky-CSS, so smoothing only the
@@ -525,22 +546,22 @@ declare namespace JSX {
      * position. Flags are space-separated and compose:
      *
      * - `fade` — opacity 0 → 1
-     * - `scale` — scale `1 - 0.2 * aa-distance` → 1 (e.g. 0.8 → 1 at distance=1)
+     * - `scale` — scale `1 - 0.2 * aa-intensity` → 1 (e.g. 0.8 → 1 at intensity=1)
      * - `rotate` — cards **arrive tilted** and **settle flat**: centred fan
-     *   `(0°, -5°, +5°, -5°, +5°, …)` × `aa-distance` → 0°. First card stays
+     *   `(0°, -5°, +5°, -5°, +5°, …)` × `aa-intensity` → 0°. First card stays
      *   flat; later cards alternate sides.
      * - `rotate-cw` — incremental clockwise ramp as from-state, settles flat:
-     *   `(0°, +1°, +2°, +3°, …)` × `aa-distance` → 0°. First card flat; each
+     *   `(0°, +1°, +2°, +3°, …)` × `aa-intensity` → 0°. First card flat; each
      *   subsequent card arrives one more degree clockwise.
      * - `rotate-ccw` — mirror of `rotate-cw`: `(0°, -1°, -2°, -3°, …)` ×
-     *   `aa-distance` → 0°.
+     *   `aa-intensity` → 0°.
      * - `tilt` — inverse of `rotate`: cards **arrive flat** and **build up
      *   rotation** by lock, settling into a centred fan
-     *   `(0°, -5°, +5°, -5°, +5°, …)` × `aa-distance`. First card stays flat.
+     *   `(0°, -5°, +5°, -5°, +5°, …)` × `aa-intensity`. First card stays flat.
      * - `tilt-cw` — inverse of `rotate-cw`: arrives flat, locks into the
-     *   clockwise ramp `(0°, +1°, +2°, +3°, …)` × `aa-distance`.
+     *   clockwise ramp `(0°, +1°, +2°, +3°, …)` × `aa-intensity`.
      * - `tilt-ccw` — mirror of `tilt-cw`: `(0°, -1°, -2°, -3°, …)` ×
-     *   `aa-distance`.
+     *   `aa-intensity`.
      * - `none` — no entry animation
      *
      * The six rotation-touching flags all control the same property and are
@@ -588,10 +609,10 @@ declare namespace JSX {
      * override plain `fade` / `scale` where they share a property.
      *
      * - `fade` — opacity → 0
-     * - `scale` — scale → `1 - 0.15 * aa-distance` (e.g. 0.85 at distance=1)
+     * - `scale` — scale → `1 - 0.15 * aa-intensity` (e.g. 0.85 at intensity=1)
      * - `perspective` — 3D tilt-back (`rotationX`, scale, slight `y`)
-     * - `blur` — `filter: blur(8 * distance px)` + slight `y`
-     * - `left` / `right` — slide `±4 * distance rem` while fading out
+     * - `blur` — `filter: blur(8 * intensity px)` + slight `y`
+     * - `left` / `right` — slide `±4 * intensity rem` while fading out
      * - `none` — cards hold their settled state and the next card overlays
      *
      * The last card has no out animation (nothing overlays it). Example:

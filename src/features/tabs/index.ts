@@ -217,12 +217,14 @@ function setupOne(ctx: FeatureContext, root: HTMLElement, config: Config): (() =
     })
     cleanups.push(() => autoplayCtl?.destroy())
   } else if (mode === 'scroll') {
-    const distance = parseFloat(config['aa-distance'] ?? '') || 30
+    // 30vh per tab is the design baseline. `aa-intensity` multiplies it:
+    // intensity=1 (default) = 30vh per tab, 2 = 60vh, 0.5 = 15vh.
+    const intensity = parseFloat(config['aa-intensity'] ?? '') || 1
     const scrollStart = config['aa-scroll-start'] ?? 'top 20%'
     const scrubAttr = config['aa-scrub']
     const scrub = scrubAttr === undefined ? true : scrubAttr === 'true' ? true : parseFloat(scrubAttr) || true
     scrollCtrl = setupScroll(ctx.gsap, root, api, {
-      distanceVh: distance,
+      distanceVh: 30 * intensity,
       scrollStart,
       scrub,
     })

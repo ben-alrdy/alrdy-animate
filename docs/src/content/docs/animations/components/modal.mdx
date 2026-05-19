@@ -85,14 +85,14 @@ Lenis hijacks page wheel events. When your modal card is taller than the viewpor
 
 Same primitives, different layout. The card uses `aa-animate="slide-left"` (slides in from the right edge) and is positioned full-height on the right side of the viewport. The inner `.modal-scroll` is still `data-lenis-prevent` so wheel events scroll the panel natively while the body stays locked.
 
-<Demo caption={[{ label: "trigger", attrs: { "aa-modal-target": "modal-side" } }, { label: "card", attrs: { "aa-modal-name": "modal-side", "aa-animate": "slide-left", "aa-distance": "1.4", "aa-duration": "0.5" } }]}>
+<Demo caption={[{ label: "trigger", attrs: { "aa-modal-target": "modal-side" } }, { label: "card", attrs: { "aa-modal-name": "modal-side", "aa-animate": "slide-left", "aa-intensity": "1.4", "aa-duration": "0.5" } }]}>
   <div data-demo-stage>
     <div data-spacer></div>
     <button class="modal-trigger" aa-modal-target="modal-side">Open side panel</button>
     <div data-spacer></div>
     <div class="modal" aa-modal-group>
       <div class="modal-backdrop" aa-modal-backdrop aa-modal-close></div>
-      <div class="modal-card modal-card--side" aa-modal-name="modal-side" aa-animate="slide-left" aa-distance="1.4" aa-duration="0.5">
+      <div class="modal-card modal-card--side" aa-modal-name="modal-side" aa-animate="slide-left" aa-intensity="1.4" aa-duration="0.5">
         <div class="modal-scroll" data-lenis-prevent>
           <div class="modal-content">
             <h2 aa-animate="text-blur" aa-split="chars" aa-stagger="0.02" aa-duration="0.6">Side panel</h2>

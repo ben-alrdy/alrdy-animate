@@ -44,7 +44,7 @@ Both flags are space-separated and combinable.
 | `aa-duration` | (init)      | seconds — falls back to `init({ duration })` (default `0.6`)           |
 | `aa-delay`    | `0`         | seconds before the enter animation starts                              |
 | `aa-ease`     | (init)      | any GSAP ease — falls back to `init({ ease })` (default `power4.out`)  |
-| `aa-distance` | `1`         | multiplier on the base 50 ms lag between each successive icon starting its slide — `2` doubles the gap (slower trail), `0.5` halves it (tighter chain) |
+| `aa-intensity` | `1`         | multiplier on the base 50 ms lag between each successive icon starting its slide — `2` doubles the gap (slower trail), `0.5` halves it (tighter chain) |
 
 ## What gets injected
 
@@ -87,15 +87,15 @@ Because the wrapper sets `inline-flex`, the icon stays aligned with adjacent tex
 
 Same directions, but with `triple` so a chain of three icons slides through. The middle clone is briefly visible at centre on the way through; the second clone is the one that lands.
 
-<Demo caption={{ "aa-hover": "icon-* triple", "aa-distance": "0.5" }}>
+<Demo caption={{ "aa-hover": "icon-* triple", "aa-intensity": "0.5" }}>
   <div data-demo-stage>
     <div data-spacer></div>
     <div class="hover-row">
-      <a href="#" class="hover-cta" aa-hover="icon-up-right triple" aa-distance="0.5">
+      <a href="#" class="hover-cta" aa-hover="icon-up-right triple" aa-intensity="0.5">
         <span>Up-right (triple)</span>
         <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7"/><path d="M8 7h9v9"/></svg>
       </a>
-      <a href="#" class="hover-cta" aa-hover="icon-right triple reverse" aa-distance="0.5">
+      <a href="#" class="hover-cta" aa-hover="icon-right triple reverse" aa-intensity="0.5">
         <span>Right (triple, reverse)</span>
         <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
       </a>
