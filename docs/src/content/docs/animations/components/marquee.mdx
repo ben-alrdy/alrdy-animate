@@ -139,20 +139,21 @@ CSS `gap` / `column-gap` on the track is intentionally **not** supported — gap
 
 `aa-marquee="switch"` flips direction whenever the page is scrolling up. Scroll the page back and forth to see it react.
 
+While running, the lib mirrors the live direction on the root as `aa-marquee-direction="left" | "right"` — useful for purely-CSS reactions like the arrows below. Each item carries a static `←` glyph, and one CSS rule rotates it `180deg` whenever the root flips to `right`, with a `transform` transition smoothing the flip.
+
 <Demo caption={{ "aa-marquee": "switch", "aa-duration": "20" }}>
   <div data-demo-stage>
     <div data-spacer></div>
-    <div class="aa-marquee-demo" aa-marquee="switch" aa-duration="20">
+    <div class="aa-marquee-demo aa-marquee-demo-arrows" aa-marquee="switch" aa-duration="20">
       <div class="aa-marquee-scroller" aa-marquee-scroller>
         <div class="aa-marquee-track" aa-marquee-track>
           <div class="aa-marquee-list" aa-marquee-list>
-            <div class="aa-marquee-item">Scroll</div>
-            <div class="aa-marquee-item">Down</div>
-            <div class="aa-marquee-item">→</div>
-            <div class="aa-marquee-item">Then</div>
-            <div class="aa-marquee-item">Scroll</div>
-            <div class="aa-marquee-item">Up</div>
-            <div class="aa-marquee-item">←</div>
+            <div class="aa-marquee-item"><span class="aa-marquee-arrow" aria-hidden="true">←</span>Scroll</div>
+            <div class="aa-marquee-item"><span class="aa-marquee-arrow" aria-hidden="true">←</span>Down</div>
+            <div class="aa-marquee-item"><span class="aa-marquee-arrow" aria-hidden="true">←</span>Then</div>
+            <div class="aa-marquee-item"><span class="aa-marquee-arrow" aria-hidden="true">←</span>Scroll</div>
+            <div class="aa-marquee-item"><span class="aa-marquee-arrow" aria-hidden="true">←</span>Back</div>
+            <div class="aa-marquee-item"><span class="aa-marquee-arrow" aria-hidden="true">←</span>Up</div>
           </div>
         </div>
       </div>
@@ -160,6 +161,18 @@ CSS `gap` / `column-gap` on the track is intentionally **not** supported — gap
     <div data-spacer></div>
   </div>
 </Demo>
+
+```css
+.aa-marquee-arrow {
+  display: inline-block;
+  margin-right: 0.4rem;
+  transition: transform 0.4s ease;
+}
+/* lib sets aa-marquee-direction on the root every time direction flips */
+[aa-marquee-direction="right"] .aa-marquee-arrow {
+  transform: rotate(180deg);
+}
+```
 
 ## Live demo — scroll-driven sweep
 
@@ -242,5 +255,16 @@ Scroll up and down past this demo to see both motions compose.
     border-radius: 999px;
     background: var(--sl-color-text);
     color: var(--sl-color-bg);
+  }
+  /* Arrow glyph reacts to the live aa-marquee-direction attribute the lib
+     sets on the marquee root. Default left-direction = arrow at 0deg (←);
+     when scroll-direction flips to right, the rule below rotates it 180deg. */
+  .aa-marquee-arrow {
+    display: inline-block;
+    margin-right: 0.4rem;
+    transition: transform 0.4s ease;
+  }
+  [aa-marquee-direction="right"] .aa-marquee-arrow {
+    transform: rotate(180deg);
   }
 `}</style>
