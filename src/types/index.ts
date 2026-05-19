@@ -84,12 +84,25 @@ export interface InitOptions {
    */
   ease?: string
   /**
-   * Global intensity multiplier for every feature that scales by `aa-intensity`:
-   * fade / rotate / slide translate (and `text-fade-*` / `text-blur-*` offsets),
-   * parallax depth, stack-card transforms, hover-icon trail timing, marquee
-   * scrub sweep, nav hide-clearance, and tabs scroll-pin range. `1` reproduces
-   * each feature's design-baseline default; `0.5` halves, `2` doubles. Per-element
-   * override: `aa-intensity`. Default `1`.
+   * Global intensity multiplier for every feature that scales by `aa-intensity`.
+   * `1` reproduces each feature's design-baseline default; `0.5` halves, `2`
+   * doubles. Per-element override: `aa-intensity`. Default `1`.
+   *
+   * Baselines by family:
+   *
+   * - **fade-\* / rotate-up translate** — `3rem` (root font-size relative).
+   * - **text-blur horizontal** — `2rem`.
+   * - **slide-\* / text-\* vertical masks / hover-bg-block** — element-relative
+   *   (`100%` of element or line); scales with element size, not root font-size.
+   * - **parallax / parallax-horizontal** — `±10%` of the parallax range.
+   * - **marquee scrub** — `±10vw` (viewport-relative).
+   * - **rotate** — `5°`. **stack** — preset-baked rotation / scale / blur /
+   *   translate. **hover-icon trail / nav / tabs scroll-pin** — internal
+   *   timing or geometry constants.
+   *
+   * The rem-based families track the root font-size at tween-creation time;
+   * the lib rebuilds tweens on breakpoint changes, so a stepped
+   * `:root { font-size }` swap per breakpoint is picked up automatically.
    */
   intensity?: number
   /**

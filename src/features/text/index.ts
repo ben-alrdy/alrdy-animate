@@ -123,7 +123,7 @@ function blurAnim(direction?: Direction): TextAnim {
   // of a yPercent mask shift — the visual is a soft drift, not a clip reveal.
   return {
     defaultSplit: 'chars',
-    buildFrom: (i) => ({ opacity: 0, filter: 'blur(10px)', x: `${1.875 * sign * i}rem` }),
+    buildFrom: (i) => ({ opacity: 0, filter: 'blur(10px)', x: `${2 * sign * i}rem` }),
     to: { opacity: 1, filter: 'blur(0px)', x: 0 },
   }
 }

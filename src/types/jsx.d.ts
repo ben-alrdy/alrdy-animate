@@ -203,17 +203,32 @@ declare namespace JSX {
      * feature that reads this attribute; `2` doubles the effect, `0.5` halves
      * it. Applied to:
      *
-     * - **fade / rotate / slide translate** — baseline 3rem (fades), 5° (rotate),
-     *   100% of element size (slides). `aa-intensity="2"` doubles the offset.
-     * - **parallax depth** — baseline ±10 yPercent range.
+     * - **fade-\* / rotate-up translate** — baseline `3rem` (scales with root
+     *   font-size, so projects that override `:root { font-size }` per breakpoint
+     *   keep visual proportion).
+     * - **rotate** — baseline `5°` angle.
+     * - **slide-\* translate** — baseline `100%` of the element's own size
+     *   (element-relative; scales with element size, not root font-size — that's
+     *   what keeps `slide-*` visually distinct from `fade-*`).
+     * - **text-blur horizontal** — baseline `2rem` per-char offset.
+     * - **text-blur vertical / text-slide / text-tilt / text-rotate** —
+     *   baseline `110%` of the line height (line-mask reveal, element-relative).
+     * - **text-fade directional** — baseline `60%` of the split unit (element-relative).
+     * - **parallax / parallax-horizontal** — baseline `±10%` of the parallax range
+     *   (viewport-relative).
      * - **stack** — scales rotation angles, scale offsets, blur radius, and
      *   translate distance baked into each preset.
-     * - **text-fade / text-blur** — multiplies the per-character offset.
      * - **hover-icon trail** — multiplies the 50ms gap between successive icons.
-     * - **nav** — multiplies the internal -150% hide-translate (default 1
+     * - **nav** — multiplies the internal `-150%` hide-translate (default 1
      *   already clears drop-shadows; raise to clear deeper ones).
-     * - **marquee scrub** — multiplies the internal ±10vw sweep.
-     * - **tabs scroll-pin** — multiplies the internal 30vh per-tab range.
+     * - **marquee scrub** — multiplies the internal `±10vw` sweep (viewport-relative).
+     * - **tabs scroll-pin** — multiplies the internal `30vh` per-tab range.
+     *
+     * **Rem caveat**: GSAP resolves `rem` to `px` once at tween creation. The
+     * lib rebuilds tweens on breakpoint changes (via `gsap.matchMedia`), so
+     * breakpoint-stepped root font-sizes are picked up automatically. A fluid
+     * `clamp()` on `:root` locks in at breakpoint entry — animations won't
+     * track a continuous root resize within a single breakpoint.
      *
      * Overrides `init({ intensity })`. Default `1`.
      */
