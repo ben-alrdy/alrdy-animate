@@ -11,14 +11,15 @@ import Demo from '../../../../components/Demo.astro'
 
 | Variant      | What it does                              |
 | ------------ | ----------------------------------------- |
-| `zoom-in`    | opacity 0 → 1 + scale 0.85 → 1            |
-| `zoom-out`   | opacity 0 → 1 + scale 1.15 → 1            |
+| `zoom-in`    | opacity 0 → 1 + scale `1 - 0.15 × intensity` → 1 (default `0.85 → 1`)        |
+| `zoom-out`   | opacity 0 → 1 + scale `1 + 0.15 × intensity` → 1 (default `1.15 → 1`)        |
 
 ## Attributes
 
 | Attribute     | Default      | Notes                                                     |
 | ------------- | ------------ | --------------------------------------------------------- |
 | `aa-animate`  | (required)   | `zoom-in` or `zoom-out`                                   |
+| `aa-intensity`| `1`          | Multiplier on the `0.15` scale delta from `1`. `1` (default) = today's `0.85`/`1.15`; `0.5` is subtler (`0.925`/`1.075`); `2` is stronger (`0.7`/`1.3`); `0` produces a pure fade with no scale motion. |
 | `aa-duration` | (init)       | seconds — falls back to `init({ duration })` (default `0.6`) |
 | `aa-delay`    | `0`          | seconds                                                   |
 | `aa-ease`     | (init)       | any GSAP ease — falls back to `init({ ease })` (default `power4.out`) |
@@ -37,6 +38,22 @@ import Demo from '../../../../components/Demo.astro'
     <div class="demo-grid">
       <div class="demo-card" aa-animate="zoom-in">zoom-in</div>
       <div class="demo-card" aa-animate="zoom-out">zoom-out</div>
+    </div>
+    <div data-spacer></div>
+  </div>
+</Demo>
+
+## Live demo — intensity (scrub-driven)
+
+`aa-intensity` scales the delta between the from-state and `1`. Default `1` reproduces `0.85`/`1.15`; lower values produce a subtler entrance, higher values are dramatic. Scrubbed so you can hold a scroll position and see the three from-states side-by-side at the same progress point.
+
+<Demo caption={{ "aa-animate": "zoom-in", "aa-intensity": "0.5 → 3", "aa-scrub": "1" }}>
+  <div data-demo-stage>
+    <div data-spacer></div>
+    <div class="demo-grid demo-grid-3" data-intensity-anchor>
+      <div class="demo-card" aa-animate="zoom-in" aa-intensity="0.5" aa-scrub="1" aa-anchor="[data-intensity-anchor]">intensity 0.5</div>
+      <div class="demo-card" aa-animate="zoom-in" aa-intensity="1" aa-scrub="1" aa-anchor="[data-intensity-anchor]">intensity 1</div>
+      <div class="demo-card" aa-animate="zoom-in" aa-intensity="3" aa-scrub="1" aa-anchor="[data-intensity-anchor]">intensity 3</div>
     </div>
     <div data-spacer></div>
   </div>
