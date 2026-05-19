@@ -6,7 +6,7 @@
       "args": [
         "@playwright/mcp@latest",
         "--output-dir",
-        ".playwright-mcp"
+        "playwright-output"
       ],
       "env": {}
     }

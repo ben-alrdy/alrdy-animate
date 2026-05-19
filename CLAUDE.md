@@ -119,6 +119,8 @@ After implementing a feature, drive its docs demo through Playwright MCP (the `m
 5. Resize to 390×800 and 1280×800 to spot-check the responsive variants.
 6. If you can't visually confirm the change, say so explicitly rather than claiming success.
 
+**Screenshot output**: `.mcp.json` pins Playwright MCP's `--output-dir` to `playwright-output/` (gitignored). That handles auto-named files, but `browser_take_screenshot`'s `filename` arg resolves relative to CWD, not the output dir — so when you pass an explicit `filename`, prefix it with `playwright-output/` (e.g. `filename: "playwright-output/scroll-mid.png"`) so it lands in the same folder instead of cluttering the repo root.
+
 ## Conventions
 
 - **Attribute prefix is `aa-`**, not `data-aa-`. Spec-permissive, matches HTMX precedent. Next.js users `import 'alrdy-animate/jsx'` once for autocomplete.

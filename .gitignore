@@ -39,7 +39,7 @@ yarn-error.log*
 /playwright-report
 
 # Playwright MCP screenshot/console output
-/.playwright-mcp
+/playwright-output
 
 # Stray root-level images (Playwright MCP screenshots when no path is given)
 /*.png
