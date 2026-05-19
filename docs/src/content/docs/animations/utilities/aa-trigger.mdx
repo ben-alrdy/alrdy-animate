@@ -19,6 +19,8 @@ import Demo from '../../../../components/Demo.astro'
 
 Inside known containers (`[aa-modal-name]`, `[aa-tabs-content]`, `[aa-tabs-visual]`, `[aa-slider-item]`) the trigger is *inferred* — e.g. animations inside a slide automatically use `event:slide-active`. Setting `aa-trigger` explicitly always wins.
 
+`load` and `load-once` animations also pick up the global [`loadDelay`](/initialization/init-options/) init option (default `0.1s`), which is added on top of any per-element `aa-delay` so the entrance plays a beat after `init()` settles. Set `loadDelay: 0` to opt out globally.
+
 ## Why `load-once` exists
 
 If `load-once` fired on every `init()` call, every Barba (or View Transition) navigation would replay the animation **while the new container is still hidden behind the transition wrapper** — the user never sees it, and by the time the wrapper drops away the element is already in its final state. So `load-once` is intentionally one-shot: it fires on the *very first* init in the page lifetime (until the next hard reload), then stays out of the way.
