@@ -275,6 +275,27 @@ export async function init(options: InitOptions = {}): Promise<void> {
     addDisposer(disposeFade)
   }
 
+  // SplitText (used by the text feature) is created with `autoSplit: true`,
+  // which re-splits when `document.fonts.ready` resolves to pick up real-font
+  // line metrics. If init runs before fonts are ready, the entry tween starts
+  // playing against fallback-font chars, then the font-load resplit replaces
+  // those chars and `handle.rebuild()` snaps the new timeline to progress(1)
+  // because `triggerPlayed` is true — visible as a brief flash followed by a
+  // jump to the end state. Awaiting fonts up front makes SplitText split once
+  // with correct metrics. Gated on the text feature so other pages aren't
+  // delayed; FOUC guard keeps animated elements hidden during the wait.
+  if (
+    effectiveFeatures.has('text') &&
+    typeof document !== 'undefined' &&
+    document.fonts?.ready
+  ) {
+    try {
+      await document.fonts.ready
+    } catch {
+      // fonts.ready can reject in edge cases (e.g. font load errors); proceed.
+    }
+  }
+
   const featureModules = await loadFeatures(effectiveFeatures)
   const featureCtx: FeatureContext = {
     gsap: gsapHandle,
