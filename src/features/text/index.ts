@@ -450,7 +450,7 @@ function setupBarReveal(
     again,
     buildAnimation: (vars) => {
       if (!split || split.lines.length === 0) return null
-      const color = resolveBarColor(element.getAttribute('aa-color') ?? undefined, element)
+      const color = resolveBarColor(config['aa-color'], element)
       setups = buildBarLines(split.lines, color, isBlock)
       // Lock initial states explicitly so the element looks correct at
       // time 0 regardless of when each per-line tween starts.
