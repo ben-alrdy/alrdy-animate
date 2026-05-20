@@ -9,31 +9,49 @@ import Demo from '../../../../components/Demo.astro'
 
 ## Modes
 
-`aa-split` is a single attribute with one mode token plus an optional `mask` flag.
+`aa-split` is a single attribute with one mode token plus optional `mask` and `index` flags (order-independent).
 
 | Token          | Effect                                                              |
 | -------------- | ------------------------------------------------------------------- |
 | `words`        | Split into `.aa-word` parts.                                        |
-| `chars`        | Split into `.aa-char` parts.                                        |
+| `chars`        | Split into `.aa-char` parts (direct children of `.aa-line`; no `.aa-word` wrappers). |
 | `lines`        | Split into `.aa-line` parts.                                        |
-| `lines-words`  | Split into chars+words, group by line for cascading line waves.     |
+| `lines-words`  | Split into words, group by line for cascading line waves.           |
 | `lines-chars`  | Split into chars, group by line for cascading line waves.           |
-| `mask` (flag)  | Wrap each split unit in `overflow: clip` for slide-up reveals.      |
+| `mask` (flag)  | Wrap each line in `overflow: clip` (`.aa-line-mask`) for slide-up reveals. Always line-level — per-char or per-word masks trap the moving unit. |
+| `index` (flag) | Expose 1-based `--char` / `--word` / `--line` CSS variables on each split unit for CSS-driven stagger calcs. |
 
 ## Config attributes
 
 | Attribute    | Default | Notes                                                                  |
 | ------------ | ------- | ---------------------------------------------------------------------- |
-| `aa-split`   | (required) | One mode token + optional `mask` flag. Example: `"lines mask"`.     |
+| `aa-split`   | (required) | Mode token + optional `mask` / `index` flags. Example: `"chars mask index"`. |
 | `aa-stagger` | (off)   | Seconds, or `"<unit> <line>"`. One value = unit stagger only. Two = unit then line. |
 
-`lines-chars` and `lines-words` keep the chars/words split but group the animation by line: chars within a line stagger by the first value of `aa-stagger`, while each line's tween starts the second value later than the previous one — e.g. `aa-stagger="0.02 0.2"` spaces chars 0.02s apart and lines 0.2s apart. A single value reuses itself for both. With `mask`, the mask is applied at the line level (`aa-line-mask`).
+`lines-chars` and `lines-words` keep the chars/words split but group the animation by line: chars within a line stagger by the first value of `aa-stagger`, while each line's tween starts the second value later than the previous one — e.g. `aa-stagger="0.02 0.2"` spaces chars 0.02s apart and lines 0.2s apart. A single value reuses itself for both.
 
 `|` shorthand and `-sm` / `-md` / `-lg` / `-xl` suffixes work like elsewhere — e.g. `aa-split="words|lines"` splits to words on mobile and lines from `md` up.
 
 ## Required GSAP plugins
 
-`gsap`, `SplitText` (chars fall back to a regex splitter when SplitText is missing).
+`gsap`, `SplitText`.
+
+## Descender padding
+
+Anything that clips per line — `aa-split="lines mask"` (which wraps each line in `.aa-line-mask`) and the built-in line-clipping animations (`text-slide-*`, `text-tilt-*`, `text-blur-up`, `text-blur-down`, `text-oval-*`) — uses `overflow: clip` at the line box. At tight `line-height` values the bottom edge sits on the baseline and slices descenders (g, j, p, q, y).
+
+The companion CSS pads each clipped line by `0.15em` at the bottom and offsets the wrapper with a matching negative margin so the visual line spacing stays identical. Override globally on `:root` or per-element by setting `--aa-line-mask-pad`:
+
+```css
+/* Fonts with deeper descenders (display serifs, italics) */
+:root { --aa-line-mask-pad: 0.22em; }
+
+/* Or per element */
+.my-headline { --aa-line-mask-pad: 0.22em; }
+
+/* Opt out entirely */
+.flat-cap-headline { --aa-line-mask-pad: 0; }
+```
 
 ## Live demo — words
 
@@ -58,6 +76,63 @@ The headline below is split into words. Hover any word — pure CSS picks up the
     </h2>
   </div>
 </Demo>
+
+## Live demo — CSS-driven stagger with `index`
+
+Adding `index` to `aa-split` sets a 1-based `--char` (or `--word` / `--line`) custom property on every split unit. CSS can then derive a `transition-delay` per unit without any JavaScript stagger. Hover the button below — each character translates up with a delay calculated from `var(--char)`.
+
+<Demo caption={{ "aa-split": "chars index" }}>
+  <div data-demo-stage class="split-button-stage">
+    <a class="split-button" href="#">
+      <span class="split-button__inner">
+        <span class="split-button__text" aa-split="chars index">Hover me</span>
+      </span>
+    </a>
+  </div>
+</Demo>
+
+```html
+<a class="split-button" href="#">
+  <span class="split-button__inner">
+    <span class="split-button__text" aa-split="chars index">Hover me</span>
+  </span>
+</a>
+```
+
+```css
+.split-button {
+  --shine: #ef2528;
+  display: inline-grid;
+  padding: 0.75em 1.25em;
+  border-radius: 2.5em;
+  background: #fff;
+  color: #131313;
+  font-weight: 600;
+  text-decoration: none;
+}
+.split-button__inner { display: flex; justify-content: center; }
+/* The text wrapper clips chars at the baseline so they appear from below. */
+.split-button__text { clip-path: inset(0% 0% -15%); }
+
+.split-button .aa-char {
+  text-shadow: 0 1.1em var(--shine);
+  transition:
+    translate 0.3s cubic-bezier(0.625, 0.05, 0, 1),
+    text-shadow 0.1s 0.15s ease;
+}
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .split-button:hover .aa-char {
+    text-shadow: 0 1.1em currentColor;
+    translate: 0 -1.1em 0;
+    /* var(--char) is set on each char by aa-split="chars index" */
+    transition:
+      translate 0.5s calc((var(--char) - 1) * 0.024s) cubic-bezier(0.625, 0.05, 0, 1),
+      text-shadow 0.175s calc((var(--char) - 1) * 0.024s + 0.25s) ease;
+  }
+}
+```
+
+Credit to [Osmo Supply's Button 032](https://www.osmo.supply/) for the recipe.
 
 ## Live demo — combining with `text-fade-up`
 
@@ -150,6 +225,49 @@ Override the animation's default split granularity by adding `aa-split` to a tex
       margin: 0;
       max-width: 28ch;
       text-align: left;
+    }
+
+    .split-button-stage {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 3rem 1rem;
+    }
+    .split-button {
+      --shine: var(--sl-color-accent);
+      display: inline-grid;
+      padding: 0.75em 1.25em;
+      border-radius: 2.5em;
+      background: var(--sl-color-white);
+      color: var(--sl-color-black);
+      font-weight: 600;
+      font-size: clamp(1.25rem, 2vw, 1.75rem);
+      line-height: 1;
+      text-decoration: none;
+      cursor: pointer;
+      user-select: none;
+    }
+    .split-button__inner {
+      display: flex;
+      justify-content: center;
+    }
+    .split-button__text {
+      clip-path: inset(0% 0% -15%);
+    }
+    .split-button .aa-char {
+      text-shadow: 0 1.1em var(--shine);
+      transition:
+        translate 0.3s cubic-bezier(0.625, 0.05, 0, 1),
+        text-shadow 0.1s 0.15s ease;
+    }
+    @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+      .split-button:hover .aa-char {
+        text-shadow: 0 1.1em currentColor;
+        translate: 0 -1.1em 0;
+        transition:
+          translate 0.5s calc((var(--char) - 1) * 0.024s) cubic-bezier(0.625, 0.05, 0, 1),
+          text-shadow 0.175s calc((var(--char) - 1) * 0.024s + 0.25s) ease;
+      }
     }
   `}
 </style>

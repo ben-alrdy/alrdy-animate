@@ -26,14 +26,9 @@ const splitFeature: FeatureModule = {
       ctx.responsive.bind(element, attrs, ({ config }) => {
         const split = parseSplit(config['aa-split'])
         if (!split) return
-        const maskGranularity = split.mask
-          ? split.groupBy === 'lines'
-            ? 'lines'
-            : split.mode
-          : undefined
         const result = applySplit(element, split.mode, ctx.gsap, {
-          ...(maskGranularity ? { mask: maskGranularity } : {}),
-          ...(split.groupBy === 'lines' ? { ensureLines: true } : {}),
+          mask: split.mask,
+          index: split.index,
         })
         return () => result.revert()
       })

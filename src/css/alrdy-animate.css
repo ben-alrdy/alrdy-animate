@@ -97,20 +97,24 @@ html[aa-timeout] [aa-animate]:not([aa-ready]) {
 }
 
 /*
- * Descender fix for line masks. SplitText wraps each line in `.aa-line-mask`
- * with `overflow: clip`; at tight line-heights the mask's bottom edge sits on
+ * Descender fix for line-clipping wrappers. SplitText's `.aa-line-mask`
+ * (slide/tilt/blur-Y) and the text-oval wrapper `.aa-oval-line` both apply
+ * `overflow: clip` per line; at tight line-heights the bottom edge sits on
  * the baseline and slices descenders (g, j, p, q, y). Padding the inner line
- * enlarges the reveal window, the matching negative margin on the mask
- * cancels the layout bump, and `yPercent: 100/-110` still resolves to the new
- * (taller) line height so the FROM state stays fully hidden.
+ * enlarges the reveal window, the matching negative margin on the wrapper
+ * cancels the layout bump, and any `yPercent: 100/-110` or oval clip-path
+ * resolves against the new (taller) box so the FROM state stays fully hidden.
  *
  * Override globally on `:root` or per-element by setting `--aa-line-mask-pad`
  * (e.g. `0.22em` for fonts with deeper descenders, or `0` to opt out).
  */
-.aa-line-mask {
+.aa-line-mask,
+.aa-oval-line {
+  display: block;
   margin-bottom: calc(var(--aa-line-mask-pad, 0.15em) * -1);
 }
-.aa-line-mask > .aa-line {
+.aa-line-mask > .aa-line,
+.aa-oval-line > .aa-line {
   padding-bottom: var(--aa-line-mask-pad, 0.15em);
 }
 

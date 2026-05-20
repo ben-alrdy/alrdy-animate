@@ -7,6 +7,8 @@ export interface SplitConfig {
   /** When set, animation tools should group units by line (e.g. "lines-chars"). */
   groupBy?: 'lines'
   mask: boolean
+  /** When set, each split unit gets an inline `--char` / `--word` / `--line` CSS variable (1-based) for CSS-driven stagger. */
+  index: boolean
 }
 
 export interface SplitResult {
@@ -20,10 +22,12 @@ export interface SplitResult {
 interface SplitTextOptions {
   type: string
   autoSplit?: boolean
+  tag?: string
   linesClass?: string
   wordsClass?: string
   charsClass?: string
   mask?: string
+  propIndex?: boolean
   aria?: 'auto' | 'hidden' | 'none'
   onSplit?: (instance: SplitTextInstance) => void
 }
@@ -68,15 +72,17 @@ export function parseSplit(value: string | undefined): SplitConfig | null {
     groupBy = 'lines'
   }
   if (!mode) return null
-  const mask = tokens.slice(1).includes('mask')
-  return groupBy ? { mode, groupBy, mask } : { mode, mask }
+  const flags = tokens.slice(1)
+  const mask = flags.includes('mask')
+  const index = flags.includes('index')
+  return groupBy ? { mode, groupBy, mask, index } : { mode, mask, index }
 }
 
 interface ApplyOptions {
-  /** When set, wrap each split unit at this granularity in an overflow-clipped wrapper. */
-  mask?: SplitMode
-  /** When 'lines', force SplitText to also produce lines (needed for line-grouping). */
-  ensureLines?: boolean
+  /** When true, wrap each line in an `overflow: clip` wrapper. Per-char/word masks aren't useful for slide animations — the wrapper would trap the moving unit. */
+  mask?: boolean
+  /** When true, expose 1-based `--char` / `--word` / `--line` CSS variables on each split unit for CSS-driven stagger. */
+  index?: boolean
   /**
    * Called when SplitText auto-re-splits (e.g. the viewport resizes within a
    * breakpoint and line wrapping changes). The original `.aa-char`/`.aa-line`
@@ -102,17 +108,25 @@ export function applySplit(
     console.warn('[alrdy-animate] aa-split requires the GSAP SplitText plugin.')
     return { mode, words: [], chars: [], lines: [element as HTMLElement], revert: () => {} }
   }
-  const needsLines = mode === 'lines' || opts.ensureLines === true
+  // For chars mode, we omit 'words' from the type. SplitText always uses word
+  // wrappers internally during parsing, then unwraps them when 'words' is
+  // absent from type — and its smartWrap protection only kicks in when lines
+  // aren't being split, which we always do. Word wrappers therefore add a DOM
+  // level with no behavioral payoff for chars-mode animations.
   const type =
     mode === 'lines'
       ? 'lines'
       : mode === 'words'
         ? 'words,lines'
-        : needsLines
-          ? 'chars,words,lines'
-          : 'chars,words,lines'
+        : 'chars,lines'
   const splitOpts: SplitTextOptions = {
     type,
+    // span wrappers keep the produced markup spec-valid in any context
+    // (`<span>` / `<a>` / `<button>` containers can't legally hold `<div>`).
+    // SplitText's default of `tag: "div"` would inline-inject `display:
+    // inline-block` / `block`, but we ship those rules in alrdy-animate.css
+    // for `.aa-char` / `.aa-word` / `.aa-line` so layout is preserved.
+    tag: 'span',
     // autoSplit re-runs SplitText when line wrapping changes (typical case:
     // user resizes the viewport within a breakpoint and the text re-wraps).
     // Without this, lines stay frozen at their original measurements while
@@ -127,7 +141,9 @@ export function applySplit(
     wordsClass: 'aa-word',
     charsClass: 'aa-char',
   }
-  if (opts.mask) splitOpts.mask = opts.mask
+  // mask is always line-level: per-char/word masks would trap the moving unit.
+  if (opts.mask) splitOpts.mask = 'lines'
+  if (opts.index) splitOpts.propIndex = true
 
   // SplitText's onSplit fires both for the initial split (synchronously inside
   // the constructor) and for every resize-driven re-split. We skip the first

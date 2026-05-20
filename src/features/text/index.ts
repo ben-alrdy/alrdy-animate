@@ -495,13 +495,10 @@ function setupOne(
   const stagger: StaggerValue = buildStagger(staggerSpec.unit, staggerSpec.flags)
   const lineStagger = staggerSpec.line
   const lineGrouped = userSplit?.groupBy === 'lines' && !anim.setup
-  const maskGranularity: SplitMode | undefined = userSplit?.mask
-    ? userSplit.groupBy === 'lines'
-      ? 'lines'
-      : splitMode
-    : anim.maskLines
-      ? 'lines'
-      : undefined
+  // Absence of the `mask` flag in aa-split means "I'm just naming the split
+  // mode" — don't force-disable masks that the animation enables by default.
+  // Users who want masks off entirely simply pick an animation that has none.
+  const mask = userSplit?.mask || anim.maskLines || false
 
   // Tracks the current split — reassigned on each SplitText auto-resplit
   // (resize within a breakpoint changes line wrapping) so the buildAnimation
@@ -509,8 +506,8 @@ function setupOne(
   let split: SplitResult | undefined
 
   const initialSplit = applySplit(element, splitMode, ctx.gsap, {
-    ...(maskGranularity ? { mask: maskGranularity } : {}),
-    ...(lineGrouped ? { ensureLines: true } : {}),
+    mask,
+    ...(userSplit?.index ? { index: true } : {}),
     onResplit: (newSplit) => {
       split = newSplit
       handle?.rebuild()

@@ -26,6 +26,8 @@ import TextDemo from '../../../../components/TextDemo.astro'
 | `aa-ease`     | (init)      | Any GSAP ease.                                     |
 | `aa-scrub`    | (off)       | `true` or seconds — bind progress to scroll.       |
 
+Each line is clipped by a wrapper, so tight `line-height` values can shave descenders (g, j, p, q, y). Tune the [descender padding](/animations/utilities/aa-split/#descender-padding) via `--aa-line-mask-pad` if your typeface needs more room.
+
 ## Required GSAP plugins
 
 `gsap`, `ScrollTrigger`, `SplitText`.

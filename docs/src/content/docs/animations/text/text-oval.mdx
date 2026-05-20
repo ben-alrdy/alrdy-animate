@@ -6,9 +6,11 @@ description: Per-line ellipse clip-path reveal. Each line emerges from a small e
 import Demo from '../../../../components/Demo.astro'
 import TextDemo from '../../../../components/TextDemo.astro'
 
-`text-oval-up` and `text-oval-down` wrap each line and animate a `clip-path: ellipse(...)` open from a small starting ellipse to a fully-revealed line. `up` anchors the ellipse at the bottom edge (line emerges over the horizon); `down` anchors at the top.
+`text-oval-up` and `text-oval-down` auto-split the element into lines and animate a `clip-path: ellipse(...)` open on each line, from a small starting ellipse to a fully-revealed line. `up` anchors the ellipse at the bottom edge (line emerges over the horizon); `down` anchors at the top.
 
 This is purely CSS clip-path — no opacity fade — so the silhouette of the type is visible during the reveal.
+
+`aa-split` is not needed and is not listed below: the reveal is structurally per-line, so chars/words don't apply.
 
 ## Variants
 
@@ -27,6 +29,8 @@ This is purely CSS clip-path — no opacity fade — so the silhouette of the ty
 | `aa-delay`    | `0`         | Seconds.                                           |
 | `aa-ease`     | (init)      | Any GSAP ease.                                     |
 | `aa-scrub`    | (off)       | `true` or seconds — bind progress to scroll.       |
+
+Each line is clipped by an ellipse wrapper, so tight `line-height` values can shave descenders (g, j, p, q, y). Tune the [descender padding](/animations/utilities/aa-split/#descender-padding) via `--aa-line-mask-pad` if your typeface needs more room.
 
 ## Required GSAP plugins
 

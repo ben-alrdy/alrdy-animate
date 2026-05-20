@@ -117,14 +117,20 @@ declare namespace JSX {
     'aa-trigger-xl'?: string
 
     /**
-     * How to split text before animating. Values (space-separated, order doesn't
-     * matter):
+     * How to split text before animating. Values (space-separated; the first
+     * token is the mode, remaining tokens are order-independent flags):
      *
-     * - `chars` | `words` | `lines` — the unit to split into.
-     * - `mask` — wrap each split unit in a clipping mask (typical for
-     *   `text-slide-*` and `text-blur-up`).
+     * - Mode: `chars` | `words` | `lines` | `lines-chars` | `lines-words`.
+     * - `mask` (flag) — wrap each line in `overflow: clip` (typical for
+     *   `text-slide-*` and `text-blur-up`). Always line-level, never per-char or
+     *   per-word — a per-unit mask would trap the moving unit.
+     * - `index` (flag) — expose 1-based `--char` / `--word` / `--line` CSS
+     *   custom properties on each split unit, so you can derive
+     *   `transition-delay: calc((var(--char) - 1) * 0.024s)` for
+     *   CSS-driven hover/load staggers without any JS.
      *
-     * Examples: `aa-split="lines"`, `aa-split="lines mask"`, `aa-split="chars"`.
+     * Examples: `aa-split="lines mask"`, `aa-split="chars"`,
+     * `aa-split="chars index"`, `aa-split="lines-chars mask"`.
      *
      * Required by every `text-*` preset (feature: `text`, plugin: `SplitText`).
      * Also usable as a standalone utility on plain elements via the `split`
