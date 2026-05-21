@@ -14,9 +14,9 @@ test.describe('class presets', () => {
 
     const initLine = messages.find((m) => m.includes('[alrdy-animate] initialized'))
     expect(initLine).toMatch(/Features:/)
-    // text-fade-up + text-blur-up → text feature; fade-up (cta-card) → scroll feature.
+    // text-fade-up + text-blur-up → text feature; fade-up (cta-card) → appear feature.
     expect(initLine).toMatch(/text/)
-    expect(initLine).toMatch(/scroll/)
+    expect(initLine).toMatch(/appear/)
     expect(initLine).toMatch(/Plugins:.*ScrollTrigger/)
     expect(initLine).toMatch(/SplitText/)
   })
@@ -75,7 +75,7 @@ test.describe('class presets', () => {
     // The override demo has an h2 with class heading-style-h2 AND aa-animate="fade-right".
     // The preset would have given it text-fade-up (a text feature). Because of the
     // override rule, it should be driven by aa-animate="fade-right" instead — a
-    // scroll feature. Easiest signal: it must still have its explicit attribute.
+    // appear feature. Easiest signal: it must still have its explicit attribute.
     const overrideAttr = await page.evaluate(() => {
       const el = document.querySelector(
         '[data-presets-demo] .heading-style-h2[aa-animate]',

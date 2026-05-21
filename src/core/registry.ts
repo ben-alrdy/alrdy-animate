@@ -50,10 +50,10 @@ export interface FeatureModule {
 type Loader = () => Promise<{ default: FeatureModule }>
 
 const loaders: Record<FeatureName, Loader> = {
-  scroll: () => import('../features/scroll/index'),
+  appear: () => import('../features/appear/index'),
   text: () => import('../features/text/index'),
-  reveal: () => import('../features/reveal/index'),
-  slices: () => import('../features/slices/index'),
+  reveal: () => import('../features/appear/reveal'),
+  slices: () => import('../features/appear/slices'),
   parallax: () => import('../features/parallax/index'),
   tabs: () => import('../features/tabs/index'),
   marquee: () => import('../features/marquee/index'),
@@ -90,7 +90,7 @@ export async function loadFeatures(names: Iterable<FeatureName>): Promise<Featur
  *
  * Features that operate on whole roots (tabs, slider, marquee, modal, nav)
  * have non-trivial per-root setup beyond this shape and should not use this
- * helper. It exists for the per-element appearance features (scroll, text,
+ * helper. It exists for the per-element appearance features (appear, text,
  * reveal, parallax) whose init bodies were byte-for-byte identical.
  */
 export function bindFeature(

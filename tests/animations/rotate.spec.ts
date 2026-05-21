@@ -16,7 +16,7 @@ test.describe('rotate demo page', () => {
     expect(messages.find((m) => m.includes('Missing GSAP plugins'))).toBeUndefined()
 
     const initLine = messages.find((m) => m.includes('[alrdy-animate] initialized'))
-    expect(initLine).toMatch(/Features:.*scroll/)
+    expect(initLine).toMatch(/Features:.*appear/)
     expect(initLine).toMatch(/Plugins:.*ScrollTrigger/)
     expect(initLine).toMatch(/Elements:\s*[1-9]/)
   })

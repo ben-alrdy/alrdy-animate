@@ -2,7 +2,7 @@ import type { ResolvedPreset } from './presets'
 import { VALUE_BEARING_ATTRS } from './settings'
 
 export type FeatureName =
-  | 'scroll'
+  | 'appear'
   | 'text'
   | 'reveal'
   | 'slices'
@@ -30,12 +30,12 @@ const ANIMATE_TO_FEATURE: Array<[RegExp, FeatureName]> = [
 ]
 
 export function classifyAnimateValue(value: string | null): FeatureName {
-  if (!value) return 'scroll'
+  if (!value) return 'appear'
   const head = value.split('|')[0].trim()
   for (const [pattern, feature] of ANIMATE_TO_FEATURE) {
     if (pattern.test(head)) return feature
   }
-  return 'scroll'
+  return 'appear'
 }
 
 // Anchor attribute → feature name. Iteration order doesn't matter; classification

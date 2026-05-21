@@ -20,8 +20,8 @@ import { onCustomTrigger, resolveTriggers } from './trigger'
  *
  * Examples:
  *   reducedMotion active:
- *     featuresToReplace = {scroll, text, reveal, hover, parallax}
- *     fadeFor           = {scroll, text, reveal}        // hover + parallax stay still
+ *     featuresToReplace = {appear, text, reveal, hover, parallax}
+ *     fadeFor           = {appear, text, reveal}        // hover + parallax stay still
  *
  *   optimizeMobile + small viewport:
  *     featuresToReplace = {text, parallax, split}
@@ -178,7 +178,7 @@ export function runFadeFallbackPass(
  * unified fade pass when the OS reports `(prefers-reduced-motion: reduce)`.
  */
 export const REDUCED_MOTION_REPLACED_FEATURES: ReadonlySet<FeatureName> = new Set([
-  'scroll',
+  'appear',
   'text',
   'reveal',
   'parallax',
@@ -191,7 +191,7 @@ export const REDUCED_MOTION_REPLACED_FEATURES: ReadonlySet<FeatureName> = new Se
  * just don't animate).
  */
 export const REDUCED_MOTION_FADE_FEATURES: ReadonlySet<FeatureName> = new Set([
-  'scroll',
+  'appear',
   'text',
   'reveal',
 ])

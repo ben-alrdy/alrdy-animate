@@ -33,7 +33,7 @@ declare namespace JSX {
      * element animate at all (the FOUC guard hides anything with `aa-animate`
      * until `init()` flips `aa-ready` on it).
      *
-     * **Scroll/load/event presets** (feature: `scroll`):
+     * **Appear presets** (feature: `appear`):
      * `fade` | `fade-up` | `fade-down` | `fade-left` | `fade-right` |
      * `zoom-in` | `zoom-out` | `slide-up` | `slide-down` | `slide-left` |
      * `slide-right` | `blur` | `rotate-*` (rotate, rotate-up, rotate-up-tl/tr/bl/br, rotate-ccw variants)

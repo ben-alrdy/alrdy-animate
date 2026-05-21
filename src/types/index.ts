@@ -137,7 +137,7 @@ export interface InitOptions {
    * non-scrubbed `scrollStart` — e.g. `scrollStart: 'top 85%'` for entrances,
    * `scrubStart: 'top 100%'` to give scrubs the full viewport pass. Per-element
    * `aa-scroll-start` still wins. Honoured by every scroll-position-reading
-   * feature (scroll / text / reveal / reduced-motion).
+   * feature (appear / text / reveal / reduced-motion).
    */
   scrubStart?: string
   /**

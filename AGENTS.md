@@ -1,13 +1,20 @@
 <!--
-  Last synced with src/ at v8.0.0-alpha.15 (2026-05-21) — stack: in/out scrub
-  windows no longer overlap on tightly-packed cards (out clamps to the lock
-  point), and the sticky-card default CSS is now zero-specificity via
-  `:where()` with `top: 25vh` as the new default (was `4rem`) — author classes
-  win without `!important`. Also: `text-blur-up` / `text-blur-down` no longer
-  line-mask. All four directional blur variants now use the same shape:
-  `chars` split, no mask, soft `2rem × intensity` drift on the named axis.
-  Reach for `text-slide-*` or `text-tilt-*` when you want the line-clip
-  reveal. Earlier alpha.12 — renamed `aa-distance`
+  Last synced with src/ at v8.0.0-alpha.16 (2026-05-21) — feature module
+  `scroll` renamed to `appear` (fade/slide/zoom/blur/rotate presets). `reveal`
+  and `slices` are still distinct lazy chunks but now live as sibling files
+  under `src/features/appear/` to mirror the docs grouping. Public `FeatureName`
+  values are `'appear' | 'reveal' | 'slices' | …` — old `'scroll'` is gone (it
+  collided with the `TriggerKind 'scroll'` and `aa-tabs="scroll"` mode anyway).
+  Also: `reveal` now respects `aa-stagger` (clips each child individually) and
+  `aa-anchor` (selector resolves to the ScrollTrigger element), bringing it to
+  parity with `appear`. Earlier alpha.15 — stack: in/out scrub windows no
+  longer overlap on tightly-packed cards (out clamps to the lock point), and
+  the sticky-card default CSS is now zero-specificity via `:where()` with
+  `top: 25vh` as the new default (was `4rem`) — author classes win without
+  `!important`. Also: `text-blur-up` / `text-blur-down` no longer line-mask.
+  All four directional blur variants now use the same shape: `chars` split,
+  no mask, soft `2rem × intensity` drift on the named axis. Reach for
+  `text-slide-*` or `text-tilt-*` when you want the line-clip reveal. Earlier alpha.12 — renamed `aa-distance`
   to `aa-intensity` across every feature (and the `init({ distance })` option
   to `init({ intensity })`). Hard cutover, no alias. `aa-intensity="1"` is the
   default everywhere and reproduces today's design baseline; `0.5` halves the
@@ -182,7 +189,7 @@ element.dispatchEvent(new CustomEvent('aa:trigger', {
 
 Presence of `aa-animate` makes an element animate; the FOUC guard hides it until `init()` flips `aa-ready` on it.
 
-**Scroll/load/event presets** (feature: `scroll`, plugin: `ScrollTrigger`):
+**Appear presets** (feature: `appear`, plugin: `ScrollTrigger`):
 `fade`, `fade-up`, `fade-down`, `fade-left`, `fade-right`, `zoom-in`, `zoom-out`, `slide-up`, `slide-down`, `slide-left`, `slide-right`, `blur`, `rotate`, `rotate-up`, `rotate-up-tl` / `-tr` / `-bl` / `-br`, `rotate-*-ccw` variants.
 
 **Text presets** (feature: `text`, plugins: `ScrollTrigger` + `SplitText`):
@@ -204,7 +211,7 @@ Twelve features ship; the scanner detects which ones are needed by which attribu
 
 | Feature | Triggering attributes | Required GSAP plugins | Purpose |
 |---|---|---|---|
-| `scroll` | `aa-animate` (non-text, non-reveal value) | `ScrollTrigger` | Scroll/load/event-triggered fades, slides, zooms, blur, rotate. |
+| `appear` | `aa-animate` (non-text, non-reveal, non-slices value) | `ScrollTrigger` | Scroll/load/event-triggered fades, slides, zooms, blur, rotate. |
 | `text` | `aa-animate="text-*"` | `ScrollTrigger`, `SplitText` | Text-character / word / line animations via `aa-split`. |
 | `reveal` | `aa-animate="reveal-*"` | `ScrollTrigger` | Clip-path entrances (inset / circle / oval). |
 | `slices` | `aa-animate="slices..."` | `ScrollTrigger` | Shutter-style reveal — N rows scale away. Direction in name, mode/count as space flags. |

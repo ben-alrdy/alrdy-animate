@@ -4,7 +4,7 @@ const initialized = (msg: ConsoleMessage): boolean =>
   msg.text().includes('[alrdy-animate] initialized')
 
 test.describe('stagger demo page', () => {
-  test('initializes with scroll + text features', async ({ page }) => {
+  test('initializes with appear + text features', async ({ page }) => {
     const messages: string[] = []
     page.on('console', (m) => messages.push(m.text()))
 
@@ -13,7 +13,7 @@ test.describe('stagger demo page', () => {
     await initLog
 
     const initLine = messages.find((m) => m.includes('[alrdy-animate] initialized'))
-    expect(initLine).toMatch(/Features:.*scroll/)
+    expect(initLine).toMatch(/Features:.*appear/)
     expect(initLine).toMatch(/Features:.*text/)
     expect(initLine).toMatch(/Plugins:.*ScrollTrigger/)
     expect(initLine).toMatch(/Plugins:.*SplitText/)

@@ -180,7 +180,7 @@ export async function init(options: InitOptions = {}): Promise<void> {
     typeof document !== 'undefined' &&
     document.documentElement.hasAttribute('aa-timeout')
   if (timedOut) {
-    effectiveFeatures.delete('scroll')
+    effectiveFeatures.delete('appear')
     effectiveFeatures.delete('text')
     effectiveFeatures.delete('reveal')
     effectiveFeatures.delete('parallax')
@@ -196,7 +196,7 @@ export async function init(options: InitOptions = {}): Promise<void> {
   const requiredPlugins = new Set<string>()
   for (const f of effectiveFeatures) {
     if (
-      f === 'scroll' ||
+      f === 'appear' ||
       f === 'text' ||
       f === 'reveal' ||
       f === 'slices' ||

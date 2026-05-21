@@ -30,9 +30,21 @@ const externalIds = [...Object.keys(gsapGlobals), 'lenis']
 // UMD inlines dynamic imports into a single bundle, so manualChunks is
 // rejected by Rollup for that format. We attach this function only to the
 // ESM output via the per-format `rollupOptions.output[]` array.
+// Sibling feature modules nested under an umbrella directory. Each is its own
+// lazy chunk despite living next to a parent feature's `index.ts`. Internal
+// helper files inside other feature dirs (e.g. hover/effects.ts) stay bundled
+// into the parent chunk because they're not listed here.
+const SIBLING_CHUNKS: Record<string, ReadonlySet<string>> = {
+  appear: new Set(['reveal', 'slices']),
+}
+
 function featureChunk(id: string): string | undefined {
-  const featureMatch = id.match(/\/src\/features\/([^/]+)\/index\.[jt]s$/)
-  if (featureMatch) return featureMatch[1]
+  const featureMatch = id.match(/\/src\/features\/([^/]+)\/([^/]+)\.[jt]s$/)
+  if (featureMatch) {
+    const [, dir, base] = featureMatch
+    if (base === 'index') return dir
+    if (SIBLING_CHUNKS[dir]?.has(base)) return base
+  }
   if (/\/src\/split\/index\.[jt]s$/.test(id)) return 'split'
 
   // Everything else under src/core (excluding the entry file) and the split

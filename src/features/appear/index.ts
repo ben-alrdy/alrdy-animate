@@ -128,12 +128,12 @@ function setupOne(
   return handle ? () => handle.dispose() : undefined
 }
 
-const scrollFeature: FeatureModule = {
-  name: 'scroll',
+const appearFeature: FeatureModule = {
+  name: 'appear',
   init(ctx: FeatureContext): () => void {
     bindFeature(ctx, elementMatches, setupOne)
     return () => {}
   },
 }
 
-export default scrollFeature
+export default appearFeature
