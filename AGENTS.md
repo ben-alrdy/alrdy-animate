@@ -1,5 +1,13 @@
 <!--
-  Last synced with src/ at v8.0.0-alpha.12 (2026-05-19) — renamed `aa-distance`
+  Last synced with src/ at v8.0.0-alpha.15 (2026-05-21) — stack: in/out scrub
+  windows no longer overlap on tightly-packed cards (out clamps to the lock
+  point), and the sticky-card default CSS is now zero-specificity via
+  `:where()` with `top: 25vh` as the new default (was `4rem`) — author classes
+  win without `!important`. Also: `text-blur-up` / `text-blur-down` no longer
+  line-mask. All four directional blur variants now use the same shape:
+  `chars` split, no mask, soft `2rem × intensity` drift on the named axis.
+  Reach for `text-slide-*` or `text-tilt-*` when you want the line-clip
+  reveal. Earlier alpha.12 — renamed `aa-distance`
   to `aa-intensity` across every feature (and the `init({ distance })` option
   to `init({ intensity })`). Hard cutover, no alias. `aa-intensity="1"` is the
   default everywhere and reproduces today's design baseline; `0.5` halves the
@@ -233,7 +241,7 @@ options: ResolvedOptions         // live readonly snapshot — see "Custom GSAP 
 |---|---|---|
 | `duration` | `0.6` | Seconds. |
 | `ease` | `'power4.out'` | Any GSAP ease or one of the lib's named eases (`osmo`, `energy`, `smooth`, `punch`, `relaxed`, `jump`, `pop`, `elastic`, `anticipate`, `bounce`, `fade`) — named eases need `CustomEase` loaded. |
-| `intensity` | `1` | Multiplier for every feature that reads `aa-intensity` (fade/rotate/slide translate, parallax depth, stack transforms, text-fade/blur offsets, hover-icon trail timing, marquee scrub sweep, nav hide-clearance, tabs scroll-pin range). `1` reproduces each feature's design baseline; `0.5` halves, `2` doubles. **Baselines by family**: fade-\*/rotate-up `3rem`, text-blur horizontal `2rem` (both root-font-size relative); slide-\*/text-\* vertical masks/hover-bg-block `100%` of element or line (element-relative); parallax `±10%` of range; marquee scrub `±10vw`. Rem-based values track `:root { font-size }` and rebuild on breakpoint changes via `gsap.matchMedia` — so per-breakpoint stepped root sizes Just Work; a fluid `clamp()` on `:root` locks in at breakpoint entry. |
+| `intensity` | `1` | Multiplier for every feature that reads `aa-intensity` (fade/rotate/slide translate, parallax depth, stack transforms, text-fade/blur offsets, hover-icon trail timing, marquee scrub sweep, nav hide-clearance, tabs scroll-pin range). `1` reproduces each feature's design baseline; `0.5` halves, `2` doubles. **Baselines by family**: fade-\*/rotate-up `3rem`, text-blur (all directions) `2rem` (all root-font-size relative); slide-\*/text-slide-\*/text-tilt-\* line masks + hover-bg-block `100%` of element or line (element-relative); parallax `±10%` of range; marquee scrub `±10vw`. Rem-based values track `:root { font-size }` and rebuild on breakpoint changes via `gsap.matchMedia` — so per-breakpoint stepped root sizes Just Work; a fluid `clamp()` on `:root` locks in at breakpoint entry. |
 | `loadDelay` | `0.1` | Seconds added to every `aa-trigger="load"` / `"load-once"` animation's delay so the entrance plays a beat after `init()` settles. Composes additively with per-element `aa-delay` (`aa-delay="0.3"` + `loadDelay: 0.1` fires at `0.4s`). Scroll / event / click / scrub triggers are unaffected. Skipped on slow-load revisits (`html[aa-fallback]`), where the entrance is already replaced by the inline CSS fallback. Set to `0` to opt out globally. |
 | `scrollStart` | `'top 85%'` | Default ScrollTrigger `start`. Used by every scroll-triggered animation. |
 | `scrollEnd` | `'bottom 60%'` | Default ScrollTrigger `end`. Only used when `aa-scrub` is set. Non-scrubbed animations ignore this — the `again: true` reset point is computed dynamically (one viewport below the element), not from `scrollEnd`. |
@@ -352,7 +360,7 @@ Pipe shorthand: `snap` on desktop, `draggable` on mobile.
 </section>
 ```
 
-Each card is locked at `top: var(--aa-stack-top, 4rem)` via CSS sticky. Override per card with regular CSS (`.my-card { top: 6rem }`) or the variable (`style="--aa-stack-top: 6rem"`). Children inside `[aa-stack-card]` inherit `event:card-active` automatically — they fade up at `aa-scroll-start` (default `top 85%`) and reverse on full exit (the same `again` reset as scroll-triggered animations elsewhere). Add `aa-stack="enabled|none"` to disable on small screens.
+Each card is locked at `top: var(--aa-stack-top, 25vh)` via CSS sticky. The default is applied at zero specificity (via `:where()`), so any author class that sets `top` wins without `!important` — `.my-card { top: 6rem }` Just Works, including class-based styles authored in Webflow. The CSS variable (`style="--aa-stack-top: 6rem"`) is the no-CSS escape hatch. Children inside `[aa-stack-card]` inherit `event:card-active` automatically — they fade up at `aa-scroll-start` (default `top 85%`) and reverse on full exit (the same `again` reset as scroll-triggered animations elsewhere). Add `aa-stack="enabled|none"` to disable on small screens.
 
 **In-preset flags** (`aa-stack-in`): `fade`, `scale`, plus two parallel rotation families that share the same per-card curve but apply at different ends of the tween:
 

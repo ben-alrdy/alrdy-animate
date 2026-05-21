@@ -10,7 +10,7 @@ import TextDemo from '../../../../components/TextDemo.astro'
 
 This is purely CSS clip-path — no opacity fade — so the silhouette of the type is visible during the reveal.
 
-`aa-split` is not needed and is not listed below: the reveal is structurally per-line, so chars/words don't apply.
+`aa-split` is locked to `lines`: the reveal is structurally per-line, so chars/words don't apply. Any value you set is ignored.
 
 ## Variants
 
@@ -24,10 +24,11 @@ This is purely CSS clip-path — no opacity fade — so the silhouette of the ty
 | Attribute     | Default     | Notes                                              |
 | ------------- | ----------- | -------------------------------------------------- |
 | `aa-animate`  | (required)  | `text-oval-up` or `text-oval-down`.                |
+| `aa-split`    | `lines` (locked) | Cannot be overridden — the reveal wraps each line in a clip-ellipse. |
 | `aa-stagger`  | `0.1` (init)| Seconds between lines. Falls back to `init({ stagger: { lines } })` (default `0.1`). |
-| `aa-duration` | (init)      | Seconds.                                           |
+| `aa-duration` | (init)      | Seconds. Falls back to `init({ duration })` (default `0.6`). |
 | `aa-delay`    | `0`         | Seconds.                                           |
-| `aa-ease`     | (init)      | Any GSAP ease.                                     |
+| `aa-ease`     | (init)      | Any GSAP ease. Falls back to `init({ ease })` (default `power4.out`). |
 | `aa-scrub`    | (off)       | `true` or seconds — bind progress to scroll.       |
 
 Each line is clipped by an ellipse wrapper, so tight `line-height` values can shave descenders (g, j, p, q, y). Tune the [descender padding](/animations/utilities/aa-split/#descender-padding) via `--aa-line-mask-pad` if your typeface needs more room.

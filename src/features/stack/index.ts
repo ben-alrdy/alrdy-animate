@@ -385,18 +385,30 @@ function setupOne(
     }
 
     // Out tween: scrubbed over the *next* card's entry window. The last card
-    // has nothing to be overlaid by, so it holds its settled state.
+    // has nothing to be overlaid by, so it holds its settled state. The start
+    // is clamped to this card's lock point so out never begins while the in
+    // is still scrubbing — when D >= innerHeight - stickyTop the clamp is
+    // inert (behavior unchanged); when cards are closer than that, out
+    // begins exactly when in finishes, so the in's target value and the
+    // out's recorded from-state agree at the handoff. Without the clamp,
+    // pairings that share a property (e.g. `stack-in="scale"` +
+    // `stack-out="perspective"`, which both write `scale`) fight for the
+    // property on every scroll tick and snap visibly at activation.
     if (outFlags.size > 0 && index < cards.length - 1) {
       const nextCard = cards[index + 1]
-      const nextEntryStart = (): number => geometry.tops[index + 1] - window.innerHeight
-      const nextLockPoint = (): number => geometry.tops[index + 1] - geometry.stickyTop
+      const outStart = (): number =>
+        Math.max(
+          geometry.tops[index + 1] - window.innerHeight,
+          geometry.tops[index] - geometry.stickyTop,
+        )
+      const outEnd = (): number => geometry.tops[index + 1] - geometry.stickyTop
       const tween = gsap.to(card, {
         ...buildOutTo(outFlags, intensity),
         ease: 'power1.in',
         scrollTrigger: {
           trigger: nextCard,
-          start: nextEntryStart,
-          end: nextLockPoint,
+          start: outStart,
+          end: outEnd,
           scrub,
         },
       })

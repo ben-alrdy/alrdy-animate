@@ -91,8 +91,8 @@ export interface InitOptions {
    * Baselines by family:
    *
    * - **fade-\* / rotate-up translate** — `3rem` (root font-size relative).
-   * - **text-blur horizontal** — `2rem`.
-   * - **slide-\* / text-\* vertical masks / hover-bg-block** — element-relative
+   * - **text-blur (all directions)** — `2rem` (root font-size relative).
+   * - **slide-\* / text-slide-\* / text-tilt-\* / hover-bg-block** — element-relative
    *   (`100%` of element or line); scales with element size, not root font-size.
    * - **parallax / parallax-horizontal** — `±10%` of the parallax range.
    * - **marquee scrub** — `±10vw` (viewport-relative).

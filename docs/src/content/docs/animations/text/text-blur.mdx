@@ -6,31 +6,29 @@ description: Per-character blur entrances. Plain text-blur fades each character 
 import Demo from '../../../../components/Demo.astro'
 import TextDemo from '../../../../components/TextDemo.astro'
 
-The blur family splits the element into characters and fades each one in while a CSS blur filter dissipates. The plain variant has no positional offset; directional variants add an offset so characters drift into place behind the blur.
-
-`text-blur-up` / `text-blur-down` are line-masked — characters slide vertically by 110% of their own height and are clipped by their parent line. `text-blur-left` / `text-blur-right` slide horizontally by `30 × intensity` pixels.
+The blur family splits the element into characters and fades each one in while a CSS blur filter dissipates. The plain variant has no positional offset; directional variants add a soft `2rem × intensity` drift on the named axis so characters drift into place behind the blur.
 
 ## Variants
 
 | Variant            | Blur amount | Offset                                           |
 | ------------------ | ----------- | ------------------------------------------------ |
 | `text-blur`        | 20px        | none                                             |
-| `text-blur-up`     | 10px        | translateY 110% from below (line-masked)         |
-| `text-blur-down`   | 10px        | translateY 110% from above (line-masked)         |
-| `text-blur-left`   | 10px        | translateX `30 × intensity` from the right       |
-| `text-blur-right`  | 10px        | translateX `30 × intensity` from the left        |
+| `text-blur-up`     | 10px        | translateY `2rem × intensity` from below         |
+| `text-blur-down`   | 10px        | translateY `2rem × intensity` from above         |
+| `text-blur-left`   | 10px        | translateX `2rem × intensity` from the right     |
+| `text-blur-right`  | 10px        | translateX `2rem × intensity` from the left      |
 
 ## Attributes
 
 | Attribute     | Default     | Notes                                              |
 | ------------- | ----------- | -------------------------------------------------- |
 | `aa-animate`  | (required)  | One of the variants above.                         |
-| `aa-split`    | `chars`     | Override split mode. `text-blur-up`/`-down` line-mask by default — see [descender padding](/animations/utilities/aa-split/#descender-padding). |
+| `aa-split`    | `chars`     | Override split mode (`chars`, `words`, `lines`). No line mask by default — add `mask` if you want one (see [descender padding](/animations/utilities/aa-split/#descender-padding)). |
 | `aa-stagger`  | `0.02`      | Seconds between parts.                             |
-| `aa-duration` | (init)      | Seconds.                                           |
+| `aa-duration` | (init)      | Seconds. Falls back to `init({ duration })` (default `0.6`). |
 | `aa-delay`    | `0`         | Seconds.                                           |
-| `aa-intensity` | `1`        | Multiplier on the horizontal offset (left/right). |
-| `aa-ease`     | (init)      | Any GSAP ease.                                     |
+| `aa-intensity` | `1`        | Multiplier on the `2rem` translate offset.        |
+| `aa-ease`     | (init)      | Any GSAP ease. Falls back to `init({ ease })` (default `power4.out`). |
 | `aa-scrub`    | (off)       | `true` or seconds — bind progress to scroll.       |
 
 ## Required GSAP plugins

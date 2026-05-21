@@ -122,7 +122,7 @@ declare namespace JSX {
      *
      * - Mode: `chars` | `words` | `lines` | `lines-chars` | `lines-words`.
      * - `mask` (flag) — wrap each line in `overflow: clip` (typical for
-     *   `text-slide-*` and `text-blur-up`). Always line-level, never per-char or
+     *   `text-slide-*` and `text-tilt-*`). Always line-level, never per-char or
      *   per-word — a per-unit mask would trap the moving unit.
      * - `index` (flag) — expose 1-based `--char` / `--word` / `--line` CSS
      *   custom properties on each split unit, so you can derive
@@ -216,9 +216,10 @@ declare namespace JSX {
      * - **slide-\* translate** — baseline `100%` of the element's own size
      *   (element-relative; scales with element size, not root font-size — that's
      *   what keeps `slide-*` visually distinct from `fade-*`).
-     * - **text-blur horizontal** — baseline `2rem` per-char offset.
-     * - **text-blur vertical / text-slide / text-tilt / text-rotate** —
-     *   baseline `110%` of the line height (line-mask reveal, element-relative).
+     * - **text-blur (all directions)** — baseline `2rem` per-char offset
+     *   (root-font-size relative). No line mask — characters drift on the named axis.
+     * - **text-slide / text-tilt / text-rotate** — baseline `110%` of the line
+     *   height (line-mask reveal, element-relative).
      * - **text-fade directional** — baseline `60%` of the split unit (element-relative).
      * - **parallax / parallax-horizontal** — baseline `±10%` of the parallax range
      *   (viewport-relative).
@@ -554,10 +555,11 @@ declare namespace JSX {
 
     /**
      * Marker on each card inside `[aa-stack]`. The shipped stylesheet applies
-     * `position: sticky; top: var(--aa-stack-top, 4rem)`; override the offset
-     * with regular CSS (`.my-card { top: 6rem }`) or the CSS variable
-     * (`style="--aa-stack-top: 6rem"`). Animations inside default to
-     * `aa-trigger="event:card-active"`.
+     * `position: sticky; top: var(--aa-stack-top, 25vh)` at zero specificity
+     * (via `:where()`), so any author class that sets `top` wins without
+     * `!important`. Use regular CSS (`.my-card { top: 6rem }`) or the CSS
+     * variable (`style="--aa-stack-top: 6rem"`) to override. Animations
+     * inside default to `aa-trigger="event:card-active"`.
      */
     'aa-stack-card'?: string | boolean
 

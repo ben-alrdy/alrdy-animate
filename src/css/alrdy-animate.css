@@ -260,14 +260,14 @@ body.aa-modal-locked {
 
 /*
  * Stack feature: cards stick at the top of the viewport via CSS sticky.
- * GSAP only owns the entry / exit transforms and event firing. The author
- * controls the lock offset by overriding `--aa-stack-top` (per-card via
- * inline style or any selector) or by setting `top` directly. Low-specificity
- * attribute selector so any author class on the card wins cleanly.
+ * GSAP only owns the entry / exit transforms and event firing. Wrapped in
+ * `:where()` so the defaults are zero-specificity — any author class that
+ * sets `top` (or `position`) wins without `!important`. `--aa-stack-top` is
+ * the no-CSS escape hatch (`style="--aa-stack-top: 6rem"`).
  */
-[aa-stack-card] {
+:where([aa-stack-card]) {
   position: sticky;
-  top: var(--aa-stack-top, 4rem);
+  top: var(--aa-stack-top, 25vh);
   will-change: transform;
 }
 

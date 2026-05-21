@@ -8,15 +8,18 @@ import TextDemo from '../../../../components/TextDemo.astro'
 
 `text-rotate` wraps each split line in a perspective container and rotates the line in from `rotateX(-90deg)` while sliding up from below and scaling out from 75% horizontally. The wrapper uses `perspective: 5em` (relative to the element's font size) so depth scales naturally with the headline.
 
+`aa-split` is locked to `lines`: the reveal wraps each line in a perspective container, so chars/words don't apply. Any value you set is ignored.
+
 ## Attributes
 
 | Attribute     | Default     | Notes                                              |
 | ------------- | ----------- | -------------------------------------------------- |
 | `aa-animate`  | (required)  | `text-rotate`.                                     |
+| `aa-split`    | `lines` (locked) | Cannot be overridden — each line is wrapped in a perspective container. |
 | `aa-stagger`  | `0.1` (init)| Seconds between lines. Falls back to `init({ stagger: { lines } })` (default `0.1`). |
-| `aa-duration` | (init)      | Seconds.                                           |
+| `aa-duration` | (init)      | Seconds. Falls back to `init({ duration })` (default `0.6`). |
 | `aa-delay`    | `0`         | Seconds.                                           |
-| `aa-ease`     | (init)      | Any GSAP ease.                                     |
+| `aa-ease`     | (init)      | Any GSAP ease. Falls back to `init({ ease })` (default `power4.out`). |
 | `aa-scrub`    | (off)       | `true` or seconds — bind progress to scroll.       |
 
 ## Required GSAP plugins

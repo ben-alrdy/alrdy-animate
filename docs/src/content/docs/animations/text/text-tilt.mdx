@@ -20,10 +20,11 @@ import TextDemo from '../../../../components/TextDemo.astro'
 | Attribute     | Default     | Notes                                              |
 | ------------- | ----------- | -------------------------------------------------- |
 | `aa-animate`  | (required)  | `text-tilt-up` or `text-tilt-down`.                |
+| `aa-split`    | `lines`     | Override split mode (`chars`, `words`, `lines`). Lines stay masked regardless — see [descender padding](/animations/utilities/aa-split/#descender-padding). |
 | `aa-stagger`  | `0.1` (init)| Seconds between lines. Falls back to `init({ stagger: { lines } })` (default `0.1`). |
-| `aa-duration` | (init)      | Seconds.                                           |
+| `aa-duration` | (init)      | Seconds. Falls back to `init({ duration })` (default `0.6`). |
 | `aa-delay`    | `0`         | Seconds.                                           |
-| `aa-ease`     | (init)      | Any GSAP ease.                                     |
+| `aa-ease`     | (init)      | Any GSAP ease. Falls back to `init({ ease })` (default `power4.out`). |
 | `aa-scrub`    | (off)       | `true` or seconds — bind progress to scroll.       |
 
 Each line is clipped by a wrapper, so tight `line-height` values can shave descenders (g, j, p, q, y). Tune the [descender padding](/animations/utilities/aa-split/#descender-padding) via `--aa-line-mask-pad` if your typeface needs more room.

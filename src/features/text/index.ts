@@ -111,20 +111,11 @@ function blurAnim(direction?: Direction): TextAnim {
     }
   }
   const { prop, sign } = DIR_AXIS[direction]
-  if (prop === 'yPercent') {
-    return {
-      defaultSplit: 'chars',
-      maskLines: true,
-      buildFrom: () => ({ opacity: 0, filter: 'blur(10px)', yPercent: 110 * sign }),
-      to: { opacity: 1, filter: 'blur(0px)', yPercent: 0 },
-    }
-  }
-  // Horizontal blur uses an absolute rem offset scaled by aa-intensity instead
-  // of a yPercent mask shift — the visual is a soft drift, not a clip reveal.
+  const offsetProp = prop === 'yPercent' ? 'y' : 'x'
   return {
     defaultSplit: 'chars',
-    buildFrom: (i) => ({ opacity: 0, filter: 'blur(10px)', x: `${2 * sign * i}rem` }),
-    to: { opacity: 1, filter: 'blur(0px)', x: 0 },
+    buildFrom: (i) => ({ opacity: 0, filter: 'blur(10px)', [offsetProp]: `${2 * sign * i}rem` }),
+    to: { opacity: 1, filter: 'blur(0px)', [offsetProp]: 0 },
   }
 }
 

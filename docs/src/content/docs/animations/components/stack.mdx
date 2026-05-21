@@ -204,7 +204,7 @@ All three lifecycle slots active. Cards scale up from `0.8` as they enter, fire 
 <Demo caption={[{ label: "root", attrs: { "aa-stack": "", "aa-stack-in": "scale", "aa-stack-lock": "pulse", "aa-stack-out": "blur fade" } }, { label: "card", attrs: { "aa-stack-card": "" } }]}>
   <div data-demo-stage>
     <div data-spacer></div>
-    <section class="aa-stack-demo" aa-stack aa-stack-in="scale" aa-stack-lock="pulse" aa-stack-out="blur fade">
+    <section class="aa-stack-demo aa-stack-demo--tight" aa-stack aa-stack-in="scale" aa-stack-lock="pulse" aa-stack-out="blur fade">
       <article class="aa-stack-card aa-stack-card-1" aa-stack-card>
         <h3 class="aa-stack-card__h" aa-animate="text-fade-up" aa-split="lines mask">Scale on entry</h3>
         <p class="aa-stack-card__p" aa-animate="text-fade-up" aa-split="lines mask" aa-delay="0.15">Card scrubs from <code>scale: 0.8</code> to <code>1</code> as it approaches lock.</p>
@@ -232,6 +232,15 @@ All three lifecycle slots active. Cards scale up from `0.8` as they enter, fire 
        tweens have time to play before the next card locks. */
     gap: 50vh;
     padding: 2rem 0 50vh;
+  }
+  /* Tight 20vh gap deliberately packs cards closer than the entry-window
+     length (viewport − sticky-top). Without the in/out clamp, the out tween
+     would begin fading + blurring the card while its in tween was still
+     scaling it up — two animations visibly fighting for screen presence.
+     With the clamp, in finishes (card fully scaled, locked, pulsed) before
+     out starts, so the lifecycle reads cleanly even at this density. */
+  .aa-stack-demo--tight {
+    gap: 20vh;
   }
   .aa-stack-card {
     background: var(--sl-color-accent);

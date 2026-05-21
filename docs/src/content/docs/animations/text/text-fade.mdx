@@ -25,12 +25,12 @@ The fade family splits the element into characters and animates the opacity of e
 | Attribute     | Default     | Notes                                              |
 | ------------- | ----------- | -------------------------------------------------- |
 | `aa-animate`  | (required)  | One of the variants above.                         |
-| `aa-split`    | `chars`     | Override split mode (`chars`, `words`, `lines`). With `mask`, tune the [descender padding](/animations/utilities/aa-split/#descender-padding). |
-| `aa-stagger`  | `0.02`      | Seconds between parts.                             |
-| `aa-duration` | (init)      | Seconds.                                           |
+| `aa-split`    | `chars`     | Override split mode (`chars`, `words`, `lines`). Add `mask` flag for line clipping (see [descender padding](/animations/utilities/aa-split/#descender-padding)). |
+| `aa-stagger`  | `0.02`      | Seconds between parts. Falls back to `init({ stagger: { chars } })` (default `0.02`). |
+| `aa-duration` | (init)      | Seconds. Falls back to `init({ duration })` (default `0.6`). |
 | `aa-delay`    | `0`         | Seconds.                                           |
-| `aa-intensity` | `1`        | Multiplier on offset variants.                     |
-| `aa-ease`     | (init)      | Any GSAP ease.                                     |
+| `aa-intensity` | `1`        | Multiplier on offset variants. Falls back to `init({ intensity })` (default `1`). |
+| `aa-ease`     | (init)      | Any GSAP ease. Falls back to `init({ ease })` (default `power4.out`). |
 | `aa-scrub`    | (off)       | `true` or seconds — bind progress to scroll.       |
 
 ## Required GSAP plugins
