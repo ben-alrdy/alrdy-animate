@@ -37,6 +37,13 @@ Path to **v8.0.0** stable:
 
 ---
 
+## [8.0.0-alpha.17] — 2026-05-22
+
+### Fixed
+- Strip `.css` side-effect imports from emitted `.d.ts` files. Previously the side-effect `import '../css/alrdy-animate.css'` in `src/core/index.ts` was preserved verbatim into `dist/types/core/index.d.ts` (because of `verbatimModuleSyntax`), but at that location the relative path resolves to `dist/types/css/` which doesn't exist (CSS ships flat at `dist/alrdy-animate.css`). Consumer `tsc` failed the resolution and fell back to `any` for the whole entry module — forcing downstream Next.js projects to hand-mirror `InitOptions` in a local `.d.ts`. Now stripped via a post-`tsc` build step; Vite still bundles the CSS the same way (source untouched). After upgrading, downstream consumers can replace their `InitOptions` mirror with `import type { InitOptions } from 'alrdy-animate'`.
+
+---
+
 ## [8.0.0-alpha.7] — 2026-05-17
 
 ### Added
