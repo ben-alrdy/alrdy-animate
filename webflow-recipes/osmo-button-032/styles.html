@@ -1,0 +1,64 @@
+<style>
+  :root {
+    --button-032-color: #131313;
+    --button-032-color-hover-shine: #ef2528;
+    --button-032-color-background: #fff;
+    --button-032-color-focus: #fff;
+    --button-032-border-radius: 2.5em;
+    --button-032-focus-inset: -0.125em;
+    --button-032-index-offset: 1;
+    --button-032-hover-scale: 1.065 1.095;
+    --button-032-click-scale: 0.955, 0.925;
+    --button-032-ease-click: cubic-bezier(0.4, 0, 0.2, 1);
+    --button-032-ease-hover: cubic-bezier(0.625, 0.05, 0, 1);
+    --button-032-ease-natural: cubic-bezier(0.32, 0.12, 0.2, 1);
+    --button-032-ease-focus: cubic-bezier(0.32, 0.72, 0, 1);
+  }
+
+  .button-032 {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .button-032:active .button-032__bg {
+    transform: scale(var(--button-032-click-scale));
+  }
+
+  .button-032:is(:focus-visible)::after {
+    box-shadow: 0 0 0 0.125em var(--button-032-color-focus);
+    scale: var(--button-032-hover-scale);
+  }
+
+  .button-032::after {
+    content: '';
+    display: block;
+    position: absolute;
+    inset: var(--button-032-focus-inset);
+    border-radius: var(--button-032-border-radius);
+    transition: box-shadow 0.3s var(--button-032-ease-focus), scale 0.45s var(--button-032-ease-hover);
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  .button-032__bg {
+    transition: scale 0.45s var(--button-032-ease-hover), transform 0.15s var(--button-032-ease-click);
+  }
+
+  .button-032 .aa-char {
+    text-shadow: 0 1.1em var(--button-032-color-hover-shine);
+    transition: translate 0.3s var(--button-032-ease-hover), text-shadow 0.1s 0.15s ease;
+  }
+
+  @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+    .button-032:is(:hover, :focus-visible) .button-032__bg,
+    [data-hover]:is(:hover, :focus-visible) .button-032 .button-032__bg {
+      scale: var(--button-032-hover-scale);
+    }
+
+    .button-032:is(:hover, :focus-visible) .aa-char,
+    [data-hover]:is(:hover, :focus-visible) .button-032 .aa-char {
+      text-shadow: 0 1.1em currentColor;
+      translate: 0 -1.1em 0;
+      transition: translate 0.5s calc((var(--char) - var(--button-032-index-offset)) * 0.024s) var(--button-032-ease-hover), text-shadow 0.175s calc((var(--char) - var(--button-032-index-offset)) * 0.024s + 0.25s) ease;
+    }
+  }
+</style>

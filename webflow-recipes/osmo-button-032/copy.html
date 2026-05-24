@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Copy to Webflow — Osmo Button 032 (alrdy-animate)</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 2.5rem 1.5rem;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f6f7f9;
+      color: #131313;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.5rem;
+    }
+    .card {
+      width: 100%;
+      max-width: 720px;
+      background: #fff;
+      border-radius: 0.75rem;
+      padding: 2rem;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+    }
+    h1 {
+      font-size: 1.5rem;
+      margin: 0 0 0.5rem;
+    }
+    p.lead { color: #555; margin: 0 0 1.5rem; }
+    .preview {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 3rem 1.5rem;
+      background: #131313;
+      border-radius: 0.5rem;
+      margin-bottom: 1.5rem;
+      font-size: 1.5rem;
+    }
+    .actions {
+      display: flex;
+      gap: 0.75rem;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .copy-btn {
+      padding: 0.875rem 1.5rem;
+      border: none;
+      border-radius: 0.5rem;
+      background: #0667e6;
+      color: #fff;
+      font-weight: 600;
+      font-size: 0.95rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: background 0.15s ease, transform 0.1s ease;
+    }
+    .copy-btn:hover { background: #0556bd; }
+    .copy-btn:active { transform: translateY(1px); }
+    .success {
+      color: #10b981;
+      font-weight: 600;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+    .success.show { opacity: 1; }
+    ol.steps {
+      margin: 0;
+      padding-left: 1.25rem;
+      color: #444;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+    .note {
+      margin-top: 1.5rem;
+      padding: 0.75rem 1rem;
+      background: #f1f5f9;
+      border-left: 3px solid #0667e6;
+      border-radius: 0.25rem;
+      font-size: 0.85rem;
+      color: #475569;
+    }
+    code {
+      background: #e9edf2;
+      padding: 0.1rem 0.35rem;
+      border-radius: 0.2rem;
+      font-family: 'SF Mono', Menlo, monospace;
+      font-size: 0.85em;
+    }
+
+    /* Live preview of the actual button — mirrors styles.html exactly. */
+    :root {
+      --button-032-color: #131313;
+      --button-032-color-hover-shine: #ef2528;
+      --button-032-color-background: #fff;
+      --button-032-color-focus: #fff;
+      --button-032-border-radius: 2.5em;
+      --button-032-focus-inset: -0.125em;
+      --button-032-index-offset: 1;
+      --button-032-hover-scale: 1.065 1.095;
+      --button-032-click-scale: 0.955, 0.925;
+      --button-032-ease-click: cubic-bezier(0.4, 0, 0.2, 1);
+      --button-032-ease-hover: cubic-bezier(0.625, 0.05, 0, 1);
+      --button-032-ease-focus: cubic-bezier(0.32, 0.72, 0, 1);
+    }
+    .button-032 {
+      color: var(--button-032-color);
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      background-color: transparent;
+      outline: none;
+      padding: 0;
+      line-height: 1;
+      text-decoration: none;
+      display: inline-grid;
+      position: relative;
+    }
+    .button-032::after {
+      content: '';
+      display: block;
+      position: absolute;
+      inset: var(--button-032-focus-inset);
+      border-radius: var(--button-032-border-radius);
+      transition: box-shadow 0.3s var(--button-032-ease-focus), scale 0.45s var(--button-032-ease-hover);
+      pointer-events: none;
+      z-index: 1;
+    }
+    .button-032:active .button-032__bg { transform: scale(var(--button-032-click-scale)); }
+    .button-032__bg {
+      background-color: var(--button-032-color-background);
+      border-radius: var(--button-032-border-radius);
+      grid-area: 1 / 1;
+      width: 100%;
+      height: 100%;
+      transition: scale 0.45s var(--button-032-ease-hover), transform 0.15s var(--button-032-ease-click);
+    }
+    .button-032__inner {
+      grid-area: 1 / 1;
+      display: flex;
+      justify-content: center;
+      align-items: stretch;
+      padding: 0.75em 1em;
+      z-index: 1;
+    }
+    .button-032__text { clip-path: inset(0% 0% -15%); display: inline-block; }
+    .preview-char {
+      display: inline-block;
+      text-shadow: 0 1.1em var(--button-032-color-hover-shine);
+      transition: translate 0.3s var(--button-032-ease-hover), text-shadow 0.1s 0.15s ease;
+    }
+    @media (hover: hover) and (pointer: fine) {
+      .button-032:hover .button-032__bg { scale: var(--button-032-hover-scale); }
+      .button-032:hover .preview-char {
+        text-shadow: 0 1.1em currentColor;
+        translate: 0 -1.1em 0;
+        transition: translate 0.5s calc((var(--char) - 1) * 0.024s) var(--button-032-ease-hover), text-shadow 0.175s calc((var(--char) - 1) * 0.024s + 0.25s) ease;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Osmo Button 032 &mdash; alrdy-animate edition</h1>
+    <p class="lead">Hover the button below, then click <strong>Copy to Webflow</strong>. The Designer's <code>paste</code> handler will reconstruct the elements.</p>
+
+    <div class="preview">
+      <a href="#" class="button-032">
+        <span class="button-032__bg"></span>
+        <span class="button-032__inner">
+          <span class="button-032__text">
+            <span class="preview-char" style="--char: 1;">B</span><span class="preview-char" style="--char: 2;">u</span><span class="preview-char" style="--char: 3;">t</span><span class="preview-char" style="--char: 4;">t</span><span class="preview-char" style="--char: 5;">o</span><span class="preview-char" style="--char: 6;">n</span>
+          </span>
+        </span>
+      </a>
+    </div>
+
+    <div class="actions">
+      <button class="copy-btn" id="copy-btn" type="button">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="12" viewBox="0 0 18 12" fill="none" aria-hidden="true">
+          <path fill-rule="evenodd" clip-rule="evenodd" d="M18 0.5L12.2564 11.5H6.8616L9.26528 6.94113H9.15743C7.17441 9.46307 4.2157 11.1233 0 11.5V7.00422C0 7.00422 2.69689 6.84817 4.28232 5.21518H0V0.500083H4.81286V4.37819L4.92088 4.37775L6.88758 0.500083H10.5274V4.35359L10.6355 4.35342L12.676 0.5H18Z" fill="currentColor"/>
+        </svg>
+        Copy to Webflow
+      </button>
+      <span class="success" id="success">Copied! Switch to Webflow Designer and paste (&#8984;V / Ctrl&#8239;+&#8239;V).</span>
+    </div>
+
+    <ol class="steps" style="margin-top:1.5rem;">
+      <li>Click <strong>Copy to Webflow</strong> above. The JSON envelope is written to your clipboard with both <code>application/json</code> and <code>text/plain</code> MIME types.</li>
+      <li>Switch to the Webflow Designer. Click on the canvas where the button should land.</li>
+      <li>Paste (&#8984;V / Ctrl&#8239;+&#8239;V). Webflow reconstructs the element, classes, and base styles. The text span comes pre-wired with the custom attribute <code>aa-split="chars index"</code>.</li>
+      <li>Open <strong>Project Settings &rarr; Custom Code &rarr; Head</strong> and paste the contents of <code>styles.html</code> from this folder. Save and publish.</li>
+    </ol>
+
+    <div class="note">
+      Works in Chrome and modern Chromium-based browsers. If pasting fails: don't have the same Webflow project open in two tabs (it corrupts the clipboard state). Re-click <strong>Copy to Webflow</strong> if your clipboard contents got replaced in between.
+    </div>
+  </div>
+
+  <script>
+    const webflowJson = {"type":"@webflow/XscpData","payload":{"nodes":[{"_id":"e54e23b6-041b-1f41-37ac-141c92b19b3e","type":"Link","tag":"a","classes":["50b057fc-d59b-4686-5af8-259d96374f9a"],"children":["56fc7221-8990-700c-365e-8f040adc4baf","54d90396-c55c-c88d-a014-82af4e86f5c7"],"data":{"button":false,"block":"inline","eventIds":[],"link":{"mode":"external","url":"#"},"xattr":[{"name":"data-button-032","value":""}],"attr":{"id":""},"devlink":{"runtimeProps":{},"slot":""},"displayName":"","search":{"exclude":false},"visibility":{"conditions":[],"keepInHtml":{"tag":"False","val":{}}}}},{"_id":"56fc7221-8990-700c-365e-8f040adc4baf","type":"DOM","tag":"div","classes":["50b057fc-d59b-4686-5af8-259d96374f9b"],"children":[],"data":{"tag":"span","attributes":[],"text":false,"slot":"","visibility":{"conditions":[],"keepInHtml":{"tag":"False","val":{}}}}},{"_id":"54d90396-c55c-c88d-a014-82af4e86f5c7","type":"DOM","tag":"div","classes":["50b057fc-d59b-4686-5af8-259d96374f9c"],"children":["2540150d-38ac-e62f-a861-d8e3e7d2cc30"],"data":{"tag":"span","attributes":[],"text":false,"slot":"","visibility":{"conditions":[],"keepInHtml":{"tag":"False","val":{}}}}},{"_id":"2540150d-38ac-e62f-a861-d8e3e7d2cc30","type":"DOM","tag":"div","classes":["50b057fc-d59b-4686-5af8-259d96374f9d"],"children":["e9768647-a174-e1e4-c0ab-ab562637ff42"],"data":{"tag":"span","attributes":[{"name":"data-button-032-text","value":""},{"name":"aa-split","value":"chars index"}],"text":false,"slot":"","visibility":{"conditions":[],"keepInHtml":{"tag":"False","val":{}}}}},{"_id":"e9768647-a174-e1e4-c0ab-ab562637ff42","text":true,"v":"Button"}],"styles":[{"_id":"50b057fc-d59b-4686-5af8-259d96374f9a","fake":false,"type":"class","name":"button-032","namespace":"","comb":"","styleLess":"position: relative; padding-top: 0px; padding-right: 0px; padding-bottom: 0px; padding-left: 0px; background-color: transparent; outline-style: none; line-height: 1; text-decoration: none; color: @raw<|var(--button-032-color)|>; display: @raw<|inline-grid|>; user-select: @raw<|none|>;","variants":{},"children":[],"createdBy":"600de73c75a23e4818d075ab","origin":null,"selector":null},{"_id":"50b057fc-d59b-4686-5af8-259d96374f9b","fake":false,"type":"class","name":"button-032__bg","namespace":"","comb":"","styleLess":"width: 100%; height: 100%; padding-top: 0px; padding-right: 0px; padding-bottom: 0px; padding-left: 0px; grid-area: @raw<|1 / 1|>; background-color: @raw<|var(--button-032-color-background)|>; border-radius: @raw<|var(--button-032-border-radius)|>;","variants":{},"children":[],"createdBy":"600de73c75a23e4818d075ab","origin":null,"selector":null},{"_id":"50b057fc-d59b-4686-5af8-259d96374f9c","fake":false,"type":"class","name":"button-032__inner","namespace":"","comb":"","styleLess":"display: flex; width: 100%; height: 100%; justify-content: center; align-items: stretch; grid-column-gap: 0.125em; grid-row-gap: 0.125em; grid-area: @raw<|1 / 1|>; padding-top: 0.75em; padding-right: 1em; padding-bottom: 0.75em; padding-left: 1em; z-index: @raw<|1|>;","variants":{},"children":[],"createdBy":"600de73c75a23e4818d075ab","origin":null,"selector":null},{"_id":"50b057fc-d59b-4686-5af8-259d96374f9d","fake":false,"type":"class","name":"button-032__text","namespace":"","comb":"","styleLess":"clip-path: @raw<|inset(0% 0% -15% 0%)|>;","variants":{},"children":[],"createdBy":"600de73c75a23e4818d075ab","origin":null,"selector":null}],"assets":[],"ix1":[],"ix2":{"interactions":[],"events":[],"actionLists":[]}},"meta":{"droppedLinks":0,"dynBindRemovedCount":0,"dynListBindRemovedCount":0,"paginationRemovedCount":0,"universalBindingsRemovedCount":0,"unlinkedSymbolCount":0,"codeComponentsRemovedCount":0,"richTextComponentsStripped":false}};
+
+    const btn = document.getElementById('copy-btn');
+    const success = document.getElementById('success');
+    let hideTimer;
+
+    btn.addEventListener('click', () => {
+      const jsonString = JSON.stringify(webflowJson);
+
+      const handler = (e) => {
+        e.preventDefault();
+        e.clipboardData.setData('application/json', jsonString);
+        e.clipboardData.setData('text/plain', jsonString);
+      };
+
+      document.addEventListener('copy', handler);
+      const ok = document.execCommand('copy');
+      document.removeEventListener('copy', handler);
+
+      if (ok) {
+        success.classList.add('show');
+        clearTimeout(hideTimer);
+        hideTimer = setTimeout(() => success.classList.remove('show'), 5000);
+      } else {
+        success.textContent = 'Copy failed — try Chrome.';
+        success.style.color = '#dc2626';
+        success.classList.add('show');
+      }
+    });
+  </script>
+</body>
+</html>

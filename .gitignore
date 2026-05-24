@@ -36,6 +36,7 @@ yarn-error.log*
 # Test
 /coverage
 /test-results
+/docs/test-results
 /playwright-report
 
 # Playwright MCP screenshot/console output

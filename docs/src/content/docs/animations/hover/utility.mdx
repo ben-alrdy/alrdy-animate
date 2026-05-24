@@ -1,0 +1,136 @@
+---
+title: utility (aa-hover-trigger)
+description: Layer multiple hover effects on one element via aa-hover-trigger. Each child keeps a single aa-hover effect; the wrapper shares the mouseenter/leave event.
+---
+
+import Demo from '../../../../components/Demo.astro'
+
+`aa-hover-trigger` is a marker attribute placed on a wrapper. Any descendant element with `aa-hover` listens to **the wrapper's** mouseenter/leave, not its own. This lets you build composite buttons where the background, icon, and text each carry their own single `aa-hover` effect (no flag collisions) but all fire from one shared hover region.
+
+If no `aa-hover-trigger` exists on the page, every `aa-hover` element is its own trigger.
+
+## How it works
+
+At init the hover feature scans for `[aa-hover-trigger]` once, then maps every descendant `[aa-hover]` to its owning trigger. Top-down so the mental model is clear: *the trigger wraps these children*. Nested triggers correctly hand ownership to the innermost (document-order writes win).
+
+Each effect still runs against **its own host element** — only the event source changes. So a `<svg aa-hover="icon-right">` inside the trigger still wraps its icon in a clip box on the SVG; a `<span aa-hover="text">` still splits the span's text into chars. The trigger only decides *when* to fire.
+
+## Authoring rules
+
+1. Put `aa-hover-trigger` on the wrapper that should drive the hover.
+2. Give each child a single `aa-hover` value with its own flags (`icon-right reverse`, `curve vertical`, `text reverse`, …).
+3. Set `aa-duration` / `aa-delay` / `aa-ease` on each child individually. They share the *event*, not the *timing* — that's intentional so you can have the icon snap in faster than the curve sweeps.
+4. `aa-color` is per-effect — set it on each child you want coloured.
+
+## Live demo — curve + text reverse + icon-right on one button
+
+The wrapper carries the curve (four-direction by default — entry edge follows the cursor). The label chars lift and stay up while hovered (`text reverse`). The arrow slides off to the right; a clone slides in from the left and snaps back on leave (`icon-right reverse`). All three fire from the wrapper's mouseenter, even when the cursor sits inside the label or icon-box. `aa-color` on the icon recolours the slide-in clone so it stays visible against the black curve.
+
+```html
+<a class="cmp-btn" href="#" aa-hover-trigger aa-hover="curve" aa-color="#131313" aa-duration="0.6">
+  <span class="cmp-btn-label" aa-hover="text reverse" aa-color="#ffffff" aa-duration="0.5">
+    Click me
+  </span>
+  <span class="cmp-btn-icon" aa-hover="icon-right reverse" aa-color="#ffffff" aa-duration="0.5">
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M5 12h14M13 6l6 6-6 6"
+            stroke="currentColor" stroke-width="2" fill="none"
+            stroke-linecap="round" stroke-linejoin="round" />
+    </svg>
+  </span>
+</a>
+```
+
+<Demo caption={{ "wrapper": "aa-hover-trigger", "children": "curve / text reverse / icon-right reverse" }}>
+  <div data-demo-stage>
+    <div data-spacer></div>
+    <div class="cmp-row">
+      <a class="cmp-btn" href="#" aa-hover-trigger aa-hover="curve" aa-color="#131313" aa-duration="0.6">
+        <span class="cmp-btn-label" aa-hover="text reverse" aa-color="#ffffff" aa-duration="0.5">Click me</span>
+        <span class="cmp-btn-icon" aa-hover="icon-right reverse" aa-color="#ffffff" aa-duration="0.5" >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </span>
+      </a>
+    </div>
+    <div data-spacer></div>
+  </div>
+</Demo>
+
+## Live demo — underline-in + text reverse nested
+
+Two effects on the same word. The outer span owns the underline bar (`underline-in`); the inner span owns the char lift (`text reverse`). Both fire from the `<a>`'s mouseenter via the trigger map, so hovering anywhere on the link drives both at once.
+
+A small `padding-bottom` on the underline-in span keeps the bar from overlapping the descenders of the incoming text-shadow as the chars lift up — without it, the bar would sit on the same baseline the shadow's `g`/`y`-style descenders land on.
+
+```html
+<a class="cmp-link" href="#" aa-hover-trigger>
+  <span aa-hover="underline-in" aa-duration="0.5" style="padding-bottom: 0.15em">
+    <span aa-hover="text reverse" aa-duration="0.5">Click me</span>
+  </span>
+</a>
+```
+
+<Demo caption={{ "wrapper": "aa-hover-trigger", "outer": "underline-in", "inner": "text reverse" }}>
+  <div data-demo-stage>
+    <div data-spacer></div>
+    <div class="cmp-row">
+      <a class="cmp-link" href="#" aa-hover-trigger>
+        <span aa-hover="underline-in" aa-duration="0.5" style={{ paddingBottom: "0.15em" }}>
+          <span aa-hover="text reverse" aa-duration="0.5">Click me</span>
+        </span>
+      </a>
+    </div>
+    <div data-spacer></div>
+  </div>
+</Demo>
+
+<style>{`
+  .cmp-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2rem;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.5rem;
+  }
+  /* Composite button — curve fills the box, label + icon stack as siblings.
+     align-items: center keeps text and icon on a shared horizontal midline;
+     line-height: 1 (the text hover effect forces this on .cmp-btn-label too)
+     matches the icon box height (1em), so the two boxes are equal-height and
+     the centre line falls in the same place. */
+  .cmp-btn {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5em;
+    padding: 0.85em 1.4em;
+    color: #131313;
+    background: #ffffff;
+    border: 1.5px solid #131313;
+    border-radius: 999px;
+    text-decoration: none;
+    font: inherit;
+    line-height: 1;
+    cursor: pointer;
+  }
+  /* No z-index dance needed — the injected aa-hover-bg sits at z-index -1
+     within the host's stacking context (set up by prepareHost). */
+  .cmp-btn-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1em;
+    height: 1em;
+  }
+  .cmp-btn-icon svg {
+    width: 100%;
+    height: 100%;
+  }
+  .cmp-link {
+    color: #131313;
+    text-decoration: none;
+  }
+`}</style>
