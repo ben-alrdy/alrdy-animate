@@ -1,6 +1,8 @@
 import type { GsapHandle, GsapTimeline, GsapTween } from '../../core/gsap-detect'
+import type { StaggerValue } from '../../core/stagger'
+import { applySplit, type SplitMode } from '../../split/runtime'
 import { defaultEdge, detectEdge, type DirectionMode, type Edge } from './direction'
-import { prepareHost, restoreHost } from './host'
+import { ensurePositioned, prepareHost, restoreHost } from './host'
 
 // ===========================================================================
 // Block effect — solid panel sliding in from the entering edge
@@ -23,6 +25,7 @@ export interface BlockSettings {
 
 export function setupBlockHover(
   host: HTMLElement,
+  trigger: HTMLElement,
   gsap: GsapHandle,
   settings: BlockSettings,
 ): () => void {
@@ -31,27 +34,29 @@ export function setupBlockHover(
   const bg = document.createElement('span')
   bg.setAttribute('aa-hover-bg', 'block')
   bg.setAttribute('aria-hidden', 'true')
-  Object.assign(bg.style, {
-    position: 'absolute',
-    inset: '0',
-    pointerEvents: 'none',
-    background: settings.color,
-    willChange: 'transform',
-  })
-  // Inserted as the first child so content paints over the bg by DOM order
-  // alone — without this, broad selectors like `.host span { z-index: 1 }`
-  // would also match the injected span, tie on z-index, and let the bg
-  // (last child) cover the content. Absolutely-positioned children don't
-  // consume grid/flex slots, so layout stays unaffected.
-  host.insertBefore(bg, host.firstChild)
+  // Layout (position/inset/z-index/etc.) comes from the companion CSS rule
+  // on `[aa-hover-bg]`. Only the runtime-driven fill is set inline.
+  bg.style.background = settings.color
+  // Append rather than insert-first — `z-index: -1` (set by the CSS rule)
+  // combined with the host's `isolation: isolate` (set by prepareHost)
+  // puts the bg behind the host's other content regardless of DOM order,
+  // so we don't need the first-child trick anymore. Absolutely-positioned
+  // children don't consume grid/flex slots, so layout stays unaffected.
+  host.appendChild(bg)
 
   const start = BLOCK_TRANSFORM[defaultEdge(settings.mode)]
   gsap.gsap.set(bg, { xPercent: start.x, yPercent: start.y })
 
   let active: GsapTween | null = null
 
+  // Edge detection runs against the trigger's rect, not the host's: when
+  // trigger !== host (composite buttons), the mouseenter fires from somewhere
+  // on the wrapper that may sit entirely outside the host's box — measuring
+  // against the host would produce negative-axis nonsense and pick the wrong
+  // edge. The block/curve still paints on the host; only the "from" edge is
+  // resolved relative to the composite hit region the author intends.
   const onEnter = (event: MouseEvent): void => {
-    const t = BLOCK_TRANSFORM[detectEdge(event, host, settings.mode)]
+    const t = BLOCK_TRANSFORM[detectEdge(event, trigger, settings.mode)]
     active?.kill()
     active = gsap.gsap.fromTo(
       bg,
@@ -68,7 +73,7 @@ export function setupBlockHover(
   }
 
   const onLeave = (event: MouseEvent): void => {
-    const t = BLOCK_TRANSFORM[detectEdge(event, host, settings.mode)]
+    const t = BLOCK_TRANSFORM[detectEdge(event, trigger, settings.mode)]
     active?.kill()
     active = gsap.gsap.to(bg, {
       xPercent: t.x,
@@ -79,12 +84,12 @@ export function setupBlockHover(
     })
   }
 
-  host.addEventListener('mouseenter', onEnter)
-  host.addEventListener('mouseleave', onLeave)
+  trigger.addEventListener('mouseenter', onEnter)
+  trigger.addEventListener('mouseleave', onLeave)
 
   return () => {
-    host.removeEventListener('mouseenter', onEnter)
-    host.removeEventListener('mouseleave', onLeave)
+    trigger.removeEventListener('mouseenter', onEnter)
+    trigger.removeEventListener('mouseleave', onLeave)
     active?.kill()
     bg.remove()
     restoreHost(host, restore)
@@ -176,6 +181,7 @@ export interface CurveSettings {
 
 export function setupCurveHover(
   host: HTMLElement,
+  trigger: HTMLElement,
   gsap: GsapHandle,
   settings: CurveSettings,
 ): () => void {
@@ -186,26 +192,24 @@ export function setupCurveHover(
   svg.setAttribute('aria-hidden', 'true')
   svg.setAttribute('viewBox', '0 0 100 100')
   svg.setAttribute('preserveAspectRatio', 'none')
-  Object.assign(svg.style, {
-    position: 'absolute',
-    inset: '0',
-    width: '100%',
-    height: '100%',
-    pointerEvents: 'none',
-    fill: settings.color,
-  })
+  // Layout (position/inset/width/height/z-index/etc.) comes from the
+  // companion CSS rule on `[aa-hover-bg]`. Only the runtime-driven fill
+  // is set inline.
+  svg.style.fill = settings.color
 
   const path = document.createElementNS(SVG_NS, 'path')
   path.setAttribute('d', CURVE_FROM_PATHS[defaultEdge(settings.mode)].start)
   svg.appendChild(path)
-  // First-child insertion (see block.ts comment) — keeps content on top by
-  // DOM order even when broad sibling rules match the injected element.
-  host.insertBefore(svg, host.firstChild)
+  // Append (not first-child) — z-index: -1 + host's isolation: isolate
+  // keep the curve behind content regardless of DOM order. See block.
+  host.appendChild(svg)
 
   let active: GsapTween | null = null
 
+  // See setupBlockHover — edge detection runs against the trigger's rect to
+  // stay sane when trigger !== host (composite buttons).
   const onEnter = (event: MouseEvent): void => {
-    const edge = detectEdge(event, host, settings.mode)
+    const edge = detectEdge(event, trigger, settings.mode)
     const p = CURVE_FROM_PATHS[edge]
     active?.kill()
     active = gsap.gsap.fromTo(
@@ -222,7 +226,7 @@ export function setupCurveHover(
   }
 
   const onLeave = (event: MouseEvent): void => {
-    const edge = detectEdge(event, host, settings.mode)
+    const edge = detectEdge(event, trigger, settings.mode)
     active?.kill()
     const state = { p: 0 }
     active = gsap.gsap.to(state, {
@@ -236,12 +240,12 @@ export function setupCurveHover(
     })
   }
 
-  host.addEventListener('mouseenter', onEnter)
-  host.addEventListener('mouseleave', onLeave)
+  trigger.addEventListener('mouseenter', onEnter)
+  trigger.addEventListener('mouseleave', onLeave)
 
   return () => {
-    host.removeEventListener('mouseenter', onEnter)
-    host.removeEventListener('mouseleave', onLeave)
+    trigger.removeEventListener('mouseenter', onEnter)
+    trigger.removeEventListener('mouseleave', onLeave)
     active?.kill()
     svg.remove()
     restoreHost(host, restore)
@@ -315,6 +319,15 @@ export interface IconSettings {
   ease: string
   /** Lag (in seconds) between each successive icon starting its slide. */
   cloneLag: number
+  /**
+   * Color override for the clone(s). Default `currentColor` = no override
+   * (clone inherits the host's color, matching the original). Any other
+   * value is set inline as the clone's `color`, which feeds the cloned
+   * SVG's `stroke="currentColor"` paths — giving the "swap-in" icon a
+   * distinct colour against a coloured hover background (e.g. white clone
+   * over a black `curve` fill in a composite button).
+   */
+  color: string
 }
 
 /**
@@ -340,6 +353,7 @@ function scaleMotion(
 
 export function setupIconHover(
   host: HTMLElement,
+  trigger: HTMLElement,
   gsap: GsapHandle,
   settings: IconSettings,
 ): () => void {
@@ -379,6 +393,7 @@ export function setupIconHover(
       left: scaleOffset(map.cloneOffset.left, i),
       top: scaleOffset(map.cloneOffset.top, i),
     })
+    if (settings.color !== 'currentColor') clone.style.color = settings.color
     wrap.appendChild(clone)
     clones.push(clone)
   }
@@ -396,20 +411,391 @@ export function setupIconHover(
     tl.timeScale(1).play(0)
   }
   const onLeave = (): void => {
-    tl.reverse()
+    // 1.5× faster on reverse. `tl.reverse()` plays the timeline mirrored,
+    // which means the trailing clone's `cloneLag` becomes a LEAD lag on
+    // exit — the original is the last thing to return. Without a speed-up
+    // it reads as "the icon is late." Speeding the reverse keeps the
+    // forward chain effect intact while bringing the icon back into sync
+    // with the other effects' flat-duration leaves (block/text).
+    tl.timeScale(1.5).reverse()
   }
 
-  host.addEventListener('mouseenter', onEnter)
-  if (settings.reverse) host.addEventListener('mouseleave', onLeave)
+  trigger.addEventListener('mouseenter', onEnter)
+  if (settings.reverse) trigger.addEventListener('mouseleave', onLeave)
 
   return () => {
-    host.removeEventListener('mouseenter', onEnter)
-    if (settings.reverse) host.removeEventListener('mouseleave', onLeave)
+    trigger.removeEventListener('mouseenter', onEnter)
+    if (settings.reverse) trigger.removeEventListener('mouseleave', onLeave)
     tl.kill()
     for (const clone of clones) clone.remove()
     // Unwrap: drop the icon back to its original parent and remove the wrapper.
     parent.insertBefore(icon, wrap)
     wrap.remove()
     gsap.gsap.set(icon, { clearProps: 'transform' })
+  }
+}
+
+// ===========================================================================
+// Underline effect — animated underline bar(s) at the host's bottom edge
+// ===========================================================================
+
+export interface UnderlineSettings {
+  duration: number
+  delay: number
+  ease: string
+  color: string
+  /** `underline` → bar is always visible; on hover it collapses to the right
+   *  edge then re-grows from the left in a two-phase sweep. `underline-in` →
+   *  bar is off by default, sweeps in on hover and out on leave. */
+  variant: 'underline' | 'underline-in'
+}
+
+function createUnderlineBar(color: string): HTMLSpanElement {
+  const bar = document.createElement('span')
+  bar.setAttribute('aa-hover-underline', '')
+  bar.setAttribute('aria-hidden', 'true')
+  // Companion CSS supplies layout (position, width, height, default offset,
+  // currentColor background, transform-origin). Inline backgroundColor only
+  // when the author overrode aa-color away from currentColor.
+  if (color !== 'currentColor') bar.style.backgroundColor = color
+  return bar
+}
+
+/**
+ * `underline` — bar always visible. Hover plays a single sweep-out / sweep-in
+ * cycle (collapse to the right edge, then re-grow from the left). Mouseleave
+ * is a no-op because the cycle already lands back in the always-on state.
+ * A second mouseenter mid-cycle is ignored so the bar never re-enters
+ * partway through itself — two bars tiling each other's gap would render
+ * a simultaneous cross-fade visually static, hence the sequenced sweep.
+ */
+function setupUnderlineSweep(
+  host: HTMLElement,
+  trigger: HTMLElement,
+  gsap: GsapHandle,
+  settings: UnderlineSettings,
+): () => void {
+  const restore = ensurePositioned(host)
+  const bar = createUnderlineBar(settings.color)
+  host.appendChild(bar)
+  gsap.gsap.set(bar, { scaleX: 1, transformOrigin: 'left center' })
+
+  let active: GsapTimeline | null = null
+  const half = settings.duration / 2
+
+  const onEnter = (): void => {
+    if (active) return
+    active = gsap.gsap
+      .timeline({ delay: settings.delay, onComplete: () => (active = null) })
+      .set(bar, { transformOrigin: 'right center' })
+      .to(bar, { scaleX: 0, duration: half, ease: settings.ease })
+      .set(bar, { transformOrigin: 'left center' })
+      .to(bar, { scaleX: 1, duration: half, ease: settings.ease })
+  }
+
+  trigger.addEventListener('mouseenter', onEnter)
+
+  return () => {
+    trigger.removeEventListener('mouseenter', onEnter)
+    active?.kill()
+    bar.remove()
+    restoreHost(host, restore)
+  }
+}
+
+/**
+ * `underline-in` — bar invisible at rest. Mouseenter grows it from the left,
+ * mouseleave shrinks it toward the right. Queue-up interrupt: a leave fired
+ * while IN is animating is deferred until IN settles, so quick flicks always
+ * produce one full IN + one full OUT — never a half-finished tween.
+ */
+function setupUnderlineIn(
+  host: HTMLElement,
+  trigger: HTMLElement,
+  gsap: GsapHandle,
+  settings: UnderlineSettings,
+): () => void {
+  const restore = ensurePositioned(host)
+  const bar = createUnderlineBar(settings.color)
+  host.appendChild(bar)
+  gsap.gsap.set(bar, { scaleX: 0, transformOrigin: 'left center' })
+
+  let inActive: GsapTween | null = null
+  let outActive: GsapTween | null = null
+  let pendingLeave = false
+
+  const runIn = (): void => {
+    // At rest (scaleX=0), reset origin to left so the bar sweeps in from
+    // the left edge. Mid-OUT (bar partially visible with origin=right),
+    // keep that origin so the bar grows back into view without snapping
+    // anchor — avoids the "flash to 0 then regrow from left" flicker on
+    // quick re-enters during retraction.
+    const current = Number(gsap.gsap.getProperty(bar, 'scaleX'))
+    if (current === 0) {
+      gsap.gsap.set(bar, { transformOrigin: 'left center' })
+    }
+    inActive = gsap.gsap.to(bar, {
+      scaleX: 1,
+      duration: settings.duration,
+      ease: settings.ease,
+      delay: settings.delay,
+      onComplete: () => {
+        inActive = null
+        if (pendingLeave) {
+          pendingLeave = false
+          runOut()
+        }
+      },
+    })
+  }
+
+  const runOut = (): void => {
+    outActive = gsap.gsap.fromTo(
+      bar,
+      { transformOrigin: 'right center' },
+      {
+        scaleX: 0,
+        duration: settings.duration,
+        ease: settings.ease,
+        onComplete: () => (outActive = null),
+      },
+    )
+  }
+
+  const onEnter = (): void => {
+    if (inActive) return
+    outActive?.kill()
+    outActive = null
+    pendingLeave = false
+    runIn()
+  }
+
+  const onLeave = (): void => {
+    if (inActive) {
+      pendingLeave = true
+      return
+    }
+    runOut()
+  }
+
+  trigger.addEventListener('mouseenter', onEnter)
+  trigger.addEventListener('mouseleave', onLeave)
+
+  return () => {
+    trigger.removeEventListener('mouseenter', onEnter)
+    trigger.removeEventListener('mouseleave', onLeave)
+    inActive?.kill()
+    outActive?.kill()
+    bar.remove()
+    restoreHost(host, restore)
+  }
+}
+
+export function setupUnderlineHover(
+  host: HTMLElement,
+  trigger: HTMLElement,
+  gsap: GsapHandle,
+  settings: UnderlineSettings,
+): () => void {
+  return settings.variant === 'underline'
+    ? setupUnderlineSweep(host, trigger, gsap, settings)
+    : setupUnderlineIn(host, trigger, gsap, settings)
+}
+
+// ===========================================================================
+// Text effect — chars/words translate up; text-shadow at original baseline
+// renders the "incoming" letter underneath. No DOM clones; pure shadow trick.
+// ===========================================================================
+
+export interface TextSettings {
+  duration: number
+  delay: number
+  ease: string
+  color: string
+  splitMode: SplitMode
+  stagger: StaggerValue
+  /** false (default) = one-shot: tween up, then instantly snap back to rest.
+   * The animation always plays to completion; re-hovers mid-tween are ignored.
+   * true = transition: chars stay up while hovered, return on leave, and either
+   * direction can be interrupted mid-tween (CSS-transition-like behaviour). */
+  reverse: boolean
+}
+
+/**
+ * Force the host into the layout invariant the shadow trick requires:
+ * `line-height: 1`, zero vertical padding, and a clip-path reference box.
+ * `display: inline` is upgraded to `inline-block` because clip-path on a
+ * raw inline element resolves percentages against a degenerate box and
+ * clips the chars to nothing (visible when the host sits inside another
+ * inline element). `block` / `inline-block` / `flex` etc. are left alone.
+ * With these guarantees the element box equals the font's em-box and the
+ * text-shadow trick lands cleanly. Authors who need vertical breathing
+ * room should wrap the host or use margin — padding on the host itself
+ * is what causes the shadow to leak.
+ */
+interface TextHostRestore {
+  lineHeight: string
+  paddingTop: string
+  paddingBottom: string
+  clipPath: string
+  display: string
+}
+
+function prepareTextHost(host: HTMLElement): TextHostRestore {
+  const restore: TextHostRestore = {
+    lineHeight: host.style.lineHeight,
+    paddingTop: host.style.paddingTop,
+    paddingBottom: host.style.paddingBottom,
+    clipPath: host.style.clipPath,
+    display: host.style.display,
+  }
+  host.style.lineHeight = '1'
+  host.style.paddingTop = '0'
+  host.style.paddingBottom = '0'
+  if (getComputedStyle(host).display === 'inline') host.style.display = 'inline-block'
+  return restore
+}
+
+function restoreTextHost(host: HTMLElement, restore: TextHostRestore): void {
+  host.style.lineHeight = restore.lineHeight
+  host.style.paddingTop = restore.paddingTop
+  host.style.paddingBottom = restore.paddingBottom
+  host.style.clipPath = restore.clipPath
+  host.style.display = restore.display
+}
+
+export function setupTextHover(
+  host: HTMLElement,
+  trigger: HTMLElement,
+  gsap: GsapHandle,
+  settings: TextSettings,
+): () => void {
+  const restoreState = prepareTextHost(host)
+
+  // Matches Osmo's button-032 defaults — battle-tested in production. The 0%
+  // top means ascenders at rest may clip slightly at the box top (accepted
+  // trade-off). The -15% bottom extends the visible region 15% below the box
+  // so descenders (g, p, q, y) render unclipped; combined with a 1.1em shift
+  // this leaves a sliver (~0.05em) where the shadow's top ascenders are
+  // technically visible, which is hidden in practice by the actual glyph
+  // ascent of typical fonts. Override per-host via `--aa-hover-text-clip`.
+  const clipOverride = getComputedStyle(host).getPropertyValue('--aa-hover-text-clip').trim()
+  host.style.clipPath = clipOverride || 'inset(0% 0% -15%)'
+
+  // Shift = how far chars translate AND how far the text-shadow sits below
+  // the original baseline. 1.1em (Osmo default) — chars at y=-1.1em are
+  // entirely above the box (char top at -1.1em, char bottom at -0.1em),
+  // making the one-shot's snap-back invisible. Override per-host via
+  // `--aa-hover-text-shift`. Use a length ≥ box height (1em).
+  const shift =
+    getComputedStyle(host).getPropertyValue('--aa-hover-text-shift').trim() || '1.1em'
+
+  let units: HTMLElement[] = []
+  let tl: GsapTimeline | null = null
+
+  const applyShadows = (els: HTMLElement[]): void => {
+    for (const u of els) u.style.textShadow = `0 ${shift} ${settings.color}`
+  }
+  const clearShadows = (els: HTMLElement[]): void => {
+    for (const u of els) u.style.textShadow = ''
+  }
+
+  const pickUnits = (split: {
+    words: HTMLElement[]
+    chars: HTMLElement[]
+    lines: HTMLElement[]
+  }): HTMLElement[] => {
+    if (settings.splitMode === 'words') return split.words
+    // `lines` mode + the companion CSS `white-space: nowrap` on hover-text
+    // hosts collapses the text to a single line — so SplitText('lines')
+    // produces one line wrapper, and tweening that wrapper lifts the whole
+    // text as a single block (no per-char/word stagger). The host itself
+    // stays put, so the text-shadow trick still reveals at the rest position.
+    if (settings.splitMode === 'lines') return split.lines
+    return split.chars
+  }
+
+  /**
+   * Build a paused timeline that lifts the chars to `y: -shift` with stagger.
+   * Reverse mode plays forward on enter / reverse on leave (resumes from
+   * current time, so fast flicks interrupt cleanly). One-shot mode plays
+   * forward then snaps back to y=0 via onComplete — the snap is invisible
+   * because chars at y=-shift sit above the clip-path's top edge.
+   *
+   * Using a timeline (rather than fresh `gsap.to` tweens per enter/leave)
+   * keeps the stagger naturally mirrored on reverse — the last char to lift
+   * is the first to drop, reading as a wave that goes up then back down
+   * instead of two same-direction waves.
+   */
+  const buildTimeline = (): void => {
+    tl?.kill()
+    tl = gsap.gsap.timeline({ paused: true })
+    tl.fromTo(
+      units,
+      { y: 0 },
+      {
+        y: `-${shift}`,
+        duration: settings.duration,
+        ease: settings.ease,
+        delay: settings.delay,
+        stagger: settings.stagger,
+      },
+    )
+    if (!settings.reverse) {
+      tl.eventCallback('onComplete', () => {
+        gsap.gsap.set(units, { y: 0 })
+      })
+    }
+  }
+
+  const split = applySplit(host, settings.splitMode, gsap, {
+    onResplit: (newSplit) => {
+      units = pickUnits(newSplit)
+      applyShadows(units)
+      buildTimeline()
+    },
+  })
+  units = pickUnits(split)
+  if (units.length === 0) {
+    split.revert()
+    restoreTextHost(host, restoreState)
+    return () => {}
+  }
+  applyShadows(units)
+  buildTimeline()
+
+  const onEnter = (): void => {
+    if (settings.reverse) {
+      // play() resumes forward from current time, so an enter mid-reverse
+      // picks up wherever the chars are and tweens back up smoothly.
+      // timeScale(1) resets the 1.5× speed-up applied on the previous leave.
+      tl!.timeScale(1).play()
+    } else {
+      // One-shot: replay from the start, but ignore re-entries while the
+      // animation is still in flight so the run always finishes.
+      if (tl!.isActive()) return
+      tl!.restart()
+    }
+  }
+
+  const onLeave = (): void => {
+    // Reverse mode only. 1.5× speed-up on exit matches the icon hover —
+    // the entrance gets to read at its full ease, the exit gets out of the
+    // way faster so quick flicks don't feel laggy. reverse() plays the
+    // timeline backward from current time, interrupting a partial enter
+    // cleanly.
+    tl!.timeScale(1.5).reverse()
+  }
+
+  trigger.addEventListener('mouseenter', onEnter)
+  if (settings.reverse) trigger.addEventListener('mouseleave', onLeave)
+
+  return () => {
+    trigger.removeEventListener('mouseenter', onEnter)
+    if (settings.reverse) trigger.removeEventListener('mouseleave', onLeave)
+    tl?.kill()
+    clearShadows(units)
+    restoreTextHost(host, restoreState)
+    split.revert()
   }
 }

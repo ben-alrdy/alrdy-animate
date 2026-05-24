@@ -13,6 +13,7 @@ export interface GsapInstance {
   fromTo: (...args: unknown[]) => GsapTween
   set: (...args: unknown[]) => GsapTween
   killTweensOf: (targets: unknown, props?: string) => void
+  getProperty: (target: unknown, property: string, unit?: string) => number | string
   delayedCall: (delay: number, callback: () => void, params?: unknown[], scope?: unknown) => GsapTween
   timeline: (...args: unknown[]) => GsapTimeline
   defaults: (vars?: Record<string, unknown>) => Record<string, unknown>
@@ -74,6 +75,12 @@ export interface GsapTimeline extends GsapTween {
   play: (from?: number | string, suppressEvents?: boolean) => GsapTimeline
   pause: (atTime?: number | string, suppressEvents?: boolean) => GsapTimeline
   reverse: (from?: number | string, suppressEvents?: boolean) => GsapTimeline
+  /** Rewind to time 0 and play forward. */
+  restart: (includeDelay?: boolean, suppressEvents?: boolean) => GsapTimeline
+  /** True if the timeline has at least one active child tween right now. */
+  isActive: () => boolean
+  /** Set or replace a timeline lifecycle callback (`onComplete`, `onUpdate`, …). */
+  eventCallback: (type: string, callback?: (() => void) | null) => GsapTimeline
 }
 
 const PLUGIN_GLOBAL_NAMES: Record<string, string> = {

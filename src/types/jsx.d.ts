@@ -454,13 +454,62 @@ declare namespace JSX {
     'aa-modal-backdrop'?: string | boolean
 
     /**
-     * Hover animation preset. Values:
+     * Hover animation preset. Space-separated `head flag1 flag2 …`. Skipped on
+     * touch-only devices (via `(hover: hover)` media query) so it never gets
+     * stuck on tap.
      *
-     * - `bg-block` (`hover-bg-block`) — direction-aware background slide
-     *   (the bg block slides in from the side the cursor entered from).
+     * **Background fills** (inject a layer behind the host's content):
      *
-     * Pair with `aa-color` to colorize the element on hover. Feature: `hover`.
-     * No GSAP plugin required.
+     * - `block` — solid panel slides in from the cursor's entry edge.
+     * - `curve` — same idea, leading edge is a soft curved wave.
+     *
+     *   Flags: `all` (default — closest of 4 edges), `vertical` / `horizontal`,
+     *   or one of `top`/`bottom`/`left`/`right` to force.
+     *
+     * **Icon swap** (clones a descendant `<svg>` through a clip box):
+     *
+     * - `icon-<dir>` where `<dir>` is `up`, `down`, `left`, `right`,
+     *   `up-right`, `up-left`, `down-right`, `down-left`. Original slides
+     *   off; clone enters from the opposite side.
+     *
+     *   Flags: `reverse` (re-reverse on leave instead of one-shot),
+     *   `triple` (two clones for a longer trail).
+     *
+     * **Underline** (injects a bar at the host's bottom edge — queue-up
+     * interrupt model: full IN completes before OUT on quick flicks):
+     *
+     * - `underline-in` — no underline by default; sweeps in left → right on
+     *   hover, retracts right-ward on leave.
+     * - `underline` — underline always present; on hover the bar collapses
+     *   toward the right edge then re-grows from the left in a two-phase
+     *   sweep, ending in the same visible state.
+     *
+     *   CSS variables: `--aa-hover-underline-thickness` (default `0.0625em`),
+     *   `--aa-hover-underline-offset` (default `0`; auto-set to `0.05em` on
+     *   every `<p>` so inline links clear deep descenders. Positive pushes
+     *   the bar further below the text, negative pulls it up into the host's
+     *   content box).
+     *
+     * **Text** (char/word lift with `text-shadow` filling the original
+     * position — uses `clip-path` for visual clipping, no overflow mutation):
+     *
+     * - `text` — one-shot scroll: chars tween up, instant invisible reset on
+     *   completion. Each hover replays. Stateless.
+     * - `text reverse` — stay-until-leave: chars stay up while hovered;
+     *   mouseleave plays reverse. Queue-up interrupt model.
+     *
+     *   Pair with `aa-split="chars"` (default), `"words"`, or `"lines"` to
+     *   pick the granularity — `lines` lifts the whole label as a single
+     *   block (companion CSS enforces `white-space: nowrap` on text-hover
+     *   hosts so multi-word labels stay on one line). Pair with `aa-stagger`
+     *   for per-unit lag (no effect with `lines`, since there's only one unit).
+     *   CSS variables: `--aa-hover-text-shift` (default `1.1em`),
+     *   `--aa-hover-text-clip` (default `inset(0% 0% -15%)`).
+     *   Requires GSAP `SplitText`.
+     *
+     * Pair with `aa-color` to override the bar/panel/text-shadow color
+     * (default `currentColor`). Combine effects via [[aa-hover-trigger]] on a
+     * wrapper. Feature: `hover`.
      */
     'aa-hover'?: string
     /** Breakpoint variant of `aa-hover`. Activates at `>= breakpoints.sm`. */
@@ -472,9 +521,34 @@ declare namespace JSX {
     /** Breakpoint variant of `aa-hover`. Activates at `>= breakpoints.xl`. */
     'aa-hover-xl'?: string
     /**
+     * Marker attribute on a wrapper element. Any descendant with `aa-hover`
+     * binds its mouseenter/mouseleave to **this** wrapper, not its own host —
+     * letting you build composite buttons where the background, icon, and
+     * text each carry a single `aa-hover` effect but all fire from one shared
+     * hover region.
+     *
+     * Each effect still runs against its own host element (DOM injection,
+     * style scope) — only the event source changes. Per-element timing
+     * attributes (`aa-duration`/`aa-delay`/`aa-ease`) stay independent so you
+     * can make different effects sync or vary.
+     *
+     * If no `aa-hover-trigger` exists on the page, every `aa-hover` element is
+     * its own trigger (current behavior preserved).
+     *
+     * Nested triggers: descendants belong to the innermost ancestor that
+     * carries `aa-hover-trigger`.
+     */
+    'aa-hover-trigger'?: string | boolean
+    /**
      * Color to fade the element to on hover. Any CSS color (`#ff0033`,
      * `rgb(...)`, named color). Used on its own or with `aa-hover` for combined
      * direction-aware bg + colorize.
+     *
+     * **Icon-hover caveat:** for the `icon-<dir>` head, `aa-color` sets `color`
+     * on the clone — which only paints SVG `<path>` elements that use
+     * `fill="currentColor"` / `stroke="currentColor"`. SVGs with literal
+     * `fill="#000"` / `stroke="#000"` in their markup will not change colour;
+     * patch the SVG to use `currentColor` for the override to take effect.
      */
     'aa-color'?: string
     /** Breakpoint variant of `aa-color`. Activates at `>= breakpoints.sm`. */

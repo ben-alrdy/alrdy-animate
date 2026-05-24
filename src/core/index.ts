@@ -207,6 +207,32 @@ export async function init(options: InitOptions = {}): Promise<void> {
       requiredPlugins.add('ScrollTrigger')
     }
     if (f === 'text' || f === 'split') requiredPlugins.add('SplitText')
+    if (
+      f === 'hover' &&
+      typeof document !== 'undefined' &&
+      typeof window !== 'undefined' &&
+      window.matchMedia('(hover: hover)').matches
+    ) {
+      // hover='text' (char/word lift) is the only hover head that needs
+      // SplitText. Sniff the DOM once so authors don't have to declare it.
+      // Skip on touch-only devices — the hover feature short-circuits there,
+      // so loading SplitText would burn payload for nothing.
+      const HOVER_ATTRS = ['aa-hover', 'aa-hover-sm', 'aa-hover-md', 'aa-hover-lg', 'aa-hover-xl']
+      const selector = HOVER_ATTRS.map((a) => `[${a}]`).join(',')
+      let needsSplit = false
+      for (const el of document.querySelectorAll(selector)) {
+        for (const attr of HOVER_ATTRS) {
+          const v = el.getAttribute(attr)
+          if (!v) continue
+          if (v.split('|').some((part) => part.trim().split(/\s+/)[0] === 'text')) {
+            needsSplit = true
+            break
+          }
+        }
+        if (needsSplit) break
+      }
+      if (needsSplit) requiredPlugins.add('SplitText')
+    }
     if (f === 'slider' || f === 'marquee') {
       requiredPlugins.add('Draggable')
       requiredPlugins.add('InertiaPlugin')

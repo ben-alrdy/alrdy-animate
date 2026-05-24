@@ -1,0 +1,202 @@
+---
+title: underline
+description: Animated underlines on hover. Two variants — sweep-in from off, or always-on with a two-phase sweep. Queue-up interrupt model keeps quick flicks clean.
+---
+
+import Demo from '../../../../components/Demo.astro'
+
+`aa-hover="underline-in"` and `aa-hover="underline"` add an animated underline bar at the bottom of the host. The library appends a single `<span aa-hover-underline>` and animates its `scaleX` — no HTML changes required. A **queue-up interrupt model** plays the full IN tween before any OUT, so rapid mouseenter→mouseleave flicks always settle cleanly.
+
+Touch-only devices skip the effect via `(hover: hover)` so iOS / Android don't fire stuck animations on tap.
+
+## Variants
+
+| Variant         | Default state          | On hover                                                                       |
+| --------------- | ---------------------- | ------------------------------------------------------------------------------ |
+| `underline-in`  | No underline           | Bar grows left → right; on leave, shrinks right-ward back to 0.                |
+| `underline`     | Underline always shown | Bar collapses toward the right edge, then re-grows from the left. Two phases.  |
+
+## Attributes
+
+| Attribute     | Default        | Notes                                                                            |
+| ------------- | -------------- | -------------------------------------------------------------------------------- |
+| `aa-hover`    | (required)     | `underline-in` or `underline`                                                    |
+| `aa-color`    | `currentColor` | Bar `background-color`                                                           |
+| `aa-duration` | (init)         | Seconds. For `underline`, this is the total sweep time (split into two halves).  |
+| `aa-delay`    | `0`            | Seconds before the enter animation starts.                                       |
+| `aa-ease`     | (init)         | Any GSAP ease — falls back to `init({ ease })` (default `power4.out`).           |
+
+## CSS variables
+
+The injected bar's layout (`position`, `width`, `height`, `transform-origin`, the offset math) all live in `alrdy-animate.css` — that import is **required** for the underline head, see the [Next.js install guide](/installation/nextjs/) or the [Webflow install guide](/installation/webflow/). Without it the bar renders as a static unstyled span.
+
+Set on the host, an ancestor, or `:root`. In Webflow, paste into a Custom Code embed `<style>` block — the Designer's Style panel can't author CSS custom properties.
+
+| Variable                            | Default      | Notes                                                                  |
+| ----------------------------------- | ------------ | ---------------------------------------------------------------------- |
+| `--aa-hover-underline-thickness`    | `0.0625em`   | Bar height.                                                            |
+| `--aa-hover-underline-offset`       | `0`          | Positive pushes the bar further below the text; negative pulls it up. Auto-bumped to `0.05em` for bars inside a `<p>` so inline links clear deep descenders. |
+
+## Required GSAP plugins
+
+`gsap`.
+
+## Live demo — `underline-in`
+
+Each link's bar sweeps in, then back out. Flick across rapidly — the queue-up model keeps every cycle clean.
+
+<Demo caption={{ "aa-hover": "underline-in", "aa-duration": "0.45" }}>
+  <div data-demo-stage>
+    <div data-spacer></div>
+    <div class="ul-row">
+      <a href="#" class="ul-link" aa-hover="underline-in" aa-duration="0.45">Read more</a>
+      <a href="#" class="ul-link" aa-hover="underline-in" aa-duration="0.45">View case study</a>
+      <a href="#" class="ul-link" aa-hover="underline-in" aa-duration="0.45">Download brief</a>
+    </div>
+    <div data-spacer></div>
+  </div>
+</Demo>
+
+## Live demo — `underline` (always-on)
+
+The line is permanent; hover collapses it to the right edge, then re-grows it from the left. Each phase runs for half of `aa-duration`.
+
+<Demo caption={{ "aa-hover": "underline", "aa-duration": "0.5" }}>
+  <div data-demo-stage>
+    <div data-spacer></div>
+    <nav class="ul-nav">
+      <a href="#" class="ul-nav-item" aa-hover="underline" aa-duration="0.5">Work</a>
+      <a href="#" class="ul-nav-item" aa-hover="underline" aa-duration="0.5">Studio</a>
+      <a href="#" class="ul-nav-item" aa-hover="underline" aa-duration="0.5">Journal</a>
+      <a href="#" class="ul-nav-item" aa-hover="underline" aa-duration="0.5">Contact</a>
+    </nav>
+    <div data-spacer></div>
+  </div>
+</Demo>
+
+## Live demo — thick underline via CSS variable
+
+`--aa-hover-underline-thickness: 0.2em` produces a heavy bar; a small positive `--aa-hover-underline-offset` pushes it clear of deep descenders.
+
+<Demo caption={{ "aa-hover": "underline-in", "--aa-hover-underline-thickness": "0.2em", "--aa-hover-underline-offset": "0.15em" }}>
+  <div data-demo-stage>
+    <div data-spacer></div>
+    <div class="ul-row">
+      <a href="#" class="ul-link ul-thick" aa-hover="underline-in" aa-duration="0.5">Bold link</a>
+      <a href="#" class="ul-link ul-thick" aa-hover="underline-in" aa-duration="0.5">Big claim</a>
+    </div>
+    <div data-spacer></div>
+  </div>
+</Demo>
+
+## Live demo — coloured underline (independent of text)
+
+`aa-color` overrides the bar's `background-color` so the underline reads in a brand colour while the text stays black.
+
+<Demo caption={{ "aa-hover": "underline-in", "aa-color": "#ef2528" }}>
+  <div data-demo-stage>
+    <div data-spacer></div>
+    <div class="ul-row">
+      <a href="#" class="ul-link" aa-hover="underline-in" aa-color="#ef2528" aa-duration="0.45">Red accent</a>
+      <a href="#" class="ul-link ul-lime" aa-hover="underline-in" aa-color="var(--aa-lime)" aa-duration="0.45">Lime highlight</a>
+    </div>
+    <div data-spacer></div>
+  </div>
+</Demo>
+
+## Host setup
+
+The bar lives inside the host with `position: absolute; bottom: 0; left: 0; width: 100%` — so it lands at the bottom edge of the host's content box. Two recipes cover almost every case.
+
+### Standalone link or button (recommended)
+
+For nav links, CTAs, or anything where the `<a>` doesn't live inside flowing paragraph text. Symmetric vertical padding adds clearance below the descenders **and** widens the hoverable area above the cap-height, so the cursor doesn't have to land exactly on the glyphs.
+
+```css
+.nav-link {
+  display: inline-block;
+  line-height: 1;
+  padding: 0.3em 0;
+  color: inherit;
+  text-decoration: none;
+}
+```
+
+```html
+<a class="nav-link" href="/work" aa-hover="underline">Work</a>
+```
+
+### Inline link inside paragraph text
+
+Leave layout alone — the default inline `<a>`'s bounding box already matches the glyph extent, so the bar lands near the descender baseline. The lib auto-sets `--aa-hover-underline-offset: 0.05em` on every `<p>`, mirroring the gap browsers use for `text-decoration: underline`, so this works out of the box. For deep-descender fonts (`g`, `j`, `y`) bump the offset higher with `--aa-hover-underline-offset: 0.1em` on the `<p>` (or any ancestor).
+
+For other block-level text containers (`<li>`, `<blockquote>`, custom `<div>` paragraphs), set the variable yourself to opt in:
+
+```css
+.prose { --aa-hover-underline-offset: 0.05em; }
+```
+
+```css
+p a {
+  color: inherit;
+  text-decoration: none;
+}
+```
+
+<Demo caption={{ "aa-hover": "underline" }}>
+  <div data-demo-stage>
+    <div data-spacer></div>
+    <div class="ul-paragraph"><span>We rebuilt the studio site last year, and the </span><a href="#" aa-hover="underline" aa-duration="0.4">writeup of the migration</a><span> walks through how a small team shipped a multi-page Webflow rebuild without touching a CMS field manually. The </span><a href="#" aa-hover="underline" aa-duration="0.4">follow-up notes</a><span> cover what we'd do differently next time.</span></div>
+    <div data-spacer></div>
+  </div>
+</Demo>
+
+<style>{`
+  .ul-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2rem;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.5rem;
+  }
+  .ul-nav {
+    display: flex;
+    gap: 2rem;
+    justify-content: center;
+    font-size: 1.2rem;
+  }
+  .ul-link, .ul-nav-item {
+    display: inline-block;
+    line-height: 1;
+    padding: 0.3em 0;
+    color: #131313;
+    text-decoration: none;
+  }
+  .ul-thick {
+    --aa-hover-underline-thickness: 0.2em;
+    --aa-hover-underline-offset: 0.15em;
+    font-weight: 700;
+  }
+  /* Chunky highlight bar (60% of font-size) pulled up into the text — negative
+     offset lifts the bar above the host's bottom edge so it sits behind the
+     glyphs' lower portion. */
+  .ul-lime {
+    --aa-hover-underline-thickness: 0.6em;
+    --aa-hover-underline-offset: -0.18em;
+  }
+  /* MDX auto-closes <p> when its content mixes text and JSX, so the demo uses
+     a <div> wrapper — and we opt the wrapper into the same offset default
+     that the lib's CSS auto-applies to real <p> elements. */
+  .ul-paragraph {
+    --aa-hover-underline-offset: 0.05em;
+    max-width: 38em;
+    margin: 0 auto;
+    line-height: 1.55;
+    font-size: 1rem;
+  }
+  .ul-paragraph a {
+    color: #131313;
+    text-decoration: none;
+  }
+`}</style>

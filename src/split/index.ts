@@ -12,6 +12,19 @@ function shouldSkip(el: Element): boolean {
     const v = el.getAttribute(`aa-animate-${bp}`)
     if (v && v.startsWith('text-')) return true
   }
+  // The hover 'text' head owns its own split via applySplit inside
+  // setupTextHover. Skip those elements so the split feature doesn't
+  // double-split them. Match exactly `text` — the hover parser doesn't
+  // recognize any other text-* head, so over-matching would silently
+  // suppress aa-split on typo'd hover values.
+  const hover = el.getAttribute('aa-hover') ?? ''
+  for (const part of hover.split('|')) {
+    if (part.trim().split(/\s+/)[0] === 'text') return true
+  }
+  for (const bp of ['sm', 'md', 'lg', 'xl']) {
+    const v = el.getAttribute(`aa-hover-${bp}`)
+    if (v && v.trim().split(/\s+/)[0] === 'text') return true
+  }
   return false
 }
 

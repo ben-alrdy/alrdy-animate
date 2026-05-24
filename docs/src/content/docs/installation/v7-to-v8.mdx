@@ -23,7 +23,7 @@ npm install alrdy-animate@alpha gsap lenis
 
 ## 1. CSS-only animations are gone
 
-**Biggest change.** v7 shipped two parallel engines: a CSS-keyframes path for lightweight scroll/load animations, and a GSAP path for everything else. v8 is GSAP-only. The shipped `alrdy-animate.css` now contains *only* split-text utility classes and a reduced-motion safety net.
+**Biggest change.** v7 shipped two parallel engines: a CSS-keyframes path for lightweight scroll/load animations, and a GSAP path for everything else. v8 is GSAP-only. The shipped `alrdy-animate.css` no longer carries keyframe animations — it now carries split-text utility classes, structural layout for the hover heads (`[aa-hover-bg]`, `[aa-hover-underline]`, `:where([aa-hover~="text"])`), the FOUC guard, and a reduced-motion safety net.
 
 What that means concretely:
 

@@ -1,6 +1,19 @@
 <!--
-  Last synced with src/ at v8.0.0-alpha.16 (2026-05-21) — feature module
-  `scroll` renamed to `appear` (fade/slide/zoom/blur/rotate presets). `reveal`
+  Last synced with src/ at v8.0.0-alpha.17 (2026-05-24) — hover feature
+  extended with `underline-in` / `underline` (animated underline bars,
+  two-phase sweep on the always-on `underline`, queue-up interrupt) and
+  `text` / `text reverse` (char or word lift via text-shadow + `clip-path`
+  clipping, no overflow mutation).
+  New `aa-hover-trigger` marker attribute on a wrapper makes descendants with
+  `aa-hover` bind to that wrapper's mouseenter/leave instead of their own —
+  letting one button combine background + icon + text hovers in a single
+  region. SplitText is now auto-required (and only) when an `aa-hover` head
+  is exactly `text`, and only on devices that report `(hover: hover)` so
+  touch-only payloads don't pay for it. `aa-split="lines"` paired with the
+  text head lifts the whole label as a single block (companion CSS forces
+  `white-space: nowrap` on text-hover hosts). Earlier alpha.16 — feature
+  module `scroll` renamed to `appear`
+  (fade/slide/zoom/blur/rotate presets). `reveal`
   and `slices` are still distinct lazy chunks but now live as sibling files
   under `src/features/appear/` to mirror the docs grouping. Public `FeatureName`
   values are `'appear' | 'reveal' | 'slices' | …` — old `'scroll'` is gone (it
@@ -221,7 +234,7 @@ Twelve features ship; the scanner detects which ones are needed by which attribu
 | `tabs` | `aa-tabs` | `ScrollTrigger` | Tab switching with progress indicator + autoplay. |
 | `nav` | `aa-nav` | `ScrollTrigger`, `Flip` | Scroll-spy nav with animated current/hover indicator. |
 | `modal` | `aa-modal-name` | (none) | Fixed-position dialogs with backdrop + close handling. |
-| `hover` | `aa-hover` | (none) | `hover-bg-block` direction-aware bg slide. |
+| `hover` | `aa-hover` | (none — `SplitText` if any `aa-hover` value is exactly `text`, and the device matches `(hover: hover)`) | `block` / `curve` direction-aware bg, `icon-<dir>` icon swap (with `reverse` / `triple` flags), `underline-in` / `underline` animated underline bars (queue-up interrupt), `text` / `text reverse` char / word / line lift with text-shadow (granularity via `aa-split="chars" \| "words" \| "lines"`). Combine effects via `aa-hover-trigger` on a wrapper. |
 | `cursor` | `aa-cursor` | (none) | Custom pointer tracking with state-driven styling. |
 | `stack` | `aa-stack` | `ScrollTrigger` | Stacking-card layout: CSS `position: sticky` locks cards, scrubbed in/out tweens + optional lock pulse animate the lifecycle, `card-active` / `card-inactive` events drive `aa-animate` children inside each card. |
 
@@ -388,6 +401,32 @@ await AlrdyAnimate.init({ root: container, debug: false })
 
 `keepGlobals: true` preserves Lenis and scroll observers across the navigation. `keepFromStates: true` keeps the leaving DOM frozen mid-animation instead of flashing to the visible state during the transition. See `docs/recipes/webflow-barba/` for the full lifecycle.
 
+### Composite hover button (`aa-hover-trigger`)
+
+Layer multiple hover effects on one button by putting `aa-hover-trigger` on the wrapper. Each child element keeps a single `aa-hover` effect with its own flags; all listen to the wrapper's mouseenter/leave via the trigger map. Per-element `aa-duration`/`aa-delay`/`aa-ease` keep timing independent so effects can sync or vary.
+
+```html
+<a aa-hover-trigger aa-hover="curve vertical" aa-color="#ef2528"
+   aa-duration="0.5" aa-ease="power3.out">
+  <span aa-hover="text" aa-color="#ffffff" aa-duration="0.5" aa-ease="power3.out">Click me</span>
+  <span class="icon" aa-hover="icon-right reverse triple" aa-duration="0.55" aa-ease="power3.out">
+    <svg viewBox="0 0 24 24" aria-hidden="true">…</svg>
+  </span>
+</a>
+```
+
+Hover anywhere on the link — even outside the icon or text — to fire all three effects from one event. For an underline + char-lift on the same word, nest two elements (no attribute composition needed):
+
+```html
+<a aa-hover-trigger>
+  <span aa-hover="underline-in">
+    <span aa-hover="text" aa-split="chars">Click me</span>
+  </span>
+</a>
+```
+
+Nested triggers: descendants belong to the innermost ancestor that carries `aa-hover-trigger`. If no `aa-hover-trigger` exists on the page, every `aa-hover` element is its own trigger.
+
 ### Custom event trigger
 
 ```html
@@ -468,7 +507,7 @@ Don't suggest these — they aren't shipped in v8:
 - **Pin** animations — to be rebuilt in v8.x.
 - **Form-submit** feature — dropped, no production use.
 - **Lazy-load image handler** — use native `loading="lazy"` instead.
-- **CSS-only animations / `.in-view` IntersectionObserver** — every animation is GSAP-driven. The shipped CSS file only carries split-utility classes and a reduced-motion safety net.
+- **CSS-only animations / `.in-view` IntersectionObserver** — every animation is GSAP-driven. The shipped CSS file carries split-utility classes, layout for the hover heads (`[aa-hover-bg]`, `[aa-hover-underline]`, `:where([aa-hover~="text"])`), structural marquee rules, the FOUC guard, and a reduced-motion safety net. The CSS import is **required** when using any hover head — drop the `import 'alrdy-animate/style'` (npm) or the `<link rel="stylesheet" href=".../alrdy-animate.css">` (CDN) and `block`/`curve`/`underline`/`underline-in`/`text` will render as unstyled spans / svgs.
 - **Page transitions** are out of scope — `init/destroy/refresh` lifecycle hooks let users wire Barba (Webflow) or View Transitions (Next.js) themselves. See the recipes referenced above.
 
 ---

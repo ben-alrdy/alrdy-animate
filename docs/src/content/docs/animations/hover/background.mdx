@@ -41,8 +41,10 @@ Examples: `aa-hover="block"`, `aa-hover="curve vertical"`, `aa-hover="block top"
 
 ## What gets injected
 
-- **block** — a `<span aa-hover-bg="block">` absolutely positioned to fill the host. The host gets `position: relative` + `overflow: hidden` if it doesn't already have them.
+- **block** — a `<span aa-hover-bg="block">` absolutely positioned to fill the host. The host gets `position: relative` + `overflow: hidden` + `isolation: isolate` if it doesn't already have them.
 - **curve** — an `<svg aa-hover-bg="curve" viewBox="0 0 100 100" preserveAspectRatio="none">` containing a single `<path>` that morphs between a degenerate edge-pinned shape and full coverage. Same host treatment as block.
+
+The injected layer's layout (`position: absolute; inset: 0; z-index: -1; pointer-events: none`) comes from `alrdy-animate.css` — that import is **required** for these effects, see the [Next.js install guide](/installation/nextjs/) or the [Webflow install guide](/installation/webflow/). Without it the injected `<span>` / `<svg>` renders as a static block and breaks layout.
 
 If you want hover-driven changes to anything else on the element (text colour, border, scale), do that in CSS using `:hover` — the lib intentionally keeps its scope to the injected layer.
 
@@ -160,8 +162,6 @@ Same list, but each row hovers with a curved wave instead of a flat panel.
     text-align: center;
   }
   .hover-tile-label {
-    position: relative;
-    z-index: 1;
     font-size: 1rem;
   }
 
@@ -184,9 +184,5 @@ Same list, but each row hovers with a curved wave instead of a flat panel.
     padding: 1.25rem 1.25rem;
     color: #131313;
     text-decoration: none;
-  }
-  .hover-list-item span {
-    position: relative;
-    z-index: 1;
   }
 `}</style>

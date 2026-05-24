@@ -1,0 +1,157 @@
+---
+title: text
+description: Char-by-char hover where letters translate up and a text-shadow renders the "incoming" copy at the original baseline. Pure CSS shadow trick — no DOM clones.
+---
+
+import Demo from '../../../../components/Demo.astro'
+
+`aa-hover="text"` splits the host's text into chars (or words via `aa-split="words"`), applies an inline `text-shadow` below each unit, and translates them upward on hover. The shadow takes the original position visually — no DOM clones, no extra weight per character.
+
+The host's `clip-path` is set inline so the shadow renders cleanly only within the text box. No `overflow` mutation — `clip-path` is purely visual and works on inline elements.
+
+For the clip mask to actually hide the shadow at rest, the host's box must equal its font em-box. The library enforces this by setting `line-height: 1` and `padding-top: 0` + `padding-bottom: 0` inline (saved and restored on dispose). Apply visual breathing room (padding, margin) to a parent wrapper, not directly to the host.
+
+Hover effects are skipped on touch-only devices via `(hover: hover)` so iOS / Android don't fire stuck animations on tap.
+
+## Variants
+
+| Variant         | Behavior                                                                       |
+| --------------- | ------------------------------------------------------------------------------ |
+| `text`          | *One-shot*: chars tween up, then instantly snap back. The animation always plays to completion; re-hovers during the tween are ignored. The snap is invisible because chars at the top of the tween sit above the clip and the shadow drops below it. |
+| `text reverse`  | *Transition*: chars translate up and stay while hovered; mouseleave plays the reverse. Either direction can be interrupted mid-tween — like a CSS hover transition. |
+
+## Attributes
+
+| Attribute     | Default        | Notes                                                                  |
+| ------------- | -------------- | ---------------------------------------------------------------------- |
+| `aa-hover`    | (required)     | `text` or `text reverse`                                               |
+| `aa-color`    | `currentColor` | Color of the `text-shadow` (the "incoming" copy)                       |
+| `aa-split`    | `chars`        | `chars` (default), `words`, or `lines` — granularity of the lift. `lines` collapses to a single unit via the companion CSS `white-space: nowrap` rule, so stagger has no effect there. |
+| `aa-stagger`  | (init)         | seconds between successive units — default per-mode from `init({ stagger })` |
+| `aa-duration` | (init)         | seconds — falls back to `init({ duration })` (default `0.6`)           |
+| `aa-delay`    | `0`            | seconds before the enter animation starts                              |
+| `aa-ease`     | (init)         | any GSAP ease — falls back to `init({ ease })` (default `power4.out`)  |
+
+## CSS variables
+
+`alrdy-animate.css` is **required** for the text head — it applies `white-space: nowrap` (at zero specificity, so designers can override) to keep the host single-line so the shift / clip math holds. See the [Next.js install guide](/installation/nextjs/) or the [Webflow install guide](/installation/webflow/). Without the CSS the host can wrap to two lines and the lifted chars will leak above the next line instead of clipping out of view.
+
+| Variable                  | Default               | Notes                                                                |
+| ------------------------- | --------------------- | -------------------------------------------------------------------- |
+| `--aa-hover-text-shift`   | `1.1em`               | Distance chars translate AND distance text-shadow sits below baseline. Matches Osmo's battle-tested `button-032` recipe. Use a length ≥ `1em`. |
+| `--aa-hover-text-clip`    | `inset(0% 0% -15%)`   | `clip-path` value set on the host. `0%` top clips at the box top; `-15%` bottom extends visible area below by 15% so descenders (g, p, q, y) render unclipped. The combination accepts a sub-pixel shadow peek-through at rest in exchange for clean descenders — same trade-off Osmo's recipe makes. |
+
+## Required GSAP plugins
+
+`gsap`, `SplitText`.
+
+## Live demo — baseline one-shot
+
+Default behavior. Each hover plays a single up-scroll; the chars snap back at completion. Re-hovering during the tween is ignored, so the animation always finishes once started.
+
+<Demo caption={{ "aa-hover": "text", "aa-duration": "0.5" }}>
+  <div data-demo-stage>
+    <div data-spacer></div>
+    <div class="tx-row">
+      <a href="#" class="tx-link" aa-hover="text" aa-duration="0.5">Click me</a>
+      <a href="#" class="tx-link" aa-hover="text" aa-duration="0.5">Learn more</a>
+      <a href="#" class="tx-link" aa-hover="text" aa-duration="0.5">Get started</a>
+    </div>
+    <div data-spacer></div>
+  </div>
+</Demo>
+
+## Live demo — `text reverse` (transition)
+
+Chars translate up and stay while hovered. Mouseleave plays the reverse. Either direction is interruptible — fast flicks back and forth never wait for a half-finished tween to land.
+
+<Demo caption={{ "aa-hover": "text reverse", "aa-duration": "0.5" }}>
+  <div data-demo-stage>
+    <div data-spacer></div>
+    <div class="tx-row">
+      <a href="#" class="tx-link" aa-hover="text reverse" aa-duration="0.5">Hover me</a>
+      <a href="#" class="tx-link" aa-hover="text reverse" aa-duration="0.5">Stay up</a>
+    </div>
+    <div data-spacer></div>
+  </div>
+</Demo>
+
+## Live demo — split modes (`chars` / `words` / `lines`)
+
+`aa-split` picks the granularity. `chars` (the default) lifts each character with stagger across the word. `words` lifts whole words. `lines` treats the entire label as a single unit — no stagger, the text moves as one block (companion CSS forces `white-space: nowrap` on text-hover hosts so this stays a single line).
+
+<Demo caption={{ "aa-hover": "text", "aa-split": "chars | words | lines", "aa-duration": "0.5" }}>
+  <div data-demo-stage>
+    <div data-spacer></div>
+    <div class="tx-row">
+      <a href="#" class="tx-link" aa-hover="text" aa-split="chars" aa-duration="0.5">Split by chars</a>
+      <a href="#" class="tx-link" aa-hover="text" aa-split="words" aa-duration="0.5">Split by words</a>
+      <a href="#" class="tx-link" aa-hover="text" aa-split="lines" aa-duration="0.5">Split by lines</a>
+    </div>
+    <div data-spacer></div>
+  </div>
+</Demo>
+
+## Live demo — custom shadow color (reverse only)
+
+`aa-color` sets the shadow color — the "incoming" copy renders in your brand colour while the source text stays neutral. This only makes visual sense with `reverse`: in the one-shot variant the chars snap back at completion, so a coloured shadow would briefly appear, then flick back to the original colour — jarring.
+
+<Demo caption={{ "aa-hover": "text reverse", "aa-color": "#ef2528", "aa-duration": "0.5" }}>
+  <div data-demo-stage>
+    <div data-spacer></div>
+    <div class="tx-row">
+      <a href="#" class="tx-link" aa-hover="text reverse" aa-color="#ef2528" aa-duration="0.5">Red on swap</a>
+    </div>
+    <div data-spacer></div>
+  </div>
+</Demo>
+
+## Live demo — bigger shift distance
+
+`--aa-hover-text-shift: 1.5em` exaggerates the scroll. Pair with a slightly longer duration so the travel feels right.
+
+<Demo caption={{ "aa-hover": "text reverse", "--aa-hover-text-shift": "3.5em", "aa-duration": "0.7" }}>
+  <div data-demo-stage>
+    <div data-spacer></div>
+    <div class="tx-row">
+      <a href="#" class="tx-link tx-shift" aa-hover="text reverse" aa-duration="0.7">Far travel</a>
+    </div>
+    <div data-spacer></div>
+  </div>
+</Demo>
+
+## Live demo — slow stagger wave
+
+Crank `aa-stagger` for a pronounced left-to-right wave across the chars.
+
+<Demo caption={{ "aa-hover": "text reverse", "aa-stagger": "0.02", "aa-duration": "0.5" }}>
+  <div data-demo-stage>
+    <div data-spacer></div>
+    <div class="tx-row">
+      <a href="#" class="tx-link" aa-hover="text reverse" aa-stagger="0.02" aa-duration="0.5">A long button label</a>
+    </div>
+    <div data-spacer></div>
+  </div>
+</Demo>
+
+<style>{`
+  .tx-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2rem;
+    /* Vertical padding goes here on the row, not on the .tx-link host —
+       the hover effect forces line-height: 1 + zero vertical padding on
+       the host so the clip-path math stays clean. */
+    padding: 0.5rem 0;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.8rem;
+  }
+  .tx-link {
+    color: #131313;
+    text-decoration: none;
+  }
+  .tx-shift {
+    --aa-hover-text-shift: 3.5em;
+  }
+`}</style>

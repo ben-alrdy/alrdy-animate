@@ -52,7 +52,7 @@ export function AlrdyInit() {
 }
 ```
 
-The `import 'alrdy-animate/style'` line is what carries the FOUC guard (`[aa-animate]:not([aa-ready]) { visibility: hidden }`) — without it, every animated element flashes briefly in its final state before init applies the from-states.
+The `import 'alrdy-animate/style'` line is **required**. It carries the FOUC guard (`[aa-animate]:not([aa-ready]) { visibility: hidden }`) — without it, every animated element flashes briefly in its final state before init applies the from-states. It also supplies the layout rules for the hover heads (`[aa-hover-bg]` for `block`/`curve`, `[aa-hover-underline]` for the underline bars including its `--aa-hover-underline-offset` / `--aa-hover-underline-thickness` variables, and the `:where([aa-hover~="text"])` nowrap rule for the text head) — drop the import and these effects render as static unstyled spans.
 
 ## Mount it in the root layout
 

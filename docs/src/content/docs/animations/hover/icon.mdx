@@ -38,13 +38,14 @@ Both flags are space-separated and combinable.
 
 ## Attributes
 
-| Attribute     | Default     | Notes                                                                  |
-| ------------- | ----------- | ---------------------------------------------------------------------- |
-| `aa-hover`    | (required)  | `icon-<direction>` plus optional `reverse` / `triple` flags            |
-| `aa-duration` | (init)      | seconds — falls back to `init({ duration })` (default `0.6`)           |
-| `aa-delay`    | `0`         | seconds before the enter animation starts                              |
-| `aa-ease`     | (init)      | any GSAP ease — falls back to `init({ ease })` (default `power4.out`)  |
-| `aa-intensity` | `1`         | multiplier on the base 50 ms lag between each successive icon starting its slide — `2` doubles the gap (slower trail), `0.5` halves it (tighter chain) |
+| Attribute     | Default        | Notes                                                                  |
+| ------------- | -------------- | ---------------------------------------------------------------------- |
+| `aa-hover`    | (required)     | `icon-<direction>` plus optional `reverse` / `triple` flags            |
+| `aa-color`    | `currentColor` | Colour applied to the cloned SVG(s) only — the original keeps the inherited colour. Use to make the slide-in clone stand out against a coloured hover background (e.g. `aa-color="#ffffff"` on an icon inside a `curve` button filling black). Requires the SVG to use `stroke="currentColor"` or `fill="currentColor"`. |
+| `aa-duration` | (init)         | seconds — falls back to `init({ duration })` (default `0.6`)           |
+| `aa-delay`    | `0`            | seconds before the enter animation starts                              |
+| `aa-ease`     | (init)         | any GSAP ease — falls back to `init({ ease })` (default `power4.out`)  |
+| `aa-intensity` | `1`           | multiplier on the base 50 ms lag between each successive icon starting its slide — `2` doubles the gap (slower trail), `0.5` halves it (tighter chain) |
 
 ## What gets injected
 

@@ -271,6 +271,88 @@ body.aa-modal-locked {
   will-change: transform;
 }
 
+/*
+ * Hover background layer (curve / block): JS appends a single
+ * <span aa-hover-bg="block"> or <svg aa-hover-bg="curve"> inside the host.
+ * `z-index: -1` paints it behind the host's own content; combined with the
+ * host's `isolation: isolate` (set by prepareHost) the negative z-index
+ * resolves *inside* the host's stacking context and doesn't fall through to
+ * the page background. JS only sets the runtime-driven color (background for
+ * block, fill for curve) inline.
+ */
+:where([aa-hover-bg]) {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  pointer-events: none;
+  will-change: transform;
+}
+
+/*
+ * Hover underline bar: JS appends a single <span aa-hover-underline> inside
+ * the host. This rule supplies layout + defaults so the JS only sets inline
+ * backgroundColor when aa-color overrides currentColor. Author can override
+ * thickness/offset via CSS variables on the host or :root, no JS needed.
+ */
+:where([aa-hover-underline]) {
+  position: absolute;
+  /* Sit behind the host's text content so a thick bar pulled up into the
+     glyphs (negative offset) reads as a highlighter, not as an opaque block
+     covering the text. The host is given `isolation: isolate` by the lib so
+     `z-index: -1` stays within the host's stacking context — it doesn't fall
+     through to the page background. */
+  z-index: -1;
+  left: 0;
+  /* `--aa-hover-underline-offset` reads naturally: positive = bar sits further
+     below the text; negative = bar pulled up into the host's content box. We
+     map that to CSS `bottom` by negating, since `bottom` measures from the
+     host's bottom edge upward (the CSS convention) which is the opposite of
+     what authors expect from "offset". The fallback needs an explicit unit —
+     `calc(0 * -1)` resolves to a unitless <number>, which is invalid for
+     `bottom` and falls back to `auto`. */
+  bottom: calc(var(--aa-hover-underline-offset, 0px) * -1);
+  width: 100%;
+  height: var(--aa-hover-underline-thickness, 0.0625em);
+  background-color: currentColor;
+  pointer-events: none;
+  transform-origin: left center;
+  will-change: transform;
+}
+
+/*
+ * Auto-clearance for inline <a> in paragraph text. Authors don't typically
+ * style <p> for animations, but the inline bar's `bottom: 0` lands exactly on
+ * the descender baseline — which clips fonts with deep `g`/`j`/`y` tails.
+ * Setting the variable on <p> (custom-property cascade, not a `bottom`
+ * declaration on the bar itself) gives descendant bars a baseline-matching
+ * gap without touching standalone-link hosts. Override per-element with the
+ * variable to widen / narrow the gap.
+ */
+:where(p) {
+  --aa-hover-underline-offset: 0.05em;
+}
+
+/*
+ * Hover text head: `white-space: nowrap` keeps the text on a single line so
+ * the shadow trick lines up. The clip-path math (`inset(0% 0% -15%)` + a
+ * 1.1em shift) assumes one line's worth of vertical space; wrapping to a
+ * second line would leak the lifted chars / wrapper above the next line
+ * instead of clipping out of view. `:where()` is zero-specificity so
+ * authors can override per-host when they explicitly want a multi-line
+ * hover-text effect.
+ */
+:where(
+  [aa-hover~='text'],
+  [aa-hover-sm~='text'],
+  [aa-hover-md~='text'],
+  [aa-hover-lg~='text'],
+  [aa-hover-xl~='text']
+) {
+  white-space: nowrap;
+}
+
 @media (prefers-reduced-motion: reduce) {
   [aa-animate] {
     transition-duration: 0ms !important;
