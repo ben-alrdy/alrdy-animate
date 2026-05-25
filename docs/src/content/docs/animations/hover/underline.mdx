@@ -5,7 +5,7 @@ description: Animated underlines on hover. Two variants — sweep-in from off, o
 
 import Demo from '../../../../components/Demo.astro'
 
-`aa-hover="underline-in"` and `aa-hover="underline"` add an animated underline bar at the bottom of the host. The library appends a single `<span aa-hover-underline>` and animates its `scaleX` — no HTML changes required. A **queue-up interrupt model** plays the full IN tween before any OUT, so rapid mouseenter→mouseleave flicks always settle cleanly.
+`aa-hover="underline-in"` and `aa-hover="underline"` add an animated underline bar at the bottom of the host. The library appends a single `<span aa-hover-underline>` and animates its `scaleX` — no HTML changes required. Rapid flicks stay directionally clean via an **asymmetric interrupt model**: a leave during IN is queued (the full IN runs first, then OUT), and an enter during OUT *fast-forwards* the in-flight shrink to ~100 ms before growing back in from the left — so OUT always retracts rightward and IN always grows leftward, even on quick reversals.
 
 Touch-only devices skip the effect via `(hover: hover)` so iOS / Android don't fire stuck animations on tap.
 

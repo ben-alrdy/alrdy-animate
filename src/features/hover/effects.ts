@@ -505,9 +505,10 @@ function setupUnderlineSweep(
 
 /**
  * `underline-in` — bar invisible at rest. Mouseenter grows it from the left,
- * mouseleave shrinks it toward the right. Queue-up interrupt: a leave fired
- * while IN is animating is deferred until IN settles, so quick flicks always
- * produce one full IN + one full OUT — never a half-finished tween.
+ * mouseleave shrinks it toward the right. Quick re-entry mid-OUT accelerates
+ * the in-flight tween to land within ~FINISH_SECONDS, then chains the IN tween
+ * — so direction stays correct (OUT rightward, IN leftward) with no snap.
+ * Quick re-leave mid-IN is queued: the full IN runs first, then OUT.
  */
 function setupUnderlineIn(
   host: HTMLElement,
@@ -515,6 +516,8 @@ function setupUnderlineIn(
   gsap: GsapHandle,
   settings: UnderlineSettings,
 ): () => void {
+  const FINISH_SECONDS = 0.1
+
   const restore = ensurePositioned(host)
   const bar = createUnderlineBar(settings.color)
   host.appendChild(bar)
@@ -523,30 +526,26 @@ function setupUnderlineIn(
   let inActive: GsapTween | null = null
   let outActive: GsapTween | null = null
   let pendingLeave = false
+  let pendingEnter = false
 
   const runIn = (): void => {
-    // At rest (scaleX=0), reset origin to left so the bar sweeps in from
-    // the left edge. Mid-OUT (bar partially visible with origin=right),
-    // keep that origin so the bar grows back into view without snapping
-    // anchor — avoids the "flash to 0 then regrow from left" flicker on
-    // quick re-enters during retraction.
-    const current = Number(gsap.gsap.getProperty(bar, 'scaleX'))
-    if (current === 0) {
-      gsap.gsap.set(bar, { transformOrigin: 'left center' })
-    }
-    inActive = gsap.gsap.to(bar, {
-      scaleX: 1,
-      duration: settings.duration,
-      ease: settings.ease,
-      delay: settings.delay,
-      onComplete: () => {
-        inActive = null
-        if (pendingLeave) {
-          pendingLeave = false
-          runOut()
-        }
+    inActive = gsap.gsap.fromTo(
+      bar,
+      { scaleX: 0, transformOrigin: 'left center' },
+      {
+        scaleX: 1,
+        duration: settings.duration,
+        ease: settings.ease,
+        delay: settings.delay,
+        onComplete: () => {
+          inActive = null
+          if (pendingLeave) {
+            pendingLeave = false
+            runOut()
+          }
+        },
       },
-    })
+    )
   }
 
   const runOut = (): void => {
@@ -557,15 +556,34 @@ function setupUnderlineIn(
         scaleX: 0,
         duration: settings.duration,
         ease: settings.ease,
-        onComplete: () => (outActive = null),
+        onComplete: () => {
+          outActive = null
+          if (pendingEnter) {
+            pendingEnter = false
+            runIn()
+          }
+        },
       },
     )
   }
 
   const onEnter = (): void => {
-    if (inActive) return
-    outActive?.kill()
-    outActive = null
+    if (inActive) {
+      // User flicked back over while IN is still growing — cancel the queued
+      // OUT so the bar doesn't immediately retract when IN completes.
+      pendingLeave = false
+      return
+    }
+    if (outActive) {
+      // Accelerate the in-flight OUT to land within FINISH_SECONDS wall-clock,
+      // then let its onComplete chain into runIn. Preserves directional
+      // integrity (OUT shrinks rightward; IN grows from left) without a snap.
+      pendingEnter = true
+      pendingLeave = false
+      const remainingAt1x = settings.duration * (1 - outActive.progress())
+      outActive.timeScale(Math.max(1, remainingAt1x / FINISH_SECONDS))
+      return
+    }
     pendingLeave = false
     runIn()
   }
@@ -573,6 +591,13 @@ function setupUnderlineIn(
   const onLeave = (): void => {
     if (inActive) {
       pendingLeave = true
+      return
+    }
+    if (outActive) {
+      // User pulled out mid-accelerated-finish. Cancel the queued IN and
+      // restore 1× playback so the bar shrinks at its natural pace.
+      pendingEnter = false
+      outActive.timeScale(1)
       return
     }
     runOut()
