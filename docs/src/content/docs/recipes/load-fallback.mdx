@@ -70,7 +70,7 @@ Drop this snippet into `<head>` *above* the alrdy-animate `<script>` and `<link>
 
 Tune the two constants at the top to taste. Keep `TIMEOUT_DELAY` well above `FALLBACK_DELAY` — the first is "let JS win the race for the hero", the second is "give up, show the page".
 
-**Why the inline `<style>`** — the same FOUC + fallback rules ship in `dist/alrdy-animate.css`, but on a slow connection that file lands *after* the HTML renders. Without inlining, every animated element flashes briefly visible, then disappears when the lib's CSS arrives, then fades back in when the timeout fires. Inlining the critical CSS in `<head>` closes that window — the FOUC guard is active from the very first paint.
+**Why the inline `<style>`** — the same FOUC + fallback rules ship in `dist/alrdy-animate.css`, but that file lands *after* the HTML renders — always on a slow connection, and deliberately so when you load it non-blocking (the [Webflow install guide](/installation/webflow/#1-site-wide-head-code) uses `media="print"` to keep it off the critical render path). Without inlining, every animated element flashes briefly visible, then disappears when the lib's CSS arrives, then fades back in when the timeout fires. Inlining the critical CSS in `<head>` closes that window — the FOUC guard is active from the very first paint, which is also what makes loading the external stylesheet non-blocking safe.
 
 ## How the staircase works
 
