@@ -17,44 +17,43 @@ There are three pieces, mapped to three places in Webflow:
 
 ## 1. Site-wide head code
 
-Paste this into **Project Settings → Custom Code → Head Code**. It loads everything in parallel via `defer`, with an inline FOUC + slow-network fallback that fires before any external script lands.
+Paste this into **Project Settings → Custom Code → Head Code**. It loads GSAP, Lenis, and alrdy-animate in parallel via `defer`, preceded by an inline FOUC guard + slow-network fallback that's active from the first paint — so animated content is never left invisible while the bundle downloads.
 
 ```html
 <!-- Slow-network + init-timeout safety (optional but recommended).
-     Two layers: aa-fallback fades aa-trigger="load"/"load-once" elements at
-     FALLBACK_DELAY (graceful hero staircase). aa-timeout reveals every
-     animated element at TIMEOUT_DELAY (universal safety if init never
-     arrives). See /recipes/load-fallback/ for the full explanation. -->
+     aa-fallback fades aa-trigger="load"/"load-once" elements at FALLBACK_DELAY
+     (graceful hero staircase). aa-timeout reveals every animated element at
+     TIMEOUT_DELAY (universal safety net if init never arrives). -->
 <script>
-  // Tune these two numbers without reading the rest of the snippet.
-  const FALLBACK_DELAY = 1000;  // ms — hero copy fades in via CSS keyframe
+  const FALLBACK_DELAY = 1000;  // ms — load elements fade in via CSS keyframe
   const TIMEOUT_DELAY  = 4000;  // ms — universal reveal if init never runs
+
+  const selectors = '[aa-trigger~="load"][aa-animate], [aa-trigger~="load-once"][aa-animate]';
+  const styled = new WeakSet();
 
   const applyFallback = () => {
     if (document.documentElement.hasAttribute('aa-loaded')) return;
     document.documentElement.setAttribute('aa-fallback', '');
-    document.querySelectorAll('[aa-trigger~="load"][aa-animate], [aa-trigger~="load-once"][aa-animate]').forEach((el) => {
-      const stagger = parseFloat(el.getAttribute('aa-stagger'));
+    document.querySelectorAll(selectors).forEach((el) => {
+      if (styled.has(el)) return;  // apply once, even across polls
+      styled.add(el);
       const baseDelay = parseFloat(el.getAttribute('aa-delay')) || 0;
-      if (Number.isFinite(stagger) && el.children.length > 0) {
-        el.style.animation = 'none';
-        el.style.visibility = 'visible';
-        Array.from(el.children).forEach((child, i) => {
-          child.style.animation = 'aa-fallback-appear 0.5s ease both';
-          child.style.animationDelay = (baseDelay + i * stagger) + 's';
-        });
-      } else if (baseDelay > 0) {
-        el.style.animationDelay = baseDelay + 's';
-      }
+      if (baseDelay > 0) el.style.animationDelay = baseDelay + 's';
     });
   };
-  setTimeout(() => {
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', applyFallback, { once: true });
-    } else {
-      applyFallback();
+
+  // Poll instead of waiting for DOMContentLoaded: render-blocking scripts
+  // (e.g. those Webflow injects) can delay that event well past these
+  // timers, so gating on it would never let the fallback win. 
+  const deadline = performance.now() + FALLBACK_DELAY + 8000;
+  const tryFallback = () => {
+    if (document.documentElement.hasAttribute('aa-loaded')) return;
+    applyFallback();
+    if (document.readyState === 'loading' && performance.now() < deadline) {
+      setTimeout(tryFallback, 100);
     }
-  }, FALLBACK_DELAY);
+  };
+  setTimeout(tryFallback, FALLBACK_DELAY);
 
   setTimeout(() => {
     if (document.documentElement.hasAttribute('aa-loaded')) return;
@@ -96,7 +95,7 @@ Paste this into **Project Settings → Custom Code → Head Code**. It loads eve
 <script defer src="https://cdn.jsdelivr.net/npm/alrdy-animate@{{version}}/dist/alrdy-animate.umd.js"></script>
 ```
 
-**Why `defer`** — without it, every `<script>` blocks HTML parsing, which makes the whole page wait for each download in series. With `defer`, all scripts download in parallel while the parser sails through the body; they then execute in document order at the end of parsing. This is faster on every connection, and it's a hard requirement for the [load-fallback recipe](/recipes/load-fallback/) to work on slow networks.
+**Why `defer`** — without it, every `<script>` blocks HTML parsing, which makes the whole page wait for each download in series. With `defer`, all scripts download in parallel while the parser sails through the body; they then execute in document order at the end of parsing. This is faster on every connection and lets `init()` run sooner. (The inline fallback above doesn't depend on it — it polls for the hero rather than waiting on parse completion — but `defer` still helps the real animations arrive faster. See the [load-fallback recipe](/recipes/load-fallback/).)
 
 **Tuning the two timeouts.** `FALLBACK_DELAY` (default 1s) controls the hero staircase fade for `aa-trigger="load"` / `"load-once"` elements; tune it to taste — lower = faster fallback, higher = more time for JS to win the race. `TIMEOUT_DELAY` (default 4s) is the universal safety net: if `init()` hasn't run by then, *all* `[aa-animate]` elements get revealed at their natural state with no entrance animation, so the page doesn't stay invisible if the bundle is blocked or errors. Keep it well above `FALLBACK_DELAY`. When init eventually arrives it detects `aa-timeout` and skips its appearance-feature work to avoid rewinding the now-visible elements through their from-states — interactive components (tabs, slider, modal, nav, hover, cursor) still wire up normally.
 
@@ -110,10 +109,20 @@ Paste this into **Project Settings → Custom Code → Footer Code**. The `DOMCo
 <script>
   document.addEventListener('DOMContentLoaded', () => {
     AlrdyAnimate.init({
-      debug: false,           // flip to true while building to see plugin warnings
-      duration: 0.6,          // global default; per-element aa-duration overrides
-      ease: 'smooth',         // named ease; CustomEase plugin required
-      smoothScroll: true,     // creates Lenis if window.Lenis is loaded
+      duration: 0.6,          
+      ease: 'smooth',
+      presets:{
+        'heading-style-h2': {
+          animate: 'text-fade-10',
+          split: 'words',
+          stagger: '0.05',
+        },
+        'heading-style-h3': {
+          animate: 'text-fade',
+          split: 'lines-chars',
+          stagger: '0.01 0.1',
+        },
+      }        
     })
   })
 </script>

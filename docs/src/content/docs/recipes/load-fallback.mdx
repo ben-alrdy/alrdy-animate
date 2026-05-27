@@ -10,44 +10,43 @@ The lib hides every `[aa-animate]` element with `visibility: hidden` until `init
 | **`aa-fallback`** | 1s | Fades `aa-trigger="load"` / `aa-trigger="load-once"` elements (hero copy) via a CSS keyframe — graceful staircase, respecting `aa-delay` and `aa-stagger`. |
 | **`aa-timeout`** | 4s | Reveals **every** `[aa-animate]` element at its natural state with no animation — universal safety net if init never runs. |
 
-Drop this snippet into `<head>` *above* the alrdy-animate `<script>` and `<link>` tags:
+Drop this snippet into `<head>` *above* the alrdy-animate `<script>` and `<link>` tags — and ideally above any other render-blocking `<script>` (e.g. Typekit), so the two timers start counting from page load rather than after that script downloads:
 
 ```html
+<!-- Slow-network + init-timeout safety (optional but recommended).
+     aa-fallback fades aa-trigger="load"/"load-once" elements at FALLBACK_DELAY
+     (graceful hero staircase). aa-timeout reveals every animated element at
+     TIMEOUT_DELAY (universal safety net if init never arrives). -->
 <script>
-  // Tune these two numbers without reading the rest of the snippet.
-  const FALLBACK_DELAY = 1000;  // ms — hero copy fades in via CSS keyframe
+  const FALLBACK_DELAY = 1000;  // ms — load elements fade in via CSS keyframe
   const TIMEOUT_DELAY  = 4000;  // ms — universal reveal if init never runs
+
+  const selectors = '[aa-trigger~="load"][aa-animate], [aa-trigger~="load-once"][aa-animate]';
+  const styled = new WeakSet();
 
   const applyFallback = () => {
     if (document.documentElement.hasAttribute('aa-loaded')) return;
     document.documentElement.setAttribute('aa-fallback', '');
-    document.querySelectorAll('[aa-trigger~="load"][aa-animate], [aa-trigger~="load-once"][aa-animate]').forEach((el) => {
-      const stagger = parseFloat(el.getAttribute('aa-stagger'));
+    document.querySelectorAll(selectors).forEach((el) => {
+      if (styled.has(el)) return;  // apply once, even across polls
+      styled.add(el);
       const baseDelay = parseFloat(el.getAttribute('aa-delay')) || 0;
-      if (Number.isFinite(stagger) && el.children.length > 0) {
-        // Parent is a container (e.g. card grid) — show it without fading,
-        // animate each direct child with the same stagger the JS init applies.
-        el.style.animation = 'none';
-        el.style.visibility = 'visible';
-        Array.from(el.children).forEach((child, i) => {
-          child.style.animation = 'aa-fallback-appear 0.5s ease both';
-          child.style.animationDelay = (baseDelay + i * stagger) + 's';
-        });
-      } else if (baseDelay > 0) {
-        el.style.animationDelay = baseDelay + 's';
-      }
+      if (baseDelay > 0) el.style.animationDelay = baseDelay + 's';
     });
   };
-  setTimeout(() => {
-    // If the body hasn't been parsed yet (slow connection blocking on
-    // render-blocking <script> tags), defer to DOMContentLoaded so the
-    // elements actually exist when we querySelectorAll them.
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', applyFallback, { once: true });
-    } else {
-      applyFallback();
+
+  // Poll instead of waiting for DOMContentLoaded: render-blocking scripts
+  // (e.g. those Webflow injects) can delay that event well past these
+  // timers, so gating on it would never let the fallback win. 
+  const deadline = performance.now() + FALLBACK_DELAY + 8000;
+  const tryFallback = () => {
+    if (document.documentElement.hasAttribute('aa-loaded')) return;
+    applyFallback();
+    if (document.readyState === 'loading' && performance.now() < deadline) {
+      setTimeout(tryFallback, 100);
     }
-  }, FALLBACK_DELAY);
+  };
+  setTimeout(tryFallback, FALLBACK_DELAY);
 
   setTimeout(() => {
     if (document.documentElement.hasAttribute('aa-loaded')) return;
@@ -63,9 +62,6 @@ Drop this snippet into `<head>` *above* the alrdy-animate `<script>` and `<link>
   html[aa-fallback] [aa-trigger~="load"][aa-animate]:not([aa-ready]),
   html[aa-fallback] [aa-trigger~="load-once"][aa-animate]:not([aa-ready]) {
     visibility: visible;
-    /* `both` so the from-state holds during any pre-start delay too. With
-       `forwards`, a delayed element renders at its natural opacity during
-       the delay, then jumps to opacity 0 at start — visible flicker. */
     animation: aa-fallback-appear 0.5s ease both;
   }
   html[aa-timeout] [aa-animate]:not([aa-ready]) { visibility: visible; }
@@ -78,12 +74,11 @@ Tune the two constants at the top to taste. Keep `TIMEOUT_DELAY` well above `FAL
 
 ## How the staircase works
 
-The script mirrors the two timing attributes the JS init already understands, so the fallback reveal looks like a quieter version of the real animation:
+The script honours one timing attribute so the fallback looks like a quieter version of the real animation:
 
-- **`aa-delay="<seconds>"`** — applies a delay to the element's own fade-up. E.g. a paragraph with `aa-delay="0.2"` appears 200ms after the headline.
-- **`aa-stagger="<seconds>"` on a parent (with children)** — the parent itself shows immediately (no fade), and each direct child fades up at `i * stagger`, just like the JS path animates the children with stagger when they're inside an `aa-stagger` parent. If the parent also has `aa-delay`, that's added as a base offset to every child.
+- **`aa-delay="<seconds>"`** — delays the element's fade-up. E.g. a paragraph with `aa-delay="0.2"` appears 200ms after the headline, so the hero's staircase still reads. CSS alone can't apply this (typed `attr()` isn't widely supported yet), so the script sets it inline.
 
-CSS alone can't read `aa-delay` or expand `aa-stagger` across non-sibling children — `:nth-child` only works among siblings, CSS counters can't drive `animation-delay`, and typed `attr()` isn't widely supported yet. The 18-line script handles both rules in one pass.
+Everything else fades as a whole element via the CSS keyframe. The script deliberately **ignores `aa-stagger`**: a stagger targets units that don't exist yet at fallback time — the split-text lines/chars of a `text-*` animation, or the children the real init walks — and the bundle hasn't run to create them. Trying to reproduce it risks animating the wrong nodes (e.g. only an inline `<span>` inside a headline, leaving the rest of the text to just appear). A clean whole-element fade is the safe quieter version; on a normal-speed load the bundle wins the race and the real per-line / per-child stagger plays instead.
 
 ## What each layer does
 
@@ -125,9 +120,17 @@ The default keyframe is a small upward translate (`translateY(1.5rem) → 0`) pl
 
 The duration, easing, and selector stay the same — just the keyframe content changes.
 
-## Use `defer` on your CDN scripts
+## Why the snippet polls instead of waiting for `DOMContentLoaded`
 
-For the per-element delays to actually fire on slow networks, the body needs to be parsed by the time the timer fires. Add `defer` to every `<script src="…">` in `<head>`:
+The obvious way to write the apply step is "wait until the DOM is ready, then style the hero" — gate on `document.readyState` and fall back to `DOMContentLoaded`. **Don't.** On a real page it loses the race every time, for a reason that isn't obvious:
+
+A render-blocking `<script src>` (no `defer`/`async`) pauses HTML parsing until it downloads. While the parser is paused, parsing is not "complete", so `document.readyState` stays `'loading'` and `DOMContentLoaded` does not fire. On a Webflow page there are always render-blocking scripts you don't control — Typekit in `<head>`, and the **jQuery + `webflow.js` + GSAP/ScrollTrigger** bundle Webflow appends at the *end* of `<body>`. On a genuinely slow connection those keep `readyState` at `'loading'` for **5–15 seconds**, and push `DOMContentLoaded` *past* `TIMEOUT_DELAY` — so the safety-net reveal has already fired and the staircase never plays. A `readyState`/`DOMContentLoaded` gate simply cannot win.
+
+The fix is to stop using "document finished parsing" as a proxy for "the hero exists." The hero is near the top of `<body>` and is parsed within the first second or two regardless of what's blocking further down the page. So the snippet **polls for the load-trigger elements** and applies the moment they appear — typically seconds before `DOMContentLoaded` on a slow load.
+
+### Still add `defer` to your own CDN scripts
+
+`defer` doesn't fix the snippet (you can't defer Webflow's injected scripts), but it's still worth doing on the `<script src="…">` tags *you* control:
 
 ```html
 <script defer src="https://cdn.jsdelivr.net/npm/gsap@3/dist/gsap.min.js"></script>
@@ -136,9 +139,7 @@ For the per-element delays to actually fire on slow networks, the body needs to 
 <script defer src="https://cdn.jsdelivr.net/npm/alrdy-animate@{{version}}/dist/alrdy-animate.umd.js"></script>
 ```
 
-Without `defer`, every `<script>` blocks HTML parsing — on slow 4G the body hasn't been parsed by the time the 1s timer fires, so `querySelectorAll` returns no elements and the per-element delays never get applied. The snippet's built-in `DOMContentLoaded` guard catches this case as a safety net (it defers the apply step until the DOM is ready), but by then the lib bundle has usually finished loading too and `init()` runs first — meaning the fallback never fires at all on slow networks.
-
-`defer` flips this: the parser sails through the body without waiting for downloads. The `[aa-trigger~="load"]` / `[aa-trigger~="load-once"]` elements exist by the time the timer fires, the snippet applies their delays inline, and the CSS keyframe plays out the staircase before the lib bundle even finishes downloading.
+Deferred scripts don't block parsing, so the hero parses sooner (the staircase can start earlier) and `init()` runs sooner once the bundle lands. Two related wins on Webflow specifically: load alrdy-animate's GSAP build *instead of* Webflow's native GSAP rather than both — shipping GSAP twice is a large chunk of the render-blocking weight that delays the real init — and if you can, bind your `AlrdyAnimate.init(...)` call to the bundle being ready rather than to `DOMContentLoaded`, which on a slow Webflow load is one of the last events to fire.
 
 ## When you don't need this
 
@@ -147,7 +148,7 @@ You can skip the snippet if any of these are true:
 - The bundle ships in your own JS bundle (Vite / Next.js / Webpack), not from a CDN. In that case bundle availability is bound to page render, not network latency, and a JS error would prevent the React tree itself from mounting — there's no `aa-animate` flash to protect against.
 - You're shipping behind aggressive caching where most visitors hit a warm bundle *and* you're comfortable with elements staying invisible on the rare error case.
 
-If you only want one of the two layers, delete the other `setTimeout` block and its corresponding CSS rule.
+If you only want one of the two layers, delete the other layer's `setTimeout(...)` (for `aa-fallback`, the `tryFallback` block and its scheduling `setTimeout`) and its corresponding CSS rule.
 
 ## Page transitions (Barba)
 
@@ -157,13 +158,15 @@ This snippet only protects the *first* page load. On subsequent navigations the 
 
 ### Layer 1 — `aa-fallback` (slow network)
 
-1. Confirm your CDN `<script>` tags use `defer` (see above) — without it the body isn't parsed when the timer fires and the per-element delays can't apply.
-2. Open DevTools → Network → check "Disable cache" → throttle to "Slow 3G" (or "Slow 4G").
-3. Reload. You should see:
-   - Hero elements stay invisible for ~1s (the `FALLBACK_DELAY` interval).
-   - At the timer mark, they fade up — respecting any `aa-delay` and `aa-stagger` you set, so the staircase plays out before the bundle finishes downloading.
+1. Open DevTools → Network → check "Disable cache" → throttle to "Slow 3G" (or "Slow 4G").
+2. Reload. You should see:
+   - Hero elements stay invisible for `FALLBACK_DELAY` plus however long the hero takes to parse — roughly 1–3s on a slow connection, not a hard 1s.
+   - They then fade up — respecting any `aa-delay` and `aa-stagger` you set, so the staircase plays out before the bundle finishes downloading.
+   - This should land *before* the `aa-timeout` reveal (4s default). If the staircase only ever appears as an instant, no-animation reveal at the 4s mark, the fallback isn't winning — see the troubleshooting note below.
    - When the bundle eventually lands, no second animation plays — the elements stay where the fallback put them.
-4. Open the Elements panel and inspect a load-trigger element while the fallback is in flight. You should see `style="animation-delay: 0.2s"` (or `style="animation: aa-fallback-appear 0.5s ease 0.1s 1 normal both running"` on a stagger child). If those inline styles are missing, the body wasn't parsed when the timer fired — check your `defer` attributes.
+3. Open the Elements panel and inspect a load-trigger element while the fallback is in flight. You should see `<html aa-fallback>`, and on any element with `aa-delay`, an inline `style="animation-delay: 0.2s"`. Elements without `aa-delay` fade via the CSS keyframe with no inline style. If `aa-fallback` is set but a delayed element's inline style is missing, the timer fired before that element parsed — the poll retries and applies it once it appears.
+
+If the staircase never plays and you only get the blanket 4s reveal, you almost certainly have an older copy of this snippet that gated the apply step on `document.readyState === 'loading'` / `DOMContentLoaded`. On any page with render-blocking scripts (every Webflow page) that gate defers the apply until `DOMContentLoaded`, which fires *after* the timeout — re-copy the current snippet, which polls instead.
 
 ### Layer 2 — `aa-timeout` (bundle never arrives)
 
