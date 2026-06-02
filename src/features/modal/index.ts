@@ -152,6 +152,7 @@ function setupOne(
     }
     animation.cleanup(state.entries, state.backdrop)
     state.group.removeAttribute(MODAL_GROUP_STATUS_ATTR)
+    state.group.style.removeProperty('visibility')
     for (const entry of state.entries) entry.card.removeAttribute(MODAL_STATUS_ATTR)
   }
 }

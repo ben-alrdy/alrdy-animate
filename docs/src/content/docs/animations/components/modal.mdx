@@ -172,11 +172,13 @@ Same primitives, but with a small form inside. After the open animation finishes
     outline-offset: 2px;
   }
 
-  /* Use visibility — not display:none — to keep child layout intact while
-     the modal is closed. SplitText's autoSplit fires on size changes
-     (display:none → block triggers a 0×0 → laid-out resize), which would
-     orphan inner aa-animate tweens by re-creating the .aa-char/.aa-line spans
-     on first open. */
+  /* The lib drives the group's visibility inline off aa-modal-group-status
+     (hidden when idle, visible while a modal is open). The only thing left
+     for CSS is the default-hidden state, which prevents a first-load flash
+     before init runs — the lib's inline visibility:visible overrides it on
+     open. visibility (not display:none) keeps child layout intact: SplitText's
+     autoSplit fires on a 0×0 → laid-out resize, which would orphan inner
+     aa-animate tweens by re-creating the .aa-char/.aa-line spans on first open. */
   .modal {
     position: fixed;
     inset: 0;
@@ -184,9 +186,6 @@ Same primitives, but with a small form inside. After the open animation finishes
     padding: 2em 1em;
     overflow: hidden;
     visibility: hidden;
-  }
-  .modal[aa-modal-group-status="active"] {
-    visibility: visible;
   }
 
   /* rgba on background-color (not the opacity property) so GSAP's autoAlpha

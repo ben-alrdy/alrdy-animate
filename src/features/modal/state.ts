@@ -41,6 +41,11 @@ export function createModalState(group: HTMLElement): ModalState {
 
   const setGroupStatus = (status: 'active' | 'not-active'): void => {
     group.setAttribute(MODAL_GROUP_STATUS_ATTR, status)
+    // Drive the group's own visibility inline so users don't need custom CSS
+    // keyed on the status attribute. visibility (not display) keeps the cards
+    // measurable for SplitText; a child card's own visibility:visible on open
+    // overrides this hidden parent, so the active card still shows.
+    group.style.visibility = status === 'active' ? 'visible' : 'hidden'
   }
 
   const activeEntry = (): ModalEntry | null => entries.find(isActive) ?? null
