@@ -58,7 +58,6 @@ function setupOne(
 
   let detachTrap: (() => void) | null = null
   let detachEsc: (() => void) | null = null
-  let lastOpener: HTMLElement | null = null
   let pendingOpenFocus: { kill: () => void } | null = null
 
   const closeEntry = (entry: ModalEntry): void => {
@@ -70,19 +69,15 @@ function setupOne(
     pendingOpenFocus?.kill()
     pendingOpenFocus = null
 
-    const opener = lastOpener
-    lastOpener = null
-
     const cardDuration = durationFor(entry)
     animation.close(entry, state.backdrop, cardDuration, () => {
       state.setStatus(entry, 'not-active')
       if (!state.activeEntry()) state.setGroupStatus('not-active')
       unlockBodyScroll()
-      opener?.focus({ preventScroll: true })
     })
   }
 
-  const openEntry = (entry: ModalEntry, opener: HTMLElement | null): void => {
+  const openEntry = (entry: ModalEntry): void => {
     if (state.isActive(entry)) return
 
     // If another modal in this group is already open, close it first. We
@@ -91,7 +86,6 @@ function setupOne(
     const prev = state.activeEntry()
     if (prev && prev !== entry) closeEntry(prev)
 
-    lastOpener = opener
     state.setGroupStatus('active')
     state.setStatus(entry, 'active')
     lockBodyScroll()
@@ -120,7 +114,7 @@ function setupOne(
     const entry = state.byName.get(name)
     if (!entry) return
     e.preventDefault()
-    openEntry(entry, trigger)
+    openEntry(entry)
   }
   document.addEventListener('click', onDocClick)
   cleanups.push(() => document.removeEventListener('click', onDocClick))

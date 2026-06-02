@@ -14,7 +14,7 @@ export interface AnimationController {
    * Reverse the card + inner aa-animate timelines (via the modal-inactive
    * event, which paired-reverses each subscriber at REVERSE_TIME_SCALE) and
    * fade the backdrop out. Calls onComplete after the longest of the two has
-   * finished so the caller can hide the group / restore focus / unlock.
+   * finished so the caller can hide the group / unlock scroll.
    */
   close: (
     entry: ModalEntry,
