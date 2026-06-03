@@ -227,6 +227,35 @@ Scroll up and down past this demo to see both motions compose.
   </div>
 </Demo>
 
+## Live demo — lazy-loaded images (regression test)
+
+The items here are `<img loading="lazy">` logos with **no `width`/`height` attributes**, so each item's real width is only known once the image loads. Because this section sits far down the page, the browser defers those loads until you scroll near it — which is *after* `init()` measured the list. A naive marquee would lock its loop to the stale (near-zero) pre-load width and visibly snap back mid-list once the images grow.
+
+The library guards against this: a `ResizeObserver` on `[aa-marquee-list]` catches the size change when the images land (and on late web-font swaps, or responsive item resizing) and rebuilds the loop and clones against the new measurement, preserving the loop's progress so the correction is seamless. Scroll down to this demo and watch — it should settle into a clean, jump-free loop with no mid-list reset.
+
+<Demo caption={{ "aa-marquee": "", "aa-duration": "20" }}>
+  <div data-demo-stage>
+    <div data-spacer></div>
+    <div data-spacer></div>
+    <div class="aa-marquee-demo aa-marquee-demo-logos" aa-marquee aa-duration="20">
+      <div class="aa-marquee-scroller" aa-marquee-scroller>
+        <div class="aa-marquee-track" aa-marquee-track>
+          <div class="aa-marquee-list" aa-marquee-list>
+            <div class="aa-marquee-item aa-marquee-item-logo"><img loading="lazy" alt="" src="https://picsum.photos/seed/aa-logo-1/160/56" /></div>
+            <div class="aa-marquee-item aa-marquee-item-logo"><img loading="lazy" alt="" src="https://picsum.photos/seed/aa-logo-2/96/56" /></div>
+            <div class="aa-marquee-item aa-marquee-item-logo"><img loading="lazy" alt="" src="https://picsum.photos/seed/aa-logo-3/200/56" /></div>
+            <div class="aa-marquee-item aa-marquee-item-logo"><img loading="lazy" alt="" src="https://picsum.photos/seed/aa-logo-4/120/56" /></div>
+            <div class="aa-marquee-item aa-marquee-item-logo"><img loading="lazy" alt="" src="https://picsum.photos/seed/aa-logo-5/84/56" /></div>
+            <div class="aa-marquee-item aa-marquee-item-logo"><img loading="lazy" alt="" src="https://picsum.photos/seed/aa-logo-6/176/56" /></div>
+            <div class="aa-marquee-item aa-marquee-item-logo"><img loading="lazy" alt="" src="https://picsum.photos/seed/aa-logo-7/132/56" /></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div data-spacer></div>
+  </div>
+</Demo>
+
 <style>{`
   /* Structural defaults (display:flex on every wrapper, overflow:hidden + flex:none
      on the inner three, will-change on the animated layers) ship in
@@ -266,5 +295,20 @@ Scroll up and down past this demo to see both motions compose.
   }
   [aa-marquee-direction="right"] .aa-marquee-arrow {
     transform: rotate(180deg);
+  }
+  /* Lazy-image marquee: items are <img loading="lazy"> with no width/height,
+     so each item's width — and the list's measured cycle distance — only
+     settles after the image loads. Item box carries no accent background or
+     padding; the image sets the height and lets width follow its aspect ratio. */
+  .aa-marquee-demo-logos .aa-marquee-item-logo {
+    padding: 0;
+    background: transparent;
+    border-radius: 0;
+  }
+  .aa-marquee-demo-logos .aa-marquee-item-logo img {
+    display: block;
+    height: 56px;
+    width: auto;
+    border-radius: 6px;
   }
 `}</style>
