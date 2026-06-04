@@ -336,18 +336,14 @@ body.aa-modal-locked {
 
 /*
  * Touch fallback for the always-on `underline` variant. The hover feature is
- * skipped entirely on `(hover: none)` devices (no reliable mouseenter), so the
- * JS-appended bar never renders and an `aa-hover="underline"` link reads as
- * plain text — losing its affordance as a link. Paint a native
- * `text-decoration` underline there instead so the link still looks like one;
- * it honours the same thickness/offset variables for visual continuity. Only
- * `underline` qualifies (`~=` matches the exact token, so `underline-in` is
- * excluded — its rest state is intentionally line-less, so there is nothing to
- * fall back to). NOT wrapped in `:where()`: a zero-specificity rule loses to
- * the element-level `a { text-decoration: none }` resets that Webflow and most
- * CSS frameworks ship, so the fallback would never paint. The bare attribute
- * selector (0,1,0) clears those element resets; authors who need to override
- * still can with any class- or attribute-level rule.
+ * skipped on `(hover: none)` devices, so the JS bar never renders and an
+ * `aa-hover="underline"` link reads as plain text. Paint a native underline
+ * there instead. Only `underline` qualifies (`~=` excludes `underline-in`,
+ * whose rest state is intentionally line-less). Not `:where()`: a
+ * zero-specificity rule loses to the `a { text-decoration: none }` resets
+ * Webflow and most frameworks ship; the bare attribute selector (0,1,0) clears
+ * them while staying easy to override. Offset is left at the browser default
+ * (`auto`), which keeps skip-ink stepping cleanly around descenders.
  */
 @media (hover: none) {
   [aa-hover~='underline'],
@@ -357,7 +353,6 @@ body.aa-modal-locked {
   [aa-hover-xl~='underline'] {
     text-decoration: underline;
     text-decoration-thickness: var(--aa-hover-underline-thickness, 0.0625em);
-    text-underline-offset: var(--aa-hover-underline-offset, 0);
   }
 }
 

@@ -39,7 +39,7 @@ Set on the host, an ancestor, or `:root`. In Webflow, paste into a Custom Code e
 
 ## Touch devices
 
-The hover feature is skipped entirely on `(hover: none)` devices — touch screens have no reliable `mouseenter`, so no bar is injected. For the always-on `underline` variant that would leave the link looking like plain text, so the CSS file paints a static native `text-decoration` underline there instead (honouring the same `--aa-hover-underline-thickness` / `--aa-hover-underline-offset` variables). The link still reads as a link; only the sweep animation is dropped. `underline-in` gets no fallback — its rest state is intentionally line-less, so there's nothing to preserve.
+The hover feature is skipped entirely on `(hover: none)` devices — touch screens have no reliable `mouseenter`, so no bar is injected. For the always-on `underline` variant that would leave the link looking like plain text, so the CSS file paints a static native `text-decoration` underline there instead (honouring `--aa-hover-underline-thickness`; the offset is left at the browser default so `skip-ink` steps cleanly around descenders). The link still reads as a link; only the sweep animation is dropped. `underline-in` gets no fallback — its rest state is intentionally line-less, so there's nothing to preserve.
 
 ## Required GSAP plugins
 
