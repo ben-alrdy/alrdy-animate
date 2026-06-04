@@ -154,6 +154,11 @@ declare namespace JSX {
      *
      * Defaults vary by split mode: chars `0.02`, words `0.05`, lines `0.1`,
      * default `0.1`. Override via `init({ stagger: { chars: 0.04 } })`.
+     *
+     * In line-grouped modes (`aa-split="lines-chars"` / `"lines-words"`) a
+     * second number sets the per-line offset — `aa-stagger="0.02 0.2"`. Omit it
+     * and the line offset defaults to the `lines` stagger (`0.1`), independent
+     * of the unit. Origin/random/grid flags apply only to the unit stagger.
      */
     'aa-stagger'?: string | number
     /** Breakpoint variant of `aa-stagger`. Activates at `>= breakpoints.sm`. */

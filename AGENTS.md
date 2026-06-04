@@ -1,5 +1,5 @@
 <!--
-  Last synced with src/ at v8.0.0-alpha.17 (2026-05-24) — hover feature
+  Last synced with src/ at v8.0.0-alpha.22 (2026-06-04) — line-grouped stagger offset default
   extended with `underline-in` / `underline` (animated underline bars,
   two-phase sweep on the always-on `underline`, queue-up interrupt) and
   `text` / `text reverse` (char or word lift via text-shadow + `clip-path`
@@ -335,6 +335,8 @@ init({
 ```
 
 `aa-animate-md` activates at `>= 768px`; below, no animation. `aa-trigger="load-once"` fires once per page session. For Next.js / SPAs where `init()` re-runs on every route change and you want the animation each time the user arrives, swap to `aa-trigger="load"`.
+
+In line-grouped split modes (`aa-split="lines-chars"` / `"lines-words"`) `aa-stagger` accepts a second number for the per-line offset — `aa-stagger="0.02 0.2"` (chars 0.02s, lines 0.2s). Omit it and the line offset defaults to the `lines` stagger (`0.1`), independent of the unit.
 
 ### Hero animation on every Next.js route entry (back/forward nav)
 

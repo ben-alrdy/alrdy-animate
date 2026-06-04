@@ -482,7 +482,11 @@ function setupOne(
 
   const userSplit = parseSplit(config['aa-split'])
   const splitMode = userSplit?.mode ?? anim.defaultSplit
-  const staggerSpec = parseStaggerSpec(config['aa-stagger'], defaultStaggerFor(splitMode, opts))
+  const staggerSpec = parseStaggerSpec(
+    config['aa-stagger'],
+    defaultStaggerFor(splitMode, opts),
+    defaultStaggerFor('lines', opts),
+  )
   const stagger: StaggerValue = buildStagger(staggerSpec.unit, staggerSpec.flags)
   const lineStagger = staggerSpec.line
   const lineGrouped = userSplit?.groupBy === 'lines' && !anim.setup

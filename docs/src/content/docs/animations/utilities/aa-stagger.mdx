@@ -40,7 +40,7 @@ Combine flags with spaces: `aa-stagger="0.1 center grid"`. Random ignores origin
 
 For text animations, a second number sets the per-line offset in line-grouped modes (`aa-split="lines-chars"` / `"lines-words"`): `aa-stagger="0.02 0.2"` staggers chars 0.02s apart and lines 0.2s apart. Flags only apply to the unit stagger (chars/words), not to the line cascade.
 
-If you omit the second number, the per-line offset defaults to the same value as the unit stagger. So `aa-split="lines-chars"` with no `aa-stagger` cascades both chars and lines 0.02s apart (the `chars` default), and `aa-stagger="0.05"` on a line-grouped split offsets each line by 0.05s too.
+If you omit the second number, the per-line offset defaults to the `lines` stagger (0.1s), independent of the unit. So `aa-split="lines-chars"` with no `aa-stagger` staggers chars 0.02s apart and cascades lines 0.1s apart, and `aa-stagger="0.05"` on a line-grouped split keeps the 0.1s line offset while setting chars to 0.05s. Pass a second number to override it: `aa-stagger="0.05 0.3"`.
 
 ## Required GSAP plugins
 

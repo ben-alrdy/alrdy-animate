@@ -48,7 +48,9 @@ const defaultFlags = (): StaggerFlags => ({
 /**
  * `aa-stagger` value grammar:
  *   - First numeric token = unit stagger (per element)
- *   - Second numeric token = line stagger (used by line-grouped text modes only)
+ *   - Second numeric token = line stagger (used by line-grouped text modes
+ *     only). When omitted it falls back to `lineFallback` (the caller passes
+ *     the `lines` default), independent of the unit stagger.
  *   - Non-numeric tokens are flags applied to the unit stagger:
  *       start | center | end | edges        — origin (default: start)
  *       random | random:N                   — random; optional batch size N
@@ -61,10 +63,11 @@ const defaultFlags = (): StaggerFlags => ({
 export function parseStaggerSpec(
   value: string | undefined,
   fallback: number,
+  lineFallback: number = fallback,
 ): StaggerSpec {
   const flags = defaultFlags()
   if (!value) {
-    return { unit: fallback, line: fallback, flags }
+    return { unit: fallback, line: lineFallback, flags }
   }
   const tokens = value.trim().split(/\s+/)
   const numerics: number[] = []
@@ -87,7 +90,7 @@ export function parseStaggerSpec(
     }
   }
   const unit = numerics[0] ?? fallback
-  const line = numerics[1] ?? unit
+  const line = numerics[1] ?? lineFallback
   return { unit, line, flags }
 }
 
