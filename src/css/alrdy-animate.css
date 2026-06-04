@@ -335,6 +335,31 @@ body.aa-modal-locked {
 }
 
 /*
+ * Touch fallback for the always-on `underline` variant. The hover feature is
+ * skipped entirely on `(hover: none)` devices (no reliable mouseenter), so the
+ * JS-appended bar never renders and an `aa-hover="underline"` link reads as
+ * plain text — losing its affordance as a link. Paint a native
+ * `text-decoration` underline there instead so the link still looks like one;
+ * it honours the same thickness/offset variables for visual continuity. Only
+ * `underline` qualifies (`~=` matches the exact token, so `underline-in` is
+ * excluded — its rest state is intentionally line-less, so there is nothing to
+ * fall back to). `:where()` keeps it zero-specificity for easy override.
+ */
+@media (hover: none) {
+  :where(
+    [aa-hover~='underline'],
+    [aa-hover-sm~='underline'],
+    [aa-hover-md~='underline'],
+    [aa-hover-lg~='underline'],
+    [aa-hover-xl~='underline']
+  ) {
+    text-decoration: underline;
+    text-decoration-thickness: var(--aa-hover-underline-thickness, 0.0625em);
+    text-underline-offset: var(--aa-hover-underline-offset, 0);
+  }
+}
+
+/*
  * Hover text head: `white-space: nowrap` keeps the text on a single line so
  * the shadow trick lines up. The clip-path math (`inset(0% 0% -15%)` + a
  * 1.1em shift) assumes one line's worth of vertical space; wrapping to a

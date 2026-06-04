@@ -490,7 +490,11 @@ declare namespace JSX {
      *   hover, retracts right-ward on leave.
      * - `underline` — underline always present; on hover the bar collapses
      *   toward the right edge then re-grows from the left in a two-phase
-     *   sweep, ending in the same visible state.
+     *   sweep, ending in the same visible state. On `(hover: none)` devices the
+     *   hover feature is skipped, so a static native `text-decoration` underline
+     *   is painted via CSS instead (honouring the same thickness/offset
+     *   variables) so the link still reads as a link. `underline-in` gets no
+     *   such fallback — its rest state is intentionally line-less.
      *
      *   CSS variables: `--aa-hover-underline-thickness` (default `0.0625em`),
      *   `--aa-hover-underline-offset` (default `0`; auto-set to `0.05em` on
