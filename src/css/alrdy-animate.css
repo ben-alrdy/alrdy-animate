@@ -343,16 +343,18 @@ body.aa-modal-locked {
  * it honours the same thickness/offset variables for visual continuity. Only
  * `underline` qualifies (`~=` matches the exact token, so `underline-in` is
  * excluded — its rest state is intentionally line-less, so there is nothing to
- * fall back to). `:where()` keeps it zero-specificity for easy override.
+ * fall back to). NOT wrapped in `:where()`: a zero-specificity rule loses to
+ * the element-level `a { text-decoration: none }` resets that Webflow and most
+ * CSS frameworks ship, so the fallback would never paint. The bare attribute
+ * selector (0,1,0) clears those element resets; authors who need to override
+ * still can with any class- or attribute-level rule.
  */
 @media (hover: none) {
-  :where(
-    [aa-hover~='underline'],
-    [aa-hover-sm~='underline'],
-    [aa-hover-md~='underline'],
-    [aa-hover-lg~='underline'],
-    [aa-hover-xl~='underline']
-  ) {
+  [aa-hover~='underline'],
+  [aa-hover-sm~='underline'],
+  [aa-hover-md~='underline'],
+  [aa-hover-lg~='underline'],
+  [aa-hover-xl~='underline'] {
     text-decoration: underline;
     text-decoration-thickness: var(--aa-hover-underline-thickness, 0.0625em);
     text-underline-offset: var(--aa-hover-underline-offset, 0);
