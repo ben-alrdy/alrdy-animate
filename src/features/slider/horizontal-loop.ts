@@ -337,6 +337,7 @@ export function horizontalLoop(
     const trigger = items[0].parentNode as HTMLElement
     let touchStartY = 0
     let touchStartX = 0
+    let disabledForScroll = false
 
     const handleTouchStart = (e: TouchEvent): void => {
       touchStartY = e.touches[0].clientY
@@ -346,12 +347,23 @@ export function horizontalLoop(
       if (!isDragInitialized) {
         const deltaY = Math.abs(e.touches[0].clientY - touchStartY)
         const deltaX = Math.abs(e.touches[0].clientX - touchStartX)
-        if (deltaY > deltaX) draggable.disable()
-        else isDragInitialized = true
+        if (deltaY > deltaX) {
+          draggable.disable()
+          disabledForScroll = true
+        } else isDragInitialized = true
       }
     }
     const handleTouchEnd = (): void => {
       if (!isDragInitialized) draggable.enable()
+      // onPressInit already fired onDragStart (which stops autoplay), but
+      // disabling Draggable mid-press strips its pointerup listener so its own
+      // onRelease never fires. Without this, the static-press release path
+      // never runs and autoplay stays stopped after a vertical scroll / tap.
+      // Mirror a static press (isThrowing=false) so the caller restarts.
+      if (disabledForScroll) {
+        disabledForScroll = false
+        config.onRelease?.(false)
+      }
       isDragInitialized = false
     }
 
