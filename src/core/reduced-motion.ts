@@ -91,7 +91,11 @@ export function runFadeFallbackPass(
         options,
         scrub,
       )
-      const triggers = resolveTriggers(element, getAttr(element, 'aa-trigger') ?? undefined)
+      const triggers = resolveTriggers(
+        element,
+        getAttr(element, 'aa-trigger') ?? undefined,
+        options.breakpoints,
+      )
       const hasLoadOnce = triggers.some((t) => t.kind === 'load-once')
       const hasLoad = triggers.some((t) => t.kind === 'load')
 

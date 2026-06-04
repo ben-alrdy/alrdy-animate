@@ -1,3 +1,6 @@
+import type { Breakpoints } from '../types/index'
+import { resolveAttrAtWidth, type ValueAttr } from './settings'
+
 export type TriggerKind = 'scroll' | 'event' | 'click' | 'load-once' | 'load'
 
 export interface ParsedTrigger {
@@ -66,14 +69,39 @@ export function parseTrigger(value: string | undefined): ParsedTrigger {
  * Order matters: the *closest* match wins, which is the right call for nested
  * components (e.g. tabs inside a slider — tab-active beats slide-active
  * because it's closer to the animated element).
+ *
+ * `rootSelector` + `enableAttr` let inference skip a container whose feature is
+ * responsively disabled (`none`) at the current breakpoint — it never inits, so
+ * inheriting its event would strand the inner animation paused forever. Modal
+ * has no per-breakpoint disable, so it carries no enable mapping.
  */
-const INFERENCE_CONTAINERS: ReadonlyArray<{ selector: string; eventName: string }> = [
+const INFERENCE_CONTAINERS: ReadonlyArray<{
+  selector: string
+  eventName: string
+  rootSelector?: string
+  enableAttr?: ValueAttr
+}> = [
   { selector: '[aa-modal-name]', eventName: 'modal-active' },
-  { selector: '[aa-tabs-content]', eventName: 'tab-active' },
-  { selector: '[aa-tabs-visual]', eventName: 'tab-active' },
-  { selector: '[aa-slider-item]', eventName: 'slide-active' },
-  { selector: '[aa-stack-card]', eventName: 'card-active' },
+  { selector: '[aa-tabs-content]', eventName: 'tab-active', rootSelector: '[aa-tabs]', enableAttr: 'aa-tabs' },
+  { selector: '[aa-tabs-visual]', eventName: 'tab-active', rootSelector: '[aa-tabs]', enableAttr: 'aa-tabs' },
+  { selector: '[aa-slider-item]', eventName: 'slide-active', rootSelector: '[aa-slider]', enableAttr: 'aa-slider' },
+  { selector: '[aa-stack-card]', eventName: 'card-active', rootSelector: '[aa-stack]', enableAttr: 'aa-stack' },
 ]
+
+// True when the container's owning feature resolves to `none` at the current
+// width — it won't init, so it never emits its event. Without breakpoints (or
+// an enable mapping) we assume active, preserving the legacy always-infer path.
+function containerDisabled(
+  container: Element,
+  def: { rootSelector?: string; enableAttr?: ValueAttr },
+  breakpoints: Breakpoints | undefined,
+): boolean {
+  if (!breakpoints || !def.enableAttr || !def.rootSelector) return false
+  const root = container.closest(def.rootSelector)
+  if (!root) return false
+  const value = resolveAttrAtWidth(root, def.enableAttr, window.innerWidth, breakpoints)
+  return value !== undefined && value.trim().split(/\s+/).includes('none')
+}
 
 /**
  * Resolve the trigger(s) for an animated element.
@@ -83,22 +111,30 @@ const INFERENCE_CONTAINERS: ReadonlyArray<{ selector: string; eventName: string 
  * container, and explicit values may be a space-separated list). Otherwise,
  * walk up the DOM looking for a known container ancestor and return the
  * matching event trigger. Default is scroll.
+ *
+ * Pass `breakpoints` so inference can skip a container whose feature is
+ * responsively disabled at the current width (e.g. `aa-stack="|none"` on
+ * mobile) — without it the inner animation would inherit an event that the
+ * disabled feature never emits and never play.
  */
 export function resolveTriggers(
   element: Element,
   explicit: string | undefined,
+  breakpoints?: Breakpoints,
 ): ParsedTrigger[] {
   if (explicit !== undefined && explicit.trim() !== '') return parseTriggers(explicit)
 
-  // Find the closest container ancestor across all known patterns. We compute
-  // the matched element for each, then pick the deepest (the one that doesn't
+  // Find the closest *active* container ancestor across all known patterns. We
+  // compute the matched element for each, skip any whose feature is disabled at
+  // this breakpoint, then pick the deepest survivor (the one that doesn't
   // contain any of the others).
   let best: { container: Element; eventName: string } | null = null
-  for (const { selector, eventName } of INFERENCE_CONTAINERS) {
-    const match = element.closest(selector)
+  for (const def of INFERENCE_CONTAINERS) {
+    const match = element.closest(def.selector)
     if (!match) continue
+    if (containerDisabled(match, def, breakpoints)) continue
     if (!best || best.container.contains(match)) {
-      best = { container: match, eventName }
+      best = { container: match, eventName: def.eventName }
     }
   }
 
@@ -106,8 +142,12 @@ export function resolveTriggers(
   return [{ kind: 'scroll' }]
 }
 
-export function resolveTrigger(element: Element, explicit: string | undefined): ParsedTrigger {
-  return resolveTriggers(element, explicit)[0]
+export function resolveTrigger(
+  element: Element,
+  explicit: string | undefined,
+  breakpoints?: Breakpoints,
+): ParsedTrigger {
+  return resolveTriggers(element, explicit, breakpoints)[0]
 }
 
 type Listener = (element: Element, eventName: string) => void

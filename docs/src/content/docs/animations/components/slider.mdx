@@ -80,6 +80,8 @@ Autoplay is a separate, standalone attribute — `aa-autoplay` — so the same c
 
 If you need to opt out — e.g. an animation inside a slide that should still respond to scroll position — set `aa-trigger="scroll"` explicitly to override the inference.
 
+Inference is breakpoint-aware: in a range where `aa-slider` resolves to `none` (e.g. the `aa-slider="none|"` bento-on-desktop pattern), the slider never emits `slide-active`, so the in-slide animations fall back to scroll automatically — no `aa-trigger` needed.
+
 ## Keyboard navigation
 
 When the slider has focus, **Arrow Left** / **Arrow Right** step backwards / forwards, **Home** jumps to the first slide, **End** to the last. The slider root gets `tabindex="0"` automatically.

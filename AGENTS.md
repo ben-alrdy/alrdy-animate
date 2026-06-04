@@ -1,5 +1,5 @@
 <!--
-  Last synced with src/ at v8.0.0-alpha.22 (2026-06-04) — line-grouped stagger offset default
+  Last synced with src/ at v8.0.0-alpha.24 (2026-06-04) — breakpoint-aware container inference (disabled feature → scroll fallback)
   extended with `underline-in` / `underline` (animated underline bars,
   two-phase sweep on the always-on `underline`, queue-up interrupt) and
   `text` / `text reverse` (char or word lift via text-shadow + `clip-path`
@@ -184,6 +184,8 @@ The five trigger kinds:
 | `[aa-stack-card]` | `event:card-active` |
 
 Set `aa-trigger="scroll"` explicitly to opt out.
+
+**Breakpoint-aware** — inference checks whether the container's feature is actually live at the current breakpoint. If the controlling attribute (`aa-tabs` / `aa-slider` / `aa-stack`) resolves to `none` there (e.g. `aa-stack="|none"` below `md`), the feature never emits its event, so the inner animation falls back to **scroll** instead of waiting forever. No `aa-trigger` needed for either mode.
 
 **Reverse pairing** — events named `<x>-active` automatically pair with `<x>-inactive` for the reverse animation. So `event:tab-active` on the active animation auto-listens for `event:tab-inactive` and reverses.
 
@@ -382,7 +384,7 @@ Pipe shorthand: `snap` on desktop, `draggable` on mobile.
 </section>
 ```
 
-Each card is locked at `top: var(--aa-stack-top, 25vh)` via CSS sticky. The default is applied at zero specificity (via `:where()`), so any author class that sets `top` wins without `!important` — `.my-card { top: 6rem }` Just Works, including class-based styles authored in Webflow. The CSS variable (`style="--aa-stack-top: 6rem"`) is the no-CSS escape hatch. Children inside `[aa-stack-card]` inherit `event:card-active` automatically — they fade up at `aa-scroll-start` (default `top 85%`) and reverse on full exit (the same `again` reset as scroll-triggered animations elsewhere). Add `aa-stack="enabled|none"` to disable on small screens.
+Each card is locked at `top: var(--aa-stack-top, 25vh)` via CSS sticky. The default is applied at zero specificity (via `:where()`), so any author class that sets `top` wins without `!important` — `.my-card { top: 6rem }` Just Works, including class-based styles authored in Webflow. The CSS variable (`style="--aa-stack-top: 6rem"`) is the no-CSS escape hatch. Children inside `[aa-stack-card]` inherit `event:card-active` automatically — they fade up at `aa-scroll-start` (default `top 85%`) and reverse on full exit (the same `again` reset as scroll-triggered animations elsewhere). `aa-stack` is a bare marker (the lifecycle is set via `aa-stack-in`/`-lock`/`-out`); add `aa-stack="|none"` to disable the JS below `md` — the in-card animations then fall back to scroll automatically. The CSS sticky is unconditional, so revert `position` yourself at that breakpoint.
 
 **In-preset flags** (`aa-stack-in`): `fade`, `scale`, plus two parallel rotation families that share the same per-card curve but apply at different ends of the tween:
 

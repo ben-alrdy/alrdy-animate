@@ -22,9 +22,18 @@ import Demo from '../../../../components/Demo.astro'
 
 Required GSAP plugins: `gsap`, `ScrollTrigger`.
 
+## Structural attributes
+
+| Attribute        | What it marks                                                                                                                                                                                                 |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `aa-stack`       | Stack root. A bare marker — you don't need a value; the lifecycle is configured through `aa-stack-in` / `-lock` / `-out`. Pass `none` (typically via the `\|` shorthand) to disable the JS at a breakpoint. |
+| `aa-stack-card`  | Each card. The shipped stylesheet applies `position: sticky; top: var(--aa-stack-top, 25vh)` at zero specificity (`:where()`) so any author class that sets `top` or `position` wins without `!important`.    |
+
+The sticky positioning is **CSS-only** and unconditional — it applies to every `[aa-stack-card]` regardless of breakpoint or `aa-stack` value. `aa-stack="none"` only disables the GSAP layer (in/out tweens, lock animation, and the per-card events); the cards stay sticky. To make cards flow normally at a breakpoint, revert `position` yourself in CSS (or, in Webflow, set the card's Position back to Relative on that breakpoint). See [Responsive control](#responsive-control).
+
 ## Sticky offset
 
-The shipped stylesheet applies `position: sticky; top: var(--aa-stack-top, 4rem)` to every `[aa-stack-card]`. Three ways to change the offset:
+The shipped stylesheet applies `position: sticky; top: var(--aa-stack-top, 25vh)` to every `[aa-stack-card]`. Three ways to change the offset:
 
 - **Plain CSS** — `.my-card { top: 6rem }` wins by specificity.
 - **CSS variable, in CSS** — `.my-card { --aa-stack-top: 6rem }`.
@@ -106,17 +115,57 @@ Set `aa-trigger="scroll"` on an inner element to opt out of inference and use it
 
 ## Responsive control
 
-Use the standard `|` shorthand or `-sm` / `-md` / `-lg` / `-xl` suffixes:
+`aa-stack` takes the standard responsive syntax — the `|` shorthand (splits at `md`, 768px) or the `-sm` / `-md` / `-lg` / `-xl` suffixes. Because the value is normally empty (the marker just enables the feature), `none` is the only token you'll pass here, on the breakpoint where you want the JS off.
 
 ```html
-<!-- Stacking on desktop, plain stacked flow on mobile -->
-<section aa-stack="enabled | none">…</section>
+<!-- Active on tablet + desktop (≥ md / 768px), off below.
+     Left of the | applies at md and up; right applies below it. -->
+<section aa-stack="|none" aa-stack-in="fade scale" aa-stack-out="perspective">…</section>
+
+<!-- Suffix form of the same thing: off in the base range, on from md up. -->
+<section aa-stack="none" aa-stack-md="" aa-stack-in="fade scale">…</section>
 
 <!-- Different lifecycle presets per breakpoint -->
 <section aa-stack aa-stack-in="fade scale" aa-stack-in-sm="fade">…</section>
 ```
 
-When `aa-stack="none"` is active, the feature skips initialization at that breakpoint and `[aa-stack-card]` stays a plain sticky element with no scrub or events.
+When `aa-stack="none"` is active, the feature skips initialization at that breakpoint — no in/out tweens, no lock animation, no `card-active` / `card-inactive` events. The `[aa-stack-card]` elements **stay sticky** regardless, because that comes from the (unconditional, zero-specificity) CSS rule, not from the JS. If you want the cards to flow normally below a breakpoint, revert their `position` there yourself:
+
+```css
+@media (max-width: 767px) {
+  [aa-stack-card] { position: relative; top: auto; }
+}
+```
+
+In Webflow, set the card's Position back to Relative (or Static) on the Tablet/Mobile breakpoint — `:where()` is zero-specificity, so the breakpoint setting wins without `!important`. Pair that with `aa-stack="|none"` so both layers turn off together.
+
+In-card `aa-animate` elements adapt automatically: while the stack is active they're driven by `card-active`, but in a range where `aa-stack` resolves to `none` the feature never emits that event, so trigger inference skips it and the element falls back to **scroll**. You don't write `aa-trigger` for either case.
+
+## Live demo — disabled below `md` (scroll fallback)
+
+`aa-stack="|none"` keeps the stack on tablet + desktop and turns the JS off below `md` (768px). The CSS reverts the cards to normal flow on mobile, and the in-card headlines fall back to scroll-triggered playback. Resize across 768px to compare — above it the content fires on card activation, below it on scroll.
+
+<Demo caption={[{ label: "root", attrs: { "aa-stack": "|none", "aa-stack-in": "fade" } }, { label: "card", attrs: { "aa-stack-card": "" } }]}>
+  <div data-demo-stage>
+    <div data-spacer></div>
+    <section id="aa-stack-responsive" class="aa-stack-demo aa-stack-demo--responsive" aa-stack="|none" aa-stack-in="fade">
+      <article class="aa-stack-card aa-stack-card-1" aa-stack-card>
+        <h3 class="aa-stack-card__h" aa-animate="text-fade-up" aa-split="lines mask">Tablet + desktop: stacked</h3>
+        <p class="aa-stack-card__p" aa-animate="text-fade-up" aa-split="lines mask" aa-delay="0.15">Above 768px these cards stick and the content fires on card activation.</p>
+      </article>
+      <article class="aa-stack-card aa-stack-card-2" aa-stack-card>
+        <h3 class="aa-stack-card__h" aa-animate="text-fade-up" aa-split="lines mask">Below md: plain scroll</h3>
+        <p class="aa-stack-card__p" aa-animate="text-fade-up" aa-split="lines mask" aa-delay="0.15">On mobile the stack JS is off, the cards flow normally, and these lines fade up on scroll instead.</p>
+      </article>
+      <article class="aa-stack-card aa-stack-card-3" aa-stack-card>
+        <h3 class="aa-stack-card__h" aa-animate="text-fade-up" aa-split="lines mask">One attribute, both modes</h3>
+        <p class="aa-stack-card__p" aa-animate="text-fade-up" aa-split="lines mask" aa-delay="0.15">The same markup drives the sticky stack above 768px and a plain scroll list below it.</p>
+      </article>
+    </section>
+    <div data-spacer></div>
+    <div data-spacer></div>
+  </div>
+</Demo>
 
 ## Live demo — rotate entrance + perspective exit
 
@@ -241,6 +290,14 @@ All three lifecycle slots active. Cards scale up from `0.8` as they enter, fire 
      out starts, so the lifecycle reads cleanly even at this density. */
   .aa-stack-demo--tight {
     gap: 20vh;
+  }
+  /* Responsive demo: below md the stack JS is off (aa-stack="|none"), so revert
+     the CSS sticky too — cards flow normally and their content scroll-triggers. */
+  @media (max-width: 767px) {
+    .aa-stack-demo--responsive .aa-stack-card {
+      position: relative;
+      top: auto;
+    }
   }
   .aa-stack-card {
     background: var(--sl-color-accent);

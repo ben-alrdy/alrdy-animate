@@ -101,7 +101,10 @@ declare namespace JSX {
      * `[aa-slider-item]`, or `[aa-stack-card]`, the trigger defaults to the
      * matching event (`event:modal-active` / `event:tab-active` /
      * `event:slide-active` / `event:card-active`). Set `aa-trigger="scroll"`
-     * explicitly to opt out of inference.
+     * explicitly to opt out of inference. Inference is breakpoint-aware: when
+     * the container's feature is disabled (`aa-tabs`/`aa-slider`/`aa-stack`
+     * resolves to `none`) at the current breakpoint it emits no event, so the
+     * inner animation falls back to scroll automatically.
      *
      * **Dispatching custom events** from your code:
      * `el.dispatchEvent(new CustomEvent('aa:trigger', { detail: { name: 'foo' }, bubbles: true }))`.
@@ -613,8 +616,12 @@ declare namespace JSX {
      * the viewport, so `aa-animate` elements inside a card auto-fire on entry
      * and reverse on full exit — same trigger inference as slider/tabs/modal.
      *
-     * Use `aa-stack="none"` (typically inside a `\|` shorthand or `-sm` /
-     * `-md` / `-lg` / `-xl` suffix) to opt out at a breakpoint. Pair with
+     * `aa-stack` is a bare marker — the lifecycle is set via the `aa-stack-*`
+     * attributes below; you don't pass a value. Use `none` (typically via the
+     * `\|` shorthand, e.g. `aa-stack="|none"`, or a `-sm` / `-md` / `-lg` /
+     * `-xl` suffix) to disable the JS at a breakpoint; the in-card animations
+     * then fall back to scroll automatically. The CSS `position: sticky` is
+     * unconditional, so revert `position` yourself at that breakpoint. Pair with
      * `aa-stack-card` on each card, optional `aa-stack-in` / `aa-stack-lock` /
      * `aa-stack-out` for the lifecycle animations, and `aa-intensity` /
      * `aa-scroll-start` to tune intensity and inner-content trigger. The

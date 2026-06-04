@@ -170,3 +170,30 @@ export function resolveRanges(
 
   return result
 }
+
+function bucketForWidth(width: number, breakpoints: Breakpoints): RangeKey {
+  if (width >= breakpoints.xl) return 'xl'
+  if (width >= breakpoints.lg) return 'lg'
+  if (width >= breakpoints.md) return 'md'
+  if (width >= breakpoints.sm) return 'sm'
+  return 'base'
+}
+
+// Resolve one value-bearing attribute's effective value at a given width, with
+// the same `|` split + suffix accumulation as resolveRanges(). Trigger inference
+// uses it to tell whether a container feature is `none` at the current
+// breakpoint. Undefined when the attribute isn't set in the active range.
+export function resolveAttrAtWidth(
+  el: Element,
+  attr: ValueAttr,
+  width: number,
+  breakpoints: Breakpoints,
+): string | undefined {
+  const { buckets } = readAttrs(el)
+  let value: string | undefined
+  for (const k of ACCUM_KEYS[bucketForWidth(width, breakpoints)]) {
+    const b = buckets.get(k)
+    if (b && b[attr] !== undefined) value = b[attr]
+  }
+  return value
+}

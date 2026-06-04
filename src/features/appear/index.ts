@@ -106,7 +106,7 @@ function setupOne(
   // can pre-style elements (e.g. a card with permanent rotate(8deg)) and the
   // entrance still resolves to that state instead of clobbering it to 0.
   const handle = setupTriggeredAnimation(ctx, element, {
-    triggers: resolveTriggers(element, config['aa-trigger']),
+    triggers: resolveTriggers(element, config['aa-trigger'], ctx.options.breakpoints),
     delay,
     scrollStart,
     scrollEnd,

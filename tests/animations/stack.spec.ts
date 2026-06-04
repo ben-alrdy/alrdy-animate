@@ -141,4 +141,61 @@ test.describe('stack demo page', () => {
     })
     expect(played.visible).toBe(played.total)
   })
+
+  test('below md (aa-stack="|none") in-card animations fall back to scroll, not the never-emitted card-active', async ({ page }) => {
+    // Mobile width: the responsive demo's `aa-stack="|none"` disables the stack
+    // JS here, so it never emits `card-active`. The in-card text-fade-up must
+    // infer `scroll` instead and play on scroll — the regression being that it
+    // used to inherit `card-active` and sit paused at opacity:0 forever.
+    await page.setViewportSize({ width: 390, height: 800 })
+    const initLog = page.waitForEvent('console', { predicate: initialized, timeout: 8000 })
+    await page.goto('/animations/components/stack/')
+    await initLog
+    await page.waitForTimeout(300)
+
+    const section = page.locator('#aa-stack-responsive')
+    const headline = section.locator('[aa-stack-card]').first().locator('h3').first()
+
+    // Start a recorder for any card-active dispatched within this section.
+    await page.evaluate(() => {
+      const sec = document.getElementById('aa-stack-responsive')
+      const w = window as unknown as { __respCardActive: boolean }
+      w.__respCardActive = false
+      document.addEventListener('aa:trigger', (e) => {
+        const d = (e as CustomEvent).detail as { name?: string }
+        if (d?.name === 'card-active' && sec?.contains(e.target as Node)) w.__respCardActive = true
+      })
+    })
+
+    // Paused at opacity:0 before scrolling (split lines carry the from-state).
+    const initialHidden = await headline.evaluate((el) => {
+      const lines = el.querySelectorAll('.aa-line, .aa-word, .aa-char')
+      let hidden = 0
+      lines.forEach((l) => {
+        if (parseFloat(getComputedStyle(l as HTMLElement).opacity) < 0.2) hidden++
+      })
+      return { total: lines.length, hidden }
+    })
+    expect(initialHidden.total).toBeGreaterThan(0)
+    expect(initialHidden.hidden).toBe(initialHidden.total)
+
+    await section.locator('[aa-stack-card]').first().scrollIntoViewIfNeeded()
+    await page.waitForTimeout(900)
+
+    const played = await headline.evaluate((el) => {
+      const lines = el.querySelectorAll('.aa-line, .aa-word, .aa-char')
+      let visible = 0
+      lines.forEach((l) => {
+        if (parseFloat(getComputedStyle(l as HTMLElement).opacity) > 0.85) visible++
+      })
+      return { total: lines.length, visible }
+    })
+    expect(played.visible).toBe(played.total)
+
+    // It played via scroll, not via a card-active event (which never fires here).
+    const sawCardActive = await page.evaluate(
+      () => (window as unknown as { __respCardActive: boolean }).__respCardActive,
+    )
+    expect(sawCardActive).toBe(false)
+  })
 })

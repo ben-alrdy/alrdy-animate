@@ -82,7 +82,7 @@ function setupOne(
   const triggerEl = resolveAnchor(element, config['aa-anchor'])
 
   const handle = setupTriggeredAnimation(ctx, element, {
-    triggers: resolveTriggers(element, config['aa-trigger']),
+    triggers: resolveTriggers(element, config['aa-trigger'], ctx.options.breakpoints),
     delay,
     scrollStart,
     scrollEnd,

@@ -433,7 +433,7 @@ function setupBarReveal(
   split = initialSplit
 
   const handle = setupTriggeredAnimation(ctx, element, {
-    triggers: resolveTriggers(element, config['aa-trigger']),
+    triggers: resolveTriggers(element, config['aa-trigger'], ctx.options.breakpoints),
     delay,
     scrollStart,
     scrollEnd,
@@ -511,7 +511,7 @@ function setupOne(
   split = initialSplit
 
   const handle = setupTriggeredAnimation(ctx, element, {
-    triggers: resolveTriggers(element, config['aa-trigger']),
+    triggers: resolveTriggers(element, config['aa-trigger'], ctx.options.breakpoints),
     delay,
     scrollStart,
     scrollEnd,
