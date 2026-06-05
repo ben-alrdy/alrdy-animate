@@ -50,12 +50,33 @@ Per-toggle override: place `aa-autoplay="6"` on a single `aa-tabs-toggle` to var
 | --------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
 | `aa-tabs`             | Tabs root.                                                                                                                       |
 | `aa-tabs-toggle`      | Clickable header / tab. ID is auto-assigned if you omit a value. Gets `tabindex="0"` and ARIA roles automatically.                |
-| `aa-tabs-content`     | Inline expanding panel — height tweens between 0 and natural on open / close. Pair with a toggle by matching the toggle's ID.    |
+| `aa-tabs-content`     | Inline expanding panel — height tweens between 0 and natural on open / close. Pair with a toggle by matching the toggle's ID. Keep vertical padding and borders **off** this element — see [Content padding](#content-padding--keep-it-off-the-panel). |
 | `aa-tabs-visual`      | Cross-fade panel — `autoAlpha` tweens between 0 and 1. Stacked layout (e.g. `position: absolute; inset: 0`) is the author's job. |
 | `aa-tabs-wrapper`     | Optional wrapper around toggle + content. When present, receives `aa-tabs-status="active"` for shared CSS targeting.             |
 | `aa-tabs-initial`     | Mark a toggle (or wrapper) to open at init. For `single` / autoplay / `scroll` modes, the first toggle is used if you omit it.  |
 | `aa-tabs-progress`    | Inside an `aa-tabs-toggle`. Value is `width` (default), `height`, or `circle`. Used in autoplay and `scroll` modes.             |
 | `aa-tabs-status`      | Set by the lib on the wrapper (or toggle, when no wrapper). Values: `active` / `inactive`. Style off it for hover and active states.|
+
+## Content padding — keep it off the panel
+
+The lib collapses `aa-tabs-content` by tweening its `height` to 0 and clipping with `overflow: hidden`. With `box-sizing: border-box` (the default in Webflow and most resets), an element's rendered height can never shrink below its own vertical padding or border — so a closed panel with `padding: 1rem 0` still occupies `2rem`, leaving phantom gaps between accordion items.
+
+The fix is structural: treat `aa-tabs-content` as a bare clip element and put the spacing on an inner div.
+
+```html
+<div aa-tabs>
+  <div class="faq-item" aa-tabs-wrapper>
+    <button class="faq-question" aa-tabs-toggle="1">Question</button>
+    <div class="faq-answer" aa-tabs-content="1">  <!-- clip element: no padding, no border -->
+      <div class="faq-answer-inner">              <!-- padding (and any border/background) lives here -->
+        <p>Answer copy…</p>
+      </div>
+    </div>
+  </div>
+</div>
+```
+
+Horizontal padding on the panel is harmless (it doesn't affect height), and margins on children are fine too — the overflow clip swallows them. Only **vertical padding and borders directly on the `aa-tabs-content` element** survive the collapse.
 
 ## Config attributes
 
@@ -454,6 +475,10 @@ The expanding content carries an image *and* a paragraph; both pick up the trigg
     outline-offset: -2px;
     border-radius: 6px;
   }
+  /* The aa-tabs-content element is the clip element: horizontal-only padding
+     here (safe — doesn't affect height); vertical spacing comes from the
+     children's margins, which the overflow clip swallows. See the
+     "Content padding" section above. */
   .aa-tabs-body {
     padding: 0 1rem;
   }

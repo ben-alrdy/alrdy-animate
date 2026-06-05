@@ -1,5 +1,6 @@
 <!--
-  Last synced with src/ at v8.0.0-alpha.28 (2026-06-05) — documented the `--aa-ease-*` CSS custom properties (named eases reusable in plain CSS; elastic/bounce have no variable);
+  Last synced with src/ at v8.0.0-alpha.28 (2026-06-05) — documented the `--aa-ease-*` CSS custom properties (named eases reusable in plain CSS; elastic/bounce have no variable)
+  and the aa-tabs-content padding rule (keep vertical padding/borders off the clip element — pad an inner div);
   fade-*/rotate-up translate baseline reduced 3rem → 2rem;
   breakpoint-aware container inference (disabled feature → scroll fallback)
   extended with `underline-in` / `underline` (animated underline bars,
@@ -235,7 +236,7 @@ Twelve features ship; the scanner detects which ones are needed by which attribu
 | `parallax` | `aa-parallax-start` / `aa-parallax-end` | `ScrollTrigger` | Depth-based scroll parallax (multiplier on scroll speed). |
 | `slider` | `aa-slider` | `ScrollTrigger`, `Draggable`, `InertiaPlugin` | Draggable carousel with optional autoplay. |
 | `marquee` | `aa-marquee` | `ScrollTrigger`, `Draggable`, `InertiaPlugin` | Infinite-loop scroller. |
-| `tabs` | `aa-tabs` | `ScrollTrigger` | Tab switching with progress indicator + autoplay. |
+| `tabs` | `aa-tabs` | `ScrollTrigger` | Tab switching with progress indicator + autoplay. The `aa-tabs-content` panel collapses via a height-to-0 tween + `overflow: hidden` — with `box-sizing: border-box` the rendered height can't shrink below the element's own vertical padding or border, so a padded panel leaves a phantom gap when closed. Keep `aa-tabs-content` bare (horizontal padding is fine) and put vertical padding / border / background on an inner div, or use margins on children (the clip swallows those). |
 | `nav` | `aa-nav` | `ScrollTrigger`, `Flip` | Scroll-spy nav with animated current/hover indicator. |
 | `modal` | `aa-modal-name` | (none) | Fixed-position dialogs with backdrop + close handling. |
 | `hover` | `aa-hover` | (none — `SplitText` if any `aa-hover` value is exactly `text`, and the device matches `(hover: hover)`) | `block` / `curve` direction-aware bg, `icon-<dir>` icon swap (with `reverse` / `triple` flags), `underline-in` / `underline` animated underline bars (queue-up interrupt), `text` / `text reverse` char / word / line lift with text-shadow (granularity via `aa-split="chars" \| "words" \| "lines"`). Combine effects via `aa-hover-trigger` on a wrapper. |
@@ -525,7 +526,7 @@ gsap.to(el, { clipPath: 'inset(0%)', duration: reducedMotion ? 0.01 : duration, 
 
 Don't suggest these — they aren't shipped in v8:
 
-- **Accordion** — there is no dedicated `aa-accordion` feature. Use `aa-tabs` for the show-one-panel-at-a-time pattern (it handles the toggle/content pairing, ARIA state, and active-event triggering).
+- **Accordion** — there is no dedicated `aa-accordion` feature. Use `aa-tabs` for the show-one-panel-at-a-time pattern (it handles the toggle/content pairing, ARIA state, and active-event triggering). When building one, structure each panel as `aa-tabs-content` (no vertical padding or border) wrapping an inner div that carries the spacing — see the tabs row in the feature table for why.
 - **Pin** animations — to be rebuilt in v8.x.
 - **Form-submit** feature — dropped, no production use.
 - **Lazy-load image handler** — use native `loading="lazy"` instead.
