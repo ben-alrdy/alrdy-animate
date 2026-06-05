@@ -201,6 +201,7 @@ function setupOne(
     scrollEnd,
     scrub,
     again,
+    willChange: 'transform',
     buildAnimation: (vars) => {
       const animation = ctx.gsap.gsap.to(setup.slices, {
         [axis.scaleProp]: toScale,

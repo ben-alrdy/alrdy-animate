@@ -52,6 +52,36 @@ export function toTimelineVars(vars: TriggerVars): Record<string, unknown> {
   return { ...rest, defaults: { easeReverse } }
 }
 
+const WILL_CHANGE_TRANSFORM_KEYS = new Set([
+  'x', 'y', 'z', 'xPercent', 'yPercent', 'scale', 'scaleX', 'scaleY',
+  'rotation', 'rotate', 'rotationX', 'rotationY', 'rotationZ', 'skewX', 'skewY',
+  'transform', 'transformPerspective',
+])
+
+/**
+ * Derive a `will-change` value from a set of GSAP from/to vars — used by
+ * entrance features so the orchestrator can hint the compositor for the exact
+ * properties being animated (and nothing more). Returns '' when nothing maps,
+ * which disables will-change management for that animation.
+ */
+export function cssWillChange(vars: Record<string, unknown>): string {
+  const props: string[] = []
+  let hasTransform = false
+  for (const key of Object.keys(vars)) {
+    if (key === 'opacity' || key === 'autoAlpha') {
+      if (!props.includes('opacity')) props.push('opacity')
+    } else if (key === 'filter') {
+      if (!props.includes('filter')) props.push('filter')
+    } else if (key === 'clipPath') {
+      if (!props.includes('clip-path')) props.push('clip-path')
+    } else if (WILL_CHANGE_TRANSFORM_KEYS.has(key)) {
+      hasTransform = true
+    }
+  }
+  if (hasTransform) props.unshift('transform')
+  return props.join(', ')
+}
+
 export interface TriggeredAnimationOptions {
   /**
    * Pre-parsed triggers — the feature decides whether to use
@@ -59,6 +89,13 @@ export interface TriggeredAnimationOptions {
    * the bare `parseTriggers`. Passing the result keeps the helper agnostic.
    */
   triggers: ParsedTrigger[]
+  /**
+   * CSS `will-change` value to apply to the animated targets only while the
+   * tween is actually playing — set on play/load, cleared on complete/reset.
+   * Avoids leaving a permanent compositor layer (which also breaks descendant
+   * `backdrop-filter`). Omit/empty to skip will-change management.
+   */
+  willChange?: string
   delay: number
   scrollStart: string
   scrollEnd: string | undefined
@@ -140,7 +177,27 @@ export function setupTriggeredAnimation(
   let triggerPlayed = false
   let loadFired = false
 
+  // will-change is applied to the animated targets only while a tween is
+  // playing, then cleared — so it never lingers as a permanent compositor
+  // layer (which wastes memory and, on a nav, neutralises a descendant's
+  // backdrop-filter). `wcEls` snapshots the targets we set so we can clear
+  // exactly those even after the tween's own targets list changes on rebuild.
+  const wc = opts.willChange
+  let wcEls: HTMLElement[] = []
+  const setWillChange = (): void => {
+    if (!wc || !currentAnim) return
+    wcEls = currentAnim
+      .targets()
+      .filter((t): t is HTMLElement => t instanceof HTMLElement)
+    for (const el of wcEls) el.style.willChange = wc
+  }
+  const clearWillChange = (): void => {
+    for (const el of wcEls) el.style.willChange = ''
+    wcEls = []
+  }
+
   const killCurrent = (): void => {
+    clearWillChange()
     if (currentExtraCleanup) {
       try {
         currentExtraCleanup()
@@ -203,7 +260,19 @@ export function setupTriggeredAnimation(
     currentAnim = built.animation
     currentExtraCleanup = built.cleanup
 
+    if (wc) {
+      // Clear when the tween settles in either direction. Scrub tweens never
+      // fire these (they're scroll-scrubbed) and never call setWillChange, so
+      // they opt out of will-change management entirely — force3D handles their
+      // compositing.
+      currentAnim.eventCallback('onComplete', clearWillChange)
+      currentAnim.eventCallback('onReverseComplete', clearWillChange)
+    }
+
     if (isLoadOneShot) {
+      // Warm the layer now so it's ready before the (delayed) load tween plays;
+      // onComplete clears it once the entrance settles.
+      setWillChange()
       loadFired = true
       return
     }
@@ -227,6 +296,7 @@ export function setupTriggeredAnimation(
       forwardName: persistentTrigger.eventName,
       onForward: () => {
         triggerPlayed = true
+        setWillChange()
         // Always restart from time 0 so an interrupted reverse doesn't leak
         // forward; reset timeScale to 1 in case a prior reverse left it
         // accelerated.
@@ -234,6 +304,7 @@ export function setupTriggeredAnimation(
       },
       onReverse: () => {
         triggerPlayed = false
+        setWillChange()
         currentAnim?.timeScale(REVERSE_TIME_SCALE).reverse()
       },
     })
@@ -245,10 +316,12 @@ export function setupTriggeredAnimation(
       again: opts.again,
       onPlay: () => {
         triggerPlayed = true
+        setWillChange()
         currentAnim?.play()
       },
       onReset: () => {
         triggerPlayed = false
+        clearWillChange()
         currentAnim?.progress(0).pause()
       },
     })

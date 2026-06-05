@@ -44,6 +44,8 @@ export interface GsapMatchMedia {
 
 export interface GsapTween {
   kill: () => void
+  /** The elements/objects this tween animates. */
+  targets: () => Element[]
   progress: {
     (): number
     (value: number): GsapTween
@@ -56,6 +58,8 @@ export interface GsapTween {
   play: (from?: number | string, suppressEvents?: boolean) => GsapTween
   pause: (atTime?: number | string, suppressEvents?: boolean) => GsapTween
   reverse: (from?: number | string, suppressEvents?: boolean) => GsapTween
+  /** Set or replace a lifecycle callback (`onComplete`, `onReverseComplete`, …). */
+  eventCallback: (type: string, callback?: (() => void) | null) => GsapTween
 }
 
 export interface GsapTimeline extends GsapTween {

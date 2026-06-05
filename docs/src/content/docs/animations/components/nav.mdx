@@ -30,6 +30,26 @@ The hide threshold is shared, not per-nav: the body picks up `aa-scroll-started=
 | `aa-duration`   | (init `duration`)        | GSAP tween duration in seconds.                                                                                                                                          |
 | `aa-ease`       | `osmo`                   | Nav-specific default of `osmo` (the `init({ ease })` default of `power4.out` does *not* apply here). Because the hide is GSAP-driven, the full GSAP ease vocabulary works — any v8 named ease (osmo, energy, smooth, punch, relaxed, jump, pop, anticipate, fade, **elastic, bounce**) or a raw GSAP ease string like `power3.inOut`. |
 
+## Frosted bar (`backdrop-filter`)
+
+A frosted nav (blurring the page content behind it, usually only once `is-scrolled`) is a common combo with an entrance + hide. There's a CSS gotcha to know: `backdrop-filter` on an element is **neutralised when an ancestor establishes a containing block** via `transform`, `filter`, or `will-change: transform`. Since the entrance and hide both transform the nav, a naive setup can leave the blur not rendering.
+
+Two things make it Just Work:
+
+1. **The lib no longer leaves a permanent `will-change` on animated elements** (since v8.0.0-alpha.32). It's applied only while a tween is actually playing and cleared afterwards, so at rest your nav has no `will-change` and a *descendant's* `backdrop-filter` renders fine. (The resting transform the hide leaves is an identity matrix, which does **not** break backdrop-filter.)
+2. **Best practice: put `backdrop-filter` on the same element that gets transformed** — i.e. the `aa-nav` element itself (or whichever element carries `aa-animate` / `aa-nav`), not a deeper descendant. An element's *own* transform/`will-change` never breaks its *own* `backdrop-filter`, so the blur survives **every** state including mid-slide:
+
+```html
+<nav class="nav" aa-nav="hide change" aa-animate="slide-down" aa-trigger="load">
+  <div class="nav-content"><!-- logo / links / button --></div>
+</nav>
+```
+```css
+.nav.is-scrolled { background: rgba(255,255,255,.6); backdrop-filter: blur(10px); }
+```
+
+If your frosted bar must be a narrower inner element, put `aa-nav` + `aa-animate` + `backdrop-filter` all on that inner element and keep the outer wrapper transparent. A descendant blur (blur on a child of the `aa-nav` element) also works at rest thanks to (1), but can momentarily drop during the slide-in motion — co-locating per (2) avoids that.
+
 ## Scroll-spy: is-current link tracking
 
 Any `[aa-scroll-target]` link inside the nav whose target selector resolves to a section automatically picks up an `is-current` class while that section is the one closest to the viewport's middle. ScrollTrigger watches each section between `0% 50%` and `100% 50%`. Style off `[aa-scroll-target].is-current` for active-state styling.

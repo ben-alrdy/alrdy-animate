@@ -8,7 +8,7 @@ import {
   parseStaggerSpec,
   type StaggerValue,
 } from '../../core/stagger'
-import { setupTriggeredAnimation } from '../../core/triggered-animation'
+import { cssWillChange, setupTriggeredAnimation } from '../../core/triggered-animation'
 import { resolveTriggers } from '../../core/trigger'
 
 type FromState = Record<string, number | string>
@@ -113,6 +113,7 @@ function setupOne(
     scrub,
     again,
     triggerEl,
+    willChange: cssWillChange(fromState),
     buildAnimation: (vars) => {
       const animation = ctx.gsap.gsap.from(targets, {
         ...fromState,
