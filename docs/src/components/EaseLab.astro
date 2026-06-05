@@ -1,0 +1,316 @@
+---
+/*
+ * Interactive ease comparison. One square per ease travels the same distance
+ * over the same duration — so the only thing that differs row to row is the
+ * curve. Each row also draws a mini progress-vs-time graph of that curve.
+ * Hit "Play" (or scroll it into view) to race them side by side.
+ *
+ * Named-ease SVG paths are duplicated from src/core/named-eases.ts so the lab
+ * registers them itself and works standalone, independent of init() order.
+ * Keep them in sync if the source paths change.
+ */
+export interface EaseItem {
+  /** GSAP ease string passed to gsap.to (e.g. "osmo", "power4.out", "none"). */
+  name: string
+  /** Display label; falls back to `name`. */
+  label?: string
+  /** Short note shown under the name (e.g. "init default", "JS only"). */
+  note?: string
+}
+interface Props {
+  title: string
+  items: EaseItem[]
+  duration?: number
+}
+const { title, items, duration = 1 } = Astro.props
+---
+
+<div class="easelab" data-easelab data-duration={duration}>
+  <div class="easelab-bar">
+    <span class="easelab-title">{title}</span>
+    <button type="button" class="easelab-play" data-easelab-play aria-label={`Replay ${title}`}>
+      <span aria-hidden="true">▶</span> Play
+    </button>
+    <span class="easelab-hint">same distance · {duration}s</span>
+  </div>
+
+  {items.map((it) => (
+    <div class="easelab-row">
+      <svg class="easelab-curve" data-easelab-curve data-ease={it.name} viewBox="0 0 40 40" aria-hidden="true"></svg>
+      <div class="easelab-meta">
+        <code class="easelab-name">{it.label ?? it.name}</code>
+        {it.note && <span class="easelab-note">{it.note}</span>}
+      </div>
+      <div class="easelab-track">
+        <span class="easelab-square" data-easelab-square data-ease={it.name}></span>
+      </div>
+    </div>
+  ))}
+</div>
+
+<script>
+  // Named-ease paths — keep in sync with src/core/named-eases.ts.
+  const NAMED_EASE_PATHS: Record<string, string> = {
+    osmo: 'M0,0 C0.625,0.05 0,1 1,1',
+    energy: 'M0,0 C0.32,0.72 0,1 1,1',
+    smooth: 'M0,0 C0.38,0.005 0.215,1 1,1',
+    punch: 'M0,0 C0.19,1 0.22,1 1,1',
+    relaxed: 'M0,0 C0.7,0 0.3,1 1,1',
+    jump: 'M0,0 C0.35,1.5 0.6,1 1,1',
+    pop: 'M0,0 C0.17,0.67 0.3,1.33 1,1',
+    elastic:
+      'M0,0 C0.0127,0.0956 0.0562,0.434 0.076,0.5737 C0.0958,0.7134 0.1077,0.7761 0.1187,0.8382 C0.1297,0.9003 0.1341,0.9145 0.1419,0.9463 C0.1497,0.9781 0.1574,1.0055 0.1654,1.0292 C0.1734,1.0529 0.1814,1.0725 0.1897,1.0886 C0.198,1.1047 0.2086,1.1177 0.2153,1.1258 C0.222,1.1339 0.2248,1.1342 0.2297,1.137 C0.2346,1.1398 0.2396,1.1415 0.2448,1.1424 C0.25,1.1433 0.2554,1.1433 0.261,1.1423 C0.2666,1.1413 0.2704,1.1409 0.2786,1.1366 C0.2868,1.1323 0.2922,1.1308 0.3101,1.1165 C0.328,1.1022 0.3669,1.0665 0.3862,1.0507 C0.4055,1.0349 0.4118,1.0304 0.4257,1.0219 C0.4397,1.0134 0.4548,1.0053 0.4699,0.9995 C0.485,0.9937 0.4967,0.9898 0.5163,0.9872 C0.5359,0.9846 0.5383,0.9819 0.5877,0.9842 C0.6371,0.9865 0.7439,0.9985 0.8126,1.0011 C0.8813,1.0037 0.9688,1.0002 1,1',
+    anticipate: 'M0,0 C0.8,-0.4 0.5,1 1,1',
+    bounce:
+      'M0,0 C0.03,0 0.08,0.02 0.12,0.08 C0.18,0.2 0.22,0.5 0.28,0.85 C0.32,1.05 0.38,1.12 0.45,1.08 C0.52,1.02 0.6,0.98 0.7,1 C0.8,1.02 0.9,1 1,1',
+    fade: 'M0,0 C0.25,0.1 0.25,1 1,1',
+  }
+
+  const TRAVEL_PAD = 22 // px of breathing room each side of the track for overshoot
+
+  // Mini-graph geometry. Progress range is padded beyond [0,1] so overshoot
+  // (jump/pop/elastic/bounce) and anticipation (anticipate) stay on canvas.
+  const SVG = 40
+  const G_PAD = 5
+  const V_MIN = -0.45
+  const V_MAX = 1.45
+  const SVGNS = 'http://www.w3.org/2000/svg'
+  const gx = (t: number): number => G_PAD + t * (SVG - 2 * G_PAD)
+  const gy = (v: number): number =>
+    SVG - G_PAD - ((v - V_MIN) / (V_MAX - V_MIN)) * (SVG - 2 * G_PAD)
+
+  function whenGsapReady(cb: () => void, tries = 0): void {
+    const gsap = (window as any).gsap
+    if (gsap) return cb()
+    if (tries > 200) return // ~3s budget
+    requestAnimationFrame(() => whenGsapReady(cb, tries + 1))
+  }
+
+  function drawCurve(svg: SVGSVGElement, ease: string): void {
+    const gsap = (window as any).gsap
+    const fn = gsap.parseEase(ease) || gsap.parseEase('none')
+    const N = 36
+    const pts: string[] = []
+    for (let i = 0; i < N; i++) {
+      const t = i / (N - 1)
+      pts.push(`${gx(t).toFixed(2)},${gy(fn(t)).toFixed(2)}`)
+    }
+    const guide = (v: number): SVGLineElement => {
+      const l = document.createElementNS(SVGNS, 'line')
+      l.setAttribute('x1', String(gx(0)))
+      l.setAttribute('x2', String(gx(1)))
+      l.setAttribute('y1', gy(v).toFixed(2))
+      l.setAttribute('y2', gy(v).toFixed(2))
+      l.setAttribute('class', 'easelab-guide')
+      return l
+    }
+    const line = document.createElementNS(SVGNS, 'polyline')
+    line.setAttribute('points', pts.join(' '))
+    line.setAttribute('class', 'easelab-plot')
+    svg.replaceChildren(guide(0), guide(1), line)
+  }
+
+  function travel(track: HTMLElement, square: HTMLElement): number {
+    return Math.max(0, track.clientWidth - square.offsetWidth - 2 * TRAVEL_PAD)
+  }
+
+  function setup(): void {
+    const gsap = (window as any).gsap
+    const CustomEase = (window as any).CustomEase
+    if (CustomEase) {
+      gsap.registerPlugin(CustomEase)
+      for (const [name, path] of Object.entries(NAMED_EASE_PATHS)) {
+        try {
+          if (!gsap.parseEase(name)) CustomEase.create(name, path)
+        } catch {
+          /* already registered or unavailable — fine */
+        }
+      }
+    }
+
+    document.querySelectorAll<SVGSVGElement>('[data-easelab-curve]').forEach((svg) => {
+      drawCurve(svg, svg.dataset.ease || 'none')
+    })
+
+    const labs = document.querySelectorAll<HTMLElement>('[data-easelab]')
+    labs.forEach((lab) => {
+      const duration = Number(lab.dataset.duration) || 1
+      const squares = lab.querySelectorAll<HTMLElement>('[data-easelab-square]')
+
+      const reset = (): void => {
+        squares.forEach((sq) => gsap.set(sq, { x: TRAVEL_PAD }))
+      }
+      const play = (): void => {
+        squares.forEach((sq) => {
+          const track = sq.parentElement as HTMLElement
+          gsap.killTweensOf(sq)
+          gsap.fromTo(
+            sq,
+            { x: TRAVEL_PAD },
+            { x: TRAVEL_PAD + travel(track, sq), duration, ease: sq.dataset.ease || 'none' },
+          )
+        })
+      }
+
+      reset()
+      lab.querySelector('[data-easelab-play]')?.addEventListener('click', play)
+      window.addEventListener('resize', reset)
+
+      // Auto-play the first time the lab scrolls into view.
+      const io = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((e) => {
+            if (e.isIntersecting) {
+              play()
+              io.disconnect()
+            }
+          })
+        },
+        { threshold: 0.3 },
+      )
+      io.observe(lab)
+    })
+  }
+
+  whenGsapReady(setup)
+</script>
+
+<style>
+  .easelab {
+    margin: 1.25rem 0;
+    border: 1px solid var(--sl-color-gray-5);
+    border-radius: 10px;
+    background: var(--sl-color-bg-nav);
+    padding: 0.75rem 1rem 1rem;
+    overflow-x: clip;
+  }
+  /* Neutralise Starlight's prose `* + *` top-margin, which otherwise leaks
+     onto the grid items and misaligns each row. */
+  .easelab * {
+    margin: 0 !important;
+  }
+  .easelab-bar {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.6rem 0.9rem;
+    margin-bottom: 0.65rem;
+  }
+  .easelab-title {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--sl-color-white);
+    margin-right: auto;
+  }
+  .easelab-play {
+    appearance: none;
+    cursor: pointer;
+    border: 1px solid var(--sl-color-accent);
+    background: var(--sl-color-accent);
+    color: var(--sl-color-text-invert, var(--sl-color-white));
+    font: inherit;
+    font-size: 0.8rem;
+    font-weight: 600;
+    line-height: 1;
+    padding: 0.45rem 0.85rem;
+    border-radius: 6px;
+    transition: filter 0.2s var(--aa-ease-osmo, ease);
+  }
+  .easelab-play:hover {
+    filter: brightness(1.1);
+  }
+  .easelab-play:active {
+    filter: brightness(0.95);
+  }
+  .easelab-hint {
+    font-family: var(--sl-font-system-mono, monospace);
+    font-size: 0.7rem;
+    color: var(--sl-color-gray-3);
+  }
+  .easelab-row {
+    display: grid;
+    grid-template-columns: 2.25rem 7rem 1fr;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.28rem 0;
+  }
+  .easelab-curve {
+    width: 2.25rem;
+    height: 2.25rem;
+    color: var(--sl-color-text);
+    overflow: visible;
+  }
+  .easelab-curve :global(.easelab-plot) {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2.2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    vector-effect: non-scaling-stroke;
+  }
+  .easelab-curve :global(.easelab-guide) {
+    stroke: var(--sl-color-gray-4, var(--sl-color-gray-5));
+    stroke-width: 1;
+    stroke-dasharray: 2 2;
+    vector-effect: non-scaling-stroke;
+    opacity: 0.6;
+  }
+  .easelab-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+    min-width: 0;
+  }
+  .easelab-name {
+    background: transparent;
+    padding: 0;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--sl-color-text);
+    white-space: nowrap;
+  }
+  .easelab-note {
+    font-size: 0.62rem;
+    color: var(--sl-color-gray-3);
+    font-style: italic;
+  }
+  .easelab-track {
+    position: relative;
+    height: 34px;
+    border-radius: 6px;
+    background: color-mix(in srgb, var(--sl-color-gray-5) 35%, transparent);
+    overflow: visible;
+  }
+  .easelab-square {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 26px;
+    height: 26px;
+    transform: translateY(-50%);
+    margin-top: -1px;
+    border-radius: 5px;
+    background: var(--sl-color-accent);
+    box-shadow: 0 1px 4px rgb(0 0 0 / 0.25);
+    will-change: transform;
+  }
+
+  @media (max-width: 30rem) {
+    .easelab-row {
+      grid-template-columns: 2.25rem 1fr;
+      grid-template-areas: 'curve name' 'track track';
+      row-gap: 0.35rem;
+    }
+    .easelab-curve {
+      grid-area: curve;
+    }
+    .easelab-meta {
+      grid-area: name;
+    }
+    .easelab-track {
+      grid-area: track;
+    }
+  }
+</style>

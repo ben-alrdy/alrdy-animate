@@ -1,0 +1,116 @@
+---
+title: aa-ease
+description: Set the easing curve for any animation — choose a named ease, any GSAP ease string, and reuse the same curves in plain CSS via the shipped custom properties.
+---
+
+import EaseLab from '../../../../components/EaseLab.astro'
+
+`aa-ease` controls the *shape* of an animation over time — whether it accelerates, decelerates, overshoots, or settles. It works on every animated feature (`aa-animate`, text, hover, components) and falls back to the global `init({ ease })` default when omitted.
+
+```html
+<div aa-animate="fade-up" aa-ease="osmo">…</div>
+```
+
+The value is any **named ease** the library ships (`osmo`, `energy`, `pop`, …) or any **GSAP ease string** (`power2.out`, `expo.inOut`, `back.out(1.7)`, `elastic.out(1, 0.3)`). The global default is `power4.out`.
+
+## Attributes
+
+| Attribute | Default | Notes |
+| --------- | ------- | ----- |
+| `aa-ease` | `init({ ease })` → `power4.out` | a named ease or any GSAP ease string |
+
+Like every value-bearing attribute, `aa-ease` supports responsive variants: pipe shorthand splits at `md` (`aa-ease="power1.out \| osmo"`), and `-sm` / `-md` / `-lg` / `-xl` suffixes target a breakpoint and up. Use `none` to opt out at a breakpoint.
+
+## Named eases
+
+The library registers 11 custom eases with GSAP on `init()` (this needs the **`CustomEase`** plugin — the dev-mode console warns if it's missing). Reference any of them by name in `aa-ease`, or globally via `init({ ease: 'osmo' })`.
+
+| Name | Character | CSS variable |
+| ---- | --------- | ------------ |
+| `osmo` | snappy out — fast start, long glide (the docs default) | `--aa-ease-osmo` |
+| `energy` | brisk acceleration into a smooth landing | `--aa-ease-energy` |
+| `smooth` | gentle ease-in-out, minimal flourish | `--aa-ease-smooth` |
+| `punch` | very fast out, hard decelerate | `--aa-ease-punch` |
+| `relaxed` | slow on both ends, quick through the middle | `--aa-ease-relaxed` |
+| `jump` | overshoots the target, then settles back | `--aa-ease-jump` |
+| `pop` | slight anticipation, light overshoot | `--aa-ease-pop` |
+| `anticipate` | pulls back first, then launches | `--aa-ease-anticipate` |
+| `fade` | soft, even ease-in-out for opacity | `--aa-ease-fade` |
+| `elastic` | spring oscillation that wobbles to rest | *JS only* |
+| `bounce` | drops and bounces like gravity | *JS only* |
+
+`elastic` and `bounce` are multi-segment curves that can't be expressed as a single CSS `cubic-bezier()`, so they exist only as GSAP eases — there's no `--aa-ease-*` variable for them. Everything else has a CSS counterpart (see below).
+
+## Compare the eases
+
+Each row sends a square the same distance over the same duration — so the only difference you're seeing is the curve. The little graph beside each name plots progress (vertical) over time (horizontal); the dashed lines mark the start and end positions, so anything dipping below or rising above them is anticipation or overshoot. Hit **Play** to race them.
+
+<EaseLab
+  title="Named eases"
+  items={[
+    { name: 'smooth' },
+    { name: 'fade' },
+    { name: 'osmo' },
+    { name: 'relaxed' },
+    { name: 'punch' },
+    { name: 'energy' },
+    { name: 'anticipate' },
+    { name: 'jump' },
+    { name: 'pop' },
+    { name: 'elastic', note: 'JS only' },
+    { name: 'bounce', note: 'JS only' },
+  ]}
+/>
+
+<EaseLab
+  title="GSAP defaults"
+  items={[
+    { name: 'none', label: 'none', note: 'linear' },
+    { name: 'power1.out' },
+    { name: 'power2.out' },
+    { name: 'power4.out', note: 'init default' },
+    { name: 'expo.out' },
+    { name: 'sine.inOut' },
+    { name: 'back.out(1.7)' },
+    { name: 'elastic.out(1, 0.4)' },
+    { name: 'bounce.out' },
+  ]}
+/>
+
+## Using eases in CSS
+
+The companion stylesheet (`alrdy-animate/style`) exports each CSS-expressible named ease as a custom property on `:root`. Use them in any plain CSS `transition` or `animation` — handy for hover states, Webflow interactions, or anything outside GSAP's reach. You don't register anything; importing the stylesheet (which you already do for the FOUC guard) is enough.
+
+```css
+:root {
+  --aa-ease-osmo:       cubic-bezier(0.625, 0.05, 0, 1);
+  --aa-ease-energy:     cubic-bezier(0.32, 0.72, 0, 1);
+  --aa-ease-smooth:     cubic-bezier(0.38, 0.005, 0.215, 1);
+  --aa-ease-punch:      cubic-bezier(0.19, 1, 0.22, 1);
+  --aa-ease-relaxed:    cubic-bezier(0.7, 0, 0.3, 1);
+  --aa-ease-jump:       cubic-bezier(0.35, 1.5, 0.6, 1);
+  --aa-ease-pop:        cubic-bezier(0.17, 0.67, 0.3, 1.33);
+  --aa-ease-anticipate: cubic-bezier(0.8, -0.4, 0.5, 1);
+  --aa-ease-fade:       cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+```
+
+Reference them in your own rules:
+
+```css
+.button {
+  transition: transform 0.4s var(--aa-ease-jump);
+}
+.button:hover {
+  transform: translateY(-2px);
+}
+```
+
+There's nothing magic about the variables — they're just the `cubic-bezier()` values above, so you can copy a value inline instead of using the variable if you prefer. Two things to keep in mind:
+
+- **`elastic` and `bounce` have no CSS variable.** They're multi-segment curves; CSS `cubic-bezier()` only models a single segment. Use them through GSAP (`aa-ease`) where you need that motion.
+- **The GSAP names aren't CSS values.** `transition: … osmo` won't work — `osmo` is a GSAP CustomEase registered in JS. In CSS, always go through `var(--aa-ease-osmo)` (or the raw `cubic-bezier()`).
+
+## Required GSAP plugins
+
+`gsap`. The named eases additionally require **`CustomEase`** — load it (Webflow includes it in the GSAP bundle; on npm it's `gsap/CustomEase`) so the named curves register on `init()`. Without it, named eases fall back to GSAP's linear default and the dev console warns.

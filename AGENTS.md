@@ -1,5 +1,6 @@
 <!--
-  Last synced with src/ at v8.0.0-alpha.27 (2026-06-05) — fade-*/rotate-up translate baseline reduced 3rem → 2rem;
+  Last synced with src/ at v8.0.0-alpha.28 (2026-06-05) — documented the `--aa-ease-*` CSS custom properties (named eases reusable in plain CSS; elastic/bounce have no variable);
+  fade-*/rotate-up translate baseline reduced 3rem → 2rem;
   breakpoint-aware container inference (disabled feature → scroll fallback)
   extended with `underline-in` / `underline` (animated underline bars,
   two-phase sweep on the always-on `underline`, queue-up interrupt) and
@@ -486,6 +487,22 @@ gsap.to(el, { ease: 'smooth' })
 ```
 
 Available names: `osmo`, `energy`, `smooth`, `punch`, `relaxed`, `jump`, `pop`, `elastic`, `anticipate`, `bounce`, `fade`. Canonical list lives in `src/core/named-eases.ts`.
+
+**5. Reuse the named eases in plain CSS.** The companion stylesheet (`alrdy-animate/style`, imported for the FOUC guard) exports each CSS-expressible named ease as a `:root` custom property — usable in any CSS `transition`/`animation`, no JS needed:
+
+```css
+.button { transition: transform 0.4s var(--aa-ease-jump); }
+```
+
+| Variable | Value | | Variable | Value |
+| --- | --- | --- | --- | --- |
+| `--aa-ease-osmo` | `cubic-bezier(0.625, 0.05, 0, 1)` | | `--aa-ease-relaxed` | `cubic-bezier(0.7, 0, 0.3, 1)` |
+| `--aa-ease-energy` | `cubic-bezier(0.32, 0.72, 0, 1)` | | `--aa-ease-jump` | `cubic-bezier(0.35, 1.5, 0.6, 1)` |
+| `--aa-ease-smooth` | `cubic-bezier(0.38, 0.005, 0.215, 1)` | | `--aa-ease-pop` | `cubic-bezier(0.17, 0.67, 0.3, 1.33)` |
+| `--aa-ease-punch` | `cubic-bezier(0.19, 1, 0.22, 1)` | | `--aa-ease-anticipate` | `cubic-bezier(0.8, -0.4, 0.5, 1)` |
+| | | | `--aa-ease-fade` | `cubic-bezier(0.25, 0.1, 0.25, 1)` |
+
+`elastic` and `bounce` are multi-segment curves with no `cubic-bezier()` equivalent, so they have **no CSS variable** — use them through GSAP (`aa-ease` / `ease`). And the GSAP names aren't CSS values: `transition: … osmo` won't work — in CSS always go through `var(--aa-ease-osmo)`. Canonical list lives in `src/css/alrdy-animate.css`.
 
 **Worked example.** A "sticky features" pinned-scroll widget — written without v8-aware helpers vs. with them:
 
