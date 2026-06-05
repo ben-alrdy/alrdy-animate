@@ -155,48 +155,44 @@ html[aa-timeout] [aa-animate]:not([aa-ready]) {
  * current breakpoint, and writes per-element CSS variables for hide-y,
  * duration, and ease (resolved from aa-intensity / aa-duration / aa-ease).
  *
- * Driven by CSS animation, not transition. Authors very commonly add their
- * own `transition: …` for the `is-scrolled` state on the same nav element;
- * keeping the hide on `animation` puts the two on independent shorthands so
- * they can't clobber each other in the cascade.
+ * Driven by a `transition` on the individual `translate` property — NOT by
+ * `transform` keyframes. Two reasons:
  *
- * Both keyframes carry explicit `from` AND `to` states. Without an explicit
- * `from`, the show animation infers its starting point from the element's
- * current computed transform — but at the moment the body's direction flips
- * to "up", the previous hide-out rule has already stopped matching, so the
- * computed transform has snapped back to translateY(0) and the show would
- * animate from 0 to 0 (i.e. instant). Pinning `from` to the hidden position
- * keeps the show working correctly.
+ *   1. No flash on direction reversal. The previous approach swapped between
+ *      two forwards-filled @keyframes (hide-out ⇄ hide-in) on the direction
+ *      flip. Removing a forwards animation and adding another in the same
+ *      style update exposes the element's base transform for one compositor
+ *      frame — which read as "snap into position, vanish, then slide back
+ *      down", intermittently, and worst on mobile scroll-up where the URL-bar
+ *      resize forces an extra ScrollTrigger.refresh/recalc at the flip. A
+ *      transition interpolates from the *current* computed value, so there is
+ *      no from-keyframe snap and no animation-name swap — the flash can't
+ *      happen, and rapid up/down reversals interrupt cleanly.
+ *
+ *   2. No clobbering with the entrance. Navs commonly also carry an
+ *      `aa-animate` entrance (e.g. slide-down) whose GSAP tween writes the
+ *      `transform` property. Driving the hide via the separate `translate`
+ *      longhand means the two compose instead of fighting over `transform`.
+ *
+ * Author `transition: …` rules for the `is-scrolled` state normally target
+ * color/background/box-shadow, so they coexist with `transition: translate`.
  */
 [aa-nav-hide] {
   /* Default off-screen Y. JS overrides this via inline style based on the
      element's `aa-intensity` attribute. The internal -150% baseline is
      multiplied by aa-intensity (default 1 → -150%, 2 → -300%, 0.67 → -100%).
-     The full percentage is precomputed by the JS rather than expressed as
-     `calc(-150% * var(--aa-nav-intensity))` in the keyframe — var() inside
-     calc() inside transform inside @keyframes doesn't resolve reliably from
-     inline styles across all browsers. */
+     The percentage resolves against the element's own height, same as
+     translateY(%). */
   --aa-nav-hide-y: -150%;
   --aa-nav-duration: 0.6s;
   --aa-nav-ease: var(--aa-ease-osmo);
-  will-change: transform;
+  translate: 0 0;
+  transition: translate var(--aa-nav-duration) var(--aa-nav-ease);
+  will-change: translate;
 }
 
 body[aa-scroll-direction="down"][aa-scroll-started="true"] [aa-nav-hide] {
-  animation: aa-nav-hide-out var(--aa-nav-duration) var(--aa-nav-ease) forwards;
-}
-
-body[aa-scroll-direction="up"] [aa-nav-hide] {
-  animation: aa-nav-hide-in var(--aa-nav-duration) var(--aa-nav-ease) forwards;
-}
-
-@keyframes aa-nav-hide-out {
-  from { transform: translateY(0); }
-  to   { transform: translateY(var(--aa-nav-hide-y)); }
-}
-@keyframes aa-nav-hide-in {
-  from { transform: translateY(var(--aa-nav-hide-y)); }
-  to   { transform: translateY(0); }
+  translate: 0 var(--aa-nav-hide-y);
 }
 
 /*

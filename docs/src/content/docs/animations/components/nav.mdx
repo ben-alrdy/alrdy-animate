@@ -18,9 +18,13 @@ import Demo from '../../../../components/Demo.astro'
 | `hide change`   | Both. Tokens are space-separated and order-independent.                                                      |
 | `none`          | Don't init at this breakpoint. Combine with `\|` or `-sm` / `-md` / `-lg` / `-xl` suffixes.                |
 
-The hide animation is **driven by CSS**, not GSAP. The library reads your `aa-intensity` / `aa-duration` / `aa-ease` attributes and writes them onto the nav element as CSS variables — `--aa-nav-hide-y` (the precomputed off-screen translateY percentage), `--aa-nav-duration`, `--aa-nav-ease`. A single keyframe animation scoped on `body[aa-scroll-direction="down"][aa-scroll-started="true"]` then drives the nav. Cheap, no scroll-event listener, no GSAP cycle.
+The hide animation is **driven by CSS**, not GSAP. The library reads your `aa-intensity` / `aa-duration` / `aa-ease` attributes and writes them onto the nav element as CSS variables — `--aa-nav-hide-y` (the precomputed off-screen translate percentage), `--aa-nav-duration`, `--aa-nav-ease`. A single rule scoped on `body[aa-scroll-direction="down"][aa-scroll-started="true"]` then sets the nav's `translate`, and a `transition: translate …` on the nav handles both directions. Cheap, no scroll-event listener, no GSAP cycle.
 
-The hide uses CSS **animation** (not transition) on purpose: that way you can freely add `transition: padding 0.3s, background 0.3s` on `.is-scrolled` (or any other state class on the nav) without worrying about the `transition` shorthand clobbering the hide. Animation and transition are independent shorthands.
+The hide is driven by a transition on the individual **`translate`** property (not `transform`, and not keyframes). This is deliberate: it composes with any `aa-animate` entrance on the same nav (those tween `transform`), and a transition interpolates from the current value, so reversing scroll direction mid-hide is smooth with no flash.
+
+:::caution[Don't put `transition: all` (or a `transition` shorthand including `translate`) on the `aa-nav` element]
+The hide relies on its own `transition: translate …`. A blanket `transition: all 0.3s` — or any `transition` shorthand that covers `translate` — on the same element will clobber it and the nav will hide/show instantly (or jankily). Scope your own transitions to the properties you're actually animating for the `is-scrolled` state, e.g. `transition: background 0.3s, color 0.3s, box-shadow 0.3s` — never `all`.
+:::
 
 The hide threshold is shared, not per-nav: the body picks up `aa-scroll-started="true"` once `window.scrollY > 50` (set by the [body scroll-state](#body-scroll-state) tracker) and the hide rule is gated on that. This keeps the nav put while you're at the top of the page so a small mouse-wheel nudge downward doesn't immediately hide it. The `change` token, by contrast, is per-nav and configurable via `change-<px>` because it just toggles a class on its own element.
 
@@ -28,7 +32,7 @@ The hide threshold is shared, not per-nav: the body picks up `aa-scroll-started=
 | --------------- | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `aa-intensity`  | `1`                      | Multiplier on the internal `-150%` hide-translate baseline. `1` (default) slides the nav to `-150%` — far enough to clear typical drop-shadows. `0.67` brings it to `-100%` (just clears the nav itself); `2` doubles to `-300%`. |
 | `aa-duration`   | (init `duration`)        | CSS transition duration in seconds.                                                                                                                                          |
-| `aa-ease`       | `osmo`                   | Nav-specific default — the hide animation runs via CSS keyframes, so the ease must be CSS-expressible. The `init({ ease })` default (`power4.out`) is GSAP-only and doesn't apply here. Accepts any v8 named ease (osmo, energy, smooth, punch, relaxed, jump, pop, anticipate, fade), a `cubic-bezier(...)`, or a CSS keyword (`linear`, `ease`, `ease-in-out`, …). |
+| `aa-ease`       | `osmo`                   | Nav-specific default — the hide runs via a CSS transition, so the ease must be CSS-expressible. The `init({ ease })` default (`power4.out`) is GSAP-only and doesn't apply here. Accepts any v8 named ease (osmo, energy, smooth, punch, relaxed, jump, pop, anticipate, fade), a `cubic-bezier(...)`, or a CSS keyword (`linear`, `ease`, `ease-in-out`, …). |
 
 `elastic` and `bounce` aren't expressible as a single cubic-bezier; if you pass one of those, the nav falls back to `osmo` and a debug warning is logged. Use a GSAP-driven approach if you really need them — but they're rarely the right call for a sticky nav anyway.
 
@@ -159,7 +163,7 @@ Identical pill styling, only the current indicator (no hover indicator) and an `
     </section>
     <section id="bar-demo-4" class="aa-nav-demo-section">
       <h3>contact</h3>
-      <p>The body picks up <code>aa-scroll-direction</code> and <code>aa-scroll-started</code> attributes — the hide rule is just a CSS transform keyed on those.</p>
+      <p>The body picks up <code>aa-scroll-direction</code> and <code>aa-scroll-started</code> attributes — the hide rule is just a CSS <code>translate</code> keyed on those.</p>
     </section>
   </div>
 </Demo>
@@ -198,8 +202,10 @@ Identical pill styling, only the current indicator (no hover indicator) and an `
     border: 1px solid var(--sl-color-gray-5);
     border-radius: 999px;
     margin: 0;
-    /* No transform here. The lib uses CSS animation (not transition) for the
-       hide, so user transitions on the same element don't clobber it. */
+    /* Scope the transition to the properties we actually animate for the
+       is-scrolled state. The lib drives the hide via its own
+       `transition: translate …`; a blanket `transition: all` here would
+       clobber it, so we list properties explicitly and never touch translate. */
     transition: background 0.4s ease, color 0.4s ease, border-color 0.4s ease,
                 box-shadow 0.3s ease;
   }
