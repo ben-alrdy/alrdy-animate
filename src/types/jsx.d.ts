@@ -217,7 +217,7 @@ declare namespace JSX {
      * feature that reads this attribute; `2` doubles the effect, `0.5` halves
      * it. Applied to:
      *
-     * - **fade-\* / rotate-up translate** — baseline `3rem` (scales with root
+     * - **fade-\* / rotate-up translate** — baseline `2rem` (scales with root
      *   font-size, so projects that override `:root { font-size }` per breakpoint
      *   keep visual proportion).
      * - **rotate** — baseline `5°` angle.

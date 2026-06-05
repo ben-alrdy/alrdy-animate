@@ -12,19 +12,19 @@ import Demo from '../../../../components/Demo.astro'
 | Variant      | What it does                                  |
 | ------------ | --------------------------------------------- |
 | `fade`       | opacity 0 → 1, no transform                   |
-| `fade-up`    | opacity + translateY from below (`3rem`)      |
+| `fade-up`    | opacity + translateY from below (`2rem`)      |
 | `fade-down`  | opacity + translateY from above               |
 | `fade-left`  | opacity + translateX from the right           |
 | `fade-right` | opacity + translateX from the left            |
 
-The `3rem` offset is **root-font-size relative** — projects that override `:root { font-size }` per breakpoint keep visual proportion automatically. The lib rebuilds tweens on breakpoint changes, so stepped root sizes Just Work; a fluid `clamp()` on `:root` locks in at breakpoint entry.
+The `2rem` offset is **root-font-size relative** — projects that override `:root { font-size }` per breakpoint keep visual proportion automatically. The lib rebuilds tweens on breakpoint changes, so stepped root sizes Just Work; a fluid `clamp()` on `:root` locks in at breakpoint entry.
 
 ## Attributes
 
 | Attribute     | Default     | Notes                                                     |
 | ------------- | ----------- | --------------------------------------------------------- |
 | `aa-animate`  | (required)  | one of the variants above                                 |
-| `aa-intensity` | `1`        | multiplier on the `3rem` translate offset                 |
+| `aa-intensity` | `1`        | multiplier on the `2rem` translate offset                 |
 | `aa-duration` | (init)      | seconds — falls back to `init({ duration })` (default `0.6`) |
 | `aa-delay`    | `0`         | seconds                                                   |
 | `aa-ease`     | (init)      | any GSAP ease — falls back to `init({ ease })` (default `power4.out`) |
@@ -52,7 +52,7 @@ The `3rem` offset is **root-font-size relative** — projects that override `:ro
 
 ## Live demo — intensity
 
-`aa-intensity` scales the `3rem` translate offset.
+`aa-intensity` scales the `2rem` translate offset.
 
 <Demo caption={{ "aa-animate": "fade-up", "aa-intensity": "1 → 6" }}>
   <div data-demo-stage>

@@ -90,7 +90,7 @@ export interface InitOptions {
    *
    * Baselines by family:
    *
-   * - **fade-\* / rotate-up translate** — `3rem` (root font-size relative).
+   * - **fade-\* / rotate-up translate** — `2rem` (root font-size relative).
    * - **text-blur (all directions)** — `2rem` (root font-size relative).
    * - **slide-\* / text-slide-\* / text-tilt-\* / hover-bg-block** — element-relative
    *   (`100%` of element or line); scales with element size, not root font-size.

@@ -15,10 +15,10 @@ type FromState = Record<string, number | string>
 
 const FROM_FOR: Record<string, (intensity: number) => FromState> = {
   fade: () => ({ opacity: 0 }),
-  'fade-up': (i) => ({ y: `${3 * i}rem`, opacity: 0 }),
-  'fade-down': (i) => ({ y: `${-3 * i}rem`, opacity: 0 }),
-  'fade-left': (i) => ({ x: `${3 * i}rem`, opacity: 0 }),
-  'fade-right': (i) => ({ x: `${-3 * i}rem`, opacity: 0 }),
+  'fade-up': (i) => ({ y: `${2 * i}rem`, opacity: 0 }),
+  'fade-down': (i) => ({ y: `${-2 * i}rem`, opacity: 0 }),
+  'fade-left': (i) => ({ x: `${2 * i}rem`, opacity: 0 }),
+  'fade-right': (i) => ({ x: `${-2 * i}rem`, opacity: 0 }),
   'zoom-in': (i) => ({ scale: Math.max(0, 1 - 0.15 * i), opacity: 0 }),
   'zoom-out': (i) => ({ scale: 1 + 0.15 * i, opacity: 0 }),
   'slide-up': (i) => ({ yPercent: 100 * i }),
@@ -53,7 +53,7 @@ function buildRotateFromState(value: string, intensity: number): FromState {
   // entrance starts from a negative tilt; -ccw starts positive.
   const degrees = 5 * intensity * (ccw ? 1 : -1)
   const state: FromState = { rotation: degrees, opacity: 0 }
-  if (up) state.y = `${3 * intensity}rem`
+  if (up) state.y = `${2 * intensity}rem`
   if (corner) state.transformOrigin = CORNER_TO_ORIGIN[corner]
   return state
 }

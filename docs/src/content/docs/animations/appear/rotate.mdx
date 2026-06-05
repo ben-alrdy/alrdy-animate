@@ -16,7 +16,7 @@ The animation is built with `gsap.from()`, so any rotation, opacity, or transfor
 | `rotate`             | rotates clockwise into place + opacity 0 → natural                    |
 | `rotate-ccw`         | rotates counter-clockwise into place                                  |
 | `rotate-tl` · `-tr` · `-bl` · `-br` | pivots from the named corner instead of center        |
-| `rotate-up`          | combines rotation with `fade-up`'s translate (3rem × intensity)       |
+| `rotate-up`          | combines rotation with `fade-up`'s translate (2rem × intensity)       |
 | `rotate-up-bl-ccw`   | every modifier composes — pick a corner, a direction, optionally up   |
 
 ## Attributes
@@ -24,7 +24,7 @@ The animation is built with `gsap.from()`, so any rotation, opacity, or transfor
 | Attribute     | Default      | Notes                                                                  |
 | ------------- | ------------ | ---------------------------------------------------------------------- |
 | `aa-animate`  | (required)   | one of the variants above                                              |
-| `aa-intensity` | `1`         | multiplier on the 5° angle (and on the 3rem y-offset for `rotate-up`)  |
+| `aa-intensity` | `1`         | multiplier on the 5° angle (and on the 2rem y-offset for `rotate-up`)  |
 | `aa-duration` | (init)       | seconds — falls back to `init({ duration })` (default `0.6`)           |
 | `aa-delay`    | `0`          | seconds                                                                |
 | `aa-ease`     | (init)       | any GSAP ease — falls back to `init({ ease })` (default `power4.out`)  |
@@ -54,7 +54,7 @@ The animation is built with `gsap.from()`, so any rotation, opacity, or transfor
 
 ## Live demo — with upward translate
 
-`rotate-up` adds the same `3rem × intensity` upward translate that `fade-up` uses. Combine it with corner and direction modifiers freely.
+`rotate-up` adds the same `2rem × intensity` upward translate that `fade-up` uses. Combine it with corner and direction modifiers freely.
 
 <Demo caption='aa-animate="rotate-up | rotate-up-bl-ccw"'>
   <div data-demo-stage>
