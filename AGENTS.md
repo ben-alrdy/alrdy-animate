@@ -1,5 +1,5 @@
 <!--
-  Last synced with src/ at v8.0.0-alpha.29 (2026-06-05) — nav `hide` now drives the slide via a CSS `transition` on the `translate` longhand (was `transform` keyframes); fixes a mobile scroll-up flash and warns against `transition: all` on the `aa-nav` element
+  Last synced with src/ at v8.0.0-alpha.28 (2026-06-05) — documented the `--aa-ease-*` CSS custom properties (named eases reusable in plain CSS; elastic/bounce have no variable)
   and the aa-tabs-content padding rule (keep vertical padding/borders off the clip element — pad an inner div);
   fade-*/rotate-up translate baseline reduced 3rem → 2rem;
   breakpoint-aware container inference (disabled feature → scroll fallback)
@@ -237,7 +237,7 @@ Twelve features ship; the scanner detects which ones are needed by which attribu
 | `slider` | `aa-slider` | `ScrollTrigger`, `Draggable`, `InertiaPlugin` | Draggable carousel with optional autoplay. |
 | `marquee` | `aa-marquee` | `ScrollTrigger`, `Draggable`, `InertiaPlugin` | Infinite-loop scroller. |
 | `tabs` | `aa-tabs` | `ScrollTrigger` | Tab switching with progress indicator + autoplay. The `aa-tabs-content` panel collapses via a height-to-0 tween + `overflow: hidden` — with `box-sizing: border-box` the rendered height can't shrink below the element's own vertical padding or border, so a padded panel leaves a phantom gap when closed. Keep `aa-tabs-content` bare (horizontal padding is fine) and put vertical padding / border / background on an inner div, or use margins on children (the clip swallows those). |
-| `nav` | `aa-nav` | `ScrollTrigger`, `Flip` | Scroll-spy nav with animated current/hover indicator. The `hide` token drives the off-screen slide via a CSS `transition` on the individual `translate` property. **Do not put `transition: all` (or any `transition` shorthand covering `translate`) on the `aa-nav` element** — it clobbers the hide and the nav jumps/janks instead of sliding. Scope your own `is-scrolled`-state transitions to explicit properties (`background`, `color`, `box-shadow`), never `all`. |
+| `nav` | `aa-nav` | `ScrollTrigger`, `Flip` | Scroll-spy nav with animated current/hover indicator. |
 | `modal` | `aa-modal-name` | (none) | Fixed-position dialogs with backdrop + close handling. |
 | `hover` | `aa-hover` | (none — `SplitText` if any `aa-hover` value is exactly `text`, and the device matches `(hover: hover)`) | `block` / `curve` direction-aware bg, `icon-<dir>` icon swap (with `reverse` / `triple` flags), `underline-in` / `underline` animated underline bars (queue-up interrupt), `text` / `text reverse` char / word / line lift with text-shadow (granularity via `aa-split="chars" \| "words" \| "lines"`). Combine effects via `aa-hover-trigger` on a wrapper. |
 | `cursor` | `aa-cursor` | (none) | Custom pointer tracking with state-driven styling. |
