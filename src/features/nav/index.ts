@@ -1,5 +1,5 @@
+import type { GsapTween } from '../../core/gsap-detect'
 import type { FeatureContext, FeatureModule } from '../../core/registry'
-import { NAMED_EASES } from '../../core/named-eases'
 import { parseNum } from '../../core/parse'
 import { readAttrs } from '../../core/settings'
 
@@ -17,39 +17,6 @@ interface FlipLike {
     source: Element,
     vars?: Record<string, unknown>,
   ) => unknown
-}
-
-const NAMED_EASE_KEYS = new Set(Object.keys(NAMED_EASES))
-// elastic and bounce are multi-segment paths; not expressible as cubic-bezier.
-const NAMED_EASE_CSS_UNSUPPORTED = new Set(['elastic', 'bounce'])
-
-const CSS_KEYWORD_EASES = new Set([
-  'linear',
-  'ease',
-  'ease-in',
-  'ease-out',
-  'ease-in-out',
-  'step-start',
-  'step-end',
-])
-
-function resolveCssEase(value: string | undefined, debug: boolean): string {
-  if (!value) return 'var(--aa-ease-osmo)'
-  const trimmed = value.trim()
-  if (trimmed === '') return 'var(--aa-ease-osmo)'
-  if (CSS_KEYWORD_EASES.has(trimmed)) return trimmed
-  if (/^cubic-bezier\(.+\)$/i.test(trimmed)) return trimmed
-  if (/^steps\(.+\)$/i.test(trimmed)) return trimmed
-  if (NAMED_EASE_KEYS.has(trimmed) && !NAMED_EASE_CSS_UNSUPPORTED.has(trimmed)) {
-    return `var(--aa-ease-${trimmed})`
-  }
-  if (debug) {
-    console.warn(
-      `[alrdy-animate] nav: aa-ease="${trimmed}" can't be expressed in CSS; using default. ` +
-        `Use one of ${[...NAMED_EASE_KEYS].filter((k) => !NAMED_EASE_CSS_UNSUPPORTED.has(k)).join(', ')}, a cubic-bezier(...), or a CSS keyword.`,
-    )
-  }
-  return 'var(--aa-ease-osmo)'
 }
 
 interface ParsedNavValue {
@@ -80,7 +47,7 @@ function parseNavValue(value: string | undefined): ParsedNavValue {
 }
 
 /**
- * 3a. CSS-driven hide + JS-toggled `is-scrolled` class.
+ * 3a. GSAP-driven hide + JS-toggled `is-scrolled` class.
  * Responsive: bound through ctx.responsive so `aa-nav="hide|none"` opts out
  * cleanly per breakpoint.
  */
@@ -93,28 +60,61 @@ function setupHideAndChange(ctx: FeatureContext, navElement: HTMLElement): () =>
     const cleanups: Array<() => void> = []
 
     if (parsed.hide) {
+      // GSAP-driven, not CSS. The nav commonly also carries an `aa-animate`
+      // entrance whose tween owns the element's `transform` (and zeroes the
+      // individual `translate`/`rotate`/`scale` props so they can't fight it),
+      // so the hide has to run through GSAP too — one system owning `transform`
+      // means no inline-vs-stylesheet conflict and no author-`transition`
+      // clobber. `overwrite: 'auto'` lets a mid-hide direction reversal pick up
+      // from the current position instead of snapping, so there's no flash.
+      //
       // -150% is the design baseline: at intensity=1 the nav slides far enough
-      // off-screen to clear a typical drop-shadow. We bake the 150 in here
-      // (rather than inheriting options.intensity's default of 1 and asking
-      // authors to write aa-intensity="1.5") so aa-intensity=1 always reproduces
-      // the recommended look across every feature.
+      // off-screen to clear a typical drop-shadow. The 150 is baked in here so
+      // aa-intensity=1 reproduces the recommended look across every feature.
+      const gsap = ctx.gsap.gsap
       const intensity = parseNum(config['aa-intensity'], 1)
       const duration = parseNum(config['aa-duration'], ctx.options.duration)
-      const ease = resolveCssEase(config['aa-ease'], ctx.debug)
-      // Pre-compute the off-screen translateY as a single percentage. Using a
-      // bare percentage in the keyframe (rather than `calc(-100% * var(...))`)
-      // avoids a known fragility with var() resolution inside calc() inside
-      // transform inside @keyframes, which doesn't substitute reliably across
-      // all browsers when the custom property comes from inline style.
-      navElement.style.setProperty('--aa-nav-hide-y', `${-150 * intensity}%`)
-      navElement.style.setProperty('--aa-nav-duration', `${duration}s`)
-      navElement.style.setProperty('--aa-nav-ease', ease)
-      navElement.setAttribute('aa-nav-hide', '')
+      const ease = config['aa-ease'] ?? 'osmo'
+      const hiddenY = -150 * intensity
+
+      // Drive off the same body scroll-state attributes the CSS used to read
+      // (set by core/scroll-state.ts; gated together with it under
+      // init({ scrollState }).)
+      const body = document.body
+      const shouldHide = (): boolean =>
+        body.getAttribute('aa-scroll-direction') === 'down' &&
+        body.getAttribute('aa-scroll-started') === 'true'
+
+      let hidden = shouldHide()
+      // Seed the resting state without a tween so init() never overwrites a
+      // concurrent entrance tween mid-flight. Seeding hidden=true only happens
+      // on a reload already scrolled past the threshold, where snapping
+      // off-screen is the correct first frame anyway.
+      if (hidden) gsap.set(navElement, { yPercent: hiddenY })
+
+      let tween: GsapTween | undefined
+      const sync = (): void => {
+        const next = shouldHide()
+        if (next === hidden) return
+        hidden = next
+        tween = gsap.to(navElement, {
+          yPercent: next ? hiddenY : 0,
+          duration,
+          ease,
+          overwrite: 'auto',
+        })
+      }
+
+      const observer = new MutationObserver(sync)
+      observer.observe(body, {
+        attributes: true,
+        attributeFilter: ['aa-scroll-direction', 'aa-scroll-started'],
+      })
+
       cleanups.push(() => {
-        navElement.removeAttribute('aa-nav-hide')
-        navElement.style.removeProperty('--aa-nav-hide-y')
-        navElement.style.removeProperty('--aa-nav-duration')
-        navElement.style.removeProperty('--aa-nav-ease')
+        observer.disconnect()
+        tween?.kill()
+        gsap.set(navElement, { yPercent: 0 })
       })
     }
 

@@ -12,25 +12,23 @@ import Demo from '../../../../components/Demo.astro'
 | `aa-nav` token  | Effect                                                                                                      |
 | --------------- | ----------------------------------------------------------------------------------------------------------- |
 | (empty)         | No hide, no class. Other features (is-current tracking, indicators, section classes) still work.            |
-| `hide`          | CSS-translate the nav up off-screen when the user scrolls down (only past the global ~50px scroll-started threshold), slides it back in when they scroll up. |
+| `hide`          | Translate the nav up off-screen when the user scrolls down (only past the global ~50px scroll-started threshold), slide it back in when they scroll up. |
 | `change`        | Add `is-scrolled` to the nav once `scrollY > 100`. Useful for shrinking padding or changing background.     |
 | `change-150`    | Same, threshold 150px (any pixel value).                                                                     |
 | `hide change`   | Both. Tokens are space-separated and order-independent.                                                      |
 | `none`          | Don't init at this breakpoint. Combine with `\|` or `-sm` / `-md` / `-lg` / `-xl` suffixes.                |
 
-The hide animation is **driven by CSS**, not GSAP. The library reads your `aa-intensity` / `aa-duration` / `aa-ease` attributes and writes them onto the nav element as CSS variables — `--aa-nav-hide-y` (the precomputed off-screen translateY percentage), `--aa-nav-duration`, `--aa-nav-ease`. A single keyframe animation scoped on `body[aa-scroll-direction="down"][aa-scroll-started="true"]` then drives the nav. Cheap, no scroll-event listener, no GSAP cycle.
+The hide is **GSAP-driven**. The library watches the body's [scroll-state](#body-scroll-state) attributes and, on the down→up / up→down flip, tweens the nav's `yPercent` off-screen (`-150% × aa-intensity`) and back, using your `aa-duration` / `aa-ease`. `overwrite: 'auto'` means a mid-hide direction reversal picks up smoothly from the current position rather than snapping.
 
-The hide uses CSS **animation** (not transition) on purpose: that way you can freely add `transition: padding 0.3s, background 0.3s` on `.is-scrolled` (or any other state class on the nav) without worrying about the `transition` shorthand clobbering the hide. Animation and transition are independent shorthands.
+It runs through GSAP — not a CSS keyframe or transition — on purpose. A nav very commonly also carries an `aa-animate` entrance (e.g. `slide-down`), and GSAP's entrance tween *owns* the element's `transform` (it even zeroes the individual `translate` / `rotate` / `scale` CSS properties so they can't fight it). Driving the hide through GSAP too means one system owns `transform`: the hide composes with the entrance instead of conflicting with it, and an author's own `transition: …` on the nav (for the `is-scrolled` state) can't clobber it. You're free to add any `transition` you like on the nav for the `change` state — it's independent of the hide.
 
 The hide threshold is shared, not per-nav: the body picks up `aa-scroll-started="true"` once `window.scrollY > 50` (set by the [body scroll-state](#body-scroll-state) tracker) and the hide rule is gated on that. This keeps the nav put while you're at the top of the page so a small mouse-wheel nudge downward doesn't immediately hide it. The `change` token, by contrast, is per-nav and configurable via `change-<px>` because it just toggles a class on its own element.
 
 | Attribute       | Default                  | Notes                                                                                                                                                                        |
 | --------------- | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `aa-intensity`  | `1`                      | Multiplier on the internal `-150%` hide-translate baseline. `1` (default) slides the nav to `-150%` — far enough to clear typical drop-shadows. `0.67` brings it to `-100%` (just clears the nav itself); `2` doubles to `-300%`. |
-| `aa-duration`   | (init `duration`)        | CSS transition duration in seconds.                                                                                                                                          |
-| `aa-ease`       | `osmo`                   | Nav-specific default — the hide animation runs via CSS keyframes, so the ease must be CSS-expressible. The `init({ ease })` default (`power4.out`) is GSAP-only and doesn't apply here. Accepts any v8 named ease (osmo, energy, smooth, punch, relaxed, jump, pop, anticipate, fade), a `cubic-bezier(...)`, or a CSS keyword (`linear`, `ease`, `ease-in-out`, …). |
-
-`elastic` and `bounce` aren't expressible as a single cubic-bezier; if you pass one of those, the nav falls back to `osmo` and a debug warning is logged. Use a GSAP-driven approach if you really need them — but they're rarely the right call for a sticky nav anyway.
+| `aa-duration`   | (init `duration`)        | GSAP tween duration in seconds.                                                                                                                                          |
+| `aa-ease`       | `osmo`                   | Nav-specific default of `osmo` (the `init({ ease })` default of `power4.out` does *not* apply here). Because the hide is GSAP-driven, the full GSAP ease vocabulary works — any v8 named ease (osmo, energy, smooth, punch, relaxed, jump, pop, anticipate, fade, **elastic, bounce**) or a raw GSAP ease string like `power3.inOut`. |
 
 ## Scroll-spy: is-current link tracking
 
@@ -159,7 +157,7 @@ Identical pill styling, only the current indicator (no hover indicator) and an `
     </section>
     <section id="bar-demo-4" class="aa-nav-demo-section">
       <h3>contact</h3>
-      <p>The body picks up <code>aa-scroll-direction</code> and <code>aa-scroll-started</code> attributes — the hide rule is just a CSS transform keyed on those.</p>
+      <p>The body picks up <code>aa-scroll-direction</code> and <code>aa-scroll-started</code> attributes — the GSAP-driven hide just tweens the nav off-screen when they flip to scrolling down.</p>
     </section>
   </div>
 </Demo>
@@ -198,8 +196,8 @@ Identical pill styling, only the current indicator (no hover indicator) and an `
     border: 1px solid var(--sl-color-gray-5);
     border-radius: 999px;
     margin: 0;
-    /* No transform here. The lib uses CSS animation (not transition) for the
-       hide, so user transitions on the same element don't clobber it. */
+    /* The lib drives the hide via a GSAP yPercent tween (it owns transform),
+       so these is-scrolled transitions are independent and safe to add. */
     transition: background 0.4s ease, color 0.4s ease, border-color 0.4s ease,
                 box-shadow 0.3s ease;
   }
