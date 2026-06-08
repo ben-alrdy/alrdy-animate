@@ -1,5 +1,6 @@
 import { parseAutoplay } from '../../core/autoplay'
 import { parseNum } from '../../core/parse'
+import { observeSize } from '../../core/visibility'
 import type { FeatureContext, FeatureModule } from '../../core/registry'
 import { readAttrs, type Config } from '../../core/settings'
 import { setupAutoplay, type AutoplayController } from './autoplay'
@@ -168,13 +169,25 @@ function setupOne(ctx: FeatureContext, root: HTMLElement, config: Config): (() =
     }),
   )
 
-  // Refresh measurements on resize.
-  cleanups.push(
-    ctx.onResize(() => {
-      const refresh = (slider as SliderLoop & { refresh?: (deep?: boolean) => void }).refresh
-      if (typeof refresh === 'function') refresh(true)
-    }, 150),
-  )
+  // Re-measure the carousel. Two complementary signals — neither alone is a
+  // superset of the other:
+  //
+  //  - ctx.onResize (window resize): catches viewport changes that don't alter
+  //    the root's own width — a fixed-width root with vw-sized slides, or a
+  //    media query that re-lays-out the slides without resizing root.
+  //  - observeSize (ResizeObserver on root): catches the box going 0 → laid-out
+  //    when the slider is revealed (a display:none modal / form-success opens)
+  //    and content growth (late images) — neither fires a window resize, and
+  //    horizontalLoop measured every width as 0 while hidden, so the carousel
+  //    math stays dead until this fires.
+  //
+  // Both run a deep refresh; refresh() itself detects a reveal-from-hidden
+  // (degenerate zero-width build) and re-seats onto the first slide, so the
+  // callbacks are identical and a redundant double-refresh on a plain responsive
+  // resize is harmless (idempotent re-measure).
+  const remeasure = (): void => slider.refresh(true)
+  cleanups.push(ctx.onResize(remeasure, 150))
+  cleanups.push(observeSize(root, remeasure))
 
   // Initial onChange (fired by horizontalLoop on construction) has already
   // toggled is-active classes and emitted slide-active on the starting slide

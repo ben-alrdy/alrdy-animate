@@ -1,4 +1,6 @@
-export const MODAL_STATUS_ATTR = 'aa-modal-status'
+import { MODAL_STATUS_ATTR } from '../../core/trigger'
+
+export { MODAL_STATUS_ATTR }
 export const MODAL_GROUP_STATUS_ATTR = 'aa-modal-group-status'
 
 export interface ModalEntry {

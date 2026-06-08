@@ -10,6 +10,12 @@ export interface ParsedTrigger {
 
 export const CUSTOM_EVENT_NAME = 'aa:trigger'
 
+// Modal vocabulary lives here (core already encodes the modal-active event and
+// the card selector in INFERENCE_CONTAINERS) so the gate (viewport-gate.ts) and
+// the modal feature (modal/state.ts) share one definition instead of drifting.
+export const MODAL_CARD_SELECTOR = '[aa-modal-name]'
+export const MODAL_STATUS_ATTR = 'aa-modal-status'
+
 /**
  * Multiplier applied to event-triggered animations on reverse, so the
  * exit feels snappier than the entrance (matches v7's 2× reverse).
@@ -81,7 +87,7 @@ const INFERENCE_CONTAINERS: ReadonlyArray<{
   rootSelector?: string
   enableAttr?: ValueAttr
 }> = [
-  { selector: '[aa-modal-name]', eventName: 'modal-active' },
+  { selector: MODAL_CARD_SELECTOR, eventName: 'modal-active' },
   { selector: '[aa-tabs-content]', eventName: 'tab-active', rootSelector: '[aa-tabs]', enableAttr: 'aa-tabs' },
   { selector: '[aa-tabs-visual]', eventName: 'tab-active', rootSelector: '[aa-tabs]', enableAttr: 'aa-tabs' },
   { selector: '[aa-slider-item]', eventName: 'slide-active', rootSelector: '[aa-slider]', enableAttr: 'aa-slider' },

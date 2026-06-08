@@ -17,6 +17,7 @@
  */
 
 import type { GsapHandle } from './gsap-detect'
+import { subscribeWithPair, MODAL_CARD_SELECTOR, MODAL_STATUS_ATTR } from './trigger'
 
 interface ScrollTriggerInstance {
   kill: () => void
@@ -37,11 +38,37 @@ export interface ViewportGateOptions {
  * on leave/leaveBack. Returns a disposer that kills the trigger. Returns `null`
  * when ScrollTrigger isn't available — caller decides whether to default to
  * always-active or skip silently.
+ *
+ * Inside a modal the gate switches strategy: a modal is `position:fixed`, and
+ * ScrollTrigger's scroll-based in-view math misjudges fixed elements — when the
+ * modal is opened at a non-zero scroll, the refresh every resize triggers can
+ * decide the element is off-screen and fire `onIdle`, freezing the gated
+ * animation for good (a fixed element never scrolls back into view). So we gate
+ * on the modal's own open/close lifecycle instead: active while open, idle while
+ * closed. This is also more correct — there's no point running the animation
+ * while the modal is hidden.
  */
 export function createViewportGate(
   gsapHandle: GsapHandle,
   opts: ViewportGateOptions,
 ): (() => void) | null {
+  const modalCard = opts.trigger.closest<HTMLElement>(MODAL_CARD_SELECTOR)
+  if (modalCard) {
+    const dispose = subscribeWithPair({
+      element: opts.trigger,
+      forwardName: 'modal-active',
+      onForward: opts.onActive,
+      onReverse: opts.onIdle,
+    })
+    // The gate is usually created after `modal-active` has already fired (the
+    // marquee/slider builds on reveal, mid-open), so reflect the current open
+    // state now — a future-only subscription would otherwise sit idle until the
+    // next open/close toggle.
+    if (modalCard.getAttribute(MODAL_STATUS_ATTR) === 'active') opts.onActive()
+    else opts.onIdle()
+    return dispose
+  }
+
   const ScrollTrigger = gsapHandle.plugins.ScrollTrigger as ScrollTriggerLike | undefined
   if (!ScrollTrigger) return null
 

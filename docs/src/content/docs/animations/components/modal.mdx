@@ -155,6 +155,66 @@ Same primitives, but with a small form inside. After the open animation finishes
   </div>
 </Demo>
 
+## Live demo — Components revealed after submit (marquee + slider)
+
+The real-world case this guards against: a form whose **success message is `display:none` until submit**, and that success message contains an `aa-marquee` and an `aa-slider`. Both measure their layout when the library initialises — while they're still hidden at `0×0`. A `ResizeObserver` watches each component's box, so the moment the success panel is revealed they re-measure and run immediately — **no window resize needed.** (Submit the form to reveal the panel; the email field is illustrative and nothing is sent.)
+
+<Demo caption={[{ label: "trigger", attrs: { "aa-modal-target": "modal-success" } }, { label: "card", attrs: { "aa-modal-name": "modal-success", "aa-animate": "fade-up", "aa-duration": "0.5" } }]}>
+  <div data-demo-stage>
+    <div data-spacer></div>
+    <button class="modal-trigger" aa-modal-target="modal-success" onclick="var c=document.querySelector('[aa-modal-name=modal-success]'); c.querySelector('[data-form]').classList.remove('is-hidden'); c.querySelector('[data-success]').classList.remove('is-shown');">Open form modal</button>
+    <div data-spacer></div>
+    <div class="modal" aa-modal-group>
+      <div class="modal-backdrop" aa-modal-backdrop aa-modal-close></div>
+      <div class="modal-card modal-card--center" aa-modal-name="modal-success" aa-animate="fade-up" aa-duration="0.5">
+        <div class="modal-scroll" data-lenis-prevent>
+          <div class="modal-content">
+            <form class="modal-form" data-form onsubmit="event.preventDefault(); this.classList.add('is-hidden'); this.parentElement.querySelector('[data-success]').classList.add('is-shown');">
+              <h2 aa-animate="text-blur" aa-split="chars" aa-stagger="0.02" aa-duration="0.6">Apply now</h2>
+              <p aa-animate="text-slide-up" aa-split="lines mask" aa-delay="0.1" aa-stagger="0.04" aa-duration="0.5">Submit to reveal the success message — it holds a marquee and a slider that were <code>display:none</code> until now.</p>
+              <label class="modal-form-row">
+                <span>Email</span>
+                <input type="email" name="email" placeholder="you@example.com" autocomplete="email" />
+              </label>
+              <button type="submit" class="modal-form-submit">Send application</button>
+            </form>
+            <div class="modal-success" data-success>
+              <h2>You're in 🎉</h2>
+              <p>This panel was <code>display:none</code> a moment ago. The marquee and slider below came out of a zero-size container and run without any resize.</p>
+              <div class="modal-marquee" aa-marquee aa-duration="10">
+                <div aa-marquee-scroller>
+                  <div aa-marquee-track>
+                    <div aa-marquee-list>
+                      <div class="aa-marquee-item">Application sent</div>
+                      <div class="aa-marquee-item">Profile matched</div>
+                      <div class="aa-marquee-item">Recruiter notified</div>
+                      <div class="aa-marquee-item">Interview soon</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="modal-slider" aa-slider>
+                <div class="aa-slider-track">
+                  <div class="aa-slider-card" aa-slider-item><div class="aa-slider-card__inner">Next steps</div></div>
+                  <div class="aa-slider-card" aa-slider-item><div class="aa-slider-card__inner">Prepare your CV</div></div>
+                  <div class="aa-slider-card" aa-slider-item><div class="aa-slider-card__inner">Book a slot</div></div>
+                  <div class="aa-slider-card" aa-slider-item><div class="aa-slider-card__inner">Meet the team</div></div>
+                </div>
+                <div class="aa-slider-controls">
+                  <button aa-slider-prev>Prev</button>
+                  <span><span aa-slider-current>01</span>/<span aa-slider-total>04</span></span>
+                  <button aa-slider-next>Next</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <button class="modal-close" aa-modal-close aria-label="Close"><span class="modal-close-bar"></span><span class="modal-close-bar is-second"></span></button>
+      </div>
+    </div>
+  </div>
+</Demo>
+
 <style>{`
   .modal-trigger {
     align-self: flex-start;
@@ -347,5 +407,84 @@ Same primitives, but with a small form inside. After the open animation finishes
   }
   .modal-close-bar.is-second {
     transform: rotate(-45deg);
+  }
+
+  /* --- Components-revealed-after-submit demo (marquee + slider) --- */
+  /* Class toggles (not the [hidden] attribute) so author display rules can't
+     override the hidden state. The success panel is display:none until submit,
+     which is what puts the inner slider/marquee at 0×0 on init. */
+  .modal-form.is-hidden {
+    display: none;
+  }
+  .modal-success {
+    display: none;
+  }
+  .modal-success.is-shown {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5em;
+  }
+  .modal-success > * {
+    margin: 0;
+  }
+  .modal-success h2 {
+    font-size: 2em;
+    font-weight: 500;
+    line-height: 1.2;
+  }
+  .modal-success p {
+    font-size: 1em;
+    line-height: 1.5;
+  }
+  .modal-marquee {
+    width: 100%;
+    padding: 0.5em 0;
+  }
+  .modal-marquee .aa-marquee-item {
+    flex: none;
+    padding: 0.6rem 1rem;
+    margin-right: 0.75rem;
+    background: #131313;
+    color: #ffffff;
+    border-radius: 6px;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+  .modal-slider {
+    width: 100%;
+  }
+  .modal-slider .aa-slider-track {
+    display: flex;
+    gap: 1rem;
+    overflow: hidden;
+    width: 100%;
+  }
+  .modal-slider .aa-slider-card {
+    flex: 0 0 100%;
+  }
+  .modal-slider .aa-slider-card__inner {
+    box-sizing: border-box;
+    background: #131313;
+    color: #ffffff;
+    border-radius: 6px;
+    padding: 2rem 1rem;
+    text-align: center;
+    font-weight: 500;
+  }
+  .modal-slider .aa-slider-controls {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+    justify-content: center;
+    margin-top: 1rem;
+  }
+  .modal-slider .aa-slider-controls button {
+    background: #efeeec;
+    color: #131313;
+    border: 1px solid #c8c7c4;
+    border-radius: 4px;
+    padding: 0.45rem 0.85rem;
+    cursor: pointer;
+    font: inherit;
   }
 `}</style>

@@ -10,6 +10,7 @@ export interface SliderLoop extends GsapTimeline {
   toIndex: (index: number, vars?: Record<string, unknown>) => unknown
   current: () => number
   closestIndex: (setCurrent?: boolean) => number
+  refresh: (deep?: boolean) => void
   times: number[]
   draggable?: DraggableInstance
   touchCleanup?: () => void
@@ -112,6 +113,10 @@ export function horizontalLoop(
       : ((gsap.utils.toArray as (v: unknown) => HTMLElement[])(center)[0] ||
         (items[0].parentNode as HTMLElement))
   let totalWidth = 0
+  // True when the last populateWidths() ran while the track was laid out at 0
+  // width (the slider was hidden — display:none inside a closed modal /
+  // form-success). refresh() uses it to spot the reveal and reset the index.
+  let measuredHidden = false
 
   const getTotalWidth = (): number =>
     items[length - 1].offsetLeft +
@@ -122,6 +127,7 @@ export function horizontalLoop(
 
   const populateWidths = (): void => {
     let b1 = container.getBoundingClientRect()
+    measuredHidden = b1.width === 0
     let b2: DOMRect
     items.forEach((el, i) => {
       widths[i] = parseFloat(gsap.getProperty(el, 'width', 'px'))
@@ -210,14 +216,30 @@ export function horizontalLoop(
 
   const refresh = (deep?: boolean): void => {
     const progress = tl.progress()
+    // Was the slider built/last-measured while hidden? If so, curIndex and
+    // progress were seated from zero-width metrics (closestIndex lands on the
+    // last slide). populateWidths() below refreshes measuredHidden.
+    const wasHidden = measuredHidden
     tl.progress(0, true)
     startX = items[0].offsetLeft
     populateWidths()
     if (deep) populateTimeline()
     populateOffsets()
-    if (deep && tl.draggable) {
+    if (deep && wasHidden && !measuredHidden) {
+      // Reveal (hidden → laid-out): the seated index is meaningless. Now that we
+      // own real geometry, reset to the first slide and fire onChange explicitly
+      // so the counter/active-class move to 0 (tl.time alone is a no-op when the
+      // playhead already sits at times[0], so onUpdate wouldn't fire).
+      curIndex = 0
+      tl.time(times[0], true)
+      lastIndex = 0
+      if (onChange) onChange(items[0], 0)
+    } else if (deep && tl.draggable) {
+      // A drag leaves the playhead between slides; re-seat onto the active slide.
       tl.time(times[curIndex], true)
     } else {
+      // Non-draggable: preserve the running progress fraction so a resize that
+      // lands mid-transition doesn't snap the slide.
       tl.progress(progress, true)
     }
   }
@@ -394,7 +416,7 @@ export function horizontalLoop(
 
   // Expose refresh on the timeline so the resize bus can call it without
   // capturing a closure here.
-  ;(tl as SliderLoop & { refresh: (deep?: boolean) => void }).refresh = refresh
+  tl.refresh = refresh
 
   return tl as SliderLoop
 }

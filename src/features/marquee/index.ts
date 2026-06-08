@@ -425,8 +425,16 @@ function setupOne(
     }
   }
 
+  // buildInner returns undefined when the marquee measures 0×0 — it's hidden
+  // (display:none inside a closed modal or a Webflow form-success wrapper) or
+  // its content hasn't laid out yet. Don't bail permanently: fall through and
+  // let the ResizeObserver below rebuild the moment the list gains width (the
+  // modal opens / late images land) — scheduleRebuild already tolerates a
+  // never-built start (activeLoop/teardownInner undefined, builtCycle 0). Only
+  // give up when there's no ResizeObserver to recover with (SSR / ancient
+  // browsers), where the deferred build could never fire.
   let teardownInner = buildInner()
-  if (!teardownInner) return undefined
+  if (!teardownInner && typeof ResizeObserver === 'undefined') return undefined
 
   // Lazy images and late web fonts grow the list *after* the first measurement,
   // which would leave the loop wrapping at a stale, too-short distance — the
