@@ -58,6 +58,12 @@ export interface GsapTween {
   play: (from?: number | string, suppressEvents?: boolean) => GsapTween
   pause: (atTime?: number | string, suppressEvents?: boolean) => GsapTween
   reverse: (from?: number | string, suppressEvents?: boolean) => GsapTween
+  /**
+   * Rewind to the start and play forward. `includeDelay` (default false in GSAP)
+   * replays the tween's `delay` — unlike `play(0)`, whose time 0 sits *after* the
+   * delay, so a paused tween's delay is otherwise skipped on replay.
+   */
+  restart: (includeDelay?: boolean, suppressEvents?: boolean) => GsapTween
   /** Set or replace a lifecycle callback (`onComplete`, `onReverseComplete`, …). */
   eventCallback: (type: string, callback?: (() => void) | null) => GsapTween
 }

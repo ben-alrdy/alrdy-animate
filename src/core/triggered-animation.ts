@@ -297,10 +297,15 @@ export function setupTriggeredAnimation(
       onForward: () => {
         triggerPlayed = true
         setWillChange()
-        // Always restart from time 0 so an interrupted reverse doesn't leak
-        // forward; reset timeScale to 1 in case a prior reverse left it
-        // accelerated.
-        currentAnim?.timeScale(1).play(0)
+        // Restart from the beginning *including the delay* so an interrupted
+        // reverse doesn't leak forward AND `aa-delay` is honored on every fire.
+        // `play(0)` would skip the delay — GSAP's `delay` is a start-offset on
+        // the parent timeline, and time 0 sits after it, so a paused tween's
+        // delay never replays via play(0). `restart(true)` rewinds past the
+        // delay. timeScale is reset to 1 in case a prior reverse accelerated it;
+        // suppressEvents (default) keeps the rewind from firing the
+        // onReverseComplete that would clear the will-change we just set.
+        currentAnim?.timeScale(1).restart(true)
       },
       onReverse: () => {
         triggerPlayed = false

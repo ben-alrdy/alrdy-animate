@@ -105,6 +105,32 @@ test.describe('modal demo page', () => {
     expect(afterOpen).toBeGreaterThan(0.9)
   })
 
+  test('inner aa-animate honours aa-delay on open (event-triggered)', async ({ page }) => {
+    const initLog = page.waitForEvent('console', { predicate: initialized, timeout: 8000 })
+    await page.goto(MODAL_PATH)
+    await initLog
+    await page.waitForTimeout(300)
+
+    const trigger = page.locator('[aa-modal-target="modal-center"]')
+    // aa-delay="0.5", aa-duration="0.4". The inner animation must stay at its
+    // from-state through the delay window, then complete. Before the fix the
+    // event forward used play(0), which skips GSAP's delay — the element would
+    // already be animating at 250ms.
+    const probe = page.locator('[aa-modal-name="modal-center"] [data-delay-probe]')
+
+    await trigger.click()
+
+    // Still inside the 0.5s delay — should be hidden (from-state).
+    await page.waitForTimeout(250)
+    const duringDelay = await probe.evaluate((el) => parseFloat(getComputedStyle(el).opacity))
+    expect(duringDelay).toBeLessThan(0.1)
+
+    // Past delay + duration (0.5 + 0.4 = 0.9s) — should be fully visible.
+    await page.waitForTimeout(800)
+    const afterDone = await probe.evaluate((el) => parseFloat(getComputedStyle(el).opacity))
+    expect(afterDone).toBeGreaterThan(0.9)
+  })
+
   test('Escape key closes the active modal', async ({ page }) => {
     const initLog = page.waitForEvent('console', { predicate: initialized, timeout: 8000 })
     await page.goto(MODAL_PATH)

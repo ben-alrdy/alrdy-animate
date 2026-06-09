@@ -65,9 +65,10 @@ Lenis hijacks page wheel events. When your modal card is taller than the viewpor
           <div class="modal-content">
             <h2 aa-animate="text-blur" aa-split="chars" aa-stagger="0.02" aa-duration="0.6">Centered modal</h2>
             <p aa-animate="text-slide-up" aa-split="lines mask" aa-delay="0.1" aa-stagger="0.04" aa-duration="0.5">Card animates up and fades in. Inner heading and paragraph play on the same modal-active event via trigger inference.</p>
-            <div aa-stack-card>
-              <p data-orphan-probe aa-animate="fade-up" aa-duration="0.5">This line sits inside a stray <code>aa-stack-card</code> with no <code>aa-stack</code> ancestor. Trigger inference skips the orphaned container and falls through to <code>modal-active</code>, so it still plays on open instead of stranding paused.</p>
+            <div aa-stack-card style="position: static">
+              <p data-orphan-probe aa-animate="fade-up" aa-duration="0.5">This line sits inside a stray <code>aa-stack-card</code> with no <code>aa-stack</code> ancestor. Trigger inference skips the orphaned container and falls through to <code>modal-active</code>, so it still plays on open instead of stranding paused. (<code>position: static</code> here just neutralises the stack feature's default sticky layout so the demo doesn't overlap.)</p>
             </div>
+            <p data-delay-probe aa-animate="fade-up" aa-delay="0.5" aa-duration="0.4">This line carries <code>aa-delay="0.5"</code>. Event-triggered inner animations honour their delay on every open — it waits half a second after the modal opens before fading up.</p>
             <p aa-animate="text-slide-up" aa-split="lines mask" aa-delay="0.2" aa-stagger="0.04" aa-duration="0.5">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
             <p aa-animate="text-slide-up" aa-split="lines mask" aa-delay="0.3" aa-stagger="0.04" aa-duration="0.5">Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
             <p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.</p>
