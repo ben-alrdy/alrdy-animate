@@ -9,7 +9,7 @@ test.describe('hover cursor page', () => {
     page.on('console', (m) => messages.push(m.text()))
 
     const initLog = page.waitForEvent('console', { predicate: initialized, timeout: 8000 })
-    await page.goto('/animations/hover/cursor/')
+    await page.goto('/animations/components/cursor/')
     await initLog
 
     const initLine = messages.find((m) => m.includes('[alrdy-animate] initialized'))
@@ -19,7 +19,7 @@ test.describe('hover cursor page', () => {
   test('cursor element starts hidden, shows on trigger hover, hides on leave', async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 800 })
     const initLog = page.waitForEvent('console', { predicate: initialized, timeout: 8000 })
-    await page.goto('/animations/hover/cursor/')
+    await page.goto('/animations/components/cursor/')
     await initLog
 
     const cursor = page.locator('[aa-cursor]').first()
@@ -56,7 +56,7 @@ test.describe('hover cursor page', () => {
   test('aa-cursor-offset overrides xPercent / yPercent', async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 800 })
     const initLog = page.waitForEvent('console', { predicate: initialized, timeout: 8000 })
-    await page.goto('/animations/hover/cursor/')
+    await page.goto('/animations/components/cursor/')
     await initLog
 
     // Override the default cursor's offset to "centered on mouse" (-50 -50) and re-init.
