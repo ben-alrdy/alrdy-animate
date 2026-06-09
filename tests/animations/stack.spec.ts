@@ -206,6 +206,44 @@ test.describe('stack demo page', () => {
     expect(translateY).toBeLessThan(-1)
   })
 
+  test('stack-in fade completes at the midpoint of the entry travel, not at lock', async ({ page }) => {
+    const initLog = page.waitForEvent('console', { predicate: initialized, timeout: 8000 })
+    await page.goto('/animations/components/stack/')
+    await initLog
+    await page.waitForTimeout(300)
+
+    // The responsive demo (#aa-stack-responsive) is `aa-stack-in="fade"`, active
+    // at desktop width. The card's own opacity should reach 1 by the halfway
+    // point between entry-start and lock — and still be mid-fade at a quarter.
+    const result = await page.evaluate(async () => {
+      const sec = document.getElementById('aa-stack-responsive')!
+      const cards = Array.from(sec.querySelectorAll<HTMLElement>('[aa-stack-card]'))
+      const card = cards[1]
+      const stickyTop = parseFloat(getComputedStyle(cards[0]).top) || 0
+      const naturalTop = card.getBoundingClientRect().top + window.scrollY
+      const entryStart = naturalTop - window.innerHeight
+      const lockPoint = naturalTop - stickyTop
+      const w = window as unknown as {
+        lenis?: { scrollTo: (y: number, o?: object) => void }
+        ScrollTrigger?: { update: () => void }
+      }
+      const opacityAt = async (frac: number): Promise<number> => {
+        const y = entryStart + (lockPoint - entryStart) * frac
+        if (w.lenis) w.lenis.scrollTo(y, { immediate: true })
+        else window.scrollTo(0, y)
+        await new Promise((r) => setTimeout(r, 120))
+        w.ScrollTrigger?.update()
+        await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)))
+        return parseFloat(getComputedStyle(card).opacity)
+      }
+      return { quarter: await opacityAt(0.25), mid: await opacityAt(0.5) }
+    })
+    // Mid-fade at the quarter point, fully opaque by the midpoint.
+    expect(result.quarter).toBeGreaterThan(0)
+    expect(result.quarter).toBeLessThan(1)
+    expect(result.mid).toBeGreaterThan(0.99)
+  })
+
   test('below md (aa-stack="|none") in-card animations fall back to scroll, not the never-emitted card-active', async ({ page }) => {
     // Mobile width: the responsive demo's `aa-stack="|none"` disables the stack
     // JS here, so it never emits `card-active`. The in-card text-fade-up must

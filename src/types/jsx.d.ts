@@ -659,7 +659,9 @@ declare namespace JSX {
      * from `top bottom` (card top at viewport bottom) toward its sticky lock
      * position. Flags are space-separated and compose:
      *
-     * - `fade` — opacity 0 → 1
+     * - `fade` — opacity 0 → 1, completing at the *midpoint* of the entry
+     *   travel (the card is fully opaque before it locks; scale / rotation
+     *   keep settling to lock)
      * - `scale` — scale `1 - 0.2 * aa-intensity` → 1 (e.g. 0.8 → 1 at intensity=1)
      * - `rotate` — cards **arrive tilted** and **settle flat**: centred fan
      *   `(0°, -5°, +5°, -5°, +5°, …)` × `aa-intensity` → 0°. First card stays

@@ -51,7 +51,7 @@ Runs from `aa-scroll-start` (default `top 85%`) until the card hits its sticky l
 
 | Flag          | Effect                                                                              |
 | ------------- | ----------------------------------------------------------------------------------- |
-| `fade`        | `opacity: 0 → 1`                                                                    |
+| `fade`        | `opacity: 0 → 1`, completing at the **midpoint** of the entry travel — the card is fully opaque before it locks, while `scale` / rotation keep settling to lock. |
 | `scale`       | `scale: (1 - 0.2 × intensity) → 1` (e.g. 0.8 → 1 at `aa-intensity="1"`)             |
 | `rotate`      | Cards **arrive tilted** and **settle flat**: centred fan `(0°, -5°, +5°, -5°, +5°, …)` × intensity → `0°`. First card stays flat; later cards alternate sides. |
 | `rotate-cw`   | Incremental clockwise from-state, settles flat: `(0°, +1°, +2°, +3°, …)` × intensity → `0°`. |

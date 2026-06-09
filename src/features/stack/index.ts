@@ -80,9 +80,11 @@ function rotationPair(
   return {}
 }
 
+// Scale / rotation from- and to-states for the in-tween. `fade` is deliberately
+// *not* handled here — it gets its own tween that finishes halfway to the lock
+// (see the in block), so it can't share this full-range tween.
 function buildInFrom(flags: Set<string>, intensity: number, rotation: number | undefined): Vars {
   const v: Vars = {}
-  if (flags.has('fade')) v.opacity = 0
   if (flags.has('scale')) v.scale = Math.max(0, 1 - 0.2 * intensity)
   if (rotation !== undefined) v.rotation = rotation
   return v
@@ -90,7 +92,6 @@ function buildInFrom(flags: Set<string>, intensity: number, rotation: number | u
 
 function buildInTo(flags: Set<string>, rotation: number | undefined): Vars {
   const v: Vars = {}
-  if (flags.has('fade')) v.opacity = 1
   if (flags.has('scale')) v.scale = 1
   if (rotation !== undefined) v.rotation = rotation
   return v
@@ -380,32 +381,49 @@ function setupOne(
     // motion themselves) run on schedule.
     if (reduceMotion) return
 
-    if (inFlags.size > 0) {
-      const rot = rotationPair(rotateMode, tiltMode, index, intensity)
-      const tween = gsap.fromTo(
+    // Fade scrubs only over the *first half* of the entry travel, so the card
+    // reads as fully arrived well before it reaches its sticky lock — the
+    // remaining scale / rotation then settle it the rest of the way. Split into
+    // its own tween because a single scrubbed fromTo maps every property to the
+    // same progress; opacity needs to finish earlier than scale / rotation.
+    if (inFlags.has('fade')) {
+      const fadeEnd = (): number => (entryStart() + lockPoint()) / 2
+      const fadeTween = gsap.fromTo(
         card,
-        buildInFrom(inFlags, intensity, rot.from),
+        { opacity: 0 },
         {
-          ...buildInTo(inFlags, rot.to),
+          opacity: 1,
           ease: 'power1.in',
-          // Defer the from-state until ScrollTrigger's first refresh tick.
-          // Without this, gsap.fromTo applies `rotation: ±15°` synchronously
-          // during this feature's init — and the text feature, which inits
-          // afterward in the same tick, then runs SplitText against a rotated
-          // card. SplitText measures per-character positions to group lines;
-          // on a rotated element each character sits at a different rotated
-          // y-coordinate, so every word ends up on its own line. ScrollTrigger
-          // refreshes after init completes, so this only postpones the visual
-          // by one tick — no perceptible flash.
           immediateRender: false,
-          scrollTrigger: {
-            trigger: card,
-            start: entryStart,
-            end: lockPoint,
-            scrub,
-          },
+          scrollTrigger: { trigger: card, start: entryStart, end: fadeEnd, scrub },
         },
       )
+      cleanups.push(() => fadeTween.kill())
+    }
+
+    const rot = rotationPair(rotateMode, tiltMode, index, intensity)
+    const inFrom = buildInFrom(inFlags, intensity, rot.from)
+    if (Object.keys(inFrom).length > 0) {
+      const tween = gsap.fromTo(card, inFrom, {
+        ...buildInTo(inFlags, rot.to),
+        ease: 'power1.in',
+        // Defer the from-state until ScrollTrigger's first refresh tick.
+        // Without this, gsap.fromTo applies `rotation: ±15°` synchronously
+        // during this feature's init — and the text feature, which inits
+        // afterward in the same tick, then runs SplitText against a rotated
+        // card. SplitText measures per-character positions to group lines;
+        // on a rotated element each character sits at a different rotated
+        // y-coordinate, so every word ends up on its own line. ScrollTrigger
+        // refreshes after init completes, so this only postpones the visual
+        // by one tick — no perceptible flash.
+        immediateRender: false,
+        scrollTrigger: {
+          trigger: card,
+          start: entryStart,
+          end: lockPoint,
+          scrub,
+        },
+      })
       cleanups.push(() => tween.kill())
     }
 
