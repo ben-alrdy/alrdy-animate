@@ -106,11 +106,13 @@ function buildOutTo(flags: Set<string>, intensity: number): Vars {
   if (flags.has('perspective')) {
     v.rotationX = 10 * intensity
     v.scale = 0.92
-    v.y = '-2rem'
+    // Fixed `rem` lift, scaled by intensity so it tracks the rest of the preset
+    // (exactly `2rem` at the default intensity of 1).
+    v.y = `${-2 * intensity}rem`
   }
   if (flags.has('blur')) {
     v.filter = `blur(${8 * intensity}px)`
-    v.y = '-1rem'
+    v.y = `${-1 * intensity}rem`
   }
   if (flags.has('left')) {
     v.x = `${-4 * intensity}rem`
@@ -265,14 +267,46 @@ function setupOne(
   // getComputedStyle, both of which inflate by the sticky offset whenever a
   // card is currently locked.
   let geometry = captureGeometry(cards)
+
+  const reduceMotion = ctx.reducedMotion !== null
+
+  // Last-card cover finisher: when the exit preset includes `perspective`, the
+  // final card rises by the same lift the out tween applies so it re-covers the
+  // receded card behind it (instead of unsticking the instant it locks and
+  // scrolling off with a permanent gap). It needs trailing scroll room to stay
+  // stuck while it lifts; we add it as the last card's own `margin-bottom`
+  // rather than touching the root's padding — writing onto the root would
+  // clobber the author's (often responsive) padding and any class-set value.
+  // The margin extends the root's content box below the last card, lengthening
+  // its sticky range, without shifting any card's `offsetTop` (so
+  // `captureGeometry` is unaffected). The margin is a `rem` string, so it
+  // self-adjusts if the root font-size changes — no recompute needed. The only
+  // place we convert the `rem` lift to px is the ScrollTrigger end below, which
+  // takes an absolute pixel scroll offset (and re-reads it on every refresh via
+  // its function form). Skipped under reduced motion and for a single-card stack.
+  //
+  // The cover lift is *half* the perspective out lift (`2rem` → `1rem`): the
+  // receding card also scales to 0.92, which pulls its top edge back down, so
+  // its visible peek above the last card is less than the full lift — a half
+  // lift covers it without over-shooting (which would expose it below the last
+  // card as it scrolls off).
+  const COVER_REM = 1
+  const lastCard = cards[cards.length - 1]
+  const coverEnabled =
+    !reduceMotion && cards.length > 1 && outFlags.has('perspective') && lastCard !== undefined
+  const remPx = (): number => parseFloat(getComputedStyle(document.documentElement).fontSize) || 16
+  const coverLiftPx = (): number => COVER_REM * intensity * remPx()
+  const savedMargin = lastCard !== undefined ? lastCard.style.marginBottom : ''
+  if (coverEnabled) lastCard.style.marginBottom = `${COVER_REM * intensity}rem`
+
   const onRefreshInit = (): void => {
     geometry = captureGeometry(cards)
   }
   ScrollTrigger.addEventListener('refreshInit', onRefreshInit)
 
-  const reduceMotion = ctx.reducedMotion !== null
   const cleanups: Array<() => void> = []
   cleanups.push(() => ScrollTrigger.removeEventListener('refreshInit', onRefreshInit))
+  if (coverEnabled) cleanups.push(() => (lastCard.style.marginBottom = savedMargin))
   const again = ctx.options.again !== false
 
   cards.forEach((card, index) => {
@@ -409,6 +443,28 @@ function setupOne(
           trigger: nextCard,
           start: outStart,
           end: outEnd,
+          scrub,
+        },
+      })
+      cleanups.push(() => tween.kill())
+    }
+
+    // Last-card cover finisher (see the `coverEnabled` setup above). Scrubs the
+    // final card up by the perspective lift over the trailing padding runway,
+    // 1:1 with scroll so it reads as natural continued scrolling. The last card
+    // has no out tween and its in tween never writes `y`, so this owns `y`
+    // exclusively — no property fight. The z-index ladder already puts it on
+    // top, so the lift cleanly covers the receded card behind it.
+    if (coverEnabled && index === cards.length - 1) {
+      const coverStart = (): number => geometry.tops[index] - geometry.stickyTop
+      const coverEnd = (): number => geometry.tops[index] - geometry.stickyTop + coverLiftPx()
+      const tween = gsap.to(card, {
+        y: `${-COVER_REM * intensity}rem`,
+        ease: 'none',
+        scrollTrigger: {
+          trigger: card,
+          start: coverStart,
+          end: coverEnd,
           scrub,
         },
       })

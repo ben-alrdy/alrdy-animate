@@ -81,13 +81,13 @@ Runs over the *next* card's entry window — i.e. as the next card scrolls towar
 | -------------- | ------------------------------------------------------------------------------- |
 | `fade`         | `opacity → 0`                                                                   |
 | `scale`        | `scale → (1 - 0.15 × intensity)` (e.g. 0.85)                                     |
-| `perspective`  | 3D tilt-back: `rotationX: 10 × intensity`, slight scale-down, slight `y` lift.   |
-| `blur`         | `filter: blur(8 × intensity px)` + slight `y` lift.                              |
+| `perspective`  | 3D tilt-back: `rotationX: 10 × intensity`, slight scale-down, `y` lift of `2 × intensity rem`. |
+| `blur`         | `filter: blur(8 × intensity px)` + `y` lift of `1 × intensity rem`. |
 | `left`         | Slide `x: −4 × intensity rem` while fading out.                                  |
 | `right`        | Slide `x: 4 × intensity rem` while fading out.                                   |
 | `none`         | Cards hold their settled state; the next card overlays them naturally.          |
 
-The **last card** has no exit animation — nothing overlays it.
+The **last card** normally has no exit animation — nothing overlays it. The one exception is `perspective`: there the last card rises by **half that lift** (`1 × intensity rem`) at the end of the stack so it covers the receded card behind it instead of leaving a gap. (Half, because the receding card also scales down — its top edge drops back, so its visible peek is less than the full lift. The feature adds that distance as the last card's bottom margin to give it the scroll runway it needs.)
 
 ## Tuning attributes
 
@@ -185,7 +185,7 @@ In-card `aa-animate` elements adapt automatically: while the stack is active the
       </article>
       <article class="aa-stack-card aa-stack-card-3" aa-stack-card>
         <h3 class="aa-stack-card__h" aa-animate="text-fade-up" aa-split="lines mask">Third card</h3>
-        <p class="aa-stack-card__p" aa-animate="text-fade-up" aa-split="lines mask" aa-delay="0.15">The last card has no exit animation — nothing overlays it.</p>
+        <p class="aa-stack-card__p" aa-animate="text-fade-up" aa-split="lines mask" aa-delay="0.15">With <code>perspective</code> the last card rises a touch at the end to cover the receded card behind it.</p>
       </article>
     </section>
     <h2 class="aa-stack-after" aa-animate="text-fade-up" aa-split="lines mask">Scroll-triggered heading below the sticky stack — verifies regular scroll triggers fire correctly once you scroll past the sticky section.</h2>

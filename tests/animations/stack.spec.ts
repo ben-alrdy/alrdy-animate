@@ -142,6 +142,70 @@ test.describe('stack demo page', () => {
     expect(played.visible).toBe(played.total)
   })
 
+  test('perspective exit lifts the last card to cover the receded card behind it', async ({ page }) => {
+    const initLog = page.waitForEvent('console', { predicate: initialized, timeout: 8000 })
+    await page.goto('/animations/components/stack/')
+    await initLog
+    await page.waitForTimeout(300)
+
+    // The "rotate entrance + perspective exit" demo carries aa-stack-out
+    // including `perspective`. That preset is the one that gives the LAST card a
+    // cover finisher — it rises by `3 * intensity rem` at the end of the stack so
+    // it overlays the receded card behind it instead of leaving a gap. The
+    // cover lift is half the perspective out lift (`1 * intensity rem`), and the
+    // runway for it is added as the last card's own margin-bottom (so it never
+    // clobbers the author's root padding).
+    const result = await page.evaluate(() => {
+      const persp = Array.from(document.querySelectorAll<HTMLElement>('[aa-stack]')).find((s) =>
+        (s.getAttribute('aa-stack-out') ?? '').includes('perspective'),
+      )
+      if (!persp) return { found: false } as const
+      const cards = Array.from(persp.querySelectorAll<HTMLElement>('[aa-stack-card]'))
+      const last = cards[cards.length - 1]
+      const remPx = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16
+      const expectedLift = 1 * remPx
+      // Read the *computed* margin (px) — the inline value is a `rem` string.
+      const marginBottom = parseFloat(getComputedStyle(last).marginBottom) || 0
+      // Root padding must stay untouched (author-owned, often responsive vh).
+      const rootInlinePad = persp.style.paddingBottom
+      return { found: true, expectedLift, marginBottom, rootInlinePad } as const
+    })
+    expect(result.found).toBe(true)
+    if (!result.found) return
+    // The margin runway equals the lift distance, proving the cover path armed.
+    expect(result.marginBottom).toBeGreaterThan(0)
+    expect(Math.abs(result.marginBottom - result.expectedLift)).toBeLessThan(0.5)
+    // The author's root padding is never overwritten with an absolute px.
+    expect(result.rootInlinePad).toBe('')
+
+    // Scroll to the very end of the perspective stack and assert the last card
+    // has a negative translateY applied (the cover lift), which it never had
+    // before — previously the last card held its settled state untouched.
+    const translateY = await page.evaluate(async () => {
+      const persp = Array.from(document.querySelectorAll<HTMLElement>('[aa-stack]')).find((s) =>
+        (s.getAttribute('aa-stack-out') ?? '').includes('perspective'),
+      )!
+      const cards = Array.from(persp.querySelectorAll<HTMLElement>('[aa-stack-card]'))
+      const last = cards[cards.length - 1]
+      const first = cards[0]
+      const stickyTop = parseFloat(getComputedStyle(first).top) || 0
+      const lockPoint = last.getBoundingClientRect().top + window.scrollY - stickyTop
+      const lift = 1 * (parseFloat(getComputedStyle(document.documentElement).fontSize) || 16)
+      const w = window as unknown as {
+        lenis?: { scrollTo: (y: number, o?: object) => void }
+        ScrollTrigger?: { update: () => void }
+      }
+      // Scroll comfortably past the lift window so the tween reaches its end.
+      if (w.lenis) w.lenis.scrollTo(lockPoint + lift + 40, { immediate: true })
+      else window.scrollTo(0, lockPoint + lift + 40)
+      await new Promise((r) => setTimeout(r, 150))
+      w.ScrollTrigger?.update()
+      await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)))
+      return new DOMMatrixReadOnly(getComputedStyle(last).transform).m42
+    })
+    expect(translateY).toBeLessThan(-1)
+  })
+
   test('below md (aa-stack="|none") in-card animations fall back to scroll, not the never-emitted card-active', async ({ page }) => {
     // Mobile width: the responsive demo's `aa-stack="|none"` disables the stack
     // JS here, so it never emits `card-active`. The in-card text-fade-up must

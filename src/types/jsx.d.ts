@@ -724,13 +724,16 @@ declare namespace JSX {
      *
      * - `fade` — opacity → 0
      * - `scale` — scale → `1 - 0.15 * aa-intensity` (e.g. 0.85 at intensity=1)
-     * - `perspective` — 3D tilt-back (`rotationX`, scale, slight `y`)
-     * - `blur` — `filter: blur(8 * intensity px)` + slight `y`
+     * - `perspective` — 3D tilt-back (`rotationX`, scale, `y` lift of
+     *   `2 * intensity rem`)
+     * - `blur` — `filter: blur(8 * intensity px)` + `y` lift of `1 * intensity rem`
      * - `left` / `right` — slide `±4 * intensity rem` while fading out
      * - `none` — cards hold their settled state and the next card overlays
      *
-     * The last card has no out animation (nothing overlays it). Example:
-     * `aa-stack-out="perspective"`.
+     * The last card normally has no out animation (nothing overlays it). When
+     * `perspective` is set, the last card instead rises by half that lift (`1 *
+     * intensity rem`) at the end of the stack so it covers the receded card
+     * behind it rather than leaving a gap. Example: `aa-stack-out="perspective"`.
      */
     'aa-stack-out'?: string
     /** Breakpoint variant of `aa-stack-out`. Activates at `>= breakpoints.sm`. */

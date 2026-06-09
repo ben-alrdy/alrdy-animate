@@ -1,5 +1,5 @@
 <!--
-  Last synced with src/ at v8.0.0-alpha.33 (2026-06-08) — components inside modals and `display:none`-until-revealed containers (e.g. a form-success message) now work: sliders/marquees measure layout at init and were dead while hidden, so they re-measure on reveal via a `ResizeObserver` (a window resize never fires), and inside a modal their loop/autoplay gates on the modal's open/close lifecycle instead of scroll position (scroll-based gating misjudges `position:fixed` modals and froze the loop on resize when opened at a non-zero scroll). Earlier alpha.32 — `will-change` is no longer left permanently on `[aa-animate]` elements: the orchestrator (appear/reveal/slices) sets it on the animated targets only while a tween plays and clears it on settle (re-armed on `again` reset / event reverse). Fixes frosted navs — a permanent `will-change: transform` on the nav was neutralising a descendant's `backdrop-filter`. Earlier alpha.31 — nav `hide` is now GSAP-driven (yPercent tween toggled on scroll-direction, overwrite:'auto'); composes with an `aa-animate` entrance on the same nav, immune to author `transition` clobber, full GSAP ease vocab (incl. elastic/bounce). Earlier alpha.28 — documented the `--aa-ease-*` CSS custom properties (named eases reusable in plain CSS; elastic/bounce have no variable)
+  Last synced with src/ at v8.0.0-alpha.33 (2026-06-09) — stack `aa-stack-out="perspective"`/`blur` `y` lift is `rem`-based and intensity-scaled (`2 × intensity rem` / `1 × intensity rem`); with `perspective` the last card now rises by *half* that lift (`1 × intensity rem`) at the end of the stack to cover the receded card behind it (last card's bottom margin extended to supply the runway). Earlier alpha.33 — components inside modals and `display:none`-until-revealed containers (e.g. a form-success message) now work: sliders/marquees measure layout at init and were dead while hidden, so they re-measure on reveal via a `ResizeObserver` (a window resize never fires), and inside a modal their loop/autoplay gates on the modal's open/close lifecycle instead of scroll position (scroll-based gating misjudges `position:fixed` modals and froze the loop on resize when opened at a non-zero scroll). Earlier alpha.32 — `will-change` is no longer left permanently on `[aa-animate]` elements: the orchestrator (appear/reveal/slices) sets it on the animated targets only while a tween plays and clears it on settle (re-armed on `again` reset / event reverse). Fixes frosted navs — a permanent `will-change: transform` on the nav was neutralising a descendant's `backdrop-filter`. Earlier alpha.31 — nav `hide` is now GSAP-driven (yPercent tween toggled on scroll-direction, overwrite:'auto'); composes with an `aa-animate` entrance on the same nav, immune to author `transition` clobber, full GSAP ease vocab (incl. elastic/bounce). Earlier alpha.28 — documented the `--aa-ease-*` CSS custom properties (named eases reusable in plain CSS; elastic/bounce have no variable)
   and the aa-tabs-content padding rule (keep vertical padding/borders off the clip element — pad an inner div);
   fade-*/rotate-up translate baseline reduced 3rem → 2rem;
   breakpoint-aware container inference (disabled feature → scroll fallback)
@@ -382,7 +382,7 @@ Pipe shorthand: `snap` on desktop, `draggable` on mobile.
   </article>
   <article aa-stack-card>
     <h2 aa-animate="fade-up">Third card</h2>
-    <p aa-animate="fade-up" aa-delay="0.15">The last card has no exit animation — nothing overlays it.</p>
+    <p aa-animate="fade-up" aa-delay="0.15">With perspective, the last card rises to cover the card behind it.</p>
   </article>
 </section>
 ```
@@ -395,6 +395,8 @@ Each card is locked at `top: var(--aa-stack-top, 25vh)` via CSS sticky. The defa
 - `tilt` / `tilt-cw` / `tilt-ccw` — cards **arrive flat**, build up to the same per-card curve by lock (Osmo splay-at-lock).
 
 `none` skips. All six rotation flags are mutually exclusive — `tilt*` wins over `rotate*`, and within a family `*-cw`/`*-ccw` wins over the plain flag. Magnitudes scale with `aa-intensity`.
+
+**Out-preset flags** (`aa-stack-out`): `fade`, `scale`, `perspective` (3D tilt-back), `blur`, `left`/`right`. The `perspective` and `blur` `y` lifts are `rem`-based (`2 × intensity rem` / `1 × intensity rem`). The last card normally has no out animation, but with `perspective` it rises by *half* that lift (`1 × intensity rem`) at the end of the stack to cover the receded card behind it — half because the receding card also scales down, so its visible peek is less than the full lift (the last card's bottom margin is extended by that distance to supply the scroll runway).
 
 ### Page transition (Barba) leave hook
 
