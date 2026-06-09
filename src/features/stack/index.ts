@@ -107,13 +107,17 @@ function buildOutTo(flags: Set<string>, intensity: number): Vars {
   if (flags.has('perspective')) {
     v.rotationX = 10 * intensity
     v.scale = 0.92
-    // Fixed `rem` lift, scaled by intensity so it tracks the rest of the preset
-    // (exactly `2rem` at the default intensity of 1).
-    v.y = `${-2 * intensity}rem`
+    // Lift as a percentage of the card's *own height* (`translateY(%)` resolves
+    // against element height). A fixed `rem` lift gets swallowed on tall cards:
+    // the `scale: 0.92` pulls the top edge down by ~4% of height, which on a
+    // large screen (tall cards) outgrows a fixed lift and the card vanishes
+    // behind the next one. A height-relative lift keeps the peek proportional
+    // across screen sizes. Scaled by intensity like the rest of the preset.
+    v.y = `${-7 * intensity}%`
   }
   if (flags.has('blur')) {
     v.filter = `blur(${8 * intensity}px)`
-    v.y = `${-1 * intensity}rem`
+    v.y = `${-3.5 * intensity}%`
   }
   if (flags.has('left')) {
     v.x = `${-4 * intensity}rem`
@@ -272,36 +276,38 @@ function setupOne(
   const reduceMotion = ctx.reducedMotion !== null
 
   // Last-card cover finisher: when the exit preset includes `perspective`, the
-  // final card rises by the same lift the out tween applies so it re-covers the
-  // receded card behind it (instead of unsticking the instant it locks and
-  // scrolling off with a permanent gap). It needs trailing scroll room to stay
-  // stuck while it lifts; we add it as the last card's own `margin-bottom`
-  // rather than touching the root's padding — writing onto the root would
-  // clobber the author's (often responsive) padding and any class-set value.
-  // The margin extends the root's content box below the last card, lengthening
-  // its sticky range, without shifting any card's `offsetTop` (so
-  // `captureGeometry` is unaffected). The margin is a `rem` string, so it
-  // self-adjusts if the root font-size changes — no recompute needed. The only
-  // place we convert the `rem` lift to px is the ScrollTrigger end below, which
-  // takes an absolute pixel scroll offset (and re-reads it on every refresh via
-  // its function form). Skipped under reduced motion and for a single-card stack.
+  // final card rises at the end of the stack so it re-covers the receded card
+  // behind it (instead of unsticking the instant it locks and scrolling off with
+  // a permanent gap). It needs trailing scroll room to stay stuck while it
+  // lifts; we add it as the last card's own `margin-bottom` rather than touching
+  // the root's padding — writing onto the root would clobber the author's (often
+  // responsive) padding and any class-set value. The margin extends the root's
+  // content box below the last card, lengthening its sticky range, without
+  // shifting any card's `offsetTop` (so `captureGeometry` is unaffected).
   //
-  // The cover lift is *half* the perspective out lift (`2rem` → `1rem`): the
-  // receding card also scales to 0.92, which pulls its top edge back down, so
-  // its visible peek above the last card is less than the full lift — a half
-  // lift covers it without over-shooting (which would expose it below the last
-  // card as it scrolls off).
-  const COVER_REM = 1
+  // The cover lift is *half* the perspective out lift (`7%` → `3.5%` of the
+  // card's height): the receding card also scales to 0.92, which pulls its top
+  // edge back down, so its visible peek above the last card is less than the
+  // full lift — a half lift covers it without over-shooting (which would expose
+  // it below the last card as it scrolls off). It's a percentage of card height
+  // (like the out lift) so the cover stays proportional across screen sizes; the
+  // runway margin and the ScrollTrigger end need that in px (margin-% and scroll
+  // offsets aren't height-relative), so we recompute it from `offsetHeight` on
+  // every refresh. Skipped under reduced motion and for a single-card stack.
+  const COVER_PCT = 3.5
   const lastCard = cards[cards.length - 1]
   const coverEnabled =
     !reduceMotion && cards.length > 1 && outFlags.has('perspective') && lastCard !== undefined
-  const remPx = (): number => parseFloat(getComputedStyle(document.documentElement).fontSize) || 16
-  const coverLiftPx = (): number => COVER_REM * intensity * remPx()
+  const coverLiftPx = (): number => (lastCard.offsetHeight * COVER_PCT * intensity) / 100
   const savedMargin = lastCard !== undefined ? lastCard.style.marginBottom : ''
-  if (coverEnabled) lastCard.style.marginBottom = `${COVER_REM * intensity}rem`
+  const applyCoverRunway = (): void => {
+    if (coverEnabled) lastCard.style.marginBottom = `${coverLiftPx()}px`
+  }
+  applyCoverRunway()
 
   const onRefreshInit = (): void => {
     geometry = captureGeometry(cards)
+    applyCoverRunway()
   }
   ScrollTrigger.addEventListener('refreshInit', onRefreshInit)
 
@@ -462,28 +468,34 @@ function setupOne(
           start: outStart,
           end: outEnd,
           scrub,
+          // The perspective / blur `y` lift is a percentage of card height;
+          // re-resolve it to px on refresh so it tracks the card as it resizes.
+          invalidateOnRefresh: true,
         },
       })
       cleanups.push(() => tween.kill())
     }
 
     // Last-card cover finisher (see the `coverEnabled` setup above). Scrubs the
-    // final card up by the perspective lift over the trailing padding runway,
-    // 1:1 with scroll so it reads as natural continued scrolling. The last card
-    // has no out tween and its in tween never writes `y`, so this owns `y`
-    // exclusively — no property fight. The z-index ladder already puts it on
+    // final card up by half the perspective lift over the trailing margin
+    // runway, 1:1 with scroll so it reads as natural continued scrolling. The
+    // last card has no out tween and its in tween never writes `y`, so this owns
+    // `y` exclusively — no property fight. The z-index ladder already puts it on
     // top, so the lift cleanly covers the receded card behind it.
     if (coverEnabled && index === cards.length - 1) {
       const coverStart = (): number => geometry.tops[index] - geometry.stickyTop
       const coverEnd = (): number => geometry.tops[index] - geometry.stickyTop + coverLiftPx()
       const tween = gsap.to(card, {
-        y: `${-COVER_REM * intensity}rem`,
+        y: `${-COVER_PCT * intensity}%`,
         ease: 'none',
         scrollTrigger: {
           trigger: card,
           start: coverStart,
           end: coverEnd,
           scrub,
+          // `y` is a height percentage and the margin runway / end are px from
+          // `offsetHeight`; re-resolve all of them together on refresh.
+          invalidateOnRefresh: true,
         },
       })
       cleanups.push(() => tween.kill())

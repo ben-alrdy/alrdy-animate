@@ -150,11 +150,11 @@ test.describe('stack demo page', () => {
 
     // The "rotate entrance + perspective exit" demo carries aa-stack-out
     // including `perspective`. That preset is the one that gives the LAST card a
-    // cover finisher — it rises by `3 * intensity rem` at the end of the stack so
-    // it overlays the receded card behind it instead of leaving a gap. The
-    // cover lift is half the perspective out lift (`1 * intensity rem`), and the
-    // runway for it is added as the last card's own margin-bottom (so it never
-    // clobbers the author's root padding).
+    // cover finisher — it rises at the end of the stack so it overlays the
+    // receded card behind it instead of leaving a gap. The cover lift is half
+    // the perspective out lift = `3.5%` of the card's height, and the runway for
+    // it is added as the last card's own margin-bottom (so it never clobbers the
+    // author's root padding).
     const result = await page.evaluate(() => {
       const persp = Array.from(document.querySelectorAll<HTMLElement>('[aa-stack]')).find((s) =>
         (s.getAttribute('aa-stack-out') ?? '').includes('perspective'),
@@ -162,9 +162,8 @@ test.describe('stack demo page', () => {
       if (!persp) return { found: false } as const
       const cards = Array.from(persp.querySelectorAll<HTMLElement>('[aa-stack-card]'))
       const last = cards[cards.length - 1]
-      const remPx = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16
-      const expectedLift = 1 * remPx
-      // Read the *computed* margin (px) — the inline value is a `rem` string.
+      const expectedLift = (last.offsetHeight * 3.5) / 100
+      // Margin runway is computed px from offsetHeight.
       const marginBottom = parseFloat(getComputedStyle(last).marginBottom) || 0
       // Root padding must stay untouched (author-owned, often responsive vh).
       const rootInlinePad = persp.style.paddingBottom
@@ -190,7 +189,7 @@ test.describe('stack demo page', () => {
       const first = cards[0]
       const stickyTop = parseFloat(getComputedStyle(first).top) || 0
       const lockPoint = last.getBoundingClientRect().top + window.scrollY - stickyTop
-      const lift = 1 * (parseFloat(getComputedStyle(document.documentElement).fontSize) || 16)
+      const lift = (last.offsetHeight * 3.5) / 100
       const w = window as unknown as {
         lenis?: { scrollTo: (y: number, o?: object) => void }
         ScrollTrigger?: { update: () => void }
