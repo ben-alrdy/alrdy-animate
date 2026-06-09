@@ -30,7 +30,7 @@ import Demo from '../../../../components/Demo.astro'
 - **Scroll lock** while any modal is open — `lenis.stop()` if Lenis is on the page, else `body.aa-modal-locked { overflow: hidden }`.
 - **ESC key** closes the active modal.
 - **Focus trap** — Tab/Shift+Tab cycles within the card.
-- **Auto-focus** the first focusable element after the open animation finishes.
+- **Auto-focus** the first form input (input/select/textarea) after the open animation finishes. Modals without a field anchor focus on the card itself — buttons and links are never auto-focused, so the modal never opens with a primary/close action pre-selected.
 - **Inner animations** — anything inside the card with `aa-animate` plays on `modal-active` and reverses on `modal-inactive` automatically. Reverse runs at 2× forward speed (`REVERSE_TIME_SCALE`).
 
 ## Required GSAP plugins
@@ -65,6 +65,9 @@ Lenis hijacks page wheel events. When your modal card is taller than the viewpor
           <div class="modal-content">
             <h2 aa-animate="text-blur" aa-split="chars" aa-stagger="0.02" aa-duration="0.6">Centered modal</h2>
             <p aa-animate="text-slide-up" aa-split="lines mask" aa-delay="0.1" aa-stagger="0.04" aa-duration="0.5">Card animates up and fades in. Inner heading and paragraph play on the same modal-active event via trigger inference.</p>
+            <div aa-stack-card>
+              <p data-orphan-probe aa-animate="fade-up" aa-duration="0.5">This line sits inside a stray <code>aa-stack-card</code> with no <code>aa-stack</code> ancestor. Trigger inference skips the orphaned container and falls through to <code>modal-active</code>, so it still plays on open instead of stranding paused.</p>
+            </div>
             <p aa-animate="text-slide-up" aa-split="lines mask" aa-delay="0.2" aa-stagger="0.04" aa-duration="0.5">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
             <p aa-animate="text-slide-up" aa-split="lines mask" aa-delay="0.3" aa-stagger="0.04" aa-duration="0.5">Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
             <p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.</p>
@@ -118,7 +121,7 @@ Same primitives, different layout. The card uses `aa-animate="slide-left"` (slid
 
 ## Live demo — Form modal (auto-focus first input)
 
-Same primitives, but with a small form inside. After the open animation finishes, the modal feature focuses the first focusable element — here the email input — so users can start typing immediately. Tab/Shift+Tab cycles between the form fields and the close button without leaving the modal.
+Same primitives, but with a small form inside. After the open animation finishes, the modal feature focuses the first form input — here the email field — so users can start typing immediately. (Only inputs are auto-focused; a modal with no field leaves focus on the card itself rather than landing on a button.) Tab/Shift+Tab cycles between the form fields and the close button without leaving the modal.
 
 <Demo caption={[{ label: "trigger", attrs: { "aa-modal-target": "modal-form" } }, { label: "card", attrs: { "aa-modal-name": "modal-form", "aa-animate": "fade-up", "aa-duration": "0.5" } }]}>
   <div data-demo-stage>

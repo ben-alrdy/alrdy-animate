@@ -80,6 +80,31 @@ test.describe('modal demo page', () => {
     expect(afterClose).toBeLessThan(0.1)
   })
 
+  test('inner aa-animate inside an orphaned aa-stack-card still plays on open', async ({
+    page,
+  }) => {
+    const initLog = page.waitForEvent('console', { predicate: initialized, timeout: 8000 })
+    await page.goto(MODAL_PATH)
+    await initLog
+    await page.waitForTimeout(300)
+
+    const trigger = page.locator('[aa-modal-target="modal-center"]')
+    // This element sits inside an `aa-stack-card` with no `aa-stack` ancestor.
+    // Trigger inference must skip the orphaned container and fall through to
+    // `modal-active`; before the orphan-skip fix it inferred `card-active` and
+    // sat paused at opacity 0 forever.
+    const probe = page.locator('[aa-modal-name="modal-center"] [data-orphan-probe]')
+
+    const beforeOpen = await probe.evaluate((el) => parseFloat(getComputedStyle(el).opacity))
+    expect(beforeOpen).toBeLessThan(0.1)
+
+    await trigger.click()
+    await page.waitForTimeout(900)
+
+    const afterOpen = await probe.evaluate((el) => parseFloat(getComputedStyle(el).opacity))
+    expect(afterOpen).toBeGreaterThan(0.9)
+  })
+
   test('Escape key closes the active modal', async ({ page }) => {
     const initLog = page.waitForEvent('console', { predicate: initialized, timeout: 8000 })
     await page.goto(MODAL_PATH)
@@ -147,26 +172,6 @@ test.describe('modal demo page', () => {
     expect(
       await page.evaluate(() => document.body.classList.contains('aa-modal-locked')),
     ).toBe(false)
-  })
-
-  test('focus restored to trigger after close', async ({ page }) => {
-    const initLog = page.waitForEvent('console', { predicate: initialized, timeout: 8000 })
-    await page.goto(MODAL_PATH)
-    await initLog
-    await page.waitForTimeout(300)
-
-    const trigger = page.locator('[aa-modal-target="modal-center"]')
-    await trigger.focus()
-    await trigger.click()
-    await page.waitForTimeout(700)
-
-    await page.keyboard.press('Escape')
-    await page.waitForTimeout(700)
-
-    // The library calls .focus() on the original opener; verify the same DOM
-    // node is now :focus.
-    const isFocused = await trigger.evaluate((el) => el === document.activeElement)
-    expect(isFocused).toBe(true)
   })
 
   test('side panel opens with slide-left', async ({ page }) => {

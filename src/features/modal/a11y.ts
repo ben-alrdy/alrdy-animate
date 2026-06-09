@@ -7,9 +7,23 @@ const FOCUSABLE_SELECTOR = [
   '[tabindex]:not([tabindex="-1"])',
 ].join(',')
 
+const INPUT_SELECTOR = [
+  'input:not([disabled]):not([type="hidden"]):not([type="button"]):not([type="submit"]):not([type="reset"])',
+  'select:not([disabled])',
+  'textarea:not([disabled])',
+].join(',')
+
 function getFocusable(card: HTMLElement): HTMLElement[] {
   return Array.from(card.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)).filter(
     (el) => !el.hasAttribute('disabled') && el.offsetParent !== null,
+  )
+}
+
+function getFirstInput(card: HTMLElement): HTMLElement | null {
+  return (
+    Array.from(card.querySelectorAll<HTMLElement>(INPUT_SELECTOR)).find(
+      (el) => !el.hasAttribute('disabled') && el.offsetParent !== null,
+    ) ?? null
   )
 }
 
@@ -47,14 +61,16 @@ export function trapFocus(card: HTMLElement): () => void {
 }
 
 /**
- * Focus the first focusable element inside the card. If the card itself
- * isn't focusable, give it tabindex="-1" so we can land focus on it as a
- * last resort and the trap has something to anchor on.
+ * Focus the first form input field (input/select/textarea) inside the card,
+ * if one exists. We deliberately do NOT auto-focus buttons or links on open —
+ * landing focus on a primary/close button invites accidental activation and
+ * yanks the viewport. When there's no input to fill, anchor focus on the card
+ * itself (tabindex="-1") so the trap has somewhere to start.
  */
 export function focusFirst(card: HTMLElement): void {
-  const focusable = getFocusable(card)
-  if (focusable.length > 0) {
-    focusable[0].focus()
+  const firstInput = getFirstInput(card)
+  if (firstInput) {
+    firstInput.focus()
     return
   }
   if (!card.hasAttribute('tabindex')) card.setAttribute('tabindex', '-1')

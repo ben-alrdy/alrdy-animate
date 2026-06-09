@@ -94,17 +94,24 @@ const INFERENCE_CONTAINERS: ReadonlyArray<{
   { selector: '[aa-stack-card]', eventName: 'card-active', rootSelector: '[aa-stack]', enableAttr: 'aa-stack' },
 ]
 
-// True when the container's owning feature resolves to `none` at the current
-// width — it won't init, so it never emits its event. Without breakpoints (or
-// an enable mapping) we assume active, preserving the legacy always-infer path.
+// True when the container won't ever emit its event, so inference must skip it
+// and fall through to the next container (or scroll). Two cases:
+//   1. Orphan — the container has a `rootSelector` but no matching ancestor
+//      (e.g. a stray `aa-stack-card` left inside a modal with no `aa-stack`).
+//      The owning feature never inits on it, so its event never fires; treating
+//      it as active would strand the inner animation paused forever.
+//   2. Responsively disabled — the owning root resolves to `none` at the current
+//      width, so the feature skips it this breakpoint.
+// Containers without a `rootSelector` (modal) are always active.
 function containerDisabled(
   container: Element,
   def: { rootSelector?: string; enableAttr?: ValueAttr },
   breakpoints: Breakpoints | undefined,
 ): boolean {
-  if (!breakpoints || !def.enableAttr || !def.rootSelector) return false
+  if (!def.rootSelector) return false
   const root = container.closest(def.rootSelector)
-  if (!root) return false
+  if (!root) return true
+  if (!breakpoints || !def.enableAttr) return false
   const value = resolveAttrAtWidth(root, def.enableAttr, window.innerWidth, breakpoints)
   return value !== undefined && value.trim().split(/\s+/).includes('none')
 }
