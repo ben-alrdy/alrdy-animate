@@ -47,6 +47,20 @@ let stage: Stage = 'idle'
 let depsLoaded = false
 let alrdyReady = false
 
+// Monotonic token bumped on every navigate() start and every hard reset. An
+// in-flight leave/enter captures the current value and bails if it no longer
+// matches — i.e. a browser back/forward (incl. the iOS/Android swipe-back
+// gesture) superseded it. Without this, a back gesture mid-leave still fires the
+// leave's onComplete and re-pushes forward; a back mid-enter lets the stale
+// enter finish and clobber the reset.
+let navToken = 0
+
+// Handle to the GSAP timeline currently driving the deck. A back gesture
+// mid-transition must kill() it, or the still-running tween keeps re-applying
+// its transforms every frame after we've cleared them — snapping the deck back
+// into the covered state.
+let activeTimeline: { kill: () => void } | null = null
+
 async function loadPeerDeps() {
   if (depsLoaded) return
   await Promise.all([
@@ -128,6 +142,53 @@ function waitForNewMain(excludeNode: HTMLElement | null) {
 }
 
 // ----------------------------------------------------------------------------
+// HARD RESET — abort whatever transition is in flight and return the document
+// to a clean, scrollable state. Called when a browser back/forward (incl. the
+// iOS/Android swipe-back gesture) interrupts the deck: that navigation goes
+// through history, never through navigate(), so it skips the state machine. If
+// it lands mid-transition the deck is left covering the viewport, the body
+// scroll-locked, Lenis stopped, and `stage` stuck non-idle — the page looks
+// frozen and further TransitionLink clicks are swallowed by navigate()'s
+// `stage !== 'idle'` guard. Bumping navToken signals any pending leave/enter
+// that it was superseded.
+// ----------------------------------------------------------------------------
+function hardResetTransition() {
+  navToken++
+  stage = 'idle'
+  activeTimeline?.kill()
+  activeTimeline = null
+
+  const gsap = (window as any).gsap
+  if (gsap) {
+    const overlay = document.querySelector<HTMLElement>('[data-transition-overlay]')
+    const snapshot = overlay?.querySelector<HTMLElement>('[data-transition-snapshot]')
+    const middle = overlay?.querySelector<HTMLElement>('[data-transition-middle]')
+    const next = overlay?.querySelector<HTMLElement>('[data-transition-next]')
+    const backdrop = overlay?.querySelector<HTMLElement>('.transition__backdrop')
+    if (snapshot) snapshot.innerHTML = ''
+    gsap.set([snapshot, middle, next, backdrop].filter(Boolean), { clearProps: 'all' })
+    if (overlay) gsap.set(overlay, { display: 'none' })
+
+    // A back gesture mid-enter may have left the real new <main> in its fixed,
+    // scaled deck position (handoffNextToRealMain ran). Strip those inline
+    // styles so it returns to normal document flow.
+    document
+      .querySelectorAll<HTMLElement>('main[data-transition-container]')
+      .forEach((el) =>
+        gsap.set(el, {
+          clearProps:
+            'position,top,left,right,width,height,overflow,zIndex,transformStyle,willChange,backfaceVisibility,transform,clipPath,opacity,visibility',
+        }),
+      )
+  }
+
+  document.body.style.overflow = ''
+  const lenis = window.lenis as unknown as { resize?: () => void; start?: () => void } | undefined
+  lenis?.resize?.()
+  lenis?.start?.()
+}
+
+// ----------------------------------------------------------------------------
 // LEAVE — Osmo phases 1 + 2 (clipPath rounds + deck forms)
 // ----------------------------------------------------------------------------
 function runLeaveTimeline(
@@ -143,7 +204,13 @@ function runLeaveTimeline(
       resolve()
       return
     }
-    const tl = gsap.timeline({ onComplete: () => resolve() })
+    const tl = gsap.timeline({
+      onComplete: () => {
+        activeTimeline = null
+        resolve()
+      },
+    })
+    activeTimeline = tl
     // PHASE 1: clipPath rounds on all three layers.
     tl.to(
       [snapshot, middle, next],
@@ -236,7 +303,13 @@ function runEnterTimeline(
       resolve()
       return
     }
-    const tl = gsap.timeline({ onComplete: () => resolve() })
+    const tl = gsap.timeline({
+      onComplete: () => {
+        activeTimeline = null
+        resolve()
+      },
+    })
+    activeTimeline = tl
     // PHASE 3: snapshot (top card) drops off-bottom.
     tl.to(snapshot, { yPercent: 130, duration: 1.2, ease: 'osmo' }, 0)
     // PHASE 4a: middle drops off-bottom, slightly delayed.
@@ -299,6 +372,18 @@ export function AlrdyProvider({ children }: { children: React.ReactNode }) {
     }
   }, [])
 
+  // Browser back/forward (incl. the iOS/Android swipe-back gesture) navigates
+  // via history, never through navigate() — so it skips the leave→enter state
+  // machine. If it fires mid-transition, abort and reset; the pathname effect
+  // below then re-scans the new route cleanly via its non-entering branch.
+  useEffect(() => {
+    const onPopState = () => {
+      if (stage !== 'idle') hardResetTransition()
+    }
+    window.addEventListener('popstate', onPopState)
+    return () => window.removeEventListener('popstate', onPopState)
+  }, [])
+
   // Pathname-driven enter. Fires after navigate() called router.push, or on
   // browser back/forward (in which case we just refresh alrdy-animate, no
   // visual transition).
@@ -326,6 +411,11 @@ export function AlrdyProvider({ children }: { children: React.ReactNode }) {
 
     let cancelled = false
     ;(async () => {
+      // Capture the token so a back/forward gesture mid-enter (which hard-resets
+      // and bumps navToken) makes us bail before clobbering the reset.
+      const token = navToken
+      const superseded = () => cancelled || token !== navToken
+
       const overlay = document.querySelector<HTMLElement>('[data-transition-overlay]')
       const snapshot = overlay?.querySelector<HTMLElement>('[data-transition-snapshot]')
       const middle = overlay?.querySelector<HTMLElement>('[data-transition-middle]')
@@ -337,11 +427,12 @@ export function AlrdyProvider({ children }: { children: React.ReactNode }) {
       }
 
       await alrdyDestroy()
-      if (cancelled) return
+      if (superseded()) return
 
       const newMain = await waitForNewMain(snapshot)
-      if (cancelled || !newMain) {
-        stage = 'idle'
+      if (superseded() || !newMain) {
+        // Don't reset stage if a newer transition already owns it.
+        if (token === navToken) stage = 'idle'
         return
       }
 
@@ -355,10 +446,13 @@ export function AlrdyProvider({ children }: { children: React.ReactNode }) {
       // Init alrdy-animate AFTER handoff so its from-states are applied to
       // a main element that's already in its scaled deck position.
       await alrdyInit(newMain)
-      if (cancelled) return
+      if (superseded()) return
 
       const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
       await runEnterTimeline(snapshot, middle, newMain, reducedMotion)
+      // A back gesture during the enter already hard-reset us — don't run the
+      // cleanup below, it would clobber the reset's clean state.
+      if (superseded()) return
 
       // Cleanup: restore the real new <main> to normal flow, clear the overlay,
       // restore body scroll + Lenis, refresh ScrollTrigger.
@@ -408,6 +502,7 @@ export function AlrdyProvider({ children }: { children: React.ReactNode }) {
       }
 
       stage = 'leaving'
+      const token = ++navToken
       pendingHrefRef.current = href
       const scrollY = window.scrollY || 0
 
@@ -444,6 +539,9 @@ export function AlrdyProvider({ children }: { children: React.ReactNode }) {
 
       const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
       runLeaveTimeline(snapshot, middle, next, reducedMotion).then(() => {
+        // A back/forward gesture during the leave already hard-reset us and
+        // bumped navToken — don't push forward into the page we were leaving.
+        if (token !== navToken) return
         // Deck has formed; the orange middle + cream next-card stack covers
         // the bottom of the viewport while the snapshot sits centred above.
         // Around the edges the black backdrop shows. Safe to push.

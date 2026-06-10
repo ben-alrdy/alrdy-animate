@@ -66,6 +66,9 @@ The recipe below is the implementation.
   mid-transition.
 - **Re-entrant clicks ignored.** A `stage` flag (`idle | leaving | entering`)
   rejects a second click while a transition is running.
+- **Survives a mid-transition back/forward.** A `popstate` during the deck
+  (the mobile swipe-back gesture) aborts and resets the transition instead of
+  leaving the page frozen — see [Interrupting the transition](#interrupting-the-transition-browser-backforward-and-mobile-swipe-back).
 
 ## The state machine
 
@@ -356,6 +359,123 @@ function waitForNewMain(excludeNode: HTMLElement) {
   })
 }
 ```
+
+## Interrupting the transition: browser back/forward and mobile swipe-back
+
+The state machine above assumes navigation flows through `navigate()` —
+click → leave → push → enter. **History navigation doesn't.** The browser
+back/forward buttons, and especially the **iOS/Android edge swipe-back
+gesture**, change the route via `history` directly, bypassing `navigate()`.
+
+The pathname effect's non-entering branch (`stage !== 'entering'`) already
+handles a history navigation that fires **at idle** — it re-scans the new
+route with no visual transition. The trap is a history navigation that fires
+**mid-transition**, which mobile users hit constantly: they tap a link, the
+deck starts forming, and they immediately swipe back. Now:
+
+- the deck is left covering the viewport (the cards never drop away),
+- `document.body` stays `overflow: hidden` and Lenis stays `stop()`-ed,
+- `stage` stays `leaving` / `entering` — so the next `<TransitionLink>` click
+  is swallowed by `navigate()`'s `stage !== 'idle'` guard.
+
+The page looks **frozen on the route you were leaving**, and tapping does
+nothing. Desktop back/forward can hit this too, but the swipe gesture makes
+it a near-certainty on touch devices.
+
+Fix it with a `popstate` listener that **aborts** the in-flight transition,
+plus a monotonic `navToken` so any pending leave/enter continuation bails
+instead of fighting the reset:
+
+```ts
+// Module scope, alongside `stage`:
+let navToken = 0                                       // bumped on navigate() + reset
+let activeTimeline: { kill: () => void } | null = null // the running GSAP timeline
+```
+
+Capture the timeline so the reset can `kill()` it — a still-running tween
+keeps re-applying its transforms every frame after you've cleared them,
+snapping the deck back into the covered state:
+
+```ts
+const tl = gsap.timeline({ onComplete: () => { activeTimeline = null; resolve() } })
+activeTimeline = tl
+```
+
+The reset: kill the timeline, clear the overlay + any inline styles the
+handoff left on the real new `<main>`, and restore scroll / Lenis / stage.
+
+```ts
+function hardResetTransition() {
+  navToken++                  // signal any pending leave/enter that it's stale
+  stage = 'idle'
+  activeTimeline?.kill()
+  activeTimeline = null
+
+  const gsap = (window as any).gsap
+  const overlay  = document.querySelector<HTMLElement>('[data-transition-overlay]')
+  const snapshot = overlay?.querySelector<HTMLElement>('[data-transition-snapshot]')
+  if (snapshot) snapshot.innerHTML = '' // drop the cloned leaving page
+  gsap?.set(
+    overlay?.querySelectorAll(
+      '[data-transition-snapshot],[data-transition-middle],[data-transition-next],.transition__backdrop',
+    ),
+    { clearProps: 'all' },
+  )
+  if (overlay) gsap?.set(overlay, { display: 'none' })
+
+  // A back gesture mid-enter may have left the real new <main> position:fixed
+  // at scale 0.8 (the handoff already ran) — strip those inline styles so it
+  // returns to normal document flow.
+  document.querySelectorAll<HTMLElement>('main[data-transition-container]').forEach((el) =>
+    gsap?.set(el, {
+      clearProps:
+        'position,top,left,right,width,height,overflow,zIndex,transformStyle,willChange,backfaceVisibility,transform,clipPath,opacity,visibility',
+    }),
+  )
+
+  document.body.style.overflow = ''
+  ;(window.lenis as any)?.resize?.()
+  ;(window.lenis as any)?.start?.()
+}
+```
+
+Wire the listener, and guard both continuations against a superseding token:
+
+```ts
+useEffect(() => {
+  const onPopState = () => { if (stage !== 'idle') hardResetTransition() }
+  window.addEventListener('popstate', onPopState)
+  return () => window.removeEventListener('popstate', onPopState)
+}, [])
+```
+
+```ts
+// navigate(): capture the token right after `stage = 'leaving'`
+const token = ++navToken
+// ...
+runLeaveTimeline(...).then(() => {
+  if (token !== navToken) return // back gesture mid-leave → don't push forward
+  window.scrollTo(0, 0)
+  stage = 'entering'
+  router.push(href)
+})
+```
+
+```ts
+// pathname effect, entering branch: capture at the top, re-check after each await
+const token = navToken
+const superseded = () => cancelled || token !== navToken
+// ...after waitForNewMain / alrdyInit / runEnterTimeline:
+if (superseded()) return // hardReset already cleaned up — don't clobber it
+```
+
+Without `navToken`, a back gesture mid-leave still fires the leave's
+`onComplete` and re-pushes you *forward* into the page you were leaving; a
+back gesture mid-enter lets the stale enter timeline finish and its cleanup
+overwrites the reset's clean state. The token is what makes "abort" stick.
+
+The runnable `examples/nextjs-transition/` has this wired in — swipe back
+mid-transition there and the page recovers instead of freezing.
 
 ## The Osmo timeline (verbatim, split at the deck-formed boundary)
 
@@ -660,11 +780,15 @@ navigations leave the headline visible at its natural state. The grid uses
   snapshot slot keeps its inline styles from `cloneNode(true)`, independent
   of `destroy()`. The real leaving DOM is about to be unmounted by React
   anyway.
-- **Browser back/forward bypasses `navigate()`.** The pathname effect's
-  fallback branch (`stage !== 'entering'`) handles this by running just
-  `destroy → init → fireEnterAnimations` without a visual transition. If
-  you want a transition for history navigations too, listen for
-  `popstate` and trigger `navigate(window.location.pathname)` from there.
+- **Browser back/forward bypasses `navigate()` — and mid-transition it
+  *freezes* the page unless you abort.** The pathname effect's fallback
+  branch (`stage !== 'entering'`) only covers history navigation that fires
+  at idle, where it runs `destroy → init → fireEnterAnimations` with no
+  visual transition. A swipe-back *during* the deck needs the `popstate` +
+  `navToken` hard-reset — see [Interrupting the transition](#interrupting-the-transition-browser-backforward-and-mobile-swipe-back).
+  (If you instead want a *visual* transition for history navigations too,
+  listen for `popstate` and call `navigate(window.location.pathname)` — but
+  you still need the abort path for the mid-transition case.)
 
 ## Differences from the Webflow + Barba recipe
 
