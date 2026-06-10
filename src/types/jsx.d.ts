@@ -39,11 +39,14 @@ declare namespace JSX {
      * `slide-right` | `blur` | `rotate-*` (rotate, rotate-up, rotate-up-tl/tr/bl/br, rotate-ccw variants)
      *
      * **Text presets** (feature: `text`, requires `SplitText`):
-     * `text-fade` | `text-fade-up` | `text-fade-down` | `text-slide-up` |
-     * `text-slide-down` | `text-scale` | `text-scale-up` | `text-scale-down` |
-     * `text-blur` | `text-blur-up` | `text-tilt` | `text-rotate` |
-     * `text-marker` | `text-oval` | `text-block`. Pair with `aa-split` to
-     * control granularity.
+     * `text-fade` | `text-fade-30` | `text-fade-10` | `text-fade-up` |
+     * `text-fade-down` | `text-fade-left` | `text-fade-right` | `text-blur` |
+     * `text-blur-up` | `text-blur-down` | `text-blur-left` | `text-blur-right` |
+     * `text-scale` | `text-scale-up` | `text-scale-down` | `text-slide-up` |
+     * `text-slide-down` | `text-tilt-up` | `text-tilt-down` | `text-oval-up` |
+     * `text-oval-down` | `text-rotate` | `text-block-<dir>` | `text-marker-<dir>`
+     * (`<dir>` = `up`|`down`|`left`|`right`; the direction suffix is required).
+     * Pair with `aa-split` to control granularity.
      *
      * **Reveal presets** (feature: `reveal`): `reveal-up` | `reveal-down` |
      * `reveal-left` | `reveal-right` | `reveal-center` | `reveal-oval-up` |
@@ -449,9 +452,15 @@ declare namespace JSX {
     'aa-slider-button'?: string
 
     /**
-     * Marker on a modal element. The attribute value is the modal's name —
-     * `aa-modal-name="signup"`. Triggers (`aa-modal-target`, `aa-modal-close`)
-     * reference this name. Feature: `modal`. No GSAP plugin required.
+     * Required outer container for a modal group — the element the `modal`
+     * feature scans and operates on. Wraps the modal card(s) and the backdrop.
+     * No GSAP plugin required.
+     */
+    'aa-modal-group'?: string | boolean
+    /**
+     * Marker on a modal card inside `[aa-modal-group]`. The attribute value is
+     * the modal's name — `aa-modal-name="signup"`. Triggers (`aa-modal-target`,
+     * `aa-modal-close`) reference this name. Feature: `modal`.
      */
     'aa-modal-name'?: string
     /** On a button/link, the `aa-modal-name` of the modal to open. */
@@ -460,6 +469,10 @@ declare namespace JSX {
     'aa-modal-close'?: string | boolean
     /** Marker on the modal backdrop element. Click on the backdrop closes the modal. */
     'aa-modal-backdrop'?: string | boolean
+    /** Written by the lib on each `[aa-modal-name]` card: `"active"` | `"not-active"`. Read-only. */
+    'aa-modal-status'?: string
+    /** Written by the lib on the `[aa-modal-group]` container: `"active"` | `"not-active"`. Read-only. */
+    'aa-modal-group-status'?: string
 
     /**
      * Hover animation preset. Space-separated `head flag1 flag2 …`. Skipped on
