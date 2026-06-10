@@ -2,7 +2,7 @@
 
 All notable changes to **alrdy-animate**. Format follows [Keep a Changelog](https://keepachangelog.com/); versions follow [SemVer](https://semver.org/).
 
-**v8.0.0** is the current stable release on the `latest` dist-tag (`npm install alrdy-animate`). It supersedes the v7 line; v7 stays available at `npm install alrdy-animate@7`. The v8 pre-release iterated under the `alpha` dist-tag through `8.0.0-alpha.36` before promotion.
+The `latest` dist-tag points to **v7.3.5** (the v7 stable). The v8 line is on the **`alpha`** dist-tag — `npm install alrdy-animate@alpha`. **8.0.0** (below) will flip `latest` to v8 once it's validated in production; v7 will remain installable at `npm install alrdy-animate@7`.
 
 ---
 
@@ -24,17 +24,22 @@ What v8 doesn't have yet: **Pin** animations (rebuild planned in v8.x), form-sub
 
 ---
 
-## [8.0.0] — 2026-06-10
+## [8.0.0] — unreleased
 
-First stable release of the v8 line — promotes `8.0.0-alpha.36` to `latest`. No API changes from the late alphas; the surface is everything described in [v7 → v8 highlights](#v7--v8-highlights) above, with the full delta documented in the migration guide.
+The v8 stable release — currently validating on the `alpha` dist-tag before it promotes to `latest`. No API changes from the late alphas; the surface is everything described in [v7 → v8 highlights](#v7--v8-highlights) above, with the full delta documented in the migration guide.
 
 ### Added
 - [v7 → v8 migration guide](https://animate.alrdy.de/installation/v7-to-v8/) (`docs/src/content/docs/installation/v7-to-v8.mdx`). Find-and-replace level coverage: removed CSS-only animation engine, `aa-load` → `aa-trigger="load[-once]"`, hover model change, `init()` option renames (`templates` → `presets`, `gsapFeatures` auto-loaded, `smoothScroll` flattened), `aa-split` separator (`&` → space), `aa-delay-mobile` → responsive `|` shorthand, `accordion` → `tabs`, and a per-value map of v7 animation names to their v8 equivalents (and which are deferred / removed).
+- **Modal dialog semantics.** Cards now get `role="dialog"` + `aria-modal="true"` and an accessible name auto-derived (truncated) from the card's leading text block (`aria-label`); triggers get `aria-haspopup="dialog"`. Author-set values are respected. Focus trap / ESC / scroll lock are unchanged.
 
 ### Changed
-- **`latest` dist-tag flips from v7.3.5 to 8.0.0.** Every `npm install alrdy-animate` and `@latest` CDN consumer now resolves to v8 — a major upgrade. v7 stays installable via `alrdy-animate@7`.
+- **Promoting 8.0.0 will flip the `latest` dist-tag from v7.3.5 to v8** — once promoted, every `npm install alrdy-animate` and `@latest` CDN consumer resolves to v8 (a major upgrade). v7 stays installable via `alrdy-animate@7`.
+
+### Performance
+- Text split-unit `will-change` is now managed per-tween by the orchestrator instead of a permanent CSS rule on every `.aa-char` / `.aa-word`, so text-heavy pages no longer carry hundreds of never-reclaimed compositor layers (hover-text keeps a scoped persistent hint).
 
 ### Fixed
+- Fieldless modals no longer open with a focus ring drawn around the card — focus still anchors there (trap intact), but the card's outline is suppressed since it's a non-interactive container.
 - Stabilized the Playwright suite under CPU contention: timing-sensitive assertions now retry (`expect.poll` / `toPass` via `tests/helpers.ts`) instead of sampling animated state once after a fixed wait.
 
 ---
