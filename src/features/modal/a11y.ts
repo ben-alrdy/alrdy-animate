@@ -82,6 +82,48 @@ export function focusFirst(card: HTMLElement): void {
   card.focus({ preventScroll: true })
 }
 
+let titleIdCounter = 0
+
+/**
+ * Apply dialog semantics so assistive tech announces the card as a modal
+ * dialog and treats the rest of the page as inert. Respects author-set `role`
+ * / `aria-modal` / accessible name. When the author hasn't named the dialog,
+ * derive an accessible name from the first heading inside it; if there's no
+ * heading either, warn (dev only) — `aria-modal` without a name announces as
+ * an unlabelled "dialog".
+ */
+export function applyDialogSemantics(card: HTMLElement, debug: boolean): void {
+  if (!card.hasAttribute('role')) card.setAttribute('role', 'dialog')
+  if (!card.hasAttribute('aria-modal')) card.setAttribute('aria-modal', 'true')
+
+  if (!card.hasAttribute('aria-label') && !card.hasAttribute('aria-labelledby')) {
+    const heading = card.querySelector<HTMLElement>('h1, h2, h3, h4, h5, h6')
+    if (heading) {
+      if (!heading.id) heading.id = `aa-modal-title-${(titleIdCounter += 1)}`
+      card.setAttribute('aria-labelledby', heading.id)
+    } else if (debug) {
+      console.warn(
+        '[alrdy-animate] modal has no accessible name — add an `aria-label` to the [aa-modal-name] element (or a heading inside it) so screen readers can announce the dialog.',
+      )
+    }
+  }
+}
+
+/**
+ * Mark the controls that open these modals with `aria-haspopup="dialog"` so
+ * assistive tech announces that activating them opens a dialog. Triggers are
+ * click-delegated and may live anywhere in the document, so match by name.
+ */
+export function markDialogTriggers(names: Set<string>): void {
+  if (typeof document === 'undefined') return
+  for (const trigger of document.querySelectorAll<HTMLElement>('[aa-modal-target]')) {
+    const name = trigger.getAttribute('aa-modal-target')
+    if (name && names.has(name) && !trigger.hasAttribute('aria-haspopup')) {
+      trigger.setAttribute('aria-haspopup', 'dialog')
+    }
+  }
+}
+
 /**
  * Document-level Escape listener. Returns a disposer.
  */

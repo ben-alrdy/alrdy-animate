@@ -1,7 +1,13 @@
 import { bindRootFeature, type FeatureContext, type FeatureModule } from '../../core/registry'
 import type { Config } from '../../core/settings'
 import { createAnimationController } from './animation'
-import { attachEsc, focusFirst, trapFocus } from './a11y'
+import {
+  applyDialogSemantics,
+  attachEsc,
+  focusFirst,
+  markDialogTriggers,
+  trapFocus,
+} from './a11y'
 import { lockBodyScroll, resetScrollLock, unlockBodyScroll } from './scroll-lock'
 import {
   MODAL_GROUP_STATUS_ATTR,
@@ -55,6 +61,13 @@ function setupOne(
   state.setGroupStatus('not-active')
   for (const entry of state.entries) state.setStatus(entry, 'not-active')
   animation.applyInitialClosed(state.entries, state.backdrop)
+
+  // Dialog semantics: announce each card as a modal dialog and mark its
+  // triggers. Static (set once); closed cards are visibility:hidden so they
+  // stay out of the a11y tree until opened.
+  const debug = ctx.options.debug ?? false
+  for (const entry of state.entries) applyDialogSemantics(entry.card, debug)
+  markDialogTriggers(new Set(state.entries.map((e) => e.name)))
 
   let detachTrap: (() => void) | null = null
   let detachEsc: (() => void) | null = null
