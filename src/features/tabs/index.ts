@@ -1,6 +1,6 @@
 import { parseAutoplay } from '../../core/autoplay'
-import type { FeatureContext, FeatureModule } from '../../core/registry'
-import { readAttrs, type Config } from '../../core/settings'
+import { bindRootFeature, type FeatureContext, type FeatureModule } from '../../core/registry'
+import type { Config } from '../../core/settings'
 import { REVERSE_TIME_SCALE } from '../../core/trigger'
 import { createAnimationController, createAriaController, hasVisualAnimation } from './controller'
 import { setupAutoplay, type AutoplayController } from './autoplay'
@@ -248,13 +248,7 @@ function setupOne(ctx: FeatureContext, root: HTMLElement, config: Config): (() =
 const tabsFeature: FeatureModule = {
   name: 'tabs',
   init(ctx: FeatureContext): () => void {
-    const subjects = ctx.elements.filter(
-      (el): el is HTMLElement => el instanceof HTMLElement && el.hasAttribute('aa-tabs'),
-    )
-    for (const root of subjects) {
-      const attrs = readAttrs(root)
-      ctx.responsive.bind(root, attrs, ({ config }) => setupOne(ctx, root, config))
-    }
+    bindRootFeature(ctx, 'aa-tabs', setupOne)
     return () => {}
   },
 }

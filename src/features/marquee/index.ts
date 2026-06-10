@@ -1,6 +1,6 @@
-import type { FeatureContext, FeatureModule } from '../../core/registry'
+import { bindRootFeature, type FeatureContext, type FeatureModule } from '../../core/registry'
 import { parseNum, parseScrub } from '../../core/parse'
-import { readAttrs, type Config } from '../../core/settings'
+import type { Config } from '../../core/settings'
 import { attachHoverPauseListener, createViewportGate } from '../../core/viewport-gate'
 
 interface ParsedTokens {
@@ -486,13 +486,7 @@ function setupOne(
 const marqueeFeature: FeatureModule = {
   name: 'marquee',
   init(ctx: FeatureContext): () => void {
-    const subjects = ctx.elements.filter(
-      (el): el is HTMLElement => el instanceof HTMLElement && el.hasAttribute('aa-marquee'),
-    )
-    for (const root of subjects) {
-      const attrs = readAttrs(root)
-      ctx.responsive.bind(root, attrs, ({ config }) => setupOne(ctx, root, config))
-    }
+    bindRootFeature(ctx, 'aa-marquee', setupOne)
     return () => {}
   },
 }

@@ -1,7 +1,7 @@
 import type { GsapInstance } from '../../core/gsap-detect'
 import { parseNum } from '../../core/parse'
-import type { FeatureContext, FeatureModule } from '../../core/registry'
-import { readAttrs, type Config } from '../../core/settings'
+import { bindRootFeature, type FeatureContext, type FeatureModule } from '../../core/registry'
+import type { Config } from '../../core/settings'
 import { emitTrigger } from '../../core/trigger'
 
 const IN_FLAGS = new Set([
@@ -515,13 +515,7 @@ function setupOne(
 const stackFeature: FeatureModule = {
   name: 'stack',
   init(ctx: FeatureContext): () => void {
-    const subjects = ctx.elements.filter(
-      (el): el is HTMLElement => el instanceof HTMLElement && el.hasAttribute('aa-stack'),
-    )
-    for (const root of subjects) {
-      const attrs = readAttrs(root)
-      ctx.responsive.bind(root, attrs, ({ config }) => setupOne(ctx, root, config))
-    }
+    bindRootFeature(ctx, 'aa-stack', setupOne)
     return () => {}
   },
 }

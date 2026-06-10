@@ -1,8 +1,8 @@
 import { parseAutoplay } from '../../core/autoplay'
 import { parseNum } from '../../core/parse'
 import { observeSize } from '../../core/visibility'
-import type { FeatureContext, FeatureModule } from '../../core/registry'
-import { readAttrs, type Config } from '../../core/settings'
+import { bindRootFeature, type FeatureContext, type FeatureModule } from '../../core/registry'
+import type { Config } from '../../core/settings'
 import { setupAutoplay, type AutoplayController } from './autoplay'
 import { horizontalLoop, type SliderLoop } from './horizontal-loop'
 import { attachKeyboard } from './keyboard'
@@ -205,13 +205,7 @@ function setupOne(ctx: FeatureContext, root: HTMLElement, config: Config): (() =
 const sliderFeature: FeatureModule = {
   name: 'slider',
   init(ctx: FeatureContext): () => void {
-    const subjects = ctx.elements.filter(
-      (el): el is HTMLElement => el instanceof HTMLElement && el.hasAttribute('aa-slider'),
-    )
-    for (const root of subjects) {
-      const attrs = readAttrs(root)
-      ctx.responsive.bind(root, attrs, ({ config }) => setupOne(ctx, root, config))
-    }
+    bindRootFeature(ctx, 'aa-slider', setupOne)
     return () => {}
   },
 }

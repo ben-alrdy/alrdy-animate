@@ -1,5 +1,5 @@
-import type { FeatureContext, FeatureModule } from '../../core/registry'
-import { readAttrs, type Config } from '../../core/settings'
+import { bindRootFeature, type FeatureContext, type FeatureModule } from '../../core/registry'
+import type { Config } from '../../core/settings'
 import { createAnimationController } from './animation'
 import { attachEsc, focusFirst, trapFocus } from './a11y'
 import { lockBodyScroll, resetScrollLock, unlockBodyScroll } from './scroll-lock'
@@ -154,13 +154,7 @@ function setupOne(
 const modalFeature: FeatureModule = {
   name: 'modal',
   init(ctx: FeatureContext): () => void {
-    const groups = ctx.elements.filter(
-      (el): el is HTMLElement => el instanceof HTMLElement && el.hasAttribute('aa-modal-group'),
-    )
-    for (const group of groups) {
-      const attrs = readAttrs(group)
-      ctx.responsive.bind(group, attrs, ({ config }) => setupOne(ctx, group, config))
-    }
+    bindRootFeature(ctx, 'aa-modal-group', setupOne)
     return () => {
       // Belt-and-suspenders in case a setupOne died without running its own
       // cleanup (e.g. ResponsiveController revertAll already torched it).

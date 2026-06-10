@@ -88,10 +88,9 @@ export async function loadFeatures(names: Iterable<FeatureName>): Promise<Featur
  * owns, then bind each through `ctx.responsive` so per-breakpoint configs are
  * routed correctly and matchMedia teardown is automatic.
  *
- * Features that operate on whole roots (tabs, slider, marquee, modal, nav)
- * have non-trivial per-root setup beyond this shape and should not use this
- * helper. It exists for the per-element appearance features (appear, text,
- * reveal, parallax) whose init bodies were byte-for-byte identical.
+ * It exists for the per-element appearance features (appear, text, reveal,
+ * parallax) whose init bodies were byte-for-byte identical. Whole-root
+ * features (tabs, slider, marquee, stack, modal) use `bindRootFeature` below.
  */
 export function bindFeature(
   ctx: FeatureContext,
@@ -102,5 +101,30 @@ export function bindFeature(
   for (const element of subjects) {
     const attrs = readAttrs(element, ctx.presetMap.get(element))
     ctx.responsive.bind(element, attrs, ({ config }) => setupOne(ctx, element, config))
+  }
+}
+
+/**
+ * Whole-root feature init shape: filter `ctx.elements` to the HTMLElements
+ * carrying `attr`, then bind each root through `ctx.responsive` so
+ * per-breakpoint configs route correctly and matchMedia teardown is automatic.
+ *
+ * Mirrors `bindFeature` for the per-root features (tabs, slider, marquee,
+ * stack, modal) whose init wrappers were byte-for-byte identical. Roots are
+ * never preset-resolved, so attrs are read without a preset. Features needing
+ * a feature-level teardown (e.g. modal's scroll-lock reset) add their own
+ * `return` after calling this. `nav` keeps a bespoke init (multiple setups).
+ */
+export function bindRootFeature(
+  ctx: FeatureContext,
+  attr: string,
+  setupOne: (ctx: FeatureContext, root: HTMLElement, config: Config) => (() => void) | undefined,
+): void {
+  const subjects = ctx.elements.filter(
+    (el): el is HTMLElement => el instanceof HTMLElement && el.hasAttribute(attr),
+  )
+  for (const root of subjects) {
+    const attrs = readAttrs(root)
+    ctx.responsive.bind(root, attrs, ({ config }) => setupOne(ctx, root, config))
   }
 }
