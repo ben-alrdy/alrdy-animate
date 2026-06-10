@@ -4,7 +4,7 @@ import type {
   ResizeUnsubscribe,
   ResolvedOptions,
 } from '../types/index'
-import type { GsapHandle } from './gsap-detect'
+import type { GsapHandle, GsapTween } from './gsap-detect'
 import type { ResponsiveController } from './match-media'
 import type { ResolvedPreset } from './presets'
 import type { FeatureName } from './scanner'
@@ -41,16 +41,16 @@ export interface FeatureContext {
   presetMap: Map<Element, ResolvedPreset>
   onResize: (fn: ResizeCallback, debounce?: number) => ResizeUnsubscribe
   /**
-   * Register a `load` / `load-once` entrance to start *after* the browser's
-   * first paint of the revealed (from-state) element, rather than autoplaying
-   * during init(). Load tweens are built `paused` and their `restart(true)`
-   * release is collected here; init() flushes all releases one paint after the
-   * aa-ready reveal (or via a short timeout fallback when no paint will come —
-   * background tab / SSR). This stops a wall-clock tween from advancing during
-   * the heavy post-init layout/paint block and "popping in" already mid-fade.
-   * Releases are cancelled if destroy() runs before the flush.
+   * Register a `load` / `load-once` entrance tween to start *after* the
+   * browser's first paint of the revealed (from-state) element, rather than
+   * autoplaying during init(). The feature builds the tween `paused` and hands
+   * it here; init() releases all registered tweens (via `restart(true)`, which
+   * replays from time 0 including the full delay) one paint after the aa-ready
+   * reveal. This stops a wall-clock tween from advancing during the heavy
+   * post-init layout/paint block and "popping in" already mid-fade.
+   * Registration is a no-op once destroy() has cancelled the gate.
    */
-  deferLoadStart: (release: () => void) => void
+  deferLoadStart: (tween: GsapTween) => void
 }
 
 export interface FeatureModule {

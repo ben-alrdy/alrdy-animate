@@ -113,9 +113,10 @@ export interface InitOptions {
    * surface the entrance already mid-fade (the symptom on content-heavy pages).
    * `loadDelay` then adds an intentional beat on top, measured from that first
    * paint. Added on top of any per-element `aa-delay` — set `aa-delay="0.3"`
-   * with `loadDelay: 0.1` and the load animation fires `0.4s` after paint. Set
-   * to `0` to opt out of the extra beat (paint-gating still applies). Default
-   * `0.1`.
+   * with `loadDelay: 0.1` and the load animation fires `0.4s` after paint.
+   * Default `0`: paint-gating alone handles "wait for settle", so the entrance
+   * starts the moment it's painted; set a positive value to delay it by a
+   * deliberate beat.
    *
    * Skipped when the slow-network fallback fired (`html[aa-fallback]`) —
    * those load animations don't run anyway, and adding more delay on revisit

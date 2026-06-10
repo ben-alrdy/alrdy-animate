@@ -1,5 +1,5 @@
 import type { ReducedMotionOptions, ResolvedOptions } from '../types/index'
-import type { GsapHandle } from './gsap-detect'
+import type { GsapHandle, GsapTween } from './gsap-detect'
 import { parseNum, parseScrub } from './parse'
 import { resolveAnimateValue, type ResolvedPreset } from './presets'
 import { classifyAnimateValue, type FeatureName } from './scanner'
@@ -51,10 +51,10 @@ export interface FadeFallbackDeps {
   presetMap: Map<Element, ResolvedPreset>
   /**
    * Same paint-gated load-start hook as `FeatureContext.deferLoadStart`. The
-   * fade pass's `load` entrances are built `paused` and released here so they
+   * fade pass's `load` entrances are built `paused` and handed here so they
    * don't advance during the post-init paint block, matching the main path.
    */
-  deferLoadStart: (release: () => void) => void
+  deferLoadStart: (tween: GsapTween) => void
 }
 
 /**
@@ -112,9 +112,9 @@ export function runFadeFallbackPass(
         // the from-state and flash. The end-of-init aa-ready flip still
         // happens, keeping DOM consistent.
         if (document.documentElement.hasAttribute('aa-fallback')) continue
-        // Built `paused` and released after first paint (same rationale as the
-        // main triggered path) — keeps the fade from advancing during the
-        // post-init paint block. `restart(true)` honors the full delay.
+        // Built `paused` and handed to the load gate (same rationale as the
+        // main triggered path) — released after first paint so the fade
+        // doesn't advance during the post-init paint block.
         const tween = gsapHandle.gsap.fromTo(element, fromState, {
           ...toState,
           duration,
@@ -122,7 +122,7 @@ export function runFadeFallbackPass(
           delay: delay + options.loadDelay,
           paused: true,
         })
-        deferLoadStart(() => tween.restart(true))
+        deferLoadStart(tween)
         continue
       }
 

@@ -19,7 +19,7 @@ import Demo from '../../../../components/Demo.astro'
 
 Inside known containers (`[aa-modal-name]`, `[aa-tabs-content]`, `[aa-tabs-visual]`, `[aa-slider-item]`) the trigger is *inferred* — e.g. animations inside a slide automatically use `event:slide-active`. Setting `aa-trigger` explicitly always wins.
 
-`load` and `load-once` animations also pick up the global [`loadDelay`](/initialization/init-options/) init option (default `0.1s`), which is added on top of any per-element `aa-delay` so the entrance plays a beat after `init()` settles. Set `loadDelay: 0` to opt out globally.
+`load` and `load-once` entrances are **paint-gated**: the lib builds them paused and starts them one frame after the reveal, so the animation begins exactly at its first painted frame instead of jumping ahead while a heavy page is still laying out. The global [`loadDelay`](/initialization/init-options/) init option (default `0`) adds an optional beat on top of any per-element `aa-delay`, measured from that paint — set a positive value if you want the entrance to hold briefly before playing.
 
 ## Why `load-once` exists
 

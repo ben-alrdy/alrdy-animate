@@ -294,14 +294,11 @@ export function setupTriggeredAnimation(
       // Warm the layer now so it's ready before the (delayed) load tween plays;
       // onComplete clears it once the entrance settles.
       setWillChange()
-      // Release after first paint instead of autoplaying. `restart(true)`
-      // replays from time 0 *including* the full delay (aa-delay + loadDelay),
-      // measured from paint — `play()` would skip the delay (see the event
-      // path's note above). Reached only past the aa-fallback early-return, so
-      // the slow-network CSS fallback still wins when it's set (nothing
-      // registers, the gate stays empty for this element).
-      const built = currentAnim
-      if (built) ctx.deferLoadStart(() => built.restart(true))
+      // Hand the paused tween to the load gate; init() releases it after first
+      // paint via restart(true) (replays including the full delay). Reached
+      // only past the aa-fallback early-return, so the slow-network CSS
+      // fallback still wins when it's set (nothing registers for this element).
+      if (currentAnim) ctx.deferLoadStart(currentAnim)
       loadFired = true
       return
     }

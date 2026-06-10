@@ -43,7 +43,7 @@ export const DEFAULT_OPTIONS: ResolvedOptions = {
   duration: 0.6,
   ease: 'power4.out',
   intensity: 1,
-  loadDelay: 0.1,
+  loadDelay: 0,
   scrollStart: 'top 85%',
   scrollEnd: 'bottom 60%',
   again: true,

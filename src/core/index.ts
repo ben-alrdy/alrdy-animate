@@ -7,7 +7,7 @@ import type {
   ResizeCallback,
   ResizeUnsubscribe,
 } from '../types/index'
-import { detectGsap, type GsapHandle } from './gsap-detect'
+import { detectGsap, type GsapHandle, type GsapTween } from './gsap-detect'
 import { createResponsiveController, type ResponsiveController } from './match-media'
 import { NAMED_EASES } from './named-eases'
 import { resolvePresets } from './presets'
@@ -261,17 +261,17 @@ export async function init(options: InitOptions = {}): Promise<void> {
   const responsive = createResponsiveController(gsapHandle, state.breakpoints)
   activeHandles = { gsap: gsapHandle, responsive }
 
-  // Load gate: `load` / `load-once` entrances build `paused` and register a
-  // release here instead of autoplaying. We flush them one paint AFTER the
+  // Load gate: `load` / `load-once` entrances build `paused` and register the
+  // tween here instead of autoplaying. We release them one paint AFTER the
   // aa-ready reveal (below) so a wall-clock tween can't advance during the
   // heavy post-init layout/paint block and surface already mid-fade. Lives as
   // a closure local (auto-GC'd per init, no global state); a disposer flips
   // `gateCancelled` so a pending flush after destroy() is a no-op. Created
   // before the fade pass so both it and the feature context share the hook.
-  const loadGate: Array<() => void> = []
+  const loadGate: GsapTween[] = []
   let gateCancelled = false
-  const deferLoadStart = (release: () => void): void => {
-    if (!gateCancelled) loadGate.push(release)
+  const deferLoadStart = (tween: GsapTween): void => {
+    if (!gateCancelled) loadGate.push(tween)
   }
   addDisposer(() => {
     gateCancelled = true
@@ -396,20 +396,27 @@ export async function init(options: InitOptions = {}): Promise<void> {
   // Release paint-gated load entrances (registered via `deferLoadStart`) one
   // paint AFTER the aa-ready reveal, so they start visibly at frame 0 instead
   // of a wall-clock tween advancing during the post-init layout/paint block.
-  // `flush` is idempotent (`splice` empties the gate) and guarded by
-  // `gateCancelled`, so destroy() before release is a no-op and the rAF /
-  // timeout paths can't double-fire. In a hidden tab (or SSR) no paint is
-  // coming, so flush now; otherwise wait for paint via double-rAF, with a
-  // short timeout as the safety net (background timers throttle but still
-  // fire — without it, paused entrances would stay invisible). Scheduled after
-  // resolveReady() so `await ready()` observers see the from-state, not a
-  // half-played frame.
+  // `flush` is guarded by `gateCancelled` (so destroy() before release is a
+  // no-op) and empties the gate (so it's harmless if somehow run twice).
+  // Scheduled after resolveReady() so `await ready()` observers see the
+  // from-state, not a half-played frame.
+  //
+  // Double-rAF, NOT a timer: GSAP's own ticker rAF (registered at load, before
+  // ours) runs first in each rendering step, so by the time our flush calls
+  // restart() the ticker clock is already advanced to "now" and the tween
+  // anchors at 0. A `setTimeout` flush would instead run as a task BEFORE the
+  // rendering step — on a page blocked past the timer it would release while
+  // the ticker clock is stale, then the next tick jumps the tween forward:
+  // the exact mid-fade pop-in this gate prevents. No timer is needed for
+  // safety either: a tab hidden now takes the synchronous branch; a tab
+  // backgrounded after scheduling has rAF suspended but resumes (and flushes)
+  // on return to the foreground, so the entrance is never stuck invisible.
   if (loadGate.length > 0) {
     const flush = (): void => {
       if (gateCancelled) return
-      for (const release of loadGate.splice(0)) {
+      for (const tween of loadGate.splice(0)) {
         try {
-          release()
+          tween.restart(true)
         } catch (err) {
           console.error('[alrdy-animate] load release threw', err)
         }
@@ -419,10 +426,10 @@ export async function init(options: InitOptions = {}): Promise<void> {
       typeof requestAnimationFrame !== 'function' ||
       (typeof document !== 'undefined' && document.visibilityState === 'hidden')
     ) {
+      // SSR or a tab hidden right now — no paint is coming to gate against.
       flush()
     } else {
       requestAnimationFrame(() => requestAnimationFrame(flush))
-      setTimeout(flush, 120)
     }
   }
 }
