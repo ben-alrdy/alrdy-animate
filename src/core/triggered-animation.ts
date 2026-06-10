@@ -184,11 +184,27 @@ export function setupTriggeredAnimation(
   // exactly those even after the tween's own targets list changes on rebuild.
   const wc = opts.willChange
   let wcEls: HTMLElement[] = []
+  // Gather the animated elements for will-change. Tweens expose `targets()`;
+  // timelines (e.g. the text feature's per-line builds) have no runtime
+  // `targets()` despite the typed inheritance — walk their child tweens via
+  // `getChildren()` instead. Calling the missing method would throw and abort
+  // the play callback, leaving the animation stuck at its from-state.
+  const collectTargets = (anim: GsapTween): Element[] => {
+    const loose = anim as unknown as {
+      targets?: () => unknown[]
+      getChildren?: (nested?: boolean, tweens?: boolean, timelines?: boolean) => unknown[]
+    }
+    if (typeof loose.getChildren === 'function') {
+      return loose.getChildren(true, true, false).flatMap((child) => {
+        const c = child as { targets?: () => unknown[] }
+        return typeof c.targets === 'function' ? (c.targets() as Element[]) : []
+      })
+    }
+    return typeof loose.targets === 'function' ? (loose.targets() as Element[]) : []
+  }
   const setWillChange = (): void => {
     if (!wc || !currentAnim) return
-    wcEls = currentAnim
-      .targets()
-      .filter((t): t is HTMLElement => t instanceof HTMLElement)
+    wcEls = collectTargets(currentAnim).filter((t): t is HTMLElement => t instanceof HTMLElement)
     for (const el of wcEls) el.style.willChange = wc
   }
   const clearWillChange = (): void => {

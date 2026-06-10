@@ -29,10 +29,18 @@
  * (src/core/triggered-animation.ts) — set on the animated targets only while a
  * tween is playing (incl. `filter` for blur entrances, warmed during the load
  * delay), then cleared when it settles. We deliberately do NOT leave a
- * permanent `[aa-animate] { will-change }` rule: a never-reclaimed compositor
- * layer wastes memory and, on a nav, neutralises a descendant's
- * `backdrop-filter`. The split units (.aa-word/.aa-char) keep their own hint
- * below since the text feature animates those directly.
+ * permanent will-change on `[aa-animate]` or on the split units
+ * (.aa-word/.aa-char): a never-reclaimed compositor layer wastes memory and,
+ * on a nav, neutralises a descendant's `backdrop-filter`. Triggered text
+ * animations route their split units through the same per-tween management
+ * (text feature passes `willChange` to setupTriggeredAnimation).
+ *
+ * The one exception is hover-text (`aa-hover="text"`): those chars are animated
+ * by the hover feature on pointer interaction, not by the triggered
+ * orchestrator, so they keep a persistent hint below — they're few and the
+ * effect must feel instant on hover. Authors driving their own CSS-transition
+ * staggers on split units (via the `aa-split` `index` flag + `--char`/`--word`
+ * CSS vars) should add their own `will-change` in that transition CSS.
  */
 
 /*
@@ -85,6 +93,20 @@ html[aa-timeout] [aa-animate]:not([aa-ready]) {
 .aa-word,
 .aa-char {
   display: inline-block;
+}
+
+/*
+ * Persistent will-change for hover-text split units only (see the note above).
+ * Scoped to the hover-text host so non-hover split units don't carry a
+ * never-reclaimed layer — triggered text manages will-change per-tween instead.
+ */
+:where(
+  [aa-hover~='text'],
+  [aa-hover-sm~='text'],
+  [aa-hover-md~='text'],
+  [aa-hover-lg~='text'],
+  [aa-hover-xl~='text']
+) :is(.aa-word, .aa-char) {
   will-change: transform, opacity, filter;
 }
 

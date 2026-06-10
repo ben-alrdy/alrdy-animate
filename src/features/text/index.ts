@@ -517,6 +517,12 @@ function setupOne(
     scrollEnd,
     scrub,
     again,
+    // Hint the compositor for the split units (chars/words/lines) only while
+    // the tween runs; the orchestrator clears it on settle. Covers the full
+    // text-animation footprint (transform + opacity, plus filter for blur).
+    // Replaces the old permanent will-change on the global .aa-char/.aa-word
+    // CSS rule, which left a never-reclaimed layer per split unit.
+    willChange: 'transform, opacity, filter',
     buildAnimation: (vars) => {
       if (!split) return null
       let targets: GsapTarget
