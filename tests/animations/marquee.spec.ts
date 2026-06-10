@@ -95,20 +95,23 @@ test.describe('marquee demo page', () => {
 
     const track = hoverMarquee.locator('[aa-marquee-track]')
 
-    // Hover and confirm the track stops moving across two samples.
+    // Hover and confirm the track stops moving across two samples. toPass
+    // retries the whole sample-pair so a starved rAF window can't false-fail.
     await hoverMarquee.hover()
-    await page.waitForTimeout(150)
-    const xA = await readTrackX(track)
-    await page.waitForTimeout(500)
-    const xB = await readTrackX(track)
-    expect(Math.abs(xB - xA)).toBeLessThan(1.5)
+    await expect(async () => {
+      const xA = await readTrackX(track)
+      await page.waitForTimeout(250)
+      const xB = await readTrackX(track)
+      expect(Math.abs(xB - xA)).toBeLessThan(1.5)
+    }).toPass({ timeout: 5000 })
 
     // Move the pointer away and the loop should resume.
     await page.mouse.move(0, 0)
-    await page.waitForTimeout(400)
-    const xC = await readTrackX(track)
-    await page.waitForTimeout(500)
-    const xD = await readTrackX(track)
-    expect(Math.abs(xD - xC)).toBeGreaterThan(2)
+    await expect(async () => {
+      const xC = await readTrackX(track)
+      await page.waitForTimeout(250)
+      const xD = await readTrackX(track)
+      expect(Math.abs(xD - xC)).toBeGreaterThan(2)
+    }).toPass({ timeout: 5000 })
   })
 })

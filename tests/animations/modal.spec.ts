@@ -1,4 +1,5 @@
 import { expect, test, type ConsoleMessage } from '@playwright/test'
+import { opacityOf } from '../helpers'
 
 const initialized = (msg: ConsoleMessage): boolean =>
   msg.text().includes('[alrdy-animate] initialized')
@@ -37,12 +38,10 @@ test.describe('modal demo page', () => {
     expect(initialVisibility).toBe('hidden')
 
     await trigger.click()
-    await page.waitForTimeout(700)
 
-    expect(await card.getAttribute('aa-modal-status')).toBe('active')
-    expect(await group.getAttribute('aa-modal-group-status')).toBe('active')
-    const openVisibility = await card.evaluate((el) => getComputedStyle(el).visibility)
-    expect(openVisibility).toBe('visible')
+    await expect(card).toHaveAttribute('aa-modal-status', 'active')
+    await expect(group).toHaveAttribute('aa-modal-group-status', 'active')
+    await expect(card).toHaveCSS('visibility', 'visible')
   })
 
   test('inner aa-animate elements play forward then reverse on close', async ({ page }) => {
@@ -63,21 +62,11 @@ test.describe('modal demo page', () => {
     expect(beforeOpen).toBeLessThan(0.1)
 
     await trigger.click()
-    await page.waitForTimeout(900)
-
-    const afterOpen = await firstChar.evaluate((el) =>
-      parseFloat(getComputedStyle(el).opacity),
-    )
-    expect(afterOpen).toBeGreaterThan(0.9)
+    await expect.poll(() => opacityOf(firstChar), { timeout: 5000 }).toBeGreaterThan(0.9)
 
     // Close via Escape — should reverse the inner animation.
     await page.keyboard.press('Escape')
-    await page.waitForTimeout(700)
-
-    const afterClose = await firstChar.evaluate((el) =>
-      parseFloat(getComputedStyle(el).opacity),
-    )
-    expect(afterClose).toBeLessThan(0.1)
+    await expect.poll(() => opacityOf(firstChar), { timeout: 5000 }).toBeLessThan(0.1)
   })
 
   test('inner aa-animate inside an orphaned aa-stack-card still plays on open', async ({
@@ -99,10 +88,7 @@ test.describe('modal demo page', () => {
     expect(beforeOpen).toBeLessThan(0.1)
 
     await trigger.click()
-    await page.waitForTimeout(900)
-
-    const afterOpen = await probe.evaluate((el) => parseFloat(getComputedStyle(el).opacity))
-    expect(afterOpen).toBeGreaterThan(0.9)
+    await expect.poll(() => opacityOf(probe), { timeout: 5000 }).toBeGreaterThan(0.9)
   })
 
   test('inner aa-animate honours aa-delay on open (event-triggered)', async ({ page }) => {

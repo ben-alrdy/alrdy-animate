@@ -1,4 +1,5 @@
 import { expect, test, type ConsoleMessage } from '@playwright/test'
+import { opacityOf } from '../helpers'
 
 const initialized = (msg: ConsoleMessage): boolean =>
   msg.text().includes('[alrdy-animate] initialized')
@@ -79,20 +80,17 @@ test.describe('stagger demo page', () => {
       .locator('h2.ts-h[aa-split="lines-chars"]')
       .first()
     await heading.scrollIntoViewIfNeeded()
-    await page.waitForTimeout(3000)
 
-    const sample = await heading.evaluate((el) => {
-      const lines = el.querySelectorAll('.aa-line')
-      const chars = el.querySelectorAll('.aa-char')
-      const lastChar = chars[chars.length - 1] as HTMLElement | undefined
-      return {
-        lineCount: lines.length,
-        charCount: chars.length,
-        lastCharOpacity: lastChar ? parseFloat(getComputedStyle(lastChar).opacity) : 0,
-      }
-    })
-    expect(sample.lineCount).toBeGreaterThanOrEqual(2)
-    expect(sample.charCount).toBeGreaterThan(20)
-    expect(sample.lastCharOpacity).toBeGreaterThan(0.95)
+    // Structural split is stable once init runs.
+    const { lineCount, charCount } = await heading.evaluate((el) => ({
+      lineCount: el.querySelectorAll('.aa-line').length,
+      charCount: el.querySelectorAll('.aa-char').length,
+    }))
+    expect(lineCount).toBeGreaterThanOrEqual(2)
+    expect(charCount).toBeGreaterThan(20)
+
+    // The staggered entrance can take a while under load — poll the last char in.
+    const lastChar = heading.locator('.aa-char').last()
+    await expect.poll(() => opacityOf(lastChar), { timeout: 6000 }).toBeGreaterThan(0.95)
   })
 })

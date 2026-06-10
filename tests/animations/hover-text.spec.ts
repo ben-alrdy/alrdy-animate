@@ -1,4 +1,5 @@
 import { expect, test, type ConsoleMessage } from '@playwright/test'
+import { styleOf } from '../helpers'
 
 const initialized = (msg: ConsoleMessage): boolean =>
   msg.text().includes('[alrdy-animate] initialized')
@@ -33,11 +34,12 @@ test.describe('hover text page', () => {
     const firstShadow = await chars.first().evaluate((el) => getComputedStyle(el).textShadow)
     expect(firstShadow).not.toBe('none')
 
-    const beforeTransform = await chars.first().evaluate((el) => getComputedStyle(el).transform)
+    const beforeTransform = await styleOf(chars.first(), 'transform')
     await link.hover()
-    await page.waitForTimeout(200) // mid-tween
-    const midTransform = await chars.first().evaluate((el) => getComputedStyle(el).transform)
-    expect(midTransform).not.toEqual(beforeTransform)
+    // The lift tween must move the char off its rest transform at some point.
+    await expect
+      .poll(() => styleOf(chars.first(), 'transform'), { timeout: 4000 })
+      .not.toBe(beforeTransform)
   })
 
   test('text default (no reverse) resets chars after the one-shot completes', async ({ page }) => {
