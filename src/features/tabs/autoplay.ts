@@ -1,8 +1,7 @@
 import type { GsapHandle } from '../../core/gsap-detect'
 import {
   createProgressEntry,
-  progressFromValues,
-  progressToValues,
+  createProgressGroup,
   type ProgressEntry,
 } from '../../core/progress-bar'
 import { attachHoverPauseListener, createViewportGate } from '../../core/viewport-gate'
@@ -43,52 +42,22 @@ export function setupAutoplay(
       ? createProgressEntry(entry.progress, 'aa-tabs-progress', entry.ease, gsap.set)
       : null,
   )
-
-  const setProgress = (idx: number, mode: 'play' | 'reset' | 'kill'): void => {
-    progressByIdx.forEach((p, i) => {
-      if (!p) return
-      gsap.killTweensOf(p.target)
-      if (mode === 'play' && i === idx) {
-        const dwell = entries[i].interval
-        gsap.fromTo(p.target, progressFromValues(p), {
-          ...progressToValues(p),
-          duration: dwell,
-          ease: p.ease,
-          overwrite: true,
-        })
-      } else {
-        gsap.set(p.target, progressFromValues(p))
-      }
-    })
-  }
-
-  const pauseAllProgress = (): void => {
-    progressByIdx.forEach((p) => {
-      if (!p) return
-      const tweens = (gsap.getTweensOf as (t: unknown) => Array<{ pause: () => void }>)(p.target)
-      tweens.forEach((t) => t.pause())
-    })
-  }
-  const resumeAllProgress = (): void => {
-    progressByIdx.forEach((p) => {
-      if (!p) return
-      const tweens = (gsap.getTweensOf as (t: unknown) => Array<{ resume: () => void }>)(p.target)
-      tweens.forEach((t) => t.resume())
-    })
-  }
+  const progress = createProgressGroup(gsap, progressByIdx)
+  // Each tab carries its own dwell, so the active bar fills over that tab's interval.
+  const dwellFor = (i: number): number => entries[i].interval
 
   const tick = (): void => {
     const next = (currentIdx + 1) % entries.length
     currentIdx = next
     api.open(entries[next])
-    setProgress(next, 'play')
+    progress.play(next, dwellFor)
     const dwell = entries[next].interval
     autoplayCall = gsap.delayedCall(dwell, tick)
   }
 
   const start = (): void => {
     if (autoplayCall) return
-    setProgress(currentIdx, 'play')
+    progress.play(currentIdx, dwellFor)
     const dwell = entries[currentIdx].interval
     autoplayCall = gsap.delayedCall(dwell, tick)
   }
@@ -98,12 +67,7 @@ export function setupAutoplay(
       autoplayCall.kill()
       autoplayCall = null
     }
-    progressByIdx.forEach((p) => {
-      if (p) gsap.killTweensOf(p.target)
-    })
-    progressByIdx.forEach((p) => {
-      if (p) gsap.set(p.target, progressFromValues(p))
-    })
+    progress.reset()
     isPausedByHover = false
   }
 
@@ -113,12 +77,7 @@ export function setupAutoplay(
       autoplayCall.kill()
       autoplayCall = null
     }
-    progressByIdx.forEach((p) => {
-      if (p) {
-        gsap.killTweensOf(p.target)
-        gsap.set(p.target, progressFromValues(p))
-      }
-    })
+    progress.reset()
     currentIdx = idx
     api.open(entries[idx])
     // In hover-pause mode, a click *while hovering* should leave autoplay
@@ -129,7 +88,7 @@ export function setupAutoplay(
       return
     }
     isPausedByHover = false
-    setProgress(idx, 'play')
+    progress.play(idx, dwellFor)
     const dwell = entries[idx].interval
     autoplayCall = gsap.delayedCall(dwell, tick)
   }
@@ -137,14 +96,14 @@ export function setupAutoplay(
   const pauseByHover = (): void => {
     if (autoplayCall && !autoplayCall.paused()) {
       autoplayCall.pause()
-      pauseAllProgress()
+      progress.pause()
       isPausedByHover = true
     }
   }
   const resumeFromHover = (): void => {
     if (autoplayCall && isPausedByHover) {
       autoplayCall.resume()
-      resumeAllProgress()
+      progress.resume()
       isPausedByHover = false
     }
   }

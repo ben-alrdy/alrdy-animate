@@ -98,3 +98,77 @@ export function progressSetFill(
   }
   set(entry.target, { [entry.property as string]: `${clamped * 100}%` })
 }
+
+/** The slice of GSAP a progress group drives. The autoplay controllers already
+ *  hold a loosely-typed gsap, so this is structurally satisfied by that. */
+interface ProgressGsap {
+  set: GsapSet
+  fromTo: (target: unknown, fromVars: Record<string, unknown>, toVars: Record<string, unknown>) => unknown
+  killTweensOf: (target: unknown) => void
+  getTweensOf: (target: unknown) => Array<{ pause: () => void; resume: () => void }>
+}
+
+export interface ProgressGroup {
+  /** Tween the active index's bar empty → full over `durationFor(index)` and
+   *  snap every other bar back to empty. */
+  play: (activeIndex: number, durationFor: (index: number) => number) => void
+  /** Kill all in-flight tweens and reset every bar to empty. */
+  reset: () => void
+  /** Pause in-flight bar tweens (hover-pause). */
+  pause: () => void
+  /** Resume paused bar tweens. */
+  resume: () => void
+}
+
+/**
+ * Drive a set of progress bars (one per slide/tab) as a group. Centralises the
+ * `killTweensOf` / `fromTo` / `getTweensOf` plumbing the slider and tabs
+ * autoplay controllers both need — the only difference between them (per-entry
+ * dwell vs a shared interval) is supplied via the `durationFor` callback.
+ * `null` entries (a slide/tab with no progress element) are skipped.
+ */
+export function createProgressGroup(
+  // The autoplay controllers hold a loosely-typed gsap (`Record<string, any>`);
+  // narrow it to the slice we use here.
+  gsapLoose: Record<string, unknown>,
+  entries: ReadonlyArray<ProgressEntry | null>,
+): ProgressGroup {
+  const gsap = gsapLoose as unknown as ProgressGsap
+  return {
+    play(activeIndex, durationFor): void {
+      entries.forEach((entry, i) => {
+        if (!entry) return
+        gsap.killTweensOf(entry.target)
+        if (i === activeIndex) {
+          gsap.fromTo(entry.target, progressFromValues(entry), {
+            ...progressToValues(entry),
+            duration: durationFor(i),
+            ease: entry.ease,
+            overwrite: true,
+          })
+        } else {
+          gsap.set(entry.target, progressFromValues(entry))
+        }
+      })
+    },
+    reset(): void {
+      for (const entry of entries) {
+        if (!entry) continue
+        gsap.killTweensOf(entry.target)
+        gsap.set(entry.target, progressFromValues(entry))
+      }
+    },
+    pause(): void {
+      for (const entry of entries) {
+        if (!entry) continue
+        for (const t of gsap.getTweensOf(entry.target)) t.pause()
+      }
+    },
+    resume(): void {
+      for (const entry of entries) {
+        if (!entry) continue
+        for (const t of gsap.getTweensOf(entry.target)) t.resume()
+      }
+    },
+  }
+}

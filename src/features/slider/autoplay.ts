@@ -1,8 +1,7 @@
 import type { GsapHandle } from '../../core/gsap-detect'
 import {
   createProgressEntry,
-  progressFromValues,
-  progressToValues,
+  createProgressGroup,
   type ProgressEntry,
 } from '../../core/progress-bar'
 import { attachHoverPauseListener, createViewportGate } from '../../core/viewport-gate'
@@ -48,53 +47,14 @@ export function setupAutoplay(
   let isPausedByHover = false
   let dragInProgress = false
 
-  const progress: ProgressEntry[] = []
+  const progressEntries: ProgressEntry[] = []
   for (const el of root.querySelectorAll<Element>('[aa-slider-progress]')) {
     const entry = createProgressEntry(el, 'aa-slider-progress', ease, gsap.set)
-    if (entry) progress.push(entry)
+    if (entry) progressEntries.push(entry)
   }
-
-  const syncProgress = (activeIndex: number): void => {
-    progress.forEach((entry, i) => {
-      gsap.killTweensOf(entry.target)
-      if (i === activeIndex) {
-        gsap.fromTo(entry.target, progressFromValues(entry), {
-          ...progressToValues(entry),
-          duration: interval,
-          ease: entry.ease,
-          overwrite: true,
-        })
-      } else {
-        gsap.set(entry.target, progressFromValues(entry))
-      }
-    })
-  }
-
-  const stopProgress = (): void => {
-    for (const entry of progress) gsap.killTweensOf(entry.target)
-  }
-
-  const resetAllProgress = (): void => {
-    for (const entry of progress) gsap.set(entry.target, progressFromValues(entry))
-  }
-
-  const pauseProgress = (): void => {
-    for (const entry of progress) {
-      const tweens = (gsap.getTweensOf as (t: unknown) => Array<{ pause: () => void }>)(
-        entry.target,
-      )
-      tweens.forEach((t) => t.pause())
-    }
-  }
-
-  const resumeProgress = (): void => {
-    for (const entry of progress) {
-      const tweens = (gsap.getTweensOf as (t: unknown) => Array<{ resume: () => void }>)(
-        entry.target,
-      )
-      tweens.forEach((t) => t.resume())
-    }
-  }
+  const progress = createProgressGroup(gsap, progressEntries)
+  // Every slide shares the same dwell (`interval`).
+  const syncProgress = (activeIndex: number): void => progress.play(activeIndex, () => interval)
 
   const start = (): void => {
     if (autoplayCall) return
@@ -114,8 +74,7 @@ export function setupAutoplay(
       autoplayCall.kill()
       autoplayCall = null
     }
-    stopProgress()
-    resetAllProgress()
+    progress.reset()
     isPausedByHover = false
   }
 
@@ -126,7 +85,7 @@ export function setupAutoplay(
   const pauseByHover = (): void => {
     if (autoplayCall) {
       autoplayCall.pause()
-      pauseProgress()
+      progress.pause()
       isPausedByHover = true
     }
   }
@@ -134,7 +93,7 @@ export function setupAutoplay(
   const resumeFromHover = (): void => {
     if (autoplayCall && isPausedByHover) {
       autoplayCall.resume()
-      resumeProgress()
+      progress.resume()
       isPausedByHover = false
     }
   }
