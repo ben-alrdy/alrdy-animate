@@ -1,4 +1,5 @@
 import type { ResolvedOptions } from '../types/index'
+import type { Config } from './settings'
 
 type StaggerFrom = 'start' | 'end' | 'center' | 'edges'
 
@@ -124,4 +125,27 @@ export function buildStagger(unit: number, flags: StaggerFlags): StaggerValue {
     return out
   }
   return unit
+}
+
+/**
+ * Resolve the animation targets + stagger for an entrance feature (appear,
+ * reveal): with `aa-stagger` and element children present, stagger the
+ * children; otherwise animate the element itself with no stagger. Returns the
+ * element in a single-item array in the no-children case (GSAP treats a
+ * one-element array and a bare element identically).
+ */
+export function collectStaggerTargets(
+  element: Element,
+  config: Config,
+  options: ResolvedOptions,
+): { targets: Element[]; stagger: StaggerValue } {
+  const wantsStagger = config['aa-stagger'] !== undefined
+  const children = wantsStagger
+    ? Array.from(element.children).filter((c): c is Element => c.nodeType === 1)
+    : []
+  const targets: Element[] = children.length > 0 ? children : [element]
+  const staggerSpec = parseStaggerSpec(config['aa-stagger'], defaultStaggerFor(undefined, options))
+  const stagger: StaggerValue =
+    children.length > 0 ? buildStagger(staggerSpec.unit, staggerSpec.flags) : 0
+  return { targets, stagger }
 }

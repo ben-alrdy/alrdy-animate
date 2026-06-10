@@ -2,12 +2,7 @@ import { bindFeature, type FeatureContext, type FeatureModule } from '../../core
 import { readAnimationConfig, resolveAnchor } from '../../core/parse'
 import { matchAnimateValue, type ResolvedPreset } from '../../core/presets'
 import type { Config } from '../../core/settings'
-import {
-  buildStagger,
-  defaultStaggerFor,
-  parseStaggerSpec,
-  type StaggerValue,
-} from '../../core/stagger'
+import { collectStaggerTargets } from '../../core/stagger'
 import { cssWillChange, setupTriggeredAnimation } from '../../core/triggered-animation'
 import { resolveTriggers } from '../../core/trigger'
 
@@ -68,16 +63,7 @@ function setupOne(
     ? { clipPath: reveal.to, opacity: 1 }
     : { clipPath: reveal.to }
 
-  // aa-stagger present + element has children → clip each child individually.
-  // aa-stagger present but no children → silently fall through and reveal the element itself.
-  const wantsStagger = config['aa-stagger'] !== undefined
-  const children = wantsStagger
-    ? Array.from(element.children).filter((c): c is Element => c.nodeType === 1)
-    : []
-  const targets: Element | Element[] = children.length > 0 ? children : element
-  const staggerSpec = parseStaggerSpec(config['aa-stagger'], defaultStaggerFor(undefined, opts))
-  const stagger: StaggerValue =
-    children.length > 0 ? buildStagger(staggerSpec.unit, staggerSpec.flags) : 0
+  const { targets, stagger } = collectStaggerTargets(element, config, opts)
 
   const triggerEl = resolveAnchor(element, config['aa-anchor'])
 
