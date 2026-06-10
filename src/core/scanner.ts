@@ -20,6 +20,26 @@ export type FeatureName =
 export interface ScanResult {
   elements: Element[]
   features: Set<FeatureName>
+  /**
+   * Some element the hover feature will process resolves to the `text` head
+   * (char/word lift) in some breakpoint segment — the only hover effect that
+   * needs SplitText. Detected during this pass so init doesn't re-walk the DOM.
+   */
+  needsHoverSplit: boolean
+}
+
+const HOVER_ATTRS = ['aa-hover', 'aa-hover-sm', 'aa-hover-md', 'aa-hover-lg', 'aa-hover-xl'] as const
+
+// The hover feature requires a base `aa-hover` to process an element (see
+// hover/index.ts `elementMatches`), so suffix-only hover never runs — gate on
+// the base attr, then check base + suffixes for the `text` head.
+function hoverWantsSplitText(el: Element): boolean {
+  if (!el.hasAttribute('aa-hover')) return false
+  for (const attr of HOVER_ATTRS) {
+    const v = el.getAttribute(attr)
+    if (v && v.split('|').some((part) => part.trim().split(/\s+/)[0] === 'text')) return true
+  }
+  return false
 }
 
 const ANIMATE_TO_FEATURE: Array<[RegExp, FeatureName]> = [
@@ -60,6 +80,7 @@ export function scan(
 ): ScanResult {
   const features = new Set<FeatureName>()
   const elements = new Set<Element>()
+  let needsHoverSplit = false
 
   // Single combined selector — one tree walk instead of 1 + 10. Classify by
   // attribute presence in JS.
@@ -75,6 +96,7 @@ export function scan(
     for (const [attr, feature] of ANCHOR_TO_FEATURE) {
       if (el.hasAttribute(attr)) features.add(feature)
     }
+    if (!needsHoverSplit && hoverWantsSplitText(el)) needsHoverSplit = true
   }
 
   // Preset-resolved elements have no `aa-*` attributes (resolvePresets skips
@@ -86,5 +108,5 @@ export function scan(
     if (animateValue !== null) features.add(classifyAnimateValue(animateValue))
   }
 
-  return { elements: Array.from(elements), features }
+  return { elements: Array.from(elements), features, needsHoverSplit }
 }

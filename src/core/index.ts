@@ -143,7 +143,7 @@ export async function init(options: InitOptions = {}): Promise<void> {
   state.options.reducedMotion = !!reducedMotion
   state.options.optimizeMobile = optimizeMobile
 
-  const { elements, features } = scan(root, presetMap)
+  const { elements, features, needsHoverSplit } = scan(root, presetMap)
   if (elements.length === 0) {
     resolveReady()
     return
@@ -207,32 +207,11 @@ export async function init(options: InitOptions = {}): Promise<void> {
       requiredPlugins.add('ScrollTrigger')
     }
     if (f === 'text' || f === 'split') requiredPlugins.add('SplitText')
-    if (
-      f === 'hover' &&
-      typeof document !== 'undefined' &&
-      typeof window !== 'undefined' &&
-      window.matchMedia('(hover: hover)').matches
-    ) {
-      // hover='text' (char/word lift) is the only hover head that needs
-      // SplitText. Sniff the DOM once so authors don't have to declare it.
-      // Skip on touch-only devices — the hover feature short-circuits there,
-      // so loading SplitText would burn payload for nothing.
-      const HOVER_ATTRS = ['aa-hover', 'aa-hover-sm', 'aa-hover-md', 'aa-hover-lg', 'aa-hover-xl']
-      const selector = HOVER_ATTRS.map((a) => `[${a}]`).join(',')
-      let needsSplit = false
-      for (const el of document.querySelectorAll(selector)) {
-        for (const attr of HOVER_ATTRS) {
-          const v = el.getAttribute(attr)
-          if (!v) continue
-          if (v.split('|').some((part) => part.trim().split(/\s+/)[0] === 'text')) {
-            needsSplit = true
-            break
-          }
-        }
-        if (needsSplit) break
-      }
-      if (needsSplit) requiredPlugins.add('SplitText')
-    }
+    // hover='text' (char/word lift) is the only hover head that needs
+    // SplitText; the scanner flags it during its single DOM pass. Reaching here
+    // with f==='hover' implies the device has hover — touch-only devices drop
+    // `hover` from effectiveFeatures above, so no matchMedia check is needed.
+    if (f === 'hover' && needsHoverSplit) requiredPlugins.add('SplitText')
     if (f === 'slider' || f === 'marquee') {
       requiredPlugins.add('Draggable')
       requiredPlugins.add('InertiaPlugin')
