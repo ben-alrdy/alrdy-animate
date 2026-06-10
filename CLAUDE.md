@@ -1,14 +1,15 @@
 # Claude Code instructions
 
-This is the source repo for **alrdy-animate**, an attribute-driven scroll-animation and interactive-component library used by alrdy agency in Webflow projects and recent Next.js client sites. Currently being rebuilt as **v8.0.0-alpha.0**.
+This is the source repo for **alrdy-animate**, an attribute-driven scroll-animation and interactive-component library used by alrdy agency in Webflow projects and recent Next.js client sites. The v8 line is a full TypeScript + Vite rewrite, shipping under the `alpha` dist-tag and being promoted to a stable **8.0.0** `latest`.
 
 ## Read this first
 
-The canonical design doc lives outside the repo at **`/Users/ben/.claude/plans/have-a-detailed-look-mellow-salamander.md`**. Read it before making any architectural decision. It covers attribute conventions, the matchMedia-driven responsive system, the trigger orchestrator, the Phase 2–6 roadmap, and what's deliberately out of scope.
+The public API surface is documented in **`AGENTS.md`** (repo root) and the docs site under **`docs/src/content/docs/`** — those are canonical for how the library behaves. Older design/exploration notes live outside the repo in `~/.claude/plans/` (one file per session, kebab-named); they're history, not spec — trust the code, `AGENTS.md`, and the docs over them.
 
 ## Branches
 
-- **`main`** — v8 line. v8.0.0-alpha.0 development.
+- **`v8`** — active development branch. All v8 work and every release tag live here.
+- **`main`** — release/stable line; lags `v8` until a release fast-forwards it.
 - **`v7-maintenance`** — preserves the 7.3.5 tip for any v7 patches. Do not delete.
 
 ## Stack and constraints
@@ -22,51 +23,19 @@ The canonical design doc lives outside the repo at **`/Users/ben/.claude/plans/h
 
 ## Architecture
 
-```
-src/
-├── core/           # public init/destroy/refresh + onResize + the orchestrator
-│   ├── index.ts            # public API + window.AlrdyAnimate
-│   ├── scanner.ts          # finds aa-* elements, classifies feature
-│   ├── settings.ts         # parses | shorthand + Tailwind-style breakpoint suffixes
-│   ├── match-media.ts      # ResponsiveController wraps gsap.matchMedia
-│   ├── registry.ts         # lazy-loads feature modules by name
-│   ├── trigger.ts          # scroll vs event:<name> vs click trigger orchestrator
-│   ├── resize.ts           # shared debounced resize bus (public via onResize)
-│   ├── lifecycle.ts        # cleanup helpers (mm.revert, disposers)
-│   ├── gsap-detect.ts      # window.gsap detection + dev-mode warnings
-│   └── state.ts            # internal singleton state (initialized, options, breakpoints)
-├── features/
-│   ├── scroll/index.ts     # fade/zoom/slide/blur/rotate via fromTo + ScrollTrigger; supports aa-children + aa-scrub
-│   ├── text/index.ts       # text-fade / text-blur / text-slide-* / text-tilt / text-marker / text-oval / text-rotate / text-block (uses split runtime)
-│   ├── reveal/index.ts     # reveal-* (clip-path inset / circle / oval entrances)
-│   ├── parallax/index.ts   # parallax / parallax-horizontal — aa-parallax-start/end overrides
-│   ├── hover/index.ts      # hover-bg-block + aa-color colorize-on-hover
-│   ├── cursor/index.ts     # custom pointer tracking (aa-cursor + aa-cursor-trigger)
-│   ├── tabs/index.ts       # tab switching with optional aa-autoplay + progress indicator
-│   ├── slider/index.ts     # draggable carousel (Draggable + InertiaPlugin) with optional autoplay
-│   ├── marquee/index.ts    # infinite-loop scroller (ScrollTrigger + Draggable + InertiaPlugin)
-│   ├── nav/index.ts        # scroll-spy nav with current/hover indicators (ScrollTrigger + Flip)
-│   └── modal/index.ts      # fixed-position dialogs with aa-modal-name/target/close/backdrop
-├── split/index.ts          # standalone aa-split utility (SplitText + regex fallback)
-├── css/alrdy-animate.css   # companion stylesheet: split helper classes + reduced-motion
-└── types/
-    ├── index.ts            # public TS types
-    ├── jsx.d.ts            # JSX.IntrinsicElements ambient types for aa-* (for Next.js autocomplete)
-    └── css.d.ts            # *.css module declaration for the side-effect import
+High-level map — the directory tree itself is the source of truth; don't treat this as an exhaustive file list.
 
-docs/                       # Astro 6 + Starlight 0.38 site (separate package)
-└── src/
-    ├── content.config.ts   # Starlight docsLoader + docsSchema
-    ├── content/docs/       # MDX pages: index, 404, installation/, initialization/, animations/
-    └── components/Demo.astro  # iframe-style demo wrapper, loads alrdy-animate from file:..
+- **`src/core/`** — public API (`index.ts` → `init`/`destroy`/`refresh`/`onResize` + `window.AlrdyAnimate`) and the shared engine: `scanner` (finds `aa-*`, classifies feature), `settings` + `parse` (`|` shorthand + Tailwind breakpoint suffixes), `match-media` (wraps `gsap.matchMedia`), `registry` (lazy-loads features by name), `trigger`/`triggered-animation` (scroll vs `event:`/`click:`/`load` orchestrator), `presets` (class→animation resolution), `stagger`, `reduced-motion`, `viewport-gate`, `gsap-detect`, `resize`, `state`.
+- **`src/features/`** — one folder per feature module: `appear` (fade/zoom/slide/blur/rotate; also hosts `reveal` and `slices` entry files), `text`, `parallax`, `tabs`, `marquee`, `nav`, `slider`, `modal`, `hover`, `cursor`, `stack`. Registry feature names: `appear, text, reveal, slices, parallax, tabs, marquee, nav, slider, modal, hover, cursor, stack, split`.
+- **`src/split/`** — standalone `aa-split` utility (SplitText + regex fallback). **`src/smooth-scroll/`** — Lenis integration. **`src/css/alrdy-animate.css`** — split helper classes + reduced-motion safety net. **`src/types/`** — `index.ts` (public types), `jsx.d.ts` (ambient `aa-*` JSX types), `css.d.ts`.
+- **`docs/`** — Astro + Starlight site (separate package). MDX pages under `src/content/docs/` (`installation/`, `initialization/`, `animations/`, `recipes/`); `components/Demo.astro` loads the lib from the built `dist/`.
+- **`tests/`** — Playwright specs in `tests/animations/` and `tests/presets/`, driven against the docs dev server; `tests/helpers.ts` holds shared polling assertions.
 
-tests/
-└── animations/fade-up.spec.ts   # Playwright spec, drives docs dev server
-```
+The Vite build outputs a tree-shakeable ESM entry per feature plus an all-features UMD bundle; `gsap`, its plugins, and `lenis` are marked external (see `vite.config.ts`).
 
 ## Adding a new feature
 
-Mirror the pattern in `src/features/scroll/index.ts`:
+Mirror the pattern in `src/features/appear/index.ts`:
 
 1. Filter `ctx.elements` to those your feature handles.
 2. For each element, call `ctx.responsive.bind(element, attrs, ({ config }) => ...)`. The callback runs inside `gsap.matchMedia()` so any `gsap.fromTo` / ScrollTrigger created there is auto-cleaned on breakpoint exit and on `destroy()`.
@@ -74,7 +43,7 @@ Mirror the pattern in `src/features/scroll/index.ts`:
 4. If you need event-based triggering (slider-active, accordion-open, custom), use `parseTrigger(config['aa-trigger'])` + `onCustomTrigger(...)` from `src/core/trigger.ts`. The custom event is `aa:trigger` with `detail.name`.
 5. Declare `requiredPlugins: ['ScrollTrigger', 'SplitText', ...]` so the dev-mode warning lists them.
 
-Add a docs page at `docs/src/content/docs/animations/<name>.mdx` and a Playwright spec at `tests/animations/<name>.spec.ts` (use the fade-up spec as a template).
+Add a docs page at `docs/src/content/docs/animations/<name>.mdx` and a Playwright spec at `tests/animations/<name>.spec.ts` (use `fade.spec.ts` as a template; prefer the retrying helpers in `tests/helpers.ts` over fixed `waitForTimeout` + single-sample reads, which flake under load).
 
 ## Commands
 
@@ -95,20 +64,18 @@ npm run test:update # update Playwright snapshots
 Flow:
 
 ```sh
-# 1. Bump + commit + tag in one shot.
+# 1. Bump + commit + tag in one shot. (npm version refuses if the tree is dirty — commit first.)
 npm version prerelease --preid alpha -m "chore: release v%s"   # 8.0.0-alpha.N → alpha.N+1
-npm version prerelease --preid beta  -m "chore: release v%s"   # …-alpha.N    → …-beta.0
-npm version prerelease --preid rc    -m "chore: release v%s"   # …-beta.N     → …-rc.0
+npm version 8.0.0                    -m "chore: release v%s"   # promote alpha → stable 8.0.0 (→ latest)
 npm version patch                    -m "chore: release v%s"   # 8.0.0        → 8.0.1
-# (npm version refuses if working tree is dirty — commit first.)
 
 # 2. Push commits + tag.
 git push --follow-tags origin <branch>
 ```
 
-The workflow derives the dist-tag from the version suffix: `-alpha.N` → `alpha`, `-beta.N` → `beta`, `-rc.N` → `rc`, no suffix → `latest`. Flipping `latest` to a new major (e.g. 8.0.0) is therefore a deliberate act of bumping past all pre-release suffixes — not something to do casually.
+The workflow derives the dist-tag from the version suffix: `-alpha.N` → `alpha`, `-beta.N` → `beta`, `-rc.N` → `rc`, no suffix → `latest`. **Tagging a suffixless `8.0.0` flips `latest` from v7 to v8 instantly and globally** — every `npm install alrdy-animate` and `@latest` CDN consumer jumps a major. Do it deliberately, with the suite green and the docs/CHANGELOG/AGENTS.md in sync.
 
-## Visual verification (Phase 2 onwards)
+## Visual verification
 
 After implementing a feature, drive its docs demo through Playwright MCP (the `mcp__playwright__browser_*` tools) before reporting the task complete:
 
@@ -119,7 +86,7 @@ After implementing a feature, drive its docs demo through Playwright MCP (the `m
 5. Resize to 390×800 and 1280×800 to spot-check the responsive variants.
 6. If you can't visually confirm the change, say so explicitly rather than claiming success.
 
-**Screenshot output**: `.mcp.json` pins Playwright MCP's `--output-dir` to `playwright-output/` (gitignored). That handles auto-named files, but `browser_take_screenshot`'s `filename` arg resolves relative to CWD, not the output dir — so when you pass an explicit `filename`, prefix it with `playwright-output/` (e.g. `filename: "playwright-output/scroll-mid.png"`) so it lands in the same folder instead of cluttering the repo root.
+**Screenshot output**: Playwright MCP is configured at the user level (the project `.mcp.json` no longer registers it). `browser_take_screenshot`'s `filename` arg resolves relative to CWD, so prefix explicit filenames with `playwright-output/` (gitignored) — e.g. `filename: "playwright-output/scroll-mid.png"` — to keep them out of the repo root.
 
 ## Conventions
 
@@ -131,16 +98,16 @@ After implementing a feature, drive its docs demo through Playwright MCP (the `m
 - **Responsive variants**: `|` shorthand splits at `md` (768px). Suffixes (`-sm`, `-md`, `-lg`, `-xl`) follow Tailwind semantics ("at this breakpoint and up"). Both compile to exclusive width ranges in `resolveRanges()`. Only one variant ever runs at once.
 - **`none` as a value** opts out at that breakpoint (e.g. `aa-slider="snap|none"`).
 - **JSDoc only on public types, never on implementation. No Storybook.** `src/types/jsx.d.ts` and `src/types/index.ts` carry per-attribute / per-option JSDoc — that's our AI-affordance surface (IDE hovers, Claude/Cursor autocomplete) and is mirrored in the shipped `AGENTS.md`. Internal modules stay comment-free; prose lives in `docs/src/content/docs/` (one MDX page per animation with attribute table + live `<Demo>`).
-- **Bundle size budget**: core ≤ 5KB gzip; each feature ≤ 5KB gzip; whole UMD ≤ 30KB gzip. Currently 3.82 KB UMD gzip.
+- **Bundle size budget**: core ≤ 5KB gzip; each feature module ≈ ≤ 5KB gzip (the real-world cost, since ESM consumers only pull the features they use). The all-features UMD bundles everything — currently ~32.6 KB gzip; watch that it doesn't balloon, but it's not the per-page cost.
 
 ## What's deferred
 
 - **Pin** animations (rebuild from scratch in v8.x)
 - **Form-submit** feature (no production use; dropped)
-- **Templates / theme registry** (dropped)
+- **Theme registry** (dropped). Note: class-based **presets** *did* ship (`aa-*` resolved from a class map via `src/core/presets.ts`) — that replaced the old v7 "templates" concept.
 - **Lazy-load image handler** (delegate to native `loading="lazy"`)
 - **CSS-only animations / `.in-view` IntersectionObserver** — dropped. All animations are GSAP-driven; the shipped CSS file only carries split-utility classes and a reduced-motion safety net.
-- **Page transitions** are out of scope; `init/destroy/refresh` lifecycle hooks let users wire Barba (Webflow) or View Transitions (Next.js) themselves. Recipes will live in `docs/src/content/docs/recipes/` in Phase 5.
+- **Page transitions** are out of scope; `init/destroy/refresh` lifecycle hooks let users wire Barba (Webflow) or View Transitions (Next.js) themselves. Recipes for this live in `docs/src/content/docs/recipes/`.
 
 ## Keep AI affordances in sync
 
@@ -170,4 +137,4 @@ If a session adds a public-API change without touching these artifacts, flag it 
 
 ## When in doubt
 
-Read the plan file. If a question isn't answered there or by this CLAUDE.md, surface it to the user (ben@alrdy.de) rather than guessing.
+Check `AGENTS.md`, the docs under `docs/src/content/docs/`, and the code. If a question isn't answered there or by this CLAUDE.md, surface it to the user (ben@alrdy.de) rather than guessing.

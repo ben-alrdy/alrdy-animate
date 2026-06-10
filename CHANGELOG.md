@@ -2,13 +2,13 @@
 
 All notable changes to **alrdy-animate**. Format follows [Keep a Changelog](https://keepachangelog.com/); versions follow [SemVer](https://semver.org/).
 
-The `latest` dist-tag currently points to **v7.3.5** (the v7 stable). The v8 line lives under the **`alpha`** dist-tag — install with `npm install alrdy-animate@alpha`. v8 will replace `latest` once the API has stabilized for a full beta cycle (see [Unreleased](#unreleased)).
+**v8.0.0** is the current stable release on the `latest` dist-tag (`npm install alrdy-animate`). It supersedes the v7 line; v7 stays available at `npm install alrdy-animate@7`. The v8 pre-release iterated under the `alpha` dist-tag through `8.0.0-alpha.36` before promotion.
 
 ---
 
 ## v7 → v8 highlights
 
-If you're on v7 and considering the alpha:
+If you're upgrading from v7, here's what changes:
 
 - **Full TypeScript rewrite** built with Vite 7. Strict-mode types ship in `dist/types/`; per-attribute JSDoc surfaces in IDE hovers and AI autocomplete via `import 'alrdy-animate/jsx'`.
 - **CSS-only animation path is gone.** Every animation is now GSAP-driven. The shipped CSS file only carries split-utility classes and a reduced-motion safety net. `aa-load` (CSS-only load trigger) is replaced by `aa-trigger="load"` / `"load-once"` on a GSAP-animated element.
@@ -20,20 +20,22 @@ If you're on v7 and considering the alpha:
 - **Reduced-motion + mobile-optimization options** built into init; decorative features auto-drop to fade fallbacks based on `prefers-reduced-motion` or small viewports.
 - **`AGENTS.md` shipped in the package root** as a single-file reference for AI coding assistants (Claude Code, Cursor, Aider) — they can read it from `node_modules/alrdy-animate/` without web-fetching docs.
 
-What v8 doesn't have yet: **Pin** animations (rebuild planned in v8.x), form-submit handler (dropped), templates/theme registry (dropped). Lazy-loaded images delegate to native `loading="lazy"`.
+What v8 doesn't have yet: **Pin** animations (rebuild planned in v8.x), form-submit handler (dropped), theme registry (dropped — class-based **presets** replaced v7 templates). Lazy-loaded images delegate to native `loading="lazy"`.
 
 ---
 
-## [Unreleased]
+## [8.0.0] — 2026-06-10
 
-- [v7 → v8 migration guide](https://animate.alrdy.de/installation/v7-to-v8/) at `docs/src/content/docs/installation/v7-to-v8.mdx`. Find-and-replace level coverage: removed CSS-only animation engine, `aa-load` → `aa-trigger="load[-once]"`, hover model change, `init()` option renames (`templates` → `presets`, `gsapFeatures` auto-loaded, `smoothScroll` flattened), `aa-split` separator (`&` → space), `aa-delay-mobile` → responsive `|` shorthand, `accordion` → `tabs`, and a per-value list of which v7 animation names map to which v8 equivalent (and which are deferred / removed).
+First stable release of the v8 line — promotes `8.0.0-alpha.36` to `latest`. No API changes from the late alphas; the surface is everything described in [v7 → v8 highlights](#v7--v8-highlights) above, with the full delta documented in the migration guide.
 
-Path to **v8.0.0** stable:
+### Added
+- [v7 → v8 migration guide](https://animate.alrdy.de/installation/v7-to-v8/) (`docs/src/content/docs/installation/v7-to-v8.mdx`). Find-and-replace level coverage: removed CSS-only animation engine, `aa-load` → `aa-trigger="load[-once]"`, hover model change, `init()` option renames (`templates` → `presets`, `gsapFeatures` auto-loaded, `smoothScroll` flattened), `aa-split` separator (`&` → space), `aa-delay-mobile` → responsive `|` shorthand, `accordion` → `tabs`, and a per-value map of v7 animation names to their v8 equivalents (and which are deferred / removed).
 
-1. **`8.0.0-beta.1`** — API freeze. Only bugfixes and doc polish until the beta cycle is clean. Includes:
-   - Production validation in real Webflow + Next.js projects.
-2. **`8.0.0-rc.1`** — last-call release candidate.
-3. **`8.0.0`** promoted to `latest`.
+### Changed
+- **`latest` dist-tag flips from v7.3.5 to 8.0.0.** Every `npm install alrdy-animate` and `@latest` CDN consumer now resolves to v8 — a major upgrade. v7 stays installable via `alrdy-animate@7`.
+
+### Fixed
+- Stabilized the Playwright suite under CPU contention: timing-sensitive assertions now retry (`expect.poll` / `toPass` via `tests/helpers.ts`) instead of sampling animated state once after a fixed wait.
 
 ---
 
