@@ -261,6 +261,22 @@ export async function init(options: InitOptions = {}): Promise<void> {
   const responsive = createResponsiveController(gsapHandle, state.breakpoints)
   activeHandles = { gsap: gsapHandle, responsive }
 
+  // Load gate: `load` / `load-once` entrances build `paused` and register a
+  // release here instead of autoplaying. We flush them one paint AFTER the
+  // aa-ready reveal (below) so a wall-clock tween can't advance during the
+  // heavy post-init layout/paint block and surface already mid-fade. Lives as
+  // a closure local (auto-GC'd per init, no global state); a disposer flips
+  // `gateCancelled` so a pending flush after destroy() is a no-op. Created
+  // before the fade pass so both it and the feature context share the hook.
+  const loadGate: Array<() => void> = []
+  let gateCancelled = false
+  const deferLoadStart = (release: () => void): void => {
+    if (!gateCancelled) loadGate.push(release)
+  }
+  addDisposer(() => {
+    gateCancelled = true
+  })
+
   // Run the unified fade-fallback pass BEFORE feature inits so its
   // ScrollTriggers register first. Component features that run after still
   // see their elements at the correct positions (no transform conflicts).
@@ -276,6 +292,7 @@ export async function init(options: InitOptions = {}): Promise<void> {
       firstInit: !state.firstInitComplete,
       fadeFor: fadeFeatures,
       presetMap,
+      deferLoadStart,
     })
     addDisposer(disposeFade)
   }
@@ -312,6 +329,7 @@ export async function init(options: InitOptions = {}): Promise<void> {
     reducedMotion,
     presetMap,
     onResize: (fn, debounce = 150) => subscribeResize(fn, debounce),
+    deferLoadStart,
   }
   for (const mod of featureModules) {
     try {
@@ -374,6 +392,39 @@ export async function init(options: InitOptions = {}): Promise<void> {
   }
 
   resolveReady()
+
+  // Release paint-gated load entrances (registered via `deferLoadStart`) one
+  // paint AFTER the aa-ready reveal, so they start visibly at frame 0 instead
+  // of a wall-clock tween advancing during the post-init layout/paint block.
+  // `flush` is idempotent (`splice` empties the gate) and guarded by
+  // `gateCancelled`, so destroy() before release is a no-op and the rAF /
+  // timeout paths can't double-fire. In a hidden tab (or SSR) no paint is
+  // coming, so flush now; otherwise wait for paint via double-rAF, with a
+  // short timeout as the safety net (background timers throttle but still
+  // fire — without it, paused entrances would stay invisible). Scheduled after
+  // resolveReady() so `await ready()` observers see the from-state, not a
+  // half-played frame.
+  if (loadGate.length > 0) {
+    const flush = (): void => {
+      if (gateCancelled) return
+      for (const release of loadGate.splice(0)) {
+        try {
+          release()
+        } catch (err) {
+          console.error('[alrdy-animate] load release threw', err)
+        }
+      }
+    }
+    if (
+      typeof requestAnimationFrame !== 'function' ||
+      (typeof document !== 'undefined' && document.visibilityState === 'hidden')
+    ) {
+      flush()
+    } else {
+      requestAnimationFrame(() => requestAnimationFrame(flush))
+      setTimeout(flush, 120)
+    }
+  }
 }
 
 export function destroy(options: DestroyApiOptions = {}): void {

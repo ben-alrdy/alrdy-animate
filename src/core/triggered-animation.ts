@@ -231,7 +231,12 @@ export function setupTriggeredAnimation(
   }
 
   const buildVars = (): TriggerVars => {
-    if (isLoadOneShot) return { delay: loadDelay }
+    // Built `paused` so the wall-clock tween doesn't advance during the heavy
+    // post-init layout/paint block (which would surface the entrance already
+    // mid-fade). The orchestrator registers a paint-gated `restart(true)` via
+    // `ctx.deferLoadStart` below; `from()`'s immediateRender writes the
+    // from-state now so the revealed element shows true frame 0 while paused.
+    if (isLoadOneShot) return { paused: true, delay: loadDelay }
     if (persistentTrigger?.kind === 'event') {
       return {
         paused: true,
@@ -289,6 +294,14 @@ export function setupTriggeredAnimation(
       // Warm the layer now so it's ready before the (delayed) load tween plays;
       // onComplete clears it once the entrance settles.
       setWillChange()
+      // Release after first paint instead of autoplaying. `restart(true)`
+      // replays from time 0 *including* the full delay (aa-delay + loadDelay),
+      // measured from paint — `play()` would skip the delay (see the event
+      // path's note above). Reached only past the aa-fallback early-return, so
+      // the slow-network CSS fallback still wins when it's set (nothing
+      // registers, the gate stays empty for this element).
+      const built = currentAnim
+      if (built) ctx.deferLoadStart(() => built.restart(true))
       loadFired = true
       return
     }

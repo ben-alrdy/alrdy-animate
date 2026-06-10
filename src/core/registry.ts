@@ -40,6 +40,17 @@ export interface FeatureContext {
    */
   presetMap: Map<Element, ResolvedPreset>
   onResize: (fn: ResizeCallback, debounce?: number) => ResizeUnsubscribe
+  /**
+   * Register a `load` / `load-once` entrance to start *after* the browser's
+   * first paint of the revealed (from-state) element, rather than autoplaying
+   * during init(). Load tweens are built `paused` and their `restart(true)`
+   * release is collected here; init() flushes all releases one paint after the
+   * aa-ready reveal (or via a short timeout fallback when no paint will come —
+   * background tab / SSR). This stops a wall-clock tween from advancing during
+   * the heavy post-init layout/paint block and "popping in" already mid-fade.
+   * Releases are cancelled if destroy() runs before the flush.
+   */
+  deferLoadStart: (release: () => void) => void
 }
 
 export interface FeatureModule {

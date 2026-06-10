@@ -107,10 +107,15 @@ export interface InitOptions {
   intensity?: number
   /**
    * Seconds added to the delay of every `aa-trigger="load"` and
-   * `aa-trigger="load-once"` animation so the entrance plays a beat after
-   * `init()` settles. Added on top of any per-element `aa-delay` — set
-   * `aa-delay="0.3"` with `loadDelay: 0.1` and the load animation fires at
-   * `0.4s`. Set to `0` to opt out globally. Default `0.1`.
+   * `aa-trigger="load-once"` entrance. Load entrances are *paint-gated*: built
+   * paused and released one frame after `init()` reveals them, so a wall-clock
+   * GSAP tween can't advance during the heavy post-init layout/paint block and
+   * surface the entrance already mid-fade (the symptom on content-heavy pages).
+   * `loadDelay` then adds an intentional beat on top, measured from that first
+   * paint. Added on top of any per-element `aa-delay` — set `aa-delay="0.3"`
+   * with `loadDelay: 0.1` and the load animation fires `0.4s` after paint. Set
+   * to `0` to opt out of the extra beat (paint-gating still applies). Default
+   * `0.1`.
    *
    * Skipped when the slow-network fallback fired (`html[aa-fallback]`) —
    * those load animations don't run anyway, and adding more delay on revisit

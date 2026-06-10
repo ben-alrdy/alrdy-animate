@@ -49,6 +49,12 @@ export interface FadeFallbackDeps {
    * when no `presets` option was set.
    */
   presetMap: Map<Element, ResolvedPreset>
+  /**
+   * Same paint-gated load-start hook as `FeatureContext.deferLoadStart`. The
+   * fade pass's `load` entrances are built `paused` and released here so they
+   * don't advance during the post-init paint block, matching the main path.
+   */
+  deferLoadStart: (release: () => void) => void
 }
 
 /**
@@ -59,7 +65,8 @@ export function runFadeFallbackPass(
   elements: Element[],
   deps: FadeFallbackDeps,
 ): () => void {
-  const { gsap: gsapHandle, options, reducedMotion, firstInit, fadeFor, presetMap } = deps
+  const { gsap: gsapHandle, options, reducedMotion, firstInit, fadeFor, presetMap, deferLoadStart } =
+    deps
   const { duration, ease } = reducedMotion
   const fromState = { opacity: 0 } as const
   const toState = { opacity: 1 } as const
@@ -105,12 +112,17 @@ export function runFadeFallbackPass(
         // the from-state and flash. The end-of-init aa-ready flip still
         // happens, keeping DOM consistent.
         if (document.documentElement.hasAttribute('aa-fallback')) continue
-        gsapHandle.gsap.fromTo(element, fromState, {
+        // Built `paused` and released after first paint (same rationale as the
+        // main triggered path) — keeps the fade from advancing during the
+        // post-init paint block. `restart(true)` honors the full delay.
+        const tween = gsapHandle.gsap.fromTo(element, fromState, {
           ...toState,
           duration,
           ease,
           delay: delay + options.loadDelay,
+          paused: true,
         })
+        deferLoadStart(() => tween.restart(true))
         continue
       }
 
