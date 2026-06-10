@@ -82,28 +82,59 @@ export function focusFirst(card: HTMLElement): void {
   card.focus({ preventScroll: true })
 }
 
-let titleIdCounter = 0
+const ACCESSIBLE_NAME_MAX = 80
+
+/**
+ * Derive the dialog's accessible name from the first text block inside the
+ * card — the leading text-bearing element, usually the title line — rather
+ * than assuming a heading (modals are outside the page's heading flow) or
+ * scooping text across the whole card (which would run the title into the body
+ * copy). Skips `aria-hidden` subtrees so split text isn't read from the hidden
+ * animated element (the split runtime exposes an `.aa-sr-only` clone for AT).
+ * Collapses whitespace and truncates at a word boundary so the name stays
+ * short; falls back to the capped wrapper text when the modal has no inner
+ * structure.
+ */
+function deriveAccessibleName(card: HTMLElement): string | null {
+  if (typeof document === 'undefined') return null
+  const walker = document.createTreeWalker(card, NodeFilter.SHOW_TEXT, {
+    acceptNode(node): number {
+      if (!node.textContent || !node.textContent.trim()) return NodeFilter.FILTER_REJECT
+      for (let el = node.parentElement; el && el !== card; el = el.parentElement) {
+        if (el.getAttribute('aria-hidden') === 'true') return NodeFilter.FILTER_REJECT
+      }
+      return NodeFilter.FILTER_ACCEPT
+    },
+  })
+  const first = walker.nextNode()
+  if (!first) return null
+  const block = first.parentElement ?? card
+  const text = (block.textContent ?? '').replace(/\s+/g, ' ').trim()
+  if (!text) return null
+  if (text.length <= ACCESSIBLE_NAME_MAX) return text
+  const slice = text.slice(0, ACCESSIBLE_NAME_MAX)
+  const cut = slice.lastIndexOf(' ')
+  return (cut > ACCESSIBLE_NAME_MAX / 2 ? slice.slice(0, cut) : slice).trim()
+}
 
 /**
  * Apply dialog semantics so assistive tech announces the card as a modal
  * dialog and treats the rest of the page as inert. Respects author-set `role`
  * / `aria-modal` / accessible name. When the author hasn't named the dialog,
- * derive an accessible name from the first heading inside it; if there's no
- * heading either, warn (dev only) — `aria-modal` without a name announces as
- * an unlabelled "dialog".
+ * derive a name from its leading text; if there's no text at all, warn (dev
+ * only) — `aria-modal` without a name announces as an unlabelled "dialog".
  */
 export function applyDialogSemantics(card: HTMLElement, debug: boolean): void {
   if (!card.hasAttribute('role')) card.setAttribute('role', 'dialog')
   if (!card.hasAttribute('aria-modal')) card.setAttribute('aria-modal', 'true')
 
   if (!card.hasAttribute('aria-label') && !card.hasAttribute('aria-labelledby')) {
-    const heading = card.querySelector<HTMLElement>('h1, h2, h3, h4, h5, h6')
-    if (heading) {
-      if (!heading.id) heading.id = `aa-modal-title-${(titleIdCounter += 1)}`
-      card.setAttribute('aria-labelledby', heading.id)
+    const name = deriveAccessibleName(card)
+    if (name) {
+      card.setAttribute('aria-label', name)
     } else if (debug) {
       console.warn(
-        '[alrdy-animate] modal has no accessible name — add an `aria-label` to the [aa-modal-name] element (or a heading inside it) so screen readers can announce the dialog.',
+        '[alrdy-animate] modal has no text to derive an accessible name from — add an `aria-label` to the [aa-modal-name] element so screen readers can announce the dialog.',
       )
     }
   }
