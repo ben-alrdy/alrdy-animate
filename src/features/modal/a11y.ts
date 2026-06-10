@@ -38,7 +38,7 @@ export function trapFocus(card: HTMLElement): () => void {
     const focusable = getFocusable(card)
     if (focusable.length === 0) {
       e.preventDefault()
-      card.focus()
+      card.focus({ preventScroll: true })
       return
     }
     const first = focusable[0]
@@ -65,7 +65,12 @@ export function trapFocus(card: HTMLElement): () => void {
  * if one exists. We deliberately do NOT auto-focus buttons or links on open —
  * landing focus on a primary/close button invites accidental activation and
  * yanks the viewport. When there's no input to fill, anchor focus on the card
- * itself (tabindex="-1") so the trap has somewhere to start.
+ * itself (tabindex="-1") so the trap has somewhere to start — with
+ * `preventScroll` so anchoring a fieldless modal never jumps the page (and
+ * never fights a stopped Lenis), and with its focus outline suppressed in CSS
+ * (`[aa-modal-name]:focus`) since the card is a non-interactive container, not
+ * a control. The first input keeps its default focus so a below-the-fold field
+ * in a tall scrollable card still scrolls natively into view.
  */
 export function focusFirst(card: HTMLElement): void {
   const firstInput = getFirstInput(card)
@@ -74,7 +79,7 @@ export function focusFirst(card: HTMLElement): void {
     return
   }
   if (!card.hasAttribute('tabindex')) card.setAttribute('tabindex', '-1')
-  card.focus()
+  card.focus({ preventScroll: true })
 }
 
 /**

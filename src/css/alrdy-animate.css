@@ -236,6 +236,17 @@ body.aa-modal-locked {
 [aa-modal-group] [aa-modal-name] {
   will-change: transform, opacity;
 }
+/*
+ * On open, focus is anchored on the card (tabindex="-1") so keyboard and
+ * screen-reader users land inside the trapped dialog — but the card is a
+ * non-interactive container, so its focus outline is meaningless noise (it
+ * paints a ring around the whole modal, most visibly on a fieldless modal that
+ * has no input to take focus instead). Suppress it on the card element only;
+ * focusable descendants (close button, links) keep their own focus rings.
+ */
+[aa-modal-name]:focus {
+  outline: none;
+}
 
 /*
  * Stack feature: cards stick at the top of the viewport via CSS sticky.
