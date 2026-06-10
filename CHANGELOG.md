@@ -40,7 +40,7 @@ The v8 stable release — currently validating on the `alpha` dist-tag before it
 - `init()` no longer makes a second full-DOM pass to decide whether `aa-hover="text"` needs SplitText — the scanner detects it during its single tree walk.
 
 ### Fixed
-- Fieldless modals no longer open with a focus ring drawn around the card — focus still anchors there (trap intact), but the card's outline is suppressed since it's a non-interactive container.
+- Fieldless modals no longer open with a focus ring drawn around the card — focus still anchors there (trap intact), but the card's outline is suppressed since it's a non-interactive container. The suppression uses `!important` so it wins over common global focus-reset rules (e.g. `*[tabindex]:focus-visible { outline: … }`) that the card's `tabindex="-1"` would otherwise match.
 - Stabilized the Playwright suite under CPU contention: timing-sensitive assertions now retry (`expect.poll` / `toPass` via `tests/helpers.ts`) instead of sampling animated state once after a fixed wait.
 
 ---

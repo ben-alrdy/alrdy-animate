@@ -243,9 +243,15 @@ body.aa-modal-locked {
  * paints a ring around the whole modal, most visibly on a fieldless modal that
  * has no input to take focus instead). Suppress it on the card element only;
  * focusable descendants (close button, links) keep their own focus rings.
+ *
+ * `!important` because the card's `tabindex="-1"` matches the common global
+ * focus-reset rule `*[tabindex]:focus-visible { outline: … }` that accessible
+ * design systems ship; that rule ties this one on specificity and, loading
+ * later, would otherwise win and ring the whole dialog. Scoped to the card
+ * container, so it never suppresses a real control's focus ring.
  */
 [aa-modal-name]:focus {
-  outline: none;
+  outline: none !important;
 }
 
 /*
