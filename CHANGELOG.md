@@ -24,6 +24,11 @@ What v8 doesn't have yet: **Pin** animations (rebuild planned in v8.x), form-sub
 
 ---
 
+## [8.0.2] — 2026-06-11
+
+### Fixed
+- **Load-triggered split-text entrances no longer snap to their end state instead of animating.** SplitText's `autoSplit` fires a settling re-split (via its own internal ResizeObserver) ~a frame after the initial split, replacing the `.aa-char` / `.aa-line` nodes. When that re-split landed before a `aa-trigger="load"` / `"load-once"` entrance had finished, the orchestrator's `rebuild()` bailed out (it treated "entrance registered" as "entrance done"), stranding the tween on the orphaned original nodes — the text appeared with no animation. Whether it happened was a per-browser timing race (Firefox the usual loser, Chrome usually fine). The orchestrator now tracks entrance *completion* separately from registration and rebuilds the entrance against the fresh nodes when a re-split lands mid-flight, so the animation runs regardless of when the settling re-split fires. A genuine resize-driven re-split *after* the entrance completes is still a no-op (no wrongful replay).
+
 ## [8.0.1] — 2026-06-11
 
 ### Fixed

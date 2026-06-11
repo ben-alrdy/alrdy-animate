@@ -176,6 +176,7 @@ export function setupTriggeredAnimation(
   let currentExtraCleanup: (() => void) | undefined
   let triggerPlayed = false
   let loadFired = false
+  let loadCompleted = false
 
   // will-change is applied to the animated targets only while a tween is
   // playing, then cleared — so it never lingers as a permanent compositor
@@ -259,11 +260,20 @@ export function setupTriggeredAnimation(
   }
 
   const rebuild = (): void => {
-    // Load fires exactly once per init cycle. A rebuild() (e.g. text feature
-    // calling us on SplitText auto-resplit) must NOT re-fire the load tween
-    // — the new chars settle at their natural visible state, which is the
-    // correct post-load state.
-    if (isLoadOneShot && loadFired) return
+    // Once the load entrance has fully PLAYED, a later rebuild() (e.g. a
+    // resize-driven SplitText auto-resplit) must NOT re-fire it — the fresh
+    // chars settle at their natural visible (end) state, which is the correct
+    // post-load result. We gate on completion, not registration: SplitText's
+    // `autoSplit` fires an initial ResizeObserver callback ~one frame after
+    // construction, which resplits and replaces the `.aa-char` nodes *before*
+    // the gated entrance has played. That early resplit must rebuild the tween
+    // against the new nodes (handled below via `loadFired && !loadCompleted`),
+    // or the entrance is stranded on the orphaned originals — visible as the
+    // text snapping straight to its end state with no animation (Firefox loses
+    // this race more often than Chromium, but it's timing, not browser-bound).
+    if (isLoadOneShot && loadCompleted) return
+
+    const wasFired = loadFired
 
     killCurrent()
 
@@ -291,14 +301,31 @@ export function setupTriggeredAnimation(
     }
 
     if (isLoadOneShot) {
-      // Warm the layer now so it's ready before the (delayed) load tween plays;
-      // onComplete clears it once the entrance settles.
+      // Mark the entrance complete once it finishes so a later resize-resplit
+      // becomes a no-op (the early-return above). This replaces the wc onComplete
+      // set just above, so fold clearWillChange back in to keep that behaviour.
+      currentAnim.eventCallback('onComplete', () => {
+        loadCompleted = true
+        clearWillChange()
+      })
+      // Warm the layer now so it's ready before the (delayed) load tween plays.
       setWillChange()
-      // Hand the paused tween to the load gate; init() releases it after first
-      // paint via restart(true) (replays including the full delay). Reached
-      // only past the aa-fallback early-return, so the slow-network CSS
-      // fallback still wins when it's set (nothing registers for this element).
-      if (currentAnim) ctx.deferLoadStart(currentAnim)
+      if (wasFired) {
+        // A pre-completion resplit replaced our targets (autoSplit's initial
+        // ResizeObserver fire). The load gate has already been built — and by
+        // now likely flushed — so re-deferring would strand this tween (the
+        // gate only flushes once). Play it directly: restart(true) replays from
+        // frame 0 including the delay. The spurious resplit lands within a
+        // frame of the gate flush, so the original entrance had barely begun;
+        // restarting from 0 is visually seamless.
+        currentAnim.restart(true)
+      } else {
+        // First build: hand the paused tween to the load gate; init() releases
+        // it after first paint via restart(true). Reached only past the
+        // aa-fallback early-return, so the slow-network CSS fallback still wins
+        // when it's set (nothing registers for this element).
+        if (currentAnim) ctx.deferLoadStart(currentAnim)
+      }
       loadFired = true
       return
     }
