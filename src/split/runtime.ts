@@ -108,17 +108,16 @@ export function applySplit(
     console.warn('[alrdy-animate] aa-split requires the GSAP SplitText plugin.')
     return { mode, words: [], chars: [], lines: [element as HTMLElement], revert: () => {} }
   }
-  // For chars mode, we omit 'words' from the type. SplitText always uses word
-  // wrappers internally during parsing, then unwraps them when 'words' is
-  // absent from type — and its smartWrap protection only kicks in when lines
-  // aren't being split, which we always do. Word wrappers therefore add a DOM
-  // level with no behavioral payoff for chars-mode animations.
+  // Chars mode keeps 'words' so each word stays an atomic inline-block box that
+  // can't break mid-word. Without it, SplitText's line measurement can assign
+  // part of a word to one `.aa-line` and the rest to the next (Safari-specific,
+  // worsened by mid-text inline-block sub-spans). Char tweens still hit `.aa-char`.
   const type =
     mode === 'lines'
       ? 'lines'
       : mode === 'words'
         ? 'words,lines'
-        : 'chars,lines'
+        : 'words,chars,lines'
   const splitOpts: SplitTextOptions = {
     type,
     // span wrappers keep the produced markup spec-valid in any context

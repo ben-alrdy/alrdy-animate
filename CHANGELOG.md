@@ -24,6 +24,11 @@ What v8 doesn't have yet: **Pin** animations (rebuild planned in v8.x), form-sub
 
 ---
 
+## [8.0.1] — 2026-06-11
+
+### Fixed
+- **Character splits no longer break a word across lines.** `aa-split="chars"` (and any char-based text animation, e.g. `text-fade` / `text-blur`) now wraps chars in `.aa-word` containers, so each word stays an atomic inline-block box. Previously bare `.aa-char` spans let SplitText's line measurement put part of a word on one line and the rest on the next — a Safari-specific symptom, worsened by mid-text inline-block sub-spans (e.g. an underline wrapper around one word). Char tweens are unaffected.
+
 ## [8.0.0] — 2026-06-11
 
 The v8 stable release — **promotes the `latest` dist-tag from v7.3.5 to v8**. The surface is everything described in [v7 → v8 highlights](#v7--v8-highlights) above, with the full delta documented in the migration guide.

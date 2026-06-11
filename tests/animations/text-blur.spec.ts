@@ -42,4 +42,26 @@ test.describe('text-blur demo page', () => {
     expect(visibleParts.total).toBeGreaterThan(0)
     expect(visibleParts.visible).toBeGreaterThan(0)
   })
+
+  // Regression: char-split keeps word wrappers so words stay atomic and can't
+  // break mid-word (a Safari-only symptom). The break doesn't reproduce in
+  // Chromium, so we assert the structural guarantee: every char sits in a word.
+  test('char split wraps every char in an atomic .aa-word', async ({ page }) => {
+    const initLog = page.waitForEvent('console', { predicate: initialized, timeout: 8000 })
+    await page.goto('/animations/text/text-blur/')
+    await initLog
+
+    const heading = page.locator('h1[aa-animate="text-blur"]').first()
+    const structure = await heading.evaluate((el) => {
+      const chars = [...el.querySelectorAll('.aa-char')]
+      const words = [...el.querySelectorAll('.aa-word')]
+      const orphanChars = chars.filter((c) => !c.closest('.aa-word')).length
+      const wordDisplay = words[0] ? getComputedStyle(words[0] as HTMLElement).display : null
+      return { charCount: chars.length, wordCount: words.length, orphanChars, wordDisplay }
+    })
+    expect(structure.charCount).toBeGreaterThan(0)
+    expect(structure.wordCount).toBeGreaterThan(0)
+    expect(structure.orphanChars).toBe(0)
+    expect(structure.wordDisplay).toBe('inline-block')
+  })
 })
