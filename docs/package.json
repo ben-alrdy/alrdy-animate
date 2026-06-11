@@ -16,5 +16,8 @@
     "alrdy-animate": "file:..",
     "astro": "^6.1.0",
     "typescript": "^5.6.0"
+  },
+  "overrides": {
+    "yaml": "^2.8.3"
   }
 }
