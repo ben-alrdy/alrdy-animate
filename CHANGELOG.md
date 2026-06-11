@@ -2,7 +2,7 @@
 
 All notable changes to **alrdy-animate**. Format follows [Keep a Changelog](https://keepachangelog.com/); versions follow [SemVer](https://semver.org/).
 
-The `latest` dist-tag points to **v7.3.5** (the v7 stable). The v8 line is on the **`alpha`** dist-tag — `npm install alrdy-animate@alpha`. **8.0.0** (below) will flip `latest` to v8 once it's validated in production; v7 will remain installable at `npm install alrdy-animate@7`.
+The `latest` dist-tag points to **v8.0.0** — `npm install alrdy-animate` resolves to v8. v7 stays installable at `npm install alrdy-animate@7`; the `alpha` dist-tag continues to track the newest v8 prerelease for early testing.
 
 ---
 
@@ -24,13 +24,15 @@ What v8 doesn't have yet: **Pin** animations (rebuild planned in v8.x), form-sub
 
 ---
 
-## [8.0.0] — unreleased
+## [8.0.0] — 2026-06-11
 
-The v8 stable release — currently validating on the `alpha` dist-tag before it promotes to `latest`. No API changes from the late alphas; the surface is everything described in [v7 → v8 highlights](#v7--v8-highlights) above, with the full delta documented in the migration guide.
+The v8 stable release — **promotes the `latest` dist-tag from v7.3.5 to v8**. The surface is everything described in [v7 → v8 highlights](#v7--v8-highlights) above, with the full delta documented in the migration guide.
 
 ### Added
 - [v7 → v8 migration guide](https://animate.alrdy.de/installation/v7-to-v8/) (`docs/src/content/docs/installation/v7-to-v8.mdx`). Find-and-replace level coverage: removed CSS-only animation engine, `aa-load` → `aa-trigger="load[-once]"`, hover model change, `init()` option renames (`templates` → `presets`, `gsapFeatures` auto-loaded, `smoothScroll` flattened), `aa-split` separator (`&` → space), `aa-delay-mobile` → responsive `|` shorthand, `accordion` → `tabs`, and a per-value map of v7 animation names to their v8 equivalents (and which are deferred / removed).
 - **Modal dialog semantics.** Cards now get `role="dialog"` + `aria-modal="true"` and an accessible name auto-derived (truncated) from the card's leading text block (`aria-label`); triggers get `aria-haspopup="dialog"`. Author-set values are respected. Focus trap / ESC / scroll lock are unchanged.
+- **Marquee `hover-slow` token.** `aa-marquee="hover-slow"` ramps the loop down to 15% speed on pointer hover and back to full on leave (0.4s `power2.out`). Mirrors `hover-pause` gating (skipped on touch, disabled when `draggable`), yields to `hover-pause` when both are set, and composes with `switch` — the ramp respects whichever direction is live.
+- The Next.js page-transition recipe now covers **popstate (browser back/forward) interrupting an in-flight transition** — the example `AlrdyProvider` cancels the running timeline and reconciles state when navigation is driven by the history stack rather than a `<Link>` click.
 
 ### Changed
 - **Promoting 8.0.0 will flip the `latest` dist-tag from v7.3.5 to v8** — once promoted, every `npm install alrdy-animate` and `@latest` CDN consumer resolves to v8 (a major upgrade). v7 stays installable via `alrdy-animate@7`.
