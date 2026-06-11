@@ -374,8 +374,9 @@ declare namespace JSX {
     /**
      * Marker on the marquee viewport (apply `overflow: hidden`). Value tokens
      * are space-separated and order-independent: `right` (reverse direction),
-     * `paused` (start paused), `hover-pause`, `switch` (flip direction while
-     * scrolling up), `draggable`, `none` (skip init at this breakpoint).
+     * `paused` (start paused), `hover-pause`, `hover-slow` (ramp to 15% speed
+     * on hover; ignored if `hover-pause` is also set), `switch` (flip direction
+     * while scrolling up), `draggable`, `none` (skip init at this breakpoint).
      * Pair with `aa-duration` (cycle seconds), `aa-scrub` (layer a
      * scroll-driven horizontal sweep on top of the loop), and `aa-intensity`
      * (multiplier on the ±10vw scrub sweep; default `1` = ±10vw, `2` = ±20vw).

@@ -17,6 +17,7 @@ import Demo from '../../../../components/Demo.astro'
 | `right`       | Loop rightward (timeScale = -1 on the same tween).                                                    |
 | `paused`      | Start paused. Resume by toggling tokens at runtime, or driving via JS.                                |
 | `hover-pause` | Pause on `mouseenter`, resume on `mouseleave`. Skipped on touch devices and when `draggable` is set.   |
+| `hover-slow`  | Ramp down to 15% speed on `mouseenter`, back to full on `mouseleave`. Same gating as `hover-pause`; ignored when `hover-pause` is also set. |
 | `switch`      | Reverse direction while the page is scrolling **up** (driven by `body[aa-scroll-direction]`).          |
 | `draggable`   | Pointer + touch drag modulates the loop speed; release settles to a steady cruise in the flick direction. |
 | `none`        | Don't init at this breakpoint. Combine with `\|` (splits at `md`) or `-sm` / `-md` / `-lg` / `-xl`.   |
@@ -83,7 +84,8 @@ CSS `gap` / `column-gap` on the track is intentionally **not** supported — gap
 ## Composition rules
 
 - **`aa-scrub`** layers on top of the loop — the track keeps cycling, plus a scroll-driven horizontal drift on the scroller layer. Combine freely with `right` (flips drift direction) and `paused` (pure scroll-driven, no autoplay). The scroller and track sit on separate transform layers in markup so the two motions compose without one overriding the other.
-- **`draggable`** disables `hover-pause` and `switch` for the same element — all three would fight for control of the loop's progress / direction. Pick one interaction model per loop.
+- **`draggable`** disables `hover-pause`, `hover-slow`, and `switch` for the same element — all of them would fight for control of the loop's progress / direction. Pick one interaction model per loop.
+- **`hover-pause` and `hover-slow`** are mutually exclusive; if both are set, `hover-pause` wins (slowing and pausing on the same pointerover would fight). `hover-slow` composes fine with `switch` — the ramp respects whichever direction is live when you hover.
 - **`paused`** wins for the loop: a paused marquee never auto-cycles, regardless of viewport entry, hover, or scroll direction. Scrub still works on top of it.
 - The whole loop pauses automatically when the marquee scrolls out of the viewport (top-bottom / bottom-top trigger), matching the slider/tabs pattern.
 
@@ -127,6 +129,31 @@ CSS `gap` / `column-gap` on the track is intentionally **not** supported — gap
             <div class="aa-marquee-item">Pause</div>
             <div class="aa-marquee-item">Then</div>
             <div class="aa-marquee-item">Release</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div data-spacer></div>
+  </div>
+</Demo>
+
+## Live demo — switch with hover-slow
+
+`aa-marquee="switch hover-slow"` combines both interactions: the loop flips direction while the page scrolls up, **and** ramps down to 15% speed under the cursor. The two compose — hover slows whichever direction is currently live, so a mid-hover scroll-direction flip still reads. Scroll past it, then park the cursor over it.
+
+<Demo caption={{ "aa-marquee": "switch hover-slow", "aa-duration": "10" }}>
+  <div data-demo-stage>
+    <div data-spacer></div>
+    <div class="aa-marquee-demo aa-marquee-demo-arrows" aa-marquee="switch hover-slow" aa-duration="10">
+      <div class="aa-marquee-scroller" aa-marquee-scroller>
+        <div class="aa-marquee-track" aa-marquee-track>
+          <div class="aa-marquee-list" aa-marquee-list>
+            <div class="aa-marquee-item"><span class="aa-marquee-arrow" aria-hidden="true">←</span>Hover</div>
+            <div class="aa-marquee-item"><span class="aa-marquee-arrow" aria-hidden="true">←</span>To</div>
+            <div class="aa-marquee-item"><span class="aa-marquee-arrow" aria-hidden="true">←</span>Slow</div>
+            <div class="aa-marquee-item"><span class="aa-marquee-arrow" aria-hidden="true">←</span>Scroll</div>
+            <div class="aa-marquee-item"><span class="aa-marquee-arrow" aria-hidden="true">←</span>To</div>
+            <div class="aa-marquee-item"><span class="aa-marquee-arrow" aria-hidden="true">←</span>Switch</div>
           </div>
         </div>
       </div>

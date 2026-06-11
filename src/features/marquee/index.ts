@@ -7,6 +7,7 @@ interface ParsedTokens {
   isRight: boolean
   isPaused: boolean
   hoverPause: boolean
+  hoverSlow: boolean
   hasSwitch: boolean
   isDraggable: boolean
   isNone: boolean
@@ -21,11 +22,15 @@ function parseMarqueeValue(raw: string | undefined): ParsedTokens {
     isRight: tokens.includes('right'),
     isPaused: tokens.includes('paused'),
     hoverPause: tokens.includes('hover-pause'),
+    hoverSlow: tokens.includes('hover-slow'),
     hasSwitch: tokens.includes('switch'),
     isDraggable: tokens.includes('draggable'),
     isNone: tokens.includes('none'),
   }
 }
+
+// `hover-slow` ramps the loop down to this fraction of its cruise timeScale.
+const HOVER_SLOW_FACTOR = 0.15
 
 interface DraggableInstance {
   kill: () => void
@@ -195,8 +200,15 @@ function setupOne(
     const timeScale = { value: baseDirection }
     let lastSwitchDirection = baseDirection
 
+    // hover-slow scales the cruise timeScale by a positive factor (1 = full
+    // speed). It multiplies onto timeScale.value so it composes with switch's
+    // direction ramp and draggable's resume. Direction reflects the sign of
+    // timeScale.value alone — the factor is always positive, so it never flips
+    // the reported direction.
+    const hoverFactor = { value: 1 }
+
     const applyTimeScale = (): void => {
-      loop.timeScale(timeScale.value)
+      loop.timeScale(timeScale.value * hoverFactor.value)
       root.setAttribute('aa-marquee-direction', timeScale.value < 0 ? 'right' : 'left')
     }
 
@@ -352,6 +364,32 @@ function setupOne(
           },
         }),
       )
+    }
+
+    // Optional hover-slow. Same gating as hover-pause (skip on touch + when
+    // draggable), and yields to hover-pause when both are set — pausing and
+    // slowing on the same pointerover would fight. We tween hoverFactor between
+    // 1 and HOVER_SLOW_FACTOR and re-apply via applyTimeScale on every frame so
+    // the ramp respects the live direction (switch may flip it mid-hover).
+    if (tokens.hoverSlow && !tokens.hoverPause && !tokens.isDraggable && !tokens.isPaused) {
+      const rampTo = (target: number): void => {
+        gsap.killTweensOf(hoverFactor)
+        gsap.to(hoverFactor, {
+          value: target,
+          duration: 0.4,
+          ease: 'power2.out',
+          onUpdate: applyTimeScale,
+          onComplete: applyTimeScale,
+        })
+      }
+      cleanups.push(
+        attachHoverPauseListener({
+          root,
+          onEnter: () => rampTo(HOVER_SLOW_FACTOR),
+          onLeave: () => rampTo(1),
+        }),
+      )
+      cleanups.push(() => gsap.killTweensOf(hoverFactor))
     }
 
     // Optional switch: invert direction when body[aa-scroll-direction] flips.
