@@ -8,9 +8,10 @@ The public API surface is documented in **`AGENTS.md`** (repo root) and the docs
 
 ## Branches
 
-- **`v8`** — active development branch. All v8 work and every release tag live here.
-- **`main`** — release/stable line; lags `v8` until a release fast-forwards it.
+- **`main`** — the single active branch. All work and every release tag live here. (The old `v8` dev branch was folded into `main` once v8 became the `latest` line — there's no longer a separate stable/dev split.)
 - **`v7-maintenance`** — preserves the 7.3.5 tip for any v7 patches. Do not delete.
+
+If a future major rewrite (v9) needs the same alpha-while-stable-holds pattern, branch `v8-maintenance` off `main`'s tip at that point (mirroring `v7-maintenance`) and develop v9 under the `alpha` dist-tag — don't recreate a permanent parallel dev branch.
 
 ## Stack and constraints
 
