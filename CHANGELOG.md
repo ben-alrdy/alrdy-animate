@@ -24,6 +24,13 @@ What v8 doesn't have yet: **Pin** animations (rebuild planned in v8.x), form-sub
 
 ---
 
+## [8.0.4] — 2026-06-18
+
+### Added
+- **`aa-trigger="lcp"` — a load-timed entrance optimised for Largest Contentful Paint.** A normal `aa-trigger="load"` fade hurts LCP: Chrome excludes `opacity:0` and `visibility:hidden` elements from LCP, and a load entrance is both until the bundle reveals it — so LCP waits for the JS. `lcp` instead has the companion stylesheet paint the marked element at first paint at `0.01` opacity (non-zero → an eligible LCP candidate *before* the bundle), skipping the FOUC guard; the appear feature then pins `opacity:1` as the `gsap.from()` destination (the CSS floor would otherwise be read as the destination) and fades it to full. Works with any opacity-bearing `aa-animate` (`fade`, `rotate*`, `blur`, `fade-up`…). Use on a single above-the-fold element and pair with `fetchpriority="high"`. **The inline `<head>` snippet gained LCP rules — existing Webflow users must re-paste it** (see installation / load-fallback recipe).
+
+---
+
 ## [8.0.2] — 2026-06-11
 
 ### Fixed

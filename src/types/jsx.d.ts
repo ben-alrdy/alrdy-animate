@@ -90,6 +90,16 @@ declare namespace JSX {
      *   re-calls `init()` on route changes — `load` replays the entrance on
      *   each fresh route, including browser back/forward nav. Contrast with
      *   `load-once`, which only fires once per page session.
+     * - `lcp` — like `load`, but optimised for the **Largest Contentful Paint**
+     *   element (the hero's largest image/visual). The companion stylesheet
+     *   paints it at first paint at a near-invisible `0.01` opacity — non-zero,
+     *   so Chrome counts it as an LCP candidate *before* the JS bundle runs,
+     *   instead of being hidden by the FOUC guard — then the entrance fades it
+     *   to full. Use on a single above-the-fold element; pair with
+     *   `fetchpriority="high"` / `loading="eager"` and keep the image in static
+     *   HTML. Works with any opacity-bearing `aa-animate` (`fade`, `rotate*`,
+     *   `blur`, `fade-up`…). Requires the updated inline `<head>` snippet (see
+     *   `docs/installation/webflow/` and `docs/recipes/load-fallback/`).
      * - `event:<name>` — listens for `aa:trigger` custom events with
      *   `detail.name === '<name>'` dispatched on the element or any ancestor.
      *   Names ending in `-active` auto-pair with `-inactive` for reverse.

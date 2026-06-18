@@ -2,6 +2,7 @@ import type { GsapTween } from './gsap-detect'
 import type { FeatureContext } from './registry'
 import { bindAgainTrigger } from './scroll-trigger'
 import {
+  isLoadKind,
   type ParsedTrigger,
   REVERSE_EASE,
   REVERSE_TIME_SCALE,
@@ -150,12 +151,12 @@ export function setupTriggeredAnimation(
   opts: TriggeredAnimationOptions,
 ): TriggeredAnimationHandle | null {
   const hasLoadOnce = opts.triggers.some((t) => t.kind === 'load-once')
-  const hasLoad = opts.triggers.some((t) => t.kind === 'load')
+  const hasLoad = opts.triggers.some((t) => isLoadKind(t.kind))
   const isLoadOneShot = (hasLoadOnce && ctx.firstInit) || hasLoad
   let persistentTrigger: ParsedTrigger | undefined
   if (!isLoadOneShot) {
     persistentTrigger = opts.triggers.find(
-      (t) => t.kind !== 'load-once' && t.kind !== 'load',
+      (t) => t.kind !== 'load-once' && !isLoadKind(t.kind),
     )
   }
   // No firing trigger at all (e.g. `aa-trigger="load-once"` on a subsequent

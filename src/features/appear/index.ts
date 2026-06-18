@@ -80,8 +80,19 @@ function setupOne(
   const { duration, delay, ease, intensity, scrollStart, scrollEnd, scrub, again } =
     readAnimationConfig(config, opts)
 
+  const triggers = resolveTriggers(element, config['aa-trigger'], ctx.options.breakpoints)
+  // `aa-trigger="lcp"`: the companion CSS paints this element at ~0.01 opacity
+  // before the bundle (an eligible Largest Contentful Paint candidate). Because
+  // that floor is the element's *current* opacity when the tween is created,
+  // gsap.from() would read 0.01 as the destination — so we pin opacity:1 first
+  // (see buildAnimation). Transforms still resolve from natural CSS.
+  const isLcp = triggers.some((t) => t.kind === 'lcp')
+
   const fromState = buildFromState(animate, intensity)
   if (!fromState) return
+  // Start the fade from the CSS first-paint value (0.01) rather than 0, so the
+  // hand-off from the CSS placeholder to the GSAP tween has zero opacity change.
+  if (isLcp && fromState.opacity === 0) fromState.opacity = 0.01
 
   const { targets, stagger } = collectStaggerTargets(element, config, opts)
 
@@ -92,7 +103,7 @@ function setupOne(
   // can pre-style elements (e.g. a card with permanent rotate(8deg)) and the
   // entrance still resolves to that state instead of clobbering it to 0.
   const handle = setupTriggeredAnimation(ctx, element, {
-    triggers: resolveTriggers(element, config['aa-trigger'], ctx.options.breakpoints),
+    triggers,
     delay,
     scrollStart,
     scrollEnd,
@@ -101,6 +112,10 @@ function setupOne(
     triggerEl,
     willChange: cssWillChange(fromState),
     buildAnimation: (vars) => {
+      // For lcp, establish opacity:1 as the .from() destination, overriding the
+      // CSS 0.01 floor. set + from run synchronously, so from's immediateRender
+      // overwrites the 1 with the from-value before any paint — no flash.
+      if (isLcp) ctx.gsap.gsap.set(targets, { opacity: 1 })
       const animation = ctx.gsap.gsap.from(targets, {
         ...fromState,
         duration,

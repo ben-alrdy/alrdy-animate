@@ -4,7 +4,7 @@ import { parseNum, parseScrub } from './parse'
 import { resolveAnimateValue, type ResolvedPreset } from './presets'
 import { classifyAnimateValue, type FeatureName } from './scanner'
 import { resolveScrollStart } from './scroll-trigger'
-import { onCustomTrigger, resolveTriggers } from './trigger'
+import { isLoadKind, onCustomTrigger, resolveTriggers } from './trigger'
 
 /**
  * Single global fade-fallback pass. Whichever conditions trigger it
@@ -104,7 +104,7 @@ export function runFadeFallbackPass(
         options.breakpoints,
       )
       const hasLoadOnce = triggers.some((t) => t.kind === 'load-once')
-      const hasLoad = triggers.some((t) => t.kind === 'load')
+      const hasLoad = triggers.some((t) => isLoadKind(t.kind))
 
       if ((hasLoadOnce && firstInit) || hasLoad) {
         // aa-fallback signals the inline-snippet timeout already faded the
@@ -126,7 +126,7 @@ export function runFadeFallbackPass(
         continue
       }
 
-      const trigger = triggers.find((t) => t.kind !== 'load-once' && t.kind !== 'load')
+      const trigger = triggers.find((t) => t.kind !== 'load-once' && !isLoadKind(t.kind))
       if (!trigger) continue
 
       if (trigger.kind === 'event' && trigger.eventName) {

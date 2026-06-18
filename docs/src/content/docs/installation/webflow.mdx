@@ -26,10 +26,7 @@ This goes into **Project Settings → Custom Code → Head Code** as two blocks:
 Paste this first. It's inline (no network request), so it applies on the very first paint: the **FOUC guard** (`[aa-animate]:not([aa-ready]) { visibility: hidden }`) hides animated elements until `init()` flips `aa-ready` on them — without it, every animated element would briefly render in its final state, then snap to its from-state once `init()` runs. The **safety fallback** then reveals those elements again if the bundle is slow (`aa-fallback`) or never arrives (`aa-timeout`). Having the guard inline on the first paint is also what lets the external stylesheet load non-blocking (below) without reintroducing a flash.
 
 ```html
-<!-- Slow-network + init-timeout safety (optional but recommended).
-     aa-fallback fades aa-trigger="load"/"load-once" elements at FALLBACK_DELAY
-     (graceful hero staircase). aa-timeout reveals every animated element at
-     TIMEOUT_DELAY (universal safety net if init never arrives). -->
+<!-- alrdy-animate FOUC guard + slow-network/timeout safety (optional but recommended). -->
 <script>
   const FALLBACK_DELAY = 1000;  // ms — load elements fade in via CSS keyframe
   const TIMEOUT_DELAY  = 4000;  // ms — universal reveal if init never runs
@@ -48,9 +45,7 @@ Paste this first. It's inline (no network request), so it applies on the very fi
     });
   };
 
-  // Poll instead of waiting for DOMContentLoaded: render-blocking scripts
-  // (e.g. those Webflow injects) can delay that event well past these
-  // timers, so gating on it would never let the fallback win. 
+  // Poll, not DOMContentLoaded: render-blocking scripts can delay that past these timers.
   const deadline = performance.now() + FALLBACK_DELAY + 8000;
   const tryFallback = () => {
     if (document.documentElement.hasAttribute('aa-loaded')) return;
@@ -67,7 +62,7 @@ Paste this first. It's inline (no network request), so it applies on the very fi
   }, TIMEOUT_DELAY);
 </script>
 <style>
-  [aa-animate]:not([aa-ready]) { visibility: hidden; }
+  [aa-animate]:not([aa-ready]):not([aa-trigger~="lcp"]) { visibility: hidden; }
   @keyframes aa-fallback-appear {
     from { opacity: 0; transform: translateY(1.5rem); }
     to   { opacity: 1; transform: translateY(0); }
@@ -78,6 +73,10 @@ Paste this first. It's inline (no network request), so it applies on the very fi
     animation: aa-fallback-appear 0.5s ease both;
   }
   html[aa-timeout] [aa-animate]:not([aa-ready]) { visibility: visible; }
+  /* LCP: paint marked element at 0.01 pre-bundle (eligible LCP candidate), then fade to full. */
+  [aa-animate][aa-trigger~="lcp"]:not([aa-ready]) { visibility: visible; opacity: 0.01; }
+  html[aa-fallback] [aa-animate][aa-trigger~="lcp"]:not([aa-ready]) { opacity: 1; transition: opacity 0.5s ease; }
+  html[aa-timeout] [aa-animate][aa-trigger~="lcp"]:not([aa-ready]) { opacity: 1; }
 </style>
 ```
 

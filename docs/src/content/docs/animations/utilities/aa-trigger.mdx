@@ -1,6 +1,6 @@
 ---
 title: aa-trigger
-description: Override the default scroll trigger on any animated element. Supported values are `scroll`, `click`, `event:<name>`, `load`, and `load-once`. Combine values with a space (e.g. `load-once event:enter`) to play on first page load AND on subsequent page-transition events.
+description: Override the default scroll trigger on any animated element. Supported values are `scroll`, `click`, `event:<name>`, `load`, `load-once`, and `lcp` (load-timed, optimised for Largest Contentful Paint). Combine values with a space (e.g. `load-once event:enter`) to play on first page load AND on subsequent page-transition events.
 ---
 
 import Demo from '../../../../components/Demo.astro'
@@ -14,6 +14,7 @@ import Demo from '../../../../components/Demo.astro'
 | `scroll`        | Default. Plays when the element scrolls into view (or scrubbed if `aa-scrub` is set).                  |
 | `load`          | Plays on **every** `init()` call, including the first. Use for SPA route entries (Next.js App Router back/forward nav). Honours `aa-delay` for sequencing siblings. |
 | `load-once`     | Plays on the **first** `init()` call in the page session — never on subsequent inits. Use for hero content under a page-transition wrapper (Barba, View Transitions). Honours `aa-delay` like `load`. |
+| `lcp`           | Like `load`, but for the **Largest Contentful Paint** element (the hero's largest image/visual). Painted at first paint at `0.01` opacity so it counts toward LCP *before* the bundle loads, then fades to full. See [Optimizing LCP](#optimizing-lcp-with-aa-triggerlcp) below. |
 | `event:<name>`  | Stays paused until an `aa:trigger` CustomEvent with `detail.name === <name>` is dispatched on it.      |
 | `click`         | Plays on click of the element.                                                                         |
 
@@ -93,6 +94,39 @@ A typical hero: headline reveals first, paragraph follows, CTA fades in last. No
 
 For Webflow / `<script>`-tag projects loading from a CDN, drop the [load-fallback recipe](/recipes/load-fallback/) into `<head>`. After a tunable timeout, hero elements fade up via CSS — preserving the same staircase you defined with `aa-delay` and `aa-stagger`. When the bundle eventually arrives the lib detects the fallback and skips its own animation, so nothing flashes or replays. (Requires `defer` on your CDN scripts so the body parses before the timer fires — see the recipe.)
 
+## Optimizing LCP with `aa-trigger="lcp"`
+
+A fade-in on your hero's largest image **hurts your Largest Contentful Paint score**. Chrome excludes elements that are `opacity: 0` or `visibility: hidden` from LCP measurement — and a normal `aa-trigger="load"` entrance is *both*: the FOUC guard hides it (`visibility: hidden`) and the fade starts at `opacity: 0`. So LCP can't be recorded until the JS bundle has downloaded, parsed, run `init()`, and started the fade. On a slow connection that's a poor LCP, even though the image was ready much earlier.
+
+`aa-trigger="lcp"` fixes this. The companion stylesheet paints the marked element at first paint at a near-invisible `opacity: 0.01` — non-zero, so Chrome counts it as an LCP candidate **immediately, before the bundle runs** — and skips the FOUC guard for it. When the lib loads, the entrance fades it from `0.01` to full. Visually identical to a fade from `0`; to Lighthouse, the LCP is recorded at first paint.
+
+```html
+<img
+  aa-animate="fade"
+  aa-trigger="lcp"
+  fetchpriority="high"
+  src="hero.jpg"
+  alt="…"
+/>
+```
+
+It works with any opacity-bearing `aa-animate` — `fade`, `rotate-up`, `blur`, `fade-up`, etc. — so the LCP element can still have a rich entrance, not just a plain fade.
+
+<Demo>
+  <div class="lcp-demo">
+    <div class="lcp-demo__box lcp-demo__fade" aa-animate="fade" aa-trigger="lcp">fade · lcp</div>
+    <div class="lcp-demo__box lcp-demo__rotate" aa-animate="rotate-up" aa-trigger="lcp">rotate-up · lcp</div>
+  </div>
+</Demo>
+
+**Use it correctly:**
+
+- Put it on a **single** above-the-fold element — the one that is your LCP (usually the largest hero image or visual). Marking several elements defeats the purpose.
+- Keep the image in the **static HTML** (not injected by JS) and add `fetchpriority="high"` (or `loading="eager"`) so the browser fetches it early — `aa-trigger="lcp"` only removes the library's own LCP regression; it can't speed up an image the browser doesn't know about yet.
+- **Requires the updated inline `<head>` snippet.** The LCP rules must apply at first paint, so they live in the inline snippet you paste, not the non-blocking external stylesheet. If you set up this site before `lcp` existed, re-paste the [head snippet](/installation/webflow/#site-wide-head-code) (or the [load-fallback recipe](/recipes/load-fallback/)).
+
+Under the slow-network fallback the element still reveals: if `init()` is slow, it fades in via CSS (`aa-fallback`); if the bundle never arrives, it's shown at full opacity (`aa-timeout`).
+
 ## Page transitions (Barba, View Transitions)
 
 `aa-trigger="load-once"` fires *only* on the very first `init()` call in the page session — on subsequent inits (Barba navigations, programmatic `destroy()` + `init()`) it's a no-op and the element renders in its natural state. That's almost always what you want for hero text under a transition wrapper: animate beautifully on first load, then just be present on every navigation back.
@@ -147,5 +181,21 @@ The animation fires on cold load, forward nav, and back/forward — wherever `in
     border-radius: 6px;
     font-size: 0.95rem;
     text-decoration: none;
+  }
+  .lcp-demo {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    padding: 1.5rem 1rem;
+  }
+  .lcp-demo__box {
+    flex: 1 1 0;
+    min-width: 8rem;
+    padding: 2rem 1rem;
+    background: var(--sl-color-accent);
+    color: var(--sl-color-text-invert, var(--sl-color-white));
+    border-radius: 6px;
+    text-align: center;
+    font-size: 0.95rem;
   }
 `}</style>

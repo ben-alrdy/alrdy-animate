@@ -47,10 +47,42 @@
  * FOUC guard. Elements with aa-animate are hidden until init() has applied
  * each feature's from-state and added the aa-ready attribute. The element is
  * still laid out (visibility, not display), so SplitText measurements stay
- * correct.
+ * correct. `aa-trigger="lcp"` opts out — it's painted on purpose (see below).
  */
-[aa-animate]:not([aa-ready]) {
+[aa-animate]:not([aa-ready]):not([aa-trigger~="lcp"]) {
   visibility: hidden;
+}
+
+/*
+ * LCP entrance (`aa-trigger="lcp"`). Chrome excludes opacity:0 and
+ * visibility:hidden elements from Largest Contentful Paint, so a normal fade
+ * defers LCP until the bundle reveals the element. Instead we paint the marked
+ * element at first paint at a near-invisible 0.01 — non-zero, so it's an
+ * eligible LCP candidate before the JS arrives — then the appear feature fades
+ * it to full. `:not([aa-ready])` is a safety latch: the floor expires once init
+ * runs, so a later gsap.matchMedia revert (destroy / breakpoint variant) leaves
+ * the element at its natural opacity, never stuck at 0.01. Scoped to
+ * `[aa-animate]` (like the guard above): only animated elements ever receive
+ * `aa-ready`, so a bare `aa-trigger="lcp"` with no `aa-animate` would otherwise
+ * be stranded at 0.01 forever — instead it just renders normally.
+ */
+[aa-animate][aa-trigger~="lcp"]:not([aa-ready]) {
+  visibility: visible;
+  opacity: 0.01;
+}
+/*
+ * Slow-network fallback: the load path skips its GSAP tween when aa-fallback is
+ * set (the inline snippet faded the element in via CSS), so CSS must own the
+ * reveal here too — fade 0.01 → 1 (never drops to 0, so the LCP candidate
+ * captured at first paint stays valid). Under aa-timeout, reveal fully with no
+ * animation, matching the universal timeout safety.
+ */
+html[aa-fallback] [aa-animate][aa-trigger~="lcp"]:not([aa-ready]) {
+  opacity: 1;
+  transition: opacity 0.5s ease;
+}
+html[aa-timeout] [aa-animate][aa-trigger~="lcp"]:not([aa-ready]) {
+  opacity: 1;
 }
 
 /*

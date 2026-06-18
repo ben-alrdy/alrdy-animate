@@ -1,11 +1,22 @@
 import type { Breakpoints } from '../types/index'
 import { resolveAttrAtWidth, type ValueAttr } from './settings'
 
-export type TriggerKind = 'scroll' | 'event' | 'click' | 'load-once' | 'load'
+export type TriggerKind = 'scroll' | 'event' | 'click' | 'load-once' | 'load' | 'lcp'
 
 export interface ParsedTrigger {
   kind: TriggerKind
   eventName?: string
+}
+
+/**
+ * Load-timed kinds that fire on *every* init via the paused → load-gate →
+ * paint-release path. `load-once` is deliberately excluded — it runs the same
+ * gate but only on the first init, so callers gate it separately on
+ * `firstInit`. Centralised so adding another load-timed kind (e.g. a future
+ * `lcp`-like one) is a single edit instead of a grep across feature modules.
+ */
+export function isLoadKind(kind: TriggerKind): boolean {
+  return kind === 'load' || kind === 'lcp'
 }
 
 export const CUSTOM_EVENT_NAME = 'aa:trigger'
@@ -36,6 +47,11 @@ function parseOne(token: string): ParsedTrigger | null {
   if (token === 'click') return { kind: 'click' }
   if (token === 'load-once') return { kind: 'load-once' }
   if (token === 'load') return { kind: 'load' }
+  // `lcp` is a load-timed entrance optimised as the Largest Contentful Paint
+  // element: the companion CSS paints it immediately at ~0.01 opacity (an
+  // eligible LCP candidate, before the bundle) and the appear feature fades it
+  // to full. Timing-wise it behaves like `load` (see triggered-animation.ts).
+  if (token === 'lcp') return { kind: 'lcp' }
   if (token.startsWith('event:')) {
     return { kind: 'event', eventName: token.slice('event:'.length) }
   }
