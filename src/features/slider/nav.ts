@@ -55,6 +55,12 @@ export function setupNav(root: HTMLElement): NavSetupResult {
   // for instance). aa-slider-region role enables tablist semantics for thumbs.
   if (!root.hasAttribute('role')) root.setAttribute('role', 'region')
   root.setAttribute('aria-roledescription', 'carousel')
+  // A carousel region needs an accessible name. Supply a generic fallback when
+  // the author hasn't labelled it — otherwise screen readers announce an unnamed
+  // "carousel", and a bare role="region" with no name is itself flagged.
+  if (!root.hasAttribute('aria-label') && !root.hasAttribute('aria-labelledby')) {
+    root.setAttribute('aria-label', 'Carousel')
+  }
 
   // Per-slide ARIA + unique id.
   items.forEach((slide, i) => {
@@ -76,16 +82,15 @@ export function setupNav(root: HTMLElement): NavSetupResult {
   }
 
   if (thumbs.length > 0) {
-    // The first thumb's parent in the original slider becomes the tablist.
-    if (internalThumbs.length > 0) {
-      const tablist = internalThumbs[0].parentElement
-      if (tablist && !tablist.hasAttribute('role')) tablist.setAttribute('role', 'tablist')
-    }
     thumbs.forEach((btn, i) => {
       if (!btn.hasAttribute('aria-label')) btn.setAttribute('aria-label', `Go to slide ${i + 1}`)
-      btn.setAttribute('role', 'tab')
+      // Plain labelled buttons rather than role="tab": a tab requires a strict
+      // role="tablist" parent, which can't be guaranteed when thumbs come from a
+      // Webflow CMS Collection List (each thumb is wrapped in a role="listitem"
+      // .w-dyn-item inside a role="list" .w-dyn-items). aria-current marks the
+      // active dot — see onChange below.
+      if (btn.tagName !== 'BUTTON' && !btn.hasAttribute('role')) btn.setAttribute('role', 'button')
       btn.setAttribute('aria-controls', `${sliderIdPrefix}-slide-${i}`)
-      btn.setAttribute('aria-selected', 'false')
     })
   }
 
@@ -102,7 +107,11 @@ export function setupNav(root: HTMLElement): NavSetupResult {
       const wasActive = slide.classList.contains('is-active')
       const isActive = i === index
       slide.classList.toggle('is-active', isActive)
-      slide.setAttribute('aria-hidden', isActive ? 'false' : 'true')
+      // Deliberately no aria-hidden toggle: slide width is CSS-driven, so the
+      // library can't know how many slides are actually on screen (multi-up,
+      // center mode, partial neighbours). Hiding all-but-active would hide
+      // visible content and risk aria-hidden-focus. The active slide is conveyed
+      // by the is-active class and the active dot's aria-current.
       if (isActive && !wasActive) emitTrigger(slide, 'slide-active')
       else if (!isActive && wasActive) emitTrigger(slide, 'slide-inactive')
     })
@@ -111,7 +120,8 @@ export function setupNav(root: HTMLElement): NavSetupResult {
       thumbs.forEach((btn, i) => {
         const isActive = i === index
         btn.classList.toggle('is-active', isActive)
-        btn.setAttribute('aria-selected', isActive ? 'true' : 'false')
+        if (isActive) btn.setAttribute('aria-current', 'true')
+        else btn.removeAttribute('aria-current')
       })
     }
 

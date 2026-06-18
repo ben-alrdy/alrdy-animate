@@ -84,7 +84,7 @@ test.describe('slider demo page', () => {
 
     const items = centered.locator('[aa-slider-item]')
     expect(await items.nth(3).getAttribute('class')).toMatch(/is-active/)
-    expect(await thumbs.nth(3).getAttribute('aria-selected')).toBe('true')
+    expect(await thumbs.nth(3).getAttribute('aria-current')).toBe('true')
   })
 
   test('progress bar fills from 0% during dwell on autoplay', async ({ page }) => {

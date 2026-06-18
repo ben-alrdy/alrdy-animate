@@ -46,6 +46,50 @@ test.describe('split demo page', () => {
     expect(sample.overflow).toMatch(/clip|hidden/)
   })
 
+  test('split target with a focusable descendant is not aria-hidden (keeps the link reachable)', async ({
+    page,
+  }) => {
+    const initLog = page.waitForEvent('console', { predicate: initialized, timeout: 8000 })
+    await page.goto('/animations/utilities/aa-split/')
+    await initLog
+
+    const result = await page.evaluate(async () => {
+      const host = document.createElement('div')
+      host.id = 'aa-a11y-fixture'
+      host.innerHTML =
+        '<p id="fx-link" aa-animate="text-slide-up" aa-split="lines">Read more in our <a href="https://example.com">help center</a> for details.</p>' +
+        '<p id="fx-plain" aa-animate="text-slide-up" aa-split="lines">A plain paragraph with no interactive content.</p>'
+      document.querySelector('main')?.appendChild(host)
+
+      await (window as unknown as { AlrdyAnimate: { refresh: () => Promise<void> } }).AlrdyAnimate.refresh()
+      await new Promise((r) => setTimeout(r, 300))
+
+      const linkP = document.getElementById('fx-link') as HTMLElement
+      const plainP = document.getElementById('fx-plain') as HTMLElement
+      const link = linkP.querySelector('a') as HTMLAnchorElement
+
+      return {
+        // Focusable-descendant path: left in the accessibility tree.
+        linkParagraphAriaHidden: linkP.getAttribute('aria-hidden'),
+        linkParagraphSplit: linkP.querySelectorAll('.aa-line').length,
+        linkInsideAriaHidden: !!link.closest('[aria-hidden="true"]'),
+        linkTabbable: link.getAttribute('tabindex') !== '-1',
+        // Plain-prose path: unchanged (hidden + sr-only clone).
+        plainParagraphAriaHidden: plainP.getAttribute('aria-hidden'),
+        plainCloneInserted:
+          plainP.previousElementSibling?.classList.contains('aa-sr-only') ?? false,
+      }
+    })
+
+    expect(result.linkParagraphAriaHidden).toBeNull()
+    expect(result.linkParagraphSplit).toBeGreaterThan(0)
+    expect(result.linkInsideAriaHidden).toBe(false)
+    expect(result.linkTabbable).toBe(true)
+    // Prose without interactive content still uses the hide + sr-only-clone path.
+    expect(result.plainParagraphAriaHidden).toBe('true')
+    expect(result.plainCloneInserted).toBe(true)
+  })
+
   test('lines-chars produces both .aa-line and .aa-char and lines settle to opacity 1', async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 800 })
     const initLog = page.waitForEvent('console', { predicate: initialized, timeout: 8000 })

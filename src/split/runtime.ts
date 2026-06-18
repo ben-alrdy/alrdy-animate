@@ -44,6 +44,20 @@ function tagAllowsAriaLabel(el: Element): boolean {
   return ARIA_LABEL_ALLOWED.has(el.tagName.toLowerCase())
 }
 
+// Interactive descendants whose presence rules out aria-hiding the split target:
+// hiding the element (or its split children) would orphan these from assistive
+// tech while they remain keyboard-focusable — axe's "aria-hidden contains
+// focusable descendant" — and a plain-text screen-reader clone silently drops
+// them from the accessibility tree entirely. `tabindex="-1"` is excluded: it's
+// not in the tab order, so it isn't flagged.
+const FOCUSABLE_DESCENDANT_SELECTOR =
+  'a[href], button, input, select, textarea, iframe, audio[controls], video[controls],' +
+  ' [contenteditable=""], [contenteditable="true"], [tabindex]:not([tabindex="-1"])'
+
+function hasFocusableDescendant(el: Element): boolean {
+  return el.querySelector(FOCUSABLE_DESCENDANT_SELECTOR) !== null
+}
+
 interface SplitTextInstance {
   words: HTMLElement[]
   chars: HTMLElement[]
@@ -172,12 +186,21 @@ export function applySplit(
   const allowAriaLabel = tagAllowsAriaLabel(element)
   let srSpan: HTMLSpanElement | null = null
   let priorAriaHidden: string | null = null
-  if (allowAriaLabel) {
+  let didHide = false
+  if (hasFocusableDescendant(element)) {
+    // Element contains interactive content (e.g. a link inside an FAQ
+    // paragraph). Neither aria-hiding strategy is safe here — both would strand
+    // the focusable child outside the accessibility tree. Leave the element in
+    // the tree and split without aria changes; the descendants stay reachable
+    // and screen readers read the inline split spans fine.
+    splitOpts.aria = 'none'
+  } else if (allowAriaLabel) {
     splitOpts.aria = 'auto'
   } else {
     splitOpts.aria = 'none'
     priorAriaHidden = element.getAttribute('aria-hidden')
     element.setAttribute('aria-hidden', 'true')
+    didHide = true
     const text = element.textContent ?? ''
     if (text.trim() && element.parentElement) {
       srSpan = document.createElement('span')
@@ -200,7 +223,7 @@ export function applySplit(
         /* already reverted */
       }
       if (srSpan) srSpan.remove()
-      if (!allowAriaLabel) {
+      if (didHide) {
         if (priorAriaHidden === null) element.removeAttribute('aria-hidden')
         else element.setAttribute('aria-hidden', priorAriaHidden)
       }
