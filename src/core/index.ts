@@ -40,6 +40,12 @@ import type { ReducedMotionOptions } from '../types/index'
 
 let activeHandles: { gsap: GsapHandle; responsive: ResponsiveController } | null = null
 
+// Upper bound on how long init() will wait for `document.fonts.ready` before a
+// line-split text entrance (see the gated await below). Caps the worst case
+// (a slow/blocked webfont) so init can't hang for seconds; preloading the hero
+// font keeps fonts.ready well under this.
+const FONT_METRICS_TIMEOUT_MS = 3000
+
 function detectReducedMotion(
   setting: boolean | ReducedMotionOptions,
 ): ReducedMotionOptions | null {
@@ -143,7 +149,7 @@ export async function init(options: InitOptions = {}): Promise<void> {
   state.options.reducedMotion = !!reducedMotion
   state.options.optimizeMobile = optimizeMobile
 
-  const { elements, features, needsHoverSplit } = scan(root, presetMap)
+  const { elements, features, needsHoverSplit, needsFontMetrics } = scan(root, presetMap)
   if (elements.length === 0) {
     resolveReady()
     return
@@ -304,15 +310,26 @@ export async function init(options: InitOptions = {}): Promise<void> {
   // those chars and `handle.rebuild()` snaps the new timeline to progress(1)
   // because `triggerPlayed` is true — visible as a brief flash followed by a
   // jump to the end state. Awaiting fonts up front makes SplitText split once
-  // with correct metrics. Gated on the text feature so other pages aren't
-  // delayed; FOUC guard keeps animated elements hidden during the wait.
+  // with correct metrics.
+  //
+  // Gated on `needsFontMetrics` (a **line** split is present) rather than the
+  // whole text feature: only line wrapping shifts when the webfont swaps, so
+  // char/word-only text pages (and non-text pages) skip the wait and init
+  // sooner — char/word splits self-correct via the resplit-rebuild path. Capped
+  // with a race so a slow/blocked font can't hang init for seconds; past the
+  // cap we proceed and accept a possible one-off resplit (preloading the hero
+  // font keeps fonts.ready well under the cap). FOUC guard hides animated
+  // elements during the wait.
   if (
-    effectiveFeatures.has('text') &&
+    needsFontMetrics &&
     typeof document !== 'undefined' &&
     document.fonts?.ready
   ) {
     try {
-      await document.fonts.ready
+      await Promise.race([
+        document.fonts.ready,
+        new Promise<void>((resolve) => setTimeout(resolve, FONT_METRICS_TIMEOUT_MS)),
+      ])
     } catch {
       // fonts.ready can reject in edge cases (e.g. font load errors); proceed.
     }

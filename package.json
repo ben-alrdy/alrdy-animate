@@ -20,6 +20,10 @@
     "./jsx": {
       "types": "./dist/types/jsx.d.ts"
     },
+    "./loader": {
+      "types": "./dist/types/loader/index.d.ts",
+      "import": "./dist/loader.js"
+    },
     "./style": "./dist/alrdy-animate.css"
   },
   "files": [
@@ -28,7 +32,7 @@
     "CHANGELOG.md"
   ],
   "scripts": {
-    "build": "vite build && tsc -p tsconfig.build.json && node -e \"require('fs').copyFileSync('src/types/jsx.d.ts','dist/types/jsx.d.ts')\" && node -e \"const fs=require('fs'),path=require('path');const walk=d=>fs.readdirSync(d,{withFileTypes:true}).flatMap(e=>{const p=path.join(d,e.name);return e.isDirectory()?walk(p):p.endsWith('.d.ts')?[p]:[]});for(const f of walk('dist/types')){const s=fs.readFileSync(f,'utf8');const n=s.replace(/^\\s*import\\s+['\\\"][^'\\\"]+\\.css['\\\"];?\\s*\\n/gm,'');if(n!==s)fs.writeFileSync(f,n);}\"",
+    "build": "vite build && vite build --config vite.loader.config.ts && tsc -p tsconfig.build.json && node -e \"require('fs').copyFileSync('src/types/jsx.d.ts','dist/types/jsx.d.ts')\" && node -e \"const fs=require('fs'),path=require('path');const walk=d=>fs.readdirSync(d,{withFileTypes:true}).flatMap(e=>{const p=path.join(d,e.name);return e.isDirectory()?walk(p):p.endsWith('.d.ts')?[p]:[]});for(const f of walk('dist/types')){const s=fs.readFileSync(f,'utf8');const n=s.replace(/^\\s*import\\s+['\\\"][^'\\\"]+\\.css['\\\"];?\\s*\\n/gm,'');if(n!==s)fs.writeFileSync(f,n);}\"",
     "dev": "vite build --watch",
     "test": "playwright test",
     "test:update": "playwright test --update-snapshots",

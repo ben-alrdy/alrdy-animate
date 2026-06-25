@@ -24,6 +24,15 @@ What v8 doesn't have yet: **Pin** animations (rebuild planned in v8.x), form-sub
 
 ---
 
+## [Unreleased]
+
+### Added
+- **`aa-trigger="load-instant"` — CSS-driven, instant hero entrances.** A `load-instant` element animates via an inline `@keyframes aa-load-in` on the **first painted frame**, before the GSAP bundle loads, so above-the-fold heroes feel instant instead of waiting ~1–2s for the bundle + fonts. The library builds no GSAP tween for these elements (the appear/text feature setup and the reduced-motion pass skip any element whose triggers include `load-instant`); the end-of-init `aa-ready` flip detaches the CSS rule, leaving the element at its natural end-state with no re-animation or flash. Motion comes from `aa-animate` (element-level `fade` / `fade-up` / `blur` / `zoom` / `slide` / `rotate`). Self-revealing, so it needs no `aa-timeout` safety net. The keyframe + reveal rules live **only** in the inline `<head>` snippet (they must be present at first paint, which the non-blocking `dist` stylesheet can't guarantee) — see the new **Instant hero** recipe. The only `dist` CSS change is the FOUC guard excluding `[aa-trigger~="load-instant"]`.
+- **`alrdy-animate/loader` — optional no-GSAP companion (`./loader` export).** A ~0.9 KB-gzip module (`dist/loader.js` ESM + `dist/loader.iife.js` for inline `<script>`) that runs before the bundle and (a) maps `aa-delay`/`aa-duration` to the `--aa-load-delay`/`--aa-load-dur` custom properties (a staircase with arbitrary values, replacing v7's fixed CSS list), and (b) splits char/word `text-*` heroes into `.aa-char`/`.aa-word` (with `--char`/`--word` indices and an `.aa-sr-only` accessibility clone) so per-character cascades are instant too. Line-based `text-*` (slide/tilt/oval/rotate) fall back to an element-level fade — lines need font metrics the loader can't compute pre-bundle.
+
+### Changed
+- **`init()` only awaits `document.fonts.ready` when a line split is present.** Previously any `text` element blocked init on fonts; now the scanner flags `needsFontMetrics` (a line-mode split, where font swap changes wrapping) and only then awaits — capped at 3s. Char/word-only and non-text pages init noticeably sooner.
+
 ## [8.0.5] — 2026-06-25
 
 ### Changed

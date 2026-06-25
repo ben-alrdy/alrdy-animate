@@ -27,6 +27,10 @@ Paste this first. It's inline (no network request), so it applies on the very fi
 
 The trailing **`<noscript>`** is the no-JS safety net: with JavaScript disabled, neither `init()` nor the fallback timer ever runs, so the guard would hide every animated element permanently. The `<noscript>` override forces them all visible at their natural state (and clears the `lcp` `0.01` floor and any from-state `transform` / `filter`).
 
+:::tip[Want the hero to animate *instantly*?]
+For above-the-fold hero copy, `aa-trigger="load-instant"` paints its entrance on the first frame as pure CSS — before GSAP loads — so there's no wait for the bundle at all. It needs its own inline `<head>` block; see the [Instant hero entrances recipe](/recipes/instant-hero/).
+:::
+
 ```html
 <!-- alrdy-animate FOUC guard + slow-network/timeout safety (optional but recommended). -->
 <script>

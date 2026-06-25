@@ -26,6 +26,34 @@ export interface ScanResult {
    * needs SplitText. Detected during this pass so init doesn't re-walk the DOM.
    */
   needsHoverSplit: boolean
+  /**
+   * A `text-*` element resolves to a **line** split (line-default animation, or
+   * `aa-split` naming lines). Only line splits depend on correct font metrics
+   * up front — line wrapping changes when the webfont swaps. init() awaits
+   * `document.fonts.ready` only when this is set, so char/word-only and
+   * non-text pages aren't delayed.
+   */
+  needsFontMetrics: boolean
+}
+
+// text-* animations whose default split is `lines` (mirror the line-defaulting
+// entries in features/text TEXT_ANIMS — slide/tilt/oval/rotate and the bar
+// reveals block/marker). Char/word defaults (fade/blur/scale) are absent.
+const LINE_DEFAULT_TEXT = /^text-(slide|tilt|oval|rotate|block|marker)/
+
+// True when a text element resolves to a line split (needs real-font metrics).
+// `aa-split` wins over the animation default: an explicit `lines` forces line
+// metrics; an explicit `chars`/`words` opts out even on a line-default anim.
+function textWantsLineMetrics(animateValue: string | null, splitValue: string | null): boolean {
+  if (!animateValue) return false
+  const head = animateValue.split('|')[0].trim()
+  if (!head.startsWith('text-')) return false
+  if (splitValue) {
+    const tokens = splitValue.toLowerCase().split(/[\s|]+/)
+    if (tokens.includes('lines')) return true
+    if (tokens.includes('chars') || tokens.includes('words')) return false
+  }
+  return LINE_DEFAULT_TEXT.test(head)
 }
 
 const HOVER_ATTRS = ['aa-hover', 'aa-hover-sm', 'aa-hover-md', 'aa-hover-lg', 'aa-hover-xl'] as const
@@ -81,6 +109,7 @@ export function scan(
   const features = new Set<FeatureName>()
   const elements = new Set<Element>()
   let needsHoverSplit = false
+  let needsFontMetrics = false
 
   // Single combined selector — one tree walk instead of 1 + 10. Classify by
   // attribute presence in JS.
@@ -97,6 +126,9 @@ export function scan(
       if (el.hasAttribute(attr)) features.add(feature)
     }
     if (!needsHoverSplit && hoverWantsSplitText(el)) needsHoverSplit = true
+    if (!needsFontMetrics && textWantsLineMetrics(animateValue, el.getAttribute('aa-split'))) {
+      needsFontMetrics = true
+    }
   }
 
   // Preset-resolved elements have no `aa-*` attributes (resolvePresets skips
@@ -106,7 +138,10 @@ export function scan(
     elements.add(el)
     const animateValue = resolved.get('aa-animate') ?? null
     if (animateValue !== null) features.add(classifyAnimateValue(animateValue))
+    if (!needsFontMetrics && textWantsLineMetrics(animateValue, resolved.get('aa-split') ?? null)) {
+      needsFontMetrics = true
+    }
   }
 
-  return { elements: Array.from(elements), features, needsHoverSplit }
+  return { elements: Array.from(elements), features, needsHoverSplit, needsFontMetrics }
 }

@@ -15,6 +15,7 @@ import Demo from '../../../../components/Demo.astro'
 | `load`          | Plays on **every** `init()` call, including the first. Use for SPA route entries (Next.js App Router back/forward nav). Honours `aa-delay` for sequencing siblings. |
 | `load-once`     | Plays on the **first** `init()` call in the page session — never on subsequent inits. Use for hero content under a page-transition wrapper (Barba, View Transitions). Honours `aa-delay` like `load`. |
 | `lcp`           | Like `load`, but for the **Largest Contentful Paint** element (the hero's largest image/visual). Painted at first paint at `0.01` opacity so it counts toward LCP *before* the bundle loads, then fades to full. See [Optimizing LCP](#optimizing-lcp-with-aa-triggerlcp) below. |
+| `load-instant`  | A **CSS-driven** entrance that paints on the first frame, *before* GSAP loads — the hero feels instant. The library builds no GSAP tween (it's owned by an inline keyframe). Element-level motion from `aa-animate`; add the loader for `aa-delay` staircases and per-character `text-*` cascades. See [Instant hero entrances](/recipes/instant-hero/). |
 | `event:<name>`  | Stays paused until an `aa:trigger` CustomEvent with `detail.name === <name>` is dispatched on it.      |
 | `click`         | Plays on click of the element.                                                                         |
 
@@ -126,6 +127,12 @@ It works with any opacity-bearing `aa-animate` — `fade`, `rotate-up`, `blur`, 
 - **Requires the updated inline `<head>` snippet.** The LCP rules must apply at first paint, so they live in the inline snippet you paste, not the non-blocking external stylesheet. If you set up this site before `lcp` existed, re-paste the [head snippet](/installation/webflow/#site-wide-head-code) (or the [load-fallback recipe](/recipes/load-fallback/)).
 
 Under the slow-network fallback the element still reveals: if `init()` is slow, it fades in via CSS (`aa-fallback`); if the bundle never arrives, it's shown at full opacity (`aa-timeout`).
+
+## Instant hero entrances with `aa-trigger="load-instant"`
+
+Where `lcp` optimises the *one* largest image, `load-instant` makes a whole hero's **entrance** paint on the first frame as pure CSS — before GSAP loads — so there's no wait for the bundle at all. The motion comes from `aa-animate` (element-level `fade` / `fade-up` / `blur` / `zoom` / `slide` / `rotate`); when the bundle lands the library skips the element entirely (no GSAP tween, no flash). An optional ~0.9 KB loader script adds an `aa-delay` staircase and instant per-character `text-*` cascades. Line-based text effects (slide-up/tilt/oval) stay on the GSAP path.
+
+It needs an inline `<head>` block (the keyframe + reveal rules must be present at first paint) — the full copy-paste setup is in the **[Instant hero entrances recipe](/recipes/instant-hero/)**.
 
 ## Page transitions (Barba, View Transitions)
 
