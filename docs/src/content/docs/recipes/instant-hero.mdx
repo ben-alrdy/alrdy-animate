@@ -88,6 +88,16 @@ This is self-contained: the keyframe, the eases it uses, and the split-unit layo
   [aa-trigger~="instant"][aa-animate~="slide-left"]  { --aa-load-opacity: 1; --aa-load-x: 100%; }
   [aa-trigger~="instant"][aa-animate~="slide-right"] { --aa-load-opacity: 1; --aa-load-x: -100%; }
 
+  /* Char-split text from-states (chars inherit these from the element; opacity 0
+     is the keyframe default, so every text entrance fades). Edit the distances /
+     blur / scale here, and the per-char stagger via --aa-load-cstagger above. */
+  [aa-trigger~="instant"][aa-animate^="text-"][aa-animate*="-up"]    { --aa-load-y:  0.4em; }
+  [aa-trigger~="instant"][aa-animate^="text-"][aa-animate*="-down"]  { --aa-load-y: -0.4em; }
+  [aa-trigger~="instant"][aa-animate^="text-"][aa-animate*="-left"]  { --aa-load-x:  0.4em; }
+  [aa-trigger~="instant"][aa-animate^="text-"][aa-animate*="-right"] { --aa-load-x: -0.4em; }
+  [aa-trigger~="instant"][aa-animate^="text-blur"]                   { --aa-load-blur: 8px; }
+  [aa-trigger~="instant"][aa-animate^="text-scale"]                  { --aa-load-scale: 0; }
+
   /* Reduced motion: appear with no movement. */
   @media (prefers-reduced-motion: reduce) {
     [aa-trigger~="instant"][aa-animate],
@@ -121,7 +131,12 @@ Making the hero instant *exposes* a font swap that the old slow reveal used to h
 
 ## Customising the motion
 
-Everything is in your inline `<style>`, so edit it directly — there's no dist copy to fight. Tune the keyframe, the per-direction `--aa-load-*` offsets, the default duration (`--aa-load-dur`), or the per-character stagger (`--aa-load-cstagger`). Override any of the custom properties per-element with an inline `style` too.
+Everything is in your inline `<style>`, so edit it directly — there's no dist copy to fight, and there are no motion values hidden in the loader JS (it only splits the text and sets `--char`; all the motion is CSS). To tune things:
+
+- **Per-character stagger** — `--aa-load-cstagger` (default `0.02s`) in the `.aa-char` rule. Lower = tighter cascade.
+- **Duration / ease** — the `animation` shorthand in the element + `.aa-char` rules (`--aa-load-dur`, the `var(--aa-ease-osmo)`).
+- **How far / blurry each char starts** — the `[aa-animate^="text-"]…` from-state rules (`--aa-load-y`, `--aa-load-blur`, `--aa-load-scale`). These are inherited by the `.aa-char` spans, so editing them there changes the cascade.
+- **Per-element override** — set any custom property inline, e.g. `style="--aa-load-cstagger: 0.04s; --aa-load-y: 0.8em"` on a single hero.
 
 ## How the handoff works (no double animation)
 

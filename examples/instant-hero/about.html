@@ -26,6 +26,10 @@
   }
   [aa-trigger~="instant"][aa-animate~="fade-up"]    { --aa-load-y: 2rem; }
   [aa-trigger~="instant"][aa-animate~="fade-right"] { --aa-load-x: -2rem; }
+  /* char-split text from-states (chars inherit these; edit the cascade here) */
+  [aa-trigger~="instant"][aa-animate^="text-"][aa-animate*="-up"]   { --aa-load-y: 0.4em; }
+  [aa-trigger~="instant"][aa-animate^="text-blur"]                  { --aa-load-blur: 8px; }
+  [aa-trigger~="instant"][aa-animate^="text-scale"]                 { --aa-load-scale: 0; }
   @media (prefers-reduced-motion: reduce) {
     [aa-trigger~="instant"][aa-animate], [aa-trigger~="instant"] .aa-char { animation-duration: 1ms !important; }
   }

@@ -35,23 +35,15 @@ function num(value: string | null): number {
   return Number.isFinite(n) ? n : NaN
 }
 
-// Mirror (loosely) the GSAP text from-states as CSS custom props inherited by
-// the `.aa-char` spans. Offsets are in `em` so they scale with the type size.
-function setCharFromState(el: HTMLElement, animate: string): void {
-  el.style.setProperty('--aa-load-opacity', '0')
-  if (/blur/.test(animate)) el.style.setProperty('--aa-load-blur', '8px')
-  if (/scale/.test(animate)) el.style.setProperty('--aa-load-scale', '0')
-  if (/-up$/.test(animate)) el.style.setProperty('--aa-load-y', '0.4em')
-  else if (/-down$/.test(animate)) el.style.setProperty('--aa-load-y', '-0.4em')
-  else if (/-left$/.test(animate)) el.style.setProperty('--aa-load-x', '0.4em')
-  else if (/-right$/.test(animate)) el.style.setProperty('--aa-load-x', '-0.4em')
-}
-
 function process(el: HTMLElement): void {
   const animate = (el.getAttribute('aa-animate') ?? '').split('|')[0].trim()
   if (!animate) return
 
   // Staircase: CSS can't read attr() into a <time>, so set the custom props here.
+  // Everything else about the motion (from-state distance/blur, stagger, ease)
+  // lives in the inline CSS keyed off `aa-animate` — same as the element-level
+  // entrance — so it's all editable in one place. The loader only splits the
+  // text and sets `--char`; it does NOT bake in any from-state.
   const delay = num(el.getAttribute('aa-delay'))
   if (delay > 0) el.style.setProperty('--aa-load-delay', `${delay}s`)
   const dur = num(el.getAttribute('aa-duration'))
@@ -62,7 +54,6 @@ function process(el: HTMLElement): void {
   // element-level entrance to the per-char one.
   if (/^text-/.test(animate) && CHAR_TEXT.test(animate) && el.children.length === 0) {
     if (splitLite(el, 'chars')) {
-      setCharFromState(el, animate)
       el.setAttribute('aa-instant-split', '')
     }
   }
