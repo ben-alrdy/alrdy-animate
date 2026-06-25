@@ -49,7 +49,7 @@ Drop this snippet into `<head>` *above* the alrdy-animate `<script>` and `<link>
   }, TIMEOUT_DELAY);
 </script>
 <style>
-  [aa-animate]:not([aa-ready]):not([aa-trigger~="lcp"]) { visibility: hidden; }
+  [aa-animate]:not([aa-ready]):not([aa-trigger~="lcp"]):not([aa-trigger~="instant"]) { visibility: hidden; }
   @keyframes aa-fallback-appear {
     from { opacity: 0; transform: translateY(1.5rem); }
     to   { opacity: 1; transform: translateY(0); }
@@ -87,6 +87,8 @@ Drop this snippet into `<head>` *above* the alrdy-animate `<script>` and `<link>
 ```
 
 Tune the two constants at the top to taste. Keep `TIMEOUT_DELAY` well above `FALLBACK_DELAY` — the first is "let JS win the race for the hero", the second is "give up, show the page".
+
+The FOUC guard excludes both `lcp` and `instant` (`:not([aa-trigger~="lcp"]):not([aa-trigger~="instant"])`) — both of those paint on purpose before the bundle. If you don't use them it's harmless; if you do, it means this snippet and the [instant-hero](/recipes/instant-hero/) one share one guard, so you can combine them in a single `<head>` block without conflict.
 
 **Why the inline `<style>`** — the FOUC guard and the `lcp` opacity floor also ship in `dist/alrdy-animate.css` (that's what the npm `import 'alrdy-animate/style'` path relies on), but that file lands *after* the HTML renders — always on a slow connection, and deliberately so when you load it non-blocking (the [Webflow install guide](/installation/webflow/#1-site-wide-head-code) uses `media="print"` to keep it off the critical render path). Without inlining, every animated element flashes briefly visible, then disappears when the guard arrives, then reappears when `init()` runs. Inlining the critical CSS in `<head>` closes that window — the FOUC guard is active from the very first paint, which is also what makes loading the external stylesheet non-blocking safe.
 

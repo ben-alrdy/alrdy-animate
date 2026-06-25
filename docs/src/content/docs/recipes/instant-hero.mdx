@@ -117,6 +117,22 @@ This is self-contained: the keyframe, the eases it uses, and the split-unit layo
 
 That's the whole feature. Element-level `instant` works with just the `<style>` block — the loader is only needed for the delay staircase and per-character text.
 
+## Combining with the slow-network fallback
+
+If you also use the [slow-network + init-timeout fallback](/recipes/load-fallback/) (for `load` / `load-once` / `lcp` heroes), **merge the two into one inline `<head>` block — don't paste two separate ones.** They share the FOUC guard, and the only thing that matters is that there's exactly **one** guard line, excluding both `lcp` and `instant`:
+
+```css
+[aa-animate]:not([aa-ready]):not([aa-trigger~="lcp"]):not([aa-trigger~="instant"]) { visibility: hidden; }
+```
+
+(That's why the fallback recipe now ships this exact line — paste either order and the guards are identical.) Everything else just concatenates, because the two systems act on **disjoint** triggers:
+
+- The fallback `<script>` timer targets `[aa-trigger~="load"]` / `[aa-trigger~="load-once"]` only — it never touches `instant`.
+- The loader `<script>` + the instant `<style>` rules act on `instant` only.
+- `instant` elements are self-revealing (the keyframe owns them), so they need no `aa-fallback` / `aa-timeout` safety — and the timeout's blanket `visibility: visible` is a harmless no-op for them (they're already visible).
+
+So the combined block is: the fallback `<script>` **and** the loader `<script>`, plus one `<style>` with the single guard, the fallback keyframe/reveal rules, and the instant keyframe/rules/from-states.
+
 :::tip[For the absolute-fastest char split]
 A `<script src>` is still a network request. For a char-split hero that must animate on the very first frame, **inline** the loader instead: open `dist/loader.iife.js` (≈0.9 KB gzipped), copy its contents, and paste them inside an inline `<script>…</script>` in the head block above. No request, runs during head parse.
 :::

@@ -68,7 +68,7 @@ For above-the-fold hero copy, `aa-trigger="instant"` paints its entrance on the 
   }, TIMEOUT_DELAY);
 </script>
 <style>
-  [aa-animate]:not([aa-ready]):not([aa-trigger~="lcp"]) { visibility: hidden; }
+  [aa-animate]:not([aa-ready]):not([aa-trigger~="lcp"]):not([aa-trigger~="instant"]) { visibility: hidden; }
   @keyframes aa-fallback-appear {
     from { opacity: 0; transform: translateY(1.5rem); }
     to   { opacity: 1; transform: translateY(0); }
