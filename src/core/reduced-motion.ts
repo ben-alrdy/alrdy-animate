@@ -103,10 +103,10 @@ export function runFadeFallbackPass(
         getAttr(element, 'aa-trigger') ?? undefined,
         options.breakpoints,
       )
-      // `load-instant` is CSS-owned (inline keyframe); the inline reduced-motion
+      // `instant` is CSS-owned (inline keyframe); the inline reduced-motion
       // guard zeroes its duration so it appears with no motion. Building a GSAP
       // fade here would re-hide then fade it — skip, same as the main path.
-      if (triggers.some((t) => t.kind === 'load-instant')) continue
+      if (triggers.some((t) => t.kind === 'instant')) continue
       const hasLoadOnce = triggers.some((t) => t.kind === 'load-once')
       const hasLoad = triggers.some((t) => isLoadKind(t.kind))
 

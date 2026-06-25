@@ -150,13 +150,13 @@ export function setupTriggeredAnimation(
   element: Element,
   opts: TriggeredAnimationOptions,
 ): TriggeredAnimationHandle | null {
-  // `load-instant` entrances are owned by the inline CSS `@keyframes aa-load-in`
+  // `instant` entrances are owned by the inline CSS `@keyframes aa-load-in`
   // (painted on the first frame, before GSAP). Building a GSAP tween here would
   // re-hide the element and double-play the entrance, so skip entirely. The
   // end-of-init `aa-ready` flip detaches the CSS rule, leaving the element at
   // its natural (end) state — no jump. Covers appear/reveal/slices; the text
   // feature skips even earlier (before SplitText) so it isn't re-split.
-  if (opts.triggers.some((t) => t.kind === 'load-instant')) return null
+  if (opts.triggers.some((t) => t.kind === 'instant')) return null
 
   const hasLoadOnce = opts.triggers.some((t) => t.kind === 'load-once')
   const hasLoad = opts.triggers.some((t) => isLoadKind(t.kind))

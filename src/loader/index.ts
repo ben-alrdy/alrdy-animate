@@ -1,5 +1,5 @@
 /**
- * Instant-hero loader — the optional Tier-B companion to `aa-trigger="load-instant"`.
+ * Instant-hero loader — the optional Tier-B companion to `aa-trigger="instant"`.
  *
  * Runs inline in `<head>` (or via `import 'alrdy-animate/loader'`) *before* the
  * GSAP bundle, so hero entrances paint on the first frame as pure CSS. It does
@@ -11,7 +11,7 @@
  *   3. for everything else (element-level, or line-based `text-*` that can't be
  *      split pre-font), leaves the element to the element-level CSS reveal rule.
  *
- * The library's feature setup + reduced-motion pass skip every `load-instant`
+ * The library's feature setup + reduced-motion pass skip every `instant`
  * element, so nothing here is re-animated. The `--aa-*` it sets and the
  * `aa-instant-split` marker are read only by the inline CSS.
  *
@@ -21,7 +21,7 @@
  */
 import { splitLite } from './split-lite'
 
-const SELECTOR = '[aa-trigger~="load-instant"][aa-animate]'
+const SELECTOR = '[aa-trigger~="instant"][aa-animate]'
 
 // text-* animations the loader can render instantly via a char split. Line-based
 // text effects (slide / tilt / oval / rotate / block / marker) need font+layout
@@ -38,13 +38,13 @@ function num(value: string | null): number {
 // Mirror (loosely) the GSAP text from-states as CSS custom props inherited by
 // the `.aa-char` spans. Offsets are in `em` so they scale with the type size.
 function setCharFromState(el: HTMLElement, animate: string): void {
-  el.style.setProperty('--aa-l-o', '0')
-  if (/blur/.test(animate)) el.style.setProperty('--aa-l-b', '8px')
-  if (/scale/.test(animate)) el.style.setProperty('--aa-l-s', '0')
-  if (/-up$/.test(animate)) el.style.setProperty('--aa-l-y', '0.4em')
-  else if (/-down$/.test(animate)) el.style.setProperty('--aa-l-y', '-0.4em')
-  else if (/-left$/.test(animate)) el.style.setProperty('--aa-l-x', '0.4em')
-  else if (/-right$/.test(animate)) el.style.setProperty('--aa-l-x', '-0.4em')
+  el.style.setProperty('--aa-load-opacity', '0')
+  if (/blur/.test(animate)) el.style.setProperty('--aa-load-blur', '8px')
+  if (/scale/.test(animate)) el.style.setProperty('--aa-load-scale', '0')
+  if (/-up$/.test(animate)) el.style.setProperty('--aa-load-y', '0.4em')
+  else if (/-down$/.test(animate)) el.style.setProperty('--aa-load-y', '-0.4em')
+  else if (/-left$/.test(animate)) el.style.setProperty('--aa-load-x', '0.4em')
+  else if (/-right$/.test(animate)) el.style.setProperty('--aa-load-x', '-0.4em')
 }
 
 function process(el: HTMLElement): void {
@@ -78,20 +78,35 @@ function scan(): void {
 }
 
 /**
- * Poll for hero elements as they parse and process them immediately — the hero
- * is near the top of `<body>` and exists long before `DOMContentLoaded` on a
- * render-blocked page (same rationale as the slow-network fallback snippet).
- * Stop once the library has initialised (`html[aa-loaded]`) or parsing finishes.
+ * Process hero elements the moment they parse, before `DOMContentLoaded` / the
+ * library's `init()` runs. A `MutationObserver` fires as a microtask between
+ * the parser's chunks, so it wins the race even on a fast load where the whole
+ * document parses in a single task (rAF polling loses there — `init()` sets
+ * `aa-loaded` before the next frame, and splitting after that would mangle an
+ * already-revealed hero, so we stop on `aa-loaded`).
  */
 function run(): void {
   if (typeof document === 'undefined') return
-  // If the bundle already initialised, the lib owns these elements; splitting
-  // now would mangle an already-revealed hero. Bail.
-  if (document.documentElement.hasAttribute('aa-loaded')) return
   scan()
-  if (document.readyState === 'loading') {
-    requestAnimationFrame(run)
+  if (
+    document.documentElement.hasAttribute('aa-loaded') ||
+    document.readyState !== 'loading'
+  ) {
+    return
   }
+  const obs = new MutationObserver(() => {
+    if (document.documentElement.hasAttribute('aa-loaded')) {
+      obs.disconnect()
+      return
+    }
+    scan()
+  })
+  obs.observe(document.documentElement, { childList: true, subtree: true })
+  // Final sweep once parsing completes, then stop observing.
+  document.addEventListener('DOMContentLoaded', () => {
+    scan()
+    obs.disconnect()
+  }, { once: true })
 }
 
 run()

@@ -1,6 +1,6 @@
 # Instant hero example
 
-A tiny two-page site demonstrating `aa-trigger="load-instant"` — hero entrances
+A tiny two-page site demonstrating `aa-trigger="instant"` — hero entrances
 that paint on the first frame as pure CSS, before GSAP loads. Navigate between
 **Home** and **About** to feel the instant entrance on every page load.
 
@@ -22,7 +22,7 @@ python3 -m http.server 8080      # from the repo root
 - **Click Home ⇄ About** repeatedly — the headline + copy animate instantly on
   every navigation, no wait for the bundle.
 - **Throttle the network** (DevTools → Network → Slow 3G) and reload. The
-  `load-instant` elements still appear immediately; the one element marked with a
+  `instant` elements still appear immediately; the one element marked with a
   plain `aa-trigger="load"` (on the Home page) visibly lags until GSAP + `init()`
   arrive — that's the difference the feature removes.
 - The About headline is **character-split** by `loader.iife.js` (a ~0.9 KB no-GSAP

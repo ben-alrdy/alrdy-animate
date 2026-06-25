@@ -1,13 +1,13 @@
 ---
 title: Instant hero entrances (Webflow)
-description: Make above-the-fold hero animations paint on the first frame as pure CSS — before GSAP loads — with aa-trigger="load-instant". Element-level fade/slide/blur/zoom plus an optional no-GSAP splitter for per-character text cascades.
+description: Make above-the-fold hero animations paint on the first frame as pure CSS — before GSAP loads — with aa-trigger="instant". Element-level fade/slide/blur/zoom plus an optional no-GSAP splitter for per-character text cascades.
 ---
 
 A normal `aa-trigger="load"` entrance is GSAP-driven, so its first frame can't paint until the GSAP bundle (and, for split text, the webfont) has downloaded and `init()` has run — often a second or two on a cold load. The hero sits hidden behind the FOUC guard the whole time.
 
-`aa-trigger="load-instant"` removes that wait. The entrance is a **CSS keyframe** inlined in your `<head>`, so it paints on the **first frame the browser renders** — before GSAP exists. When the bundle finally lands, the library detects `load-instant` and does *nothing* to those elements (no re-animation, no flash); the end-of-init `aa-ready` flip just detaches the CSS rule, leaving the element at its natural end-state.
+`aa-trigger="instant"` removes that wait. The entrance is a **CSS keyframe** inlined in your `<head>`, so it paints on the **first frame the browser renders** — before GSAP exists. The keyframe runs to completion on its own, so whether the bundle arrives in 100 ms or 3 s makes no difference to the entrance. When it does arrive, the library detects `instant` and builds *no* GSAP tween for those elements — no re-animation, no flash.
 
-| | `load` | `lcp` | `load-instant` |
+| | `load` | `lcp` | `instant` |
 | --- | --- | --- | --- |
 | Engine | GSAP | GSAP (CSS 0.01 floor for LCP) | **CSS keyframe** |
 | First frame | after bundle + init | LCP candidate early, fades after bundle | **animates immediately** |
@@ -18,10 +18,10 @@ A normal `aa-trigger="load"` entrance is GSAP-driven, so its first frame can't p
 
 - **Element-level** (no extra script): `fade`, `fade-up` / `-down` / `-left` / `-right`, `zoom-in` / `zoom-out`, `blur`, `slide-up` / `-down` / `-left` / `-right`, `rotate*`. The motion comes from `aa-animate`; the eases match the GSAP named eases.
 - **Per-character text** (with the loader, below): `text-fade`, `text-fade-up`/`-down`/`-left`/`-right`, `text-blur`, `text-scale` — split into characters and staggered, all in CSS.
-- **Line-based text** (`text-slide-*`, `text-tilt-*`, `text-oval-*`, `text-rotate`) can **not** be instant — line breaks depend on layout and the final webfont, which aren't known before the bundle loads. Under `load-instant` they gracefully fall back to an element-level fade; use plain `load` (GSAP) if you need the real line effect.
+- **Line-based text** (`text-slide-*`, `text-tilt-*`, `text-oval-*`, `text-rotate`) can **not** be instant — line breaks depend on layout and the final webfont, which aren't known before the bundle loads. Under `instant` they gracefully fall back to an element-level fade; use plain `load` (GSAP) if you need the real line effect.
 
 ```html
-<h1 aa-animate="fade-up" aa-trigger="load-instant" aa-delay="0.1">
+<h1 aa-animate="fade-up" aa-trigger="instant" aa-delay="0.1">
   Instant headline
 </h1>
 ```
@@ -31,7 +31,7 @@ A normal `aa-trigger="load"` entrance is GSAP-driven, so its first frame can't p
 This is self-contained: the keyframe, the eases it uses, and the split-unit layout rules are all inlined, because anything that only arrives in the non-blocking `dist` stylesheet isn't present on the first painted frame. Paste it **above** the alrdy-animate `<script>`/`<link>` tags.
 
 ```html
-<!-- alrdy-animate · instant hero entrances (aa-trigger="load-instant") -->
+<!-- alrdy-animate · instant hero entrances (aa-trigger="instant") -->
 <style>
   /* Eases needed at first paint (the dist :root copy arrives too late). */
   :root {
@@ -44,53 +44,54 @@ This is self-contained: the keyframe, the eases it uses, and the split-unit layo
   .aa-sr-only { position: absolute; width: 1px; height: 1px; padding: 0;
     margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
 
-  /* FOUC guard — load-instant (and lcp) opt out: they paint on purpose. */
-  [aa-animate]:not([aa-ready]):not([aa-trigger~="lcp"]):not([aa-trigger~="load-instant"]) {
+  /* FOUC guard — instant (and lcp) opt out: they paint on purpose. */
+  [aa-animate]:not([aa-ready]):not([aa-trigger~="lcp"]):not([aa-trigger~="instant"]) {
     visibility: hidden;
   }
 
   /* One parametric entrance keyframe, driven by per-direction custom props. */
   @keyframes aa-load-in {
     from {
-      opacity: var(--aa-l-o, 0);
-      translate: var(--aa-l-x, 0) var(--aa-l-y, 0);
-      scale: var(--aa-l-s, 1);
-      rotate: var(--aa-l-r, 0deg);
-      filter: blur(var(--aa-l-b, 0));
+      opacity: var(--aa-load-opacity, 0);
+      translate: var(--aa-load-x, 0) var(--aa-load-y, 0);
+      scale: var(--aa-load-scale, 1);
+      rotate: var(--aa-load-rotate, 0deg);
+      filter: blur(var(--aa-load-blur, 0));
     }
     to { opacity: 1; translate: 0 0; scale: 1; rotate: 0deg; filter: blur(0); }
   }
 
-  /* Reveal every load-instant element from the first frame. */
-  [aa-trigger~="load-instant"][aa-animate]:not([aa-ready]) { visibility: visible; }
-  /* Element-level entrance — whole element animates (unless the loader char-splits it). */
-  [aa-trigger~="load-instant"][aa-animate]:not([aa-ready]):not([aa-instant-split]) {
-    animation: aa-load-in var(--aa-load-dur, 0.6s) var(--aa-ease-osmo) both;
+  /* Element-level entrance — whole element animates (unless the loader char-splits it).
+     NOT gated on :not([aa-ready]): a fast init() must not cut the entrance short.
+     `backwards` fill hides during any delay, then reverts to the natural state once
+     the animation ends (so a later hover transform isn't clobbered). */
+  [aa-trigger~="instant"][aa-animate]:not([aa-instant-split]) {
+    animation: aa-load-in var(--aa-load-dur, 0.6s) var(--aa-ease-osmo) backwards;
     animation-delay: var(--aa-load-delay, 0s);
   }
   /* Per-character entrance — set up by the loader (adds aa-instant-split + the .aa-char spans). */
-  [aa-trigger~="load-instant"][aa-instant-split]:not([aa-ready]) .aa-char {
-    animation: aa-load-in var(--aa-load-dur, 0.6s) var(--aa-ease-osmo) both;
+  [aa-trigger~="instant"][aa-instant-split] .aa-char {
+    animation: aa-load-in var(--aa-load-dur, 0.6s) var(--aa-ease-osmo) backwards;
     animation-delay: calc((var(--char) - 1) * var(--aa-load-cstagger, 0.02s) + var(--aa-load-delay, 0s));
   }
 
   /* Element-level from-states (CSS only, no JS needed). */
-  [aa-trigger~="load-instant"][aa-animate~="fade-up"]    { --aa-l-y:  2rem; }
-  [aa-trigger~="load-instant"][aa-animate~="fade-down"]  { --aa-l-y: -2rem; }
-  [aa-trigger~="load-instant"][aa-animate~="fade-left"]  { --aa-l-x:  2rem; }
-  [aa-trigger~="load-instant"][aa-animate~="fade-right"] { --aa-l-x: -2rem; }
-  [aa-trigger~="load-instant"][aa-animate~="zoom-in"]    { --aa-l-s: 0.85; }
-  [aa-trigger~="load-instant"][aa-animate~="zoom-out"]   { --aa-l-s: 1.15; }
-  [aa-trigger~="load-instant"][aa-animate~="blur"]       { --aa-l-b: 20px; }
-  [aa-trigger~="load-instant"][aa-animate~="slide-up"]    { --aa-l-o: 1; --aa-l-y: 100%; }
-  [aa-trigger~="load-instant"][aa-animate~="slide-down"]  { --aa-l-o: 1; --aa-l-y: -100%; }
-  [aa-trigger~="load-instant"][aa-animate~="slide-left"]  { --aa-l-o: 1; --aa-l-x: 100%; }
-  [aa-trigger~="load-instant"][aa-animate~="slide-right"] { --aa-l-o: 1; --aa-l-x: -100%; }
+  [aa-trigger~="instant"][aa-animate~="fade-up"]    { --aa-load-y:  2rem; }
+  [aa-trigger~="instant"][aa-animate~="fade-down"]  { --aa-load-y: -2rem; }
+  [aa-trigger~="instant"][aa-animate~="fade-left"]  { --aa-load-x:  2rem; }
+  [aa-trigger~="instant"][aa-animate~="fade-right"] { --aa-load-x: -2rem; }
+  [aa-trigger~="instant"][aa-animate~="zoom-in"]    { --aa-load-scale: 0.85; }
+  [aa-trigger~="instant"][aa-animate~="zoom-out"]   { --aa-load-scale: 1.15; }
+  [aa-trigger~="instant"][aa-animate~="blur"]       { --aa-load-blur: 20px; }
+  [aa-trigger~="instant"][aa-animate~="slide-up"]    { --aa-load-opacity: 1; --aa-load-y: 100%; }
+  [aa-trigger~="instant"][aa-animate~="slide-down"]  { --aa-load-opacity: 1; --aa-load-y: -100%; }
+  [aa-trigger~="instant"][aa-animate~="slide-left"]  { --aa-load-opacity: 1; --aa-load-x: 100%; }
+  [aa-trigger~="instant"][aa-animate~="slide-right"] { --aa-load-opacity: 1; --aa-load-x: -100%; }
 
   /* Reduced motion: appear with no movement. */
   @media (prefers-reduced-motion: reduce) {
-    [aa-trigger~="load-instant"][aa-animate],
-    [aa-trigger~="load-instant"] .aa-char { animation-duration: 1ms !important; }
+    [aa-trigger~="instant"][aa-animate],
+    [aa-trigger~="instant"] .aa-char { animation-duration: 1ms !important; }
   }
 </style>
 
@@ -104,7 +105,7 @@ This is self-contained: the keyframe, the eases it uses, and the split-unit layo
 <script src="https://cdn.jsdelivr.net/npm/alrdy-animate@{{version}}/dist/loader.iife.js"></script>
 ```
 
-That's the whole feature. Element-level `load-instant` works with just the `<style>` block — the loader is only needed for the delay staircase and per-character text.
+That's the whole feature. Element-level `instant` works with just the `<style>` block — the loader is only needed for the delay staircase and per-character text.
 
 :::tip[For the absolute-fastest char split]
 A `<script src>` is still a network request. For a char-split hero that must animate on the very first frame, **inline** the loader instead: open `dist/loader.iife.js` (≈0.9 KB gzipped), copy its contents, and paste them inside an inline `<script>…</script>` in the head block above. No request, runs during head parse.
@@ -116,19 +117,19 @@ Add `aa-delay="<seconds>"` to stagger elements (headline, then subhead, then CTA
 
 ## Fonts
 
-Making the hero instant *exposes* a font swap that the old slow reveal used to hide: with `font-display: swap` the text paints in the fallback font, then swaps to the webfont a beat later. For **char-split** text this also re-wraps the line when the font swaps. **Preload the hero webfont** (the `<link rel="preload">` above) so it's available on the first frame — this is required for `load-instant` on text and worth it everywhere.
+Making the hero instant *exposes* a font swap that the old slow reveal used to hide: with `font-display: swap` the text paints in the fallback font, then swaps to the webfont a beat later. For **char-split** text this also re-wraps the line when the font swaps. **Preload the hero webfont** (the `<link rel="preload">` above) so it's available on the first frame — this is required for `instant` on text and worth it everywhere.
 
 ## Customising the motion
 
-Everything is in your inline `<style>`, so edit it directly — there's no dist copy to fight. Tune the keyframe, the per-direction `--aa-l-*` offsets, the default duration (`--aa-load-dur`), or the per-character stagger (`--aa-load-cstagger`). Override any of the custom properties per-element with an inline `style` too.
+Everything is in your inline `<style>`, so edit it directly — there's no dist copy to fight. Tune the keyframe, the per-direction `--aa-load-*` offsets, the default duration (`--aa-load-dur`), or the per-character stagger (`--aa-load-cstagger`). Override any of the custom properties per-element with an inline `style` too.
 
 ## How the handoff works (no double animation)
 
-1. The element carries `aa-trigger="load-instant"` in the static HTML, so it's **excluded from the FOUC guard** and the CSS keyframe runs on the first frame (its `from { opacity: 0 }` + `animation-fill-mode: both` keep it hidden until it animates — no flash).
-2. If the loader is present and the element is char/word `text-*`, it splits the text into `.aa-char` spans and adds `aa-instant-split`, switching the CSS from the element-level entrance to the per-character one.
-3. When the GSAP bundle loads, the library's appear/text features and reduced-motion pass **skip every `load-instant` element** — no SplitText, no tween. `init()` flips `aa-ready` on all `[aa-animate]`, which detaches the instant CSS rule; the element is already at its natural end-state, so there's no jump.
+1. The element carries `aa-trigger="instant"` in the static HTML, so it's **excluded from the FOUC guard** and the CSS keyframe runs on the first frame (its `from { opacity: 0 }` + `animation-fill-mode: backwards` keep it hidden during any delay, then it reverts to its natural state once the animation ends — so no flash, and a later hover transform isn't clobbered).
+2. The loader processes the hero the moment it parses (via a `MutationObserver`, so it wins the race even on a fast load): it sets the `aa-delay` custom property and, for char/word `text-*`, splits the text into `.aa-char` spans and adds `aa-instant-split`, switching the CSS from the element-level entrance to the per-character one.
+3. The CSS keyframe is **not** gated on init, so it always runs to completion — a fast `init()` can't cut it short. When the GSAP bundle loads, the library's appear/text features and reduced-motion pass **skip every `instant` element** (no SplitText, no tween); `init()` still flips `aa-ready` for DOM consistency but it no longer affects these elements.
 
-This means a `load-instant` hero works even if the bundle is slow or never arrives (it's self-revealing), and on a Barba/SPA navigation the keyframe simply replays on the fresh container.
+This means a `instant` hero works even if the bundle is slow or never arrives (it's self-revealing), and on a full-page or Barba navigation the keyframe simply replays on the fresh element.
 
 ## When not to use it
 

@@ -4,12 +4,12 @@ const initialized = (msg: ConsoleMessage): boolean =>
   msg.text().includes('[alrdy-animate] initialized')
 
 /**
- * `aa-trigger="load-instant"` is owned by the inline CSS keyframe + the optional
+ * `aa-trigger="instant"` is owned by the inline CSS keyframe + the optional
  * loader, NOT by GSAP. These specs assert the library-side handoff: it builds no
  * tween, doesn't re-split loader-split text, and still flips `aa-ready` so the DOM
  * ends consistent. (The CSS entrance + loader splitter are verified separately.)
  */
-test.describe('aa-trigger="load-instant"', () => {
+test.describe('aa-trigger="instant"', () => {
   test('element-level: lib builds no GSAP tween, still reveals', async ({ page }) => {
     const initLog = page.waitForEvent('console', { predicate: initialized, timeout: 8000 })
     await page.goto('/animations/appear/fade/')
@@ -21,7 +21,7 @@ test.describe('aa-trigger="load-instant"', () => {
       const el = document.createElement('div')
       el.id = 'li-el'
       el.setAttribute('aa-animate', 'fade-up')
-      el.setAttribute('aa-trigger', 'load-instant')
+      el.setAttribute('aa-trigger', 'instant')
       el.style.cssText = 'position:fixed;top:0;left:0;width:80px;height:40px;background:#f00;'
       el.textContent = 'instant'
       document.body.appendChild(el)
@@ -52,7 +52,7 @@ test.describe('aa-trigger="load-instant"', () => {
       const el = document.createElement('h2')
       el.id = 'li-txt'
       el.setAttribute('aa-animate', 'text-fade-up')
-      el.setAttribute('aa-trigger', 'load-instant')
+      el.setAttribute('aa-trigger', 'instant')
       el.setAttribute('aa-instant-split', '')
       el.style.cssText = 'position:fixed;top:60px;left:0;'
       // Simulate the loader's split output: two .aa-char spans + sr-only clone.

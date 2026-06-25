@@ -100,12 +100,12 @@ declare namespace JSX {
      *   HTML. Works with any opacity-bearing `aa-animate` (`fade`, `rotate*`,
      *   `blur`, `fade-up`…). Requires the updated inline `<head>` snippet (see
      *   `docs/installation/webflow/` and `docs/recipes/load-fallback/`).
-     * - `load-instant` — a **CSS-driven** entrance that paints on the first
+     * - `instant` — a **CSS-driven** entrance that paints on the first
      *   frame, *before* the GSAP bundle loads, so the hero feels instant. The
      *   motion comes from `aa-animate` (fade / fade-up / blur / zoom / slide /
      *   rotate at the element level); the library builds no GSAP tween for it
-     *   (the inline `@keyframes aa-load-in` owns the entrance and the
-     *   end-of-init `aa-ready` flip detaches it). Add the `alrdy-animate/loader`
+     *   (the inline `@keyframes aa-load-in` owns the entrance and runs to
+     *   completion regardless of when the bundle loads). Add the `alrdy-animate/loader`
      *   script for an `aa-delay` staircase and instant per-character `text-*`
      *   cascades (`text-fade`/`-up`/…, `text-blur`, `text-scale`); line-based
      *   `text-*` (slide/tilt/oval/rotate) fall back to an element-level fade
