@@ -8,7 +8,7 @@ The lib hides every `[aa-animate]` element with `visibility: hidden` until `init
 | Layer | Default | What it does |
 | --- | --- | --- |
 | **`aa-fallback`** | 1s | Fades `aa-trigger="load"` / `aa-trigger="load-once"` elements (hero copy) via a CSS keyframe — graceful staircase, respecting `aa-delay` and `aa-stagger`. |
-| **`aa-timeout`** | 4s | Reveals **every** `[aa-animate]` element at its natural state with no animation — universal safety net if init never runs. |
+| **`aa-timeout`** | 4s | Reveals **every** `[aa-animate]` element at its natural state with no animation — universal safety net if init never runs. Closed modals are excluded (their natural state is hidden). |
 
 Drop this snippet into `<head>` *above* the alrdy-animate `<script>` and `<link>` tags — and ideally above any other render-blocking `<script>` (e.g. Typekit), so the two timers start counting from page load rather than after that script downloads:
 
@@ -60,6 +60,12 @@ Drop this snippet into `<head>` *above* the alrdy-animate `<script>` and `<link>
     animation: aa-fallback-appear 0.5s ease both;
   }
   html[aa-timeout] [aa-animate]:not([aa-ready]) { visibility: visible; }
+  /* …but never reveal a closed modal. A modal card's `aa-animate` is its OPEN
+     entrance — its natural state is hidden, not visible — so the blanket net
+     above would wrongly flash it (and any animated content inside it) on screen.
+     Same specificity, later in source → this wins. Only simple selectors +
+     descendant combinators, so it parses everywhere. */
+  html[aa-timeout] [aa-modal-group] [aa-animate]:not([aa-ready]) { visibility: hidden; }
   /* LCP: paint marked element at 0.01 pre-bundle (eligible LCP candidate), then fade to full. */
   [aa-animate][aa-trigger~="lcp"]:not([aa-ready]) { visibility: visible; opacity: 0.01; }
   html[aa-fallback] [aa-animate][aa-trigger~="lcp"]:not([aa-ready]) { opacity: 1; transition: opacity 0.5s ease; }
@@ -109,6 +115,8 @@ Scoped to `[aa-trigger~="load"]` / `[aa-trigger~="load-once"]` on purpose: scrol
 ### Layer 2 — `aa-timeout` (4s default)
 
 Sets `html[aa-timeout]`. The CSS rule reveals **every** `[aa-animate]` element at its natural rendered state — no animation, no from-state. This is the deep-fail safety net: if JS errored, the bundle is blocked, or the network is so slow that even the hero staircase isn't enough, the page still ends up usable.
+
+One exception: **animated content inside a modal group stays hidden**. A modal card's `aa-animate` is its *open* entrance, so its natural state is closed/hidden — the blanket reveal would otherwise flash a closed modal on screen at the 4s mark on a slow connection. The follow-up rule `html[aa-timeout] [aa-modal-group] [aa-animate]:not([aa-ready]) { visibility: hidden }` re-hides those (same specificity, later in source, so it wins) until the bundle lands and the modal feature takes over its open/close state. Any element keyed by `[aa-modal-group]` is covered automatically — no per-modal attribute needed.
 
 When `init()` eventually arrives, it detects `aa-timeout` and switches to bypass mode:
 
@@ -192,6 +200,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           html[aa-fallback] [aa-trigger~="load"][aa-animate]:not([aa-ready]),
           html[aa-fallback] [aa-trigger~="load-once"][aa-animate]:not([aa-ready]) { visibility: visible; animation: aa-fallback-appear .5s ease both }
           html[aa-timeout] [aa-animate]:not([aa-ready]) { visibility: visible }
+          html[aa-timeout] [aa-modal-group] [aa-animate]:not([aa-ready]) { visibility: hidden } /* keep closed modals hidden */
           html[aa-fallback] [aa-animate][aa-trigger~="lcp"]:not([aa-ready]) { opacity: 1; transition: opacity .5s ease }
           html[aa-timeout] [aa-animate][aa-trigger~="lcp"]:not([aa-ready]) { opacity: 1 }
         ` }} />

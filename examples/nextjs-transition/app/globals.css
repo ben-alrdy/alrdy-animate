@@ -48,6 +48,8 @@ html[aa-fallback] [aa-trigger~="load-once"][aa-animate]:not([aa-ready]) {
   animation: aa-fallback-appear 0.5s ease both;
 }
 html[aa-timeout] [aa-animate]:not([aa-ready]) { visibility: visible; }
+/* …but never reveal a closed modal (its aa-animate is the open entrance). */
+html[aa-timeout] [aa-modal-group] [aa-animate]:not([aa-ready]) { visibility: hidden; }
 
 /* ----------- Transition overlay (Osmo stacked-cards, verbatim timeline)
    Four absolutely-positioned siblings inside the fixed overlay container.

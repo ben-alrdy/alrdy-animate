@@ -75,6 +75,9 @@ The trailing **`<noscript>`** is the no-JS safety net: with JavaScript disabled,
     animation: aa-fallback-appear 0.5s ease both;
   }
   html[aa-timeout] [aa-animate]:not([aa-ready]) { visibility: visible; }
+  /* …but never reveal a closed modal: a modal card's aa-animate is its OPEN
+     entrance, so its natural state is hidden. Same specificity, later → wins. */
+  html[aa-timeout] [aa-modal-group] [aa-animate]:not([aa-ready]) { visibility: hidden; }
   /* LCP: paint marked element at 0.01 pre-bundle (eligible LCP candidate), then fade to full. */
   [aa-animate][aa-trigger~="lcp"]:not([aa-ready]) { visibility: visible; opacity: 0.01; }
   html[aa-fallback] [aa-animate][aa-trigger~="lcp"]:not([aa-ready]) { opacity: 1; transition: opacity 0.5s ease; }

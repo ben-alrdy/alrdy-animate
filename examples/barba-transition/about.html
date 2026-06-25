@@ -52,6 +52,7 @@
         animation: aa-fallback-appear 0.5s ease both;
       }
       html[aa-timeout] [aa-animate]:not([aa-ready]) { visibility: visible; }
+      html[aa-timeout] [aa-modal-group] [aa-animate]:not([aa-ready]) { visibility: hidden; }
     </style>
     <link rel="stylesheet" href="/src/styles.css" />
     <link rel="stylesheet" href="https://unpkg.com/lenis@1.3.17/dist/lenis.css" />
