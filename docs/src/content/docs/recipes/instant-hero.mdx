@@ -110,9 +110,10 @@ This is self-contained: the keyframe, the eases it uses, and the split-unit layo
 <link rel="preload" as="font" type="font/woff2" crossorigin
       href="https://YOUR-SITE.website-files.com/…/HeroFont.woff2">
 
-<!-- The loader: aa-delay staircase + per-character text splitting (no GSAP).
-     Runs early and polls for the hero, so a plain (non-defer) tag is correct. -->
-<script src="https://cdn.jsdelivr.net/npm/alrdy-animate@{{version}}/dist/loader.iife.js"></script>
+<!-- The loader: aa-delay staircase + per-character text splitting (no GSAP, no
+     dependency). Inlined so it runs during head parse with ZERO network request —
+     a minified snapshot of dist/loader.iife.js; re-copy it after upgrading. -->
+<script>(function(){"use strict";function f(t){const e=typeof Intl<"u"?Intl.Segmenter:void 0;if(e)try{const a=new e(void 0,{granularity:"grapheme"});return Array.from(a.segment(t),n=>n.segment)}catch{}return Array.from(t)}function p(t,e){const a=(t.textContent??"").trim();if(!a)return!1;const n=document.createElement("span");n.setAttribute("aria-hidden","true");let l=0,m=0;for(const r of a.split(/(\s+)/)){if(r==="")continue;if(/^\s+$/.test(r)){n.appendChild(document.createTextNode(r));continue}const o=document.createElement("span");o.className="aa-word",m+=1,o.style.setProperty("--word",String(m));for(const C of f(r)){const s=document.createElement("span");s.className="aa-char",l+=1,s.style.setProperty("--char",String(l)),s.textContent=C,o.appendChild(s)}n.appendChild(o)}const c=document.createElement("span");return c.className="aa-sr-only",c.textContent=a,t.textContent="",t.appendChild(n),t.appendChild(c),!0}const y='[aa-trigger~="instant"][aa-animate]',g=/^text-(fade|blur|scale)/,d=new WeakSet;function u(t){const e=t==null?NaN:parseFloat(t);return Number.isFinite(e)?e:NaN}function h(t){const e=(t.getAttribute("aa-animate")??"").split("|")[0].trim();if(!e)return;const a=u(t.getAttribute("aa-delay"));a>0&&t.style.setProperty("--aa-load-delay",`${a}s`);const n=u(t.getAttribute("aa-duration"));n>0&&t.style.setProperty("--aa-load-dur",`${n}s`),/^text-/.test(e)&&g.test(e)&&t.children.length===0&&p(t)&&t.setAttribute("aa-instant-split","")}function i(){const t=document.querySelectorAll(y);for(const e of t)d.has(e)||(d.add(e),h(e))}function b(){if(typeof document>"u"||(i(),document.documentElement.hasAttribute("aa-loaded")||document.readyState!=="loading"))return;const t=new MutationObserver(()=>{if(document.documentElement.hasAttribute("aa-loaded")){t.disconnect();return}i()});t.observe(document.documentElement,{childList:!0,subtree:!0}),document.addEventListener("DOMContentLoaded",()=>{i(),t.disconnect()},{once:!0})}b()})();</script>
 ```
 
 That's the whole feature. Element-level `instant` works with just the `<style>` block — the loader is only needed for the delay staircase and per-character text.
@@ -133,8 +134,8 @@ If you also use the [slow-network + init-timeout fallback](/recipes/load-fallbac
 
 So the combined block is: the fallback `<script>` **and** the loader `<script>`, plus one `<style>` with the single guard, the fallback keyframe/reveal rules, and the instant keyframe/rules/from-states.
 
-:::tip[For the absolute-fastest char split]
-A `<script src>` is still a network request. For a char-split hero that must animate on the very first frame, **inline** the loader instead: open `dist/loader.iife.js` (≈0.9 KB gzipped), copy its contents, and paste them inside an inline `<script>…</script>` in the head block above. No request, runs during head parse.
+:::tip[Prefer a CDN tag over pasting the blob?]
+Swap the inline `<script>` for `<script src="https://cdn.jsdelivr.net/npm/alrdy-animate@{{version}}/dist/loader.iife.js"></script>`. Simpler to keep updated, but it's one network request — so the first char-split paints a beat later than the inlined version. Element-level `instant` (and the `aa-delay` staircase) is pure CSS plus tiny inline JS, so the choice only affects the char cascade.
 :::
 
 ## The `aa-delay` staircase
@@ -162,7 +163,13 @@ Everything is in your inline `<style>`, so edit it directly — there's no dist 
 
 This means a `instant` hero works even if the bundle is slow or never arrives (it's self-revealing), and on a full-page or Barba navigation the keyframe simply replays on the fresh element.
 
-## When not to use it
+## When not to use it (use `load` instead)
 
-- For the single **largest** above-the-fold image, prefer [`aa-trigger="lcp"`](/animations/utilities/aa-trigger/) — it's tuned to count as the LCP candidate.
-- For anything below the fold or scroll-driven, use plain `scroll` / `load` — there's no first-paint wait to avoid, and you keep the full GSAP effect (including masked line text).
+`instant` is a first-paint optimisation for a *subset* of effects — it doesn't replace `load`. Reach for `load` (GSAP) when:
+
+- You want a **cinematic / line-based** effect — masked line reveals, `text-slide-up`, `text-tilt`, `text-oval`, `text-rotate`. Those can't be instant (line wrapping depends on the final font, the very thing you'd be waiting for), so they stay on GSAP.
+- The element is **below the fold or scroll-driven** — there's no first-paint wait to avoid, and you keep the full GSAP effect.
+- You're on **Barba / a page-transition SPA**. After the first load the bundle is cached and `init()` runs inside the leave timeline, so there's no perceptible delay — and you usually want `load-once event:enter` so the reveal **syncs to the transition's peak**, which `instant` can't do (it fires immediately on the new container, ignoring the transition). `instant` still helps the *first cold load* there, but `event:enter` is the better hero trigger for the navigations.
+- For the single **largest** above-the-fold image specifically, prefer [`aa-trigger="lcp"`](/animations/utilities/aa-trigger/) — it's tuned to count as the LCP candidate.
+
+A typical page uses `instant` on the hero and `load` / `scroll` for everything else.
