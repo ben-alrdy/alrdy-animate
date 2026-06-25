@@ -25,6 +25,8 @@ This goes into **Project Settings → Custom Code → Head Code** as two blocks:
 
 Paste this first. It's inline (no network request), so it applies on the very first paint: the **FOUC guard** (`[aa-animate]:not([aa-ready]) { visibility: hidden }`) hides animated elements until `init()` flips `aa-ready` on them — without it, every animated element would briefly render in its final state, then snap to its from-state once `init()` runs. The **safety fallback** then reveals those elements again if the bundle is slow (`aa-fallback`) or never arrives (`aa-timeout`). Having the guard inline on the first paint is also what lets the external stylesheet load non-blocking (below) without reintroducing a flash.
 
+The trailing **`<noscript>`** is the no-JS safety net: with JavaScript disabled, neither `init()` nor the fallback timer ever runs, so the guard would hide every animated element permanently. The `<noscript>` override forces them all visible at their natural state (and clears the `lcp` `0.01` floor and any from-state `transform` / `filter`).
+
 ```html
 <!-- alrdy-animate FOUC guard + slow-network/timeout safety (optional but recommended). -->
 <script>
@@ -78,6 +80,20 @@ Paste this first. It's inline (no network request), so it applies on the very fi
   html[aa-fallback] [aa-animate][aa-trigger~="lcp"]:not([aa-ready]) { opacity: 1; transition: opacity 0.5s ease; }
   html[aa-timeout] [aa-animate][aa-trigger~="lcp"]:not([aa-ready]) { opacity: 1; }
 </style>
+<noscript>
+  <style>
+    /* JS disabled: nothing ever clears the FOUC guard (no init(), no fallback
+       timer), so without this every animated element stays hidden forever.
+       Force them all visible at their natural state. */
+    [aa-animate] {
+      visibility: visible !important;
+      opacity: 1 !important;
+      transform: none !important;
+      filter: none !important;
+      clip-path: none !important;
+    }
+  </style>
+</noscript>
 ```
 
 ### Library CSS + scripts
@@ -150,7 +166,7 @@ Webflow only loads GSAP (and the plugins you've enabled) on pages where it's act
 
 **Trim the plugin list.** `init({ debug: true })` prints any "Missing GSAP plugins" warnings with the exact `<script>` tag you need to add. Drop the lines you don't use to keep the page lighter.
 
-**Why the stylesheet is non-blocking.** `media="print"` tells the browser to fetch the file at low priority without holding up the first paint; `onload="this.media='all'"` swaps it to screen styles the moment it lands, and the `<noscript>` copy keeps it working with JS disabled. This is only safe because the FOUC guard, fallback keyframe, and timeout rules are inlined in the safety snippet above — the external file then carries just helper classes and interactive-component defaults, none of which the initial render needs. One caveat: a marquee, tabs, or hover-text component placed above the fold can flash unstyled for the moment before the file lands; if that matters on a given page, inline the whole `dist/alrdy-animate.css` into the safety snippet instead.
+**Why the stylesheet is non-blocking.** `media="print"` tells the browser to fetch the file at low priority without holding up the first paint; `onload="this.media='all'"` swaps it to screen styles the moment it lands, and the `<noscript>` copy keeps it working with JS disabled. This is only safe because every rule the *first paint* depends on — the FOUC guard, the `lcp` opacity floor, the fallback keyframe, and the timeout reveal — is inlined in the safety snippet above. The external file carries helper classes and interactive-component defaults (plus a redundant copy of the FOUC guard + `lcp` floor for the npm `import 'alrdy-animate/style'` path); the fallback keyframe and timeout rules are *not* in the external file at all — they live only in the snippet. One caveat: a marquee, tabs, or hover-text component placed above the fold can flash unstyled for the moment before the file lands; if that matters on a given page, inline the whole `dist/alrdy-animate.css` into the safety snippet instead.
 
 ## 2. Site-wide footer code
 

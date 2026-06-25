@@ -71,56 +71,24 @@
   opacity: 0.01;
 }
 /*
- * Slow-network fallback: the load path skips its GSAP tween when aa-fallback is
- * set (the inline snippet faded the element in via CSS), so CSS must own the
- * reveal here too — fade 0.01 → 1 (never drops to 0, so the LCP candidate
- * captured at first paint stays valid). Under aa-timeout, reveal fully with no
- * animation, matching the universal timeout safety.
+ * Slow-network + init-timeout fallback is deliberately NOT shipped here. The
+ * `html[aa-fallback]` / `html[aa-timeout]` reveal rules and the fallback
+ * keyframe live only in the optional inline <head> snippet
+ * (docs/recipes/load-fallback). Two reasons:
+ *
+ *   1. Inert without that snippet — nothing else ever sets `aa-fallback` /
+ *      `aa-timeout` on <html>, so the rules never matched for bundled
+ *      (npm `import 'alrdy-animate/style'`) consumers anyway.
+ *   2. When the snippet IS present it must inline those rules so they apply
+ *      before this non-blocking stylesheet lands. A second copy here only
+ *      created a duplicate-`@keyframes aa-fallback-appear` collision (last in
+ *      document order wins) that silently defeated authors customising the
+ *      snippet's keyframe.
+ *
+ * The JS still reads `aa-fallback` to skip the load tween (no replay/flash when
+ * the bundle lands) and `aa-timeout` to bypass appearance features — that logic
+ * is independent of this stylesheet and unchanged.
  */
-html[aa-fallback] [aa-animate][aa-trigger~="lcp"]:not([aa-ready]) {
-  opacity: 1;
-  transition: opacity 0.5s ease;
-}
-html[aa-timeout] [aa-animate][aa-trigger~="lcp"]:not([aa-ready]) {
-  opacity: 1;
-}
-
-/*
- * Slow-network fallback for above-the-fold content. Opt-in via the
- * docs/recipes/load-fallback inline <head> snippet, which sets
- * `html[aa-fallback]` if init hasn't fired by a tunable timeout. Scoped to
- * elements the author marked `aa-trigger="load"` or `aa-trigger="load-once"`
- * so below-the-fold content doesn't get prematurely revealed. The lib's
- * load-trigger branches detect `aa-fallback` and skip their JS animation,
- * so this CSS owns the reveal and there's no replay/flash when the bundle
- * finally lands. `both` (vs `forwards`) so the from-state holds during any
- * per-element delay too — without it, delayed elements would flash visible
- * before their delay elapses and animation begins.
- */
-@keyframes aa-fallback-appear {
-  from { opacity: 0; transform: translateY(1.5rem); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-html[aa-fallback] [aa-trigger~="load"][aa-animate]:not([aa-ready]),
-html[aa-fallback] [aa-trigger~="load-once"][aa-animate]:not([aa-ready]) {
-  visibility: visible;
-  animation: aa-fallback-appear 0.5s ease both;
-}
-
-/*
- * Universal init-timeout safety. Set by the same inline <head> snippet at a
- * longer deadline than `aa-fallback` (default 4s). Reveals every animated
- * element — load-triggered *or* scroll-triggered — at its natural rendered
- * state, with no entrance animation. Where `aa-fallback` is a graceful
- * staircase for hero copy, `aa-timeout` is the deep-fail safety net: at this
- * point the bundle has lost the race so badly that we're prioritising page
- * usability over animation correctness. When init() eventually arrives, it
- * detects `aa-timeout` and skips its appearance-feature work to avoid
- * rewinding the now-visible elements through their from-states.
- */
-html[aa-timeout] [aa-animate]:not([aa-ready]) {
-  visibility: visible;
-}
 
 .aa-word,
 .aa-char {

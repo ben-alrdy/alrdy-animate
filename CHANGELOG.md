@@ -24,6 +24,11 @@ What v8 doesn't have yet: **Pin** animations (rebuild planned in v8.x), form-sub
 
 ---
 
+## [Unreleased]
+
+### Changed
+- **The slow-network / init-timeout fallback CSS no longer ships in `dist/alrdy-animate.css`.** The `@keyframes aa-fallback-appear` keyframe and the `html[aa-fallback]` / `html[aa-timeout]` reveal rules now live **only** in the optional inline `<head>` snippet ([load-fallback recipe](https://animate.alrdy.de/recipes/load-fallback/)). They were always inert without that snippet (nothing else sets those attributes), and when the snippet *is* present it inlines its own copies — so the dist copy was dead weight that also caused a duplicate-`@keyframes` collision: the cross-origin dist CSS loads *after* the inline snippet, so it silently won the keyframe-name collision and reverted any author customisation of the fallback motion. Removing it makes the snippet's keyframe the single source of truth (edit it directly — no override gymnastics). The FOUC guard and the `lcp` opacity floor **stay** in `dist` — the npm `import 'alrdy-animate/style'` path relies on them and they do real work without the snippet. No action needed for projects on the current head snippet; the JS handling of `aa-fallback` / `aa-timeout` is unchanged.
+
 ## [8.0.4] — 2026-06-18
 
 ### Added

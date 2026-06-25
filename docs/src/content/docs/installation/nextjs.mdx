@@ -91,6 +91,14 @@ export default function App({ Component, pageProps }: AppProps) {
 }
 ```
 
+## Slow-network + init fallback (recommended)
+
+`AlrdyInit` runs `init()` from inside a `useEffect` — *after* dynamically importing GSAP, Lenis, and the lib on the client. Until all of that lands and `init()` runs, the FOUC guard from `alrdy-animate/style` holds every `[aa-animate]` element at `visibility: hidden`. On a slow connection that's a visible delay; if a chunk fails to load or `init()` throws, the hero stays hidden indefinitely while the rest of the SSR'd page renders.
+
+The [slow-network + init-timeout fallback](/recipes/load-fallback/) covers exactly this case, and it's worth wiring up anywhere you ship `alrdy-animate/style`. The one Next.js-specific rule: **the fallback timer must be inline in the document `<head>` — not inside `AlrdyInit`.** A timer that lives in the bundle can't fire until the bundle loads, which is the very thing it's there to beat.
+
+See [Using it in a bundled app](/recipes/load-fallback/#using-it-in-a-bundled-app) for the App Router (`app/layout.tsx`) and Pages Router (`_document.tsx`) placement: an inline `<style>` carrying the fallback keyframe + reveal rules (these no longer ship in `dist` — only the FOUC guard and `lcp` floor do), a `<script dangerouslySetInnerHTML>` timer in the `<head>`, and the matching `<noscript>` reveal for the JS-disabled case.
+
 ## JSX autocomplete for `aa-*` attributes
 
 `alrdy-animate/jsx` provides ambient TypeScript types so your editor autocompletes `aa-animate`, `aa-trigger`, etc. on every JSX intrinsic element. Add this anywhere that's compiled — typically at the top of your root layout or a dedicated `types/global.d.ts`:

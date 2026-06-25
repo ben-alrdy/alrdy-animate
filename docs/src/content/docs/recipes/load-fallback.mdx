@@ -65,11 +65,26 @@ Drop this snippet into `<head>` *above* the alrdy-animate `<script>` and `<link>
   html[aa-fallback] [aa-animate][aa-trigger~="lcp"]:not([aa-ready]) { opacity: 1; transition: opacity 0.5s ease; }
   html[aa-timeout] [aa-animate][aa-trigger~="lcp"]:not([aa-ready]) { opacity: 1; }
 </style>
+<noscript>
+  <style>
+    /* JS disabled: neither init() nor the fallback timer runs, so the guard
+       would hide everything permanently. Force all animated elements visible. */
+    [aa-animate] {
+      visibility: visible !important;
+      opacity: 1 !important;
+      transform: none !important;
+      filter: none !important;
+      clip-path: none !important;
+    }
+  </style>
+</noscript>
 ```
 
 Tune the two constants at the top to taste. Keep `TIMEOUT_DELAY` well above `FALLBACK_DELAY` — the first is "let JS win the race for the hero", the second is "give up, show the page".
 
-**Why the inline `<style>`** — the same FOUC + fallback rules ship in `dist/alrdy-animate.css`, but that file lands *after* the HTML renders — always on a slow connection, and deliberately so when you load it non-blocking (the [Webflow install guide](/installation/webflow/#1-site-wide-head-code) uses `media="print"` to keep it off the critical render path). Without inlining, every animated element flashes briefly visible, then disappears when the lib's CSS arrives, then fades back in when the timeout fires. Inlining the critical CSS in `<head>` closes that window — the FOUC guard is active from the very first paint, which is also what makes loading the external stylesheet non-blocking safe.
+**Why the inline `<style>`** — the FOUC guard and the `lcp` opacity floor also ship in `dist/alrdy-animate.css` (that's what the npm `import 'alrdy-animate/style'` path relies on), but that file lands *after* the HTML renders — always on a slow connection, and deliberately so when you load it non-blocking (the [Webflow install guide](/installation/webflow/#1-site-wide-head-code) uses `media="print"` to keep it off the critical render path). Without inlining, every animated element flashes briefly visible, then disappears when the guard arrives, then reappears when `init()` runs. Inlining the critical CSS in `<head>` closes that window — the FOUC guard is active from the very first paint, which is also what makes loading the external stylesheet non-blocking safe.
+
+The fallback keyframe and the `aa-fallback` / `aa-timeout` reveal rules, by contrast, ship **only** in this snippet — *not* in `dist/alrdy-animate.css`. They're inert anywhere the snippet isn't loaded (nothing else sets those attributes on `<html>`), so the dist file would only ever carry a dead, conflicting copy. That means the snippet's keyframe is the single source of truth — no cross-origin dist copy can win a duplicate-`@keyframes` collision against your customisation.
 
 ## How the staircase works
 
@@ -108,7 +123,7 @@ The tradeoff: appearance animations don't play on this load (the user already sa
 
 ## Customising the motion
 
-The default keyframe is a small upward translate (`translateY(1.5rem) → 0`) plus opacity. To use a different fallback motion (slide-down, pure fade, scale-in), override the keyframe in your own CSS *after* the inline snippet:
+The default keyframe is a small upward translate (`translateY(1.5rem) → 0`) plus opacity. To use a different fallback motion (slide-down, pure fade, scale-in), **edit `@keyframes aa-fallback-appear` directly in the snippet** — it's the only definition, so there's nothing to override:
 
 ```css
 @keyframes aa-fallback-appear {
@@ -117,7 +132,7 @@ The default keyframe is a small upward translate (`translateY(1.5rem) → 0`) pl
 }
 ```
 
-The duration, easing, and selector stay the same — just the keyframe content changes.
+The duration, easing, and selector stay the same — just the keyframe content changes. (The library no longer ships its own copy of this keyframe in `dist/alrdy-animate.css`. Earlier versions did, and because that cross-origin copy loaded *after* the snippet it won the duplicate-name collision and silently reverted your edit — so a separate override never took. If you're customising on an older release, rename the keyframe **and** raise the rule's specificity, or upgrade.)
 
 ## Why the snippet polls instead of waiting for `DOMContentLoaded`
 
@@ -142,12 +157,64 @@ Deferred scripts don't block parsing, so the hero parses sooner (the staircase c
 
 ## When you don't need this
 
-You can skip the snippet if any of these are true:
+The fallback only matters when something can leave the FOUC guard's `visibility: hidden` in place — i.e. whenever `init()` can be slow or fail to run. You can skip the snippet if:
 
-- The bundle ships in your own JS bundle (Vite / Next.js / Webpack), not from a CDN. In that case bundle availability is bound to page render, not network latency, and a JS error would prevent the React tree itself from mounting — there's no `aa-animate` flash to protect against.
-- You're shipping behind aggressive caching where most visitors hit a warm bundle *and* you're comfortable with elements staying invisible on the rare error case.
+- **You don't use the FOUC guard at all** — you don't load `alrdy-animate/style` (or otherwise apply the `[aa-animate] { visibility: hidden }` rule), and you accept a brief reflow as `init()` applies from-states. With nothing hiding the elements, there's nothing to reveal.
+- **The bundle is inlined into the initial HTML payload** (not a separate `<script src>` / chunk) *and* you're comfortable with elements staying invisible in the rare case `init()` throws.
+
+"It's a Vite / Next.js / Webpack app, not a CDN script" is **not**, on its own, a reason to skip it — see [Using it in a bundled app](#using-it-in-a-bundled-app) below. A separately-loaded bundle is still subject to download latency and chunk-load failures, both of which leave guarded elements hidden.
 
 If you only want one of the two layers, delete the other layer's `setTimeout(...)` (for `aa-fallback`, the `tryFallback` block and its scheduling `setTimeout`) and its corresponding CSS rule.
+
+## Using it in a bundled app
+
+The moment you load `alrdy-animate/style` in a Next.js / Vite / Webpack app, the same two risks apply: the FOUC guard hides every `[aa-animate]` element until `init()` runs, and `init()` waits on the JS bundle — which a slow connection delays and a failed chunk-load (or an error inside `init()` itself) can prevent outright, leaving the SSR'd hero invisible while the rest of the page renders. So you want the same two layers.
+
+One rule that's easy to get wrong: **the timer must run independently of your app bundle.** Put it in a `useEffect` or a top-level module import and it can't fire until the bundle loads — which is the very thing it's meant to beat. It has to be inline in the document `<head>`, ahead of (or `beforeInteractive` relative to) your app's JS.
+
+Use the **same `<script>` + `<style>` + `<noscript>`** as the snippet at the top of this page — only the placement and one trim change:
+
+- The base **FOUC guard** and **`lcp` opacity floor** already come from `import 'alrdy-animate/style'` (a render-blocking `<link>`, present at first paint), so you don't re-inline those two rules — only the fallback keyframe and the `html[aa-fallback]` / `html[aa-timeout]` reveal rules, which no longer ship in `dist`.
+- The `html[aa-fallback]` lcp rule out-specificities the imported `0.01` floor regardless of `<link>` order, so it still wins.
+
+### Next.js App Router — `app/layout.tsx`
+
+```tsx
+import 'alrdy-animate/style' // FOUC guard + lcp floor (render-blocking, at first paint)
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="en">
+      <head>
+        {/* Fallback keyframe + reveal rules — NOT in dist, so inline them here. */}
+        <style dangerouslySetInnerHTML={{ __html: `
+          @keyframes aa-fallback-appear { from { opacity: 0; transform: translateY(1.5rem) } to { opacity: 1; transform: none } }
+          html[aa-fallback] [aa-trigger~="load"][aa-animate]:not([aa-ready]),
+          html[aa-fallback] [aa-trigger~="load-once"][aa-animate]:not([aa-ready]) { visibility: visible; animation: aa-fallback-appear .5s ease both }
+          html[aa-timeout] [aa-animate]:not([aa-ready]) { visibility: visible }
+          html[aa-fallback] [aa-animate][aa-trigger~="lcp"]:not([aa-ready]) { opacity: 1; transition: opacity .5s ease }
+          html[aa-timeout] [aa-animate][aa-trigger~="lcp"]:not([aa-ready]) { opacity: 1 }
+        ` }} />
+        {/* The timer — paste the <script> body from the snippet at the top of this page. */}
+        <script dangerouslySetInnerHTML={{ __html: `/* FALLBACK_DELAY / TIMEOUT_DELAY timer from the snippet above */` }} />
+        {/* JS-disabled reveal — same <noscript> as the snippet above. */}
+        <noscript><style dangerouslySetInnerHTML={{ __html: `[aa-animate]{visibility:visible!important;opacity:1!important;transform:none!important;filter:none!important;clip-path:none!important}` }} /></noscript>
+      </head>
+      <body>{children}</body>
+    </html>
+  )
+}
+```
+
+A raw `<script dangerouslySetInnerHTML>` in the `<head>` is injected into the SSR'd HTML and runs before hydration, so it beats the bundle without needing `next/script` — but `<Script strategy="beforeInteractive">` from `next/script` works too. The timer only ever sets `aa-*` attributes on `<html>` and an inline `animation-delay` on plain DOM nodes — neither is a React-controlled prop, so there's no hydration mismatch.
+
+### Next.js Pages Router — `pages/_document.tsx`
+
+Put the same three tags inside `<Head>` in `_document.tsx` (using `dangerouslySetInnerHTML` for the `<script>` and `<style>`). Keep the `import 'alrdy-animate/style'` in `_app.tsx`.
+
+### Plain Vite / SPA
+
+Paste the snippet verbatim into your `index.html` `<head>`, exactly like the Webflow block — there's no async-import subtlety, the inline `<style>` is the single source.
 
 ## Page transitions (Barba)
 
