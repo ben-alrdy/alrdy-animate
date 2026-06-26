@@ -1,5 +1,6 @@
 import { defineConfig } from 'astro/config'
 import starlight from '@astrojs/starlight'
+import remarkGfm from 'remark-gfm'
 import { readFileSync } from 'node:fs'
 import { visit } from 'unist-util-visit'
 
@@ -31,7 +32,9 @@ const cdnScripts = [
 export default defineConfig({
   site: 'https://animate.alrdy.de',
   markdown: {
-    remarkPlugins: [[remarkInterpolateVersion, { version }]],
+    // remark-gfm is added explicitly: providing custom `remarkPlugins` here
+    // otherwise leaves the MDX pipeline without GFM, so tables render as raw text.
+    remarkPlugins: [remarkGfm, [remarkInterpolateVersion, { version }]],
   },
   integrations: [
     starlight({
