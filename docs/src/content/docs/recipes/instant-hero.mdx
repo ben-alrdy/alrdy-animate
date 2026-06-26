@@ -28,7 +28,11 @@ A normal `aa-trigger="load"` entrance is GSAP-driven, so its first frame can't p
 
 ## 1. Head snippet (paste into Project Settings → Custom Code → Head Code)
 
-This is self-contained: the keyframe, the eases it uses, and the split-unit layout rules are all inlined, because anything that only arrives in the non-blocking `dist` stylesheet isn't present on the first painted frame. Paste it **above** the alrdy-animate `<script>`/`<link>` tags.
+This is the **complete** head block for an instant-hero site — FOUC guard, the `aa-timeout` safety net, the instant entrance CSS, the loader, and the `<noscript>` reveal. It's leaner than the [slow-network fallback](/recipes/load-fallback/) snippet because it **drops the whole `aa-fallback` staircase** (the 1s keyframe + polling timer): `instant` heroes self-reveal via CSS, so the only safety the rest of the page needs is the `aa-timeout` net in case JS never runs.
+
+Everything the *first frame* depends on (keyframe, eases, split-unit layout) is inlined, since anything that only arrives in the non-blocking `dist` stylesheet isn't present at first paint. Paste it **above** the alrdy-animate `<script>` / `<link>` tags.
+
+> **Only using `instant`?** This is all you need — no `aa-fallback`, and no separate `lcp` (the keyframe's `0.01` opacity floor already makes instant heroes LCP-eligible). Add the [GSAP-load fallback](/recipes/load-fallback/) block *only* if you also use `load` / `load-once` heroes (merge them — one shared FOUC guard).
 
 ```html
 <!-- alrdy-animate · instant hero entrances (aa-trigger="instant") -->
@@ -48,11 +52,19 @@ This is self-contained: the keyframe, the eases it uses, and the split-unit layo
   [aa-animate]:not([aa-ready]):not([aa-trigger~="lcp"]):not([aa-trigger~="instant"]) {
     visibility: hidden;
   }
+  /* Init-timeout safety: if the bundle never runs, reveal the rest of the page
+     (your scroll / below-the-fold elements) at the 4s mark below — instant heroes
+     self-reveal already, so this is just the net for everything else. */
+  html[aa-timeout] [aa-animate]:not([aa-ready]) { visibility: visible; }
+  html[aa-timeout] [aa-modal-group] [aa-animate]:not([aa-ready]) { visibility: hidden; }
 
-  /* One parametric entrance keyframe, driven by per-direction custom props. */
+  /* One parametric entrance keyframe, driven by per-direction custom props.
+     Opacity floor is 0.01 (not 0) — non-zero so the element is an eligible LCP
+     candidate at first paint (Chrome excludes opacity:0), but visually identical
+     to 0. That makes `instant` heroes LCP-friendly on their own — no `lcp` needed. */
   @keyframes aa-load-in {
     from {
-      opacity: var(--aa-load-opacity, 0);
+      opacity: var(--aa-load-opacity, 0.01);
       translate: var(--aa-load-x, 0) var(--aa-load-y, 0);
       scale: var(--aa-load-scale, 1);
       rotate: var(--aa-load-rotate, 0deg);
@@ -88,9 +100,9 @@ This is self-contained: the keyframe, the eases it uses, and the split-unit layo
   [aa-trigger~="instant"][aa-animate~="slide-left"]  { --aa-load-opacity: 1; --aa-load-x: 100%; }
   [aa-trigger~="instant"][aa-animate~="slide-right"] { --aa-load-opacity: 1; --aa-load-x: -100%; }
 
-  /* Char-split text from-states (chars inherit these from the element; opacity 0
-     is the keyframe default, so every text entrance fades). Edit the distances /
-     blur / scale here, and the per-char stagger via --aa-load-cstagger above. */
+  /* Char-split text from-states (chars inherit these from the element; the 0.01
+     opacity floor is the keyframe default, so every text entrance fades). Edit the
+     distances / blur / scale here, and the per-char stagger via --aa-load-cstagger above. */
   [aa-trigger~="instant"][aa-animate^="text-"][aa-animate*="-up"]    { --aa-load-y:  0.4em; }
   [aa-trigger~="instant"][aa-animate^="text-"][aa-animate*="-down"]  { --aa-load-y: -0.4em; }
   [aa-trigger~="instant"][aa-animate^="text-"][aa-animate*="-left"]  { --aa-load-x:  0.4em; }
@@ -105,6 +117,16 @@ This is self-contained: the keyframe, the eases it uses, and the split-unit layo
   }
 </style>
 
+<!-- Init-timeout safety net: if the bundle never runs (JS error / blocked / dead
+     slow), reveal the page at 4s so scroll/below-fold content isn't stuck hidden.
+     init() sets aa-loaded first thing, which cancels this. -->
+<script>
+  setTimeout(function () {
+    if (!document.documentElement.hasAttribute('aa-loaded'))
+      document.documentElement.setAttribute('aa-timeout', '');
+  }, 4000);
+</script>
+
 <!-- Preload the hero webfont — required for char-split text, recommended always.
      Copy the real .woff2 URL from your Webflow font's @font-face. -->
 <link rel="preload" as="font" type="font/woff2" crossorigin
@@ -114,6 +136,14 @@ This is self-contained: the keyframe, the eases it uses, and the split-unit layo
      dependency). Inlined so it runs during head parse with ZERO network request —
      a minified snapshot of dist/loader.iife.js; re-copy it after upgrading. -->
 <script>(function(){"use strict";function f(t){const e=typeof Intl<"u"?Intl.Segmenter:void 0;if(e)try{const a=new e(void 0,{granularity:"grapheme"});return Array.from(a.segment(t),n=>n.segment)}catch{}return Array.from(t)}function p(t,e){const a=(t.textContent??"").trim();if(!a)return!1;const n=document.createElement("span");n.setAttribute("aria-hidden","true");let l=0,m=0;for(const r of a.split(/(\s+)/)){if(r==="")continue;if(/^\s+$/.test(r)){n.appendChild(document.createTextNode(r));continue}const o=document.createElement("span");o.className="aa-word",m+=1,o.style.setProperty("--word",String(m));for(const C of f(r)){const s=document.createElement("span");s.className="aa-char",l+=1,s.style.setProperty("--char",String(l)),s.textContent=C,o.appendChild(s)}n.appendChild(o)}const c=document.createElement("span");return c.className="aa-sr-only",c.textContent=a,t.textContent="",t.appendChild(n),t.appendChild(c),!0}const y='[aa-trigger~="instant"][aa-animate]',g=/^text-(fade|blur|scale)/,d=new WeakSet;function u(t){const e=t==null?NaN:parseFloat(t);return Number.isFinite(e)?e:NaN}function h(t){const e=(t.getAttribute("aa-animate")??"").split("|")[0].trim();if(!e)return;const a=u(t.getAttribute("aa-delay"));a>0&&t.style.setProperty("--aa-load-delay",`${a}s`);const n=u(t.getAttribute("aa-duration"));n>0&&t.style.setProperty("--aa-load-dur",`${n}s`),/^text-/.test(e)&&g.test(e)&&t.children.length===0&&p(t)&&t.setAttribute("aa-instant-split","")}function i(){const t=document.querySelectorAll(y);for(const e of t)d.has(e)||(d.add(e),h(e))}function b(){if(typeof document>"u"||(i(),document.documentElement.hasAttribute("aa-loaded")||document.readyState!=="loading"))return;const t=new MutationObserver(()=>{if(document.documentElement.hasAttribute("aa-loaded")){t.disconnect();return}i()});t.observe(document.documentElement,{childList:!0,subtree:!0}),document.addEventListener("DOMContentLoaded",()=>{i(),t.disconnect()},{once:!0})}b()})();</script>
+
+<!-- JS disabled: no init(), no timer — so force every animated element visible. -->
+<noscript>
+  <style>
+    [aa-animate] { visibility: visible !important; opacity: 1 !important;
+      transform: none !important; filter: none !important; clip-path: none !important; }
+  </style>
+</noscript>
 ```
 
 That's the whole feature. Element-level `instant` works with just the `<style>` block — the loader is only needed for the delay staircase and per-character text.
@@ -157,7 +187,7 @@ Everything is in your inline `<style>`, so edit it directly — there's no dist 
 
 ## How the handoff works (no double animation)
 
-1. The element carries `aa-trigger="instant"` in the static HTML, so it's **excluded from the FOUC guard** and the CSS keyframe runs on the first frame (its `from { opacity: 0 }` + `animation-fill-mode: backwards` keep it hidden during any delay, then it reverts to its natural state once the animation ends — so no flash, and a later hover transform isn't clobbered).
+1. The element carries `aa-trigger="instant"` in the static HTML, so it's **excluded from the FOUC guard** and the CSS keyframe runs on the first frame (its `from { opacity: 0.01 }` — visually hidden but a valid LCP candidate — + `animation-fill-mode: backwards` keep it near-invisible during any delay, then it reverts to its natural state once the animation ends, so no flash and a later hover transform isn't clobbered).
 2. The loader processes the hero the moment it parses (via a `MutationObserver`, so it wins the race even on a fast load): it sets the `aa-delay` custom property and, for char/word `text-*`, splits the text into `.aa-char` spans and adds `aa-instant-split`, switching the CSS from the element-level entrance to the per-character one.
 3. The CSS keyframe is **not** gated on init, so it always runs to completion — a fast `init()` can't cut it short. When the GSAP bundle loads, the library's appear/text features and reduced-motion pass **skip every `instant` element** (no SplitText, no tween); `init()` still flips `aa-ready` for DOM consistency but it no longer affects these elements.
 
@@ -170,6 +200,6 @@ This means a `instant` hero works even if the bundle is slow or never arrives (i
 - You want a **cinematic / line-based** effect — masked line reveals, `text-slide-up`, `text-tilt`, `text-oval`, `text-rotate`. Those can't be instant (line wrapping depends on the final font, the very thing you'd be waiting for), so they stay on GSAP.
 - The element is **below the fold or scroll-driven** — there's no first-paint wait to avoid, and you keep the full GSAP effect.
 - You're on **Barba / a page-transition SPA**. After the first load the bundle is cached and `init()` runs inside the leave timeline, so there's no perceptible delay — and you usually want `load-once event:enter` so the reveal **syncs to the transition's peak**, which `instant` can't do (it fires immediately on the new container, ignoring the transition). `instant` still helps the *first cold load* there, but `event:enter` is the better hero trigger for the navigations.
-- For the single **largest** above-the-fold image specifically, prefer [`aa-trigger="lcp"`](/animations/utilities/aa-trigger/) — it's tuned to count as the LCP candidate.
+- The LCP element is a **GSAP** entrance (not instant) — e.g. a hero image you're fading in via `load`. Then use [`aa-trigger="lcp"`](/animations/utilities/aa-trigger/). You **don't** need `lcp` *on top of* `instant` — the instant keyframe's `0.01` floor already makes the element an eligible LCP candidate, and the two can't be combined anyway (the library skips `instant` elements, so the `lcp` handling wouldn't run).
 
 A typical page uses `instant` on the hero and `load` / `scroll` for everything else.

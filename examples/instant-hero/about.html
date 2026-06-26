@@ -12,7 +12,7 @@
   .aa-sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
   [aa-animate]:not([aa-ready]):not([aa-trigger~="lcp"]):not([aa-trigger~="instant"]) { visibility: hidden; }
   @keyframes aa-load-in {
-    from { opacity: var(--aa-load-opacity, 0); translate: var(--aa-load-x, 0) var(--aa-load-y, 0); scale: var(--aa-load-scale, 1); rotate: var(--aa-load-rotate, 0deg); filter: blur(var(--aa-load-blur, 0)); }
+    from { opacity: var(--aa-load-opacity, 0.01); translate: var(--aa-load-x, 0) var(--aa-load-y, 0); scale: var(--aa-load-scale, 1); rotate: var(--aa-load-rotate, 0deg); filter: blur(var(--aa-load-blur, 0)); }
     to   { opacity: 1; translate: 0 0; scale: 1; rotate: 0deg; filter: blur(0); }
   }
   /* See index.html for why these are ungated + use `backwards` fill. */

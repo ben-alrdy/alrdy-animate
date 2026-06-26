@@ -23,6 +23,10 @@ This goes into **Project Settings → Custom Code → Head Code** as two blocks:
 
 ### Inline FOUC guard + safety fallback
 
+:::note[Which inline snippet do you need?]
+The block below is for **GSAP `load` / `load-once` heroes** — it includes the slow-network `aa-fallback` staircase. If your above-the-fold heroes use **`aa-trigger="instant"`** instead (CSS entrance, no bundle wait), use the leaner block from the **[Instant hero recipe](/recipes/instant-hero/)** — it drops the `aa-fallback` staircase and adds the instant CSS + loader. Both share the *same* FOUC guard, so if you use both kinds of hero you merge them into one block (one guard, concatenate the rest).
+:::
+
 Paste this first. It's inline (no network request), so it applies on the very first paint: the **FOUC guard** (`[aa-animate]:not([aa-ready]) { visibility: hidden }`) hides animated elements until `init()` flips `aa-ready` on them — without it, every animated element would briefly render in its final state, then snap to its from-state once `init()` runs. The **safety fallback** then reveals those elements again if the bundle is slow (`aa-fallback`) or never arrives (`aa-timeout`). Having the guard inline on the first paint is also what lets the external stylesheet load non-blocking (below) without reintroducing a flash.
 
 The trailing **`<noscript>`** is the no-JS safety net: with JavaScript disabled, neither `init()` nor the fallback timer ever runs, so the guard would hide every animated element permanently. The `<noscript>` override forces them all visible at their natural state (and clears the `lcp` `0.01` floor and any from-state `transform` / `filter`).
