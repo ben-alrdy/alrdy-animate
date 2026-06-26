@@ -24,7 +24,12 @@ What v8 doesn't have yet: **Pin** animations (rebuild planned in v8.x), form-sub
 
 ---
 
-## [Unreleased]
+## [8.0.7] — 2026-06-26
+
+### Fixed
+- **Slow-network fallback no longer replays the entrance on split text (no "fade-in, then hide, then animate" flash).** When the inline-snippet CSS fallback (`aa-fallback`) had already revealed a `aa-trigger="load"` heading, the load orchestrator correctly skipped its GSAP entrance — but only marked it *fired*, not *complete*. `init()` clears `aa-fallback` at the end of init, and SplitText's `autoSplit` fires an initial resplit ~one frame later; that post-clear `rebuild()` no longer saw the flag, rebuilt the tween (rewinding the already-visible lines/chars to their from-state) and replayed it. The skip now marks the entrance complete, so every later resplit/resize rebuild short-circuits. Only affected split `text-*` heroes (plain `fade` elements never resplit). Verified on Chromium, Firefox, and WebKit.
+
+## [8.0.6] — 2026-06-26
 
 ### Added
 - **`aa-trigger="instant"` — CSS-driven, instant hero entrances.** A `instant` element animates via an inline `@keyframes aa-load-in` on the **first painted frame**, before the GSAP bundle loads, so above-the-fold heroes feel instant instead of waiting ~1–2s for the bundle + fonts. The library builds no GSAP tween for these elements (the appear/text feature setup and the reduced-motion pass skip any element whose triggers include `instant`); the inline keyframe is not gated on init, so it always runs to completion (a fast init can't cut it short) and uses `backwards` fill to revert to the natural state afterward — no re-animation, no flash, no clobbered hover transform. Motion comes from `aa-animate` (element-level `fade` / `fade-up` / `blur` / `zoom` / `slide` / `rotate`). Self-revealing, so it needs no `aa-timeout` safety net. The keyframe + reveal rules live **only** in the inline `<head>` snippet (they must be present at first paint, which the non-blocking `dist` stylesheet can't guarantee) — see the new **Instant hero** recipe. The only `dist` CSS change is the FOUC guard excluding `[aa-trigger~="instant"]`.

@@ -166,6 +166,78 @@ test.describe('aa-trigger="load"', () => {
     }
   })
 
+  test('regression: aa-fallback skip on split text survives a post-init resplit (no replay flash)', async ({
+    page,
+  }) => {
+    // The plain-fade fallback test above can't catch this: appear elements never
+    // resplit. Split text does — SplitText's autoSplit fires a resize-driven
+    // resplit AFTER init() clears aa-fallback, and pre-fix that rebuild rebuilt +
+    // restarted the entrance, hiding the already-revealed lines (the "shows
+    // fallback, then hides, then runs GSAP" flash). Needs a page with SplitText.
+    const initLog = page.waitForEvent('console', { predicate: initialized, timeout: 8000 })
+    await page.goto('/animations/text/text-blur/')
+    await initLog
+
+    const result = await page.evaluate(async () => {
+      const id = 'fixture-fallback-resplit'
+      document.getElementById(id)?.remove()
+
+      // Slow-network snippet fired its CSS fallback before this init cycle: the
+      // heading is already visible.
+      document.documentElement.setAttribute('aa-fallback', '')
+
+      const el = document.createElement('h2')
+      el.id = id
+      el.style.cssText =
+        'position:fixed;top:300px;left:0;width:320px;font-size:28px;line-height:1.2;z-index:9999;'
+      el.setAttribute('aa-animate', 'text-fade')
+      el.setAttribute('aa-split', 'lines')
+      el.setAttribute('aa-trigger', 'load')
+      el.setAttribute('aa-duration', '0.6')
+      el.textContent =
+        'This heading is long enough to wrap onto several lines so a width change forces a SplitText resplit'
+      document.body.appendChild(el)
+
+      await window.AlrdyAnimate.refresh()
+
+      // refresh()/init() has now cleared aa-fallback. Narrow the box so the text
+      // re-wraps and the autoSplit ResizeObserver re-splits — the post-init
+      // rebuild that, pre-fix, rebuilt + restarted the entrance and rewound the
+      // lines to opacity 0. Sample finely (the replay dip is brief — a coarse
+      // poll misses it) and track the minimum line opacity seen, plus whether a
+      // resplit actually happened (so the test can't silently pass on a no-op).
+      el.style.width = '150px'
+      let firstLine = el.querySelector('.aa-line')
+      let resplit = false
+      let minLineOp = 1
+
+      await new Promise<void>((resolve) => {
+        let i = 0
+        const tick = (): void => {
+          const lines = el.querySelectorAll<HTMLElement>('.aa-line')
+          const fl = el.querySelector('.aa-line')
+          if (fl && fl !== firstLine) { resplit = true; firstLine = fl }
+          if (lines.length) {
+            const m = Math.min(...[...lines].map((l) => parseFloat(getComputedStyle(l).opacity)))
+            if (m < minLineOp) minLineOp = m
+          }
+          i++
+          if (i < 60) setTimeout(tick, 16)
+          else resolve()
+        }
+        tick()
+      })
+
+      return { resplit, minLineOp }
+    })
+
+    // The resplit must actually fire (else the test proves nothing)…
+    expect(result.resplit).toBe(true)
+    // …and the CSS fallback's already-revealed lines must never be rewound to the
+    // from-state and replayed. Pre-fix this dipped to ~0.
+    expect(result.minLineOp).toBeGreaterThan(0.9)
+  })
+
   test('parser accepts load alongside other triggers', async ({ page }) => {
     const initLog = page.waitForEvent('console', { predicate: initialized, timeout: 8000 })
     await page.goto('/animations/appear/fade/')

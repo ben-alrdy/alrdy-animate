@@ -288,10 +288,19 @@ export function setupTriggeredAnimation(
 
     // aa-fallback signals the inline-snippet timeout already faded the
     // element in via CSS. Running our load tween now would rewind through
-    // the from-state and flash. Mark load as fired so future rebuilds
-    // remain no-ops.
+    // the from-state and flash. Mark load COMPLETE — not merely fired — so
+    // every later rebuild short-circuits at the `loadCompleted` guard above.
+    // `loadFired` alone isn't enough: init() clears `aa-fallback` at the end
+    // of init, and SplitText's autoSplit fires an initial resplit ~one frame
+    // later (see the loadCompleted comment above). That post-clear rebuild no
+    // longer sees the flag, so it would build the tween (immediateRender
+    // writes the from-state, hiding the already-revealed text) and, since
+    // `wasFired` is set, restart(true) it — replaying the entrance the CSS
+    // fallback already played. The fallback fulfilled the entrance; treat it
+    // as done.
     if (isLoadOneShot && document.documentElement.hasAttribute('aa-fallback')) {
       loadFired = true
+      loadCompleted = true
       return
     }
 
