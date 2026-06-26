@@ -150,19 +150,7 @@ That's the whole feature. Element-level `instant` works with just the `<style>` 
 
 ## Combining with the slow-network fallback
 
-If you also use the [slow-network + init-timeout fallback](/recipes/load-fallback/) (for `load` / `load-once` / `lcp` heroes), **merge the two into one inline `<head>` block — don't paste two separate ones.** They share the FOUC guard, and the only thing that matters is that there's exactly **one** guard line, excluding both `lcp` and `instant`:
-
-```css
-[aa-animate]:not([aa-ready]):not([aa-trigger~="lcp"]):not([aa-trigger~="instant"]) { visibility: hidden; }
-```
-
-(That's why the fallback recipe now ships this exact line — paste either order and the guards are identical.) Everything else just concatenates, because the two systems act on **disjoint** triggers:
-
-- The fallback `<script>` timer targets `[aa-trigger~="load"]` / `[aa-trigger~="load-once"]` only — it never touches `instant`.
-- The loader `<script>` + the instant `<style>` rules act on `instant` only.
-- `instant` elements are self-revealing (the keyframe owns them), so they need no `aa-fallback` / `aa-timeout` safety — and the timeout's blanket `visibility: visible` is a harmless no-op for them (they're already visible).
-
-So the combined block is: the fallback `<script>` **and** the loader `<script>`, plus one `<style>` with the single guard, the fallback keyframe/reveal rules, and the instant keyframe/rules/from-states.
+If a site also uses GSAP `load` / `load-once` heroes with the [slow-network fallback](/recipes/load-fallback/), **merge both into one `<head>` block** — keep a single FOUC guard (the one above, excluding `lcp` + `instant`) and concatenate the rest. No conflict: the two systems act on disjoint triggers — the fallback timer targets `load` / `load-once`, the loader + instant CSS target `instant`, and instant elements self-reveal (the `aa-timeout` blanket reveal is a harmless no-op for them).
 
 :::tip[Prefer a CDN tag over pasting the blob?]
 Swap the inline `<script>` for `<script src="https://cdn.jsdelivr.net/npm/alrdy-animate@{{version}}/dist/loader.iife.js"></script>`. Simpler to keep updated, but it's one network request — so the first char-split paints a beat later than the inlined version. Element-level `instant` (and the `aa-delay` staircase) is pure CSS plus tiny inline JS, so the choice only affects the char cascade.
@@ -187,11 +175,7 @@ Everything is in your inline `<style>`, so edit it directly — there's no dist 
 
 ## How the handoff works (no double animation)
 
-1. The element carries `aa-trigger="instant"` in the static HTML, so it's **excluded from the FOUC guard** and the CSS keyframe runs on the first frame (its `from { opacity: 0.01 }` — visually hidden but a valid LCP candidate — + `animation-fill-mode: backwards` keep it near-invisible during any delay, then it reverts to its natural state once the animation ends, so no flash and a later hover transform isn't clobbered).
-2. The loader processes the hero the moment it parses (via a `MutationObserver`, so it wins the race even on a fast load): it sets the `aa-delay` custom property and, for char/word `text-*`, splits the text into `.aa-char` spans and adds `aa-instant-split`, switching the CSS from the element-level entrance to the per-character one.
-3. The CSS keyframe is **not** gated on init, so it always runs to completion — a fast `init()` can't cut it short. When the GSAP bundle loads, the library's appear/text features and reduced-motion pass **skip every `instant` element** (no SplitText, no tween); `init()` still flips `aa-ready` for DOM consistency but it no longer affects these elements.
-
-This means a `instant` hero works even if the bundle is slow or never arrives (it's self-revealing), and on a full-page or Barba navigation the keyframe simply replays on the fresh element.
+The `instant` element is excluded from the FOUC guard, so the keyframe runs on the first frame — from `opacity: 0.01` (hidden but LCP-eligible) with `backwards` fill, so it reverts cleanly afterward without clobbering a later hover transform. The loader splits char-text the moment it parses (a `MutationObserver` wins the race even on a fast load). The keyframe isn't gated on init, so a fast `init()` can't cut it short; when the bundle lands the library **skips every `instant` element** (no tween, no re-split) and just flips `aa-ready`. So it works even if the bundle is slow or never arrives, and replays on the fresh element after a full-page or Barba navigation.
 
 ## When not to use it (use `load` instead)
 

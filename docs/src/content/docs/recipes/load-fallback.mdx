@@ -86,50 +86,18 @@ Drop this snippet into `<head>` *above* the alrdy-animate `<script>` and `<link>
 </noscript>
 ```
 
-Tune the two constants at the top to taste. Keep `TIMEOUT_DELAY` well above `FALLBACK_DELAY` — the first is "let JS win the race for the hero", the second is "give up, show the page".
+Tune the two constants up top. Keep `TIMEOUT_DELAY` well above `FALLBACK_DELAY` — "let JS win the race for the hero" vs "give up and show the page". The script reads each element's `aa-delay` and sets `animation-delay` inline so the staircase still reads; it ignores `aa-stagger` (the split units don't exist pre-bundle, so it fades each element as a whole).
 
-The FOUC guard excludes both `lcp` and `instant` (`:not([aa-trigger~="lcp"]):not([aa-trigger~="instant"])`) — both of those paint on purpose before the bundle. If you don't use them it's harmless; if you do, it means this snippet and the [instant-hero](/recipes/instant-hero/) one share one guard, so you can combine them in a single `<head>` block without conflict.
+The FOUC guard excludes `lcp` and `instant` (both paint on purpose), so this snippet and the [instant-hero](/recipes/instant-hero/) one share one guard and combine into a single `<head>` block.
 
-**Why the inline `<style>`** — the FOUC guard and the `lcp` opacity floor also ship in `dist/alrdy-animate.css` (that's what the npm `import 'alrdy-animate/style'` path relies on), but that file lands *after* the HTML renders — always on a slow connection, and deliberately so when you load it non-blocking (the [Webflow install guide](/installation/webflow/#1-site-wide-head-code) uses `media="print"` to keep it off the critical render path). Without inlining, every animated element flashes briefly visible, then disappears when the guard arrives, then reappears when `init()` runs. Inlining the critical CSS in `<head>` closes that window — the FOUC guard is active from the very first paint, which is also what makes loading the external stylesheet non-blocking safe.
-
-The fallback keyframe and the `aa-fallback` / `aa-timeout` reveal rules, by contrast, ship **only** in this snippet — *not* in `dist/alrdy-animate.css`. They're inert anywhere the snippet isn't loaded (nothing else sets those attributes on `<html>`), so the dist file would only ever carry a dead, conflicting copy. That means the snippet's keyframe is the single source of truth — no cross-origin dist copy can win a duplicate-`@keyframes` collision against your customisation.
-
-## How the staircase works
-
-The script honours one timing attribute so the fallback looks like a quieter version of the real animation:
-
-- **`aa-delay="<seconds>"`** — delays the element's fade-up. E.g. a paragraph with `aa-delay="0.2"` appears 200ms after the headline, so the hero's staircase still reads. CSS alone can't apply this (typed `attr()` isn't widely supported yet), so the script sets it inline.
-
-Everything else fades as a whole element via the CSS keyframe. The script deliberately **ignores `aa-stagger`**: a stagger targets units that don't exist yet at fallback time — the split-text lines/chars of a `text-*` animation, or the children the real init walks — and the bundle hasn't run to create them. Trying to reproduce it risks animating the wrong nodes (e.g. only an inline `<span>` inside a headline, leaving the rest of the text to just appear). A clean whole-element fade is the safe quieter version; on a normal-speed load the bundle wins the race and the real per-line / per-child stagger plays instead.
+**Why inline** — the FOUC guard + `lcp` floor also ship in `dist/alrdy-animate.css`, but that file loads *after* first paint (non-blocking), so without an inline guard every animated element flashes visible, then hides when the guard lands, then reveals at `init()`. The fallback keyframe + `aa-fallback` / `aa-timeout` rules ship **only** here (nothing else sets those attributes), so the snippet is their single source — no cross-origin dist copy to collide with.
 
 ## What each layer does
 
-`init()` sets `aa-loaded` on `<html>` as its first synchronous step. The two timers check for that attribute and bail out if it's already set.
+`init()` sets `aa-loaded` on `<html>` as its first step; both timers bail if it's already set.
 
-### Layer 1 — `aa-fallback` (1s default)
-
-Sets `html[aa-fallback]`. The CSS rule matches both `[aa-trigger~="load"]` and `[aa-trigger~="load-once"]`, so it covers every load-triggered element (including combined forms like `aa-trigger="load-once event:enter"`). The keyframe fades those elements up, respecting `aa-delay` and `aa-stagger` so the staircase still plays.
-
-When the bundle eventually arrives, the lib's load-trigger branches detect `aa-fallback` and skip their JS animation entirely — the elements stay where the fallback put them, no replay or flash. `init()` clears `aa-fallback` at the end, so subsequent Barba navigations don't re-trigger the keyframe.
-
-Scoped to `[aa-trigger~="load"]` / `[aa-trigger~="load-once"]` on purpose: scroll-triggered elements below the fold stay hidden until the lib actually arrives. Only elements the author has explicitly marked as "needs to be visible immediately" are eligible for the fallback fade.
-
-### Layer 2 — `aa-timeout` (4s default)
-
-Sets `html[aa-timeout]`. The CSS rule reveals **every** `[aa-animate]` element at its natural rendered state — no animation, no from-state. This is the deep-fail safety net: if JS errored, the bundle is blocked, or the network is so slow that even the hero staircase isn't enough, the page still ends up usable.
-
-One exception: **animated content inside a modal group stays hidden**. A modal card's `aa-animate` is its *open* entrance, so its natural state is closed/hidden — the blanket reveal would otherwise flash a closed modal on screen at the 4s mark on a slow connection. The follow-up rule `html[aa-timeout] [aa-modal-group] [aa-animate]:not([aa-ready]) { visibility: hidden }` re-hides those (same specificity, later in source, so it wins) until the bundle lands and the modal feature takes over its open/close state. Any element keyed by `[aa-modal-group]` is covered automatically — no per-modal attribute needed.
-
-When `init()` eventually arrives, it detects `aa-timeout` and switches to bypass mode:
-
-- Drops `scroll`, `text`, `reveal`, `parallax` from the feature load set — no from-states applied, no entrance ScrollTriggers, no flash from rewinding the now-visible elements.
-- Skips the reduced-motion fade pass.
-- Still wires up interactive features (tabs, slider, marquee, modal, nav, hover, cursor, split) so components remain functional.
-- Still mounts smooth-scroll, scroll-state, and scroll-target globals.
-- Flips `aa-ready` on every `[aa-animate]` element so the DOM ends in a consistent state.
-- Clears `aa-timeout`, so the next Barba navigation runs animations normally.
-
-The tradeoff: appearance animations don't play on this load (the user already saw the content for 4+ seconds), and event-triggered scroll/text/reveal entries don't fire on this page. At that point, page consistency outweighs animation correctness.
+- **`aa-fallback` (1s)** — fades `load` / `load-once` elements up via the keyframe (respecting `aa-delay`). Scoped to those triggers, so below-the-fold scroll elements stay hidden until the lib arrives. When the bundle lands, the load branches detect `aa-fallback` and skip their JS animation (no replay/flash); `init()` clears the attribute.
+- **`aa-timeout` (4s)** — the deep-fail net: reveals **every** `[aa-animate]` at its natural state, no animation. Closed modals stay hidden (a modal card's `aa-animate` is its *open* entrance — the `html[aa-timeout] [aa-modal-group]` rule re-hides them). When `init()` arrives under `aa-timeout` it skips appearance features (no rewind from-states) but still wires interactive components + globals, then clears the attribute. Tradeoff: entrance animations don't play on that load — the user already saw the content for 4s+.
 
 ## Customising the motion
 
@@ -142,28 +110,13 @@ The default keyframe is a small upward translate (`translateY(1.5rem) → 0`) pl
 }
 ```
 
-The duration, easing, and selector stay the same — just the keyframe content changes. (The library no longer ships its own copy of this keyframe in `dist/alrdy-animate.css`. Earlier versions did, and because that cross-origin copy loaded *after* the snippet it won the duplicate-name collision and silently reverted your edit — so a separate override never took. If you're customising on an older release, rename the keyframe **and** raise the rule's specificity, or upgrade.)
+The duration, easing, and selector stay the same — just edit the keyframe.
 
-## Why the snippet polls instead of waiting for `DOMContentLoaded`
+## Why it polls (don't gate on `DOMContentLoaded`)
 
-The obvious way to write the apply step is "wait until the DOM is ready, then style the hero" — gate on `document.readyState` and fall back to `DOMContentLoaded`. **Don't.** On a real page it loses the race every time, for a reason that isn't obvious:
+A render-blocking `<script>` (Typekit, or Webflow's jQuery/GSAP bundle) keeps `document.readyState` at `'loading'` and delays `DOMContentLoaded` — on a slow connection, past `TIMEOUT_DELAY`. So a `DOMContentLoaded` gate would never run the staircase. The snippet instead **polls** for the hero (which parses early, near the top of `<body>`) and applies the moment it appears.
 
-A render-blocking `<script src>` (no `defer`/`async`) pauses HTML parsing until it downloads. While the parser is paused, parsing is not "complete", so `document.readyState` stays `'loading'` and `DOMContentLoaded` does not fire. On a Webflow page there are always render-blocking scripts you don't control — Typekit in `<head>`, and the **jQuery + `webflow.js` + GSAP/ScrollTrigger** bundle Webflow appends at the *end* of `<body>`. On a genuinely slow connection those keep `readyState` at `'loading'` for **5–15 seconds**, and push `DOMContentLoaded` *past* `TIMEOUT_DELAY` — so the safety-net reveal has already fired and the staircase never plays. A `readyState`/`DOMContentLoaded` gate simply cannot win.
-
-The fix is to stop using "document finished parsing" as a proxy for "the hero exists." The hero is near the top of `<body>` and is parsed within the first second or two regardless of what's blocking further down the page. So the snippet **polls for the load-trigger elements** and applies the moment they appear — typically seconds before `DOMContentLoaded` on a slow load.
-
-### Still add `defer` to your own CDN scripts
-
-`defer` doesn't fix the snippet (you can't defer Webflow's injected scripts), but it's still worth doing on the `<script src="…">` tags *you* control:
-
-```html
-<script defer src="https://cdn.jsdelivr.net/npm/gsap@3/dist/gsap.min.js"></script>
-<script defer src="https://cdn.jsdelivr.net/npm/gsap@3/dist/ScrollTrigger.min.js"></script>
-<script defer src="https://cdn.jsdelivr.net/npm/lenis@1/dist/lenis.min.js"></script>
-<script defer src="https://cdn.jsdelivr.net/npm/alrdy-animate@{{version}}/dist/alrdy-animate.umd.js"></script>
-```
-
-Deferred scripts don't block parsing, so the hero parses sooner (the staircase can start earlier) and `init()` runs sooner once the bundle lands. Two related wins on Webflow specifically: load alrdy-animate's GSAP build *instead of* Webflow's native GSAP rather than both — shipping GSAP twice is a large chunk of the render-blocking weight that delays the real init — and if you can, bind your `AlrdyAnimate.init(...)` call to the bundle being ready rather than to `DOMContentLoaded`, which on a slow Webflow load is one of the last events to fire.
+Still add `defer` to the CDN `<script>` tags *you* control (they download in parallel, `init()` runs sooner — you can't defer Webflow's injected scripts), and load alrdy-animate's GSAP build *instead of* Webflow's native GSAP, not both.
 
 ## When you don't need this
 
@@ -233,23 +186,5 @@ This snippet only protects the *first* page load. On subsequent navigations the 
 
 ## Verifying it locally
 
-### Layer 1 — `aa-fallback` (slow network)
-
-1. Open DevTools → Network → check "Disable cache" → throttle to "Slow 3G" (or "Slow 4G").
-2. Reload. You should see:
-   - Hero elements stay invisible for `FALLBACK_DELAY` plus however long the hero takes to parse — roughly 1–3s on a slow connection, not a hard 1s.
-   - They then fade up — respecting any `aa-delay` and `aa-stagger` you set, so the staircase plays out before the bundle finishes downloading.
-   - This should land *before* the `aa-timeout` reveal (4s default). If the staircase only ever appears as an instant, no-animation reveal at the 4s mark, the fallback isn't winning — see the troubleshooting note below.
-   - When the bundle eventually lands, no second animation plays — the elements stay where the fallback put them.
-3. Open the Elements panel and inspect a load-trigger element while the fallback is in flight. You should see `<html aa-fallback>`, and on any element with `aa-delay`, an inline `style="animation-delay: 0.2s"`. Elements without `aa-delay` fade via the CSS keyframe with no inline style. If `aa-fallback` is set but a delayed element's inline style is missing, the timer fired before that element parsed — the poll retries and applies it once it appears.
-
-If the staircase never plays and you only get the blanket 4s reveal, you almost certainly have an older copy of this snippet that gated the apply step on `document.readyState === 'loading'` / `DOMContentLoaded`. On any page with render-blocking scripts (every Webflow page) that gate defers the apply until `DOMContentLoaded`, which fires *after* the timeout — re-copy the current snippet, which polls instead.
-
-### Layer 2 — `aa-timeout` (bundle never arrives)
-
-1. In DevTools → Network, **block** the alrdy-animate `<script>` URL (right-click the request → Block request URL).
-2. Reload. You should see:
-   - All `[aa-animate]` elements stay hidden for ~4s (the `TIMEOUT_DELAY` interval).
-   - At the timer mark, every animated element on the page becomes visible at its natural rendered state — no fades, no entrance motion.
-   - The Elements panel shows `<html aa-timeout>`.
-3. Unblock the request and reload. Hero fades in via Layer 1 if it gets stuck under 4s, otherwise normal init runs and the snippet does nothing.
+- **`aa-fallback`** — DevTools → Network → "Disable cache" + throttle to Slow 3G, reload. The hero should fade up (`<html aa-fallback>` in the Elements panel) *before* the 4s timeout, and the bundle landing later should *not* replay it. If you only ever get the instant 4s reveal, you have an old copy that gated on `DOMContentLoaded` — re-copy the current (polling) snippet.
+- **`aa-timeout`** — Network → block the alrdy-animate `<script>` URL, reload. Everything stays hidden ~4s, then reveals at its natural state (`<html aa-timeout>`).

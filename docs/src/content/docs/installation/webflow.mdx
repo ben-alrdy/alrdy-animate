@@ -21,19 +21,21 @@ There are three pieces, mapped to three places in Webflow:
 
 This goes into **Project Settings → Custom Code → Head Code** as two blocks: an inline safety snippet, then the library's CSS + scripts. The stylesheet is loaded **non-blocking** (off the critical render path), which is safe because the only render-critical rules — the FOUC guard and the slow-network fallback — are inlined in the first block.
 
-### Inline FOUC guard + safety fallback
+### Inline safety snippet
 
-:::note[Which inline snippet do you need?]
-The block below is for **GSAP `load` / `load-once` heroes** — it includes the slow-network `aa-fallback` staircase. If your above-the-fold heroes use **`aa-trigger="instant"`** instead (CSS entrance, no bundle wait), use the leaner block from the **[Instant hero recipe](/recipes/instant-hero/)** — it drops the `aa-fallback` staircase and adds the instant CSS + loader. Both share the *same* FOUC guard, so if you use both kinds of hero you merge them into one block (one guard, concatenate the rest).
-:::
+Paste this **first**, above the CSS/scripts block. Inline (no request), so it works on the very first paint: the **FOUC guard** (`[aa-animate]:not([aa-ready]) { visibility: hidden }`) hides animated elements until `init()` reveals them, plus a net so nothing stays blank if the bundle is slow or never arrives, and a `<noscript>` reveal for JS-off. Both tabs use the **same FOUC guard** — if a page has both kinds of hero, merge into one block (one guard, concatenate the rest).
 
-Paste this first. It's inline (no network request), so it applies on the very first paint: the **FOUC guard** (`[aa-animate]:not([aa-ready]) { visibility: hidden }`) hides animated elements until `init()` flips `aa-ready` on them — without it, every animated element would briefly render in its final state, then snap to its from-state once `init()` runs. The **safety fallback** then reveals those elements again if the bundle is slow (`aa-fallback`) or never arrives (`aa-timeout`). Having the guard inline on the first paint is also what lets the external stylesheet load non-blocking (below) without reintroducing a flash.
+<Tabs syncKey="hero-strategy">
+<TabItem label="Instant heroes (CSS)">
 
-The trailing **`<noscript>`** is the no-JS safety net: with JavaScript disabled, neither `init()` nor the fallback timer ever runs, so the guard would hide every animated element permanently. The `<noscript>` override forces them all visible at their natural state (and clears the `lcp` `0.01` floor and any from-state `transform` / `filter`).
+For `aa-trigger="instant"` heroes — the entrance paints on the first frame, *before* GSAP. Leaner: no slow-network staircase (instant heroes self-reveal), just the `aa-timeout` net for the rest of the page.
 
-:::tip[Want the hero to animate *instantly*?]
-For above-the-fold hero copy, `aa-trigger="instant"` paints its entrance on the first frame as pure CSS — before GSAP loads — so there's no wait for the bundle at all. It needs its own inline `<head>` block; see the [Instant hero entrances recipe](/recipes/instant-hero/).
-:::
+Copy the full block (FOUC guard + `aa-timeout` + instant CSS + loader + `<noscript>`) from the **[Instant hero recipe](/recipes/instant-hero/)** — that's also where you tune the motion.
+
+</TabItem>
+<TabItem label="GSAP load heroes">
+
+For `aa-trigger="load"` / `"load-once"` heroes — adds the slow-network `aa-fallback` staircase that fades the hero in if the bundle is late.
 
 ```html
 <!-- alrdy-animate FOUC guard + slow-network/timeout safety (optional but recommended). -->
@@ -107,6 +109,11 @@ For above-the-fold hero copy, `aa-trigger="instant"` paints its entrance on the 
 </noscript>
 ```
 
+**Tuning the timeouts.** `FALLBACK_DELAY` (1s) — how long before the hero fades in via CSS when the bundle is slow (lower = sooner; higher = more time for JS to win the race). `TIMEOUT_DELAY` (4s) — the universal net: reveal *every* `[aa-animate]` at its natural state if `init()` never runs; keep it well above `FALLBACK_DELAY`. When `init()` arrives it detects `aa-timeout` and skips appearance work (no rewind) while still wiring interactive components.
+
+</TabItem>
+</Tabs>
+
 ### Library CSS + scripts
 
 Paste this second, below the safety snippet. Pick the tab that matches where GSAP comes from — your choice is remembered as you move between pages.
@@ -171,13 +178,11 @@ Webflow only loads GSAP (and the plugins you've enabled) on pages where it's act
 </TabItem>
 </Tabs>
 
-**Why `defer`** — without it, every `<script>` blocks HTML parsing, which makes the whole page wait for each download in series. With `defer`, all scripts download in parallel while the parser sails through the body; they then execute in document order at the end of parsing. This is faster on every connection and lets `init()` run sooner. (The inline fallback above doesn't depend on it — it polls for the hero rather than waiting on parse completion — but `defer` still helps the real animations arrive faster. See the [load-fallback recipe](/recipes/load-fallback/).)
+A few notes:
 
-**Tuning the two timeouts.** `FALLBACK_DELAY` (default 1s) controls the hero staircase fade for `aa-trigger="load"` / `"load-once"` elements; tune it to taste — lower = faster fallback, higher = more time for JS to win the race. `TIMEOUT_DELAY` (default 4s) is the universal safety net: if `init()` hasn't run by then, *all* `[aa-animate]` elements get revealed at their natural state with no entrance animation, so the page doesn't stay invisible if the bundle is blocked or errors. Keep it well above `FALLBACK_DELAY`. When init eventually arrives it detects `aa-timeout` and skips its appearance-feature work to avoid rewinding the now-visible elements through their from-states — interactive components (tabs, slider, modal, nav, hover, cursor) still wire up normally.
-
-**Trim the plugin list.** `init({ debug: true })` prints any "Missing GSAP plugins" warnings with the exact `<script>` tag you need to add. Drop the lines you don't use to keep the page lighter.
-
-**Why the stylesheet is non-blocking.** `media="print"` tells the browser to fetch the file at low priority without holding up the first paint; `onload="this.media='all'"` swaps it to screen styles the moment it lands, and the `<noscript>` copy keeps it working with JS disabled. This is only safe because every rule the *first paint* depends on — the FOUC guard, the `lcp` opacity floor, the fallback keyframe, and the timeout reveal — is inlined in the safety snippet above. The external file carries helper classes and interactive-component defaults (plus a redundant copy of the FOUC guard + `lcp` floor for the npm `import 'alrdy-animate/style'` path); the fallback keyframe and timeout rules are *not* in the external file at all — they live only in the snippet. One caveat: a marquee, tabs, or hover-text component placed above the fold can flash unstyled for the moment before the file lands; if that matters on a given page, inline the whole `dist/alrdy-animate.css` into the safety snippet instead.
+- **`defer`** lets all scripts download in parallel and run in order after parsing — faster, and `init()` runs sooner. Plugins are registered at `init()`, so order doesn't matter and the inline snippet doesn't depend on it.
+- **Trim the plugins.** `init({ debug: true })` logs any "Missing GSAP plugins" warning with the exact `<script>` to add — drop the lines you don't use.
+- **Non-blocking stylesheet.** `media="print"` + `onload="this.media='all'"` keeps the CSS off the critical path (the `<noscript>` covers JS-off). Safe because every first-paint-critical rule is in the inline snippet above. Caveat: an above-the-fold marquee/tabs/hover-text component can briefly flash unstyled before the file lands — if that matters, inline the whole `dist/alrdy-animate.css` instead.
 
 ## 2. Site-wide footer code
 
