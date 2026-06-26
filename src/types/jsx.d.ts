@@ -106,7 +106,8 @@ declare namespace JSX {
      *   rotate at the element level); the library builds no GSAP tween for it
      *   (the inline `@keyframes aa-load-in` owns the entrance and runs to
      *   completion regardless of when the bundle loads). Add the `alrdy-animate/loader`
-     *   script for an `aa-delay` staircase and instant per-character `text-*`
+     *   script for `aa-delay` / `aa-duration` / `aa-ease` per-element timing and
+     *   instant per-character `text-*`
      *   cascades (`text-fade`/`-up`/…, `text-blur`, `text-scale`); line-based
      *   `text-*` (slide/tilt/oval/rotate) fall back to an element-level fade
      *   since lines need font metrics. Requires the inline `<head>` snippet

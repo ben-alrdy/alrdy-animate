@@ -17,11 +17,11 @@
   }
   /* See index.html for why these are ungated + use `backwards` fill. */
   [aa-trigger~="instant"][aa-animate]:not([aa-instant-split]) {
-    animation: aa-load-in var(--aa-load-dur, 0.6s) var(--aa-ease-osmo) backwards;
+    animation: aa-load-in var(--aa-load-dur, 0.6s) var(--aa-load-ease, var(--aa-ease-osmo)) backwards;
     animation-delay: var(--aa-load-delay, 0s);
   }
   [aa-trigger~="instant"][aa-instant-split] .aa-char {
-    animation: aa-load-in var(--aa-load-dur, 0.6s) var(--aa-ease-osmo) backwards;
+    animation: aa-load-in var(--aa-load-dur, 0.6s) var(--aa-load-ease, var(--aa-ease-osmo)) backwards;
     animation-delay: calc((var(--char) - 1) * var(--aa-load-cstagger, 0.03s) + var(--aa-load-delay, 0s));
   }
   [aa-trigger~="instant"][aa-animate~="fade-up"]    { --aa-load-y: 2rem; }

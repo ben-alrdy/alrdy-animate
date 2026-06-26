@@ -28,6 +28,14 @@ const SELECTOR = '[aa-trigger~="instant"][aa-animate]'
 // metrics, so they fall through to the element-level fade here.
 const CHAR_TEXT = /^text-(fade|blur|scale)/
 
+// Named eases that have a CSS cubic-bezier equivalent (the `--aa-ease-*` vars in
+// the inline snippet). GSAP-only eases (elastic/bounce/power*) aren't expressible
+// in CSS, so `aa-ease` on an instant element is limited to these (or a raw CSS
+// timing function); anything else is passed through and falls back if invalid.
+const CSS_EASES = new Set([
+  'osmo', 'energy', 'smooth', 'punch', 'relaxed', 'jump', 'pop', 'anticipate', 'fade',
+])
+
 const processed: WeakSet<Element> = new WeakSet()
 
 function num(value: string | null): number {
@@ -48,6 +56,8 @@ function process(el: HTMLElement): void {
   if (delay > 0) el.style.setProperty('--aa-load-delay', `${delay}s`)
   const dur = num(el.getAttribute('aa-duration'))
   if (dur > 0) el.style.setProperty('--aa-load-dur', `${dur}s`)
+  const ease = (el.getAttribute('aa-ease') ?? '').trim()
+  if (ease) el.style.setProperty('--aa-load-ease', CSS_EASES.has(ease) ? `var(--aa-ease-${ease})` : ease)
 
   // Char split only for char/word text on a plain-text element (nested markup
   // would be destroyed). `aa-instant-split` switches the CSS from the
