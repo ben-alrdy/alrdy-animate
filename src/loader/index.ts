@@ -52,10 +52,12 @@ function process(el: HTMLElement): void {
   // lives in the inline CSS keyed off `aa-animate` — same as the element-level
   // entrance — so it's all editable in one place. The loader only splits the
   // text and sets `--char`; it does NOT bake in any from-state.
+  // Per-element delay goes in --aa-delay; the CSS adds it on top of the global
+  // --aa-load-delay base, so a non-zero base composes with per-element aa-delay.
   const delay = num(el.getAttribute('aa-delay'))
-  if (delay > 0) el.style.setProperty('--aa-load-delay', `${delay}s`)
+  if (delay > 0) el.style.setProperty('--aa-delay', `${delay}s`)
   const dur = num(el.getAttribute('aa-duration'))
-  if (dur > 0) el.style.setProperty('--aa-load-dur', `${dur}s`)
+  if (dur > 0) el.style.setProperty('--aa-load-duration', `${dur}s`)
   const ease = (el.getAttribute('aa-ease') ?? '').trim()
   if (ease) el.style.setProperty('--aa-load-ease', CSS_EASES.has(ease) ? `var(--aa-ease-${ease})` : ease)
 

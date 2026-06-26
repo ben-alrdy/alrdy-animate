@@ -44,19 +44,13 @@ Everything the *first frame* depends on (keyframe, eases, split-unit layout) is 
     --aa-ease-anticipate: cubic-bezier(0.8, -0.4, 0.5, 1);
     --aa-ease-fade: cubic-bezier(0.25, 0.1, 0.25, 1);
 
-    /* ── Instant defaults — tune everything here ──
-       Per element, override via aa-duration / aa-ease / aa-delay or inline style;
-       the directional from-states below override --aa-load-x/y/scale/blur per aa-animate. */
-    --aa-load-dur: 0.6s;                  /* entrance duration */
+    /* ── Instant defaults — tune here ──
+       Per element, override via aa-duration / aa-ease / aa-delay or inline style. */
+    --aa-load-duration: 0.6s;             /* entrance duration */
     --aa-load-ease: var(--aa-ease-osmo);  /* entrance ease */
-    --aa-load-delay: 0s;                  /* base delay (per element: aa-delay) */
+    --aa-load-delay: 0s;                  /* base delay on every entrance — per-element aa-delay adds on top */
     --aa-load-cstagger: 0.02s;            /* per-character stagger */
-    --aa-load-opacity: 0.01;             /* fade floor — non-zero = LCP-eligible at first paint */
-    --aa-load-x: 0;
-    --aa-load-y: 0;
-    --aa-load-scale: 1;
-    --aa-load-rotate: 0deg;
-    --aa-load-blur: 0;
+    --aa-load-opacity: 0.01;              /* fade floor — non-zero = LCP-eligible at first paint */
   }
   .aa-word, .aa-char { display: inline-block; }
   .aa-sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
@@ -69,15 +63,15 @@ Everything the *first frame* depends on (keyframe, eases, split-unit layout) is 
   /* Entrance. `backwards` fill hides during any delay, reverts to natural after;
      not gated on :not([aa-ready]) so a fast init() can't cut it short. */
   @keyframes aa-load-in {
-    from { opacity: var(--aa-load-opacity); translate: var(--aa-load-x) var(--aa-load-y); scale: var(--aa-load-scale); rotate: var(--aa-load-rotate); filter: blur(var(--aa-load-blur)); }
+    from { opacity: var(--aa-load-opacity); translate: var(--aa-load-x, 0) var(--aa-load-y, 0); scale: var(--aa-load-scale, 1); rotate: var(--aa-load-rotate, 0deg); filter: blur(var(--aa-load-blur, 0)); }
     to   { opacity: 1; translate: 0 0; scale: 1; rotate: 0deg; filter: blur(0); }
   }
   [aa-trigger~="instant"][aa-animate]:not([aa-instant-split]),
   [aa-trigger~="instant"][aa-instant-split] .aa-char {
-    animation: aa-load-in var(--aa-load-dur) var(--aa-load-ease) backwards;
+    animation: aa-load-in var(--aa-load-duration) var(--aa-load-ease) backwards;
   }
-  [aa-trigger~="instant"][aa-animate]:not([aa-instant-split]) { animation-delay: var(--aa-load-delay); }
-  [aa-trigger~="instant"][aa-instant-split] .aa-char { animation-delay: calc((var(--char) - 1) * var(--aa-load-cstagger) + var(--aa-load-delay)); }
+  [aa-trigger~="instant"][aa-animate]:not([aa-instant-split]) { animation-delay: calc(var(--aa-load-delay) + var(--aa-delay, 0s)); }
+  [aa-trigger~="instant"][aa-instant-split] .aa-char { animation-delay: calc((var(--char) - 1) * var(--aa-load-cstagger) + var(--aa-load-delay) + var(--aa-delay, 0s)); }
 
   /* Directional from-states — override the --aa-load-* defaults per aa-animate value. */
   [aa-trigger~="instant"][aa-animate~="fade-up"]    { --aa-load-y:  2rem; }
@@ -119,7 +113,7 @@ Everything the *first frame* depends on (keyframe, eases, split-unit layout) is 
       href="https://cdn.prod.website-files.com/YOUR_SITE_ID/YOUR_FONT.woff2">
 
 <!-- Loader: reads aa-delay / aa-duration / aa-ease + char-splits text (no GSAP). Minified dist/loader.iife.js — re-copy after upgrading. -->
-<script>(function(){"use strict";function f(t){const e=typeof Intl<"u"?Intl.Segmenter:void 0;if(e)try{const a=new e(void 0,{granularity:"grapheme"});return Array.from(a.segment(t),n=>n.segment)}catch{}return Array.from(t)}function p(t,e){const a=(t.textContent??"").trim();if(!a)return!1;const n=document.createElement("span");n.setAttribute("aria-hidden","true");let o=0,m=0;for(const r of a.split(/(\s+)/)){if(r==="")continue;if(/^\s+$/.test(r)){n.appendChild(document.createTextNode(r));continue}const s=document.createElement("span");s.className="aa-word",m+=1,s.style.setProperty("--word",String(m));for(const C of f(r)){const i=document.createElement("span");i.className="aa-char",o+=1,i.style.setProperty("--char",String(o)),i.textContent=C,s.appendChild(i)}n.appendChild(s)}const d=document.createElement("span");return d.className="aa-sr-only",d.textContent=a,t.textContent="",t.appendChild(n),t.appendChild(d),!0}const y='[aa-trigger~="instant"][aa-animate]',h=/^text-(fade|blur|scale)/,g=new Set(["osmo","energy","smooth","punch","relaxed","jump","pop","anticipate","fade"]),u=new WeakSet;function l(t){const e=t==null?NaN:parseFloat(t);return Number.isFinite(e)?e:NaN}function b(t){const e=(t.getAttribute("aa-animate")??"").split("|")[0].trim();if(!e)return;const a=l(t.getAttribute("aa-delay"));a>0&&t.style.setProperty("--aa-load-delay",`${a}s`);const n=l(t.getAttribute("aa-duration"));n>0&&t.style.setProperty("--aa-load-dur",`${n}s`);const o=(t.getAttribute("aa-ease")??"").trim();o&&t.style.setProperty("--aa-load-ease",g.has(o)?`var(--aa-ease-${o})`:o),/^text-/.test(e)&&h.test(e)&&t.children.length===0&&p(t)&&t.setAttribute("aa-instant-split","")}function c(){const t=document.querySelectorAll(y);for(const e of t)u.has(e)||(u.add(e),b(e))}function A(){if(typeof document>"u"||(c(),document.documentElement.hasAttribute("aa-loaded")||document.readyState!=="loading"))return;const t=new MutationObserver(()=>{if(document.documentElement.hasAttribute("aa-loaded")){t.disconnect();return}c()});t.observe(document.documentElement,{childList:!0,subtree:!0}),document.addEventListener("DOMContentLoaded",()=>{c(),t.disconnect()},{once:!0})}A()})();</script>
+<script>(function(){"use strict";function f(t){const e=typeof Intl<"u"?Intl.Segmenter:void 0;if(e)try{const a=new e(void 0,{granularity:"grapheme"});return Array.from(a.segment(t),n=>n.segment)}catch{}return Array.from(t)}function p(t,e){const a=(t.textContent??"").trim();if(!a)return!1;const n=document.createElement("span");n.setAttribute("aria-hidden","true");let o=0,m=0;for(const r of a.split(/(\s+)/)){if(r==="")continue;if(/^\s+$/.test(r)){n.appendChild(document.createTextNode(r));continue}const s=document.createElement("span");s.className="aa-word",m+=1,s.style.setProperty("--word",String(m));for(const C of f(r)){const i=document.createElement("span");i.className="aa-char",o+=1,i.style.setProperty("--char",String(o)),i.textContent=C,s.appendChild(i)}n.appendChild(s)}const d=document.createElement("span");return d.className="aa-sr-only",d.textContent=a,t.textContent="",t.appendChild(n),t.appendChild(d),!0}const y='[aa-trigger~="instant"][aa-animate]',h=/^text-(fade|blur|scale)/,g=new Set(["osmo","energy","smooth","punch","relaxed","jump","pop","anticipate","fade"]),u=new WeakSet;function l(t){const e=t==null?NaN:parseFloat(t);return Number.isFinite(e)?e:NaN}function b(t){const e=(t.getAttribute("aa-animate")??"").split("|")[0].trim();if(!e)return;const a=l(t.getAttribute("aa-delay"));a>0&&t.style.setProperty("--aa-delay",`${a}s`);const n=l(t.getAttribute("aa-duration"));n>0&&t.style.setProperty("--aa-load-duration",`${n}s`);const o=(t.getAttribute("aa-ease")??"").trim();o&&t.style.setProperty("--aa-load-ease",g.has(o)?`var(--aa-ease-${o})`:o),/^text-/.test(e)&&h.test(e)&&t.children.length===0&&p(t)&&t.setAttribute("aa-instant-split","")}function c(){const t=document.querySelectorAll(y);for(const e of t)u.has(e)||(u.add(e),b(e))}function A(){if(typeof document>"u"||(c(),document.documentElement.hasAttribute("aa-loaded")||document.readyState!=="loading"))return;const t=new MutationObserver(()=>{if(document.documentElement.hasAttribute("aa-loaded")){t.disconnect();return}c()});t.observe(document.documentElement,{childList:!0,subtree:!0}),document.addEventListener("DOMContentLoaded",()=>{c(),t.disconnect()},{once:!0})}A()})();</script>
 
 <!-- JS off: force everything visible. -->
 <noscript><style>[aa-animate]{visibility:visible!important;opacity:1!important;transform:none!important;filter:none!important;clip-path:none!important}</style></noscript>

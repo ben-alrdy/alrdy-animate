@@ -7,23 +7,30 @@
 
 <!-- Same animation-critical inline block as index.html (must be inline). -->
 <style>
-  :root { --aa-ease-osmo: cubic-bezier(0.625, 0.05, 0, 1); --aa-ease-smooth: cubic-bezier(0.38, 0.005, 0.215, 1); }
+  :root {
+    --aa-ease-osmo: cubic-bezier(0.625, 0.05, 0, 1);
+    --aa-ease-smooth: cubic-bezier(0.38, 0.005, 0.215, 1);
+    /* instant defaults — tune here */
+    --aa-load-duration: 0.6s;
+    --aa-load-ease: var(--aa-ease-osmo);
+    --aa-load-delay: 0s;
+    --aa-load-cstagger: 0.03s;
+    --aa-load-opacity: 0.01;
+  }
   .aa-word, .aa-char { display: inline-block; }
   .aa-sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
   [aa-animate]:not([aa-ready]):not([aa-trigger~="lcp"]):not([aa-trigger~="instant"]) { visibility: hidden; }
   @keyframes aa-load-in {
-    from { opacity: var(--aa-load-opacity, 0.01); translate: var(--aa-load-x, 0) var(--aa-load-y, 0); scale: var(--aa-load-scale, 1); rotate: var(--aa-load-rotate, 0deg); filter: blur(var(--aa-load-blur, 0)); }
+    from { opacity: var(--aa-load-opacity); translate: var(--aa-load-x, 0) var(--aa-load-y, 0); scale: var(--aa-load-scale, 1); rotate: var(--aa-load-rotate, 0deg); filter: blur(var(--aa-load-blur, 0)); }
     to   { opacity: 1; translate: 0 0; scale: 1; rotate: 0deg; filter: blur(0); }
   }
   /* See index.html for why these are ungated + use `backwards` fill. */
-  [aa-trigger~="instant"][aa-animate]:not([aa-instant-split]) {
-    animation: aa-load-in var(--aa-load-dur, 0.6s) var(--aa-load-ease, var(--aa-ease-osmo)) backwards;
-    animation-delay: var(--aa-load-delay, 0s);
-  }
+  [aa-trigger~="instant"][aa-animate]:not([aa-instant-split]),
   [aa-trigger~="instant"][aa-instant-split] .aa-char {
-    animation: aa-load-in var(--aa-load-dur, 0.6s) var(--aa-load-ease, var(--aa-ease-osmo)) backwards;
-    animation-delay: calc((var(--char) - 1) * var(--aa-load-cstagger, 0.03s) + var(--aa-load-delay, 0s));
+    animation: aa-load-in var(--aa-load-duration) var(--aa-load-ease) backwards;
   }
+  [aa-trigger~="instant"][aa-animate]:not([aa-instant-split]) { animation-delay: calc(var(--aa-load-delay) + var(--aa-delay, 0s)); }
+  [aa-trigger~="instant"][aa-instant-split] .aa-char { animation-delay: calc((var(--char) - 1) * var(--aa-load-cstagger) + var(--aa-load-delay) + var(--aa-delay, 0s)); }
   [aa-trigger~="instant"][aa-animate~="fade-up"]    { --aa-load-y: 2rem; }
   [aa-trigger~="instant"][aa-animate~="fade-right"] { --aa-load-x: -2rem; }
   /* char-split text from-states (chars inherit these; edit the cascade here) */
