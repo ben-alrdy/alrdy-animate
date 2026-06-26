@@ -7,15 +7,15 @@ The lib hides every `[aa-animate]` element with `visibility: hidden` until `init
 
 | Layer | Default | What it does |
 | --- | --- | --- |
-| **`aa-fallback`** | 1s | Fades `aa-trigger="load"` / `aa-trigger="load-once"` elements (hero copy) via a CSS keyframe — graceful staircase, respecting `aa-delay` and `aa-stagger`. |
+| **`aa-fallback`** | 100ms | Fades `aa-trigger="load"` / `aa-trigger="load-once"` elements (hero copy) via a CSS keyframe — graceful staircase, respecting `aa-delay` and `aa-stagger`. |
 | **`aa-timeout`** | 4s | Reveals **every** `[aa-animate]` element at its natural state with no animation — universal safety net if init never runs. Closed modals are excluded (their natural state is hidden). |
 
 Drop this snippet into `<head>` *above* the alrdy-animate `<script>` and `<link>` tags — and ideally above any other render-blocking `<script>` (e.g. Typekit), so the two timers start counting from page load rather than after that script downloads:
 
 ```html
-<!-- alrdy-animate FOUC guard + slow-network/timeout safety (optional but recommended). -->
+<!-- alrdy-animate FOUC guard + slow-network/timeout safety. -->
 <script>
-  const FALLBACK_DELAY = 1000;  // ms — load elements fade in via CSS keyframe
+  const FALLBACK_DELAY = 100;   // ms — load elements fade in via CSS keyframe
   const TIMEOUT_DELAY  = 4000;  // ms — universal reveal if init never runs
 
   const selectors = '[aa-trigger~="load"][aa-animate], [aa-trigger~="load-once"][aa-animate]';
@@ -25,14 +25,14 @@ Drop this snippet into `<head>` *above* the alrdy-animate `<script>` and `<link>
     if (document.documentElement.hasAttribute('aa-loaded')) return;
     document.documentElement.setAttribute('aa-fallback', '');
     document.querySelectorAll(selectors).forEach((el) => {
-      if (styled.has(el)) return;  // apply once, even across polls
+      if (styled.has(el)) return;
       styled.add(el);
       const baseDelay = parseFloat(el.getAttribute('aa-delay')) || 0;
       if (baseDelay > 0) el.style.animationDelay = baseDelay + 's';
     });
   };
 
-  // Poll, not DOMContentLoaded: render-blocking scripts can delay that past these timers.
+  // Poll, not DOMContentLoaded — render-blocking scripts can delay it past the timers.
   const deadline = performance.now() + FALLBACK_DELAY + 8000;
   const tryFallback = () => {
     if (document.documentElement.hasAttribute('aa-loaded')) return;
@@ -49,48 +49,44 @@ Drop this snippet into `<head>` *above* the alrdy-animate `<script>` and `<link>
   }, TIMEOUT_DELAY);
 </script>
 <style>
-  [aa-animate]:not([aa-ready]):not([aa-trigger~="lcp"]):not([aa-trigger~="instant"]) { visibility: hidden; }
+  /* FOUC guard (excluding LCP) */
+  [aa-animate]:not([aa-ready]):not([aa-trigger~="lcp"]) { visibility: hidden; }
+  [aa-animate][aa-trigger~="lcp"]:not([aa-ready]) { visibility: visible; opacity: 0.01; }
+
+  /* Fallback handling */
   @keyframes aa-fallback-appear {
-    from { opacity: 0; transform: translateY(1.5rem); }
-    to   { opacity: 1; transform: translateY(0); }
+    from { opacity: 0; }
+    to   { opacity: 1; }
   }
   html[aa-fallback] [aa-trigger~="load"][aa-animate]:not([aa-ready]),
   html[aa-fallback] [aa-trigger~="load-once"][aa-animate]:not([aa-ready]) {
     visibility: visible;
     animation: aa-fallback-appear 0.5s ease both;
   }
-  html[aa-timeout] [aa-animate]:not([aa-ready]) { visibility: visible; }
-  /* …but never reveal a closed modal. A modal card's `aa-animate` is its OPEN
-     entrance — its natural state is hidden, not visible — so the blanket net
-     above would wrongly flash it (and any animated content inside it) on screen.
-     Same specificity, later in source → this wins. Only simple selectors +
-     descendant combinators, so it parses everywhere. */
-  html[aa-timeout] [aa-modal-group] [aa-animate]:not([aa-ready]) { visibility: hidden; }
-  /* LCP: paint marked element at 0.01 pre-bundle (eligible LCP candidate), then fade to full. */
-  [aa-animate][aa-trigger~="lcp"]:not([aa-ready]) { visibility: visible; opacity: 0.01; }
   html[aa-fallback] [aa-animate][aa-trigger~="lcp"]:not([aa-ready]) { opacity: 1; transition: opacity 0.5s ease; }
+
+  /* Timeout handling */
+  html[aa-timeout] [aa-animate]:not([aa-ready]) { visibility: visible; }
+  html[aa-timeout] [aa-modal-group] [aa-animate]:not([aa-ready]) { visibility: hidden; } /* Keep modals hidden */
   html[aa-timeout] [aa-animate][aa-trigger~="lcp"]:not([aa-ready]) { opacity: 1; }
 </style>
-<noscript>
-  <style>
-    /* JS disabled: neither init() nor the fallback timer runs, so the guard
-       would hide everything permanently. Force all animated elements visible. */
-    [aa-animate] {
-      visibility: visible !important;
-      opacity: 1 !important;
-      transform: none !important;
-      filter: none !important;
-      clip-path: none !important;
-    }
-  </style>
-</noscript>
+<noscript><style>[aa-animate]{visibility:visible!important;opacity:1!important;transform:none!important;filter:none!important;clip-path:none!important}</style></noscript>
 ```
 
-Tune the two constants up top. Keep `TIMEOUT_DELAY` well above `FALLBACK_DELAY` — "let JS win the race for the hero" vs "give up and show the page". The script reads each element's `aa-delay` and sets `animation-delay` inline so the staircase still reads; it ignores `aa-stagger` (the split units don't exist pre-bundle, so it fades each element as a whole).
+Tune the two constants up top. At `FALLBACK_DELAY = 100ms` the CSS fade usually drives the hero entrance (a cold bundle rarely beats 100ms) — smooth and bundle-independent; raise it toward `1000ms` to give GSAP first shot at the entrance instead. Keep `TIMEOUT_DELAY` well above it — that's the "give up and show the whole page" net. The script reads each element's `aa-delay` and sets `animation-delay` inline so the staircase still reads; it ignores `aa-stagger` (the split units don't exist pre-bundle, so it fades each element as a whole).
 
-The FOUC guard excludes `lcp` and `instant` (both paint on purpose), so this snippet and the [instant-hero](/recipes/instant-hero/) one share one guard and combine into a single `<head>` block.
+The FOUC guard excludes `lcp` (it paints on purpose at the `0.01` floor), so the `lcp` floor + reveal rules live in this same `<head>` block.
 
 **Why inline** — the FOUC guard + `lcp` floor also ship in `dist/alrdy-animate.css`, but that file loads *after* first paint (non-blocking), so without an inline guard every animated element flashes visible, then hides when the guard lands, then reveals at `init()`. The fallback keyframe + `aa-fallback` / `aa-timeout` rules ship **only** here (nothing else sets those attributes), so the snippet is their single source — no cross-origin dist copy to collide with.
+
+## Preload the hero webfont
+
+Independent of the fallback, but the same kind of first-paint win: preload the font your hero text uses so it's available on the first frame. GSAP text effects (line / char splits) measure the *rendered* font, and the hero is usually your LCP element — a late font swap reflows the split and pushes out LCP. Add this near the top of `<head>` with your real font URL (Webflow: DevTools → Network → Font, or the site's CSS — `cdn.prod.website-files.com/<site-id>/<asset>.woff2`):
+
+```html
+<link rel="preload" as="font" type="font/woff2" crossorigin
+      href="https://cdn.prod.website-files.com/YOUR_SITE_ID/YOUR_FONT.woff2">
+```
 
 ## What each layer does
 
@@ -101,7 +97,7 @@ The FOUC guard excludes `lcp` and `instant` (both paint on purpose), so this sni
 
 ## Customising the motion
 
-The default keyframe is a small upward translate (`translateY(1.5rem) → 0`) plus opacity. To use a different fallback motion (slide-down, pure fade, scale-in), **edit `@keyframes aa-fallback-appear` directly in the snippet** — it's the only definition, so there's nothing to override:
+The default keyframe is a plain opacity fade. To use a different fallback motion (fade-up, slide-down, scale-in), **edit `@keyframes aa-fallback-appear` directly in the snippet** — it's the only definition, so there's nothing to override:
 
 ```css
 @keyframes aa-fallback-appear {
@@ -151,7 +147,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head>
         {/* Fallback keyframe + reveal rules — NOT in dist, so inline them here. */}
         <style dangerouslySetInnerHTML={{ __html: `
-          @keyframes aa-fallback-appear { from { opacity: 0; transform: translateY(1.5rem) } to { opacity: 1; transform: none } }
+          @keyframes aa-fallback-appear { from { opacity: 0 } to { opacity: 1 } }
           html[aa-fallback] [aa-trigger~="load"][aa-animate]:not([aa-ready]),
           html[aa-fallback] [aa-trigger~="load-once"][aa-animate]:not([aa-ready]) { visibility: visible; animation: aa-fallback-appear .5s ease both }
           html[aa-timeout] [aa-animate]:not([aa-ready]) { visibility: visible }
@@ -186,5 +182,5 @@ This snippet only protects the *first* page load. On subsequent navigations the 
 
 ## Verifying it locally
 
-- **`aa-fallback`** — DevTools → Network → "Disable cache" + throttle to Slow 3G, reload. The hero should fade up (`<html aa-fallback>` in the Elements panel) *before* the 4s timeout, and the bundle landing later should *not* replay it. If you only ever get the instant 4s reveal, you have an old copy that gated on `DOMContentLoaded` — re-copy the current (polling) snippet.
+- **`aa-fallback`** — DevTools → Network → "Disable cache" + throttle to Slow 3G, reload. The hero should fade in (`<html aa-fallback>` in the Elements panel) *before* the 4s timeout, and the bundle landing later should *not* replay it. If you only ever get the abrupt 4s reveal, you have an old copy that gated on `DOMContentLoaded` — re-copy the current (polling) snippet.
 - **`aa-timeout`** — Network → block the alrdy-animate `<script>` URL, reload. Everything stays hidden ~4s, then reveals at its natural state (`<html aa-timeout>`).

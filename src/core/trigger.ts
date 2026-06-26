@@ -1,7 +1,7 @@
 import type { Breakpoints } from '../types/index'
 import { resolveAttrAtWidth, type ValueAttr } from './settings'
 
-export type TriggerKind = 'scroll' | 'event' | 'click' | 'load-once' | 'load' | 'lcp' | 'instant'
+export type TriggerKind = 'scroll' | 'event' | 'click' | 'load-once' | 'load' | 'lcp'
 
 export interface ParsedTrigger {
   kind: TriggerKind
@@ -52,14 +52,6 @@ function parseOne(token: string): ParsedTrigger | null {
   // eligible LCP candidate, before the bundle) and the appear feature fades it
   // to full. Timing-wise it behaves like `load` (see triggered-animation.ts).
   if (token === 'lcp') return { kind: 'lcp' }
-  // `instant` is a CSS-driven first-paint entrance: the inline `<head>`
-  // snippet's `@keyframes aa-load-in` plays it before the bundle loads (no GSAP
-  // wait). The library does NOT build a GSAP tween for these — the feature
-  // setup and reduced-motion pass skip them, and the end-of-init `aa-ready`
-  // flip detaches the CSS rule, leaving the element at its natural end-state.
-  // Tier-B authors load the `alrdy-animate/loader` splitter for per-char/word
-  // staggers; without it, a `instant` element gets an element-level fade.
-  if (token === 'instant') return { kind: 'instant' }
   if (token.startsWith('event:')) {
     return { kind: 'event', eventName: token.slice('event:'.length) }
   }

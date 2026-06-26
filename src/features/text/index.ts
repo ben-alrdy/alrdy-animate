@@ -472,19 +472,6 @@ function setupOne(
 ): (() => void) | undefined {
   const animate = config['aa-animate']
   if (!animate || !SUPPORTED.has(animate)) return undefined
-  // `instant`: the entrance is owned by the inline CSS keyframe + the
-  // optional loader splitter (Tier B), which run before the bundle. Skip before
-  // any SplitText work so we neither re-split the loader's `.aa-char` DOM nor
-  // re-animate. The end-of-init `aa-ready` flip detaches the CSS rule. Without
-  // the loader, the element-level `[aa-trigger~="instant"]` rule fades the
-  // whole heading — a graceful degradation.
-  if (
-    resolveTriggers(element, config['aa-trigger'], ctx.options.breakpoints).some(
-      (t) => t.kind === 'instant',
-    )
-  ) {
-    return undefined
-  }
   const bar = parseBarName(animate)
   if (bar) return setupBarReveal(ctx, element, config, bar)
   const anim = TEXT_ANIMS[animate]

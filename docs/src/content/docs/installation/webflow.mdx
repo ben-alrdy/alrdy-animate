@@ -23,24 +23,12 @@ This goes into **Project Settings → Custom Code → Head Code** as two blocks:
 
 ### Inline safety snippet
 
-Paste this **first**, above the CSS/scripts block. Inline (no request), so it works on the very first paint: the **FOUC guard** (`[aa-animate]:not([aa-ready]) { visibility: hidden }`) hides animated elements until `init()` reveals them, plus a net so nothing stays blank if the bundle is slow or never arrives, and a `<noscript>` reveal for JS-off. Both tabs use the **same FOUC guard** — if a page has both kinds of hero, merge into one block (one guard, concatenate the rest).
-
-<Tabs syncKey="hero-strategy">
-<TabItem label="Instant heroes (CSS)">
-
-For `aa-trigger="instant"` heroes — the entrance paints on the first frame, *before* GSAP. Leaner: no slow-network staircase (instant heroes self-reveal), just the `aa-timeout` net for the rest of the page.
-
-Copy the full block (FOUC guard + `aa-timeout` + instant CSS + loader + `<noscript>`) from the **[Instant hero recipe](/recipes/instant-hero/)** — that's also where you tune the motion.
-
-</TabItem>
-<TabItem label="GSAP load heroes">
-
-For `aa-trigger="load"` / `"load-once"` heroes — adds the slow-network `aa-fallback` staircase that fades the hero in if the bundle is late.
+Paste this **first**, above the CSS/scripts block. Inline (no request), so it works on the very first paint: the **FOUC guard** (`[aa-animate]:not([aa-ready]) { visibility: hidden }`) hides animated elements until `init()` reveals them, plus a net so nothing stays blank if the bundle is slow or never arrives, and a `<noscript>` reveal for JS-off. For `aa-trigger="load"` / `"load-once"` heroes it also adds the slow-network `aa-fallback` staircase that fades the hero in if the bundle is late.
 
 ```html
-<!-- alrdy-animate FOUC guard + slow-network/timeout safety (optional but recommended). -->
+<!-- alrdy-animate FOUC guard + slow-network/timeout safety. -->
 <script>
-  const FALLBACK_DELAY = 1000;  // ms — load elements fade in via CSS keyframe
+  const FALLBACK_DELAY = 100;   // ms — load elements fade in via CSS keyframe
   const TIMEOUT_DELAY  = 4000;  // ms — universal reveal if init never runs
 
   const selectors = '[aa-trigger~="load"][aa-animate], [aa-trigger~="load-once"][aa-animate]';
@@ -50,14 +38,14 @@ For `aa-trigger="load"` / `"load-once"` heroes — adds the slow-network `aa-fal
     if (document.documentElement.hasAttribute('aa-loaded')) return;
     document.documentElement.setAttribute('aa-fallback', '');
     document.querySelectorAll(selectors).forEach((el) => {
-      if (styled.has(el)) return;  // apply once, even across polls
+      if (styled.has(el)) return;
       styled.add(el);
       const baseDelay = parseFloat(el.getAttribute('aa-delay')) || 0;
       if (baseDelay > 0) el.style.animationDelay = baseDelay + 's';
     });
   };
 
-  // Poll, not DOMContentLoaded: render-blocking scripts can delay that past these timers.
+  // Poll, not DOMContentLoaded — render-blocking scripts can delay it past the timers.
   const deadline = performance.now() + FALLBACK_DELAY + 8000;
   const tryFallback = () => {
     if (document.documentElement.hasAttribute('aa-loaded')) return;
@@ -74,45 +62,38 @@ For `aa-trigger="load"` / `"load-once"` heroes — adds the slow-network `aa-fal
   }, TIMEOUT_DELAY);
 </script>
 <style>
-  [aa-animate]:not([aa-ready]):not([aa-trigger~="lcp"]):not([aa-trigger~="instant"]) { visibility: hidden; }
+  /* FOUC guard (excluding LCP) */
+  [aa-animate]:not([aa-ready]):not([aa-trigger~="lcp"]) { visibility: hidden; }
+  [aa-animate][aa-trigger~="lcp"]:not([aa-ready]) { visibility: visible; opacity: 0.01; }
+
+  /* Fallback handling */
   @keyframes aa-fallback-appear {
-    from { opacity: 0; transform: translateY(1.5rem); }
-    to   { opacity: 1; transform: translateY(0); }
+    from { opacity: 0; }
+    to   { opacity: 1; }
   }
   html[aa-fallback] [aa-trigger~="load"][aa-animate]:not([aa-ready]),
   html[aa-fallback] [aa-trigger~="load-once"][aa-animate]:not([aa-ready]) {
     visibility: visible;
     animation: aa-fallback-appear 0.5s ease both;
   }
-  html[aa-timeout] [aa-animate]:not([aa-ready]) { visibility: visible; }
-  /* …but never reveal a closed modal: a modal card's aa-animate is its OPEN
-     entrance, so its natural state is hidden. Same specificity, later → wins. */
-  html[aa-timeout] [aa-modal-group] [aa-animate]:not([aa-ready]) { visibility: hidden; }
-  /* LCP: paint marked element at 0.01 pre-bundle (eligible LCP candidate), then fade to full. */
-  [aa-animate][aa-trigger~="lcp"]:not([aa-ready]) { visibility: visible; opacity: 0.01; }
   html[aa-fallback] [aa-animate][aa-trigger~="lcp"]:not([aa-ready]) { opacity: 1; transition: opacity 0.5s ease; }
+
+  /* Timeout handling */
+  html[aa-timeout] [aa-animate]:not([aa-ready]) { visibility: visible; }
+  html[aa-timeout] [aa-modal-group] [aa-animate]:not([aa-ready]) { visibility: hidden; } /* Keep modals hidden */
   html[aa-timeout] [aa-animate][aa-trigger~="lcp"]:not([aa-ready]) { opacity: 1; }
 </style>
-<noscript>
-  <style>
-    /* JS disabled: nothing ever clears the FOUC guard (no init(), no fallback
-       timer), so without this every animated element stays hidden forever.
-       Force them all visible at their natural state. */
-    [aa-animate] {
-      visibility: visible !important;
-      opacity: 1 !important;
-      transform: none !important;
-      filter: none !important;
-      clip-path: none !important;
-    }
-  </style>
-</noscript>
+<noscript><style>[aa-animate]{visibility:visible!important;opacity:1!important;transform:none!important;filter:none!important;clip-path:none!important}</style></noscript>
 ```
 
-**Tuning the timeouts.** `FALLBACK_DELAY` (1s) — how long before the hero fades in via CSS when the bundle is slow (lower = sooner; higher = more time for JS to win the race). `TIMEOUT_DELAY` (4s) — the universal net: reveal *every* `[aa-animate]` at its natural state if `init()` never runs; keep it well above `FALLBACK_DELAY`. When `init()` arrives it detects `aa-timeout` and skips appearance work (no rewind) while still wiring interactive components.
+**Tuning the timeouts.** `FALLBACK_DELAY` (100ms) — how long before the hero fades in via CSS when the bundle is slow; at 100ms the CSS fade usually drives the entrance (a cold bundle rarely beats it), so raise it toward 1s to give GSAP first shot instead. `TIMEOUT_DELAY` (4s) — the universal net: reveal *every* `[aa-animate]` at its natural state if `init()` never runs; keep it well above `FALLBACK_DELAY`. When `init()` arrives it detects `aa-timeout` and skips appearance work (no rewind) while still wiring interactive components.
 
-</TabItem>
-</Tabs>
+**Preload the hero webfont.** Independent of the fallback, but the same first-paint win — GSAP text splits measure the *rendered* font and the hero is usually your LCP element, so a late font swap reflows the split and delays LCP. Add this near the top of the head with your real font URL (DevTools → Network → Font, or the site CSS — `cdn.prod.website-files.com/<site-id>/<asset>.woff2`):
+
+```html
+<link rel="preload" as="font" type="font/woff2" crossorigin
+      href="https://cdn.prod.website-files.com/YOUR_SITE_ID/YOUR_FONT.woff2">
+```
 
 ### Library CSS + scripts
 
@@ -284,7 +265,7 @@ For animations that only run on a single page (a hero parallax, a custom scroll-
 2. Open DevTools → Console. With `debug: true` you should see one log line:
    `[alrdy-animate] initialized. Features: scroll, text; Plugins: ScrollTrigger, SplitText; Elements: 12; SmoothScroll: lenis`
 3. If you see a "Missing GSAP plugins" warning, copy the suggested `<script>` tag into the head and republish.
-4. To check the slow-network fallback: DevTools → Network → throttle to "Slow 4G" → reload. Hero elements should fade up via the inline keyframe within ~1s, even before the lib bundle finishes loading.
+4. To check the slow-network fallback: DevTools → Network → throttle to "Slow 4G" → reload. Hero elements should fade in via the inline keyframe within ~100ms, even before the lib bundle finishes loading.
 
 ## Using with AI assistants (Claude Code, Cursor, etc.)
 

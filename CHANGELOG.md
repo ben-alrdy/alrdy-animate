@@ -24,6 +24,11 @@ What v8 doesn't have yet: **Pin** animations (rebuild planned in v8.x), form-sub
 
 ---
 
+## [8.0.8] — 2026-06-26
+
+### Removed
+- **`aa-trigger="instant"` and the `alrdy-animate/loader` companion (the `./loader` export) have been removed.** Both shipped one patch earlier (8.0.6), but on real 4G testing `aa-trigger="load"` paired with a fast (~100 ms) `aa-fallback` produced a smoother above-the-fold entrance than the CSS-first-paint `instant` path — the instant animation's clock runs on the document timeline, so a render-blocking stylesheet advances (or completes) the entrance before the page is even visible. Rather than carry a second-best, maintenance-heavy feature (a separate Vite build, a DOM splitter, an inline `<head>` keyframe), `instant` is gone: the `instant` trigger kind, the `./loader` export and its `dist/loader.*` outputs, the Instant-hero recipe, and the `loader` build step are all removed. The `dist` FOUC guard now excepts only `[aa-trigger~="lcp"]`. **Migration:** switch `aa-trigger="instant"` heroes to `aa-trigger="load"` and use the [slow-network + init-timeout fallback](https://animate.alrdy.de/recipes/load-fallback/) snippet (now defaulting `aa-fallback` to 100 ms) for the fast first-paint reveal.
+
 ## [8.0.7] — 2026-06-26
 
 ### Fixed

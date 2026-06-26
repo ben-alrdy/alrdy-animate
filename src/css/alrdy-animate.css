@@ -48,12 +48,8 @@
  * each feature's from-state and added the aa-ready attribute. The element is
  * still laid out (visibility, not display), so SplitText measurements stay
  * correct. `aa-trigger="lcp"` opts out — it's painted on purpose (see below).
- * `aa-trigger="instant"` also opts out — its entrance is a CSS keyframe
- * painted on the first frame by the inline `<head>` snippet (the keyframe +
- * reveal rules live there, not here, so they're present before this non-blocking
- * stylesheet lands); this exclusion stops the late guard re-hiding it mid-play.
  */
-[aa-animate]:not([aa-ready]):not([aa-trigger~="lcp"]):not([aa-trigger~="instant"]) {
+[aa-animate]:not([aa-ready]):not([aa-trigger~="lcp"]) {
   visibility: hidden;
 }
 
