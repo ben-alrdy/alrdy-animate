@@ -42,7 +42,7 @@ The library exposes the following on `window.AlrdyAnimate` (UMD) and as named ex
 | `refresh()` | Shorthand for `destroy()` then `init()` with the previous options. |
 | `onResize(fn, { debounce })` | Subscribe to a shared debounced resize bus. Returns an unsubscribe function. |
 | `ready()` | Returns a Promise that resolves after the most recent `init()` finishes mounting features and registering plugins/eases. Resolves immediately when called before any init, or after the previous init has already completed. Each new `init()` / `refresh()` creates a fresh promise. |
-| `options` | Live readonly snapshot of the resolved options after `init()` — every `InitOptions` field with defaults filled in, plus `reducedMotion` / `optimizeMobile` collapsed to the booleans the lib actually uses internally. Reads always reflect the most recent init. |
+| `options` | Live readonly snapshot of the resolved options after `init()` — every `InitOptions` field with defaults filled in, plus `reducedMotion` / `optimizeMobile` collapsed to the values the lib actually uses internally (`optimizeMobile` reads back as `true` / `'fade'` / `false`). Reads always reflect the most recent init. |
 
 `init` / `destroy` / `refresh` are the lifecycle hooks for Barba, View Transitions, or any other page-transition library — see the [Webflow + Barba recipe](/recipes/webflow-barba/) for a full example. `ready` + `options` + `onResize` are the interop surface for project-specific GSAP scripts that load alongside the lib (custom navs, sliders, scroll-driven scenes) — see the [Webflow guide](/installation/webflow/#global-gsap-code-runs-on-every-page) for the recommended pattern.
 

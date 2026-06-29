@@ -5,13 +5,21 @@ sidebar:
   order: 4
 ---
 
-`optimizeMobile: true` is a viewport-driven variant of the reduced-motion fade fallback, tuned for performance rather than accessibility. When the viewport is below `breakpoints.md` (default 768px), the heaviest decorative features are dropped and their elements collapse to a simple opacity fade.
+`optimizeMobile` drops the heaviest decorative features on small viewports, tuned for performance rather than accessibility. When the viewport is below `breakpoints.md` (default 768px), `text-*` animations, `parallax`, and the standalone `aa-split` utility never run — their feature modules' `init()` is skipped entirely, so the expensive work (SplitText splitting headings into per-char/word/line spans, parallax scroll-driven transforms) is never executed.
 
 ```js
-AlrdyAnimate.init({ optimizeMobile: true })
+AlrdyAnimate.init({ optimizeMobile: true })   // text simply appears, no animation
+AlrdyAnimate.init({ optimizeMobile: 'fade' }) // text fades in softly (0.8s)
 ```
 
+The two values differ only in how `text-*` elements appear:
+
+- **`true`** — text is **simply made visible** (no animation, no flash). Fastest path: no fade pass, no extra ScrollTriggers.
+- **`'fade'`** — text collapses to a **soft opacity fade** (`0.8s`, `power2.out`) — gentler and slower than the reduced-motion fallback, so it doesn't look abrupt next to already-static content.
+
 Off by default. Enable per-project when mobile FCP / LCP matters more than the full set of text animations.
+
+The perf win is about **JS runtime, not download size**: the heavy modules are simply never executed. This applies even in Webflow, where the whole bundle is loaded by one `<script>` tag — there's no byte saving there, but the main-thread layout/splitting work is skipped all the same. (ESM / Next.js consumers additionally tree-shake the unused modules out of the bundle.)
 
 ## What changes
 
@@ -20,7 +28,7 @@ With `optimizeMobile: true` and viewport `< breakpoints.md`:
 | Feature | Behaviour |
 | --- | --- |
 | `aa-animate` — fade / zoom / slide / blur / rotate | **Unchanged.** Cheap GSAP tweens; they add real value for mobile hierarchy. |
-| `aa-animate` — text-* | Collapse to simple opacity fade. **SplitText is not loaded** — no per-char DOM, no layout-parsing cost. |
+| `aa-animate` — text-* | **`true`:** simply made visible (no animation). **`'fade'`:** soft opacity fade. Either way **SplitText is not loaded** — no per-char DOM, no layout-parsing cost. |
 | `aa-animate` — reveal-* / slices | **Unchanged.** Clip-path / GPU transforms are cheap. |
 | `aa-animate` — parallax / parallax-horizontal | **Skipped entirely.** Continuous scroll-driven transforms are the classic mobile perf killer. |
 | `aa-split` (standalone utility) | No-op — text stays un-split. |
@@ -31,7 +39,7 @@ The win is biggest for sites with heavy text animation. SplitText creates 50–2
 
 ## Snapshot semantics
 
-The viewport check fires **once at `init()` time** — `AlrdyAnimate.options.optimizeMobile` is `true` only if the option is set AND the viewport was below `breakpoints.md` when init ran. Resize past the breakpoint while the page is open and the lib does **not** auto-rewire. Call `refresh()` to re-evaluate if you need that:
+The viewport check fires **once at `init()` time** — `AlrdyAnimate.options.optimizeMobile` reflects the active mode (`true` / `'fade'`) only if the option is set AND the viewport was below `breakpoints.md` when init ran; otherwise it reads `false`. Resize past the breakpoint while the page is open and the lib does **not** auto-rewire. Call `refresh()` to re-evaluate if you need that:
 
 ```js
 window.matchMedia(`(min-width: ${AlrdyAnimate.options.breakpoints.md}px)`).addEventListener(
@@ -66,6 +74,6 @@ If both fire on the same page, **`reducedMotion` wins** — its drop set is a su
 | Intent | Accessibility | Performance |
 | Default | `true` | `false` |
 | Drops | appear, text, reveal, hover, parallax | text, parallax, standalone split |
-| Fade timing | `{ duration: 0.4, ease: 'power1.out' }` (configurable) | Same as reduced-motion timing |
+| Text fade timing | `{ duration: 0.4, ease: 'power1.out' }` (configurable) | `'fade'`: `{ duration: 0.8, ease: 'power2.out' }`. `true`: no fade (text just visible) |
 
 Set `optimizeMobile: true` if you want the perf win on every small-viewport visit without needing the user to have OS reduced-motion enabled.

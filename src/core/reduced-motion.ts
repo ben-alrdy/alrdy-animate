@@ -226,8 +226,10 @@ export const OPTIMIZE_MOBILE_REPLACED_FEATURES: ReadonlySet<FeatureName> = new S
 
 /**
  * Subset of `OPTIMIZE_MOBILE_REPLACED_FEATURES` whose elements still get a
- * fade. Parallax stays still (no transform); aa-split is a utility, not an
- * animation, so its elements get nothing.
+ * fade — but only under `optimizeMobile: 'fade'`. Under `optimizeMobile: true`
+ * the selector in `core/index.ts` treats the fade set as empty, so text is
+ * simply made visible. Parallax stays still (no transform); aa-split is a
+ * utility, not an animation, so its elements get nothing.
  */
 export const OPTIMIZE_MOBILE_FADE_FEATURES: ReadonlySet<FeatureName> = new Set([
   'text',

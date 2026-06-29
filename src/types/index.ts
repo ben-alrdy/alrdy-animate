@@ -177,20 +177,28 @@ export interface InitOptions {
   reducedMotion?: boolean | ReducedMotionOptions
   /**
    * Drop the heaviest decorative features on small viewports for a faster
-   * mobile experience. Default `false`. When `true` and the viewport is below
-   * `breakpoints.md` (default 768px):
+   * mobile experience. Default `false`. When set and the viewport is below
+   * `breakpoints.md` (default 768px), the heavy modules never execute their
+   * `init()` (SplitText is not loaded, no per-char/word/line spans are created,
+   * parallax registers no scrub ScrollTrigger) — the saving is reduced JS
+   * runtime / main-thread layout work, which applies even on Webflow where the
+   * whole bundle is already loaded. In both modes:
    *
-   * - `text-*` animations collapse to a simple opacity fade (SplitText is not
-   *   loaded; per-char/word/line spans are not created).
    * - `parallax` / `parallax-horizontal` are skipped entirely — elements
    *   render at their natural position.
    * - The standalone `aa-split` utility is a no-op (text stays un-split).
+   *
+   * The two accepted values differ only in how `text-*` elements appear:
+   *
+   * - `true` — text is **simply made visible** (no animation, no flash, fastest
+   *   path: no fade pass, no extra ScrollTriggers).
+   * - `'fade'` — text collapses to a soft opacity fade (0.8s, power2.out).
    *
    * Everything else (fade-up, zoom-in, slide-*, rotate, blur, reveal, hover,
    * tabs, slider, marquee, nav, modal, cursor) runs normally. Snapshotted at
    * init — resize past the breakpoint and call `refresh()` to re-evaluate.
    */
-  optimizeMobile?: boolean
+  optimizeMobile?: boolean | 'fade'
   /**
    * Smooth scroll via Lenis. `true` (default) creates a Lenis instance with
    * library defaults; pass an options object to forward Lenis options
@@ -293,7 +301,8 @@ export interface ResolvedOptions extends InitOptions {
   smoothScroll: boolean | SmoothScrollOptions
   scrollState: boolean
   reducedMotion: boolean | ReducedMotionOptions
-  optimizeMobile: boolean
+  /** Collapsed at init to the active mode (`true` / `'fade'`) or `false`. */
+  optimizeMobile: boolean | 'fade'
 }
 
 /**

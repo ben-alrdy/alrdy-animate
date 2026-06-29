@@ -106,13 +106,13 @@ This `h2` carries the same `heading-style-h2` class but adds an explicit `aa-ani
 
 ## Reduced motion + optimizeMobile
 
-Preset elements are indistinguishable from hand-authored ones during the reduced-motion / `optimizeMobile` fade-fallback pass. With either active:
+Preset elements are indistinguishable from hand-authored ones during the reduced-motion / `optimizeMobile` fallback passes:
 
-- `text-*` and appear (`fade-*`, `zoom-*`, `slide-*`, `blur-in`, `rotate-*`) presets collapse to a simple opacity fade.
-- `parallax` presets are skipped entirely (parallax is dropped under both modes).
-- Any preset element targeted by the fade pass uses the same timing as hand-authored elements.
+- Under **`reducedMotion`**, `text-*` and appear (`fade-*`, `zoom-*`, `slide-*`, `blur-in`, `rotate-*`) presets collapse to a simple opacity fade; `parallax` presets are skipped.
+- Under **`optimizeMobile`**, only `text-*` and `parallax` presets are affected (appear presets run normally). `parallax` is skipped; `text-*` is simply made visible (`optimizeMobile: true`) or soft-faded (`optimizeMobile: 'fade'`).
+- Any preset element targeted by a fade pass uses the same timing as hand-authored elements.
 
-No extra wiring required — the preset map is consulted by the fade-fallback pass alongside real attribute lookups.
+No extra wiring required — the preset map is consulted by the fallback pass alongside real attribute lookups.
 
 ## Scope
 

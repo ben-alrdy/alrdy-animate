@@ -34,6 +34,16 @@ export const DEFAULT_REDUCED_MOTION: ReducedMotionOptions = {
 }
 
 /**
+ * Timing for `optimizeMobile: 'fade'`. Softer/slower than the reduced-motion
+ * fallback so a mobile text fade doesn't look abrupt next to already-static
+ * content. (`optimizeMobile: true` skips the fade entirely.)
+ */
+export const DEFAULT_OPTIMIZE_MOBILE_FADE: ReducedMotionOptions = {
+  duration: 0.8,
+  ease: 'power2.out',
+}
+
+/**
  * Single source of truth for init-time defaults. Features must NOT carry
  * their own per-animation duration / ease / stagger fallbacks — they always
  * pull from `ctx.options`, which is `ResolvedOptions` (every field populated

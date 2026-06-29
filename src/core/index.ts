@@ -24,6 +24,7 @@ import { scan, type FeatureName } from './scanner'
 import { initScrollState } from './scroll-state'
 import { initScrollTarget } from './scroll-target'
 import {
+  DEFAULT_OPTIMIZE_MOBILE_FADE,
   DEFAULT_OPTIONS,
   DEFAULT_REDUCED_MOTION,
   addDisposer,
@@ -55,13 +56,19 @@ function detectReducedMotion(
   return setting === true ? DEFAULT_REDUCED_MOTION : setting
 }
 
-function detectOptimizeMobile(setting: boolean, mdBreakpoint: number): boolean {
-  if (setting !== true) return false
+function detectOptimizeMobile(
+  setting: boolean | 'fade',
+  mdBreakpoint: number,
+): false | true | 'fade' {
+  if (setting !== true && setting !== 'fade') return false
   if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return false
   // Match the same exclusive width arithmetic the responsive system uses
   // (see core/settings.ts `buildRangeQuery`) so the cutoff is consistent
   // with `aa-foo-md`/the `|` shorthand split point.
-  return window.matchMedia(`(max-width: ${mdBreakpoint - 0.02}px)`).matches
+  if (!window.matchMedia(`(max-width: ${mdBreakpoint - 0.02}px)`).matches) return false
+  // Preserve the mode so the caller can choose "just visible" (true) vs the
+  // soft fade ('fade').
+  return setting
 }
 
 /**
@@ -143,9 +150,10 @@ export async function init(options: InitOptions = {}): Promise<void> {
     state.options.optimizeMobile,
     state.breakpoints.md,
   )
-  // Collapse the public snapshot to plain booleans. The timing object (if
-  // user passed one) lives in the local `reducedMotion` variable and is
-  // threaded into `featureCtx.reducedMotion` / `runFadeFallbackPass` below.
+  // Collapse the public snapshot: reducedMotion → plain boolean (its timing
+  // object lives in the local `reducedMotion` variable and is threaded into
+  // `featureCtx.reducedMotion` / `runFadeFallbackPass` below); optimizeMobile →
+  // the active mode (`true` / `'fade'`) or `false` when inactive.
   state.options.reducedMotion = !!reducedMotion
   state.options.optimizeMobile = optimizeMobile
 
@@ -161,8 +169,10 @@ export async function init(options: InitOptions = {}): Promise<void> {
     replacedFeatures = REDUCED_MOTION_REPLACED_FEATURES
     fadeFeatures = REDUCED_MOTION_FADE_FEATURES
   } else if (optimizeMobile) {
+    // text/parallax/split are dropped in both modes (identical perf win); only
+    // the fade set differs — `'fade'` fades text, `true` leaves it static.
     replacedFeatures = OPTIMIZE_MOBILE_REPLACED_FEATURES
-    fadeFeatures = OPTIMIZE_MOBILE_FADE_FEATURES
+    fadeFeatures = optimizeMobile === 'fade' ? OPTIMIZE_MOBILE_FADE_FEATURES : new Set()
   } else {
     replacedFeatures = new Set()
     fadeFeatures = new Set()
@@ -287,10 +297,9 @@ export async function init(options: InitOptions = {}): Promise<void> {
   // ScrollTriggers register first. Component features that run after still
   // see their elements at the correct positions (no transform conflicts).
   if (needsFadePass) {
-    // Mobile-optimization mode reuses reducedMotion's fade timing for
-    // consistency. Override here if you ever want a separate `optimizeMobile`
-    // fade-timing knob (e.g. snappier 0.3s fade for perf-focused mobile).
-    const fadeTiming = reducedMotion ?? DEFAULT_REDUCED_MOTION
+    // reducedMotion's own timing wins when it's active; otherwise this pass was
+    // scheduled by `optimizeMobile: 'fade'`, which uses a softer/slower fade.
+    const fadeTiming = reducedMotion ?? DEFAULT_OPTIMIZE_MOBILE_FADE
     const disposeFade = runFadeFallbackPass(elements, {
       gsap: gsapHandle,
       options: state.options,
@@ -392,7 +401,7 @@ export async function init(options: InitOptions = {}): Promise<void> {
       : reducedMotion
         ? 'reduced-motion'
         : optimizeMobile
-          ? 'optimize-mobile'
+          ? `optimize-mobile (${optimizeMobile === 'fade' ? 'fade' : 'visible'})`
           : null
     const featuresLabel =
       replacedBy && droppedFeatures.length
@@ -404,7 +413,7 @@ export async function init(options: InitOptions = {}): Promise<void> {
         `Elements: ${elements.length}; ` +
         `SmoothScroll: ${lenisActive ? 'lenis' : 'off'}; ` +
         `ReducedMotion: ${reducedMotion ? 'active' : 'off'}; ` +
-        `OptimizeMobile: ${optimizeMobile ? 'active' : 'off'}`,
+        `OptimizeMobile: ${optimizeMobile ? optimizeMobile : 'off'}`,
     )
   }
 
