@@ -1,0 +1,75 @@
+---
+title: aa-again
+description: Per-element override of the global init({ again }) scroll-replay default. aa-again="false" plays a scroll-triggered animation once and stays finished (no replay when it re-enters the viewport); aa-again="true" forces replay even when the global default is off.
+---
+
+import Demo from '../../../../components/Demo.astro'
+
+`aa-again` overrides the global [`init({ again })`](/initialization/init-options/) default on a single element. By default every scroll-triggered animation **replays** each time its trigger re-enters the viewport. Set `aa-again="false"` to make one element play **once** and stay finished — useful for animated content inside a slider/carousel that shouldn't re-fire as the section scrolls past, or any entrance you only want to see the first time.
+
+Only affects scroll-triggered animations (`appear` / `text` / `reveal`); `load`, `event`, and `scrub` triggers ignore it. Supports the `|` and `-sm/-md/-lg/-xl` responsive forms like other value-bearing attributes.
+
+## Values
+
+| Value       | Behaviour                                                                                   |
+| ----------- | ------------------------------------------------------------------------------------------- |
+| (omitted)   | Uses the global `init({ again })` default (`true` unless you changed it).                    |
+| `false`     | Plays once on enter, then stays finished — never resets/replays when it re-enters the view.  |
+| `true`      | Forces replay-on-re-enter, even when `init({ again: false })` is set globally.               |
+
+```html
+<!-- plays once and stays put -->
+<div aa-animate="fade-up" aa-again="false">…</div>
+
+<!-- replays every time, even under a global init({ again: false }) -->
+<div aa-animate="fade-up" aa-again="true">…</div>
+```
+
+## Try it
+
+Scroll the two cards into view, then scroll back up past them and down again. The **default** card resets and replays each time; the **`aa-again="false"`** card animates once and then stays put.
+
+<Demo caption={[
+  { label: 'left', attrs: { 'aa-animate': 'fade-up' } },
+  { label: 'right', attrs: { 'aa-animate': 'fade-up', 'aa-again': 'false' } },
+]}>
+  <div class="again-grid">
+    <div class="again-card" id="again-default" aa-animate="fade-up">
+      <strong>Default</strong>
+      <span>replays on every re-enter</span>
+    </div>
+    <div class="again-card" id="again-once" aa-animate="fade-up" aa-again="false">
+      <strong>aa-again=&quot;false&quot;</strong>
+      <span>plays once, stays finished</span>
+    </div>
+  </div>
+</Demo>
+
+<style>{`
+  .again-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    /* Clear the demo's attribute caption (top-right overlay). */
+    margin-top: 3rem;
+  }
+  .again-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    padding: 1.25rem 1rem;
+    border: 1px solid var(--sl-color-gray-5);
+    border-radius: 8px;
+    background: var(--sl-color-bg-nav);
+  }
+  .again-card strong {
+    font-size: 1.05rem;
+  }
+  .again-card span {
+    font-size: 0.85rem;
+    opacity: 0.7;
+  }
+  @media (max-width: 480px) {
+    .again-grid { grid-template-columns: 1fr; }
+  }
+`}</style>

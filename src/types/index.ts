@@ -149,7 +149,7 @@ export interface InitOptions {
   /**
    * When true, scroll-triggered animations replay every time their trigger
    * re-enters the viewport. When false, they play once and stay finished.
-   * Default `true`.
+   * Default `true`. Override per element with `aa-again="false"` / `"true"`.
    */
   again?: boolean
   /** Per-split-mode stagger defaults. Merged into `DEFAULT_OPTIONS.stagger`. */

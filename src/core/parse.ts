@@ -37,6 +37,20 @@ export function parseScrub(
 }
 
 /**
+ * Parse a boolean `aa-*` flag that overrides a global `init()` default.
+ *   - absent (null/undefined) → `fallback` (the global default)
+ *   - `"false"`               → `false`
+ *   - present otherwise (`""`, `"true"`, any value) → `true`
+ */
+export function parseBool(
+  value: string | null | undefined,
+  fallback: boolean,
+): boolean {
+  if (value === undefined || value === null) return fallback
+  return value !== 'false'
+}
+
+/**
  * Resolve an `aa-anchor` selector to the element that should anchor the
  * ScrollTrigger. Falls back to the animating element itself when no selector
  * is given or no match is found, so a malformed anchor never breaks the page.
@@ -99,6 +113,6 @@ export function readAnimationConfig(config: Config, opts: ResolvedOptions): Anim
     scrollEnd: config['aa-scroll-end'] ?? opts.scrollEnd,
     scrub,
     scrollStart: resolveScrollStart(config['aa-scroll-start'], opts, scrub),
-    again: opts.again !== false,
+    again: parseBool(config['aa-again'], opts.again),
   }
 }

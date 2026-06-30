@@ -13,6 +13,7 @@ export const VALUE_BEARING_ATTRS = [
   'aa-scroll-end',
   'aa-scrub',
   'aa-anchor',
+  'aa-again',
   'aa-parallax-start',
   'aa-parallax-end',
   'aa-slider',

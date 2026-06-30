@@ -318,6 +318,19 @@ declare namespace JSX {
     'aa-anchor'?: string
 
     /**
+     * Per-element override of the global `init({ again })` scroll-replay
+     * default. `aa-again="false"` makes a scroll-triggered animation play once
+     * and stay finished — it won't reset/replay when the element re-enters the
+     * viewport; `aa-again="true"` forces replay even when the global default is
+     * off. Only affects scroll-triggered animations (`appear` / `text` /
+     * `reveal`); `load` / `event` / `scrub` animations ignore it. Handy for
+     * animated content inside a slider/carousel that shouldn't re-fire as the
+     * section scrolls past. Supports the `|` and `-sm/-md/-lg/-xl` responsive
+     * forms like other value-bearing attributes.
+     */
+    'aa-again'?: string
+
+    /**
      * Parallax start depth. Numeric multiplier, no unit. `0` = element doesn't
      * move (locked to viewport scroll); `1` = element moves at scroll speed
      * (i.e. no parallax); `0.5` = element moves at half speed (lags behind);

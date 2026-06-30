@@ -24,6 +24,16 @@ What v8 doesn't have yet: **Pin** animations (rebuild planned in v8.x), form-sub
 
 ---
 
+## [8.0.10] — 2026-06-30
+
+### Added
+- **`aa-again` — per-element override of the global `init({ again })` scroll-replay default.** `aa-again="false"` plays a scroll-triggered animation once and leaves it finished — it won't reset/replay when the element re-enters the viewport; `aa-again="true"` forces replay even when `init({ again: false })` is set globally. Only affects scroll-triggered animations (`appear` / `text` / `reveal`); `load`, `event`, and `scrub` triggers ignore it. Supports the `|` and `-sm/-md/-lg/-xl` responsive forms like other value-bearing attributes. Handy for animated content inside a slider/carousel that shouldn't re-fire as the section scrolls past. Implemented via a new `parseBool` helper in `parse.ts` (`readAnimationConfig`) plus registration in `VALUE_BEARING_ATTRS`; behaviour is unchanged when the attribute is absent.
+
+## [8.0.9] — 2026-06-29
+
+### Changed
+- **`optimizeMobile` now accepts `'fade'` in addition to `true` / `false`.** `true` makes `text-*` elements simply visible on small viewports (no animation, no flash — the previous fade is gone); `'fade'` keeps a softer/slower fade (`0.8s`, `power2.out`, via `DEFAULT_OPTIMIZE_MOBILE_FADE`) instead of reusing the reduced-motion `0.4s` timing. Both modes drop the same heavy modules (`text` / `parallax` / `split`); `true` additionally skips the fade pass entirely (no extra ScrollTriggers). `AlrdyAnimate.options.optimizeMobile` reads back the active mode (`true` / `'fade'`) or `false`.
+
 ## [8.0.8] — 2026-06-26
 
 ### Removed
