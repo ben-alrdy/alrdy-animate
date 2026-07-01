@@ -21,6 +21,7 @@ import { subscribeWithPair, MODAL_CARD_SELECTOR, MODAL_STATUS_ATTR } from './tri
 
 interface ScrollTriggerInstance {
   kill: () => void
+  isActive: boolean
 }
 
 interface ScrollTriggerLike {
@@ -35,9 +36,10 @@ export interface ViewportGateOptions {
 
 /**
  * Create a ScrollTrigger that fires `onActive` on enter/enterBack and `onIdle`
- * on leave/leaveBack. Returns a disposer that kills the trigger. Returns `null`
- * when ScrollTrigger isn't available — caller decides whether to default to
- * always-active or skip silently.
+ * on leave/leaveBack, then reflects the current in-view state once on creation.
+ * Returns a disposer that kills the trigger. Returns `null` when ScrollTrigger
+ * isn't available — caller decides whether to default to always-active or skip
+ * silently.
  *
  * Inside a modal the gate switches strategy: a modal is `position:fixed`, and
  * ScrollTrigger's scroll-based in-view math misjudges fixed elements — when the
@@ -81,6 +83,15 @@ export function createViewportGate(
     onLeave: opts.onIdle,
     onLeaveBack: opts.onIdle,
   })
+
+  // ScrollTrigger's enter/leave callbacks fire only on scroll *crossings*, not
+  // for the position the page loads at. An element already below the fold at
+  // load has not crossed its start, so no callback fires and the caller's
+  // animation would run un-gated (e.g. a marquee looping while off-screen). A
+  // scrolled-past element likewise never gets `onLeave`. Reflect the initial
+  // state explicitly so the gate is correct from the first frame.
+  if (st.isActive) opts.onActive()
+  else opts.onIdle()
 
   return () => st.kill()
 }
