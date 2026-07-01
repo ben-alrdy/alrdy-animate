@@ -81,6 +81,8 @@ interface DraggableInstance {
   isThrowing: boolean
   getDirection: (from: 'start' | 'velocity') => string
   vars: Record<string, unknown>
+  /** The InertiaPlugin throw tween (present while a throw is in flight). */
+  tween?: { kill: () => void }
 }
 
 interface DraggableConstructor {
@@ -373,6 +375,16 @@ function setupOne(
         // cruise direction. Each release with measurable velocity overrides it.
         let throwDirection = baseDirection
 
+        // Proxy-space speed (px/s) that matches the loop's cruise: the loop
+        // advances one cycle (progress 0→1) over `duration`s, and align maps
+        // proxy.x → progress at 1/cycleDistance, so cruise ≡ cycleDistance/duration.
+        const cruiseVelPxPerS = cycleDistance / duration
+        // Per-throw velocity sampling so we can hand the decelerating throw off
+        // to the loop the instant it slows to cruise speed (see onThrowUpdate).
+        let prevThrowX = 0
+        let prevThrowT = 0
+        let handedOff = false
+
         const align = (): void => {
           if (!draggable) return
           loop.progress(wrap(startProgress + (draggable.startX - draggable.x) * ratio))
@@ -402,9 +414,33 @@ function setupOne(
             // becomes (startX - x) = drag delta, which align() turns into
             // progress delta with the right sign.
             gsap.set(proxy, { x: -startProgress / ratio })
+            prevThrowT = 0
+            handedOff = false
           },
           onDrag: align,
-          onThrowUpdate: align,
+          onThrowUpdate(this: DraggableInstance) {
+            align()
+            // Blend the throw into the cruise loop: once the decelerating throw
+            // slows to the loop's own speed, kill the inertia and resume the
+            // loop from here. Because the speeds (and direction — throwDirection
+            // is the flick direction) match at the crossover, it continues
+            // seamlessly instead of coasting to a stop and then jumping back up
+            // to cruise. dt-free-ish: sample proxy.x speed frame to frame.
+            if (!isPlaying || handedOff) return
+            const now = performance.now()
+            const x = this.x
+            if (prevThrowT) {
+              const dt = (now - prevThrowT) / 1000
+              if (dt > 0 && Math.abs(x - prevThrowX) / dt <= cruiseVelPxPerS) {
+                handedOff = true
+                this.tween?.kill()
+                resumeLoop()
+                return
+              }
+            }
+            prevThrowX = x
+            prevThrowT = now
+          },
           onRelease(this: DraggableInstance) {
             // Capture the flick direction from velocity at release.
             // Drag right (proxy.x increasing → progress decreasing → track moves
