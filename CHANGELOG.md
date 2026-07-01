@@ -24,6 +24,20 @@ What v8 doesn't have yet: **Pin** animations (rebuild planned in v8.x), form-sub
 
 ---
 
+## [8.1.0] — 2026-07-01
+
+### Changed
+- **BREAKING — the marquee loop is now driven by `aa-autoplay`, not `aa-duration`** (unifying it with `aa-slider` / `aa-tabs`). Presence of `aa-autoplay` enables the loop; the value is the seconds-per-cycle duration (default **40**); tokens `hover-pause` / `hover-slow`. **With no `aa-autoplay` the marquee is static** (a scroll-driven `aa-scrub` sweep can still apply). The `paused` / `hover-pause` / `hover-slow` tokens are removed from `aa-marquee` — which now carries only `right` / `switch` / `draggable` / `none` — and `aa-duration` is no longer read by marquee. **Migration:** `aa-duration="30"` → `aa-autoplay="30"`; add a bare `aa-autoplay` to keep any default-speed loop moving (an attribute-less marquee is now static); `aa-marquee="paused"` → drop `aa-autoplay`; `aa-marquee="hover-pause"` → `aa-autoplay="hover-pause"`.
+- **BREAKING — `[aa-marquee-scroller]` is now optional**, required only when scrubbing. A basic marquee is just `[aa-marquee] > [aa-marquee-track] > [aa-marquee-list]`; wrap the track in `[aa-marquee-scroller]` only to add an `aa-scrub` sweep. The scrub sweep travel moved off `aa-intensity` onto the scroller element as a **percent of the marquee's own width**: `aa-marquee-scroller="30"` = ±30% per side (default **20**). It's width-relative (not viewport-relative), so the sweep feels the same at any browser width; breakpoint-aware via `|` / `-sm/-md/-lg/-xl`. **Migration:** `aa-intensity` on a scrub marquee → `aa-marquee-scroller="<n>"`.
+
+### Added
+- **`aa-animate` on marquee items now works.** Put `aa-animate` (+ `aa-stagger`) on the `[aa-marquee-list]` element and its items reveal in sequence when the marquee scrolls into view. The library sanitizes the runtime clones (strips the animation attributes and any inline from-state across the whole animated subtree, including split-text spans) so duplicated items render solid instead of staying hidden — only the authored originals animate. Pair with `aa-again="false"` (the marquee travels through the viewport as the page scrolls, so replay would otherwise re-fire the entrance) and an early `aa-scroll-start="top 100%"`.
+- **The draggable marquee blends the throw into the cruise loop.** On release, the inertia throw hands off to the loop the moment it decelerates to the loop's own cruise speed (in the flick direction), instead of coasting to a full stop and then restarting at cruise.
+
+### Fixed
+- **Marquees (and slider/tabs autoplay) no longer run while off-screen.** The viewport gate reflects its in-view state on creation, so a component that loads below the fold is paused until scrolled into view (and one loaded already in view starts immediately), rather than relying on a later scroll crossing.
+- **Reverse-loop freeze.** A left-direction marquee built paused at loop-progress 0 (e.g. the page loaded scrolled past it) no longer freezes when `switch` or a drag flick reverses it — a reversed GSAP loop parked on its start edge has no runway, so the loop's `timeScale` application now nudges progress across the wrap-equivalent boundary (progress 0 and 1 render identically under the wrap modifier).
+
 ## [8.0.10] — 2026-06-30
 
 ### Added
