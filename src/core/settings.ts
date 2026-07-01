@@ -19,6 +19,7 @@ export const VALUE_BEARING_ATTRS = [
   'aa-slider',
   'aa-tabs',
   'aa-marquee',
+  'aa-marquee-scroller',
   'aa-autoplay',
   'aa-nav',
   'aa-hover',

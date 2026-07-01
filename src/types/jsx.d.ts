@@ -343,15 +343,21 @@ declare namespace JSX {
     'aa-parallax-end'?: string | number
 
     /**
-     * Autoplay configuration for `aa-slider` and `aa-tabs`. Values:
+     * Autoplay configuration for `aa-slider`, `aa-tabs`, and `aa-marquee`.
+     * Presence of the attribute enables auto-motion. Values:
      *
-     * - `<seconds>` — interval between auto-advances (e.g. `"3"` for 3s).
+     * - `<seconds>` — interval between auto-advances for slider/tabs, or the
+     *   seconds-per-cycle duration for marquee (e.g. `"3"`).
      * - `<seconds> hover-pause` — pause on pointer hover/focus
      *   (e.g. `"3 hover-pause"`).
+     * - `hover-slow` — (marquee only) ramp the loop down to 15% speed on hover.
+     * - `none` — opt out at this breakpoint (e.g. `"4|none"`).
      * - `true` / `false` (boolean form in JSX) — use `init({ autoplay })`
      *   defaults; `false` disables autoplay even if a default is set.
      *
-     * Defaults from `init({ autoplay })`: `{ interval: 4, hoverPause: false }`.
+     * Slider/tabs default interval from `init({ autoplay })`:
+     * `{ interval: 4, hoverPause: false }`. Marquee defaults to `40`s per cycle
+     * and is **static** when `aa-autoplay` is absent (scrub may still apply).
      */
     'aa-autoplay'?: string | boolean | number
     /** Breakpoint variant of `aa-autoplay`. Activates at `>= breakpoints.sm`. */
@@ -397,30 +403,37 @@ declare namespace JSX {
     /**
      * Marker on the marquee viewport (apply `overflow: hidden`). Value tokens
      * are space-separated and order-independent: `right` (reverse direction),
-     * `paused` (start paused), `hover-pause`, `hover-slow` (ramp to 15% speed
-     * on hover; ignored if `hover-pause` is also set), `switch` (flip direction
-     * while scrolling up), `draggable`, `none` (skip init at this breakpoint).
-     * Pair with `aa-duration` (cycle seconds), `aa-scrub` (layer a
-     * scroll-driven horizontal sweep on top of the loop), and `aa-intensity`
-     * (multiplier on the ±10vw scrub sweep; default `1` = ±10vw, `2` = ±20vw).
-     * Three child wrappers are required, each with a single role:
-     * `[aa-marquee-scroller]` > `[aa-marquee-track]` > `[aa-marquee-list]`.
-     * Feature: `marquee`. Plugins: `ScrollTrigger`, plus `Draggable` +
-     * `InertiaPlugin` when `draggable` is set.
+     * `switch` (flip direction while scrolling up), `draggable`, `none` (skip
+     * init at this breakpoint). Auto-motion is controlled by `aa-autoplay`
+     * (like slider/tabs): add `aa-autoplay` to make the row loop (value = cycle
+     * seconds, default `40`; tokens `hover-pause`, `hover-slow`); with no
+     * `aa-autoplay` the marquee is static (but `aa-scrub` may still apply).
+     * Add `aa-scrub` on the root to layer a scroll-driven horizontal sweep on
+     * top of the loop — the sweep travel (in vw) is authored on the optional
+     * `[aa-marquee-scroller]` wrapper. Required children:
+     * `[aa-marquee-track]` > `[aa-marquee-list]`; wrap the track in
+     * `[aa-marquee-scroller]` only when scrubbing. Feature: `marquee`.
+     * Plugins: `ScrollTrigger`, plus `Draggable` + `InertiaPlugin` when
+     * `draggable` is set.
      */
     'aa-marquee'?: string | boolean
     /**
-     * Marker on the scroll-driven sweep layer (direct child of `[aa-marquee]`).
-     * When `aa-scrub` is set on the root, this element gets a horizontal sweep
-     * tied to scroll position — composes with the infinite loop on the track
-     * below it. Stays static when `aa-scrub` is absent.
+     * Optional wrapper around `[aa-marquee-track]`, needed only when the root
+     * carries `aa-scrub`. Its value is the scroll-driven sweep travel as a
+     * **percent of the marquee's own width**: `aa-marquee-scroller="30"` → ±30%
+     * per side (default `20` → ±20%). Width-relative (not viewport-relative), so
+     * the sweep feels the same regardless of browser width. Composes with the
+     * infinite loop on the track below it. Supports the `|` and `-sm/-md/-lg/-xl`
+     * responsive forms (e.g. `"20|10"` = 20% desktop, 10% mobile). Omit the
+     * wrapper entirely for a non-scrubbing marquee.
      */
     'aa-marquee-scroller'?: string | boolean
     /**
-     * Marker on the infinite-loop layer (child of `[aa-marquee-scroller]`).
-     * The lib clones `[aa-marquee-list]` into this element until the row fills
-     * the viewport, then drives the looping translate on it. Author one list
-     * inside this element; the clones (`aa-marquee-clone`) appear at runtime.
+     * Marker on the infinite-loop layer (child of `[aa-marquee]`, or of
+     * `[aa-marquee-scroller]` when scrubbing). The lib clones `[aa-marquee-list]`
+     * into this element until the row fills the viewport, then drives the
+     * looping translate on it. Author one list inside; the clones
+     * (`aa-marquee-clone`) appear at runtime.
      */
     'aa-marquee-track'?: string | boolean
     /**

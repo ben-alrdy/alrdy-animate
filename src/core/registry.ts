@@ -8,7 +8,7 @@ import type { GsapHandle, GsapTween } from './gsap-detect'
 import type { ResponsiveController } from './match-media'
 import type { ResolvedPreset } from './presets'
 import type { FeatureName } from './scanner'
-import { readAttrs, type Config } from './settings'
+import { readAttrs, type Config, type ResolvedAttrs } from './settings'
 
 export interface FeatureContext {
   gsap: GsapHandle
@@ -125,17 +125,23 @@ export function bindFeature(
  * never preset-resolved, so attrs are read without a preset. Features needing
  * a feature-level teardown (e.g. modal's scroll-lock reset) add their own
  * `return` after calling this. `nav` keeps a bespoke init (multiple setups).
+ *
+ * `resolveAttrs` defaults to the root-only `readAttrs`; a feature can pass its
+ * own reader to fold in attributes that live on descendants (e.g. marquee
+ * merges the `aa-marquee-scroller` child's per-breakpoint buckets into the
+ * root config) while keeping the shared filter + bind + teardown wiring.
  */
 export function bindRootFeature(
   ctx: FeatureContext,
   attr: string,
   setupOne: (ctx: FeatureContext, root: HTMLElement, config: Config) => (() => void) | undefined,
+  resolveAttrs: (root: HTMLElement) => ResolvedAttrs = readAttrs,
 ): void {
   const subjects = ctx.elements.filter(
     (el): el is HTMLElement => el instanceof HTMLElement && el.hasAttribute(attr),
   )
   for (const root of subjects) {
-    const attrs = readAttrs(root)
+    const attrs = resolveAttrs(root)
     ctx.responsive.bind(root, attrs, ({ config }) => setupOne(ctx, root, config))
   }
 }

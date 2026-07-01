@@ -18,16 +18,7 @@ import Demo from '../../../../components/Demo.astro'
 | `center`          | Centers the active slide horizontally in the container.                                               |
 | `none`            | Don't init at this breakpoint. Combine with the `\|` shorthand (splits at `md`) or any of the `-sm` / `-md` / `-lg` / `-xl` suffix attributes for responsive on/off. |
 
-Autoplay is a separate, standalone attribute — `aa-autoplay` — so the same configuration shape applies uniformly to sliders and tabs and `aa-delay` keeps its meaning of "tween start delay" everywhere.
-
-| `aa-autoplay` value           | Effect                                                                                       |
-| ----------------------------- | -------------------------------------------------------------------------------------------- |
-| (attribute absent)            | No autoplay.                                                                                 |
-| (empty: `aa-autoplay`)        | Autoplay enabled at the init default interval (`autoplay.interval`, default 4s). No hover pause. |
-| `<number>` (e.g. `"3"`)       | Autoplay with the given dwell in seconds.                                                    |
-| `hover-pause`                 | Add hover-pause: `mouseenter` pauses, `mouseleave` resumes (non-touch only).                  |
-| `<number> hover-pause`        | Both — e.g. `aa-autoplay="3 hover-pause"`.                                                   |
-| `none`                        | Opt out (e.g. `aa-autoplay="3\|none"` — autoplay on desktop, off on mobile).                 |
+Autoplay is configured separately via the standalone `aa-autoplay` attribute — see [Config attributes](#config-attributes).
 
 ```html
 <div aa-slider="draggable center" aa-duration="0.6" aa-autoplay="3 hover-pause">…</div>
@@ -35,6 +26,26 @@ Autoplay is a separate, standalone attribute — `aa-autoplay` — so the same c
 <!-- Bento on desktop, autoplay carousel on mobile -->
 <div aa-slider="none|" aa-autoplay="none|3">…</div>
 ```
+
+## Config attributes
+
+| Attribute     | Default               | Notes                                                                  |
+| ------------- | --------------------- | ---------------------------------------------------------------------- |
+| `aa-duration` | (init)                | Seconds for each slide transition.                                     |
+| `aa-autoplay` | (off; init `interval` when present) | See [Autoplay](#autoplay) below. Drives the per-slide dwell + progress-bar fill. |
+| `aa-ease`     | (init)                | Any GSAP ease — used for transitions and progress bars.                |
+
+### Autoplay
+
+Autoplay is configured via the standalone **`aa-autoplay`** attribute, shared with `aa-tabs` so the same configuration shape applies uniformly across components (and `aa-delay` keeps its meaning of "tween start delay" everywhere).
+
+| Attribute     | Value                 | Effect                                                                                          |
+| ------------- | --------------------- | ---------------------------------------------------------------------------------------------- |
+| `aa-autoplay` | (absent)              | No autoplay.                                                                                    |
+| `aa-autoplay` | (present, no value)   | Autoplay at the init default interval (default 4s). No hover-pause.                             |
+| `aa-autoplay` | `"3"`                 | Autoplay with a 3s dwell per slide.                                                             |
+| `aa-autoplay` | `"3 hover-pause"`     | 3s dwell; `mouseenter` pauses, `mouseleave` resumes (non-touch only).                           |
+| `aa-autoplay` | `"3\|none"`           | Autoplay on desktop, off on mobile (`\|` splits at `md`; `-sm`/`-md`/`-lg`/`-xl` also work).    |
 
 ## Structural attributes
 
@@ -49,14 +60,6 @@ Autoplay is a separate, standalone attribute — `aa-autoplay` — so the same c
 | `aa-slider-current`   | Element whose text content reflects the current 1-based slide index.       |
 | `aa-slider-total`     | Element whose text content reflects the total slide count.                 |
 | `aa-slider-progress`  | Inside `aa-slider-button`, fills over the resolved `aa-autoplay` interval. Value is `width` (default), `height`, or `circle`. For `circle`, mark an SVG (or place an SVG inside the marked element) — the lib finds the inner `<circle>` and tweens its `stroke-dashoffset` from full circumference to zero. |
-
-## Config attributes
-
-| Attribute     | Default               | Notes                                                                  |
-| ------------- | --------------------- | ---------------------------------------------------------------------- |
-| `aa-duration` | (init)                | Seconds for each slide transition.                                     |
-| `aa-autoplay` | (off; init `interval` when present) | See the autoplay table above. Drives the per-slide dwell + progress-bar fill. |
-| `aa-ease`     | (init)                | Any GSAP ease — used for transitions and progress bars.                |
 
 ## Required GSAP plugins
 

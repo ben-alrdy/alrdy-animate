@@ -57,6 +57,8 @@ export interface StaggerOptions {
 /**
  * Autoplay defaults shared by slider and tabs. Override per-element via
  * `aa-autoplay="<seconds> [hover-pause]"` (e.g. `aa-autoplay="3 hover-pause"`).
+ * Marquee also uses `aa-autoplay` to enable its loop, but with its own cruise
+ * default of `40`s (these `interval`/`hoverPause` defaults don't apply to it).
  *
  * Defaults: `{ interval: 4, hoverPause: false }`.
  */
@@ -95,7 +97,6 @@ export interface InitOptions {
    * - **slide-\* / text-slide-\* / text-tilt-\* / hover-bg-block** — element-relative
    *   (`100%` of element or line); scales with element size, not root font-size.
    * - **parallax / parallax-horizontal** — `±10%` of the parallax range.
-   * - **marquee scrub** — `±10vw` (viewport-relative).
    * - **rotate** — `5°`. **stack** — preset-baked rotation / scale / blur /
    *   translate. **hover-icon trail / nav / tabs scroll-pin** — internal
    *   timing or geometry constants.

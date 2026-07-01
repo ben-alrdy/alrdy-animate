@@ -7,6 +7,12 @@ import Demo from '../../../../components/Demo.astro'
 
 `aa-modal-group` is a fixed-position dialog container. Its descendants — `[aa-modal-name]` cards — open when a button with the matching `aa-modal-target` is clicked anywhere in the page. The card's own `aa-animate` (e.g. `fade-up`, `slide-left`) handles its enter; everything inside the card with `aa-animate` plays automatically too via trigger inference, and reverses when the modal closes.
 
+## Config attributes
+
+| Attribute     | Default | Notes                                                                                            |
+| ------------- | ------- | ------------------------------------------------------------------------------------------------ |
+| `aa-duration` | (init)  | Open duration in seconds. Read from the group, then overridden per card. Close runs at 2×.       |
+
 ## Structural attributes
 
 | Attribute               | Where it goes                              | Notes                                                                                        |
@@ -18,12 +24,6 @@ import Demo from '../../../../components/Demo.astro'
 | `aa-modal-target="<id>"`| Trigger button                             | Click opens the matching modal. Multiple triggers per modal are fine.                        |
 | `aa-modal-close`        | Any descendant of the group                | Click closes the active modal. Backdrop typically gets both `aa-modal-backdrop` and `aa-modal-close`. |
 | `aa-modal-backdrop`     | Optional dim element                       | Fades 0 → 1 on open, 1 → 0 on close, independent of the card's own animation.                |
-
-## Config attributes
-
-| Attribute     | Default | Notes                                                                                            |
-| ------------- | ------- | ------------------------------------------------------------------------------------------------ |
-| `aa-duration` | (init)  | Open duration in seconds. Read from the group, then overridden per card. Close runs at 2×.       |
 
 ## What you get for free
 
@@ -186,7 +186,7 @@ The real-world case this guards against: a form whose **success message is `disp
             <div class="modal-success" data-success>
               <h2>You're in 🎉</h2>
               <p>This panel was <code>display:none</code> a moment ago. The marquee and slider below came out of a zero-size container and run without any resize.</p>
-              <div class="modal-marquee" aa-marquee aa-duration="10">
+              <div class="modal-marquee" aa-marquee aa-autoplay="10">
                 <div aa-marquee-scroller>
                   <div aa-marquee-track>
                     <div aa-marquee-list>

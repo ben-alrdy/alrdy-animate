@@ -1,13 +1,11 @@
+import { parseAutoplay } from '../../core/autoplay'
 import { bindRootFeature, type FeatureContext, type FeatureModule } from '../../core/registry'
 import { parseNum, parseScrub } from '../../core/parse'
-import type { Config } from '../../core/settings'
+import { readAttrs, type BucketKey, type Config } from '../../core/settings'
 import { attachHoverPauseListener, createViewportGate } from '../../core/viewport-gate'
 
 interface ParsedTokens {
   isRight: boolean
-  isPaused: boolean
-  hoverPause: boolean
-  hoverSlow: boolean
   hasSwitch: boolean
   isDraggable: boolean
   isNone: boolean
@@ -20,12 +18,54 @@ function parseMarqueeValue(raw: string | undefined): ParsedTokens {
     .filter(Boolean)
   return {
     isRight: tokens.includes('right'),
-    isPaused: tokens.includes('paused'),
-    hoverPause: tokens.includes('hover-pause'),
-    hoverSlow: tokens.includes('hover-slow'),
     hasSwitch: tokens.includes('switch'),
     isDraggable: tokens.includes('draggable'),
     isNone: tokens.includes('none'),
+  }
+}
+
+// Animation attributes stripped from clones so the FOUC guard
+// (`[aa-animate]:not([aa-ready])`) doesn't leave them hidden and no stray
+// ScrollTrigger/entrance re-fires on a duplicated item. Originals keep theirs.
+const CLONE_STRIPPED_ATTRS = [
+  'aa-animate',
+  'aa-delay',
+  'aa-duration',
+  'aa-stagger',
+  'aa-trigger',
+  'aa-again',
+  'aa-scroll-start',
+  'aa-scroll-end',
+  'aa-ease',
+]
+// Inline from-state GSAP may have applied to the original before cloning.
+// Includes clip-path (reveal-*) and both vendor forms.
+const CLONE_CLEARED_STYLES = [
+  'opacity',
+  'transform',
+  'filter',
+  'visibility',
+  'clip-path',
+  '-webkit-clip-path',
+]
+
+function clearFromState(el: HTMLElement): void {
+  for (const prop of CLONE_CLEARED_STYLES) el.style.removeProperty(prop)
+}
+
+// Strip the animation attributes so the clone is never rescanned or FOUC-hidden;
+// then clear any inline from-state so the clone renders solid. The from-state
+// may sit on the `aa-animate` element itself, on its direct children (the
+// `aa-stagger` targets), or deeper still (split text lands opacity/transform on
+// grandchild char/word/line spans) — so clear across the whole animated subtree.
+function sanitizeClone(clone: HTMLElement): void {
+  const animated = clone.matches('[aa-animate]')
+    ? [clone, ...clone.querySelectorAll<HTMLElement>('[aa-animate]')]
+    : [...clone.querySelectorAll<HTMLElement>('[aa-animate]')]
+  for (const el of animated) {
+    for (const attr of CLONE_STRIPPED_ATTRS) el.removeAttribute(attr)
+    clearFromState(el)
+    for (const desc of el.querySelectorAll<HTMLElement>('*')) clearFromState(desc)
   }
 }
 
@@ -75,6 +115,9 @@ function fillTrack(
     const clone = list.cloneNode(true) as HTMLElement
     clone.setAttribute('aa-marquee-clone', '')
     clone.setAttribute('aria-hidden', 'true')
+    // Strip aa-animate (+ companions + inline from-state) so cloned items
+    // render solid instead of staying FOUC-hidden or replaying an entrance.
+    sanitizeClone(clone)
     track.appendChild(clone)
     clones.push(clone)
     safety++
@@ -90,33 +133,52 @@ function setupOne(
   const tokens = parseMarqueeValue(config['aa-marquee'])
   if (tokens.isNone) return undefined
 
-  // Three authored wrappers, each with a single role. Scroller is the
-  // scroll-driven sweep layer (no-op without aa-scrub). Track is the infinite
-  // loop layer — duplicates of [aa-marquee-list] land here. List is the
-  // authored cluster of items; cloned by the lib to fill the track width.
-  const scroller = root.querySelector<HTMLElement>('[aa-marquee-scroller]')
+  // Track (infinite-loop layer, where clones land) and list (the authored
+  // cluster, cloned to fill the track) are always required. Scroller is the
+  // optional scroll-driven sweep layer — only needed when `aa-scrub` is set;
+  // it wraps the track when present.
   const track = root.querySelector<HTMLElement>('[aa-marquee-track]')
   const list = root.querySelector<HTMLElement>('[aa-marquee-list]')
-  if (!scroller || !track || !list) {
+  if (!track || !list) {
     if (ctx.debug) {
       console.warn(
-        '[alrdy-animate] aa-marquee requires [aa-marquee-scroller], [aa-marquee-track], and [aa-marquee-list] descendants.',
+        '[alrdy-animate] aa-marquee requires [aa-marquee-track] and [aa-marquee-list] descendants.',
         root,
       )
     }
     return undefined
   }
 
-  const duration = parseNum(config['aa-duration'], 20)
-  // Scrub mode is enabled by the presence of the `aa-scrub` attribute on the
-  // marquee root (mirrors how every other animation feature treats `aa-scrub`).
-  // The attribute's value also becomes the ScrollTrigger scrub delay — `true`
-  // for an instant lock, or seconds for smoothing. `aa-intensity` multiplies the
-  // 10vw design-baseline sweep magnitude: `1` (default) = ±10vw per side
-  // (20vw total), `2` = ±20vw, `0.5` = ±5vw.
+  // Autoplay drives the infinite loop. Presence of `aa-autoplay` enables it
+  // (matching slider/tabs); absence leaves the marquee static (scrub may still
+  // apply). The value is the seconds-per-cycle duration, defaulting to 40.
+  const autoplay = parseAutoplay(
+    config['aa-autoplay'],
+    ctx.options.autoplay,
+    'aa-autoplay' in config,
+    40,
+  )
+  const isPlaying = autoplay.enabled
+  const duration = autoplay.interval
+
+  // Scrub is enabled by the presence of `aa-scrub` on the root (as with every
+  // other feature). The value becomes the ScrollTrigger scrub delay — `true`
+  // for an instant lock, or seconds for smoothing. The sweep travel is a
+  // percentage of the marquee's own width, authored on the scroller element:
+  // `aa-marquee-scroller="30"` → ±30% of the marquee width per side (default
+  // 20 → ±20%). Width-relative (not viewport-relative) so the sweep feels the
+  // same regardless of how wide the browser is. Scrub requires the wrapper.
+  const scroller = root.querySelector<HTMLElement>('[aa-marquee-scroller]')
   const scrubValue = parseScrub(config['aa-scrub'])
-  const isScrub = scrubValue !== undefined
-  const intensity = parseNum(config['aa-intensity'], 1)
+  const wantsScrub = scrubValue !== undefined
+  if (wantsScrub && !scroller && ctx.debug) {
+    console.warn(
+      '[alrdy-animate] aa-marquee scrub requires an [aa-marquee-scroller] wrapper around [aa-marquee-track].',
+      root,
+    )
+  }
+  const isScrub = wantsScrub && !!scroller
+  const scrubTravelPct = parseNum(config['aa-marquee-scroller'], 20)
 
   const gsap = ctx.gsap.gsap as unknown as Record<string, any>
   const ScrollTrigger = ctx.gsap.plugins.ScrollTrigger as ScrollTriggerLike | undefined
@@ -145,10 +207,10 @@ function setupOne(
     builtCycle = cycleDistance
 
     // Compute scrub overshoot up front so fillTrack provisions enough clones
-    // to cover both the loop wrap AND the scroller sweep at its extremes.
-    // Effective sweep is `10 * intensity` vw per side, so half-sweep px =
-    // innerWidth * 10 * intensity / 100.
-    const halfSweepPx = isScrub ? (window.innerWidth * 10 * intensity) / 100 : 0
+    // to cover both the loop wrap AND the scroller sweep at its extremes. The
+    // sweep is `scrubTravelPct` percent of the marquee's own width per side, so
+    // half-sweep px = rootWidth * scrubTravelPct / 100.
+    const halfSweepPx = isScrub ? (rootWidth * scrubTravelPct) / 100 : 0
 
     const clones = fillTrack(list, track, rootWidth, cycleDistance, halfSweepPx)
 
@@ -159,8 +221,8 @@ function setupOne(
     // left edge at the +halfSweepPx extreme (max right shift), exposing the gap
     // between root.left and the shifted scroller. We restore the original inline
     // margin-left on cleanup so authored CSS keeps owning the static state.
-    const originalScrollerMarginLeft = scroller.style.marginLeft
-    if (isScrub) {
+    const originalScrollerMarginLeft = scroller?.style.marginLeft ?? ''
+    if (isScrub && scroller) {
       scroller.style.marginLeft = `${-halfSweepPx}px`
     }
 
@@ -199,6 +261,9 @@ function setupOne(
     const baseDirection = tokens.isRight ? -1 : 1
     const timeScale = { value: baseDirection }
     let lastSwitchDirection = baseDirection
+    // Last `aa-marquee-direction` value written, so applyTimeScale can skip
+    // redundant same-value attribute writes on its per-frame ramp path.
+    let lastDirectionAttr: 'left' | 'right' | undefined
 
     // hover-slow scales the cruise timeScale by a positive factor (1 = full
     // speed). It multiplies onto timeScale.value so it composes with switch's
@@ -208,31 +273,50 @@ function setupOne(
     const hoverFactor = { value: 1 }
 
     const applyTimeScale = (): void => {
-      loop.timeScale(timeScale.value * hoverFactor.value)
-      root.setAttribute('aa-marquee-direction', timeScale.value < 0 ? 'right' : 'left')
+      const ts = timeScale.value * hoverFactor.value
+      // A tween sitting exactly at a boundary has no runway to play *toward*
+      // that boundary: reverse (ts < 0) from progress 0, or forward from
+      // progress 1, freezes — GSAP won't wrap a repeat tween past the edge it's
+      // already on, and `onReverseComplete` only fires mid-playback, not when a
+      // reversed tween is resumed already at the start. The wrap modifier makes
+      // progress 0 and 1 render identically, so nudging to the far edge is
+      // invisible and restores runway. This also seeds the right-direction first
+      // build (progress 0, ts -1 → nudged to 1), and rescues a loop reversed by
+      // `switch` / draggable while still parked at the boundary (e.g. built
+      // paused after loading scrolled-past). The check only fires at the seam
+      // (progress ∈ {0,1}); mid-cycle onUpdate frames are no-ops.
+      const p = loop.progress()
+      if (ts < 0 && p <= 0) loop.progress(1)
+      else if (ts > 0 && p >= 1) loop.progress(0)
+      loop.timeScale(ts)
+      // Only touch the attribute when the direction sign actually flips —
+      // applyTimeScale runs every frame of the switch / hover-slow ramps, and a
+      // same-value setAttribute still invalidates style on the element.
+      const dir = timeScale.value < 0 ? 'right' : 'left'
+      if (dir !== lastDirectionAttr) {
+        root.setAttribute('aa-marquee-direction', dir)
+        lastDirectionAttr = dir
+      }
     }
 
     // Restore the prior progress fraction across a rebuild so the corrective
     // remeasure (lazy images loaded) doesn't itself flash a reset. On the first
-    // build there is no prior progress: right-direction starts advance to the
-    // wrap point so the loop has headroom to reverse end → start (Osmo).
+    // build there's no prior progress: applyTimeScale's boundary guard seeds
+    // the right-direction headroom (progress 0 + ts -1 → nudged to 1, Osmo).
     if (typeof prevProgress === 'number') loop.progress(prevProgress)
-    else if (baseDirection < 0) loop.progress(1)
     applyTimeScale()
-    if (!tokens.isPaused) loop.play()
+    if (isPlaying) loop.play()
 
     const cleanups: Array<() => void> = []
 
-    // Scrub layer: scroll progress drives the wrapper's x in viewport-relative
-    // units. aa-intensity=1 → ±10vw per side (20vw total); aa-intensity=2
-    // doubles it. baseDirection (left/right) flips which way the row drifts on
-    // scroll-down. We resolve vw → px ourselves because GSAP's `x` shortcut
-    // accepts raw numbers as pixels and silently drops the "vw" suffix; passing
-    // a string like "100vw" gets read as the integer 100 (px). A viewport
-    // resize rebuilds the whole unit (sweep is viewport-relative), so this
-    // layer doesn't need its own resize listener.
-    if (isScrub && ScrollTrigger) {
-      const sweepPx = (window.innerWidth * 10 * intensity) / 100
+    // Scrub layer: scroll progress drives the wrapper's x. The sweep is a
+    // percentage of the marquee's own width — `aa-marquee-scroller="30"` →
+    // ±30% of rootWidth per side (default 20 → ±20%). baseDirection (left/right)
+    // flips which way the row drifts on scroll-down. A viewport resize rebuilds
+    // the whole unit (rootWidth is remeasured), so this layer doesn't need its
+    // own resize listener.
+    if (isScrub && scroller && ScrollTrigger) {
+      const sweepPx = (rootWidth * scrubTravelPct) / 100
       // Default direction (left) sweeps right→left as you scroll down so it
       // composes with the leftward loop. `right` token flips both ends.
       const startX = baseDirection > 0 ? sweepPx : -sweepPx
@@ -295,7 +379,9 @@ function setupOne(
         }
 
         const resumeLoop = (): void => {
-          if (tokens.isPaused) return
+          // Without autoplay the loop has no cruise to resume — the drag
+          // settles and the marquee stays put.
+          if (!isPlaying) return
           timeScale.value = throwDirection
           applyTimeScale()
           loop.resume()
@@ -347,7 +433,7 @@ function setupOne(
     // and a hover-pause would freeze the loop mid-drag. Critical: use resume()
     // not play() — play() always plays forward and would flip the direction of
     // a right-direction marquee. resume() preserves the current play direction.
-    if (tokens.hoverPause && !tokens.isDraggable) {
+    if (autoplay.hoverPause && !tokens.isDraggable && isPlaying) {
       let pausedByHover = false
       cleanups.push(
         attachHoverPauseListener({
@@ -358,7 +444,7 @@ function setupOne(
             pausedByHover = true
           },
           onLeave: () => {
-            if (!pausedByHover || tokens.isPaused) return
+            if (!pausedByHover) return
             pausedByHover = false
             loop.resume()
           },
@@ -371,7 +457,7 @@ function setupOne(
     // slowing on the same pointerover would fight. We tween hoverFactor between
     // 1 and HOVER_SLOW_FACTOR and re-apply via applyTimeScale on every frame so
     // the ramp respects the live direction (switch may flip it mid-hover).
-    if (tokens.hoverSlow && !tokens.hoverPause && !tokens.isDraggable && !tokens.isPaused) {
+    if (autoplay.hoverSlow && !autoplay.hoverPause && !tokens.isDraggable && isPlaying) {
       const rampTo = (target: number): void => {
         gsap.killTweensOf(hoverFactor)
         gsap.to(hoverFactor, {
@@ -393,9 +479,9 @@ function setupOne(
     }
 
     // Optional switch: invert direction when body[aa-scroll-direction] flips.
-    // Composes with paused (still no motion) but conflicts with draggable's
-    // velocity-driven timeScale, so we skip switch in that case.
-    if (tokens.hasSwitch && !tokens.isDraggable) {
+    // Needs a running loop (autoplay) to have a direction to flip, and conflicts
+    // with draggable's velocity-driven timeScale, so we skip it in both cases.
+    if (tokens.hasSwitch && !tokens.isDraggable && isPlaying) {
       const apply = (): void => {
         const scrollDirection = document.body.getAttribute('aa-scroll-direction') ?? 'down'
         const isInverted = scrollDirection === 'up'
@@ -434,7 +520,7 @@ function setupOne(
     const gateDispose = createViewportGate(ctx.gsap, {
       trigger: root,
       onActive: () => {
-        if (!tokens.isPaused) loop.resume()
+        if (isPlaying) loop.resume()
         applyTimeScale()
         draggable?.enable()
       },
@@ -452,7 +538,7 @@ function setupOne(
       if (activeLoop === loop) activeLoop = undefined
       for (const c of clones) c.remove()
       gsap.set(track, { clearProps: 'transform,x' })
-      if (isScrub) {
+      if (isScrub && scroller) {
         gsap.set(scroller, { clearProps: 'transform,x' })
         // Restore whatever inline margin-left the author had (usually empty).
         // We never touch external CSS, so styles applied via classes are
@@ -509,8 +595,9 @@ function setupOne(
       : null
   ro?.observe(list)
 
-  // Viewport resize only needs to rebuild when scrubbing (sweep is
-  // viewport-relative); a pure-loop marquee's cycle is caught by the RO.
+  // Viewport resize only needs to rebuild when scrubbing (the sweep scales with
+  // rootWidth, which usually changes on resize); a pure-loop marquee's cycle is
+  // caught by the RO.
   const offResize = isScrub ? ctx.onResize(() => scheduleRebuild(true), 200) : undefined
 
   return () => {
@@ -521,10 +608,33 @@ function setupOne(
   }
 }
 
+// `aa-marquee-scroller` lives on the (optional) scroller child, not the root,
+// so the standard root-only readAttrs never sees it. We read the child's own
+// per-breakpoint buckets and fold its `aa-marquee-scroller` values into the
+// root's buckets, so the scrub travel resolves through the same `|`/suffix
+// pipeline (and matchMedia rebuild) as every other responsive attribute.
+function mergeScrollerAttrs(root: HTMLElement): ReturnType<typeof readAttrs> {
+  const attrs = readAttrs(root)
+  const scroller = root.querySelector<HTMLElement>('[aa-marquee-scroller]')
+  if (!scroller) return attrs
+  const scrollerAttrs = readAttrs(scroller)
+  for (const [key, bucket] of scrollerAttrs.buckets) {
+    const travel = bucket['aa-marquee-scroller']
+    if (travel === undefined) continue
+    let target = attrs.buckets.get(key as BucketKey)
+    if (!target) {
+      target = {}
+      attrs.buckets.set(key as BucketKey, target)
+    }
+    target['aa-marquee-scroller'] = travel
+  }
+  return attrs
+}
+
 const marqueeFeature: FeatureModule = {
   name: 'marquee',
   init(ctx: FeatureContext): () => void {
-    bindRootFeature(ctx, 'aa-marquee', setupOne)
+    bindRootFeature(ctx, 'aa-marquee', setupOne, mergeScrollerAttrs)
     return () => {}
   },
 }

@@ -54,12 +54,15 @@ test.describe('marquee demo page', () => {
     expect(ariaHidden).toBe('true')
   })
 
-  test('first marquee animates the track translation over time', async ({ page }) => {
+  test('first marquee loops without an [aa-marquee-scroller] wrapper', async ({ page }) => {
     const initLog = page.waitForEvent('console', { predicate: initialized, timeout: 8000 })
     await page.goto('/animations/components/marquee/')
     await initLog
 
     const firstMarquee = page.locator('[aa-marquee]').first()
+    // The basic-loop demo omits the optional scroller wrapper entirely.
+    expect(await firstMarquee.locator('[aa-marquee-scroller]').count()).toBe(0)
+
     await firstMarquee.scrollIntoViewIfNeeded()
     await page.waitForTimeout(200)
 
@@ -68,9 +71,40 @@ test.describe('marquee demo page', () => {
     await page.waitForTimeout(700)
     const x2 = await readTrackX(track)
 
-    // Direction = left (default) → x decreases over time. Wrapping can land
-    // it back near 0, but consecutive 700ms samples should not be identical.
+    // aa-autoplay present → direction = left (default) → x decreases over time.
+    // Wrapping can land it back near 0, but consecutive 700ms samples should
+    // not be identical.
     expect(Math.abs(x2 - x1)).toBeGreaterThan(2)
+  })
+
+  test('aa-animate on the list reveals originals but leaves clones solid', async ({ page }) => {
+    const initLog = page.waitForEvent('console', { predicate: initialized, timeout: 8000 })
+    await page.goto('/animations/components/marquee/')
+    await initLog
+
+    // The aa-animate demo puts aa-animate + aa-stagger on the [aa-marquee-list].
+    const marquee = page.locator('[aa-marquee]:has([aa-marquee-list][aa-animate])').first()
+    await marquee.scrollIntoViewIfNeeded()
+    await page.waitForTimeout(700)
+
+    // The authored list carries aa-animate and is processed by appear (aa-ready set).
+    const origList = marquee
+      .locator('[aa-marquee-list][aa-animate]:not([aa-marquee-clone])')
+      .first()
+    expect(await origList.count()).toBe(1)
+    expect(await origList.getAttribute('aa-ready')).not.toBeNull()
+
+    // Clones are sanitized: aa-animate stripped, and clone items are un-clipped
+    // + visible (not left FOUC-hidden or stuck under a reveal clip-path).
+    expect(await marquee.locator('[aa-marquee-clone][aa-animate]').count()).toBe(0)
+    const cloneItem = marquee.locator('[aa-marquee-clone] .aa-marquee-item').first()
+    expect(await cloneItem.count()).toBeGreaterThan(0)
+    const cloneStyle = await cloneItem.evaluate((el) => {
+      const s = getComputedStyle(el as HTMLElement)
+      return { visibility: s.visibility, clipPath: s.clipPath }
+    })
+    expect(cloneStyle.visibility).not.toBe('hidden')
+    expect(cloneStyle.clipPath === 'none' || cloneStyle.clipPath === '').toBe(true)
   })
 
   test('right-direction marquee initializes with aa-marquee-direction="right"', async ({ page }) => {
@@ -88,8 +122,9 @@ test.describe('marquee demo page', () => {
     await page.goto('/animations/components/marquee/')
     await initLog
 
-    // The "right hover-pause" demo is the second one on the page.
-    const hoverMarquee = page.locator('[aa-marquee~="hover-pause"]').first()
+    // The "right hover-pause" demo is the second one on the page. hover-pause
+    // now lives on aa-autoplay, not aa-marquee.
+    const hoverMarquee = page.locator('[aa-autoplay~="hover-pause"]').first()
     await hoverMarquee.scrollIntoViewIfNeeded()
     await page.waitForTimeout(300)
 
