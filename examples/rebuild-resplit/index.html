@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>alrdy-animate — rebuild/resplit race test</title>
+
+  <!-- GSAP core + the plugins the text feature needs. -->
+  <script defer src="https://cdn.jsdelivr.net/npm/gsap@3/dist/gsap.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/gsap@3/dist/ScrollTrigger.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/gsap@3/dist/SplitText.min.js"></script>
+
+  <!-- Freshly built library (run `npm run build` first). -->
+  <link rel="stylesheet" href="../../dist/alrdy-animate.css" />
+  <script defer src="../../dist/alrdy-animate.umd.js"></script>
+
+  <style>
+    :root { color-scheme: light dark; }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; padding: 2rem;
+      font: 15px/1.5 system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      max-width: 780px; margin-inline: auto;
+    }
+    h1 { font-size: 1.15rem; }
+    p.lede { color: #666; }
+    .panel { border: 1px solid #ccc; border-radius: 10px; padding: 1rem 1.25rem; margin: 1rem 0; }
+    button {
+      font: inherit; padding: 0.55rem 1rem; border-radius: 8px;
+      border: 1px solid #888; background: #f4f4f5; cursor: pointer;
+    }
+    button:hover { background: #e9e9ec; }
+    label.opt { display: inline-flex; gap: 0.4rem; align-items: center; margin-left: 1rem; }
+
+    /* The element under test. Width is toggled at runtime to force a
+       line re-wrap → SplitText auto-resplit while the entrance is mid-play. */
+    #stage { width: 620px; max-width: 100%; transition: none; }
+    #stage.narrow { width: 300px; }
+    #headline {
+      font-size: 1.9rem; font-weight: 700; line-height: 1.25; margin: 0;
+    }
+
+    #verdict { font-size: 1.4rem; font-weight: 700; }
+    .pass { color: #1a7f37; }
+    .fail { color: #cf222e; }
+    .idle { color: #999; }
+    pre {
+      background: #0b0b0c; color: #d6d6d6; padding: 0.75rem; border-radius: 8px;
+      overflow: auto; font-size: 12px; max-height: 220px;
+    }
+    .browser { font-size: 12px; color: #888; }
+  </style>
+</head>
+<body>
+  <h1>alrdy-animate — event-fire ↔ mid-play resplit race</h1>
+  <p class="lede">
+    Reproduces the bug where an <code>event:</code>-triggered split-text entrance is
+    <strong>snapped to its end state</strong> when an unrelated resplit (here: a width
+    change, exactly what a pinned section's <code>ScrollTrigger.refresh()</code> does)
+    lands a beat after the event fires. Run it in Chrome, Firefox and Safari.
+  </p>
+
+  <div class="panel">
+    <button id="run">▶ Run test</button>
+    <label class="opt"><input type="checkbox" id="resplit" checked /> force resplit mid-play (~150&nbsp;ms after fire)</label>
+    <p style="margin:.8rem 0 0"><span id="verdict" class="idle">— idle —</span></p>
+    <p class="browser" id="ua"></p>
+  </div>
+
+  <div class="panel">
+    <div id="stage">
+      <p id="headline"
+         aa-animate="text-fade"
+         aa-split="lines-words"
+         aa-trigger="event:test"
+         aa-duration="2"
+         aa-stagger="0.03">
+        Präzision braucht Menschen die verstehen wie aus Ideen exakte Bauteile werden und genau dafür bauen wir jeden Tag Vertrauen auf
+      </p>
+    </div>
+  </div>
+
+  <div class="panel">
+    <strong>opacity trace (first word)</strong>
+    <pre id="log">Waiting for GSAP + library…</pre>
+  </div>
+
+  <script>
+    const $ = (s) => document.querySelector(s);
+    const logEl = $('#log');
+    const verdictEl = $('#verdict');
+    $('#ua').textContent = navigator.userAgent;
+
+    const firstWord = () => {
+      const h = $('#headline');
+      return h.querySelector('.aa-word, [class*="word"]') || h;
+    };
+    const opacityOf = (el) => (el ? parseFloat(getComputedStyle(el).opacity) : NaN);
+
+    function setVerdict(text, cls) {
+      verdictEl.textContent = text;
+      verdictEl.className = cls;
+    }
+
+    async function runTest() {
+      const doResplit = $('#resplit').checked;
+      setVerdict('running…', 'idle');
+      logEl.textContent = '';
+
+      // Reset stage width. Re-firing "test" below restarts the entrance from 0
+      // (restart(true)), so no separate reset is needed on re-runs.
+      $('#stage').classList.remove('narrow');
+
+      // Let any resplit caused by resetting the width (a prior run may have left
+      // it narrow) fully settle BEFORE we fire — autoSplit debounces its resize
+      // resplit by ~200ms, so firing too soon would let that stale resplit snap
+      // this run mid-play and poison the result.
+      await new Promise((r) => setTimeout(r, 400));
+
+      const t0 = performance.now();
+      const samples = []; // [msSinceFire, opacity]
+      let narrowAt = null;
+
+      // Watch for the ACTUAL SplitText resplit. autoSplit debounces its
+      // ResizeObserver, so the resplit (a childList mutation that replaces the
+      // word/line nodes) lands well after we change the width — anchoring the
+      // verdict on the width change instead of the real resplit would miss the
+      // snap. Only count mutations that happen after the fire settles.
+      const headline = $('#headline');
+      const resplitTimes = [];
+      const mo = new MutationObserver(() => resplitTimes.push(Math.round(performance.now() - t0)));
+
+      // Fire the event-triggered entrance, then start watching for the resplit.
+      document.dispatchEvent(new CustomEvent('aa:trigger', { detail: { name: 'test' }, bubbles: true }));
+      mo.observe(headline, { childList: true, subtree: true });
+
+      // Force a resplit mid-play by narrowing the container (changes line
+      // wrapping → SplitText autoSplit re-splits → the lib's rebuild() runs
+      // while the entrance is still animating). Same disturbance a pinned
+      // section's ScrollTrigger.refresh() causes on a real page.
+      if (doResplit) {
+        setTimeout(() => {
+          $('#stage').classList.add('narrow');
+          narrowAt = Math.round(performance.now() - t0);
+        }, 150);
+      }
+
+      // Sample the first word's opacity for 2.6s.
+      await new Promise((resolve) => {
+        const tick = () => {
+          const t = performance.now() - t0;
+          samples.push([Math.round(t), +opacityOf(firstWord()).toFixed(3)]);
+          if (t < 2600) requestAnimationFrame(tick);
+          else resolve();
+        };
+        requestAnimationFrame(tick);
+      });
+      mo.disconnect();
+
+      // ---- verdict ----
+      const opAt = (ms) => {
+        for (const s of samples) if (s[0] >= ms) return s[1];
+        return samples.length ? samples[samples.length - 1][1] : NaN;
+      };
+      const peak = Math.max(...samples.map((s) => s[1]));
+      const moved = peak > 0.5; // entrance actually played at all
+      // First real resplit after the fire settled (skip the initial split noise).
+      const R = resplitTimes.find((t) => t > 60) ?? null;
+
+      let pass, note;
+      if (!moved) {
+        setVerdict('INCONCLUSIVE — entrance never played (is GSAP + SplitText loaded?)', 'idle');
+        pass = null; note = 'no motion';
+      } else if (doResplit && R === null) {
+        setVerdict('INCONCLUSIVE — width change did not re-wrap → no resplit to test', 'idle');
+        pass = null; note = 'no resplit (try a longer sentence / bigger width change)';
+      } else if (R !== null) {
+        // Snap signature: opacity was mid-play just before the resplit, then is
+        // ~full right after it. Survival: opacity keeps climbing gradually.
+        const before = opAt(R - 20);
+        const after = opAt(R + 150);
+        if (before < 0.8 && after >= 0.85) {
+          setVerdict('❌ FAIL — entrance snapped to end state at the resplit', 'fail');
+          pass = false;
+        } else {
+          setVerdict('✅ PASS — entrance kept animating through the resplit', 'pass');
+          pass = true;
+        }
+        note = `resplit @${R}ms · opacity before ${before.toFixed(2)} → after(+150ms) ${after.toFixed(2)}`;
+      } else {
+        // Control (no resplit requested): confirm a normal gradual entrance.
+        const minDuring = Math.min(...samples.filter((s) => s[0] < 1500).map((s) => s[1]));
+        pass = minDuring < 0.85;
+        setVerdict(pass ? '✅ PASS — entrance animated normally (no resplit)' : '❌ FAIL — did not animate', pass ? 'pass' : 'fail');
+        note = `no resplit · min opacity ${minDuring.toFixed(2)}`;
+      }
+
+      // Trace: mark the resplit row with an arrow.
+      const lines = samples
+        .filter((_, i) => i % 2 === 0)
+        .map(([t, o]) => `${String(t).padStart(5)}ms  ${'█'.repeat(Math.round(o * 24)).padEnd(24)} ${o.toFixed(2)}${R !== null && t >= R && t < R + 30 ? '   ← RESPLIT' : ''}`);
+      logEl.textContent =
+        `resplit forced: ${doResplit ? 'yes (width @~' + narrowAt + 'ms)' : 'no'}\n` +
+        `${note}\n\n` +
+        lines.join('\n');
+
+      return pass;
+    }
+
+    function boot() {
+      if (!window.AlrdyAnimate || !window.gsap) {
+        return setTimeout(boot, 30);
+      }
+      AlrdyAnimate.init({ debug: true, duration: 2, ease: 'power2.out' }).then(() => {
+        logEl.textContent = 'Ready. Click “Run test”.';
+        setVerdict('— ready —', 'idle');
+      });
+      $('#run').addEventListener('click', runTest);
+    }
+    document.addEventListener('DOMContentLoaded', boot);
+  </script>
+</body>
+</html>

@@ -276,6 +276,13 @@ export function setupTriggeredAnimation(
 
     const wasFired = loadFired
 
+    // Snapshot the outgoing tween's forward progress before we kill it, so a
+    // rebuild that lands while a *played* entrance hasn't finished yet can
+    // resume from where it was instead of snapping to the end (see the block at
+    // the end of rebuild). Scrub tweens sync from scroll and are excluded there.
+    const prevProgress =
+      currentAnim && opts.scrub === undefined ? currentAnim.progress() : null
+
     killCurrent()
 
     // aa-fallback signals the inline-snippet timeout already faded the
@@ -339,11 +346,31 @@ export function setupTriggeredAnimation(
       loadFired = true
       return
     }
-    // Snap to end-state if rebuilding while the trigger pair was already
-    // played forward. Scrub auto-syncs from scroll position on creation, so
-    // it doesn't need this.
+    // Restore the forward-played state onto the rebuilt tween. We reproduce the
+    // *actual* progress the outgoing tween had reached rather than forcing
+    // progress(1): a rebuild (SplitText auto-resplit) that lands while the
+    // entrance is still in flight — e.g. an unrelated `ScrollTrigger.refresh()`
+    // or reflow a beat after an `event:`-fire re-wraps the lines — then keeps
+    // playing to the end instead of snapping straight there (which read as "the
+    // heading appears instantly, no animation"). `progress < 1` is the test, not
+    // isActive(): it covers both the mid-fade case AND a resplit during the
+    // entrance's `aa-delay` (progress still 0, isActive() false) — both must
+    // play through, or the entrance would be left paused at its from-state,
+    // stuck invisible. A finished entrance had progress 1, so it stays paused at
+    // the end — refresh/resize re-measures of completed text are unchanged.
+    // Scrub auto-syncs from scroll position on creation, so it opts out.
     if (triggerPlayed && opts.scrub === undefined) {
-      currentAnim.progress(1).pause()
+      const resume = prevProgress ?? 1
+      currentAnim.progress(resume)
+      if (resume < 1) {
+        // Not finished (mid-fade, or still in its delay) — keep playing, and
+        // re-warm the compositor hint for the freshly split targets
+        // (killCurrent cleared the old ones).
+        setWillChange()
+        currentAnim.play()
+      } else {
+        currentAnim.pause()
+      }
     }
   }
 

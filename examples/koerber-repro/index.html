@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>alrdy-animate — Körber-style hero + external pinned refresh</title>
+
+  <!-- FOUC guard, same idea as the Webflow head snippet. -->
+  <style>[aa-animate]:not([aa-ready]) { visibility: hidden; }</style>
+
+  <style>
+    :root { color-scheme: light dark; }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; }
+    body { font: 15px/1.5 system-ui, -apple-system, Segoe UI, Roboto, sans-serif; }
+
+    #bar {
+      position: fixed; inset: 0 0 auto 0; z-index: 9999;
+      background: #111; color: #eee; padding: 10px 14px;
+      display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; font-size: 13px;
+    }
+    #bar .seg a { color: #fff; text-decoration: none; padding: 3px 8px; border: 1px solid #555; border-radius: 6px; }
+    #bar .seg a.on { background: #2563eb; border-color: #2563eb; }
+    #verdict { font-weight: 700; }
+    .pass { color: #46d369; } .fail { color: #ff6b6b; } .idle { color: #aaa; }
+    button { font: inherit; padding: 4px 10px; border-radius: 6px; border: 1px solid #666; background: #222; color:#fff; cursor: pointer; }
+    label { display: inline-flex; gap: 5px; align-items: center; }
+
+    section { padding: 0 6vw; }
+    .hero { min-height: 92vh; display: flex; align-items: center; padding-top: 60px; }
+    /* The hero column width is what the "reflow" toggle changes, to force the
+       lines-words paragraph to re-wrap (a stand-in for whatever layout shift
+       re-wrapped the hero on Körber while the entrance was mid-play). */
+    .hero-col { width: 640px; max-width: 100%; display: flex; flex-direction: column; gap: 1rem; transition: none; }
+    .hero-col.narrow { width: 380px; }
+    .tagline { text-transform: uppercase; letter-spacing: .12em; font-size: .85rem; color: #2563eb; font-weight: 700; }
+    h1.hero-h1 { font-size: 3rem; line-height: 1.1; margin: 0; }
+    p.hero-p { font-size: 1.3rem; margin: 0; color: #444; }
+    .btn { align-self: flex-start; padding: .7rem 1.2rem; background: #2563eb; color: #fff; border-radius: 8px; text-decoration: none; }
+
+    .spacer { min-height: 40vh; display: flex; align-items: center; color: #999; }
+    .sticky-wrap { min-height: 90vh; display: flex; align-items: center; justify-content: center;
+                   background: #f3f4f6; border-radius: 16px; margin: 4vh 0; }
+    .tail { min-height: 120vh; display: flex; align-items: center; color: #999; }
+    #trace { position: fixed; right: 10px; bottom: 10px; width: 300px; max-height: 42vh; overflow: auto;
+             background: #0b0b0c; color: #d6d6d6; font: 11px/1.35 ui-monospace, monospace; padding: 8px; border-radius: 8px; z-index: 9999; }
+  </style>
+</head>
+<body>
+  <div id="bar">
+    <span class="seg">lib:
+      <a id="lib-local" href="?lib=local">local (fixed)</a>
+      <a id="lib-cdn" href="?lib=cdn">CDN @8 (published)</a>
+    </span>
+    <label><input type="checkbox" id="opt-pinned" checked /> external pin + refresh</label>
+    <label><input type="checkbox" id="opt-reflow" checked /> re-wrap hero at refresh</label>
+    <label><input type="checkbox" id="opt-defer" /> defer hero fire (workaround)</label>
+    <label><input type="checkbox" id="opt-lenis" /> Lenis</label>
+    <button id="rerun">↻ re-run</button>
+    <span>hero&nbsp;h1/p:&nbsp;<span id="verdict" class="idle">loading…</span></span>
+  </div>
+
+  <section class="hero">
+    <div class="hero-col" data-hero-col>
+      <div class="tagline" aa-animate="blur" aa-trigger="event:hero">We’re hiring</div>
+      <h1 class="hero-h1" aa-animate="text-blur" aa-split="words" aa-trigger="event:hero" aa-delay="0.2">
+        Precision needs people who understand it
+      </h1>
+      <p class="hero-p" aa-animate="text-fade" aa-split="lines-words" aa-trigger="event:hero" aa-delay="0.3">
+        We build trust every day by turning ideas into exact parts, and we are looking for people to build it with us.
+      </p>
+      <a class="btn" href="#" aa-animate="blur" aa-trigger="event:hero" aa-delay="0.4">Open positions</a>
+    </div>
+  </section>
+
+  <section class="spacer">Scroll down — the grey block is pinned by the external script.</section>
+
+  <section>
+    <div class="sticky-wrap" data-sticky-wrap>
+      <div>
+        <h2>Pinned “features” section</h2>
+        <p>Pinned + <code>ScrollTrigger.refresh()</code> by the external script, like Körber’s <code>initStickyFeatures</code>.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="tail">More content so the pin has room to scrub.</section>
+
+  <pre id="trace">trace…</pre>
+
+  <script>
+    const params = new URLSearchParams(location.search);
+    const LIB = params.get('lib') === 'cdn' ? 'cdn' : 'local';
+    const base = { local: '../../dist/', cdn: 'https://cdn.jsdelivr.net/npm/alrdy-animate@8/dist/' }[LIB];
+    document.getElementById('lib-' + LIB).classList.add('on');
+
+    const $ = (s) => document.querySelector(s);
+    const setV = (t, c) => { const v = $('#verdict'); v.textContent = t; v.className = c; };
+    const loadScript = (src) => new Promise((res, rej) => {
+      const s = document.createElement('script'); s.src = src; s.onload = res;
+      s.onerror = () => rej(new Error('failed: ' + src)); document.head.appendChild(s);
+    });
+    const loadCss = (href) => { const l = document.createElement('link'); l.rel = 'stylesheet'; l.href = href; document.head.appendChild(l); };
+
+    // Restore checkbox state from URL.
+    if (params.get('pinned') === '0') $('#opt-pinned').checked = false;
+    if (params.get('reflow') === '0') $('#opt-reflow').checked = false;
+    if (params.get('defer') === '1') $('#opt-defer').checked = true;
+    if (params.get('lenis') === '1') $('#opt-lenis').checked = true;
+
+    // ---- external "sticky features" — raw GSAP, NOT the library. Faithful to
+    // Körber's initStickyFeatures: pin a section, then sort + refresh a couple
+    // frames later. Optionally re-wrap the hero at the same moment (the reflow
+    // that Körber's layout produced) so a real resplit lands mid-entrance. ----
+    function initExternalPinnedSection(reflow) {
+      const wrap = document.querySelector('[data-sticky-wrap]');
+      gsap.registerPlugin(ScrollTrigger);
+      if (wrap) {
+        ScrollTrigger.create({
+          trigger: wrap, start: 'center center', end: '+=1200',
+          pin: true, scrub: true, invalidateOnRefresh: true,
+        });
+      }
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        // A real layout shift that re-wraps the hero's lines → SplitText
+        // autoSplit resplit → the library's rebuild() runs while the entrance
+        // is still animating. THIS (not the pin/refresh itself) is what snapped
+        // the headings on Körber; the pin/refresh only bracketed it in time.
+        if (reflow) document.querySelector('[data-hero-col]').classList.add('narrow');
+        ScrollTrigger.sort();
+        ScrollTrigger.refresh();
+      }));
+    }
+
+    const fireHero = () => document.dispatchEvent(new CustomEvent('aa:trigger', { detail: { name: 'hero' }, bubbles: true }));
+
+    function instrumentAndVerdict() {
+      const p = $('.hero-p');
+      const fw = () => p.querySelector('.aa-word,[class*="word"]') || p;
+      const opac = () => parseFloat(getComputedStyle(fw()).opacity);
+      const t0 = performance.now(); const T = () => Math.round(performance.now() - t0);
+      const resplits = []; const mo = new MutationObserver(() => resplits.push(T()));
+      mo.observe(p, { childList: true, subtree: true });
+      const samples = [];
+      return new Promise((resolve) => {
+        const tick = () => {
+          samples.push([T(), +opac().toFixed(3)]);
+          if (T() < 2400) requestAnimationFrame(tick);
+          else {
+            mo.disconnect();
+            const opAt = (ms) => { for (const s of samples) if (s[0] >= ms) return s[1]; return samples[samples.length - 1][1]; };
+            const peak = Math.max(...samples.map((s) => s[1]));
+            const R = resplits.find((t) => t > 60) ?? null;
+            let verdict;
+            if (peak <= 0.5) { setV('INCONCLUSIVE (never played)', 'idle'); verdict = null; }
+            else if (R !== null) {
+              const before = opAt(R - 20), after = opAt(R + 150);
+              const snap = before < 0.8 && after >= 0.85;
+              setV(snap ? '❌ FAIL — snapped at resplit' : '✅ PASS — animated through resplit', snap ? 'fail' : 'pass');
+              verdict = !snap;
+              $('#trace').textContent = `lib: ${LIB}\nresplit @${R}ms  opacity ${before.toFixed(2)} → +150ms ${after.toFixed(2)}\n\n` +
+                samples.filter((_, i) => i % 2 === 0).map(([t, o]) =>
+                  `${String(t).padStart(4)}  ${'#'.repeat(Math.round(o * 20)).padEnd(20)} ${o.toFixed(2)}${R !== null && t >= R && t < R + 30 ? ' <resplit' : ''}`).join('\n');
+            } else {
+              const minEarly = Math.min(...samples.filter((s) => s[0] < 1400).map((s) => s[1]));
+              verdict = minEarly < 0.85;
+              setV(verdict ? '✅ PASS (no resplit fired — pin/refresh alone is harmless)' : '❌ FAIL', verdict ? 'pass' : 'fail');
+              $('#trace').textContent = `lib: ${LIB}\nno resplit detected · min opacity ${minEarly.toFixed(2)}\n(pin + refresh without a hero re-wrap does NOT snap)`;
+            }
+            resolve(verdict);
+          }
+        };
+        requestAnimationFrame(tick);
+      });
+    }
+
+    async function boot() {
+      setV('loading GSAP + lib…', 'idle');
+      loadCss(base + 'alrdy-animate.css');
+      await loadScript('https://cdn.jsdelivr.net/npm/gsap@3/dist/gsap.min.js');
+      await loadScript('https://cdn.jsdelivr.net/npm/gsap@3/dist/ScrollTrigger.min.js');
+      await loadScript('https://cdn.jsdelivr.net/npm/gsap@3/dist/SplitText.min.js');
+      if ($('#opt-lenis').checked) await loadScript('https://cdn.jsdelivr.net/npm/lenis@1/dist/lenis.min.js');
+      await loadScript(base + 'alrdy-animate.umd.js');
+
+      await AlrdyAnimate.init({ duration: 0.8, ease: 'power2.out', smoothScroll: $('#opt-lenis').checked });
+
+      // Mirror Körber's footer: on ready, fire the hero, then kick off the
+      // external pinned section (whose refresh + optional re-wrap lands a couple
+      // frames later, while the entrance is mid-play).
+      AlrdyAnimate.ready().then(() => {
+        $('#opt-defer').checked ? setTimeout(fireHero, 250) : fireHero();
+        if ($('#opt-pinned').checked) initExternalPinnedSection($('#opt-reflow').checked);
+        else if ($('#opt-reflow').checked) {
+          // reflow-only, no pin, still a couple frames after ready
+          requestAnimationFrame(() => requestAnimationFrame(() => $('[data-hero-col]').classList.add('narrow')));
+        }
+      });
+
+      await instrumentAndVerdict();
+    }
+
+    $('#rerun').addEventListener('click', () => {
+      const u = new URL(location.href);
+      u.searchParams.set('lib', LIB);
+      u.searchParams.set('pinned', $('#opt-pinned').checked ? '1' : '0');
+      u.searchParams.set('reflow', $('#opt-reflow').checked ? '1' : '0');
+      u.searchParams.set('defer', $('#opt-defer').checked ? '1' : '0');
+      u.searchParams.set('lenis', $('#opt-lenis').checked ? '1' : '0');
+      location.href = u.toString();
+    });
+
+    document.addEventListener('DOMContentLoaded', boot);
+  </script>
+</body>
+</html>

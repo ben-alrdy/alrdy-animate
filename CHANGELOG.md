@@ -24,6 +24,11 @@ What v8 doesn't have yet: **Pin** animations (rebuild planned in v8.x), form-sub
 
 ---
 
+## [8.1.1] — 2026-07-02
+
+### Fixed
+- **Event-triggered split-text entrances no longer snap to their end state when a resplit lands mid-entrance.** An unrelated `ScrollTrigger.refresh()` — e.g. from a pinned section initialised alongside an `event:`-triggered hero — forces a synchronous layout read that can flush SplitText's `autoSplit` ResizeObserver, producing a **layout-identical re-split** (same lines, same width) that still replaces the split nodes and runs the internal `rebuild()`. While a just-fired entrance was still playing, `rebuild()` forced `progress(1).pause()`, so the split heading appeared instantly with no animation (non-split siblings were unaffected). `rebuild()` now restores the rebuilt tween to the progress the outgoing one had actually reached and keeps playing — covering both the mid-fade case and a resplit during the entrance's `aa-delay` (progress still `0`). A genuinely completed entrance had progress `1` and still settles paused at its end state, so scroll/scrub behaviour and legitimate refresh/resize re-measures of finished text are unchanged.
+
 ## [8.1.0] — 2026-07-01
 
 ### Changed
